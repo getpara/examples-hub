@@ -26,7 +26,8 @@ export default function Navbar() {
           <Button
             variant="outline"
             onClick={() => openModal()}
-            className="flex items-center">
+            className="flex items-center"
+            data-testid="navbar-connected-address-button">
             <CheckCircle className="h-4 w-4 mr-2 text-green-500" />
             <span className="font-mono text-xs sm:text-sm">
               {wallet.address.substring(0, 6)}...{wallet.address.substring(wallet.address.length - 4)}
@@ -34,7 +35,7 @@ export default function Navbar() {
             <UserCircle className="h-4 w-4 ml-2 hidden sm:block" />
           </Button>
         ) : !isLoading ? (
-          <Button onClick={() => openModal()}>
+          <Button onClick={() => openModal()} data-testid="navbar-connect-wallet-button">
             <LogIn className="mr-2 h-4 w-4" />
             Connect Wallet
           </Button>

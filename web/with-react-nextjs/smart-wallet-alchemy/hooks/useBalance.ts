@@ -22,6 +22,7 @@ export function useBalance(address?: string) {
     enabled: !!address,
     staleTime: 15_000, // 15 seconds
     gcTime: 15_000, // 15 seconds (formerly cacheTime)
+    retry: 1,
   });
 
   return {

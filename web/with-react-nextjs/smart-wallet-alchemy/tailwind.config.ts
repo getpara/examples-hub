@@ -10,6 +10,9 @@ const config: Config = {
   ],
   theme: {
   	extend: {
+  		boxShadow: {
+  			'smart': '0 10px 40px -10px rgba(0, 0, 0, 0.15)',
+  		},
   		colors: {
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',

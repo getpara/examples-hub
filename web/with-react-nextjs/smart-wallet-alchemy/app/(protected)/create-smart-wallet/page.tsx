@@ -15,6 +15,8 @@ import { useSmartWalletAddress } from "@/hooks/use-smart-wallet-address";
 import { useDeploySmartWallet } from "@/hooks/use-deploy-smart-wallet";
 import { useNextAvailableWalletIndex } from "@/hooks/use-next-available-wallet-index";
 import { useSmartWallets } from "@/hooks/use-smart-wallets";
+import { useDeploymentFee } from "@/hooks/useDeploymentFee";
+import { useEthPrice } from "@/hooks/useEthPrice";
 
 type SmartWallet = {
   id: string;
@@ -33,11 +35,8 @@ const supportedNetworks = [
     name: "Sepolia (Testnet)",
     logoUrl: "/placeholder.svg?width=24&height=24",
     symbol: "ETH",
-    feeEth: 0.005,
   },
 ];
-
-const MOCK_ETH_PRICE_USD = 3500;
 
 export default function CreateAccountPage() {
   const router = useRouter();
@@ -56,16 +55,27 @@ export default function CreateAccountPage() {
 
   const { mutate: deployWallet, isPending: isDeploying } = useDeploySmartWallet();
 
+  const { priceUsd: ethPriceUsd } = useEthPrice();
+  const { data: deploymentFee, isLoading: isFeeLoading } = useDeploymentFee(wallet?.id || null, nextIndex ?? 0);
+
   const currentNetworkDetails = useMemo(() => {
     return supportedNetworks.find((n) => n.id === selectedNetworkId);
   }, [selectedNetworkId]);
 
   const estimatedFeeDisplay = useMemo(() => {
     if (!currentNetworkDetails) return "N/A";
-    const feeEth = currentNetworkDetails.feeEth;
-    const feeUsd = feeEth * MOCK_ETH_PRICE_USD;
-    return `${feeEth} ${currentNetworkDetails.symbol} (~$${feeUsd.toFixed(2)} USD)`;
-  }, [currentNetworkDetails]);
+
+    if (isFeeLoading) return "Calculating...";
+
+    if (deploymentFee?.isSponsored) {
+      return "Sponsored (Free)";
+    }
+
+    const ethAmount = deploymentFee?.ethAmount || "0";
+    const usdAmount = deploymentFee?.usdAmount || "0.00";
+
+    return `${ethAmount} ${currentNetworkDetails.symbol} (~$${usdAmount} USD)`;
+  }, [currentNetworkDetails, deploymentFee, isFeeLoading]);
 
   const handleDeploy = async () => {
     if (!walletName.trim()) {
@@ -138,7 +148,7 @@ export default function CreateAccountPage() {
   if (deploymentState === "success" && newlyCreatedWallet) {
     return (
       <div className="container mx-auto py-8 px-4 flex-1 flex flex-col items-center justify-center z-0">
-        <Card className="w-full max-w-lg text-center">
+        <Card className="w-full max-w-lg max-h-[85vh] overflow-auto text-center">
           <CardHeader className="pt-8">
             <PartyPopper className="mx-auto h-16 w-16 text-green-500 mb-4" />
             <CardTitle className="text-2xl">Smart Wallet Created!</CardTitle>
@@ -167,7 +177,8 @@ export default function CreateAccountPage() {
               <div
                 className="group flex items-center justify-between font-mono text-sm break-all p-2 rounded-md hover:bg-muted/50 cursor-pointer"
                 onClick={() => handleCopyAddress(newlyCreatedWallet.address)}
-                title="Click to copy address">
+                title="Click to copy address"
+                data-testid="create-success-copy-address">
                 <span>{newlyCreatedWallet.address}</span>
                 <Copy className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
               </div>
@@ -194,9 +205,11 @@ export default function CreateAccountPage() {
           </CardContent>
           <CardFooter>
             <Button
+              variant="outline"
               onClick={handleContinue}
               className="w-full"
-              size="lg">
+              size="lg"
+              data-testid="create-success-continue-button">
               Let&apos;s Go!
               <CheckCircle className="ml-2 h-5 w-5" />
             </Button>
@@ -209,12 +222,14 @@ export default function CreateAccountPage() {
   if (deploymentState === "error") {
     return (
       <div className="container mx-auto py-8 px-4 flex-1 flex flex-col items-center justify-center z-0">
-        <Card className="w-full max-w-lg text-center">
+        <Card className="w-full max-w-lg max-h-[85vh] overflow-auto text-center">
           <CardHeader className="pt-8">
             <AlertTriangle className="mx-auto h-16 w-16 text-destructive mb-4" />
             <CardTitle className="text-2xl">Deployment Failed</CardTitle>
             <CardDescription className="text-destructive">
-              {errorMessage || "An unexpected error occurred."}
+              <pre className="whitespace-pre-wrap break-words max-h-60 overflow-auto">
+                {errorMessage || "An unexpected error occurred."}
+              </pre>
             </CardDescription>
           </CardHeader>
           <CardContent className="py-6">
@@ -226,12 +241,15 @@ export default function CreateAccountPage() {
             <Button
               onClick={() => router.push("/accounts")}
               variant="outline"
-              className="w-full sm:w-auto">
+              className="w-full sm:w-auto"
+              data-testid="create-error-back-button">
               Back to Accounts
             </Button>
             <Button
+              variant="outline"
               onClick={handleTryAgain}
-              className="w-full sm:w-auto">
+              className="w-full sm:w-auto"
+              data-testid="create-error-retry-button">
               Try Again
             </Button>
           </CardFooter>
@@ -243,7 +261,7 @@ export default function CreateAccountPage() {
   if (nextIndex === null) {
     return (
       <div className="container mx-auto py-8 px-4 flex-1 flex flex-col items-center justify-center z-0">
-        <Card className="w-full max-w-lg text-center">
+        <Card className="w-full max-w-lg max-h-[85vh] overflow-auto text-center">
           <CardHeader className="pt-8">
             <Ban className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
             <CardTitle className="text-2xl">Wallet Limit Reached</CardTitle>
@@ -255,7 +273,8 @@ export default function CreateAccountPage() {
             <Button
               onClick={() => router.push("/accounts")}
               variant="outline"
-              className="w-full">
+              className="w-full"
+              data-testid="create-limit-back-button">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Accounts
             </Button>
@@ -268,12 +287,14 @@ export default function CreateAccountPage() {
   if (isWalletsError) {
     return (
       <div className="container mx-auto py-8 px-4 flex-1 flex flex-col items-center justify-center z-0">
-        <Card className="w-full max-w-lg text-center">
+        <Card className="w-full max-w-lg max-h-[85vh] overflow-auto text-center">
           <CardHeader className="pt-8">
             <AlertTriangle className="mx-auto h-16 w-16 text-destructive mb-4" />
             <CardTitle className="text-2xl">Unable to Load Wallets</CardTitle>
             <CardDescription className="text-destructive">
-              {walletsError instanceof Error ? walletsError.message : "Failed to check existing wallets"}
+              <pre className="whitespace-pre-wrap break-words max-h-60 overflow-auto">
+                {walletsError instanceof Error ? walletsError.message : "Failed to check existing wallets"}
+              </pre>
             </CardDescription>
           </CardHeader>
           <CardContent className="py-6">
@@ -285,12 +306,15 @@ export default function CreateAccountPage() {
             <Button
               onClick={() => router.push("/accounts")}
               variant="outline"
-              className="w-full sm:w-auto">
+              className="w-full sm:w-auto"
+              data-testid="create-wallets-error-back-button">
               Back to Accounts
             </Button>
             <Button
+              variant="outline"
               onClick={() => window.location.reload()}
-              className="w-full sm:w-auto">
+              className="w-full sm:w-auto"
+              data-testid="create-wallets-error-retry-button">
               Try Again
             </Button>
           </CardFooter>
@@ -302,7 +326,7 @@ export default function CreateAccountPage() {
   if (nextIndex === undefined) {
     return (
       <div className="container mx-auto py-8 px-4 flex-1 flex flex-col items-center justify-center z-0">
-        <Card className="w-full max-w-lg text-center">
+        <Card className="w-full max-w-lg max-h-[85vh] overflow-auto text-center">
           <CardHeader className="pt-8">
             <Loader2 className="mx-auto h-12 w-12 animate-spin text-primary mb-4" />
             <CardTitle className="text-2xl">Checking Wallet Status</CardTitle>
@@ -315,13 +339,14 @@ export default function CreateAccountPage() {
 
   return (
     <div className="container mx-auto py-8 px-4 flex-1 flex flex-col items-center justify-center z-0">
-      <Card className="w-full max-w-lg">
+      <Card className="w-full max-w-lg max-h-[85vh] overflow-auto">
         <CardHeader>
           <Button
-            variant="ghost"
+            variant="outline"
             size="sm"
             onClick={() => router.back()}
-            className="absolute top-4 left-4 sm:top-6 sm:left-6">
+            className="absolute top-4 left-4 sm:top-6 sm:left-6"
+            data-testid="create-back-button">
             <ArrowLeft className="mr-2 h-4 w-4" /> Back
           </Button>
           <CardTitle className="text-2xl pt-8 sm:pt-0 text-center sm:text-left">Create New Smart Wallet</CardTitle>
@@ -338,6 +363,7 @@ export default function CreateAccountPage() {
               value={walletName}
               onChange={(e) => setWalletName(e.target.value)}
               disabled={deploymentState === "deploying"}
+              data-testid="create-wallet-name-input"
             />
           </div>
           <div className="space-y-2">
@@ -355,7 +381,9 @@ export default function CreateAccountPage() {
               value={selectedNetworkId}
               onValueChange={setSelectedNetworkId}
               disabled={deploymentState === "deploying" || supportedNetworks.length <= 1}>
-              <SelectTrigger id="network">
+              <SelectTrigger
+                id="network"
+                data-testid="create-network-select">
                 <SelectValue placeholder="Select network">
                   {currentNetworkDetails && (
                     <div className="flex items-center">
@@ -414,7 +442,8 @@ export default function CreateAccountPage() {
             onClick={handleDeploy}
             disabled={isDeploying || !walletName.trim() || !predictedAddress}
             className="w-full"
-            size="lg">
+            size="lg"
+            data-testid="create-deploy-button">
             {isDeploying ? (
               <>
                 <Loader2 className="mr-2 h-5 w-5 animate-spin" />

@@ -17,5 +17,7 @@ export function useSmartWalletAddress(index: number) {
       return await getSmartWalletAddress(para, wallet.id, index);
     },
     enabled: !isLoading && !!para && !!wallet?.id && !!account?.isConnected && index >= 0 && index < 3,
+    staleTime: Infinity, // Address never changes once generated
+    retry: 1,
   });
 }

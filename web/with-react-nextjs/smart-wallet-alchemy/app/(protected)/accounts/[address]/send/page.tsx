@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Loader2, Send } from "lucide-react";
+import { ArrowLeft, Loader2, Send, Copy, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useClient, useWallet, useAccount } from "@getpara/react-sdk";
 import { useBalance } from "@/hooks/useBalance";
@@ -25,15 +25,23 @@ export default function SendAssetsPage() {
 
   const walletAddress = params.address as string;
   const { balance, isLoading: isBalanceLoading } = useBalance(walletAddress);
-  const { priceUsd } = useEthPrice();
+  const { priceUsd, isLoading: isPriceLoading } = useEthPrice();
 
   const [recipient, setRecipient] = useState("");
   const [amount, setAmount] = useState("");
   const [token] = useState("ETH");
   const [isSending, setIsSending] = useState(false);
+  const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
 
   const ethBalance = parseFloat(balance?.ether || "0");
   const usdValue = priceUsd && amount ? (parseFloat(amount) * priceUsd).toFixed(2) : null;
+
+  const handleCopyAddress = (address: string) => {
+    navigator.clipboard.writeText(address);
+    setCopiedAddress(address);
+    toast({ title: "Copied to clipboard", description: "Address copied successfully." });
+    setTimeout(() => setCopiedAddress(null), 2000);
+  };
 
   const validateForm = () => {
     if (!recipient || !amount) {
@@ -106,10 +114,11 @@ export default function SendAssetsPage() {
       <Card className="w-full max-w-lg">
         <CardHeader>
           <Button
-            variant="ghost"
+            variant="outline"
             size="sm"
             onClick={() => router.back()}
-            className="absolute top-4 left-4 sm:top-6 sm:left-6">
+            className="absolute top-4 left-4 sm:top-6 sm:left-6"
+            data-testid="send-back-button">
             <ArrowLeft className="mr-2 h-4 w-4" /> Back
           </Button>
           <CardTitle className="text-2xl pt-8 sm:pt-0 text-center sm:text-left">Send Assets</CardTitle>
@@ -118,6 +127,39 @@ export default function SendAssetsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6 py-6">
+          <div className="space-y-3 p-4 bg-muted/50 rounded-md border border-dashed">
+            <div className="space-y-1">
+              <Label className="text-xs text-muted-foreground">Smart Wallet Address</Label>
+              <div
+                className="flex items-center justify-between font-mono text-sm break-all p-2 rounded-md hover:bg-muted/80 cursor-pointer transition-colors"
+                onClick={() => handleCopyAddress(walletAddress)}
+                data-testid="send-copy-wallet-address">
+                <span className="truncate">{walletAddress}</span>
+                {copiedAddress === walletAddress ? (
+                  <Check className="h-4 w-4 text-green-500 ml-2 flex-shrink-0" />
+                ) : (
+                  <Copy className="h-4 w-4 text-muted-foreground ml-2 flex-shrink-0" />
+                )}
+              </div>
+            </div>
+            {account?.address && (
+              <div className="space-y-1">
+                <Label className="text-xs text-muted-foreground">Owner EOA</Label>
+                <div
+                  className="flex items-center justify-between font-mono text-sm break-all p-2 rounded-md hover:bg-muted/80 cursor-pointer transition-colors"
+                  onClick={() => handleCopyAddress(account.address)}
+                  data-testid="send-copy-owner-address">
+                  <span className="truncate">{account.address}</span>
+                  {copiedAddress === account.address ? (
+                    <Check className="h-4 w-4 text-green-500 ml-2 flex-shrink-0" />
+                  ) : (
+                    <Copy className="h-4 w-4 text-muted-foreground ml-2 flex-shrink-0" />
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="token">Token</Label>
             <Select
@@ -147,6 +189,7 @@ export default function SendAssetsPage() {
               onChange={(e) => setAmount(e.target.value)}
               step="0.0001"
               min="0"
+              data-testid="send-amount-input"
             />
             {usdValue && <p className="text-sm text-muted-foreground">≈ ${usdValue} USD</p>}
           </div>
@@ -159,6 +202,7 @@ export default function SendAssetsPage() {
               value={recipient}
               onChange={(e) => setRecipient(e.target.value)}
               className="font-mono"
+              data-testid="send-recipient-input"
             />
           </div>
 
@@ -176,9 +220,10 @@ export default function SendAssetsPage() {
         <CardFooter>
           <Button
             onClick={handleSend}
-            disabled={isSending || !recipient || !amount || isBalanceLoading}
+            disabled={isSending || !recipient || !amount || isBalanceLoading || !para || isPriceLoading}
             className="w-full"
-            size="lg">
+            size="lg"
+            data-testid="send-submit-button">
             {isSending ? (
               <>
                 <Loader2 className="mr-2 h-5 w-5 animate-spin" />

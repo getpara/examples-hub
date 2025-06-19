@@ -67,7 +67,8 @@ export default function AccountsPage() {
           <CardContent>
             <Button
               onClick={() => openModal()}
-              size="lg">
+              size="lg"
+              data-testid="accounts-connect-wallet-button">
               <LogIn className="mr-2 h-5 w-5" />
               Connect EOA Wallet
             </Button>
@@ -96,6 +97,7 @@ export default function AccountsPage() {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
+                    variant="outline"
                     onClick={handleNavigateToCreate}
                     size="sm"
                     disabled={
@@ -103,7 +105,8 @@ export default function AccountsPage() {
                       isWalletsError ||
                       nextAvailableIndex === null ||
                       nextAvailableIndex === undefined
-                    }>
+                    }
+                    data-testid="accounts-create-account-button">
                     <PlusCircle className="mr-2 h-4 w-4" />
                     Create Account
                   </Button>
@@ -131,24 +134,26 @@ export default function AccountsPage() {
             <div className="flex flex-col justify-center items-center h-40 text-center">
               <AlertCircle className="h-8 w-8 text-destructive mb-2" />
               <p className="text-destructive font-medium">Failed to load wallets</p>
-              <p className="text-sm text-muted-foreground mt-1">
+              <pre className="text-sm text-muted-foreground mt-1 whitespace-pre-wrap break-words max-h-60 overflow-auto">
                 {walletsError instanceof Error ? walletsError.message : "Please try refreshing the page"}
-              </p>
+              </pre>
               <Button
                 onClick={() => window.location.reload()}
                 variant="outline"
                 size="sm"
-                className="mt-4">
+                className="mt-4"
+                data-testid="accounts-error-retry-button">
                 Try Again
               </Button>
             </div>
           ) : smartWallets && smartWallets.length > 0 ? (
             <div className="space-y-3">
-              {smartWallets.map((smartWallet) => (
+              {smartWallets.map((smartWallet, index) => (
                 <Card
                   key={smartWallet.index}
                   className="cursor-pointer hover:bg-muted/50 transition-colors"
-                  onClick={() => smartWallet.isDeployed && handleNavigateToWallet(smartWallet.address)}>
+                  onClick={() => smartWallet.isDeployed && handleNavigateToWallet(smartWallet.address)}
+                  data-testid={`accounts-wallet-card-${index}`}>
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
@@ -188,7 +193,8 @@ export default function AccountsPage() {
                     onClick={handleNavigateToCreate}
                     variant="outline"
                     className="w-full"
-                    disabled={isWalletsError}>
+                    disabled={isWalletsError}
+                    data-testid="accounts-create-wallet-cta-button">
                     <PlusCircle className="mr-2 h-4 w-4" />
                     Create Smart Wallet #{nextAvailableIndex + 1}
                   </Button>
@@ -203,8 +209,10 @@ export default function AccountsPage() {
                 Create your first smart wallet to get started with gasless transactions.
               </p>
               <Button
+                variant="outline"
                 onClick={handleNavigateToCreate}
-                disabled={isWalletsError || nextAvailableIndex === null || nextAvailableIndex === undefined}>
+                disabled={isWalletsError || nextAvailableIndex === null || nextAvailableIndex === undefined}
+                data-testid="accounts-create-first-wallet-button">
                 <PlusCircle className="mr-2 h-4 w-4" />
                 Create Your First Smart Wallet
               </Button>

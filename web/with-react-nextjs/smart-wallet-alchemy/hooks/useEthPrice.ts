@@ -23,6 +23,7 @@ export function useEthPrice() {
     },
     staleTime: 3_600_000, // 1 hour
     gcTime: Infinity, // Cache forever
+    retry: 1,
   });
 
   return {

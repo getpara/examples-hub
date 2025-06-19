@@ -17,7 +17,7 @@ export function useSmartWallets() {
       return await checkExistingWallets(para, wallet.id);
     },
     enabled: !isLoading && !!para && !!wallet?.id && !!account?.isConnected,
-    retry: false,
+    retry: 1,
     staleTime: 30_000, // 30 seconds
   });
 

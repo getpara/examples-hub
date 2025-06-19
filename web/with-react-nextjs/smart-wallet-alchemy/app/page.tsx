@@ -63,6 +63,7 @@ export default function Home() {
             iconAfter={<ArrowRight className="h-5 w-5" />}
             size="lg"
             className="px-6 py-3 text-base md:text-lg"
+            data-testid="home-connect-wallet-button"
           />
         </div>
       </div>

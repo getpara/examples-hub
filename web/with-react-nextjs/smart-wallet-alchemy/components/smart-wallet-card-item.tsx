@@ -50,8 +50,9 @@ export default function SmartWalletCardItem({ wallet }: SmartWalletCardItemProps
 
   return (
     <Card
-      className="overflow-hidden hover:shadow-lg transition-shadow duration-200 cursor-pointer group"
-      onClick={handleCardClick}>
+      className="overflow-hidden hover:shadow-smart transition-shadow duration-200 cursor-pointer group"
+      onClick={handleCardClick}
+      data-testid={`wallet-card-${wallet.contractAddress}`}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 bg-muted/30 p-4">
         <div className="flex items-center">
           <Wallet className="h-5 w-5 text-muted-foreground mr-3" />
@@ -73,7 +74,8 @@ export default function SmartWalletCardItem({ wallet }: SmartWalletCardItemProps
             size="icon"
             onClick={handleCopyAddress}
             aria-label="Copy address"
-            className="hover:bg-primary/10">
+            className="hover:bg-primary/10"
+            data-testid={`wallet-card-copy-button-${wallet.contractAddress}`}>
             <Copy className="h-4 w-4" />
           </Button>
         </div>

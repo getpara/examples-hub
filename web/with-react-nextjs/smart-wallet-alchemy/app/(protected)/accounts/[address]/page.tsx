@@ -39,6 +39,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { QRCodeSVG } from "qrcode.react";
+import { isAddress } from "viem";
 
 // Mock transaction data
 interface MockTransaction {
@@ -109,6 +110,17 @@ export default function SmartWalletAccountPage() {
   const { priceUsd, isLoading: isPriceLoading, isError: isPriceError } = useEthPrice();
 
   useEffect(() => {
+    // Validate address format
+    if (!isAddress(walletAddress)) {
+      toast({
+        title: "Invalid Address",
+        description: "The wallet address is not valid.",
+        variant: "destructive",
+      });
+      router.replace("/accounts");
+      return;
+    }
+
     if (!account?.isConnected) {
       // Redirect if EOA is not connected, as smart wallets are tied to it
       toast({
@@ -200,7 +212,10 @@ export default function SmartWalletAccountPage() {
           The smart wallet with address <code className="font-mono bg-muted p-1 rounded">{walletAddress}</code> could
           not be found or you may not have access.
         </p>
-        <Button onClick={() => router.push("/accounts")}>
+        <Button
+          variant="outline"
+          onClick={() => router.push("/accounts")}
+          data-testid="account-error-back-button">
           <ArrowLeft className="mr-2 h-4 w-4" /> Back to All Accounts
         </Button>
       </div>
@@ -215,7 +230,8 @@ export default function SmartWalletAccountPage() {
         <Button
           variant="outline"
           onClick={() => router.push("/accounts")}
-          className="self-start mb-4">
+          className="self-start mb-4"
+          data-testid="account-back-button">
           <ArrowLeft className="mr-2 h-4 w-4" /> Back to All Accounts
         </Button>
 
@@ -243,17 +259,21 @@ export default function SmartWalletAccountPage() {
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
-                    size="icon">
+                    size="icon"
+                    data-testid="account-more-options-button">
                     <MoreHorizontal className="h-5 w-5" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={handleCopyAddress}>
+                  <DropdownMenuItem
+                    onClick={handleCopyAddress}
+                    data-testid="account-copy-address-menu-item">
                     <Copy className="mr-2 h-4 w-4" />
                     Copy Address
                   </DropdownMenuItem>
                   <DropdownMenuItem
-                    onClick={() => window.open(`https://sepolia.etherscan.io/address/${wallet.address}`, "_blank")}>
+                    onClick={() => window.open(`https://sepolia.etherscan.io/address/${wallet.address}`, "_blank")}
+                    data-testid="account-view-etherscan-menu-item">
                     <ExternalLink className="mr-2 h-4 w-4" />
                     View on Etherscan
                   </DropdownMenuItem>
@@ -289,6 +309,7 @@ export default function SmartWalletAccountPage() {
           </CardHeader>
           <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Button
+              variant="outline"
               size="lg"
               onClick={handleSend}
               className="w-full">
@@ -373,7 +394,8 @@ export default function SmartWalletAccountPage() {
             <CardFooter>
               <Button
                 variant="outline"
-                className="w-full">
+                className="w-full"
+                data-testid="account-view-transactions-button">
                 View All Transactions
               </Button>
             </CardFooter>
@@ -411,7 +433,8 @@ export default function SmartWalletAccountPage() {
                 <Button
                   size="icon"
                   variant="outline"
-                  onClick={handleCopyAddress}>
+                  onClick={handleCopyAddress}
+                  data-testid="account-dialog-copy-button">
                   <Copy className="h-4 w-4" />
                 </Button>
               </div>
@@ -420,14 +443,16 @@ export default function SmartWalletAccountPage() {
               <Button
                 variant="outline"
                 className="flex-1"
-                onClick={handleDownloadQR}>
+                onClick={handleDownloadQR}
+                data-testid="account-download-qr-button">
                 <ArrowDownToLine className="mr-2 h-4 w-4" />
                 Download QR
               </Button>
               <Button
                 variant="default"
                 className="flex-1"
-                onClick={() => setIsReceiveDialogOpen(false)}>
+                onClick={() => setIsReceiveDialogOpen(false)}
+                data-testid="account-dialog-done-button">
                 Done
               </Button>
             </div>
