@@ -8,8 +8,10 @@ import { useRouter } from "next/navigation";
 import { useModal, useWallet, useAccount } from "@getpara/react-sdk";
 import { useSmartWallets } from "@/hooks/use-smart-wallets";
 import { useNextAvailableWalletIndex } from "@/hooks/use-next-available-wallet-index";
-import { useBalance } from "@/hooks/useBalance";
+import { useBalance, weiToUsd } from "@/hooks/useBalance";
 import { useEthPrice } from "@/hooks/useEthPrice";
+import { formatEther } from "viem";
+import { MAX_SMART_WALLETS_PER_EOA, WALLET_LIMIT_MESSAGE } from "@/constants/smart-wallet";
 
 // Component to display wallet balance
 function WalletBalance({ address }: { address: string }) {
@@ -24,12 +26,17 @@ function WalletBalance({ address }: { address: string }) {
     return <span className="text-sm text-muted-foreground">--</span>;
   }
 
-  const ethBalance = parseFloat(balance?.ether || "0");
-  const usdValue = priceUsd ? (ethBalance * priceUsd).toFixed(2) : null;
+  if (!balance) {
+    return <span className="text-sm text-muted-foreground">--</span>;
+  }
+
+  const ethBalance = formatEther(balance.wei);
+  const ethDisplay = Number(ethBalance).toFixed(4);
+  const usdValue = priceUsd ? weiToUsd(balance.wei, priceUsd) : null;
 
   return (
     <div className="text-right">
-      <p className="font-medium">{ethBalance.toFixed(4)} ETH</p>
+      <p className="font-medium">{ethDisplay} ETH</p>
       {usdValue && <p className="text-sm text-muted-foreground">${usdValue}</p>}
     </div>
   );
@@ -114,7 +121,12 @@ export default function AccountsPage() {
                 <TooltipContent>
                   {isWalletsLoading && "Loading wallet information..."}
                   {isWalletsError && "Unable to load wallet information"}
-                  {nextAvailableIndex === null && "Wallet limit reached (3 max)"}
+                  {nextAvailableIndex === null && (
+                    <div className="space-y-1">
+                      <p>Wallet limit reached ({MAX_SMART_WALLETS_PER_EOA} max)</p>
+                      <p className="text-xs text-muted-foreground">{WALLET_LIMIT_MESSAGE}</p>
+                    </div>
+                  )}
                   {nextAvailableIndex === undefined &&
                     !isWalletsLoading &&
                     !isWalletsError &&
@@ -151,7 +163,7 @@ export default function AccountsPage() {
               {smartWallets.map((smartWallet, index) => (
                 <Card
                   key={smartWallet.index}
-                  className="cursor-pointer hover:bg-muted/50 transition-colors"
+                  className={smartWallet.isDeployed ? "cursor-pointer hover:bg-muted/50 transition-colors" : ""}
                   onClick={() => smartWallet.isDeployed && handleNavigateToWallet(smartWallet.address)}
                   data-testid={`accounts-wallet-card-${index}`}>
                   <CardContent className="p-4">
@@ -189,15 +201,27 @@ export default function AccountsPage() {
 
               {nextAvailableIndex !== null && nextAvailableIndex !== undefined && (
                 <div className="text-center pt-4">
-                  <Button
-                    onClick={handleNavigateToCreate}
-                    variant="outline"
-                    className="w-full"
-                    disabled={isWalletsError}
-                    data-testid="accounts-create-wallet-cta-button">
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    Create Smart Wallet #{nextAvailableIndex + 1}
-                  </Button>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          onClick={handleNavigateToCreate}
+                          variant="outline"
+                          className="w-full"
+                          disabled={isWalletsError}
+                          data-testid="accounts-create-wallet-cta-button">
+                          <PlusCircle className="mr-2 h-4 w-4" />
+                          Create Smart Wallet #{nextAvailableIndex + 1}
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <div className="space-y-1">
+                          <p>Create wallet {nextAvailableIndex + 1} of {MAX_SMART_WALLETS_PER_EOA}</p>
+                          <p className="text-xs text-muted-foreground">{WALLET_LIMIT_MESSAGE}</p>
+                        </div>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 </div>
               )}
             </div>
@@ -208,14 +232,35 @@ export default function AccountsPage() {
               <p className="text-muted-foreground mb-4">
                 Create your first smart wallet to get started with gasless transactions.
               </p>
-              <Button
-                variant="outline"
-                onClick={handleNavigateToCreate}
-                disabled={isWalletsError || nextAvailableIndex === null || nextAvailableIndex === undefined}
-                data-testid="accounts-create-first-wallet-button">
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Create Your First Smart Wallet
-              </Button>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      onClick={handleNavigateToCreate}
+                      disabled={isWalletsError || nextAvailableIndex === null || nextAvailableIndex === undefined}
+                      data-testid="accounts-create-first-wallet-button">
+                      <PlusCircle className="mr-2 h-4 w-4" />
+                      Create Your First Smart Wallet
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {(nextAvailableIndex === null || nextAvailableIndex === undefined) ? (
+                      <div className="space-y-1">
+                        <p>Unable to create wallet</p>
+                        <p className="text-xs text-muted-foreground">
+                          {isWalletsError ? "Error loading wallet information" : WALLET_LIMIT_MESSAGE}
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="space-y-1">
+                        <p>Create your first smart wallet</p>
+                        <p className="text-xs text-muted-foreground">{WALLET_LIMIT_MESSAGE}</p>
+                      </div>
+                    )}
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
           )}
         </CardContent>

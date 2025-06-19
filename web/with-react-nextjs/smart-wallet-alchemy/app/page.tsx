@@ -6,6 +6,7 @@ import { useAccount } from "@getpara/react-sdk";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { FullScreenLoader } from "@/components/FullScreenLoader";
+import { MAX_SMART_WALLETS_PER_EOA } from "@/constants/smart-wallet";
 
 export default function Home() {
   const { data: account, isLoading } = useAccount();
@@ -53,6 +54,12 @@ export default function Home() {
               <CheckCircle2 className="mr-2 mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
               <span>
                 <strong>Simplified Experience:</strong> Gasless transactions, pay fees in various tokens.
+              </span>
+            </li>
+            <li className="flex items-start">
+              <CheckCircle2 className="mr-2 mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
+              <span>
+                <strong>Multiple Wallets:</strong> Create up to {MAX_SMART_WALLETS_PER_EOA} smart wallets per EOA for better organization.
               </span>
             </li>
           </ul>

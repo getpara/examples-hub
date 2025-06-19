@@ -3,9 +3,10 @@
 import { useEffect, useState, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
-import { useWallet, useAccount } from "@getpara/react-sdk";
-import { useBalance } from "@/hooks/useBalance";
+import { useAccount } from "@getpara/react-sdk";
+import { useBalance, weiToUsd } from "@/hooks/useBalance";
 import { useEthPrice } from "@/hooks/useEthPrice";
+import { formatEther } from "viem";
 
 type SmartWallet = {
   id: string;
@@ -19,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import {
   ArrowLeft,
   Copy,
@@ -99,7 +101,6 @@ export default function SmartWalletAccountPage() {
   const params = useParams();
   const router = useRouter();
   const { toast } = useToast();
-  const {} = useWallet(); // Para wallet data available but not used in this view
   const { data: account } = useAccount();
   const [wallet, setWallet] = useState<SmartWallet | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -151,8 +152,7 @@ export default function SmartWalletAccountPage() {
   // Calculate USD value
   const usdValue = useMemo(() => {
     if (!balance || !priceUsd) return null;
-    const ethAmount = parseFloat(balance.ether);
-    return (ethAmount * priceUsd).toFixed(2);
+    return weiToUsd(balance.wei, priceUsd);
   }, [balance, priceUsd]);
 
   const handleCopyAddress = () => {
@@ -294,7 +294,7 @@ export default function SmartWalletAccountPage() {
             ) : (
               <>
                 <div className="text-4xl font-bold">
-                  {balance ? parseFloat(balance.ether).toFixed(4) : "0.0000"}{" "}
+                  {balance ? Number(formatEther(balance.wei)).toFixed(4) : "0.0000"}{" "}
                   <span className="text-2xl text-muted-foreground">ETH</span>
                 </div>
                 {usdValue && <div className="text-sm text-muted-foreground">≈ ${usdValue} USD</div>}
@@ -326,7 +326,10 @@ export default function SmartWalletAccountPage() {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>Transaction History (Mock)</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle>Transaction History</CardTitle>
+              <Badge variant="secondary" className="ml-2">Mock Data</Badge>
+            </div>
             <CardDescription>Recent activity for this smart wallet.</CardDescription>
           </CardHeader>
           <CardContent>

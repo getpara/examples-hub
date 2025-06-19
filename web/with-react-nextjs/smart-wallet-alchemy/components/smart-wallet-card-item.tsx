@@ -1,12 +1,13 @@
 "use client";
 
 import type React from "react";
+import { useState, useEffect, useRef } from "react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Wallet, Copy, ArrowRightCircle } from "lucide-react"; // Added ArrowRightCircle
+import { Wallet, Copy, Check, ArrowRightCircle } from "lucide-react";
 import { Button } from "./ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { useRouter } from "next/navigation"; // Import useRouter
+import { useRouter } from "next/navigation";
 type SmartWallet = {
   id: string;
   name: string;
@@ -22,17 +23,40 @@ interface SmartWalletCardItemProps {
 
 export default function SmartWalletCardItem({ wallet }: SmartWalletCardItemProps) {
   const { toast } = useToast();
-  const router = useRouter(); // Initialize router
+  const router = useRouter();
+  const [isCopied, setIsCopied] = useState(false);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Clear timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleCopyAddress = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent card click when copying
     navigator.clipboard
       .writeText(wallet.contractAddress)
       .then(() => {
+        setIsCopied(true);
         toast({
           title: "Address Copied!",
           description: `${wallet.contractAddress} copied to clipboard.`,
         });
+        
+        // Clear any existing timeout
+        if (timeoutRef.current) {
+          clearTimeout(timeoutRef.current);
+        }
+        
+        // Set new timeout
+        timeoutRef.current = setTimeout(() => {
+          setIsCopied(false);
+          timeoutRef.current = null;
+        }, 2000);
       })
       .catch((err) => {
         console.error("Failed to copy address: ", err);
@@ -76,7 +100,7 @@ export default function SmartWalletCardItem({ wallet }: SmartWalletCardItemProps
             aria-label="Copy address"
             className="hover:bg-primary/10"
             data-testid={`wallet-card-copy-button-${wallet.contractAddress}`}>
-            <Copy className="h-4 w-4" />
+            {isCopied ? <Check className="h-4 w-4 text-green-600" /> : <Copy className="h-4 w-4" />}
           </Button>
         </div>
       </CardContent>

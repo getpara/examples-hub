@@ -6,7 +6,13 @@ interface CoinGeckoResponse {
   };
 }
 
-export function useEthPrice() {
+export interface UseEthPriceReturn {
+  priceUsd: number | undefined;
+  isLoading: boolean;
+  isError: boolean;
+}
+
+export function useEthPrice(): UseEthPriceReturn {
   const query = useQuery({
     queryKey: ["eth-price"],
     queryFn: async () => {

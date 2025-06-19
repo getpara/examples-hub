@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, CheckCircle, Loader2, AlertTriangle, PartyPopper, Copy, Ban } from "lucide-react";
+import { ArrowLeft, CheckCircle, Loader2, AlertTriangle, PartyPopper, Copy, Ban, Info } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useWallet } from "@getpara/react-sdk";
 import { useSmartWalletAddress } from "@/hooks/use-smart-wallet-address";
@@ -16,7 +16,8 @@ import { useDeploySmartWallet } from "@/hooks/use-deploy-smart-wallet";
 import { useNextAvailableWalletIndex } from "@/hooks/use-next-available-wallet-index";
 import { useSmartWallets } from "@/hooks/use-smart-wallets";
 import { useDeploymentFee } from "@/hooks/useDeploymentFee";
-import { useEthPrice } from "@/hooks/useEthPrice";
+import { MAX_SMART_WALLETS_PER_EOA, WALLET_LIMIT_MESSAGE } from "@/constants/smart-wallet";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 type SmartWallet = {
   id: string;
@@ -55,7 +56,6 @@ export default function CreateAccountPage() {
 
   const { mutate: deployWallet, isPending: isDeploying } = useDeploySmartWallet();
 
-  const { priceUsd: ethPriceUsd } = useEthPrice();
   const { data: deploymentFee, isLoading: isFeeLoading } = useDeploymentFee(wallet?.id || null, nextIndex ?? 0);
 
   const currentNetworkDetails = useMemo(() => {
@@ -264,9 +264,21 @@ export default function CreateAccountPage() {
         <Card className="w-full max-w-lg max-h-[85vh] overflow-auto text-center">
           <CardHeader className="pt-8">
             <Ban className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
-            <CardTitle className="text-2xl">Wallet Limit Reached</CardTitle>
+            <CardTitle className="text-2xl flex items-center justify-center gap-2">
+              Wallet Limit Reached
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Info className="h-4 w-4 text-muted-foreground" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="max-w-xs">{WALLET_LIMIT_MESSAGE}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </CardTitle>
             <CardDescription>
-              You have reached the maximum of 3 smart wallets. To create a new one, you'll need to use a different EOA.
+              You have reached the maximum of {MAX_SMART_WALLETS_PER_EOA} smart wallets. To create a new one, you&apos;ll need to use a different EOA.
             </CardDescription>
           </CardHeader>
           <CardFooter>
@@ -299,7 +311,7 @@ export default function CreateAccountPage() {
           </CardHeader>
           <CardContent className="py-6">
             <p className="text-muted-foreground">
-              We couldn't verify your existing wallets. Please try again or contact support if the issue persists.
+              We couldn&apos;t verify your existing wallets. Please try again or contact support if the issue persists.
             </p>
           </CardContent>
           <CardFooter className="flex flex-col sm:flex-row gap-2">

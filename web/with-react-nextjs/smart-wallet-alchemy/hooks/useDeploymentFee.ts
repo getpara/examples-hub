@@ -1,27 +1,37 @@
 import { useQuery } from "@tanstack/react-query";
-import { formatEther } from "viem";
+import { formatEther, parseEther } from "viem";
 import { publicClient } from "@/lib/viem-client";
 import { createParaAlchemyClient, generateSalt } from "@/lib/smart-wallet/core";
 import { useClient } from "@getpara/react-sdk";
 import { useEthPrice } from "./useEthPrice";
+import { weiToUsd } from "./useBalance";
 
-interface DeploymentFee {
+export interface DeploymentFee {
   ethAmount: string;
   usdAmount: string;
   isSponsored: boolean;
-  gasUnits: bigint;
-  gasPrice: bigint;
 }
+
+const GAS_POLICY_ID = process.env.NEXT_PUBLIC_ALCHEMY_GAS_POLICY_ID || "";
 
 export function useDeploymentFee(walletId: string | null, index: number) {
   const para = useClient();
   const { priceUsd } = useEthPrice();
 
-  return useQuery<DeploymentFee>({
+  const query = useQuery<DeploymentFee | undefined>({
     queryKey: ["deploymentFee", walletId, index],
     queryFn: async () => {
-      if (!para || !walletId) {
-        throw new Error("Para client or wallet ID not available");
+      // Early exit if sponsored
+      if (GAS_POLICY_ID) {
+        return {
+          ethAmount: "0",
+          usdAmount: "0",
+          isSponsored: true,
+        };
+      }
+
+      if (!para || !walletId || index < 0) {
+        throw new Error("Invalid parameters for deployment fee calculation");
       }
 
       try {
@@ -43,28 +53,29 @@ export function useDeploymentFee(walletId: string | null, index: number) {
 
         // Calculate total gas units (including all UserOp gas fields)
         const totalGasUnits =
-          BigInt(deploymentOp.callGasLimit) +
-          BigInt(deploymentOp.verificationGasLimit) +
-          BigInt(deploymentOp.preVerificationGas);
+          BigInt(deploymentOp.callGasLimit || 0) +
+          BigInt(deploymentOp.verificationGasLimit || 0) +
+          BigInt(deploymentOp.preVerificationGas || 0);
 
         // Calculate the actual gas cost
         const gasCost = totalGasUnits * gasPrice;
 
         // Check if gas is sponsored (cost would be 0)
-        const isSponsored = deploymentOp.paymasterAndData !== "0x";
+        const isSponsored = 'paymasterAndData' in deploymentOp && deploymentOp.paymasterAndData !== "0x";
+
+        // Get the wei amount for calculations
+        const weiAmount = isSponsored ? BigInt(0) : gasCost;
 
         // Format ETH amount
-        const ethAmount = formatEther(isSponsored ? BigInt(0) : gasCost);
+        const ethAmount = formatEther(weiAmount);
 
-        // Calculate USD amount
-        const usdAmount = priceUsd ? (parseFloat(ethAmount) * priceUsd).toFixed(2) : "0.00";
+        // Calculate USD amount using bigint arithmetic
+        const usdAmount = priceUsd ? weiToUsd(weiAmount, priceUsd) : "0.00";
 
         return {
           ethAmount,
           usdAmount,
           isSponsored,
-          gasUnits: totalGasUnits,
-          gasPrice,
         };
       } catch (error) {
         console.error("Error estimating deployment fee:", error);
@@ -73,14 +84,13 @@ export function useDeploymentFee(walletId: string | null, index: number) {
           ethAmount: "0",
           usdAmount: "0",
           isSponsored: true,
-          gasUnits: BigInt(0),
-          gasPrice: BigInt(0),
         };
       }
     },
-    enabled: !!para && !!walletId && index >= 0,
-    staleTime: 60 * 1000, // 60 seconds
-    cacheTime: 5 * 60 * 1000, // 5 minutes
+    enabled: !!para && walletId !== null && index >= 0,
+    staleTime: 60_000, // 1 minute
     retry: 1,
   });
+
+  return query;
 }

@@ -7,6 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "validate": "yarn typecheck && yarn lint && yarn build",
     "postinstall": "yarn setup-para"
   },
   "dependencies": {

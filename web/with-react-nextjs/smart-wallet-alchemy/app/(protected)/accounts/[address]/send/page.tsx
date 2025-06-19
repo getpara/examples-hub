@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,10 +10,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ArrowLeft, Loader2, Send, Copy, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useClient, useWallet, useAccount } from "@getpara/react-sdk";
-import { useBalance } from "@/hooks/useBalance";
+import { useBalance, weiToUsd } from "@/hooks/useBalance";
 import { useEthPrice } from "@/hooks/useEthPrice";
 import { createParaAlchemyClient, generateSalt } from "@/lib/smart-wallet/core";
-import { parseEther, isAddress } from "viem";
+import { parseEther, isAddress, formatEther } from "viem";
+import { getEOAAddress } from "@/lib/utils/account";
 
 export default function SendAssetsPage() {
   const params = useParams();
@@ -32,15 +33,38 @@ export default function SendAssetsPage() {
   const [token] = useState("ETH");
   const [isSending, setIsSending] = useState(false);
   const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const ethBalance = parseFloat(balance?.ether || "0");
-  const usdValue = priceUsd && amount ? (parseFloat(amount) * priceUsd).toFixed(2) : null;
+  const ethBalance = balance ? Number(formatEther(balance.wei)) : 0;
+  const usdValue = priceUsd && amount && !isNaN(Number(amount)) ? weiToUsd(parseEther(amount), priceUsd) : null;
+
+  // Clear timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleCopyAddress = (address: string) => {
-    navigator.clipboard.writeText(address);
-    setCopiedAddress(address);
-    toast({ title: "Copied to clipboard", description: "Address copied successfully." });
-    setTimeout(() => setCopiedAddress(null), 2000);
+    navigator.clipboard.writeText(address).then(() => {
+      setCopiedAddress(address);
+      toast({ title: "Copied to clipboard", description: "Address copied successfully." });
+      
+      // Clear any existing timeout
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      
+      // Set new timeout
+      timeoutRef.current = setTimeout(() => {
+        setCopiedAddress(null);
+        timeoutRef.current = null;
+      }, 2000);
+    }).catch(() => {
+      toast({ title: "Failed to copy", description: "Could not copy address to clipboard.", variant: "destructive" });
+    });
   };
 
   const validateForm = () => {
@@ -60,8 +84,15 @@ export default function SendAssetsPage() {
       return false;
     }
 
-    if (amountNum > ethBalance) {
-      toast({ title: "Insufficient Balance", description: "Amount exceeds available balance", variant: "destructive" });
+    // Validate amount doesn't exceed balance
+    try {
+      const amountWei = parseEther(amount);
+      if (balance && amountWei > balance.wei) {
+        toast({ title: "Insufficient Balance", description: "Amount exceeds available balance", variant: "destructive" });
+        return false;
+      }
+    } catch {
+      toast({ title: "Invalid Amount", description: "Please enter a valid amount", variant: "destructive" });
       return false;
     }
 
@@ -142,22 +173,25 @@ export default function SendAssetsPage() {
                 )}
               </div>
             </div>
-            {account?.address && (
-              <div className="space-y-1">
-                <Label className="text-xs text-muted-foreground">Owner EOA</Label>
-                <div
-                  className="flex items-center justify-between font-mono text-sm break-all p-2 rounded-md hover:bg-muted/80 cursor-pointer transition-colors"
-                  onClick={() => handleCopyAddress(account.address)}
-                  data-testid="send-copy-owner-address">
-                  <span className="truncate">{account.address}</span>
-                  {copiedAddress === account.address ? (
-                    <Check className="h-4 w-4 text-green-500 ml-2 flex-shrink-0" />
-                  ) : (
-                    <Copy className="h-4 w-4 text-muted-foreground ml-2 flex-shrink-0" />
-                  )}
+            {(() => {
+              const eoaAddress = getEOAAddress(account, wallet);
+              return eoaAddress ? (
+                <div className="space-y-1">
+                  <Label className="text-xs text-muted-foreground">Owner EOA</Label>
+                  <div
+                    className="flex items-center justify-between font-mono text-sm break-all p-2 rounded-md hover:bg-muted/80 cursor-pointer transition-colors"
+                    onClick={() => handleCopyAddress(eoaAddress)}
+                    data-testid="send-copy-owner-address">
+                    <span className="truncate">{eoaAddress}</span>
+                    {copiedAddress === eoaAddress ? (
+                      <Check className="h-4 w-4 text-green-500 ml-2 flex-shrink-0" />
+                    ) : (
+                      <Copy className="h-4 w-4 text-muted-foreground ml-2 flex-shrink-0" />
+                    )}
+                  </div>
                 </div>
-              </div>
-            )}
+              ) : null;
+            })()}
           </div>
 
           <div className="space-y-2">

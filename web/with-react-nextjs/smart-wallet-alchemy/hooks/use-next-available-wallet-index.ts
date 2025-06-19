@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { useSmartWallets } from "./use-smart-wallets";
+import { MAX_SMART_WALLETS_PER_EOA } from "@/constants/smart-wallet";
 
 export function useNextAvailableWalletIndex() {
   const { data: wallets, isError } = useSmartWallets();
@@ -11,16 +12,16 @@ export function useNextAvailableWalletIndex() {
     // Count deployed wallets
     const deployedCount = wallets.filter(w => w.isDeployed).length;
     
-    // If all 3 wallets are deployed, return null (limit reached)
-    if (deployedCount === 3) {
+    // If all wallets are deployed, return null (limit reached)
+    if (deployedCount === MAX_SMART_WALLETS_PER_EOA) {
       return null;
     }
     
     // Find first non-deployed index
     const nextIndex = wallets.findIndex(w => !w.isDeployed);
     
-    // If all checked wallets are deployed but less than 3 total, return next index
-    if (nextIndex === -1 && wallets.length < 3) {
+    // If all checked wallets are deployed but less than max total, return next index
+    if (nextIndex === -1 && wallets.length < MAX_SMART_WALLETS_PER_EOA) {
       return wallets.length;
     }
     

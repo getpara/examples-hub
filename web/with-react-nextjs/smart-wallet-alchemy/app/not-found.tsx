@@ -10,7 +10,7 @@ export default function NotFound() {
         <CardHeader className="pt-8">
           <FileQuestion className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
           <CardTitle className="text-2xl">Page Not Found</CardTitle>
-          <CardDescription>The page you're looking for doesn't exist or has been moved.</CardDescription>
+          <CardDescription>The page you&apos;re looking for doesn&apos;t exist or has been moved.</CardDescription>
         </CardHeader>
         <CardContent className="py-6">
           <p className="text-muted-foreground">

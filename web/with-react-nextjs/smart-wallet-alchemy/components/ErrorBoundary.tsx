@@ -26,17 +26,12 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
     console.error("ErrorBoundary caught an error:", error, errorInfo);
   }
 
-  handleReset = () => {
-    this.setState({ hasError: false, error: null });
-  };
-
   render() {
     if (this.state.hasError) {
       return (
         <FullScreenError 
           title="Application Error"
           message={this.state.error?.message || "An unexpected error occurred"}
-          onRetry={this.handleReset}
         />
       );
     }

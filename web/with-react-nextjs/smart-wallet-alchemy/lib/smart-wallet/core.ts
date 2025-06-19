@@ -6,6 +6,7 @@ import { createParaAccount, createParaViemClient } from "@getpara/viem-v2-integr
 import { customSignMessage } from "./signature-utils";
 import type { ParaWeb as Para } from "@getpara/react-sdk";
 import { publicClient } from "@/lib/viem-client";
+import { MAX_SMART_WALLETS_PER_EOA } from "@/constants/smart-wallet";
 
 const GAS_POLICY_ID = process.env.NEXT_PUBLIC_ALCHEMY_GAS_POLICY_ID || "";
 console.log(`[createParaAlchemyClient] Using GAS_POLICY_ID: ${GAS_POLICY_ID}`);
@@ -108,7 +109,7 @@ export async function checkExistingWallets(para: Para, walletId: string) {
   const wallets = [];
 
   try {
-    for (let index = 0; index < 3; index++) {
+    for (let index = 0; index < MAX_SMART_WALLETS_PER_EOA; index++) {
       try {
         console.log(`[checkExistingWallets] Checking wallet at index: ${index}`);
         const address = await getSmartWalletAddress(para, walletId, index);
