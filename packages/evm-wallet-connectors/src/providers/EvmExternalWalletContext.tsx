@@ -401,9 +401,10 @@ export function EvmExternalWalletProvider({
     return await connect(_connector);
   };
 
-  const getQrUri = (connector: WagmiConnectorInstance) => () => {
-    return getWalletConnectUri(connector, connector.paraDetails?.getUri);
-  };
+  // old solution, kept for reference
+  // const getQrUri = (connector: WagmiConnectorInstance) => () => {
+  //   return getWalletConnectUri(connector, connector.paraDetails?.getUri);
+  // };
 
   const requestInfo = async (providerId: TExternalWallet): Promise<ExternalWalletInfo> => {
     const connector = connectors.find(c => c.paraDetails?.internalId === providerId);
@@ -481,17 +482,30 @@ export function EvmExternalWalletProvider({
     })
     .filter(c => !!c);
 
-  const wallets = dedupedConnectors.map(c => {
-    const connector = { ...c, ...c.paraDetails };
+  const wallets = dedupedConnectors
+    .map(c => {
+      // Remove the Safe connector when we are **not** inside a Safe App iframe
+      if (c.paraDetails?.internalId === 'SAFE' && (typeof window === 'undefined' || window.parent === window)) {
+        return undefined;
+      }
 
-    return {
-      ...connector,
-      connect: () => connect(connector),
-      connectMobile: isManualWalletConnect => connectMobile(connector, isManualWalletConnect),
-      type: 'EVM',
-      getQrUri: getQrUri(connector),
-    } as CommonWallet;
-  });
+      const connector = { ...c, ...c.paraDetails };
+
+      // Detect WC‑capable connectors
+      const supportsWalletConnect =
+        connector.type === 'walletConnect' ||
+        connector.paraDetails?.internalId === 'WALLETCONNECT' ||
+        connector.paraDetails?.showQrModal;
+
+      return {
+        ...connector,
+        connect: () => connect(connector),
+        connectMobile: (manual?: boolean) => connectMobile(connector, manual),
+        type: 'EVM',
+        ...(supportsWalletConnect && { getQrUri: () => getWalletConnectUri(connector, connector.getUri) }),
+      } as CommonWallet;
+    })
+    .filter(Boolean); // remove undefined from map
 
   const getConnectorInfo = (connector: WagmiConnectorInstance): Partial<ExternalWalletInfo> => {
     const paraDetails = connector.paraDetails as ParaDetails | undefined;

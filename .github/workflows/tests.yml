@@ -32,7 +32,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20.15.1"
+          node-version: '20.15.1'
 
       - name: Yarn cache
         uses: actions/cache@v4
@@ -75,7 +75,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20.15.1"
+          node-version: '20.15.1'
 
       - name: Set up cache key prefix
         id: vars
@@ -130,7 +130,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20.15.1"
+          node-version: '20.15.1'
 
       - name: Set up cache key prefix
         id: vars
@@ -157,14 +157,14 @@ jobs:
           key: ${{ runner.os }}-nx-dir-${{ env.CACHE_KEY_PREFIX }}-${{ hashFiles('packages/**/*.ts') }}-${{ hashFiles('packages/**/*.tsx') }}
           restore-keys: |
             ${{ runner.os }}-nx-dir-${{ env.CACHE_KEY_PREFIX }}
-    
+
       - name: Build packages
         run: yarn build
         env:
           NX_REJECT_UNKNOWN_LOCAL_CACHE: 0
           NX_IGNORE_MACHINE_CACHE: true
           NODE_OPTIONS: '--max_old_space_size=14336'
-      
+
       - name: Build MPC Worker
         run: yarn build
         working-directory: ./workers/mpc-worker
@@ -178,7 +178,7 @@ jobs:
 
       - name: Run Playwright tests
         run: xvfb-run npx playwright test --headed
-      
+
       - name: Configure AWS credentials
         if: failure()
         uses: aws-actions/configure-aws-credentials@67fbcbb121271f7775d2e7715933280b06314838
@@ -186,7 +186,7 @@ jobs:
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/github-actions-role
           role-session-name: github-upload-sandbox-artifacts
           aws-region: ${{ env.AWS_REGION }}
-      
+
       - name: Upload Trace Report
         if: failure()
         env:
@@ -212,8 +212,8 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20.15.1"
-      
+          node-version: '20.15.1'
+
       - name: Set up cache key prefix
         id: vars
         run: |
@@ -239,14 +239,14 @@ jobs:
           key: ${{ runner.os }}-nx-dir-${{ env.CACHE_KEY_PREFIX }}-${{ hashFiles('packages/**/*.ts') }}-${{ hashFiles('packages/**/*.tsx') }}
           restore-keys: |
             ${{ runner.os }}-nx-dir-${{ env.CACHE_KEY_PREFIX }}
-    
+
       - name: Build packages
         run: yarn build
         env:
           NX_REJECT_UNKNOWN_LOCAL_CACHE: 0
           NX_IGNORE_MACHINE_CACHE: true
           NODE_OPTIONS: '--max_old_space_size=14336'
-      
+
       - name: Build MPC Worker
         run: yarn build
         working-directory: ./workers/mpc-worker
@@ -263,7 +263,7 @@ jobs:
         with:
           repository: getpara/examples-hub
           path: examples-hub
-      
+
       - name: Move examples-hub outside to be parallel with web-sdk
         run: |
           mv examples-hub ../examples-hub
