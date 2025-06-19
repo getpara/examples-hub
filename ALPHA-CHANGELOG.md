@@ -1,6 +1,35 @@
 # Release (Wed Jun 18 2025)
 
 ## Package Versions
+- @getpara/web-sdk@2.0.0-alpha.23
+- @getpara/wagmi-v2-integration@2.0.0-alpha.23
+- @getpara/wagmi-v2-connector@2.0.0-alpha.23
+- @getpara/viem-v2-integration@2.0.0-alpha.23
+- @getpara/viem-v1-integration@2.0.0-alpha.23
+- @getpara/user-management-client@2.0.0-alpha.23
+- @getpara/solana-web3.js-v1-integration@2.0.0-alpha.23
+- @getpara/solana-wallet-connectors@2.0.0-alpha.23
+- @getpara/server-sdk@2.0.0-alpha.23
+- @getpara/react-sdk@2.0.0-alpha.23
+- @getpara/react-native-wallet@2.0.0-alpha.23
+- @getpara/react-components@2.0.0-alpha.23
+- @getpara/react-component-library@1.0.0-alpha.18
+- @getpara/react-common@2.0.0-alpha.23
+- @getpara/evm-wallet-connectors@2.0.0-alpha.23
+- @getpara/ethers-v6-integration@2.0.0-alpha.23
+- @getpara/ethers-v5-integration@2.0.0-alpha.23
+- @getpara/cosmos-wallet-connectors@2.0.0-alpha.23
+- @getpara/cosmjs-v0-integration@2.0.0-alpha.23
+- @getpara/core-sdk@2.0.0-alpha.23
+- @getpara/core-components@2.0.0-alpha.23
+
+
+### Fixes
+-  External wallet context defaults (#1034) - fe7e2c16b
+
+# Release (Wed Jun 18 2025)
+
+## Package Versions
 - @getpara/web-sdk@2.0.0-alpha.22
 - @getpara/wagmi-v2-integration@2.0.0-alpha.22
 - @getpara/wagmi-v2-connector@2.0.0-alpha.22
