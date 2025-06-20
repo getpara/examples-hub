@@ -13,6 +13,8 @@ export const AuthSection: React.FC<AuthSectionProps> = ({ onSuccess }) => {
   const [authMethod, setAuthMethod] = useState<"email" | "phone">("email");
   // Controls visibility of OTP verification screen
   const [showVerification, setShowVerification] = useState(false);
+  // Controls visibility of security choice screen
+  const [showSecurityChoice, setShowSecurityChoice] = useState(false);
 
   const handleShowVerification = () => {
     setShowVerification(true);
@@ -20,6 +22,14 @@ export const AuthSection: React.FC<AuthSectionProps> = ({ onSuccess }) => {
 
   const handleHideVerification = () => {
     setShowVerification(false);
+  };
+
+  const handleShowSecurityChoice = () => {
+    setShowSecurityChoice(true);
+  };
+
+  const handleHideSecurityChoice = () => {
+    setShowSecurityChoice(false);
   };
 
   return (
@@ -32,10 +42,14 @@ export const AuthSection: React.FC<AuthSectionProps> = ({ onSuccess }) => {
         showsVerticalScrollIndicator={true}
         keyboardShouldPersistTaps="handled">
         
-        <Text style={styles.title}>Para SDK Demo</Text>
-        <Text style={styles.subtitle}>Sign in or create an account</Text>
+        {!showSecurityChoice && (
+          <>
+            <Text style={styles.title}>Para SDK Demo</Text>
+            <Text style={styles.subtitle}>Sign in or create an account</Text>
+          </>
+        )}
 
-        {!showVerification && (
+        {!showVerification && !showSecurityChoice && (
           <View style={styles.tabs}>
             <TouchableOpacity
               style={[styles.tab, authMethod === "email" && styles.activeTab]}
@@ -53,11 +67,23 @@ export const AuthSection: React.FC<AuthSectionProps> = ({ onSuccess }) => {
 
         {/* Render selected auth method component */}
         {authMethod === "email" ? 
-          <EmailAuth onSuccess={onSuccess} onShowVerification={handleShowVerification} onHideVerification={handleHideVerification} /> : 
-          <PhoneAuth onSuccess={onSuccess} onShowVerification={handleShowVerification} onHideVerification={handleHideVerification} />
+          <EmailAuth 
+            onSuccess={onSuccess} 
+            onShowVerification={handleShowVerification} 
+            onHideVerification={handleHideVerification}
+            onShowSecurityChoice={handleShowSecurityChoice}
+            onHideSecurityChoice={handleHideSecurityChoice}
+          /> : 
+          <PhoneAuth 
+            onSuccess={onSuccess} 
+            onShowVerification={handleShowVerification} 
+            onHideVerification={handleHideVerification}
+            onShowSecurityChoice={handleShowSecurityChoice}
+            onHideSecurityChoice={handleHideSecurityChoice}
+          />
         }
 
-        {!showVerification && (
+        {!showVerification && !showSecurityChoice && (
           <>
             <View style={styles.divider}>
               <View style={styles.dividerLine} />
@@ -67,7 +93,11 @@ export const AuthSection: React.FC<AuthSectionProps> = ({ onSuccess }) => {
 
             {/* OAuth providers section */}
             <View style={styles.oauthSection}>
-              <OAuthAuth onSuccess={onSuccess} />
+              <OAuthAuth 
+                onSuccess={onSuccess} 
+                onShowSecurityChoice={handleShowSecurityChoice}
+                onHideSecurityChoice={handleHideSecurityChoice}
+              />
             </View>
 
             <View style={styles.testInfo}>

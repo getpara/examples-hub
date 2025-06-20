@@ -11,7 +11,7 @@ interface WalletSectionProps {
 
 export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
   const [wallet, setWallet] = useState<any>(null);
-  const [loadingWallet, setLoadingWallet] = useState(false);
+  const [_loadingWallet, setLoadingWallet] = useState(false);
   const [signingMessage, setSigningMessage] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
   const [status, setStatus] = useState("");
