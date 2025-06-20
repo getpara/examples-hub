@@ -1,6 +1,5 @@
 import { AuthInput } from '../AuthInput/AuthInput.js';
 import { AccountTypeIcon, GradientScroll, StepContainer } from '../common.js';
-import styled from 'styled-components';
 import { CpslButton, CpslDivider, CpslText } from '@getpara/react-components';
 import { getAccountTypeName } from '../../constants/oAuthLogos.js';
 import { useExternalWallets } from '../../../provider/providers/ExternalWalletProvider.js';
@@ -8,6 +7,7 @@ import { useAccountLinking } from '../../../provider/providers/AccountLinkProvid
 import { useEffect, useMemo } from 'react';
 import { EXTERNAL_WALLET_TYPES, TExternalWallet, TLinkedAccountType } from '@getpara/web-sdk';
 import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
+import { safeStyled } from '@getpara/react-common';
 
 function isExternalWallet(str: TLinkedAccountType | TExternalWallet): str is TExternalWallet {
   return (EXTERNAL_WALLET_TYPES as unknown as string[]).includes(str as string);
@@ -134,7 +134,7 @@ export function AccountProfileLinkOptions() {
   );
 }
 
-const Content = styled.div`
+const Content = safeStyled.div`
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -142,7 +142,7 @@ const Content = styled.div`
   width: 100%;
 `;
 
-const Option = styled(CpslButton)`
+const Option = safeStyled(CpslButton)`
   --button-justify-content: flex-start;
 
   height: 48px;

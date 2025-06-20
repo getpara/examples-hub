@@ -2,8 +2,8 @@ import { CpslButton, CpslText } from '@getpara/react-components';
 import { useEffect, useState } from 'react';
 import { AccountTypeIcon } from '../common.js';
 import { getAccountTypeName } from '../../constants/oAuthLogos.js';
-import styled from 'styled-components';
 import { useAccountLinking } from '../../../provider/providers/AccountLinkProvider.js';
+import { safeStyled } from '@getpara/react-common';
 
 export function AccountProfileUnlink() {
   const { unlinkingAccount, unlinkAccountConfirm, isUnlinkAccountPending } = useAccountLinking(),
@@ -30,7 +30,7 @@ export function AccountProfileUnlink() {
   );
 }
 
-const Content = styled.div`
+const Content = safeStyled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -38,11 +38,11 @@ const Content = styled.div`
   gap: 32px;
 `;
 
-const Upper = styled(Content)`
+const Upper = safeStyled(Content)`
   gap: 8px;
 `;
 
-const Message = styled(CpslText)`
+const Message = safeStyled(CpslText)`
   text-align: center;
   max-width: 342px;
 `;
