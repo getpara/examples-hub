@@ -1,20 +1,26 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { para } from "../para";
+import { openAuthSessionAsync } from "expo-web-browser";
 import { Input } from "./common/Input";
 import { Button } from "./common/Button";
 import { StatusDisplay } from "./common/StatusDisplay";
+import { SecurityChoice } from "./SecurityChoice";
 
 interface EmailAuthProps {
   onSuccess: () => void;
   onShowVerification?: () => void;
   onHideVerification?: () => void;
+  onShowSecurityChoice?: () => void;
+  onHideSecurityChoice?: () => void;
 }
 
-export const EmailAuth: React.FC<EmailAuthProps> = ({ onSuccess, onShowVerification, onHideVerification }) => {
+export const EmailAuth: React.FC<EmailAuthProps> = ({ onSuccess, onShowVerification, onHideVerification, onShowSecurityChoice, onHideSecurityChoice }) => {
   const [email, setEmail] = useState("");
   const [verificationCode, setVerificationCode] = useState("");
   const [showVerification, setShowVerification] = useState(false);
+  const [showSecurityChoice, setShowSecurityChoice] = useState(false);
+  const [authState, setAuthState] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
@@ -40,19 +46,33 @@ export const EmailAuth: React.FC<EmailAuthProps> = ({ onSuccess, onShowVerificat
 
     try {
       // Para automatically detects if email is new or existing user
-      const authState = await para.signUpOrLogIn({ auth: { email } });
+      const authStateResult = await para.signUpOrLogIn({ auth: { email } });
+      setAuthState(authStateResult);
 
-      if (authState?.stage === "verify") {
+      if (authStateResult?.stage === "verify") {
         // New user flow - requires email verification
         setShowVerification(true);
         onShowVerification?.();
         setStatus("Verification code sent to your email");
-      } else if (authState?.stage === "login") {
-        // Existing user - authenticate with passkey
-        setStatus("Logging in with passkey...");
-        await para.loginWithPasskey();
-        setStatus("");
-        onSuccess();
+      } else if (authStateResult?.stage === "login") {
+        // Existing user - check if they use password or passkey
+        if (authStateResult.passwordUrl) {
+          // User has password-based security
+          setStatus("Redirecting to password login...");
+          const APP_SCHEME_EMAIL = "para-sdk-demo";
+          const APP_SCHEME_REDIRECT_URL = `${APP_SCHEME_EMAIL}://para`;
+          
+          await openAuthSessionAsync(authStateResult.passwordUrl, APP_SCHEME_REDIRECT_URL);
+          await para.waitForLogin({});
+          setStatus("");
+          onSuccess();
+        } else {
+          // User has passkey-based security
+          setStatus("Logging in with passkey...");
+          await para.loginWithPasskey();
+          setStatus("");
+          onSuccess();
+        }
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Authentication failed");
@@ -73,14 +93,15 @@ export const EmailAuth: React.FC<EmailAuthProps> = ({ onSuccess, onShowVerificat
 
     try {
       // Verify OTP to confirm email ownership
-      const authState = await para.verifyNewAccount({ verificationCode });
+      const verifiedAuthState = await para.verifyNewAccount({ verificationCode });
+      setAuthState(verifiedAuthState);
 
-      // Create passkey for passwordless future logins
-      setStatus("Creating passkey...");
-      await para.registerPasskey(authState);
-
+      // Show security choice instead of auto-creating passkey
+      setShowVerification(false);
+      setShowSecurityChoice(true);
+      onHideVerification?.();
+      onShowSecurityChoice?.();
       setStatus("");
-      onSuccess();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Verification failed");
     } finally {
@@ -104,9 +125,40 @@ export const EmailAuth: React.FC<EmailAuthProps> = ({ onSuccess, onShowVerificat
     }
   };
 
+  const handleSecurityChoice = async (choice: 'passkey' | 'password') => {
+    setLoading(true);
+    setError('');
+
+    try {
+      if (choice === 'passkey') {
+        // Register passkey for future logins
+        setStatus('Creating passkey...');
+        await para.registerPasskey(authState);
+        setStatus('');
+        onHideSecurityChoice?.();
+        onSuccess();
+      } else {
+        // Redirect to password creation
+        setStatus('Redirecting to password creation...');
+        const APP_SCHEME_EMAIL = 'para-sdk-demo';
+        const APP_SCHEME_REDIRECT_URL = `${APP_SCHEME_EMAIL}://para`;
+        
+        await openAuthSessionAsync(authState.passwordUrl, APP_SCHEME_REDIRECT_URL);
+        await para.waitForWalletCreation({});
+        setStatus('');
+        onHideSecurityChoice?.();
+        onSuccess();
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Security setup failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <View style={styles.container}>
-      {!showVerification ? (
+      {!showVerification && !showSecurityChoice ? (
         <>
           <Input
             label="Email"
@@ -122,7 +174,7 @@ export const EmailAuth: React.FC<EmailAuthProps> = ({ onSuccess, onShowVerificat
             loading={loading}
           />
         </>
-      ) : (
+      ) : showVerification ? (
         <>
           <Text style={styles.subtitle}>Enter verification code sent to {email}</Text>
           <Input
@@ -155,6 +207,8 @@ export const EmailAuth: React.FC<EmailAuthProps> = ({ onSuccess, onShowVerificat
             disabled={loading}
           />
         </>
+      ) : (
+        <SecurityChoice onChoice={handleSecurityChoice} loading={loading} />
       )}
 
       <StatusDisplay

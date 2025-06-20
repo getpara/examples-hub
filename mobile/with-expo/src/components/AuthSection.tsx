@@ -12,6 +12,7 @@ export const AuthSection: React.FC<AuthSectionProps> = ({ onSuccess }) => {
   // Para supports multiple auth methods - toggle between them here
   const [authMethod, setAuthMethod] = useState<"email" | "phone">("email");
   const [showVerification, setShowVerification] = useState(false);
+  const [showSecurityChoice, setShowSecurityChoice] = useState(false);
 
   const handleShowVerification = () => {
     setShowVerification(true);
@@ -19,6 +20,14 @@ export const AuthSection: React.FC<AuthSectionProps> = ({ onSuccess }) => {
 
   const handleHideVerification = () => {
     setShowVerification(false);
+  };
+
+  const handleShowSecurityChoice = () => {
+    setShowSecurityChoice(true);
+  };
+
+  const handleHideSecurityChoice = () => {
+    setShowSecurityChoice(false);
   };
 
   return (
@@ -32,10 +41,14 @@ export const AuthSection: React.FC<AuthSectionProps> = ({ onSuccess }) => {
         showsVerticalScrollIndicator={true}
         keyboardShouldPersistTaps="handled">
         
-        <Text style={styles.title}>Para SDK Demo</Text>
-        <Text style={styles.subtitle}>Sign in or create an account</Text>
+        {!showSecurityChoice && (
+          <>
+            <Text style={styles.title}>Para SDK Demo</Text>
+            <Text style={styles.subtitle}>Sign in or create an account</Text>
+          </>
+        )}
 
-        {!showVerification && (
+        {!showVerification && !showSecurityChoice && (
           <View style={styles.tabs}>
             <TouchableOpacity
               style={[styles.tab, authMethod === "email" && styles.activeTab]}
@@ -53,11 +66,23 @@ export const AuthSection: React.FC<AuthSectionProps> = ({ onSuccess }) => {
 
         {/* Render auth component based on selected method */}
         {authMethod === "email" ? 
-          <EmailAuth onSuccess={onSuccess} onShowVerification={handleShowVerification} onHideVerification={handleHideVerification} /> : 
-          <PhoneAuth onSuccess={onSuccess} onShowVerification={handleShowVerification} onHideVerification={handleHideVerification} />
+          <EmailAuth 
+            onSuccess={onSuccess} 
+            onShowVerification={handleShowVerification} 
+            onHideVerification={handleHideVerification}
+            onShowSecurityChoice={handleShowSecurityChoice}
+            onHideSecurityChoice={handleHideSecurityChoice}
+          /> : 
+          <PhoneAuth 
+            onSuccess={onSuccess} 
+            onShowVerification={handleShowVerification} 
+            onHideVerification={handleHideVerification}
+            onShowSecurityChoice={handleShowSecurityChoice}
+            onHideSecurityChoice={handleHideSecurityChoice}
+          />
         }
 
-        {!showVerification && (
+        {!showVerification && !showSecurityChoice && (
           <>
             <View style={styles.divider}>
               <View style={styles.dividerLine} />
@@ -67,7 +92,11 @@ export const AuthSection: React.FC<AuthSectionProps> = ({ onSuccess }) => {
 
             {/* OAuth providers - Para supports Google, Apple, Twitter, Discord */}
             <View style={styles.oauthSection}>
-              <OAuthAuth onSuccess={onSuccess} />
+              <OAuthAuth 
+                onSuccess={onSuccess} 
+                onShowSecurityChoice={handleShowSecurityChoice}
+                onHideSecurityChoice={handleHideSecurityChoice}
+              />
             </View>
 
             <View style={styles.testInfo}>

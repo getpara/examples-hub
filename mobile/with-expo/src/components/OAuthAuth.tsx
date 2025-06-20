@@ -4,22 +4,27 @@ import { para } from "../para";
 import { openAuthSessionAsync } from "expo-web-browser";
 import * as Linking from "expo-linking";
 import { StatusDisplay } from "./common/StatusDisplay";
+import { SecurityChoice } from "./SecurityChoice";
 
 // OAuth providers supported by Para SDK
 type SupportedOAuthMethod = "GOOGLE" | "DISCORD" | "TWITTER" | "APPLE" | "FACEBOOK";
 
 interface OAuthAuthProps {
   onSuccess: () => void;
+  onShowSecurityChoice?: () => void;
+  onHideSecurityChoice?: () => void;
 }
 
 // Must match scheme in app.json for deep linking
 const APP_SCHEME = "para-sdk-demo";
 
-export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess }) => {
+export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess, onShowSecurityChoice, onHideSecurityChoice }) => {
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
   const [pendingOAuthProvider, setPendingOAuthProvider] = useState<SupportedOAuthMethod | null>(null);
+  const [showSecurityChoice, setShowSecurityChoice] = useState(false);
+  const [authState, setAuthState] = useState<any>(null);
 
   // Handle OAuth redirect back to app
   useEffect(() => {
@@ -30,22 +35,35 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess }) => {
           setStatus("Verifying authentication...");
 
           // Complete OAuth flow with Para backend
-          const authState = await para.verifyOAuth({
+          const verifiedAuthState = await para.verifyOAuth({
             method: pendingOAuthProvider,
           });
+          setAuthState(verifiedAuthState);
 
-          if (authState.stage === "login") {
-            // Known OAuth account - authenticate with passkey
-            setStatus("Logging in with passkey...");
-            await para.loginWithPasskey();
+          if (verifiedAuthState.stage === "login") {
+            // Existing user - check if they use password or passkey
+            if (verifiedAuthState.passwordUrl) {
+              // User has password-based security
+              setStatus("Redirecting to password login...");
+              const APP_SCHEME_OAUTH = "para-sdk-demo";
+              const APP_SCHEME_REDIRECT_URL = `${APP_SCHEME_OAUTH}://para`;
+              
+              await openAuthSessionAsync(verifiedAuthState.passwordUrl, APP_SCHEME_REDIRECT_URL);
+              await para.waitForLogin({});
+              setStatus("");
+              onSuccess();
+            } else {
+              // User has passkey-based security
+              setStatus("Logging in with passkey...");
+              await para.loginWithPasskey();
+              setStatus("");
+              onSuccess();
+            }
+          } else if (verifiedAuthState.stage === "signup") {
+            // New user - show security choice
+            setShowSecurityChoice(true);
+            onShowSecurityChoice?.();
             setStatus("");
-            onSuccess();
-          } else if (authState.stage === "signup") {
-            // First time OAuth - create passkey
-            setStatus("Creating passkey...");
-            await para.registerPasskey(authState);
-            setStatus("");
-            onSuccess();
           } else {
             throw new Error("Unexpected authentication state");
           }
@@ -71,7 +89,7 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess }) => {
     return () => {
       subscription.remove();
     };
-  }, [pendingOAuthProvider, onSuccess]);
+  }, [pendingOAuthProvider, onSuccess, onShowSecurityChoice]);
 
   const handleOAuthLogin = async (provider: SupportedOAuthMethod) => {
     setLoading(true);
@@ -110,6 +128,39 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess }) => {
     }
   };
 
+  const handleSecurityChoice = async (choice: 'passkey' | 'password') => {
+    setLoading(true);
+    setError('');
+
+    try {
+      if (choice === 'passkey') {
+        // Register passkey for future logins
+        setStatus('Creating passkey...');
+        await para.registerPasskey(authState);
+        setStatus('');
+        onHideSecurityChoice?.();
+        onSuccess();
+      } else {
+        // Redirect to password creation
+        setStatus('Redirecting to password creation...');
+        const APP_SCHEME_OAUTH = 'para-sdk-demo';
+        const APP_SCHEME_REDIRECT_URL = `${APP_SCHEME_OAUTH}://para`;
+        
+        await openAuthSessionAsync(authState.passwordUrl, APP_SCHEME_REDIRECT_URL);
+        await para.waitForWalletCreation({});
+        setStatus('');
+        onHideSecurityChoice?.();
+        onSuccess();
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Security setup failed');
+    } finally {
+      setLoading(false);
+      setShowSecurityChoice(false);
+      setPendingOAuthProvider(null);
+    }
+  };
+
   const oauthProviders: {
     method: SupportedOAuthMethod;
     name: string;
@@ -120,17 +171,23 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess }) => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.providersContainer}>
-        {oauthProviders.map((provider) => (
-          <TouchableOpacity
-            key={provider.method}
-            style={[styles.providerButton, loading && styles.disabledButton]}
-            onPress={() => handleOAuthLogin(provider.method)}
-            disabled={loading}>
-            <Text style={styles.providerButtonText}>{provider.name}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
+      {!showSecurityChoice ? (
+        <>
+          <View style={styles.providersContainer}>
+            {oauthProviders.map((provider) => (
+              <TouchableOpacity
+                key={provider.method}
+                style={[styles.providerButton, loading && styles.disabledButton]}
+                onPress={() => handleOAuthLogin(provider.method)}
+                disabled={loading}>
+                <Text style={styles.providerButtonText}>{provider.name}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </>
+      ) : (
+        <SecurityChoice onChoice={handleSecurityChoice} loading={loading} />
+      )}
 
       <StatusDisplay
         status={status}
