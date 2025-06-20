@@ -48,6 +48,7 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess }) => {
             throw new Error("Unexpected authentication state");
           }
         } catch (err) {
+          console.error(err);
           setError(err instanceof Error ? err.message : "OAuth verification failed");
         } finally {
           setPendingOAuthProvider(null);
@@ -79,6 +80,7 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess }) => {
     try {
       await handleStandardOAuth(provider);
     } catch (err) {
+      console.error(err);
       setError(err instanceof Error ? err.message : "OAuth authentication failed");
       setLoading(false);
       setPendingOAuthProvider(null);

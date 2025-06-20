@@ -63,6 +63,7 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
           setStatus("");
         }
       } catch (createErr) {
+        console.error(createErr);
         setError(createErr instanceof Error ? createErr.message : "Failed to create wallet");
       }
     } finally {
@@ -104,6 +105,7 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
         setError("Failed to get signature");
       }
     } catch (err) {
+      console.error(err);
       setError(err instanceof Error ? err.message : "Failed to sign message");
     } finally {
       setSigningMessage(false);
@@ -119,6 +121,7 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
       await para.logout();
       onLogout();
     } catch (err) {
+      console.error(err);
       setError(err instanceof Error ? err.message : "Failed to logout");
     } finally {
       setLoggingOut(false);

@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet } from "react-native";
-import { para } from "../para";
-import { Input } from "./common/Input";
-import { Button } from "./common/Button";
-import { StatusDisplay } from "./common/StatusDisplay";
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet } from 'react-native';
+import { para } from '../para';
+import { Input } from './common/Input';
+import { Button } from './common/Button';
+import { StatusDisplay } from './common/StatusDisplay';
 
 interface EmailAuthProps {
   onSuccess: () => void;
@@ -11,13 +11,17 @@ interface EmailAuthProps {
   onHideVerification?: () => void;
 }
 
-export const EmailAuth: React.FC<EmailAuthProps> = ({ onSuccess, onShowVerification, onHideVerification }) => {
-  const [email, setEmail] = useState("");
-  const [verificationCode, setVerificationCode] = useState("");
+export const EmailAuth: React.FC<EmailAuthProps> = ({
+  onSuccess,
+  onShowVerification,
+  onHideVerification,
+}) => {
+  const [email, setEmail] = useState('');
+  const [verificationCode, setVerificationCode] = useState('');
   const [showVerification, setShowVerification] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [status, setStatus] = useState("");
-  const [error, setError] = useState("");
+  const [status, setStatus] = useState('');
+  const [error, setError] = useState('');
 
   useEffect(() => {
     // Call onHideVerification when component unmounts or verification is hidden
@@ -30,32 +34,33 @@ export const EmailAuth: React.FC<EmailAuthProps> = ({ onSuccess, onShowVerificat
 
   const handleContinue = async () => {
     if (!email) {
-      setError("Please enter an email");
+      setError('Please enter an email');
       return;
     }
 
     setLoading(true);
-    setError("");
-    setStatus("Checking email...");
+    setError('');
+    setStatus('Checking email...');
 
     try {
       // Call signUpOrLogIn to determine if user exists
       const authState = await para.signUpOrLogIn({ auth: { email } });
 
-      if (authState?.stage === "verify") {
+      if (authState?.stage === 'verify') {
         // New user - show OTP verification
         setShowVerification(true);
         onShowVerification?.();
-        setStatus("Verification code sent to your email");
-      } else if (authState?.stage === "login") {
+        setStatus('Verification code sent to your email');
+      } else if (authState?.stage === 'login') {
         // Existing user - proceed with passkey login
-        setStatus("Logging in with passkey...");
+        setStatus('Logging in with passkey...');
         await para.loginWithPasskey();
-        setStatus("");
+        setStatus('');
         onSuccess();
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Authentication failed");
+      console.error(err);
+      setError(err instanceof Error ? err.message : 'Authentication failed');
     } finally {
       setLoading(false);
     }
@@ -63,26 +68,25 @@ export const EmailAuth: React.FC<EmailAuthProps> = ({ onSuccess, onShowVerificat
 
   const handleVerification = async () => {
     if (!verificationCode) {
-      setError("Please enter verification code");
+      setError('Please enter verification code');
       return;
     }
 
     setLoading(true);
-    setError("");
-    setStatus("Verifying code...");
+    setError('');
+    setStatus('Verifying code...');
 
     try {
-      // Verify the OTP code
       const authState = await para.verifyNewAccount({ verificationCode });
 
-      // Register passkey for new user
-      setStatus("Creating passkey...");
+      setStatus('Creating passkey...');
       await para.registerPasskey(authState);
 
-      setStatus("");
+      setStatus('');
       onSuccess();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Verification failed");
+      console.error(err);
+      setError(err instanceof Error ? err.message : 'Verification failed');
     } finally {
       setLoading(false);
     }
@@ -90,14 +94,15 @@ export const EmailAuth: React.FC<EmailAuthProps> = ({ onSuccess, onShowVerificat
 
   const resendCode = async () => {
     setLoading(true);
-    setError("");
-    setStatus("Resending code...");
+    setError('');
+    setStatus('Resending code...');
 
     try {
-      await para.resendVerificationCode({ type: "SIGNUP" });
-      setStatus("Verification code resent");
+      await para.resendVerificationCode({ type: 'SIGNUP' });
+      setStatus('Verification code resent');
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to resend code");
+      console.error(err);
+      setError(err instanceof Error ? err.message : 'Failed to resend code');
     } finally {
       setLoading(false);
     }
@@ -115,32 +120,32 @@ export const EmailAuth: React.FC<EmailAuthProps> = ({ onSuccess, onShowVerificat
             keyboardType="email-address"
             autoCapitalize="none"
           />
-          <Button
-            title="Continue"
-            onPress={handleContinue}
-            loading={loading}
-          />
+          <Button title="Continue" onPress={handleContinue} loading={loading} />
         </>
       ) : (
         <>
-          <Text style={styles.subtitle}>Enter verification code sent to {email}</Text>
+          <Text style={styles.subtitle}>
+            Enter verification code sent to {email}
+          </Text>
           <Input
             label="Verification Code"
             value={verificationCode}
-            onChangeText={(text) => setVerificationCode(text.slice(0, 6))}
+            onChangeText={text => setVerificationCode(text.slice(0, 6))}
             placeholder="Enter 6-digit code"
             keyboardType="number-pad"
             maxLength={6}
           />
-          
-          {(email.endsWith('@usecapsule.com') || email.endsWith('@getpara.com')) && (
+
+          {(email.endsWith('@usecapsule.com') ||
+            email.endsWith('@getpara.com')) && (
             <View style={styles.betaReminder}>
               <Text style={styles.betaReminderText}>
-                <Text style={styles.betaBold}>Beta Testing:</Text> Any random OTP will work
+                <Text style={styles.betaBold}>Beta Testing:</Text> Any random
+                OTP will work
               </Text>
             </View>
           )}
-          
+
           <Button
             title="Verify"
             onPress={handleVerification}
@@ -156,27 +161,24 @@ export const EmailAuth: React.FC<EmailAuthProps> = ({ onSuccess, onShowVerificat
         </>
       )}
 
-      <StatusDisplay
-        status={status}
-        error={error}
-      />
+      <StatusDisplay status={status} error={error} />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    width: "100%",
+    width: '100%',
   },
   subtitle: {
     fontSize: 14,
-    color: "#666",
+    color: '#666',
     marginBottom: 16,
   },
   betaReminder: {
-    backgroundColor: "#F8F8F8",
+    backgroundColor: '#F8F8F8',
     borderWidth: 1,
-    borderColor: "#E5E5E5",
+    borderColor: '#E5E5E5',
     borderRadius: 4,
     padding: 12,
     marginBottom: 16,
@@ -184,11 +186,11 @@ const styles = StyleSheet.create({
   },
   betaReminderText: {
     fontSize: 13,
-    color: "#666666",
-    textAlign: "center",
+    color: '#666666',
+    textAlign: 'center',
   },
   betaBold: {
-    fontWeight: "700",
-    color: "#000000",
+    fontWeight: '700',
+    color: '#000000',
   },
 });

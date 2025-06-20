@@ -55,6 +55,7 @@ export const PhoneAuth: React.FC<PhoneAuthProps> = ({ onSuccess, onShowVerificat
         onSuccess();
       }
     } catch (err) {
+      console.error(err);
       setError(err instanceof Error ? err.message : "Authentication failed");
     } finally {
       setLoading(false);
@@ -82,6 +83,7 @@ export const PhoneAuth: React.FC<PhoneAuthProps> = ({ onSuccess, onShowVerificat
       setStatus("");
       onSuccess();
     } catch (err) {
+      console.error(err);
       setError(err instanceof Error ? err.message : "Verification failed");
     } finally {
       setLoading(false);
@@ -97,6 +99,7 @@ export const PhoneAuth: React.FC<PhoneAuthProps> = ({ onSuccess, onShowVerificat
       await para.resendVerificationCode({ type: "SIGNUP" });
       setStatus("Verification code resent");
     } catch (err) {
+      console.error(err);
       setError(err instanceof Error ? err.message : "Failed to resend code");
     } finally {
       setLoading(false);
