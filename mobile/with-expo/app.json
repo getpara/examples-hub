@@ -1,12 +1,18 @@
 {
   "expo": {
-    "name": "para-expo",
+    "name": "Para Expo",
     "slug": "para-expo",
     "version": "1.0.0",
+    "scheme": "para-sdk-demo",
     "orientation": "portrait",
-    "icon": "./public/images/icon.png",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
     "newArchEnabled": true,
-    "scheme": "para-expo",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.getpara.example",
@@ -18,30 +24,14 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./public/images/adaptive-icon.png",
+        "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
+      "edgeToEdgeEnabled": true,
       "package": "com.getpara.example"
     },
-    "plugins": [
-      "expo-router",
-      [
-        "expo-splash-screen",
-        {
-          "image": "./public/images/splash-icon.png",
-          "imageWidth": 200,
-          "resizeMode": "contain",
-          "backgroundColor": "#ffffff"
-        }
-      ],
-      "expo-secure-store",
-      "expo-font"
-    ],
-    "experiments": {
-      "typedRoutes": true
-    },
     "web": {
-      "bundler": "metro"
+      "favicon": "./assets/favicon.png"
     }
   }
 }
