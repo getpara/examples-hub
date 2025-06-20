@@ -1,6 +1,6 @@
 {
   "name": "@getpara/web-sdk",
-  "version": "2.0.0-alpha.23",
+  "version": "2.0.0-alpha.24",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -8,8 +8,8 @@
     "wasm_exec.js"
   ],
   "dependencies": {
-    "@getpara/core-sdk": "2.0.0-alpha.23",
-    "@getpara/user-management-client": "2.0.0-alpha.23",
+    "@getpara/core-sdk": "2.0.0-alpha.24",
+    "@getpara/user-management-client": "2.0.0-alpha.24",
     "@sentry/browser": "^9.1.0",
     "base64url": "3.0.1",
     "buffer": "6.0.3",

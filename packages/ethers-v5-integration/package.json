@@ -1,13 +1,13 @@
 {
   "name": "@getpara/ethers-v5-integration",
-  "version": "2.0.0-alpha.23",
+  "version": "2.0.0-alpha.24",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
   "types": "dist/types/index.d.ts",
   "typings": "dist/types/index.d.ts",
   "sideEffects": false,
   "dependencies": {
-    "@getpara/core-sdk": "2.0.0-alpha.23",
+    "@getpara/core-sdk": "2.0.0-alpha.24",
     "ethers": "^5.8.0"
   },
   "scripts": {

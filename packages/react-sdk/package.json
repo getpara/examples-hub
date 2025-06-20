@@ -1,6 +1,6 @@
 {
   "name": "@getpara/react-sdk",
-  "version": "2.0.0-alpha.23",
+  "version": "2.0.0-alpha.24",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -15,9 +15,9 @@
     "*.css"
   ],
   "dependencies": {
-    "@getpara/react-common": "2.0.0-alpha.23",
-    "@getpara/react-components": "2.0.0-alpha.23",
-    "@getpara/web-sdk": "2.0.0-alpha.23",
+    "@getpara/react-common": "2.0.0-alpha.24",
+    "@getpara/react-components": "2.0.0-alpha.24",
+    "@getpara/web-sdk": "2.0.0-alpha.24",
     "date-fns": "^3.6.0",
     "framer-motion": "11.3.28",
     "libphonenumber-js": "^1.11.1",
@@ -33,9 +33,9 @@
     "cli": "node ./dist/cli/cli.mjs"
   },
   "devDependencies": {
-    "@getpara/cosmos-wallet-connectors": "2.0.0-alpha.23",
-    "@getpara/evm-wallet-connectors": "2.0.0-alpha.23",
-    "@getpara/solana-wallet-connectors": "2.0.0-alpha.23",
+    "@getpara/cosmos-wallet-connectors": "2.0.0-alpha.24",
+    "@getpara/evm-wallet-connectors": "2.0.0-alpha.24",
+    "@getpara/solana-wallet-connectors": "2.0.0-alpha.24",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/react": "^16.3.0",
     "@testing-library/react-hooks": "^8.0.1",
