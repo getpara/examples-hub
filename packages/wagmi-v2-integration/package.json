@@ -1,13 +1,13 @@
 {
   "name": "@getpara/wagmi-v2-integration",
-  "version": "2.0.0-alpha.24",
+  "version": "2.0.0-alpha.25",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "sideEffects": false,
   "dependencies": {
-    "@getpara/react-sdk": "2.0.0-alpha.24",
-    "@getpara/wagmi-v2-connector": "2.0.0-alpha.24"
+    "@getpara/react-sdk": "2.0.0-alpha.25",
+    "@getpara/wagmi-v2-connector": "2.0.0-alpha.25"
   },
   "scripts": {
     "build": "rm -rf dist && yarn typegen && node ./scripts/build.mjs",

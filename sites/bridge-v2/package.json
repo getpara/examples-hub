@@ -1,6 +1,6 @@
 {
   "name": "para-js-bridge",
-  "version": "2.0.0-alpha.24",
+  "version": "2.0.0-alpha.25",
   "main": "src/index.tsx",
   "private": true,
   "scripts": {
@@ -23,11 +23,11 @@
   ],
   "dependencies": {
     "@cosmjs/stargate": "0.33.0",
-    "@getpara/cosmjs-v0-integration": "2.0.0-alpha.24",
-    "@getpara/ethers-v6-integration": "2.0.0-alpha.24",
-    "@getpara/solana-web3.js-v1-integration": "2.0.0-alpha.24",
-    "@getpara/user-management-client": "2.0.0-alpha.24",
-    "@getpara/web-sdk": "2.0.0-alpha.24",
+    "@getpara/cosmjs-v0-integration": "2.0.0-alpha.25",
+    "@getpara/ethers-v6-integration": "2.0.0-alpha.25",
+    "@getpara/solana-web3.js-v1-integration": "2.0.0-alpha.25",
+    "@getpara/user-management-client": "2.0.0-alpha.25",
+    "@getpara/web-sdk": "2.0.0-alpha.25",
     "@metamask/eth-sig-util": "7.0.3",
     "@metamask/utils": "^8.1.0",
     "@solana/web3.js": "1.98.0",

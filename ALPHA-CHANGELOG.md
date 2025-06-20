@@ -1,6 +1,35 @@
 # Release (Fri Jun 20 2025)
 
 ## Package Versions
+- @getpara/web-sdk@2.0.0-alpha.25
+- @getpara/wagmi-v2-integration@2.0.0-alpha.25
+- @getpara/wagmi-v2-connector@2.0.0-alpha.25
+- @getpara/viem-v2-integration@2.0.0-alpha.25
+- @getpara/viem-v1-integration@2.0.0-alpha.25
+- @getpara/user-management-client@2.0.0-alpha.25
+- @getpara/solana-web3.js-v1-integration@2.0.0-alpha.25
+- @getpara/solana-wallet-connectors@2.0.0-alpha.25
+- @getpara/server-sdk@2.0.0-alpha.25
+- @getpara/react-sdk@2.0.0-alpha.25
+- @getpara/react-native-wallet@2.0.0-alpha.25
+- @getpara/react-components@2.0.0-alpha.25
+- @getpara/react-component-library@1.0.0-alpha.20
+- @getpara/react-common@2.0.0-alpha.25
+- @getpara/evm-wallet-connectors@2.0.0-alpha.25
+- @getpara/ethers-v6-integration@2.0.0-alpha.25
+- @getpara/ethers-v5-integration@2.0.0-alpha.25
+- @getpara/cosmos-wallet-connectors@2.0.0-alpha.25
+- @getpara/cosmjs-v0-integration@2.0.0-alpha.25
+- @getpara/core-sdk@2.0.0-alpha.25
+- @getpara/core-components@2.0.0-alpha.25
+
+
+### Fixes
+-  styled div regression with account linking (#1041) - e19d1ad7
+
+# Release (Fri Jun 20 2025)
+
+## Package Versions
 - @getpara/web-sdk@2.0.0-alpha.24
 - @getpara/wagmi-v2-integration@2.0.0-alpha.24
 - @getpara/wagmi-v2-connector@2.0.0-alpha.24
