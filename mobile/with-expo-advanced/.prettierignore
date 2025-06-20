@@ -1,0 +1,58 @@
+# Dependencies
+node_modules/
+yarn.lock
+package-lock.json
+pnpm-lock.yaml
+
+# Expo
+.expo/
+.expo-shared/
+web-build/
+
+# Native
+android/
+ios/
+*.ipa
+*.apk
+*.aab
+
+# Build outputs
+dist/
+build/
+*.log
+coverage/
+
+# IDE
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# OS
+.DS_Store
+*.swp
+.env.local
+.env.*.local
+
+# Generated files
+*.generated.*
+
+# React Native
+.bundle/
+*.jsbundle
+
+# Metro
+.metro-health-check*
+
+# Testing
+jest/
+__tests__/
+*.test.js
+*.spec.js
+
+# Documentation
+docs/
+
+# Temporary files
+tmp/
+temp/
