@@ -1,5 +1,5 @@
-import React from 'react';
-import { TextInput, View, Text, StyleSheet, KeyboardTypeOptions } from 'react-native';
+import React from "react";
+import { TextInput, View, Text, StyleSheet, KeyboardTypeOptions } from "react-native";
 
 interface InputProps {
   label?: string;
@@ -7,20 +7,22 @@ interface InputProps {
   onChangeText: (text: string) => void;
   placeholder?: string;
   keyboardType?: KeyboardTypeOptions;
-  autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
+  autoCapitalize?: "none" | "sentences" | "words" | "characters";
   secureTextEntry?: boolean;
   error?: string;
+  maxLength?: number;
 }
 
-export const Input: React.FC<InputProps> = ({ 
-  label, 
-  value, 
-  onChangeText, 
-  placeholder, 
-  keyboardType = 'default',
-  autoCapitalize = 'none',
+export const Input: React.FC<InputProps> = ({
+  label,
+  value,
+  onChangeText,
+  placeholder,
+  keyboardType = "default",
+  autoCapitalize = "none",
   secureTextEntry = false,
-  error
+  error,
+  maxLength,
 }) => {
   return (
     <View style={styles.container}>
@@ -33,7 +35,8 @@ export const Input: React.FC<InputProps> = ({
         keyboardType={keyboardType}
         autoCapitalize={autoCapitalize}
         secureTextEntry={secureTextEntry}
-        placeholderTextColor="#999"
+        placeholderTextColor="#999999"
+        maxLength={maxLength}
       />
       {error && <Text style={styles.errorText}>{error}</Text>}
     </View>
@@ -45,26 +48,30 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   label: {
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 14,
+    fontWeight: "600",
     marginBottom: 8,
-    color: '#333',
+    color: "#000000",
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    paddingVertical: 12,
+    borderColor: "#E5E5E5",
+    borderRadius: 4,
+    paddingVertical: 14,
     paddingHorizontal: 16,
     fontSize: 16,
-    backgroundColor: '#fff',
+    backgroundColor: "#FFFFFF",
+    color: "#000000",
+    minHeight: 48,
   },
   inputError: {
-    borderColor: '#ff3b30',
+    borderColor: "#000000",
+    borderWidth: 2,
   },
   errorText: {
-    color: '#ff3b30',
+    color: "#000000",
     fontSize: 12,
-    marginTop: 4,
+    marginTop: 6,
+    fontWeight: "500",
   },
 });

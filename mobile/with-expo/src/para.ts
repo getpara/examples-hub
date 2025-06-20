@@ -8,4 +8,6 @@ if (!API_KEY) {
 }
 
 // Create Para client singleton
-export const para = new ParaMobile(Environment.BETA, API_KEY);
+export const para = new ParaMobile(Environment.BETA, API_KEY, undefined, {
+  disableWorkers: true,
+});

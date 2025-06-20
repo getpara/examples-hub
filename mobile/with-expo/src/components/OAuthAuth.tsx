@@ -24,10 +24,10 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess }) => {
   useEffect(() => {
     const handleDeeplink = async (url: string) => {
       // Check if this is a Para OAuth callback
-      if (url.includes('://para?method=login') && pendingOAuthProvider) {
+      if (url.includes("://para?method=login") && pendingOAuthProvider) {
         try {
           setStatus("Verifying authentication...");
-          
+
           // Now that we received the deeplink, verify the OAuth
           const authState = await para.verifyOAuth({
             method: pendingOAuthProvider,
@@ -58,7 +58,7 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess }) => {
     };
 
     // Listen for incoming links
-    const subscription = Linking.addEventListener('url', (event) => {
+    const subscription = Linking.addEventListener("url", (event) => {
       handleDeeplink(event.url);
     });
 
@@ -89,7 +89,7 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess }) => {
   const handleStandardOAuth = async (provider: SupportedOAuthMethod) => {
     // Set the pending provider so we know which OAuth to verify when deeplink arrives
     setPendingOAuthProvider(provider);
-    
+
     // Get OAuth URL from Para
     const oauthUrl = await para.getOAuthUrl({
       method: provider,
@@ -104,10 +104,10 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess }) => {
     });
 
     // If the browser was dismissed without completing OAuth
-    if (result.type === 'cancel' || result.type === 'dismiss') {
+    if (result.type === "cancel" || result.type === "dismiss") {
       setPendingOAuthProvider(null);
       setLoading(false);
-      setError('Authentication cancelled');
+      setError("Authentication cancelled");
     }
     // The success case is handled by the deeplink listener
   };
@@ -115,32 +115,23 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess }) => {
   const oauthProviders: {
     method: SupportedOAuthMethod;
     name: string;
-    color: string;
   }[] = [
-    { method: "GOOGLE", name: "Google", color: "#4285F4" },
-    { method: "DISCORD", name: "Discord", color: "#5865F2" },
+    { method: "GOOGLE", name: "Continue with Google" },
+    { method: "DISCORD", name: "Continue with Discord" },
   ];
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Continue with</Text>
-
       <View style={styles.providersContainer}>
         {oauthProviders.map((provider) => (
           <TouchableOpacity
             key={provider.method}
-            style={[styles.providerButton, { backgroundColor: provider.color }, loading && styles.disabledButton]}
+            style={[styles.providerButton, loading && styles.disabledButton]}
             onPress={() => handleOAuthLogin(provider.method)}
             disabled={loading}>
             <Text style={styles.providerButtonText}>{provider.name}</Text>
           </TouchableOpacity>
         ))}
-      </View>
-
-      <View style={styles.divider}>
-        <View style={styles.dividerLine} />
-        <Text style={styles.dividerText}>or</Text>
-        <View style={styles.dividerLine} />
       </View>
 
       <StatusDisplay
@@ -153,13 +144,7 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess }) => {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 20,
-    textAlign: "center",
+    width: "100%",
   },
   providersContainer: {
     gap: 12,
@@ -168,9 +153,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 8,
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    borderRadius: 4,
+    backgroundColor: "#000000",
   },
   providerButtonText: {
     color: "#FFFFFF",
@@ -178,21 +164,6 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   disabledButton: {
-    opacity: 0.6,
-  },
-  divider: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginVertical: 24,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: "#E0E0E0",
-  },
-  dividerText: {
-    marginHorizontal: 16,
-    color: "#666",
-    fontSize: 14,
+    backgroundColor: "#CCCCCC",
   },
 });

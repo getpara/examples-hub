@@ -1,19 +1,23 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
-import { para } from '../para';
-import { Button } from './common/Button';
-import { StatusDisplay } from './common/StatusDisplay';
+import React, { useState, useEffect } from "react";
+import { View, Text, StyleSheet, ScrollView } from "react-native";
+import { para } from "../para";
+import { Button } from "./common/Button";
+import { StatusDisplay } from "./common/StatusDisplay";
+import { Input } from "./common/Input";
 
 interface WalletSectionProps {
   onLogout: () => void;
 }
 
 export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
-  const [walletInfo, setWalletInfo] = useState<any>(null);
-  const [loading, setLoading] = useState(false);
-  const [status, setStatus] = useState('');
-  const [error, setError] = useState('');
-  const [signature, setSignature] = useState('');
+  const [wallet, setWallet] = useState<any>(null);
+  const [loadingWallet, setLoadingWallet] = useState(false);
+  const [signingMessage, setSigningMessage] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
+  const [status, setStatus] = useState("");
+  const [error, setError] = useState("");
+  const [messageToSign, setMessageToSign] = useState("Hello from Para SDK Demo!");
+  const [signature, setSignature] = useState("");
 
   useEffect(() => {
     // Load wallet info on mount
@@ -21,95 +25,103 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
   }, []);
 
   const loadWalletInfo = async () => {
-    setLoading(true);
-    setError('');
-    setStatus('Loading wallet information...');
+    setLoadingWallet(true);
+    setError("");
+    setStatus("Loading wallet information...");
 
     try {
-      // Get wallet addresses
-      const wallets = await para.getWallets();
-      
-      setWalletInfo({
-        wallets
-      });
-      setStatus('');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load wallet info');
-    } finally {
-      setLoading(false);
-    }
-  };
+      // Try to get EVM wallets array
+      const evmWallets = await para.getWalletsByType("EVM");
+      console.log("EVM Wallets:", evmWallets);
 
-  const createWallet = async () => {
-    setLoading(true);
-    setError('');
-    setStatus('Creating new wallet...');
+      if (evmWallets && evmWallets.length > 0) {
+        // Get the first wallet from the array
+        setWallet(evmWallets[0]);
+        setStatus("");
+      } else {
+        // No wallet found, create one
+        setStatus("No wallet found. Creating new EVM wallet...");
+        await para.createWallet({ type: "EVM" });
 
-    try {
-      // Create an Ethereum wallet
-      await para.createWalletPerType({ types: ['EVM'] });
-      
-      // Reload wallet info
-      await loadWalletInfo();
-      
-      setStatus('Wallet created successfully');
+        // Get the newly created wallet
+        const newWallets = await para.getWalletsByType("EVM");
+        if (newWallets && newWallets.length > 0) {
+          setWallet(newWallets[0]);
+          setStatus("");
+        }
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create wallet');
+      // If getWalletsByType throws an error (no wallet), create one
+      try {
+        setStatus("Creating new EVM wallet...");
+        await para.createWallet({ type: "EVM" });
+
+        // Get the newly created wallet
+        const newWallets = await para.getWalletsByType("EVM");
+        if (newWallets && newWallets.length > 0) {
+          setWallet(newWallets[0]);
+          setStatus("");
+        }
+      } catch (createErr) {
+        setError(createErr instanceof Error ? createErr.message : "Failed to create wallet");
+      }
     } finally {
-      setLoading(false);
+      setLoadingWallet(false);
     }
   };
 
   const signMessage = async () => {
-    if (!walletInfo?.wallets?.length) {
-      setError('No wallet available');
+    if (!wallet) {
+      setError("No wallet available");
       return;
     }
 
-    setLoading(true);
-    setError('');
-    setStatus('Signing message...');
-    setSignature('');
+    if (!messageToSign.trim()) {
+      setError("Please enter a message to sign");
+      return;
+    }
+
+    setSigningMessage(true);
+    setError("");
+    setStatus("");  // Clear status since button shows loading
+    setSignature("");
 
     try {
-      const message = 'Hello from Para SDK Demo!';
-      
-      // Sign a message
-      const walletId = walletInfo.wallets[0].id || walletInfo.wallets[0].address;
-      const messageBase64 = btoa(message);
-      
+      // Encode message to base64
+      const messageBase64 = btoa(messageToSign);
+
+      // Sign the message using wallet ID
       const sig = await para.signMessage({
-        walletId,
-        messageBase64
+        walletId: wallet.id,
+        messageBase64,
       });
-      
+
       // Handle signature response
-      if ('signature' in sig) {
+      if ("signature" in sig) {
         setSignature(sig.signature);
+        setStatus("");  // No need for status, signature is shown
       } else {
-        setError('Failed to get signature');
+        setError("Failed to get signature");
       }
-      
-      setStatus('Message signed successfully');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to sign message');
+      setError(err instanceof Error ? err.message : "Failed to sign message");
     } finally {
-      setLoading(false);
+      setSigningMessage(false);
     }
   };
 
   const handleLogout = async () => {
-    setLoading(true);
-    setError('');
-    setStatus('Logging out...');
+    setLoggingOut(true);
+    setError("");
+    setStatus("Logging out...");
 
     try {
       await para.logout();
       onLogout();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to logout');
+      setError(err instanceof Error ? err.message : "Failed to logout");
     } finally {
-      setLoading(false);
+      setLoggingOut(false);
     }
   };
 
@@ -117,58 +129,53 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
     <ScrollView style={styles.container}>
       <Text style={styles.title}>Wallet Management</Text>
 
-      {walletInfo?.wallets && walletInfo.wallets.length > 0 && (
+      {wallet && (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Wallets</Text>
-          {walletInfo.wallets.map((wallet: any, index: number) => (
-            <View key={index} style={styles.walletItem}>
-              <Text style={styles.info}>Address: {wallet.address}</Text>
-              <Text style={styles.info}>Network: {wallet.network || 'Ethereum'}</Text>
+          <Text style={styles.sectionTitle}>EVM Wallet</Text>
+          <Text style={styles.info}>ID: {wallet.id}</Text>
+          <Text style={styles.info}>Address: {wallet.address}</Text>
+          <Text style={styles.info}>Type: EVM</Text>
+        </View>
+      )}
+
+      {wallet && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Sign Message</Text>
+          <Input
+            label="Message to Sign"
+            value={messageToSign}
+            onChangeText={setMessageToSign}
+            placeholder="Enter message to sign"
+          />
+          <View style={{ height: 16 }} />
+          <Button
+            title="Sign Message"
+            onPress={signMessage}
+            loading={signingMessage}
+          />
+          
+          {signature && (
+            <View style={styles.signatureContainer}>
+              <Text style={styles.resultLabel}>Signature Result</Text>
+              <Text style={styles.signature}>{signature}</Text>
             </View>
-          ))}
+          )}
         </View>
       )}
 
       <View style={styles.actions}>
-        {(!walletInfo?.wallets || walletInfo.wallets.length === 0) && (
-          <Button
-            title="Create Wallet"
-            onPress={createWallet}
-            loading={loading}
-          />
-        )}
-        
-        {walletInfo?.wallets && walletInfo.wallets.length > 0 && (
-          <Button
-            title="Sign Test Message"
-            onPress={signMessage}
-            loading={loading}
-          />
-        )}
-
-        <Button
-          title="Refresh"
-          onPress={loadWalletInfo}
-          variant="secondary"
-          loading={loading}
-        />
-
         <Button
           title="Logout"
           onPress={handleLogout}
           variant="secondary"
-          loading={loading}
+          loading={loggingOut}
         />
       </View>
 
-      {signature && (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Signature</Text>
-          <Text style={styles.signature}>{signature}</Text>
-        </View>
-      )}
-
-      <StatusDisplay status={status} error={error} />
+      <StatusDisplay
+        status={status}
+        error={error}
+      />
     </ScrollView>
   );
 };
@@ -177,41 +184,62 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
+    backgroundColor: "#FFFFFF",
   },
   title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
+    fontSize: 32,
+    fontWeight: "bold",
+    marginBottom: 24,
+    color: "#000000",
   },
   section: {
     marginBottom: 20,
     padding: 16,
-    backgroundColor: '#f5f5f5',
-    borderRadius: 8,
+    backgroundColor: "#F8F8F8",
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: "#E5E5E5",
   },
   sectionTitle: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     marginBottom: 8,
+    color: "#000000",
   },
   info: {
     fontSize: 14,
-    color: '#333',
+    color: "#666666",
     marginBottom: 4,
   },
-  walletItem: {
-    marginBottom: 12,
-    paddingBottom: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
-  },
   actions: {
-    gap: 12,
     marginBottom: 20,
   },
   signature: {
     fontSize: 12,
-    color: '#666',
-    fontFamily: 'monospace',
+    color: "#333333",
+    fontFamily: "monospace",
+    lineHeight: 18,
+    backgroundColor: "#FAFAFA",
+    padding: 12,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: "#E5E5E5",
+  },
+  signatureContainer: {
+    marginTop: 20,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 4,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: "#CCCCCC",
+    borderStyle: "dashed",
+  },
+  resultLabel: {
+    fontSize: 13,
+    fontWeight: "600",
+    marginBottom: 12,
+    color: "#000000",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
   },
 });

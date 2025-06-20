@@ -21,7 +21,7 @@ export const Button: React.FC<ButtonProps> = ({ title, onPress, disabled, loadin
       disabled={disabled || loading}
     >
       {loading ? (
-        <ActivityIndicator color={variant === 'primary' ? '#fff' : '#007AFF'} />
+        <ActivityIndicator color={variant === 'primary' ? '#FFFFFF' : '#000000'} />
       ) : (
         <Text style={[
           styles.buttonText,
@@ -36,28 +36,29 @@ export const Button: React.FC<ButtonProps> = ({ title, onPress, disabled, loadin
 
 const styles = StyleSheet.create({
   button: {
-    backgroundColor: '#007AFF',
-    paddingVertical: 12,
+    backgroundColor: '#000000',
+    paddingVertical: 14,
     paddingHorizontal: 24,
-    borderRadius: 8,
+    borderRadius: 4,
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: 44,
+    minHeight: 48,
   },
   secondaryButton: {
-    backgroundColor: 'transparent',
+    backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#007AFF',
+    borderColor: '#000000',
   },
   disabledButton: {
-    opacity: 0.5,
+    backgroundColor: '#CCCCCC',
+    borderColor: '#CCCCCC',
   },
   buttonText: {
-    color: '#fff',
+    color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
   },
   secondaryButtonText: {
-    color: '#007AFF',
+    color: '#000000',
   },
 });

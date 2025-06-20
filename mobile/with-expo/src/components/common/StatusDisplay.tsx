@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React from "react";
+import { View, Text, StyleSheet } from "react-native";
 
 interface StatusDisplayProps {
   status?: string;
@@ -11,18 +11,20 @@ export const StatusDisplay: React.FC<StatusDisplayProps> = ({ status, error, suc
   if (!status && !error && !success) return null;
 
   return (
-    <View style={[
-      styles.container,
-      error && styles.errorContainer,
-      success && styles.successContainer,
-      !error && !success && styles.infoContainer
-    ]}>
-      <Text style={[
-        styles.text,
-        error && styles.errorText,
-        success && styles.successText,
-        !error && !success && styles.infoText
+    <View
+      style={[
+        styles.container,
+        error && styles.errorContainer,
+        success && styles.successContainer,
+        !error && !success && styles.infoContainer,
       ]}>
+      <Text
+        style={[
+          styles.text,
+          error && styles.errorText,
+          success && styles.successText,
+          !error && !success && styles.infoText,
+        ]}>
         {error || success || status}
       </Text>
     </View>
@@ -32,29 +34,35 @@ export const StatusDisplay: React.FC<StatusDisplayProps> = ({ status, error, suc
 const styles = StyleSheet.create({
   container: {
     padding: 12,
-    borderRadius: 8,
+    borderRadius: 4,
     marginVertical: 8,
+    borderWidth: 1,
   },
   infoContainer: {
-    backgroundColor: '#e3f2fd',
+    backgroundColor: "#F8F8F8",
+    borderColor: "#E5E5E5",
   },
   errorContainer: {
-    backgroundColor: '#ffebee',
+    backgroundColor: "#FFFFFF",
+    borderColor: "#000000",
+    borderWidth: 2,
   },
   successContainer: {
-    backgroundColor: '#e8f5e9',
+    backgroundColor: "#F8F8F8",
+    borderColor: "#666666",
   },
   text: {
     fontSize: 14,
-    textAlign: 'center',
+    textAlign: "center",
+    fontWeight: "500",
   },
   infoText: {
-    color: '#1976d2',
+    color: "#666666",
   },
   errorText: {
-    color: '#c62828',
+    color: "#000000",
   },
   successText: {
-    color: '#2e7d32',
+    color: "#000000",
   },
 });
