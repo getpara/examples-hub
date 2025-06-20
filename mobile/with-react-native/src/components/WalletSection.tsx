@@ -20,7 +20,7 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
   const [signature, setSignature] = useState("");
 
   useEffect(() => {
-    // Load wallet info on mount
+    // Load or create wallet on component mount
     loadWalletInfo();
   }, []);
 
@@ -30,20 +30,20 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
     setStatus("Loading wallet information...");
 
     try {
-      // Try to get EVM wallets array
+      // Get existing EVM wallets
       const evmWallets = await para.getWalletsByType("EVM");
       console.log("EVM Wallets:", evmWallets);
 
       if (evmWallets && evmWallets.length > 0) {
-        // Get the first wallet from the array
+        // Use first wallet
         setWallet(evmWallets[0]);
         setStatus("");
       } else {
-        // No wallet found, create one
+        // Create new wallet if none exists
         setStatus("No wallet found. Creating new EVM wallet...");
         await para.createWallet({ type: "EVM" });
 
-        // Get the newly created wallet
+        // Retrieve newly created wallet
         const newWallets = await para.getWalletsByType("EVM");
         if (newWallets && newWallets.length > 0) {
           setWallet(newWallets[0]);
@@ -51,12 +51,12 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
         }
       }
     } catch (err) {
-      // If getWalletsByType throws an error (no wallet), create one
+      // Handle error by creating new wallet
       try {
         setStatus("Creating new EVM wallet...");
         await para.createWallet({ type: "EVM" });
 
-        // Get the newly created wallet
+        // Retrieve newly created wallet
         const newWallets = await para.getWalletsByType("EVM");
         if (newWallets && newWallets.length > 0) {
           setWallet(newWallets[0]);
@@ -88,19 +88,19 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
     setSignature("");
 
     try {
-      // Encode message to base64
+      // Convert message to base64 format
       const messageBase64 = btoa(messageToSign);
 
-      // Sign the message using wallet ID
+      // Sign with wallet's private key
       const sig = await para.signMessage({
         walletId: wallet.id,
         messageBase64,
       });
 
-      // Handle signature response
+      // Display signature result
       if ("signature" in sig) {
         setSignature(sig.signature);
-        setStatus("");  // No need for status, signature is shown
+        setStatus("");
       } else {
         setError("Failed to get signature");
       }
@@ -118,6 +118,7 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
     setStatus("Logging out...");
 
     try {
+      // Clear Para session
       await para.logout();
       onLogout();
     } catch (err) {

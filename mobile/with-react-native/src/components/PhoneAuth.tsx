@@ -39,16 +39,17 @@ export const PhoneAuth: React.FC<PhoneAuthProps> = ({ onSuccess, onShowVerificat
     setStatus("Checking phone number...");
 
     try {
-      // Call signUpOrLogIn to determine if user exists
+      // Determines if user exists or needs to sign up
+      // Phone must include country code (e.g., +1 for US)
       const authState = await para.signUpOrLogIn({ auth: { phone: phone as `+${number}` } });
 
       if (authState?.stage === "verify") {
-        // New user - show OTP verification
+        // New user - needs SMS verification
         setShowVerification(true);
         onShowVerification?.();
         setStatus("Verification code sent via SMS");
       } else if (authState?.stage === "login") {
-        // Existing user - proceed with passkey login
+        // Existing user - authenticate with passkey
         setStatus("Logging in with passkey...");
         await para.loginWithPasskey();
         setStatus("");
@@ -73,10 +74,10 @@ export const PhoneAuth: React.FC<PhoneAuthProps> = ({ onSuccess, onShowVerificat
     setStatus("Verifying code...");
 
     try {
-      // Verify the OTP code
+      // Verify SMS OTP code
       const authState = await para.verifyNewAccount({ verificationCode });
 
-      // Register passkey for new user
+      // Register passkey for future logins
       setStatus("Creating passkey...");
       await para.registerPasskey(authState);
 
@@ -96,6 +97,7 @@ export const PhoneAuth: React.FC<PhoneAuthProps> = ({ onSuccess, onShowVerificat
     setStatus("Resending code...");
 
     try {
+      // Request new SMS code
       await para.resendVerificationCode({ type: "SIGNUP" });
       setStatus("Verification code resent");
     } catch (err) {

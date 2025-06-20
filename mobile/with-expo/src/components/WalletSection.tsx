@@ -20,7 +20,7 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
   const [signature, setSignature] = useState("");
 
   useEffect(() => {
-    // Load wallet info on mount
+    // Fetch user's wallet on component mount
     loadWalletInfo();
   }, []);
 
@@ -30,16 +30,16 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
     setStatus("Loading wallet information...");
 
     try {
-      // Try to get EVM wallets array
+      // Para manages multiple wallet types - here we fetch EVM wallets
       const evmWallets = await para.getWalletsByType("EVM");
       console.log("EVM Wallets:", evmWallets);
 
       if (evmWallets && evmWallets.length > 0) {
-        // Get the first wallet from the array
+        // Use first wallet if exists
         setWallet(evmWallets[0]);
         setStatus("");
       } else {
-        // No wallet found, create one
+        // Auto-create wallet for new users
         setStatus("No wallet found. Creating new EVM wallet...");
         await para.createWallet({ type: "EVM" });
 
@@ -87,19 +87,19 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
     setSignature("");
 
     try {
-      // Encode message to base64
+      // Para requires base64 encoded messages
       const messageBase64 = btoa(messageToSign);
 
-      // Sign the message using wallet ID
+      // Sign with wallet's private key (managed by Para)
       const sig = await para.signMessage({
         walletId: wallet.id,
         messageBase64,
       });
 
-      // Handle signature response
+      // Signature is returned in hex format
       if ("signature" in sig) {
         setSignature(sig.signature);
-        setStatus("");  // No need for status, signature is shown
+        setStatus("");
       } else {
         setError("Failed to get signature");
       }
@@ -116,6 +116,7 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
     setStatus("Logging out...");
 
     try {
+      // Clear local session - wallet keys remain secure on Para's infrastructure
       await para.logout();
       onLogout();
     } catch (err) {

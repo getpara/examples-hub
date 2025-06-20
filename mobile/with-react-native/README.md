@@ -1,26 +1,25 @@
-# Para React Native Example
+# React Native Para SDK Example
 
-This is a React Native CLI example app demonstrating the integration of the Para SDK using `@getpara/react-native-wallet`.
+This example demonstrates how to integrate Para SDK in a React Native application with authentication and wallet management.
 
 ## Prerequisites
 
-- Node.js 18+
-- Yarn
-- React Native development environment set up ([React Native Environment Setup](https://reactnative.dev/docs/environment-setup))
+- React Native development environment ([setup guide](https://reactnative.dev/docs/environment-setup))
 - Para API key from [developer.getpara.com](https://developer.getpara.com/)
 
 ## Setup
 
-1. Install dependencies:
+1. Clone the repository and install dependencies:
 ```bash
 yarn install
+# or
+npm install
 ```
 
-2. Set up your environment variables:
-```bash
-cp .env.example .env
+2. Create a `.env` file in the project root:
 ```
-Then edit `.env` and add your Para API key.
+PARA_API_KEY=your_api_key_here
+```
 
 3. Install iOS dependencies:
 ```bash
@@ -29,51 +28,51 @@ cd ios && pod install
 
 ## Running the App
 
-### iOS
-```bash
-yarn ios
-```
-
 ### Android
 ```bash
 yarn android
+# or
+npm run android
 ```
+
+Android works out of the box using the debug.keystore that all React Native apps use by default. This keystore is already registered with Para.
+
+### iOS
+
+**Important:** The iOS app is configured with Para's team ID and will not run locally without modification.
+
+To run on iOS with your own team:
+
+1. Update `app.json` with your own bundle identifier and team ID
+2. Register your new bundle identifier in the Para Developer Portal under API Key Settings → Configuration
+3. Wait up to 24 hours for Apple and Google to update associated domains
+4. Then run:
+```bash
+yarn ios
+# or
+npm run ios
+```
+
+Without these steps, iOS will fail due to security restrictions on passkey authentication.
 
 ## Features
 
-This example demonstrates:
+- **Multiple Authentication Methods:**
+  - Email with OTP verification
+  - Phone with SMS verification
+  - OAuth (Google, Discord)
+  - Passkey authentication
 
-- Email authentication with OTP verification
-- Phone authentication with SMS verification
-- OAuth authentication (Google, Discord)
-- Native Passkeys for secure wallet management
-- EVM wallet creation and management
-- Message signing
+- **Wallet Management:**
+  - Create and retrieve EVM wallets
+  - Sign messages
 
-## Configuration
+## Key Configuration
 
-### iOS Configuration
-- **Bundle Identifier**: `com.getpara.example`
-- **URL Scheme**: `para-sdk-demo`
-- **Associated Domains**: Configured for Para's webcredentials
+- **Polyfills:** Configured in `metro.config.js` for crypto operations
+- **App Scheme:** `para-sdk-demo://` for OAuth redirects
+- **Environment:** Beta environment configured in `src/para.ts`
 
-### Android Configuration
-- **Package Name**: `com.getpara.example`
-- **Deep Link Scheme**: `para-sdk-demo`
+## Documentation
 
-## Important Notes
-
-- Your app must be registered with Para for passkeys to work correctly
-- On Android, ensure the device has a Google account signed in
-- Biometric or device unlock must be enabled on the device
-
-## Troubleshooting
-
-If you encounter issues:
-
-1. Ensure all dependencies are properly installed
-2. Check that your API key is correctly set in `.env`
-3. For iOS, make sure you've run `pod install`
-4. For Android, try cleaning the build: `cd android && ./gradlew clean`
-
-For more information, visit the [Para documentation](https://docs.getpara.com/).
+For more details on Para SDK integration, visit [docs.getpara.com](https://docs.getpara.com/)

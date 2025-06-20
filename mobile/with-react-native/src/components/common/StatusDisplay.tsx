@@ -8,6 +8,7 @@ interface StatusDisplayProps {
 }
 
 export const StatusDisplay: React.FC<StatusDisplayProps> = ({ status, error, success }) => {
+  // Only render if there's a message to display
   if (!status && !error && !success) return null;
 
   return (
@@ -25,6 +26,7 @@ export const StatusDisplay: React.FC<StatusDisplayProps> = ({ status, error, suc
           success && styles.successText,
           !error && !success && styles.infoText,
         ]}>
+        {/* Priority: error > success > status */}
         {error || success || status}
       </Text>
     </View>

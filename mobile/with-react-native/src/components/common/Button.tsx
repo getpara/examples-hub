@@ -21,6 +21,7 @@ export const Button: React.FC<ButtonProps> = ({ title, onPress, disabled, loadin
       disabled={disabled || loading}
     >
       {loading ? (
+        // Show spinner during async operations
         <ActivityIndicator color={variant === 'primary' ? '#FFFFFF' : '#000000'} />
       ) : (
         <Text style={[

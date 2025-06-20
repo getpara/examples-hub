@@ -9,6 +9,7 @@ interface AuthSectionProps {
 }
 
 export const AuthSection: React.FC<AuthSectionProps> = ({ onSuccess }) => {
+  // Para supports multiple auth methods - toggle between them here
   const [authMethod, setAuthMethod] = useState<"email" | "phone">("email");
   const [showVerification, setShowVerification] = useState(false);
 
@@ -21,6 +22,7 @@ export const AuthSection: React.FC<AuthSectionProps> = ({ onSuccess }) => {
   };
 
   return (
+    // KeyboardAvoidingView ensures inputs remain visible when keyboard opens
     <KeyboardAvoidingView 
       style={styles.container}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -49,6 +51,7 @@ export const AuthSection: React.FC<AuthSectionProps> = ({ onSuccess }) => {
           </View>
         )}
 
+        {/* Render auth component based on selected method */}
         {authMethod === "email" ? 
           <EmailAuth onSuccess={onSuccess} onShowVerification={handleShowVerification} onHideVerification={handleHideVerification} /> : 
           <PhoneAuth onSuccess={onSuccess} onShowVerification={handleShowVerification} onHideVerification={handleHideVerification} />
@@ -62,6 +65,7 @@ export const AuthSection: React.FC<AuthSectionProps> = ({ onSuccess }) => {
               <View style={styles.dividerLine} />
             </View>
 
+            {/* OAuth providers - Para supports Google, Apple, Twitter, Discord */}
             <View style={styles.oauthSection}>
               <OAuthAuth onSuccess={onSuccess} />
             </View>

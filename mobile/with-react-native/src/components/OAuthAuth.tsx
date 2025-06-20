@@ -4,13 +4,14 @@ import { para } from "../para";
 import InAppBrowser from "react-native-inappbrowser-reborn";
 import { StatusDisplay } from "./common/StatusDisplay";
 
-// Type for OAuth methods supported by getOAuthUrl and verifyOAuth
+// OAuth providers supported by Para SDK
 type SupportedOAuthMethod = "GOOGLE" | "DISCORD" | "TWITTER" | "APPLE" | "FACEBOOK";
 
 interface OAuthAuthProps {
   onSuccess: () => void;
 }
 
+// App scheme for OAuth redirects - must match app.json and platform configs
 const APP_SCHEME = "para-sdk-demo";
 
 export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess }) => {
@@ -19,7 +20,7 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess }) => {
   const [error, setError] = useState("");
   const [pendingOAuthProvider, setPendingOAuthProvider] = useState<SupportedOAuthMethod | null>(null);
 
-  // Listen for deeplinks
+  // Handle OAuth redirect deeplinks
   useEffect(() => {
     const handleDeeplink = async (url: string) => {
       // Check if this is a Para OAuth callback
@@ -27,19 +28,19 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess }) => {
         try {
           setStatus("Verifying authentication...");
 
-          // Now that we received the deeplink, verify the OAuth
+          // Verify OAuth authentication with Para
           const authState = await para.verifyOAuth({
             method: pendingOAuthProvider,
           });
 
           if (authState.stage === "login") {
-            // Existing user - proceed with passkey login
+            // Existing user - authenticate with passkey
             setStatus("Logging in with passkey...");
             await para.loginWithPasskey();
             setStatus("");
             onSuccess();
           } else if (authState.stage === "signup") {
-            // New user - register passkey
+            // New user - create passkey for future logins
             setStatus("Creating passkey...");
             await para.registerPasskey(authState);
             setStatus("");
@@ -88,22 +89,22 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess }) => {
   };
 
   const handleStandardOAuth = async (provider: SupportedOAuthMethod) => {
-    // Set the pending provider so we know which OAuth to verify when deeplink arrives
+    // Track which provider we're authenticating with
     setPendingOAuthProvider(provider);
 
-    // Get OAuth URL from Para
+    // Get OAuth URL with app redirect scheme
     const oauthUrl = await para.getOAuthUrl({
       method: provider,
-      deeplinkUrl: APP_SCHEME, // This will be used as {deeplinkUrl}://para?method=login
+      deeplinkUrl: APP_SCHEME, // Redirects to: {APP_SCHEME}://para?method=login
     });
 
-    // Open browser for OAuth flow
+    // Open in-app browser for OAuth
     try {
       if (await InAppBrowser.isAvailable()) {
         const result = await InAppBrowser.openAuth(oauthUrl, APP_SCHEME, {
-          // iOS
+          // iOS options
           ephemeralWebSession: false,
-          // Android
+          // Android options
           showTitle: true,
           enableUrlBarHiding: true,
           enableDefaultShare: false,
@@ -114,7 +115,7 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess }) => {
           setLoading(false);
           setError("Authentication cancelled");
         }
-        // The success case is handled by the deeplink listener
+        // Success redirects to deeplink handler above
       } else {
         // Fallback to external browser
         await Linking.openURL(oauthUrl);

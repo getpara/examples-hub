@@ -9,7 +9,9 @@ interface AuthSectionProps {
 }
 
 export const AuthSection: React.FC<AuthSectionProps> = ({ onSuccess }) => {
+  // Toggle between email and phone auth methods
   const [authMethod, setAuthMethod] = useState<"email" | "phone">("email");
+  // Controls visibility of OTP verification screen
   const [showVerification, setShowVerification] = useState(false);
 
   const handleShowVerification = () => {
@@ -49,6 +51,7 @@ export const AuthSection: React.FC<AuthSectionProps> = ({ onSuccess }) => {
           </View>
         )}
 
+        {/* Render selected auth method component */}
         {authMethod === "email" ? 
           <EmailAuth onSuccess={onSuccess} onShowVerification={handleShowVerification} onHideVerification={handleHideVerification} /> : 
           <PhoneAuth onSuccess={onSuccess} onShowVerification={handleShowVerification} onHideVerification={handleHideVerification} />
@@ -62,6 +65,7 @@ export const AuthSection: React.FC<AuthSectionProps> = ({ onSuccess }) => {
               <View style={styles.dividerLine} />
             </View>
 
+            {/* OAuth providers section */}
             <View style={styles.oauthSection}>
               <OAuthAuth onSuccess={onSuccess} />
             </View>

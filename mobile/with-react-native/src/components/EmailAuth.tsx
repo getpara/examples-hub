@@ -43,16 +43,16 @@ export const EmailAuth: React.FC<EmailAuthProps> = ({
     setStatus('Checking email...');
 
     try {
-      // Call signUpOrLogIn to determine if user exists
+      // Determines if user exists or needs to sign up
       const authState = await para.signUpOrLogIn({ auth: { email } });
 
       if (authState?.stage === 'verify') {
-        // New user - show OTP verification
+        // New user - needs OTP verification
         setShowVerification(true);
         onShowVerification?.();
         setStatus('Verification code sent to your email');
       } else if (authState?.stage === 'login') {
-        // Existing user - proceed with passkey login
+        // Existing user - authenticate with passkey
         setStatus('Logging in with passkey...');
         await para.loginWithPasskey();
         setStatus('');
@@ -77,8 +77,10 @@ export const EmailAuth: React.FC<EmailAuthProps> = ({
     setStatus('Verifying code...');
 
     try {
+      // Verify OTP code
       const authState = await para.verifyNewAccount({ verificationCode });
 
+      // Register passkey for future logins
       setStatus('Creating passkey...');
       await para.registerPasskey(authState);
 
@@ -98,6 +100,7 @@ export const EmailAuth: React.FC<EmailAuthProps> = ({
     setStatus('Resending code...');
 
     try {
+      // Request new OTP code
       await para.resendVerificationCode({ type: 'SIGNUP' });
       setStatus('Verification code resent');
     } catch (err) {
