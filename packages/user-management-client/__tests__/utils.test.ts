@@ -3,6 +3,7 @@ import {
   extractAuthInfo,
   extractWalletRef,
   fromAccountMetadata,
+  fromLinkedAccounts,
   isExternalWalletAddress,
   isPregenAuth,
   isPrimary,
@@ -245,6 +246,33 @@ describe('utils', () => {
         date,
         metadata: { foo: 'bar' },
       },
+    });
+  });
+
+  it('fromLinkedAccounts', () => {
+    const date = new Date();
+    expect(
+      fromLinkedAccounts({
+        primary: [{ type: 'EMAIL', identifier: email, displayName: email, date: date.toISOString() }],
+        linked: [{ type: 'PHONE', identifier: phone, displayName: phone, date: date.toISOString() }],
+      }),
+    ).toEqual({
+      primary: [
+        {
+          type: 'EMAIL',
+          identifier: email,
+          displayName: email,
+          date,
+        },
+      ],
+      linked: [
+        {
+          type: 'PHONE',
+          identifier: phone,
+          displayName: phone,
+          date,
+        },
+      ],
     });
   });
 });

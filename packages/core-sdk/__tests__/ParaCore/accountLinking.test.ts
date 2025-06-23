@@ -36,6 +36,7 @@ describe('account linking', () => {
 
     expect(mockGetLinkedAccounts).toHaveBeenCalledWith({
       userId: para.userId,
+      withMetadata: false,
     });
 
     expect(accounts).toStrictEqual(LINKED_ACCOUNTS);

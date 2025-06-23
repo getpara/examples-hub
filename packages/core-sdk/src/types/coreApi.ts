@@ -612,8 +612,10 @@ export type CoreMethods = Record<CoreMethodName, { params?: unknown; response?: 
     response: IssueJwtResponse;
   };
   getLinkedAccounts: {
-    params: void;
-    response: LinkedAccounts;
+    params: {
+      withMetadata?: boolean;
+    };
+    response: LinkedAccounts & { userId: string };
   };
 };
 

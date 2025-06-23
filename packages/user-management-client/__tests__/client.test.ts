@@ -77,6 +77,13 @@ vi.mock('axios', async importActual => {
   };
 });
 
+vi.mock('../src/utils', async importActual => {
+  return {
+    ...(await importActual()),
+    fromLinkedAccounts: vi.fn(),
+  };
+});
+
 describe('Client', () => {
   afterEach(() => {
     vi.clearAllMocks();
@@ -1344,6 +1351,12 @@ describe('Client', () => {
       await client.getLinkedAccounts({ userId });
 
       expect(mocks.get).toBeCalledWith(`/users/${userId}/linked-accounts`);
+
+      await client.getLinkedAccounts({ userId, withMetadata: true });
+
+      expect(mocks.get).toBeCalledWith(`/users/${userId}/linked-accounts`, {
+        params: { withMetadata: true },
+      });
     });
 
     it('linkAccount', async () => {

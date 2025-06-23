@@ -15,7 +15,7 @@ import ParaWeb, {
 
 export type CoreAction<method extends CoreMethodName & keyof CoreMethods> = (
   para?: ParaWeb,
-  ...args: [CoreMethodParams<method>]
+  ...args: [CoreMethodParams<method>] | []
 ) => Promise<Awaited<CoreMethodResponse<method>>>;
 
 export function generateCoreAction<const method extends CoreMethodName & keyof CoreMethods>(

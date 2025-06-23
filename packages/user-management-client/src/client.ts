@@ -55,7 +55,7 @@ import {
   LinkedAccounts,
   ResendVerificationCodeParams,
 } from './types/index.js';
-import { extractWalletRef, fromAccountMetadata } from './utils.js';
+import { extractWalletRef, fromAccountMetadata, fromLinkedAccounts } from './utils.js';
 import { SESSION_COOKIE_HEADER_NAME, VERSION_HEADER_NAME, PARTNER_ID_HEADER_NAME, API_KEY_HEADER_NAME } from './consts.js';
 import { ParaApiError } from './error.js';
 
@@ -400,10 +400,25 @@ class Client {
     return res.data;
   };
 
-  getLinkedAccounts = async ({ userId }: { userId: string }): Promise<{ accounts: LinkedAccounts }> => {
-    const res = await this.baseRequest.get<{ accounts: LinkedAccounts }>(`/users/${userId}/linked-accounts`);
+  getLinkedAccounts = async ({
+    userId,
+    withMetadata = false,
+  }: {
+    userId: string;
+    withMetadata?: boolean;
+  }): Promise<{ accounts: LinkedAccounts }> => {
+    const res = await this.baseRequest.get<{ accounts: LinkedAccounts<string> }>(
+      `/users/${userId}/linked-accounts`,
+      ...(withMetadata
+        ? [
+            {
+              params: { withMetadata },
+            },
+          ]
+        : []),
+    );
 
-    return res.data;
+    return { accounts: fromLinkedAccounts(res.data.accounts) };
   };
 
   linkAccount = async ({ userId, ...opts }: LinkAccountParams & { userId: string }) => {
@@ -423,13 +438,19 @@ class Client {
     userId: string;
     telegramAuthResponse?: TelegramAuthResponse;
     verificationCode?: string;
-  } & Partial<VerifyExternalWalletParams>) => {
-    const res = await this.baseRequest.post<{ accounts: LinkedAccounts } | { isConflict: true }>(
+  } & Partial<VerifyExternalWalletParams>): Promise<{ accounts: LinkedAccounts } | { isConflict: true }> => {
+    const res = await this.baseRequest.post<{ accounts: LinkedAccounts<string> } | { isConflict: true }>(
       `/users/${userId}/linked-accounts/${linkedAccountId}/verify`,
       opts,
     );
 
-    return res.data;
+    if ('isConflict' in res.data) {
+      return res.data;
+    }
+
+    const { accounts } = res.data;
+
+    return { accounts: fromLinkedAccounts(accounts) };
   };
 
   unlinkAccount = async ({ linkedAccountId, userId }: { linkedAccountId: string; userId: string }) => {

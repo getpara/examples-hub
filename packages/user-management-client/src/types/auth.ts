@@ -317,18 +317,19 @@ export type IssueJwtResponse = {
   keyId: string;
 };
 
-export type LinkedAccount = {
+export type LinkedAccount<D extends Date | string = Date> = {
   id?: string;
+  date: D;
   type: TLinkedAccountType;
   identifier: string;
   displayName: string;
   externalWallet?: ExternalWalletInfo;
+  metadata?: unknown;
 };
 
-export type LinkedAccounts = {
-  userId: string;
-  primary: LinkedAccount[];
-  linked: LinkedAccount[];
+export type LinkedAccounts<D extends Date | string = Date> = {
+  primary: LinkedAccount<D>[];
+  linked: LinkedAccount<D>[];
 };
 
 export type LinkAccountParams = {

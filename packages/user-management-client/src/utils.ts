@@ -12,6 +12,7 @@ import {
 import {
   AccountMetadata,
   AccountMetadataKey,
+  LinkedAccounts,
   PregenAuth,
   PregenAuthInfo,
   PregenAuthType,
@@ -387,4 +388,17 @@ export function fromAccountMetadata(
     }),
     {},
   );
+}
+
+export function fromLinkedAccounts({ primary, linked }: LinkedAccounts<string>): LinkedAccounts<Date> {
+  return {
+    primary: primary.map(account => ({
+      ...account,
+      date: new Date(account.date),
+    })),
+    linked: linked.map(account => ({
+      ...account,
+      date: new Date(account.date),
+    })),
+  };
 }

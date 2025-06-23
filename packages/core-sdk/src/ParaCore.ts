@@ -1525,6 +1525,7 @@ export abstract class ParaCore implements CoreInterface {
   /**
    * Fetches the most recent OAuth account metadata for the signed-in user.
    * If applicable, this will include the user's most recent metadata from their Google, Apple, Facebook, X, Discord, Farcaster, or Telegram account, the last time they signed in to your app.
+   * @deprecated use `para.getLinkedAccounts({ withMetadata: true })` instead.
    * @returns {Promise<AccountMetadata>} the user's account metadata.
    */
   async getAccountMetadata(): Promise<AccountMetadata> {
@@ -3913,10 +3914,12 @@ export abstract class ParaCore implements CoreInterface {
     return this.#prepareAuthState(serverAuthState, urlOptions);
   }
 
-  async getLinkedAccounts(): CoreMethodResponse<'getLinkedAccounts'> {
+  async getLinkedAccounts({
+    withMetadata = false,
+  }: CoreMethodParams<'getLinkedAccounts'> = {}): CoreMethodResponse<'getLinkedAccounts'> {
     const userId = this.assertUserId();
 
-    const { accounts } = await this.ctx.client.getLinkedAccounts({ userId });
+    const { accounts } = await this.ctx.client.getLinkedAccounts({ userId, withMetadata });
 
     return {
       userId,

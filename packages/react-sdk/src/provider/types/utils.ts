@@ -77,7 +77,7 @@ export type CoreMethodMutationHook<method extends CoreMethodName & keyof CoreMet
 >;
 
 export type CoreMethodQueryHook<method extends CoreMethodName & keyof CoreMethods> = UseQueryResult<
-  Awaited<CoreMethodResponse<method>>,
+  Awaited<CoreMethodResponse<method>> | null,
   Error
 >;
 

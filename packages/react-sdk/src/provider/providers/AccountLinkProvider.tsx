@@ -154,7 +154,7 @@ export const AccountLinkProvider = ({ children }: PropsWithChildren) => {
     !!account?.isConnected && !account?.isGuestMode && (!account?.externalWallet || includeWalletVerification);
 
   const [accountLinkInProgress, setAccountLinkInProgress] = useState<AccountLinkInProgress | undefined>(
-    coreAccountLinkInProgress,
+    coreAccountLinkInProgress || undefined,
   );
   const [unlinkingAccount, setUnlinkingAccount] = useState<LinkedAccount | undefined>(undefined);
   const [linkAccountError, setLinkAccountError] = useState<string | null>(null);
@@ -432,7 +432,7 @@ export const AccountLinkProvider = ({ children }: PropsWithChildren) => {
 
   useEffect(() => {
     setAccountLinkInProgress(prev => {
-      return coreAccountLinkInProgress ?? prev;
+      return coreAccountLinkInProgress || prev;
     });
   }, [coreAccountLinkInProgress]);
 
