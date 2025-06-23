@@ -48,7 +48,7 @@ export const Networks = () => {
                   const isSelected = !!_value;
                   const isRequired = isSelected && !_value?.optional;
                   return (
-                    <FlatCard key={type} className="para:p-4">
+                    <FlatCard key={type} className="para:p-4 para:lg:p-4">
                       <div className="para:flex para:flex-col para:md:flex-row para:items-center para:justify-between para:gap-4">
                         <div className="para:flex para:self-start para:md:self-auto  para:gap-4 para:items-center">
                           <Switch

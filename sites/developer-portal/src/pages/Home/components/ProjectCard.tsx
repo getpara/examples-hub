@@ -22,7 +22,7 @@ export const ProjectCard = ({ project }: ProjectCardProps) => {
 
   return (
     <Link to={`/${organizationId}/project/${project.id}/key`} className="para:min-h-[240px] para:min-w-[200px]">
-      <FlatCard className="para:p-6 para:h-full para:w-full para:hover:shadow-md para:transition-shadow para:duration-200 para:ease-out para:group para:cursor-pointer">
+      <FlatCard className="para:p-6 para:lg:p-6 para:h-full para:w-full para:hover:shadow-md para:transition-shadow para:duration-200 para:ease-out para:group para:cursor-pointer">
         <div className="para:flex para:flex-col para:gap-4 para:h-full para:justify-between">
           <div className="para:flex para:flex-col para:gap-4">
             <OrganizationAvatar

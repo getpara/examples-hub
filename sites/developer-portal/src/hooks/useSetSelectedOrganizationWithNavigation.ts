@@ -45,7 +45,7 @@ export const useSetSelectedOrganizationWithNavigation = (shouldRefetch: boolean)
 
       const validSelectedOrg = _allUserOrgs.find(o => o.id === selectedOrgId);
 
-      if (!storedOrgId && validSelectedOrg) {
+      if ((!storedOrgId || storedOrgId !== selectedOrgId) && validSelectedOrg) {
         setStoredSelectedOrganization(selectedOrgId);
       }
 

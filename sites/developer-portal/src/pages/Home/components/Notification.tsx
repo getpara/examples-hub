@@ -41,7 +41,9 @@ export const Notification = React.forwardRef<HTMLDivElement, NotificationProps>(
         exit={{ opacity: 0, transform: 'translateY(-40px)', zIndex: 2 }}
         transition={{ duration: 0.25 }}
       >
-        <FlatCard className={'para:py-3 para:px-4 para:gap-1 para:relative para:max-w-[634px] para:h-full'}>
+        <FlatCard
+          className={'para:py-3 para:px-4 para:lg:py-3 para:lg:px-4 para:gap-1 para:relative para:max-w-[634px] para:h-full'}
+        >
           <div
             className="para:absolute para:right-0 para:top-0 para:size-auto para:p-1 para:opacity-50 para:cursor-pointer"
             onClick={handleDismiss(notification.id)}

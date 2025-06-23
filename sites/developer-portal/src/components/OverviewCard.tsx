@@ -22,7 +22,7 @@ export const OverviewCard = ({
   className,
 }: OverviewCardProps) => {
   return (
-    <FlatCard className={cn('para:p-6 para:gap-2 para:w-[290px]', className)}>
+    <FlatCard className={cn('para:p-6 para:lg:p-6 para:gap-2 para:w-[290px]', className)}>
       <div className="para:flex para:justify-between para:items-center">
         <Typography className="para:text-sm para:font-medium para:text-card-foreground">{title}</Typography>
         <Icon className="para:size-4" />

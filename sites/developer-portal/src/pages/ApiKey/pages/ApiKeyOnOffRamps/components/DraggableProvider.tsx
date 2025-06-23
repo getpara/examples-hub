@@ -64,7 +64,7 @@ export const DraggableProvider = memo(
 
     return (
       <Reorder.Item as="div" key={provider} value={provider} dragListener={false} dragControls={controls} layout="position">
-        <FlatCard className="para:p-4">
+        <FlatCard className="para:p-4 para:lg:p-4">
           <div className="para:flex para:flex-col para:gap-4">
             <div className="para:flex para:gap-4 para:items-center para:justify-between">
               <div className="para:flex para:gap-4 para:items-center">

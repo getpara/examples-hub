@@ -10,25 +10,23 @@ import {
   toast,
   Typography,
 } from '@getpara/react-component-library';
-import { MemberRole } from '../../../types/api';
+import { MemberRole, OrganizationMember } from '../../../types/api';
 import { useOrganizationMemberCapabilities } from '../../../hooks/api/queries/useOrganizationMember';
-import { useGetAllOrganizationMembers } from '../../../hooks/api/queries/useOrganizationMembers';
 import { useRemoveMember } from '../../../hooks/api/mutations/useRemoveMember';
 import { formatErrorMessage } from '../../../utils/formatErrorMessage';
 import { AxiosError } from 'axios';
+import { memo } from 'react';
 
 type RemoveMemberDialogProps = {
-  memberId?: string;
+  member?: OrganizationMember;
   open: boolean;
   setOpen: (_: boolean) => void;
   onSuccess: () => void;
 };
 
-export const RemoveMemberDialog = ({ memberId, open, setOpen, onSuccess }: RemoveMemberDialogProps) => {
+export const RemoveMemberDialog = memo(({ member, open, setOpen, onSuccess }: RemoveMemberDialogProps) => {
   const { data: capabilities } = useOrganizationMemberCapabilities();
-  const { data: members } = useGetAllOrganizationMembers();
   const { mutate: removeMember, isPending: isRemoving } = useRemoveMember();
-  const member = members?.find(m => m.id === memberId);
 
   const canRemove = capabilities?.canDeleteMembers && capabilities?.assignableRoles.includes(member?.role as MemberRole);
 
@@ -37,9 +35,9 @@ export const RemoveMemberDialog = ({ memberId, open, setOpen, onSuccess }: Remov
   };
 
   const handleRemoveClick = () => {
-    if (memberId) {
+    if (member) {
       removeMember(
-        { memberId },
+        { memberId: member.id },
         {
           onSuccess: () => {
             setOpen(false);
@@ -88,4 +86,4 @@ export const RemoveMemberDialog = ({ memberId, open, setOpen, onSuccess }: Remov
       </DialogContent>
     </Dialog>
   );
-};
+});

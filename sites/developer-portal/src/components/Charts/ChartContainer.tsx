@@ -23,7 +23,7 @@ export const ChartContainer = ({
   noData,
 }: ChartContainerProps) => {
   return (
-    <FlatCard className="para:p-0 para:pb-[26px] para:pt-6 para:gap-[22px] para:flex-1 para:max-h-none para:md:max-h-[340px]">
+    <FlatCard className="para:p-0 para:lg:p-0 para:pb-[26px] para:pt-6 para:lg:pb-[26px] para:lg:pt-6 para:gap-[22px] para:flex-1 para:max-h-none para:md:max-h-[340px]">
       <div>
         <Typography className="para:pl-6 para:text-sm para:font-medium">{title}</Typography>
       </div>

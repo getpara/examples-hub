@@ -74,7 +74,7 @@ export const MemberSheet = ({ isOpen, memberId, onClose }: MemberSheetProps) => 
               </SheetDescription>
             </SheetHeader>
             <div className="para:flex para:flex-col para:gap-4 para:px-6">
-              <FlatCard className="para:p-4 para:flex-row para:justify-between">
+              <FlatCard className="para:p-4 para:lg:p-4 para:flex-row para:justify-between">
                 <Typography className="para:text-sm para:font-medium" color="secondary">
                   {!!member?.joinedAt ? 'Date Joined' : 'Invited'}
                 </Typography>
@@ -116,7 +116,10 @@ export const MemberSheet = ({ isOpen, memberId, onClose }: MemberSheetProps) => 
                       <FormControl>
                         <div className="para:flex para:flex-col para:border para:border-border para:rounded para:mb-0!">
                           {projects?.map(p => (
-                            <div className="para:flex para:p-4 para:justify-between para:not-last:border-b-border para:not-last:border-b">
+                            <div
+                              className="para:flex para:p-4 para:justify-between para:not-last:border-b-border para:not-last:border-b"
+                              key={p.id}
+                            >
                               <Typography>{p.name}</Typography>
                               <Switch
                                 checked={value?.includes(p.id)}
@@ -143,7 +146,7 @@ export const MemberSheet = ({ isOpen, memberId, onClose }: MemberSheetProps) => 
               )}
               <div>
                 <RemoveMemberDialog
-                  memberId={memberId}
+                  member={member}
                   open={isRemoveDialogOpen}
                   setOpen={setIsRemoveDialogOpen}
                   onSuccess={onClose}

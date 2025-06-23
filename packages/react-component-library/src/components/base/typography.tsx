@@ -10,6 +10,7 @@ export const typographyVariants = cva('', {
       h3: 'para:scroll-m-20 para:text-2xl para:font-semibold para:tracking-tight',
       h4: 'para:scroll-m-20 para:text-xl para:font-semibold para:tracking-tight',
       p: 'para:leading-normal',
+      span: 'para:leading-normal',
     },
     color: {
       default: 'para:text-foreground',

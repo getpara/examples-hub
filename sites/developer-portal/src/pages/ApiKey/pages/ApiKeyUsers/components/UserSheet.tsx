@@ -113,7 +113,7 @@ export const UserSheet = ({ isOpen, user, onClose }: UserSheetProps) => {
                 <Typography className="para:text-sm para:font-semibold">Wallets</Typography>
                 <GroupedCards>
                   {wallets.map(wallet => (
-                    <WalletInfoCard wallet={wallet} />
+                    <WalletInfoCard wallet={wallet} key={wallet.address} />
                   ))}
                 </GroupedCards>
               </div>
@@ -123,7 +123,7 @@ export const UserSheet = ({ isOpen, user, onClose }: UserSheetProps) => {
                 <Typography className="para:text-sm para:font-semibold">External Wallets</Typography>
                 <GroupedCards>
                   {externalWallets.map(wallet => (
-                    <WalletInfoCard wallet={wallet} />
+                    <WalletInfoCard wallet={wallet} key={wallet.address} />
                   ))}
                 </GroupedCards>
               </div>

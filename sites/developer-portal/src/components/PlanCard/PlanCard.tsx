@@ -25,7 +25,7 @@ export const PlanCard = ({
   onUpgradeClick,
 }: PlanCardProps) => {
   return (
-    <FlatCard className="para:p-6">
+    <FlatCard className="para:p-6 para:lg:p-6">
       <div className={'para:flex para:flex-col para:gap-4 para:md:flex-row para:md:gap-6'}>
         <PlanCardLeft
           {...planMetadata}

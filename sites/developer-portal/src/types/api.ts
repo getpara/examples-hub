@@ -42,6 +42,8 @@ export type Organization = {
   homepageUrl?: string | null;
   onboardingAnswersRaw?: object | null;
   bypassBetaUserLimit?: boolean;
+  createdAt: Date;
+  updatedAt: Date;
 };
 export type OrganizationInvite = Organization & { members: OrganizationMember[] };
 
@@ -76,6 +78,8 @@ export type Project = {
   framework?: string;
   packageManager?: string;
   archived?: boolean;
+  createdAt: Date;
+  updatedAt: Date;
 };
 
 export type ProjectResponse = { project: Project };

@@ -29,7 +29,7 @@ export const EmptyStateReferences = () => {
   return (
     <div className="para:flex para:flex-col para:md:flex-row para:gap-2 para:items-center">
       {REFERENCES.map(({ Icon, title, btnText, link }) => (
-        <FlatCard key={title} className="para:p-4 para:gap-3.5 para:flex-1 para:w-full">
+        <FlatCard key={title} className="para:p-4 para:lg:p-4 para:gap-3.5 para:flex-1 para:w-full">
           <div className="para:flex para:flex-col para:gap-2">
             <div className="para:p-1.5 para:rounded-full para:bg-muted para:w-fit">
               <Icon className="para:size-5" />

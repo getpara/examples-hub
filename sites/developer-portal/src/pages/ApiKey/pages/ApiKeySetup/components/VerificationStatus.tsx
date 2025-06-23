@@ -24,7 +24,7 @@ export const VerificationStatus = ({ platform, isConfigured, isSmall }: Verifica
       : `Pending Verification by ${isApple ? 'Apple' : 'Google'}`;
 
   return (
-    <FlatCard className="para:p-4 para:gap-1">
+    <FlatCard className="para:p-4 para:lg:p-4 para:gap-1">
       <Typography
         className={cn('para:font-medium para:leading-none', {
           'para:text-sm': isSmall,

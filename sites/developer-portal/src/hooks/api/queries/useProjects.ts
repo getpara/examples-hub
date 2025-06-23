@@ -36,6 +36,14 @@ export const useProjectsQuery = <T>(select: (data: Project[]) => T) => {
         }
       }
 
+      // Sort: non-archived first (by createdAt asc), archived last (by createdAt asc)
+      data.projects.sort((a, b) => {
+        if (a.archived === b.archived) {
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        }
+        return a.archived ? 1 : -1;
+      });
+
       return data.projects;
     },
     select,

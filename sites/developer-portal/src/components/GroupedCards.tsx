@@ -22,5 +22,7 @@ type GroupedCardProps = {
 } & PropsWithChildren;
 
 export const GroupedCard = ({ className, children }: GroupedCardProps) => {
-  return <FlatCard className={cn('para:p-4 para:flex-row para:justify-between', className)}>{children}</FlatCard>;
+  return (
+    <FlatCard className={cn('para:p-4 para:lg:p-4 para:flex-row para:justify-between', className)}>{children}</FlatCard>
+  );
 };

@@ -78,7 +78,7 @@ export const RemoveUserDialog = ({ user, open, setOpen, onSuccess }: RemoveUserD
           <DialogTitle>Delete User</DialogTitle>
           <DialogDescription>Are you sure you want to delete this user?</DialogDescription>
         </DialogHeader>
-        <FlatCard className="para:flex-row para:p-2">
+        <FlatCard className="para:flex-row para:p-2 para:lg:p-2">
           <Typography className="para:text-sm" color="muted">
             {user.userId ?? user.pregenWalletId ?? ''}
           </Typography>

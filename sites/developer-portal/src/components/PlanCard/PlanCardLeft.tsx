@@ -67,7 +67,7 @@ export const PlanCardLeft = ({
           <Typography className="para:text-3xl para:font-bold">{t('plans.plan.enterpriseCTA')}</Typography>
         ) : (
           <>
-            <Typography color="secondary" className="para:text-sm para:inline">
+            <Typography color="secondary" className="para:text-sm para:inline" variant="span">
               {isPriceLoading ? (
                 '-'
               ) : (
@@ -92,7 +92,7 @@ export const PlanCardLeft = ({
         <Button
           size="lg"
           className="para:w-fit"
-          variant={(isBillingType && !isHigherPlanActive) || isMostPopular ? 'default' : 'neutral'}
+          variant={(isBillingType && !isHigherPlanActive) || (!isBillingType && isMostPopular) ? 'default' : 'neutral'}
           onClick={handleUpgradePlanClick}
           disabled={disabled || isActive}
         >

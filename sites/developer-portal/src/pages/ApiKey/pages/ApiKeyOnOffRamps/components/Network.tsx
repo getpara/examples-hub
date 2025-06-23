@@ -33,7 +33,7 @@ export const Network = ({ network, onNetworkSelect }: NetworkProps) => {
   }
 
   return (
-    <FlatCard className="para:p-4 para:gap-4">
+    <FlatCard className="para:p-4 para:lg:p-4 para:gap-4">
       <FormField
         control={form.control}
         name="onRampAssets"

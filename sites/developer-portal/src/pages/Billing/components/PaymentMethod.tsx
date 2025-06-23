@@ -97,7 +97,7 @@ export const PaymentMethod = () => {
           <div className="para:flex para:gap-4">
             <PaymentDetails />
           </div>
-          <Typography color="secondary" className="para:font-medium">
+          <Typography color="secondary" className="para:font-medium" variant="span">
             {subscription.billing.name}
             {address && (
               <Typography color="secondary" className="para:font-medium">

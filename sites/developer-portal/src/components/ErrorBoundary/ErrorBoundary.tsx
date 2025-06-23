@@ -87,7 +87,7 @@ export const ErrorBoundary = ({
           {isError ? (
             <>
               {(errorMessage || error?.message) && (
-                <FlatCard className="para:p-4">Error: {errorMessage ?? error.message}</FlatCard>
+                <FlatCard className="para:p-4 para:lg:p-4">Error: {errorMessage ?? error.message}</FlatCard>
               )}
             </>
           ) : (

@@ -15,7 +15,7 @@ export const ArchiveProjectList = ({ selectedProjectIds, setSelectedProjectIds }
   return (
     <>
       {allActiveProjects?.map(project => (
-        <FlatCard key={project.id} className="para:p-2 para:flex-row para:items-center para:justify-between">
+        <FlatCard key={project.id} className="para:p-2 para:lg:p-2 para:flex-row para:items-center para:justify-between">
           <Typography className="para:text-sm para:font-medium">{project.name}</Typography>
           <div className="para:flex para:gap-2 para:items-center">
             <Checkbox

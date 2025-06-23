@@ -7,7 +7,7 @@ type SwitchCardProps = {
 
 export const SwitchCard = ({ label, checked, ...rest }: SwitchCardProps) => {
   return (
-    <FlatCard className="para:p-4 para:flex para:flex-row para:justify-between para:items-center">
+    <FlatCard className="para:p-4 para:lg:p-4 para:flex para:flex-row para:justify-between para:items-center">
       <span>
         <Typography className="para:font-medium para:inline">{label}: </Typography>
         <Typography

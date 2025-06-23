@@ -21,6 +21,14 @@ export const useOrganizationsQuery = <T>(select: (data: Organization[]) => T, re
 
       const { data } = await getOrganizations(userId);
 
+      // Sort: non-archived first (by createdAt asc), archived last (by createdAt asc)
+      data.organizations.sort((a, b) => {
+        if (a.archived === b.archived) {
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        }
+        return a.archived ? 1 : -1;
+      });
+
       return data.organizations;
     },
     select,
