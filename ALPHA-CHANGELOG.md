@@ -1,3 +1,36 @@
+# Release (Mon Jun 23 2025)
+
+## Package Versions
+- @getpara/web-sdk@2.0.0-alpha.26
+- @getpara/wagmi-v2-integration@2.0.0-alpha.26
+- @getpara/wagmi-v2-connector@2.0.0-alpha.26
+- @getpara/viem-v2-integration@2.0.0-alpha.26
+- @getpara/viem-v1-integration@2.0.0-alpha.26
+- @getpara/user-management-client@2.0.0-alpha.26
+- @getpara/solana-web3.js-v1-integration@2.0.0-alpha.26
+- @getpara/solana-wallet-connectors@2.0.0-alpha.26
+- @getpara/server-sdk@2.0.0-alpha.26
+- @getpara/react-sdk@2.0.0-alpha.26
+- @getpara/react-native-wallet@2.0.0-alpha.26
+- @getpara/react-components@2.0.0-alpha.26
+- @getpara/react-component-library@1.0.0-alpha.21
+- @getpara/react-common@2.0.0-alpha.26
+- @getpara/evm-wallet-connectors@2.0.0-alpha.26
+- @getpara/ethers-v6-integration@2.0.0-alpha.26
+- @getpara/ethers-v5-integration@2.0.0-alpha.26
+- @getpara/cosmos-wallet-connectors@2.0.0-alpha.26
+- @getpara/cosmjs-v0-integration@2.0.0-alpha.26
+- @getpara/core-sdk@2.0.0-alpha.26
+- @getpara/core-components@2.0.0-alpha.26
+
+
+### Fixes
+-  Reduce server session touch calls (#1047) - 2ac581cfb
+-  Option to fetch full metadata for linked accounts (#1043) - 137b12164
+
+### Chores
+-  Dev Portal - 6/23 QA Review (#1044) - 71b20b09b
+
 # Release (Fri Jun 20 2025)
 
 ## Package Versions

@@ -1,6 +1,6 @@
 {
   "name": "@getpara/cosmos-wallet-connectors",
-  "version": "2.0.0-alpha.25",
+  "version": "2.0.0-alpha.26",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -20,13 +20,13 @@
     "@cosmjs/stargate": "<=0.33.1",
     "@cosmjs/tendermint-rpc": "<=0.31.3",
     "@getpara/graz": "2.0.0-alpha.3",
-    "@getpara/web-sdk": "2.0.0-alpha.25",
+    "@getpara/web-sdk": "2.0.0-alpha.26",
     "@leapwallet/cosmos-social-login-capsule-provider": "^0.0.41",
     "zustand": "^4.5.2",
     "zustand-sync-tabs": "^0.2.2"
   },
   "devDependencies": {
-    "@getpara/react-common": "2.0.0-alpha.25",
+    "@getpara/react-common": "2.0.0-alpha.26",
     "@types/react": "^18.0.31",
     "@types/react-dom": "^18.2.7",
     "typescript": "^5.4.3"

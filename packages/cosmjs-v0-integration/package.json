@@ -1,6 +1,6 @@
 {
   "name": "@getpara/cosmjs-v0-integration",
-  "version": "2.0.0-alpha.25",
+  "version": "2.0.0-alpha.26",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
   "types": "dist/types/index.d.ts",
@@ -8,7 +8,7 @@
   "sideEffects": false,
   "dependencies": {
     "@cosmjs/stargate": "<=0.33.1",
-    "@getpara/core-sdk": "2.0.0-alpha.25"
+    "@getpara/core-sdk": "2.0.0-alpha.26"
   },
   "scripts": {
     "build": "rm -rf dist && node ./scripts/build.mjs && yarn build:types",
