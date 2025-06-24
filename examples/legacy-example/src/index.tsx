@@ -578,8 +578,18 @@ function AppInner({
   }
 
   useEffect(() => {
-    checkIsSessionActive();
-  }, [paraAccount?.isConnected]);
+    if (paraAccount?.isConnected && !paraAccount?.isGuestMode) {
+      console.log(`exported session:\n${(para as ParaCore).exportSession()}`);
+
+      if (para.authInfo?.authType === 'email' && pregenIdentifierType === 'EMAIL') {
+        setPregenIdentifier(para.email);
+      }
+
+      if (para.authInfo?.authType === 'phone' && pregenIdentifierType === 'PHONE') {
+        setPregenIdentifier(para.phone);
+      }
+    }
+  }, [paraAccount, para.authInfo]);
 
   useEffect(() => {
     async function fetchPartners() {
@@ -996,7 +1006,7 @@ function AppInner({
                 <Button colorScheme="green" isDisabled={!para} onClick={() => openModal()}>
                   Open Modal
                 </Button>
-                {paraAccount.isConnected && (
+                {paraAccount?.isConnected && (
                   <>
                     <Button
                       colorScheme="green"
@@ -1123,7 +1133,7 @@ function AppInner({
 
                     <Button
                       colorScheme="teal"
-                      isDisabled={!paraAccount.isConnected || Object.values(para?.pregenIds || []).flat().length === 0}
+                      isDisabled={!paraAccount?.isConnected || Object.values(para?.pregenIds || []).flat().length === 0}
                       onClick={async () => {
                         console.log(await para?.claimPregenWallets());
                         updateToString();
@@ -1135,10 +1145,10 @@ function AppInner({
                     <Button colorScheme="teal" onClick={checkIsSessionActive}>
                       Is Fully Logged In?
                     </Button>
-                    <Text>{paraAccount.isConnected ? 'Fully Logged In!' : 'Log In Pending...'}</Text>
+                    <Text>{paraAccount?.isConnected ? 'Fully Logged In!' : 'Log In Pending...'}</Text>
 
                     <Button
-                      isDisabled={!paraAccount.isConnected}
+                      isDisabled={!paraAccount?.isConnected}
                       colorScheme="teal"
                       onClick={async () => {
                         if (para) {
@@ -1151,7 +1161,7 @@ function AppInner({
                     </Button>
 
                     <Button
-                      isDisabled={!paraAccount.isConnected || paraAccount.isGuestMode}
+                      isDisabled={!paraAccount?.isConnected || paraAccount.isGuestMode}
                       colorScheme="teal"
                       onClick={async () => {
                         if (para) {

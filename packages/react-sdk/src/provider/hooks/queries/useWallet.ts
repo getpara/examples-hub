@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useClient, useWalletState } from '../index.js';
+import { useIsFullyLoggedIn } from './useAccount.js';
 import { getWallet } from '../../actions/getWallet.js';
 
 export const WALLET_BASE_KEY = 'PARA_WALLET';
@@ -10,9 +11,11 @@ export const WALLET_BASE_KEY = 'PARA_WALLET';
 export const useWallet = () => {
   const client = useClient();
   const { selectedWallet } = useWalletState();
+  const { data: isFullyLoggedIn, isSuccess } = useIsFullyLoggedIn();
 
   return useQuery({
-    queryKey: [WALLET_BASE_KEY, client?.getUserId(), selectedWallet.id, selectedWallet.type],
-    queryFn: async () => await getWallet(client, selectedWallet),
+    enabled: !!client && !!selectedWallet && isSuccess,
+    queryKey: [WALLET_BASE_KEY, isFullyLoggedIn, selectedWallet.id, selectedWallet.type],
+    queryFn: async () => await getWallet(client, selectedWallet, isFullyLoggedIn),
   });
 };

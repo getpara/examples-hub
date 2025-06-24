@@ -43,13 +43,14 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
   const { setSelectedWallet, updateSelectedWallet } = useWalletState();
   const setAuthStepRoute = useModalStore(state => state.setAuthStepRoute);
   const { signUpOrLogIn, isCreateGuestWalletsPending } = useAuthActions();
-  const { data: account } = useAccount();
+  const { data: account, status: statusAccount } = useAccount();
 
   const [isModalMounted, setIsModalMounted] = useState(false);
-  const [isInit, setIsInit] = useState(false);
   const externalWallets = useStore(state => state.externalWallets);
   const providerProps = useStore(state => state.providerProps);
   const setAccountLinkOptions = useModalStore(state => state.setAccountLinkOptions);
+
+  const isInitialized = useRef(false);
 
   // Merge props stored on the provider with props passed to the modal, favoring props passed to modal
   const {
@@ -122,7 +123,7 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
 
   // This will run on mount and on isOpen change but won't cause a rerender unless step or email changes
   const initModal = async (shouldAutoLogin?: boolean) => {
-    const isAccount = await para.isFullyLoggedIn(),
+    const isAccount = account?.isConnected,
       isGuest = (isAccount && para.isGuestMode) || isCreateGuestWalletsPending;
 
     switch (true) {
@@ -171,8 +172,19 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
         }
         break;
     }
-    setIsInit(true);
   };
+
+  useEffect(() => {
+    if (para && isOpen && statusAccount === 'success' && !isInitialized.current) {
+      initModal(isOpen);
+      isInitialized.current = true;
+    }
+
+    if (para && !isOpen && isInitialized.current) {
+      initModal();
+      isInitialized.current = false;
+    }
+  }, [para, isOpen, account, statusAccount]);
 
   useEffect(() => {
     let _authLayout = authLayout;
@@ -200,22 +212,6 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
   useEffect(() => {
     setOnModalStepChange(onModalStepChange);
   }, [onModalStepChange]);
-
-  // Set Para instance & init on mount
-  useEffect(() => {
-    if (para) {
-      initModal();
-    } else {
-      console.error('A Para instance must be provided.');
-    }
-  }, []);
-
-  // Init modal with proper steps on isOpen change
-  useEffect(() => {
-    if (isOpen && para) {
-      initModal(true);
-    }
-  }, [isOpen]);
 
   useEffect(() => {
     updateSelectedWallet();
@@ -255,12 +251,6 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
     } else if (RESET_TO_ACCOUNT_STEPS.includes(currentStep)) {
       setStep(ModalStep.LOGIN_DONE);
     }
-
-    if (para) {
-      await initModal();
-    }
-
-    setIsInit(false);
   };
 
   if (!para) {
@@ -306,7 +296,7 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
       $embeddedModal={!!embeddedModal}
     >
       {/* wait to show the modal content until initialized only when using embedded modal for rainbowkit to avoid unexpected modal closures */}
-      {isModalMounted && (((embeddedModal || bareModal) && isInit) || (!embeddedModal && !bareModal)) && (
+      {isModalMounted && (((embeddedModal || bareModal) && isInitialized.current) || (!embeddedModal && !bareModal)) && (
         <ModalContent
           oAuthMethods={oAuthMethods}
           disableEmailLogin={disableEmailLogin}

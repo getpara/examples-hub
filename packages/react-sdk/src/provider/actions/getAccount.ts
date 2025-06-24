@@ -28,8 +28,12 @@ export type Account =
       isGuestMode: false;
     } & AccountValue);
 
-export const getAccount = async (para?: ParaWeb): Promise<Account> => {
-  if (!!para && para.isGuestMode) {
+export const getAccount = async (para?: ParaWeb, isConnected?: boolean): Promise<Account> => {
+  if (!para) {
+    return { isConnected: false };
+  }
+
+  if (para.isGuestMode) {
     return {
       isConnected: true,
       isGuestMode: true,
@@ -37,9 +41,9 @@ export const getAccount = async (para?: ParaWeb): Promise<Account> => {
     };
   }
 
-  const isConnected = !!para && (await para?.isFullyLoggedIn());
+  const _isConnected = isConnected ?? (await para?.isFullyLoggedIn());
 
-  if (isConnected) {
+  if (_isConnected) {
     const authInfo = para.authInfo;
 
     const value: Account = {

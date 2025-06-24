@@ -34,7 +34,7 @@ import { isExternalWallet, TelegramAuthResponse, VerifiedAuth } from '@getpara/u
 import { routeMobileExternalWallet } from '../../modal/utils/routeMobileExternalWallet.js';
 import { useStore } from '../stores/useStore.js';
 import { useFormattedBiometricHints } from '../hooks/utils/useFormattedBiometricHints.js';
-import { MutationStatus } from '@tanstack/react-query';
+import { MutationStatus, useQueryClient } from '@tanstack/react-query';
 
 type Value = {
   signUpOrLogIn: (_: VerifiedAuth) => void;
@@ -90,6 +90,7 @@ export function AuthProvider({
   isRecoverySecretStepEnabled = false,
   overrides = {},
 }: Props) {
+  const queryClient = useQueryClient();
   const para = useInternalClient();
   const userAgent = useUserAgent();
   const onLoginRef = useStore(state => state.onLoginRef);
@@ -423,6 +424,8 @@ export function AuthProvider({
       on2faSetupOrError?: () => void;
       on2faNotSetup?: () => void;
     } = {}) => {
+      await queryClient.invalidateQueries({ queryKey: ['isFullyLoggedIn'] });
+
       setAuthState();
 
       await onLoginRef.current?.();

@@ -90,14 +90,6 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
     }, [onRampTestMode]);
 
     useEffect(() => {
-      const init = async () => {
-        if (!(await para.isFullyLoggedIn())) {
-          // Disconnect external wallets if the user is no longer logged in
-          await disconnectExternalWallet();
-        }
-      };
-
-      init();
       return () => {
         window.clearTimeout(refs.poll.current?.timeout);
       };
