@@ -1,8 +1,6 @@
 apply plugin: "com.android.application"
 apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.facebook.react"
-apply from: file("../../node_modules/react-native-vector-icons/fonts.gradle")
-
 
 /**
  * This is the configuration block to customize your React Native Android app.
@@ -79,9 +77,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace "com.usecapsule.example.reactnative"
+    namespace "com.getpara.example"
     defaultConfig {
-        applicationId "com.usecapsule.example.reactnative"
+        applicationId "com.getpara.example"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

@@ -1,46 +1,46 @@
-import SwiftUI
-import ParaSwift
-import Combine
 import AuthenticationServices
+import Combine
 import Foundation
+import ParaSwift
+import SwiftUI
 
 struct PhoneAuthView: View {
     @EnvironmentObject var paraManager: ParaManager
     @EnvironmentObject var appRootManager: AppRootManager
-    
+
     @State private var phoneNumber = ""
     @State private var countryCode = "1" // Default to US
     @State private var countryFlag = "🇺🇸"
     @State private var countryPattern = "### ### ####"
     @State private var shouldNavigateToVerifyPhone = false
     @State private var authState: AuthState?
-    
+
     // States for error handling and loading
     @State private var isLoading = false
     @State private var errorMessage: String?
     @State private var presentCountryCodeSelection = false
-    
+
     @Environment(\.authorizationController) private var authorizationController
     @Environment(\.webAuthenticationSession) private var webAuthenticationSession
-    
+
     @State private var searchCountry = ""
     private var countries: [CPData] = Bundle.main.decode("CountryNumbers.json")
-    
+
     var filteredCountries: [CPData] {
         if searchCountry.isEmpty {
-            return countries
+            countries
         } else {
-            return countries.filter { $0.name.localizedCaseInsensitiveContains(searchCountry)}
+            countries.filter { $0.name.localizedCaseInsensitiveContains(searchCountry) }
         }
     }
-    
+
     var body: some View {
         VStack(spacing: 20) {
             Text("Enter your phone number to create or log in.")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
-            
+
             HStack {
                 Button {
                     presentCountryCodeSelection = true
@@ -60,9 +60,9 @@ struct PhoneAuthView: View {
                                     .foregroundColor(.secondary)
                             }
                             .onTapGesture {
-                                self.countryFlag = country.flag
-                                self.countryCode = country.dial_code
-                                self.countryPattern = country.pattern
+                                countryFlag = country.flag
+                                countryCode = country.dial_code
+                                countryPattern = country.pattern
                                 presentCountryCodeSelection = false
                                 searchCountry = ""
                             }
@@ -83,19 +83,19 @@ struct PhoneAuthView: View {
                     }
                     .accessibilityIdentifier("phoneNumberField")
             }
-            
-            if let errorMessage = errorMessage {
+
+            if let errorMessage {
                 Text(errorMessage)
                     .foregroundColor(.red)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal)
                     .accessibilityIdentifier("errorMessage")
             }
-            
+
             if isLoading {
                 ProgressView("Processing...")
             }
-            
+
             Button {
                 guard !phoneNumber.isEmpty else {
                     errorMessage = "Please enter a phone number."
@@ -103,27 +103,27 @@ struct PhoneAuthView: View {
                 }
                 isLoading = true
                 errorMessage = nil
-                
+
                 Task {
                     do {
                         let formattedPhone = PhoneFormatter.formatForAPI(phoneNumber: phoneNumber, countryCode: countryCode)
                         let state = try await paraManager.initiateAuthFlow(auth: .phone(formattedPhone))
-                        self.authState = state
-                        
+                        authState = state
+
                         switch state.stage {
                         case .verify:
                             // User needs to verify phone number
                             shouldNavigateToVerifyPhone = true
-                            
+
                         case .login:
                             // Existing user - automatically determine and use preferred login method
                             try await paraManager.handleLogin(
                                 authState: state,
                                 authorizationController: authorizationController,
-                                webAuthenticationSession: webAuthenticationSession
+                                webAuthenticationSession: webAuthenticationSession,
                             )
-                            appRootManager.currentRoot = .home
-                            
+                            appRootManager.setAuthenticated(true)
+
                         case .signup:
                             // This shouldn't happen directly from phone input
                             errorMessage = "Unexpected authentication state. Please try again."
@@ -131,7 +131,7 @@ struct PhoneAuthView: View {
                     } catch {
                         errorMessage = error.localizedDescription
                     }
-                    
+
                     isLoading = false
                 }
             } label: {
@@ -149,7 +149,7 @@ struct PhoneAuthView: View {
                         .environmentObject(appRootManager)
                 }
             }
-            
+
             Spacer()
         }
         .padding()
