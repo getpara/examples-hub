@@ -34,10 +34,10 @@ phases:
       - export NODE_OPTIONS="--max-old-space-size=4096"
       - yarn build-$ENV
       - echo "Deploying site to s3://$S3_BUCKET_NAME for $ENV..."
-      - aws s3 sync $BUILD_PATH s3://$S3_BUCKET_NAME --delete
+      - aws s3 sync $BUILD_PATH s3://$S3_BUCKET_NAME $S3_SYNC_FLAGS
       - |
         echo "CloudFront cache check for $ENV..."
-        if [ "$ENV" = "sandbox" ]; then
+        if [ "$ENV" != "sandbox" ]; then
           echo "Invalidating cloudfront cache $CLOUDFRONT_DISTRIBUTION_ID for $ENV..."
           aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DISTRIBUTION_ID --paths "/index.html"
         else
