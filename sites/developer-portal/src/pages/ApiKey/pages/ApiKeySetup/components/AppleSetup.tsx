@@ -56,7 +56,17 @@ export const AppleSetup = () => {
           />
           <img src={teamIDImg} alt="Team ID" className="para:w-full" />
           <Typography className="para:text-sm para:mt-2 para:break-all" color="secondary">
-            You can find your Team ID at developer.app.com/account/resources/list.
+            You can find your Team ID{' '}
+            <a
+              href="https://developer.apple.com/account/resources"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="para:text-primary para:underline"
+              aria-label="Find your Team ID on Apple Developer portal"
+            >
+              here
+            </a>
+            .
           </Typography>
         </div>
         <div className="para:flex-1 para:flex-col para:gap-2">
