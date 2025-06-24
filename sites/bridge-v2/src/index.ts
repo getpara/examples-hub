@@ -5,7 +5,7 @@ import { BridgeResponse, MessageArguments, Platform } from './types';
 import { ParaBridge } from './classes/ParaBridge';
 
 // Immediate console log to verify bridge is loaded
-console.log('[BRIDGE] Bridge script loaded at', new Date().toISOString());
+console.warn('[BRIDGE] Bridge script loaded at', new Date().toISOString());
 
 let platform: Platform;
 let version: string | undefined;
@@ -55,20 +55,20 @@ function logNetworkInformation() {
 
 window.addEventListener('message', event => {
   try {
-    console.log('[BRIDGE] Received message from event:', JSON.stringify(event.data, null, 2));
+    console.warn('[BRIDGE] Received message from event:', JSON.stringify(event.data, null, 2));
     logger.info('Received message from event:', event.data);
     const data = event.data;
 
     switch (data.messageType) {
       case 'Para#init': {
-        console.log('[BRIDGE] Para#init received');
+        console.warn('[BRIDGE] Para#init received');
         logNetworkInformation();
 
-        console.log('[BRIDGE] Initializing Para with args:', JSON.stringify(data.arguments, null, 2));
+        console.warn('[BRIDGE] Initializing Para with args:', JSON.stringify(data.arguments, null, 2));
         logger.info('Initializing Para with args:', data.arguments);
         initPara(data.arguments);
 
-        console.log('[BRIDGE] Para initialized successfully. Platform:', platform, 'Version:', version);
+        console.warn('[BRIDGE] Para initialized successfully. Platform:', platform, 'Version:', version);
         logger.info('Para initialized successfully. Platform:', platform, 'Version:', version);
         sendResponse(data.messageType, data.requestId, true);
 
@@ -88,9 +88,28 @@ window.addEventListener('message', event => {
   }
 });
 
+// Convert BigInt values to strings in the responseData to ensure serialization works
+const convertBigIntsToStrings = (obj: any): any => {
+  if (typeof obj === 'bigint') {
+    return obj.toString();
+  }
+  if (Array.isArray(obj)) {
+    return obj.map(convertBigIntsToStrings);
+  }
+  if (obj && typeof obj === 'object') {
+    const converted: any = {};
+    for (const [key, value] of Object.entries(obj)) {
+      converted[key] = convertBigIntsToStrings(value);
+    }
+    return converted;
+  }
+  return obj;
+};
+
 function sendResponse(method: string, requestId: string, responseData: any, error?: string) {
-  const payload: BridgeResponse = { method, requestId, responseData, error };
-  console.log('[BRIDGE] Sending response:', JSON.stringify(payload, null, 2));
+  const serializedResponseData = convertBigIntsToStrings(responseData);
+  const payload: BridgeResponse = { method, requestId, responseData: serializedResponseData, error };
+  console.warn('[BRIDGE] Sending response:', JSON.stringify(payload, null, 2));
   logger.info('Sending response:', payload);
   switch (platform) {
     case Platform.flutter:

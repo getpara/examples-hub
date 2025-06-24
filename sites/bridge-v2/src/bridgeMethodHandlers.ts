@@ -16,11 +16,12 @@ import {
   solanaWeb3GetBalance,
   solanaWeb3GetRecentBlockhash,
 } from './signers/solanaWeb3Signer';
-import { initCosmJsSigners, cosmJsSignAmino, cosmJsSignDirect } from './signers/cosmjsSigner';
+import { initCosmJsSigners, cosmJsGetBalance, cosmJsSignDirect, cosmJsSignAmino } from './signers/cosmjsSigner';
 import { loginWithPasskey, generatePasskey, verifyWebChallenge } from './bridgeAuth';
 import {
-  CosmJsSignAminoArgs,
+  CosmJsSignersInitArgs,
   CosmJsSignDirectArgs,
+  CosmJsSignAminoArgs,
   EthersSendTransactionArgs,
   EthersSignMessageArgs,
   EthersSignTransactionArgs,
@@ -34,7 +35,6 @@ import {
   SolanaSignTransactionArgs,
   SolanaSignVersionedTransactionArgs,
   SolanaSignerInitArgs,
-  CosmJsSignersInitArgs,
   VerifyWebChallengeArgs,
 } from './types';
 
@@ -65,15 +65,20 @@ export const coreMethodHandlers: CoreMethodHandlers = PARA_CORE_METHODS.reduce((
 }, {}) as CoreMethodHandlers;
 
 export const bridgeMethodHandlers: Record<string, (para: ParaWeb, args: any) => Promise<any>> = {
-  cosmJsSignAmino: async (_, args: CosmJsSignAminoArgs) => {
-    logger.info('Signing CosmJS transaction...');
-    const signature = await cosmJsSignAmino(args);
-    return signature;
+  cosmJsGetBalance: async (_, args: { address: string; denom?: string; rpcUrl?: string }) => {
+    logger.info('Getting Cosmos balance...');
+    const balance = await cosmJsGetBalance(args);
+    return balance;
   },
   cosmJsSignDirect: async (_, args: CosmJsSignDirectArgs) => {
-    logger.info('Signing direct message...');
-    const signature = await cosmJsSignDirect(args);
-    return signature;
+    logger.info('Signing Cosmos direct/proto transaction...');
+    const result = await cosmJsSignDirect(args);
+    return result;
+  },
+  cosmJsSignAmino: async (_, args: CosmJsSignAminoArgs) => {
+    logger.info('Signing Cosmos amino transaction...');
+    const result = await cosmJsSignAmino(args);
+    return result;
   },
   ethersSignMessage: async (_, args: EthersSignMessageArgs) => {
     logger.info('Signing ethers message...');
@@ -149,6 +154,19 @@ export const bridgeMethodHandlers: Record<string, (para: ParaWeb, args: any) => 
     logger.info('Initializing CosmJS signers...');
     const result = await initCosmJsSigners(para, args);
     return result;
+  },
+  getCosmosSignerAddress: async (_, _args) => {
+    logger.info('Getting Cosmos signer address...');
+    const protoSigner = window['cosmjsProtoSigner'];
+    const aminoSigner = window['cosmjsAminoSigner'];
+
+    if (!protoSigner || !aminoSigner) {
+      throw new Error('CosmJS signers not initialized. Call initCosmJsSigners first.');
+    }
+
+    const address = protoSigner.address || aminoSigner.address;
+    logger.info('Cosmos signer address:', address);
+    return { address };
   },
   loginWithPasskey: async (para, args: LoginWithPasskeyArgs) => {
     logger.info('Logging in with passkey...');

@@ -95,12 +95,6 @@ export interface SolanaSignerInitArgs {
   rpcUrl: string;
 }
 
-export interface CosmJsSignersInitArgs {
-  walletId: string;
-  prefix?: string;
-  messageSigningTimeoutMs?: number;
-}
-
 export interface EthersSignMessageArgs {
   message: string;
 }
@@ -129,6 +123,12 @@ export interface SolanaSignVersionedTransactionArgs {
 
 export interface SolanaSendTransactionArgs {
   b64EncodedTx: string;
+}
+
+export interface CosmJsSignersInitArgs {
+  walletId: string;
+  prefix?: string;
+  messageSigningTimeoutMs?: number;
 }
 
 export interface CosmJsSignDirectArgs {
