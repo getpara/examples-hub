@@ -86,8 +86,15 @@ function genChangelog() {
   for (const commit of cleanedCommits) {
     let [type, title] = commit.split(':');
 
+    const cleanedTitle = title?.trim() || '';
+
+    // If title starts with 'IGNORE', we skip this commit
+    if (cleanedTitle.startsWith('IGNORE')) {
+      continue;
+    }
+
     if (type.includes('!')) {
-      title = `**BREAKING CHANGE** ${title.trim()}`;
+      title = `**BREAKING CHANGE** ${cleanedTitle}`;
       type = type.slice(0, -1);
     }
 
@@ -96,56 +103,56 @@ function genChangelog() {
         if (!features) {
           features = '### Features\n';
         }
-        features += `- ${title}\n`;
+        features += `- ${cleanedTitle}\n`;
         break;
       }
       case 'fix': {
         if (!fixes) {
           fixes = '### Fixes\n';
         }
-        fixes += `- ${title}\n`;
+        fixes += `- ${cleanedTitle}\n`;
         break;
       }
       case 'chore': {
         if (!chores) {
           chores = '### Chores\n';
         }
-        chores += `- ${title}\n`;
+        chores += `- ${cleanedTitle}\n`;
         break;
       }
       case 'docs': {
         if (!docs) {
           docs = '### Docs\n';
         }
-        docs += `- ${title}\n`;
+        docs += `- ${cleanedTitle}\n`;
         break;
       }
       case 'style': {
         if (!styles) {
           styles = '### Styles\n';
         }
-        styles += `- ${title}\n`;
+        styles += `- ${cleanedTitle}\n`;
         break;
       }
       case 'refactor': {
         if (!refactors) {
           refactors = '### Refactors\n';
         }
-        refactors += `- ${title}\n`;
+        refactors += `- ${cleanedTitle}\n`;
         break;
       }
       case 'perf': {
         if (!performances) {
           performances = '### Performance\n';
         }
-        performances += `- ${title}\n`;
+        performances += `- ${cleanedTitle}\n`;
         break;
       }
       case 'test': {
         if (!tests) {
           tests = '### Tests\n';
         }
-        tests += `- ${title}\n`;
+        tests += `- ${cleanedTitle}\n`;
         break;
       }
       default: {
