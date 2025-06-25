@@ -1,6 +1,6 @@
 import "@/styles/globals.css";
 import "@getpara/react-sdk/styles.css";
-import { QueryProvider } from "@/context";
+import { QueryProvider } from "@/context/QueryProvider";
 import { WagmiProvider } from "@/context/WagmiProvider";
 import { AppWrapper } from "@/components/layout/AppWrapper";
 

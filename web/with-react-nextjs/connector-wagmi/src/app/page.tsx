@@ -4,7 +4,11 @@ import { useState } from "react";
 import { useAccount, useSendTransaction, useWaitForTransactionReceipt } from "wagmi";
 import { parseEther, isAddress } from "viem";
 import "@getpara/react-sdk/styles.css";
-import { BalanceCard, StatusAlert, TransactionHash, ConnectWalletCard, TransferForm } from "@/components/ui";
+import { BalanceCard } from "@/components/ui/BalanceCard";
+import { StatusAlert } from "@/components/ui/StatusAlert";
+import { TransactionHash } from "@/components/ui/TransactionHash";
+import { ConnectWalletCard } from "@/components/ui/ConnectWalletCard";
+import { TransferForm } from "@/components/ui/TransferForm";
 import { useModal } from "@/context/ModalContext";
 
 export default function Home() {
