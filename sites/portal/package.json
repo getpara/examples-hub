@@ -38,7 +38,7 @@
     "preview": "vite preview",
     "start-e2e": "DISABLE_ESLINT_PLUGIN=true VITE_IS_E2E=true VITE_ENVIRONMENT=sandbox VITE_CAPSULE_API_KEY=7a455d14ff0128658ef9d224140a9ff2 vite --port 3003",
     "check-wasm-file-exists": "test -f ./public/static/js/main.wasm || (echo 'public/static/js/main.wasm file does not exist!'; exit 1)",
-    "check-mpc-worker-file-exists": "(test -f ./public/static/js/mpcWorker-bundle.js && test -f ./public/static/js/mpcWorkerServer-bundle.js) || (echo 'public/static/js/mpcWorker-bundle.js or public/static/js/mpcWorkerServer-bundle.js file does not exist!'; exit 1)",
+    "check-mpc-worker-file-exists": "(test -f ./public/static/js/mpcWorker-bundle.js && test -f ./public/static/js/mpcWorkerServer-bundle.js && test -f ./public/static/js/mpcWorkerServer-esm.js) || (echo 'public/static/js/mpcWorker-bundle.js or public/static/js/mpcWorkerServer-bundle.js or public/static/js/mpcWorkerServer-esm.js file does not exist!'; exit 1)",
     "legacy-deploy-s3": "yarn && yarn build && yarn check-wasm-file-exists && yarn check-mpc-worker-file-exists && aws s3 sync dist/ s3://capsule-$VITE_ENVIRONMENT-web-portal --profile $VITE_ENVIRONMENT",
     "legacy-deploy-sandbox": "VITE_PARA_PORTAL_ID=4bdd84d3-7606-406f-8321-19721cac17a1 VITE_ENVIRONMENT=sandbox yarn legacy-deploy-s3",
     "legacy-deploy-beta": "VITE_PARA_PORTAL_ID=4bdd84d3-7606-406f-8321-19721cac17a1 VITE_ENVIRONMENT=beta yarn legacy-deploy-s3",

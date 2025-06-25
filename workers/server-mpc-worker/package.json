@@ -6,7 +6,9 @@
     "@getpara/server-sdk": "2.0.0-alpha.26"
   },
   "scripts": {
-    "build": "rm -rf dist && tsc && npx webpack && mv ./dist/mpcWorkerServer-bundle.js ../../sites/portal/public/static/js/mpcWorkerServer-bundle.js"
+    "mv-cjs": "mv ./dist/mpcWorkerServer-bundle.js ../../sites/portal/public/static/js/mpcWorkerServer-bundle.js",
+    "mv-esm": "mv ./dist/mpcWorkerServer-esm.js ../../sites/portal/public/static/js/mpcWorkerServer-esm.js",
+    "build": "rm -rf dist && tsc && npx webpack && yarn mv-cjs && yarn mv-esm"
   },
   "devDependencies": {
     "crypto-browserify": "3.12.0",

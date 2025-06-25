@@ -23,6 +23,13 @@ function removeWorkId(workId: string, skipClearTimeout?: boolean) {
   clearTimeout(timeoutId);
 }
 
+export function resetWorker() {
+  if (worker) {
+    worker.terminate();
+    worker = undefined;
+  }
+}
+
 export async function setupWorker(
   ctx: Ctx,
   resFunction: (arg: any) => Promise<void>,
@@ -46,7 +53,11 @@ export async function setupWorker(
   };
 
   if (!worker || !worker.threadId) {
-    const workerRes = await fetch(`${getPortalBaseURL(ctx)}/static/js/mpcWorkerServer-bundle.js`);
+    // Detect if running in Deno and if so use the ESM build
+    const isDeno = typeof (globalThis as any)?.Deno !== 'undefined';
+    const workerFileName = isDeno ? 'mpcWorkerServer-esm.js' : 'mpcWorkerServer-bundle.js';
+
+    const workerRes = await fetch(`${getPortalBaseURL(ctx)}/static/js/${workerFileName}`);
     worker = new Worker(await workerRes.text(), { eval: true });
 
     const onmessage = async (message: { functionType: string; params: any; workId: string }) => {

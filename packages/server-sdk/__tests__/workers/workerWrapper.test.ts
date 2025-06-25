@@ -2,7 +2,7 @@ import { expect, describe, it, vi, beforeEach } from 'vitest';
 import * as uuid from 'uuid';
 
 import { Environment } from '../../src/index.js';
-import { setupWorker } from '../../src/workers/workerWrapper.js';
+import { setupWorker, resetWorker } from '../../src/workers/workerWrapper.js';
 
 const MOCK_WORKER_CODE = `
   const { parentPort } = require('worker_threads');
@@ -168,6 +168,57 @@ describe('workerWrapper', () => {
       expect(errorFnMock).toHaveBeenCalledWith(expect.any(Error));
 
       consoleErrorSpy.mockRestore();
+    });
+
+    // These tests should run last as they reset the worker
+    it('uses ESM worker file when running in Deno environment', async () => {
+      // Mock Deno environment
+      const originalDeno = (globalThis as any).Deno;
+      (globalThis as any).Deno = {};
+
+      // Reset worker and mocks for clean test
+      resetWorker();
+      vi.clearAllMocks();
+      const fetchSpy = vi.spyOn(global, 'fetch');
+      const ctx = { env: Environment.DEV } as any;
+      const workId = uuid.v4();
+
+      await setupWorker(ctx, vi.fn(), vi.fn(), workId, {});
+
+      expect(fetchSpy).toHaveBeenCalledWith(expect.stringContaining('/static/js/mpcWorkerServer-esm.js'));
+
+      // Restore original state
+      if (originalDeno !== undefined) {
+        (globalThis as any).Deno = originalDeno;
+      } else {
+        delete (globalThis as any).Deno;
+      }
+    });
+
+    it('uses bundle worker file when not running in Deno environment', async () => {
+      // Ensure Deno is not defined
+      const originalDeno = (globalThis as any).Deno;
+      delete (globalThis as any).Deno;
+
+      // Reset worker and mocks for clean test
+      resetWorker();
+      vi.clearAllMocks();
+      global.fetch = vi.fn(() => ({
+        text: vi.fn(() => Promise.resolve(MOCK_WORKER_CODE)),
+      })) as any;
+      const fetchSpy = vi.spyOn(global, 'fetch');
+
+      const ctx = { env: Environment.DEV } as any;
+      const workId = uuid.v4();
+
+      await setupWorker(ctx, vi.fn(), vi.fn(), workId, {});
+
+      expect(fetchSpy).toHaveBeenCalledWith(expect.stringContaining('/static/js/mpcWorkerServer-bundle.js'));
+
+      // Restore original state
+      if (originalDeno !== undefined) {
+        (globalThis as any).Deno = originalDeno;
+      }
     });
   });
 });

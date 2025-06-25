@@ -6,6 +6,7 @@ build
 .DS_Store
 mpcWorker-bundle.js
 mpcWorkerServer-bundle.js
+mpcWorkerServer-esm.js
 .vscode/*
 .vscode
 *.wasm

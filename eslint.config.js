@@ -36,6 +36,7 @@ module.exports = [
       '**/*.min.js',
       '**/mpcWorker-bundle.js',
       '**/mpcWorkerServer-bundle.js',
+      '**/mpcWorkerServer-esm.js',
       '**/wasm_exec.js',
       '**/dist/**',
       '**/build/**',
