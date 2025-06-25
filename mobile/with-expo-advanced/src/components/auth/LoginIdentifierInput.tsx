@@ -42,12 +42,12 @@ export function LoginIdentifierInput({
     <View className="gap-y-2">
       <Text
         accessibilityRole="text"
-        className="text-sm font-medium text-foreground native:text-base"
+        className="text-base font-medium text-foreground native:text-lg"
       >
         {label}
       </Text>
-      <View className="flex-row h-14 rounded-lg border border-border/60 bg-white items-center">
-        <View className="h-full w-16 flex items-center justify-center border-r border-border/60">
+      <View className="flex-row h-14 rounded-lg border border-border bg-card items-center">
+        <View className="h-full w-16 flex items-center justify-center border-r border-border">
           {inputType === 'email' ? (
             <Mail size={24} className="text-muted-foreground" />
           ) : inputType === 'phone' ? (
@@ -67,19 +67,19 @@ export function LoginIdentifierInput({
           autoCapitalize="none"
           autoCorrect={false}
           className="flex-1 h-14 text-base text-foreground border-0 bg-transparent font-nunito"
-          placeholderTextColor="#9CA3AF"
+          placeholderTextColor="#505055"
         />
 
-        <View className="flex h-full items-center justify-center pr-2">
+        <View className="flex h-full items-center justify-center pr-4">
           <Button
             size="icon"
             variant="default"
             onPress={onSubmit}
             accessibilityLabel="Continue"
             disabled={isLoading || !isValid}
-            className="flex h-10 w-10 items-center justify-center rounded-md bg-primary p-0"
+            className="flex h-9 w-9 items-center justify-center rounded-md bg-primary p-0"
           >
-            <ChevronRight size={20} className="text-primary-foreground" />
+            <ChevronRight size={18} className="text-primary-foreground" />
           </Button>
         </View>
       </View>

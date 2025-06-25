@@ -41,6 +41,7 @@
     "@rn-primitives/tabs": "1.2.0",
     "@rn-primitives/types": "1.2.0",
     "@rn-primitives/utils": "1.2.0",
+    "@shopify/react-native-skia": "^2.0.5",
     "@solana/web3.js": "1.98.2",
     "@tanstack/react-query": "5.80.6",
     "class-variance-authority": "0.7.1",

@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { ScrollView, View, Image } from 'react-native';
+import { ScrollView, View } from 'react-native';
+import Animated from 'react-native-reanimated';
 import { openAuthSessionAsync } from 'expo-web-browser';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { OAuthMethod } from '@getpara/react-native-wallet';
@@ -11,13 +12,17 @@ import {
   MAX_PROVIDERS_PER_ROW,
   PROVIDER_INFO,
 } from '@/constants/socialProviders';
-import { LoginIdentifierInput } from '@/components/auth/LoginIdentifierInput';
-import { SocialLoginOptions } from '@/components/auth/SocialLoginOptions';
-import { Separator } from '@/components/ui/separator';
 import { Text } from '@/components/ui/text';
 import { usePara } from '@/hooks/usePara';
 import { useLoginIdentifier } from '@/hooks/useLoginIdentifier';
 import { getCreds } from '@/utils';
+import { useAuthAnimations } from '@/hooks/useAuthAnimations';
+import { AnimatedLogo } from '@/components/auth/animated/AnimatedLogo';
+import { AnimatedText } from '@/components/auth/animated/AnimatedText';
+import { AnimatedLoginInput } from '@/components/auth/animated/AnimatedLoginInput';
+import { AnimatedSeparator } from '@/components/auth/animated/AnimatedSeparator';
+import { AnimatedSocialLoginOptions } from '@/components/auth/animated/AnimatedSocialLoginOptions';
+import { AnimatedGradientBackground } from '@/components/auth/animated/AnimatedGradientBackground';
 
 export default function MainAuthScreen() {
   const {
@@ -144,11 +149,28 @@ export default function MainAuthScreen() {
     };
   }, [resetLogin]);
 
+  const {
+    logoAnimatedStyle,
+    headingAnimatedStyle,
+    subtitleAnimatedStyle,
+    inputAnimatedStyle,
+    separatorAnimatedStyle,
+    socialButtonsAnimatedStyle,
+    footerAnimatedStyle,
+    triggerErrorShake,
+  } = useAuthAnimations();
+
   useEffect(() => {
     if (error && inputType) {
       setError('');
     }
   }, [inputType]);
+
+  useEffect(() => {
+    if (error) {
+      triggerErrorShake();
+    }
+  }, [error, triggerErrorShake]);
 
   const showHelperText =
     displayValue.trim() !== '' &&
@@ -198,28 +220,37 @@ export default function MainAuthScreen() {
   if (!paraClient) return null;
 
   return (
-    <View className="flex-1 bg-background px-6">
-      <ScrollView
-        keyboardShouldPersistTaps="handled"
-        contentContainerStyle={{ flexGrow: 1 }}
-      >
-        <View className="pt-6 pb-8">
-          <Image
-            source={require('@/assets/para-horizontal.png')}
-            className="h-9 w-auto mb-10 self-center"
+    <View className="flex-1 bg-background">
+      <AnimatedGradientBackground />
+      <View className="flex-1 px-6">
+        <ScrollView
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={{ flexGrow: 1 }}
+        >
+          <View className="pt-7 pb-9">
+          <AnimatedLogo
+            source={require('@/assets/para-horizontal-white.png')}
+            className="h-10 w-[130px] mb-10"
             resizeMode="contain"
+            animatedStyle={logoAnimatedStyle}
           />
-          <Text className="text-5xl text-left text-foreground font-figtree-bold">
+          <AnimatedText
+            className="text-5xl text-left text-foreground font-figtree-bold"
+            animatedStyle={headingAnimatedStyle}
+          >
             Sign In
-          </Text>
-          <Text className="mt-2 text-left text-lg text-muted-foreground">
+          </AnimatedText>
+          <AnimatedText
+            className="mt-2 text-left text-lg text-muted-foreground"
+            animatedStyle={subtitleAnimatedStyle}
+          >
             Welcome to the Para Wallet Demo. Sign in to explore seamless
             authentication and wallet integration.
-          </Text>
+          </AnimatedText>
         </View>
 
-        <View className="flex-1 pb-8 gap-y-6">
-          <LoginIdentifierInput
+        <View className="flex-1 pb-8 gap-y-8">
+          <AnimatedLoginInput
             displayValue={displayValue}
             inputType={inputType}
             countryCode={countryCode}
@@ -231,17 +262,16 @@ export default function MainAuthScreen() {
             onCountryCodeChange={setCountryCode}
             countryOptions={COUNTRY_OPTIONS}
             isLoading={isLoggingIn}
+            animatedStyle={inputAnimatedStyle}
           />
 
-          <View className="flex-row items-center gap-x-2 py-2">
-            <Separator className="flex-1" />
-            <Text className="text-center text-muted-foreground">
-              or continue with
-            </Text>
-            <Separator className="flex-1" />
-          </View>
+          <AnimatedSeparator
+            text="or continue with"
+            separatorAnimatedStyle={separatorAnimatedStyle}
+            textAnimatedStyle={subtitleAnimatedStyle}
+          />
 
-          <SocialLoginOptions
+          <AnimatedSocialLoginOptions
             onSelect={handleOauthLogin}
             disabled={isLoggingIn}
             initialProviders={INITIAL_PROVIDERS}
@@ -249,16 +279,18 @@ export default function MainAuthScreen() {
             providerInfo={PROVIDER_INFO}
             maxProvidersPerRow={MAX_PROVIDERS_PER_ROW}
             excludeProviders={[OAuthMethod.FARCASTER]}
+            containerAnimatedStyle={socialButtonsAnimatedStyle}
           />
         </View>
 
-        <View className="pb-4">
+        <Animated.View style={footerAnimatedStyle} className="pb-4">
           <Text className="text-sm text-center text-muted-foreground">
             This is a demo application showcasing the Para React Native Wallet
             SDK usage.
           </Text>
-        </View>
+        </Animated.View>
       </ScrollView>
     </View>
+  </View>
   );
 }

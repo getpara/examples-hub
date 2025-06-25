@@ -50,11 +50,11 @@ export function SocialLoginOptions({
         accessibilityLabel={`Sign in with ${info.name}`}
         onPress={() => onSelect(provider)}
         disabled={disabled}
-        className="flex-1 h-12 items-center justify-center rounded-xl
-                   border border-border/60 bg-white
+        className="flex-1 h-14 items-center justify-center rounded-xl
+                   border border-border bg-card
                    active:opacity-80"
       >
-        <Image source={info.logo} resizeMode="contain" className="h-6 w-6" />
+        <Image source={info.logo} resizeMode="contain" className="h-7 w-7" />
       </Pressable>
     );
   };
@@ -64,14 +64,14 @@ export function SocialLoginOptions({
       accessibilityRole="button"
       accessibilityLabel={expanded ? 'Show fewer options' : 'Show more options'}
       onPress={() => setExpanded((v) => !v)}
-      className="flex-1 h-12 items-center justify-center rounded-xl
-                 border border-border/60 bg-white
+      className="flex-1 h-14 items-center justify-center rounded-xl
+                 border border-border bg-card
                  active:opacity-80"
     >
       {expanded ? (
-        <X size={20} className="text-muted-foreground" />
+        <X size={24} className="text-muted-foreground" />
       ) : (
-        <Grip size={20} className="text-muted-foreground" />
+        <Grip size={24} className="text-muted-foreground" />
       )}
     </Pressable>
   );

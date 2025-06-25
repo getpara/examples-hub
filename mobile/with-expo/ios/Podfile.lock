@@ -75,7 +75,7 @@ PODS:
     - hermes-engine/Pre-built (= 0.79.4)
   - hermes-engine/Pre-built (0.79.4)
   - OpenSSL-Universal (3.3.2000)
-  - para-react-native-wallet (2.0.0-alpha.23):
+  - para-react-native-wallet (2.0.0-alpha.25):
     - RCT-Folly
     - RCTRequired
     - RCTTypeSafety
@@ -2106,7 +2106,7 @@ SPEC CHECKSUMS:
   glog: 5683914934d5b6e4240e497e0f4a3b42d1854183
   hermes-engine: 8b5a5eb386b990287d072fd7b6f6ebd9544dd251
   OpenSSL-Universal: b60a3702c9fea8b3145549d421fdb018e53ab7b4
-  para-react-native-wallet: 96df643c095c99dee42454c9f1badba20ba49bad
+  para-react-native-wallet: e8bc6750e872507bd122f5ead9ce44314d628252
   RCT-Folly: 36fe2295e44b10d831836cc0d1daec5f8abcf809
   RCTDeprecation: 0418ac97b9f53b2e37f473da1663ef3061e46beb
   RCTRequired: b9fde7f981b11aa898f03a70d3d4d36b80f1b16d
