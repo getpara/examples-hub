@@ -7,7 +7,8 @@
     "compile": "hardhat compile",
     "dev": "next dev",
     "lint": "next lint",
-    "start": "next start"
+    "start": "next start",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@getpara/ethers-v5-integration": "1.16.0",

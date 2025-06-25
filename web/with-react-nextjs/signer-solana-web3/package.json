@@ -10,7 +10,8 @@
     "anchor:build": "anchor build",
     "anchor:deploy": "anchor deploy --program-name transfer_tokens --program-keypair target/deploy/transfer_tokens-keypair.json",
     "anchor:build-deploy": "npm run anchor:build && npm run anchor:deploy",
-    "anchor:verify": "anchor verify"
+    "anchor:verify": "anchor verify",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@getpara/react-sdk": "1.16.0",

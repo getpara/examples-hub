@@ -7,7 +7,8 @@
     "dev": "next dev",
     "postinstall": "yarn graz --generate",
     "lint": "next lint",
-    "start": "next start"
+    "start": "next start",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@cosmjs/cosmwasm-stargate": "0.33.0",
