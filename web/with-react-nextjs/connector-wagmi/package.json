@@ -3,30 +3,32 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "next build",
     "dev": "next dev",
-    "lint": "next lint",
+    "build": "next build",
     "start": "next start",
-    "typecheck": "tsc --noEmit"
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "postinstall": "yarn setup-para"
   },
   "dependencies": {
-    "@getpara/react-sdk": "1.16.0",
-    "@getpara/wagmi-v2-integration": "1.16.0",
-    "@tanstack/react-query": "^5.64.2",
+    "@getpara/react-sdk": "2.0.0-alpha.26",
+    "@getpara/wagmi-v2-integration": "2.0.0-alpha.26",
+    "@tanstack/react-query": "5.81.2",
     "next": "15.1.5",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "wagmi": "2.14.16"
+    "wagmi": "2.15.6",
+    "viem": "2.31.4"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.10",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9.29.0",
     "eslint-config-next": "^15.3.4",
-    "pino-pretty": "13.0.0",
     "postcss": "^8",
-    "tailwindcss": "^3.4.1",
+    "tailwindcss": "^4.1.10",
     "typescript": "^5"
   }
 }

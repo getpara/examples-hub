@@ -1,5 +1,8 @@
-import "./globals.css";
-import { Providers } from "@/app/Providers";
+import "@/styles/globals.css";
+import "@getpara/react-sdk/styles.css";
+import { QueryProvider } from "@/context";
+import { WagmiProvider } from "@/context/WagmiProvider";
+import { AppWrapper } from "@/components/layout/AppWrapper";
 
 export default function RootLayout({
   children,
@@ -9,7 +12,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <Providers>{children}</Providers>
+        <WagmiProvider>
+          <QueryProvider>
+            <AppWrapper>{children}</AppWrapper>
+          </QueryProvider>
+        </WagmiProvider>
       </body>
     </html>
   );

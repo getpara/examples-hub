@@ -4,7 +4,6 @@ import { useAccount, useModal, useWallet } from "@getpara/react-sdk";
 import { BalanceCard, StatusAlert, TransactionHash, ConnectWalletCard, TransferForm } from "@/components/ui";
 import { useBalance, useServerTransaction } from "@/hooks";
 import { isValidEthereumAddress, isValidAmount } from "@/utils";
-import "@getpara/react-sdk/styles.css";
 
 export default function Home() {
   const [to, setTo] = useState("");
@@ -20,14 +19,7 @@ export default function Home() {
 
   // Use custom hooks
   const { data: balance, isLoading: isBalanceLoading, refetch: refetchBalance } = useBalance(address);
-  const { 
-    sendTransactionAsync, 
-    isLoading, 
-    isError,
-    isSuccess,
-    error,
-    data: transactionData
-  } = useServerTransaction();
+  const { sendTransactionAsync, isLoading, isError, isSuccess, error, data: transactionData } = useServerTransaction();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,7 +47,7 @@ export default function Home() {
         amount,
         walletId,
       });
-      
+
       // Reset form on success
       setTo("");
       setAmount("");
@@ -68,11 +60,11 @@ export default function Home() {
   // Derive status from React Query state
   const status = {
     show: isLoading || isError || isSuccess,
-    type: isLoading ? "info" as const : isError ? "error" as const : "success" as const,
-    message: isLoading 
-      ? "Submitting transaction to server for signing..." 
-      : isError 
-      ? (error?.message || "Failed to send transaction. Please try again.")
+    type: isLoading ? ("info" as const) : isError ? ("error" as const) : ("success" as const),
+    message: isLoading
+      ? "Submitting transaction to server for signing..."
+      : isError
+      ? error?.message || "Failed to send transaction. Please try again."
       : "Transaction submitted and confirmed successfully!",
   };
 

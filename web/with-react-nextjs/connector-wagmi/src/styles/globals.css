@@ -1,6 +1,4 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
 
 :root {
   --background: #ffffff;
@@ -17,9 +15,5 @@
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: "Inter", Arial, Helvetica, sans-serif;
-}
-
-#para-modal > cpsl-auth-modal {
-  z-index: 9999999999;
+  font-family: Arial, Helvetica, sans-serif;
 }
