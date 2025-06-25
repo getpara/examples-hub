@@ -113,7 +113,7 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess, onShowSecurityC
     // Get OAuth URL with app redirect scheme
     const oauthUrl = await para.getOAuthUrl({
       method: provider,
-      deeplinkUrl: APP_SCHEME, // Redirects to: {APP_SCHEME}://para?method=login
+      appScheme: APP_SCHEME, // Redirects to: {APP_SCHEME}://para?method=login
     });
 
     // Open in-app browser for OAuth
