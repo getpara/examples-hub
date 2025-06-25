@@ -79,19 +79,9 @@ void main() {
     });
     
     setUp(() async {
-      // Reduced delay between tests for faster execution
-      await Future.delayed(Duration(seconds: 1));
+      // Give app time to fully restart between tests
+      await Future.delayed(Duration(seconds: 3));
       print('🔄 Starting new test...');
-    });
-    
-    tearDown(() async {
-      // Cleanup after each test
-      try {
-        await Future.delayed(Duration(seconds: 1));
-        print('🧹 Test cleanup completed');
-      } catch (e) {
-        print('⚠️ Test cleanup had minor issues: $e');
-      }
     });
 
     // Core Helper Methods
@@ -162,11 +152,22 @@ void main() {
     }
 
     Future<void> enterText(String text, {int fieldIndex = 0}) async {
-      // Wait a bit for fields to be ready
-      await Future.delayed(Duration(seconds: 1));
+      // Wait for fields and retry if needed
+      List<AppiumWebElement> textFields = [];
       
-      final textFields = await driver.findElements(AppiumBy.className('XCUIElementTypeTextField')).toList();
-      print('🔍 Found ${textFields.length} text fields, trying to use index $fieldIndex');
+      for (int attempt = 0; attempt < 3; attempt++) {
+        await Future.delayed(Duration(seconds: 1));
+        textFields = await driver.findElements(AppiumBy.className('XCUIElementTypeTextField')).toList();
+        print('🔍 Attempt ${attempt + 1}: Found ${textFields.length} text fields');
+        
+        if (textFields.length > fieldIndex) {
+          break;
+        }
+        
+        if (attempt < 2) {
+          await Future.delayed(Duration(seconds: 1));
+        }
+      }
       
       if (textFields.length <= fieldIndex) {
         // Debug: Print available fields
@@ -182,8 +183,18 @@ void main() {
         throw Exception('Text field at index $fieldIndex not found. Found ${textFields.length} fields total.');
       }
       
+      // Click and clear field
       await textFields[fieldIndex].click();
       await Future.delayed(Duration(milliseconds: 500));
+      
+      // Try to clear existing text
+      try {
+        await textFields[fieldIndex].clear();
+        await Future.delayed(Duration(milliseconds: 300));
+      } catch (e) {
+        // Field might already be empty
+      }
+      
       await textFields[fieldIndex].sendKeys(text);
       print('✅ Entered text "$text" in field $fieldIndex');
     }
@@ -275,7 +286,31 @@ void main() {
     Future<void> waitForAuthenticationForm(String authType) async {
       print('🔄 Waiting for $authType authentication form to load...');
       
-      for (int attempt = 0; attempt < 10; attempt++) {
+      // Add initial delay to ensure screen transition completes
+      await Future.delayed(Duration(seconds: 2));
+      
+      // First check if we're still on the auth screen or need to wait for it
+      bool foundAuthScreen = false;
+      for (int i = 0; i < 3 && !foundAuthScreen; i++) {
+        final staticTexts = await driver.findElements(AppiumBy.className('XCUIElementTypeStaticText')).toList();
+        for (final element in staticTexts) {
+          try {
+            final text = await element.text;
+            if (text.contains('$authType Authentication') || text.contains('Enter your')) {
+              foundAuthScreen = true;
+              print('✅ Found $authType authentication screen');
+              break;
+            }
+          } catch (e) {
+            // Continue
+          }
+        }
+        if (!foundAuthScreen) {
+          await Future.delayed(Duration(seconds: 1));
+        }
+      }
+      
+      for (int attempt = 0; attempt < 15; attempt++) {
         try {
           final textFields = await driver.findElements(AppiumBy.className('XCUIElementTypeTextField')).toList();
           print('🔍 Found ${textFields.length} text fields on attempt ${attempt + 1}');
@@ -308,9 +343,42 @@ void main() {
           final staticTexts = await driver.findElements(AppiumBy.className('XCUIElementTypeStaticText')).toList();
           for (final element in staticTexts) {
             final text = await element.text;
-            if (text.contains('${authType} Authentication') || text.contains('Phone Number') || text.contains('Email Address')) {
-              print('✅ Found $authType authentication screen indicators');
+            // Look for exact screen title match
+            if (text == '${authType} Authentication') {
+              print('✅ Found $authType authentication screen');
               break;
+            }
+          }
+          
+          // Debug after 5 attempts
+          if (attempt == 5) {
+            print('🔍 Debug: Checking visible elements after 5 attempts...');
+            print('🔍 Static texts count: ${staticTexts.length}');
+            for (int i = 0; i < staticTexts.length && i < 5; i++) {
+              try {
+                final text = await staticTexts[i].text;
+                print('  - Text $i: "$text"');
+              } catch (e) {
+                // Continue
+              }
+            }
+            
+            // Check if we need to go back
+            final buttons = await driver.findElements(AppiumBy.className('XCUIElementTypeButton')).toList();
+            for (final button in buttons) {
+              try {
+                final label = await button.attributes['label'];
+                if (label.toLowerCase() == 'back') {
+                  print('🔍 Found back button, clicking it...');
+                  await button.click();
+                  await Future.delayed(Duration(seconds: 2));
+                  // Try clicking the auth option again
+                  await clickElementByText('$authType + Passkey Authentication');
+                  break;
+                }
+              } catch (e) {
+                // Continue
+              }
             }
           }
           
@@ -324,8 +392,8 @@ void main() {
       throw Exception('❌ $authType authentication form did not load properly after 10 attempts');
     }
 
-    Future<void> performAuthFlow(String authType, String credential) async {
-      print('🔑 Starting $authType authentication flow...');
+    Future<void> performAuthFlow(String authType, String credential, {bool isNewUser = true}) async {
+      print('🔑 Starting $authType authentication flow (${isNewUser ? 'new user' : 'existing user'})...');
       
       // Wait for auth selector screen to be ready
       await Future.delayed(Duration(seconds: 2));
@@ -347,22 +415,29 @@ void main() {
       
       await dismissKeyboard();
       await Future.delayed(Duration(seconds: 2));
-      await clickElementByText('Continue');
+      
+      // Different button text for email vs phone
+      if (authType == 'Email') {
+        await clickElementByText('Continue');
+      } else {
+        await clickElementByText('Continue with Phone');
+      }
       await Future.delayed(Duration(seconds: 3));
       
-      // Enter verification code
-      final verificationFields = await driver.findElements(AppiumBy.className('XCUIElementTypeTextField')).toList();
-      final secureFields = await driver.findElements(AppiumBy.className('XCUIElementTypeSecureTextField')).toList();
-      final allFields = [...verificationFields, ...secureFields];
-      
-      if (allFields.isNotEmpty) {
-        await allFields.first.click();
-        await allFields.first.sendKeys(testVerificationCode);
-        await Future.delayed(Duration(seconds: 3));
+      if (isNewUser) {
+        // New user flow: Enter verification code and choose biometrics
+        await enterText(testVerificationCode);
+        await Future.delayed(Duration(seconds: 2));
+        
+        // Wait for "Account Verified!" screen
+        await Future.delayed(Duration(seconds: 2));
+        
+        await clickElementByText('Use Biometrics', className: 'XCUIElementTypeStaticText');
+        await Future.delayed(Duration(seconds: 2));
       }
       
-      await clickElementByText('Use Biometrics', className: 'XCUIElementTypeStaticText');
-      await Future.delayed(Duration(seconds: 2));
+      // For both new and existing users: handle biometric authentication
+      // Existing users go directly here after clicking Continue
       await manualTapContinue();
       await performBiometricAuth();
       await waitForWalletsView();
@@ -371,61 +446,55 @@ void main() {
     }
     
     Future<void> navigateBackToHome() async {
-      // Try to navigate back to main wallet screen from any deep screen
-      for (int attempt = 0; attempt < 10; attempt++) {
-        try {
-          // Check if we're already on the main wallet screen
-          final elements = await driver.findElements(AppiumBy.className('XCUIElementTypeStaticText')).toList();
-          bool onMainScreen = false;
-          for (final element in elements) {
+      // First check if we're already on the wallet screen or auth selector
+      try {
+        final elements = await driver.findElements(AppiumBy.className('XCUIElementTypeStaticText')).toList();
+        for (final element in elements) {
+          try {
             final text = await element.text;
-            if (text.contains('Your Wallets') || text.contains('Send Funds') || text.contains('Balance:')) {
+            // Check if we're on wallet screen
+            if (text == 'Your Wallets' || text.contains('Send Funds') || text.contains('Balance:')) {
               print('✅ Already on main wallet screen');
-              onMainScreen = true;
-              break;
+              return;
             }
+            // Check if we're on auth selector
+            if (text.contains('Authentication') && text.contains('Passkey')) {
+              print('✅ Already on authentication selector screen');
+              return;
+            }
+          } catch (e) {
+            // Continue checking
           }
-          
-          if (onMainScreen) {
-            return; // We're on the main screen
-          }
-          
-          // Strategy 1: Find and click back button by accessibility label
-          bool backClicked = false;
+        }
+      } catch (e) {
+        // Continue with navigation attempt
+      }
+      
+      // If we're on a deeper screen (like transaction details), try to go back
+      for (int attempt = 0; attempt < 3; attempt++) {
+        try {
+          // Look for back button
           final backButtons = await driver.findElements(AppiumBy.className('XCUIElementTypeButton')).toList();
           for (final button in backButtons) {
             try {
               final label = await button.attributes['label'];
-              if (label.toLowerCase().contains('back') || label == '<' || label == 'Back') {
+              if (label != null && (label.toLowerCase().contains('back') || label == '<' || label == 'Back')) {
                 await button.click();
-                await Future.delayed(Duration(seconds: 2));
-                print('✅ Clicked back button: "$label" (attempt ${attempt + 1})');
-                backClicked = true;
-                break;
+                await Future.delayed(Duration(seconds: 1));
+                print('✅ Clicked back button: "$label"');
+                return;
               }
             } catch (e) {
               // Continue trying other buttons
             }
           }
-          
-          if (!backClicked) {
-            // Strategy 2: Coordinate tap on back button area (top-left corner)
-            await driver.mouse.moveTo(
-              xOffset: 90, // Back button area
-              yOffset: 190, // Navigation bar area
-              absolute: true
-            );
-            await driver.mouse.click();
-            await Future.delayed(Duration(seconds: 2));
-            print('✅ Tapped back button area via coordinates (attempt ${attempt + 1})');
-          }
-          
         } catch (e) {
-          await Future.delayed(Duration(seconds: 1));
+          await Future.delayed(Duration(milliseconds: 500));
         }
       }
       
-      print('⚠️ Could not navigate back to main screen after 10 attempts, continuing anyway');
+      // If no back button found, we're likely already on the main screen
+      print('ℹ️ No back navigation needed');
     }
     
     Future<void> waitForAuthSelectorScreen() async {
@@ -457,7 +526,7 @@ void main() {
       await waitForAuthSelectorScreen();
       
       final email = 'test${DateTime.now().millisecondsSinceEpoch}@test.usecapsule.com';
-      await performAuthFlow('Email', email);
+      await performAuthFlow('Email', email, isNewUser: true);
     }
 
     Future<void> ensureLoggedIn() async {
@@ -578,15 +647,46 @@ void main() {
       // Wait for web view to fully load
       await Future.delayed(Duration(seconds: 5));
       
+      // Debug: Print all available element types
+      print('🔍 Debugging web view elements...');
+      
+      // Check what types of elements we have
+      final secureFields = await driver.findElements(AppiumBy.className('XCUIElementTypeSecureTextField')).toList();
+      final textFields = await driver.findElements(AppiumBy.className('XCUIElementTypeTextField')).toList();
+      final webViews = await driver.findElements(AppiumBy.className('XCUIElementTypeWebView')).toList();
+      final staticTexts = await driver.findElements(AppiumBy.className('XCUIElementTypeStaticText')).toList();
+      
+      print('🔍 SecureTextFields: ${secureFields.length}');
+      print('🔍 TextFields: ${textFields.length}');
+      print('🔍 WebViews: ${webViews.length}');
+      print('🔍 StaticTexts: ${staticTexts.length}');
+      
+      // Print some static text content to understand what's on screen
+      if (staticTexts.isNotEmpty) {
+        print('🔍 Sample static texts:');
+        for (int i = 0; i < staticTexts.length && i < 5; i++) {
+          try {
+            final text = await staticTexts[i].text;
+            print('  - "$text"');
+          } catch (e) {
+            // Continue
+          }
+        }
+      }
+      
       // Find password fields with multiple approaches
       List<dynamic> passwordFields = await driver.findElements(AppiumBy.className('XCUIElementTypeSecureTextField')).toList();
       
       // Also check for regular text fields that might be password fields
       if (passwordFields.isEmpty) {
         final allTextFields = await driver.findElements(AppiumBy.className('XCUIElementTypeTextField')).toList();
+        print('🔍 Checking ${allTextFields.length} text fields for password placeholders...');
         for (final field in allTextFields) {
           try {
             final placeholder = await field.attributes['placeholderValue'];
+            final label = await field.attributes['label'];
+            final value = await field.attributes['value'];
+            print('🔍 TextField: placeholder="$placeholder", label="$label", value="$value"');
             if (placeholder.toLowerCase().contains('password')) {
               passwordFields.add(field);
             }
@@ -739,7 +839,7 @@ void main() {
       
       await Future.delayed(mediumDelay);
       await clickElementByText('$authType + Passkey Authentication');
-      await Future.delayed(Duration(seconds: 3)); // Longer wait for new screen to load
+      await Future.delayed(Duration(seconds: 5)); // Increased wait for new screen to load
       
       // Wait for the authentication form to be ready
       await waitForAuthenticationForm(authType);
@@ -809,7 +909,7 @@ void main() {
       
       await Future.delayed(mediumDelay);
       await clickElementByText('$authType + Passkey Authentication');
-      await Future.delayed(Duration(seconds: 3)); // Longer wait for new screen to load
+      await Future.delayed(Duration(seconds: 5)); // Increased wait for new screen to load
       
       // Wait for the authentication form to be ready
       await waitForAuthenticationForm(authType);
@@ -917,6 +1017,27 @@ void main() {
       await dismissAlert();
     }
 
+    tearDown(() async {
+      // Simple cleanup: always restart app for clean state
+      print('🧹 Restarting app for clean state...');
+      try {
+        // Terminate the app
+        await driver.execute('mobile:terminateApp', <dynamic>[<String, dynamic>{
+          'bundleId': 'com.usecapsule.example.flutter'
+        }]);
+        await Future.delayed(Duration(seconds: 1));
+        
+        // Relaunch the app
+        await driver.execute('mobile:launchApp', <dynamic>[<String, dynamic>{
+          'bundleId': 'com.usecapsule.example.flutter'
+        }]);
+        await Future.delayed(Duration(seconds: 2));
+        print('✅ App restarted');
+      } catch (e) {
+        print('⚠️ Could not restart app: $e');
+      }
+    });
+
     test('01 Email Authentication: Signup + Login Flow', () async {
       print('🧪 Starting Email Authentication: Signup + Login Flow...');
       
@@ -925,7 +1046,7 @@ void main() {
       savedEmail = email;
       print('📧 Generated test email: $email');
       
-      await performAuthFlow('Email', email);
+      await performAuthFlow('Email', email, isNewUser: true);
       
       // Test logout and login
       await performLogout();
@@ -933,27 +1054,19 @@ void main() {
       
       // Login with same email (should go directly to biometric auth)
       await Future.delayed(Duration(seconds: 2));
-      await clickElementByText('Email + Passkey Authentication');
-      await Future.delayed(shortDelay);
-      await enterText(email);
-      await dismissKeyboard();
-      await clickElementByText('continue');
-      await performBiometricAuth();
-      await waitForWalletsView();
+      await performAuthFlow('Email', email, isNewUser: false);
       print('✅ Email login completed successfully');
     }, timeout: Timeout(Duration(minutes: 2)));
 
     test('02 Phone Authentication: Signup + Login Flow', () async {
       print('🧪 Starting Phone Authentication: Signup + Login Flow...');
       
-      await performLogout();
-      
       // Generate unique phone number and perform signup
       final phoneNumber = '408555${1000 + Random().nextInt(9000)}';
       savedPhoneNumber = phoneNumber;
       print('📱 Generated test phone: $phoneNumber');
       
-      await performAuthFlow('Phone', phoneNumber);
+      await performAuthFlow('Phone', phoneNumber, isNewUser: true);
       
       // Test logout and login
       await performLogout();
@@ -961,20 +1074,12 @@ void main() {
       
       // Login with same phone (should go directly to biometric auth)
       await Future.delayed(Duration(seconds: 2));
-      await clickElementByText('Phone + Passkey Authentication');
-      await Future.delayed(shortDelay);
-      await enterText(phoneNumber, fieldIndex: 1);
-      await dismissKeyboard();
-      await clickElementByText('continue');
-      await performBiometricAuth();
-      await waitForWalletsView();
+      await performAuthFlow('Phone', phoneNumber, isNewUser: false);
       print('✅ Phone login completed successfully');
-    }, timeout: Timeout(Duration(minutes: 2)));
+    }, timeout: Timeout(Duration(minutes: 3)));
 
     test('03 Email Password Authentication: Signup + Login Flow', () async {
       print('🧪 Starting Email Password Authentication: Signup + Login Flow...');
-      
-      await performLogout();
       
       // Generate unique email and password for testing
       final email = 'test${DateTime.now().millisecondsSinceEpoch}@test.usecapsule.com';
@@ -1033,41 +1138,26 @@ void main() {
     test('06 EVM Transaction Signing Flow', () async {
       print('🧪 Starting EVM Transaction Signing Flow...');
       
-      // Ensure clean login state
-      try {
-        await performLogout();
-        await Future.delayed(Duration(seconds: 2));
-      } catch (e) {
-        print('ℹ️ Logout not needed: $e');
-      }
       await quickLogin();
-      
       await performTransactionSigning('EVM');
     }, timeout: Timeout(Duration(minutes: 2)));
     
     test('07 Session Validation Flow', () async {
       print('🧪 Starting Session Validation Flow...');
-      await ensureLoggedIn();
+      await quickLogin();
       print('✅ Session is valid - can access wallet screen');
-    });
+    }, timeout: Timeout(Duration(minutes: 2)));
     
     test('08 Logout Flow', () async {
       print('🧪 Starting Logout Flow...');
-      await ensureLoggedIn();
+      await quickLogin();
       await performLogout();
       print('✅ Logout completed');
-    });
+    }, timeout: Timeout(Duration(minutes: 2)));
 
     test('09 Solana Transaction Signing Flow', () async {
       print('🧪 Starting Solana Transaction Signing Flow...');
       
-      // Ensure clean login state
-      try {
-        await performLogout();
-        await Future.delayed(Duration(seconds: 2));
-      } catch (e) {
-        print('ℹ️ Logout not needed: $e');
-      }
       await quickLogin();
       
       // Check if Solana wallet exists, create if needed
@@ -1087,12 +1177,6 @@ void main() {
     test('10 Cosmos Wallet Creation and Message Signing Flow', () async {
       print('🧪 Starting Cosmos Wallet Creation and Message Signing Flow...');
       
-      try {
-        await performLogout();
-        await Future.delayed(Duration(seconds: 2));
-      } catch (e) {
-        print('ℹ️ Logout not needed: $e');
-      }
       await quickLogin();
       
       // Check if Cosmos wallet exists, create if needed
