@@ -17,8 +17,7 @@ export default function Header() {
           {pathname !== "/" && (
             <Link
               href="/"
-              className="inline-flex items-center text-gray-600 hover:text-gray-900 px-4 py-2 rounded-none transition-colors"
-            >
+              className="inline-flex items-center text-gray-600 hover:text-gray-900 px-4 py-2 rounded-none transition-colors">
               ← Back to Selector
             </Link>
           )}
@@ -26,17 +25,15 @@ export default function Header() {
         <div>
           {account?.isConnected ? (
             <button
-              onClick={openModal}
-              className="px-4 py-2 bg-green-700 text-white rounded-none hover:bg-green-800 transition-colors"
-            >
+              onClick={() => openModal()}
+              className="px-4 py-2 bg-gray-700 text-white rounded-none hover:bg-gray-800 transition-colors text-sm font-medium cursor-pointer">
               Connected: {wallet?.address?.slice(0, 6)}...
               {wallet?.address?.slice(-4)}
             </button>
           ) : (
             <button
-              onClick={openModal}
-              className="px-4 py-2 bg-blue-900 text-white rounded-none hover:bg-blue-950 transition-colors"
-            >
+              onClick={() => openModal()}
+              className="px-4 py-2 bg-gray-900 text-white rounded-none hover:bg-gray-950 transition-colors text-sm font-medium cursor-pointer">
               Connect Wallet
             </button>
           )}

@@ -1,19 +1,15 @@
 "use client";
 
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ParaProvider } from "@getpara/react-sdk";
-import { API_KEY, ENVIRONMENT } from "@/constants";
+import { ParaProvider as ParaSDKProvider } from "@getpara/react-sdk";
+import { API_KEY, ENVIRONMENT } from "@/config";
 
-const queryClient = new QueryClient();
-
-export function Providers({
+export function ParaProvider({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <QueryClientProvider client={queryClient}>
-      <ParaProvider
+    <ParaSDKProvider
         paraClientConfig={{
           apiKey: API_KEY,
           env: ENVIRONMENT,
@@ -22,16 +18,16 @@ export function Providers({
         paraModalConfig={{
           disableEmailLogin: false,
           disablePhoneLogin: false,
-          authLayout: ["AUTH:FULL"],
+          authLayout: ["AUTH:FULL", "EXTERNAL:FULL"],
           oAuthMethods: ["APPLE", "DISCORD", "FACEBOOK", "FARCASTER", "GOOGLE", "TWITTER"],
           onRampTestMode: true,
           theme: {
-            foregroundColor: "#2D3648",
+            foregroundColor: "#222222",
             backgroundColor: "#FFFFFF",
-            accentColor: "#0066CC",
-            darkForegroundColor: "#E8EBF2",
-            darkBackgroundColor: "#1A1F2B",
-            darkAccentColor: "#4D9FFF",
+            accentColor: "#888888",
+            darkForegroundColor: "#EEEEEE",
+            darkBackgroundColor: "#111111",
+            darkAccentColor: "#AAAAAA",
             mode: "light",
             borderRadius: "none",
             font: "Inter",
@@ -41,7 +37,6 @@ export function Providers({
           twoFactorAuthEnabled: false,
         }}>
         {children}
-      </ParaProvider>
-    </QueryClientProvider>
+      </ParaSDKProvider>
   );
 }

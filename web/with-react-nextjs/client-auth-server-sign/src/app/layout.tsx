@@ -1,6 +1,6 @@
-import "./globals.css";
-import Header from "@/components/Header";
-import { Providers } from "./Providers";
+import "@/styles/globals.css";
+import { Header } from "@/components/layout";
+import { ParaProvider, QueryProvider } from "@/context";
 
 export default function RootLayout({
   children,
@@ -10,10 +10,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <Providers>
-          <Header />
-          <main>{children}</main>
-        </Providers>
+        <QueryProvider>
+          <ParaProvider>
+            <Header />
+            <main>{children}</main>
+          </ParaProvider>
+        </QueryProvider>
       </body>
     </html>
   );
