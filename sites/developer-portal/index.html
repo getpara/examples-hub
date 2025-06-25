@@ -1,20 +1,187 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <link href="/src/main.css" rel="stylesheet" />
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    
+    <!-- SEO robots meta tag -->
+    <meta name="robots" content="index, follow" />
+    
+    <!-- Primary Meta Tags -->
+    <title>Para Developer Portal | Customize and manage your Para integration</title>
+    <meta name="title" content="Para Developer Portal | Customize and manage your Para integration" />
+    <meta name="description" content="Integrate Para's wallet and authentication suite into your web3 application. Manage your integration, API keys, and billing here. Get started for free." />
+    <meta name="keywords" content="Para Developer Portal, universal embedded wallet, wallet as a service, crypto onboarding, MPC wallet, wallet infrastructure, passkey onboarding" />
+    <meta name="author" content="Para" />
+    <meta name="language" content="English" />
+    <meta name="revisit-after" content="7 days" />
+    
+    <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
+    <link rel="apple-touch-icon" href="/favicon.ico" />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://developer.getpara.com" />
+    <meta property="og:title" content="Para Developer Portal | Customize and manage your Para integration" />
+    <meta property="og:description" content="Integrate Para's wallet and authentication suite into your web3 application. Manage your integration, API keys, and billing here. Get started for free." />
+    <meta property="og:image" content="https://developer.getpara.com/favicon.ico" />
+    <meta property="og:image:alt" content="Para Developer Portal - Embedded Wallet Infrastructure" />
+    <meta property="og:site_name" content="Para Developer Portal" />
+    <meta property="og:locale" content="en_US" />
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://developer.getpara.com" />
+    <meta property="twitter:title" content="Para Developer Portal | Customize and manage your Para integration" />
+    <meta property="twitter:description" content="Integrate Para's wallet and authentication suite into your web3 application. Manage your integration, API keys, and billing here. Get started for free." />
+    <meta property="twitter:image" content="https://developer.getpara.com/favicon.ico" />
+    <meta property="twitter:image:alt" content="Para Developer Portal - Embedded Wallet Infrastructure" />
+    <meta property="twitter:creator" content="@getpara" />
+    <meta property="twitter:site" content="@getpara" />
+    
+    <!-- Additional SEO Meta Tags -->
+    <meta name="theme-color" content="#000000" />
+    <meta name="msapplication-TileColor" content="#000000" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Para Developer Portal" />
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://developer.getpara.com" />
+    
+    <!-- Preconnect to external domains for performance -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Para Developer Portal | Customize and manage your Para integration",
+      "description": "Integrate Para's wallet and authentication suite into your web3 application. Manage your integration, API keys, and billing here. Get started for free.",
+      "url": "https://developer.getpara.com",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Web",
+      "creator": {
+        "@type": "Organization",
+        "name": "Para",
+        "url": "https://getpara.com"
+      },
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "featureList": [
+        "Embedded wallet API key management",
+        "Multi-chain embedded wallet integration",
+        "Enterprise wallet infrastructure",
+        "Seamless user onboarding",
+        "Team collaboration and billing",
+        "Wallet-as-a-Service documentation"
+      ]
+    }
+    </script>
+    
+    <!-- Existing Styles -->
+    <link href="/src/main.css" rel="stylesheet" />
     <link
       href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
       rel="stylesheet"
     />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Developer Portal</title>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    
+    <!-- Environment-specific configuration -->
+    <script>
+      // Only add environment prefix for non-production builds
+      const isProduction = '%VITE_ENVIRONMENT%' === 'PROD';
+      const isRootPath = window.location.pathname === '/';
+      
+      // For production, only allow SEO on root path
+      if (isProduction && !isRootPath) {
+        // Block non-root pages from indexing in production
+        const robotsMeta = document.querySelector('meta[name="robots"]');
+        if (robotsMeta) {
+          robotsMeta.content = 'noindex, nofollow';
+        }
+        
+        // Remove canonical URL for non-root pages
+        const canonicalLink = document.querySelector('link[rel="canonical"]');
+        if (canonicalLink) {
+          canonicalLink.remove();
+        }
+        
+        // Remove JSON-LD for non-root pages
+        const jsonLdScript = document.querySelector('script[type="application/ld+json"]');
+        if (jsonLdScript) {
+          jsonLdScript.remove();
+        }
+      } else if (!isProduction) {
+        // Update robots meta for non-production
+        const robotsMeta = document.querySelector('meta[name="robots"]');
+        if (robotsMeta) {
+          robotsMeta.content = 'noindex, nofollow';
+        }
+        
+        // Determine environment prefix
+        const environment = '%VITE_ENVIRONMENT%';
+        const envPrefix = environment === 'SANDBOX' ? '[SANDBOX] ' : 
+                         environment === 'BETA' ? '[BETA] ' : '[NON-PROD] ';
+        
+        // Add environment prefix to title
+        const title = document.querySelector('title');
+        if (title) {
+          title.textContent = envPrefix + title.textContent;
+        }
+        
+        // Update page title meta tag
+        const titleMeta = document.querySelector('meta[name="title"]');
+        if (titleMeta) {
+          titleMeta.content = envPrefix + titleMeta.content;
+        }
+        
+        // Update Open Graph title
+        const ogTitle = document.querySelector('meta[property="og:title"]');
+        if (ogTitle) {
+          ogTitle.content = envPrefix + ogTitle.content;
+        }
+        
+        // Update Twitter title
+        const twitterTitle = document.querySelector('meta[property="twitter:title"]');
+        if (twitterTitle) {
+          twitterTitle.content = envPrefix + twitterTitle.content;
+        }
+        
+        // Update site name
+        const ogSiteName = document.querySelector('meta[property="og:site_name"]');
+        if (ogSiteName) {
+          ogSiteName.content = envPrefix + ogSiteName.content;
+        }
+        
+        // Update app title
+        const appTitle = document.querySelector('meta[name="apple-mobile-web-app-title"]');
+        if (appTitle) {
+          appTitle.content = envPrefix + appTitle.content;
+        }
+        
+        // Remove canonical URL for non-production
+        const canonicalLink = document.querySelector('link[rel="canonical"]');
+        if (canonicalLink) {
+          canonicalLink.remove();
+        }
+        
+        // Remove JSON-LD for non-production
+        const jsonLdScript = document.querySelector('script[type="application/ld+json"]');
+        if (jsonLdScript) {
+          jsonLdScript.remove();
+        }
+      }
+    </script>
   </body>
 </html>

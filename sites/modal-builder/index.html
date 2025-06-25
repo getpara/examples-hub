@@ -2,12 +2,158 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Para | Modal Builder</title>
+    
+    <!-- SEO robots meta tag -->
+    <meta name="robots" content="index, follow" />
+    
+    <!-- Primary Meta Tags -->
+    <title>Para Modal Designer | Customize your Embedded Wallet and Onboarding UI</title>
+    <meta name="title" content="Para Modal Designer | Customize your Embedded Wallet and Onboarding UI" />
+    <meta name="description" content="Use the Para Modal Designer to build and preview custom wallet onboarding UX and theming. Export ready-to-use code in seconds." />
+    <meta name="keywords" content="Para Modal Designer, embedded wallet demo, MPC wallet, solana wallet demo, evm wallet demo, guest accounts, crypto onboarding" />
+    <meta name="author" content="Para" />
+    <meta name="language" content="English" />
+    <meta name="revisit-after" content="7 days" />
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
+    <link rel="apple-touch-icon" href="/favicon.ico" />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://demo.getpara.com" />
+    <meta property="og:title" content="Para Modal Designer | Customize your Embedded Wallet and Onboarding UI" />
+    <meta property="og:description" content="Use the Para Modal Designer to build and preview custom wallet onboarding UX and theming. Export ready-to-use code in seconds." />
+    <meta property="og:image" content="https://demo.getpara.com/favicon.ico" />
+    <meta property="og:image:alt" content="Para Modal Designer | Customize your Embedded Wallet and Onboarding UI" />
+    <meta property="og:site_name" content="Para Modal Designer" />
+    <meta property="og:locale" content="en_US" />
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://demo.getpara.com" />
+    <meta property="twitter:title" content="Para Modal Designer | Customize your Embedded Wallet and Onboarding UI" />
+    <meta property="twitter:description" content="Use the Para Modal Designer to build and preview custom wallet onboarding UX and theming. Export ready-to-use code in seconds." />
+    <meta property="twitter:image" content="https://demo.getpara.com/favicon.ico" />
+    <meta property="twitter:image:alt" content="Para Modal Designer | Customize your Embedded Wallet and Onboarding UI" />
+    <meta property="twitter:creator" content="@getpara" />
+    <meta property="twitter:site" content="@getpara" />
+    
+    <!-- Additional SEO Meta Tags -->
+    <meta name="theme-color" content="#000000" />
+    <meta name="msapplication-TileColor" content="#000000" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Para Modal Designer" />
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://demo.getpara.com" />
+    
+    <!-- Preconnect to external domains for performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Para Modal Designer | Customize your Embedded Wallet and Onboarding UI",
+      "description": "Use the Para Modal Designer to build and preview custom wallet onboarding UX and theming. Export ready-to-use code in seconds.",
+      "url": "https://demo.getpara.com",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Web",
+      "creator": {
+        "@type": "Organization",
+        "name": "Para",
+        "url": "https://getpara.com"
+      },
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "featureList": [
+        "Live embedded wallet preview",
+        "Real-time configuration testing",
+        "Custom theming options",
+        "Multi-chain wallet integration demo",
+        "Authentication method testing",
+        "Mobile and desktop preview modes"
+      ]
+    }
+    </script>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    
+    <!-- Environment-specific configuration -->
+    <script>
+      // Check if this is a production deployment
+      const isProduction = '%VITE_CAPSULE_API_KEY%' === '533efae5f7427d73cf9c1cc7e32b627b';
+      
+      if (!isProduction) {
+        // Update robots meta for non-production
+        const robotsMeta = document.querySelector('meta[name="robots"]');
+        if (robotsMeta) {
+          robotsMeta.content = 'noindex, nofollow';
+        }
+        
+        // Determine environment prefix
+        const isSandbox = '%VITE_CAPSULE_API_KEY%' === 'dd4d7071735029ce97dce17969e82ad6';
+        const envPrefix = isSandbox ? '[SANDBOX] ' : '[NON-PROD] ';
+        
+        // Add environment prefix to title
+        const title = document.querySelector('title');
+        if (title) {
+          title.textContent = envPrefix + title.textContent;
+        }
+        
+        // Update page title meta tag
+        const titleMeta = document.querySelector('meta[name="title"]');
+        if (titleMeta) {
+          titleMeta.content = envPrefix + titleMeta.content;
+        }
+        
+        // Update Open Graph title
+        const ogTitle = document.querySelector('meta[property="og:title"]');
+        if (ogTitle) {
+          ogTitle.content = envPrefix + ogTitle.content;
+        }
+        
+        // Update Twitter title
+        const twitterTitle = document.querySelector('meta[property="twitter:title"]');
+        if (twitterTitle) {
+          twitterTitle.content = envPrefix + twitterTitle.content;
+        }
+        
+        // Update site name
+        const ogSiteName = document.querySelector('meta[property="og:site_name"]');
+        if (ogSiteName) {
+          ogSiteName.content = envPrefix + ogSiteName.content;
+        }
+        
+        // Update app title
+        const appTitle = document.querySelector('meta[name="apple-mobile-web-app-title"]');
+        if (appTitle) {
+          appTitle.content = envPrefix + appTitle.content;
+        }
+        
+        // Remove canonical URL for non-production
+        const canonicalLink = document.querySelector('link[rel="canonical"]');
+        if (canonicalLink) {
+          canonicalLink.remove();
+        }
+        
+        // Remove JSON-LD for non-production
+        const jsonLdScript = document.querySelector('script[type="application/ld+json"]');
+        if (jsonLdScript) {
+          jsonLdScript.remove();
+        }
+      }
+    </script>
   </body>
 </html>
