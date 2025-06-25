@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useAccount, useSendTransaction, useWaitForTransactionReceipt } from "wagmi";
-import { parseEther, isAddress } from "viem";
+import { parseEther } from "viem";
 import "@getpara/react-sdk/styles.css";
 import { BalanceCard } from "@/components/ui/BalanceCard";
 import { StatusAlert } from "@/components/ui/StatusAlert";
@@ -10,13 +10,13 @@ import { TransactionHash } from "@/components/ui/TransactionHash";
 import { ConnectWalletCard } from "@/components/ui/ConnectWalletCard";
 import { TransferForm } from "@/components/ui/TransferForm";
 import { useModal } from "@/context/ModalContext";
+import { isValidEthereumAddress, isValidAmount } from "@/utils/validation";
 
 export default function Home() {
   const [to, setTo] = useState("");
   const [amount, setAmount] = useState("");
   const { openModal } = useModal();
-  const { isConnected } = useAccount();
-  const { address } = useAccount();
+  const { isConnected, address } = useAccount();
   const {
     sendTransaction,
     data: hash,
@@ -40,14 +40,15 @@ export default function Home() {
         throw new Error("Please connect your wallet to send a transaction.");
       }
 
-      if (!isAddress(to)) {
+      if (!isValidEthereumAddress(to)) {
         throw new Error("Invalid recipient address format.");
       }
 
-      const parsedAmount = parseEther(amount);
-      if (parsedAmount <= 0n) {
+      if (!isValidAmount(amount)) {
         throw new Error("Please enter a valid amount greater than 0.");
       }
+
+      const parsedAmount = parseEther(amount);
 
       sendTransaction({
         to: to as `0x${string}`,

@@ -2,6 +2,7 @@
 
 import { useBalance } from "wagmi";
 import { formatEther } from "viem";
+import { formatBalance } from "@/utils/format";
 
 interface BalanceCardProps {
   address?: `0x${string}`;
@@ -38,7 +39,7 @@ export function BalanceCard({ address, onRefresh }: BalanceCardProps) {
       <div className="px-6 py-3">
         <p className="text-sm text-gray-500 bg-gray-100 p-2 rounded-md">Network: Sepolia</p>
         <p className="text-lg font-medium text-gray-900">
-          {isLoading ? "Loading..." : balance ? `${formatEther(balance.value)} ETH` : "Unable to fetch balance"}
+          {isLoading ? "Loading..." : balance ? `${formatBalance(formatEther(balance.value))} ETH` : "Unable to fetch balance"}
         </p>
       </div>
     </div>

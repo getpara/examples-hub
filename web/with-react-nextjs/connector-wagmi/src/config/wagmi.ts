@@ -4,7 +4,7 @@ import { paraConnector } from "@getpara/wagmi-v2-integration";
 import { para } from "@/lib/para/client";
 import { WALLET_CONNECT_PROJECT_ID, SEPOLIA_RPC_URL } from "@/config/constants";
 import { queryClient } from "@/context/QueryProvider";
-import { createConfig, CreateConfigParameters, http } from "wagmi";
+import { createConfig, CreateConfigParameters, http, cookieStorage, createStorage } from "wagmi";
 import { coinbaseWallet, injected, metaMask, walletConnect } from "wagmi/connectors";
 import { sepolia } from "wagmi/chains";
 
@@ -46,6 +46,10 @@ const config = {
     metaMask(),
     coinbaseWallet(),
   ],
+  ssr: true,
+  storage: createStorage({
+    storage: cookieStorage,
+  }),
   transports: {
     [sepolia.id]: http(SEPOLIA_RPC_URL),
   },
