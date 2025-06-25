@@ -1,123 +1,103 @@
-import React, { useEffect } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { Dimensions, StyleSheet } from 'react-native';
-import {
-  Canvas,
-  Rect,
-  Fill,
-  Paint,
-  FractalNoise,
-  LinearGradient,
-  vec,
-  ColorMatrix,
-  BlendMode,
-} from '@shopify/react-native-skia';
+import { Canvas, Fill, Skia, Shader } from '@shopify/react-native-skia';
 import {
   useSharedValue,
   useDerivedValue,
   withRepeat,
   withTiming,
   Easing,
-  interpolate,
 } from 'react-native-reanimated';
 
 const { width, height } = Dimensions.get('window');
 
+// Custom gradient noise shader
+const whiteNoiseShader = `
+uniform vec2 u_resolution;
+uniform float u_time;
+
+float random(vec2 co) {
+  return fract(sin(dot(co.xy, vec2(12.9898, 78.233))) * 43758.5453);
+}
+
+vec4 main(vec2 fragCoord) {
+  vec2 uv = fragCoord / u_resolution;
+  
+  // Scale UV for larger, sparser grain
+  vec2 scaledUV = uv * 60.0;
+  
+  // Generate noise
+  float noise = random(scaledUV);
+  
+  // Animate center in elliptical pattern
+  float ellipseX = 0.45 + sin(u_time) * 0.3; // Slow horizontal movement
+  float ellipseY = 0.35 + cos(u_time) * 0.15;  // Slow vertical movement
+  vec2 center = vec2(ellipseX, ellipseY);
+  
+  float dist = distance(uv, center);
+  float gradient = 1.0 - smoothstep(0.0, 0.75, dist);
+  
+  // Apply gradient to noise intensity - subtle effect
+  float gradientNoise = mix(0.0, noise, gradient * 0.8);
+  
+  // Base color (dark) + orange-tinted noise
+  vec3 baseColor = vec3(0.043, 0.035, 0.051); // Your background color
+  vec3 primaryColor = vec3(1.0, 0.31, 0.0); // Orange primary color
+  
+  // Mix base color with orange based on noise gradient - subtle blend
+  vec3 color = mix(baseColor, baseColor + primaryColor * 0.6, gradientNoise);
+
+  return vec4(color, 1.0);
+}
+`;
+
 export const AnimatedGradientBackground: React.FC = () => {
-  // Animation values for wave movement
-  const waveProgress = useSharedValue(0);
-  const seedProgress = useSharedValue(0);
+  // Animation value for elliptical movement
+  const time = useSharedValue(0);
 
-  // Start animations on mount
+  // Start animation with continuous linear progression
   useEffect(() => {
-    // Animate wave parameters for organic movement
-    waveProgress.value = withRepeat(
-      withTiming(1, {
-        duration: 30000,
-        easing: Easing.inOut(Easing.ease),
-      }),
-      -1,
-      true
-    );
-
-    // Animate seed for subtle pattern changes
-    seedProgress.value = withRepeat(
-      withTiming(100, {
-        duration: 60000,
-        easing: Easing.linear,
-      }),
-      -1,
-      false
-    );
+    // Use a large value that will take a very long time to reach
+    // This avoids the jump when resetting from 2π to 0
+    time.value = withTiming(Math.PI * 2 * 1000, {
+      duration: 20000 * 1000, // 20 seconds per rotation, 1000 rotations
+      easing: Easing.linear,
+    });
   }, []);
 
-  // Animate frequency for breathing effect
-  const freqX = useDerivedValue(() => {
-    return interpolate(waveProgress.value, [0, 1], [0.003, 0.005]);
-  });
+  // Create runtime effect
+  const runtimeEffect = useMemo(() => {
+    try {
+      return Skia.RuntimeEffect.Make(whiteNoiseShader);
+    } catch (error) {
+      console.error('Failed to create shader:', error);
+      return null;
+    }
+  }, []);
 
-  const freqY = useDerivedValue(() => {
-    return interpolate(waveProgress.value, [0, 1], [0.002, 0.004]);
-  });
+  if (!runtimeEffect) {
+    // Fallback to solid color
+    return (
+      <Canvas style={StyleSheet.absoluteFillObject}>
+        <Fill color="#0b090d" />
+      </Canvas>
+    );
+  }
 
-  // Color matrix to map noise to our color palette
-  // This creates the depth effect: dark valleys to light peaks
-  const colorMatrix = [
-    // R' = noise * 0.15 (slight red for highlights)
-    0.15, 0, 0, 0, 0.04,
-    // G' = noise * 0.12 (less green)
-    0, 0.12, 0, 0, 0.035,
-    // B' = noise * 0.18 (more blue for depth)
-    0, 0, 0.18, 0, 0.05,
-    // A' = 1 (full opacity)
-    0, 0, 0, 1, 0,
-  ];
+  // Create uniforms with derived value
+  const uniforms = useDerivedValue(() => {
+    return {
+      u_resolution: [width, height],
+      u_time: time.value,
+    };
+  });
 
   return (
     <Canvas style={StyleSheet.absoluteFillObject}>
-      {/* Base background */}
-      <Fill color="#0b090d" />
-
-      {/* Main wave layer with fractal noise */}
-      <Paint opacity={0.8}>
-        <ColorMatrix matrix={colorMatrix} />
-        <FractalNoise
-          freqX={freqX}
-          freqY={freqY}
-          octaves={4}
-          seed={seedProgress}
-          tileWidth={0}
-          tileHeight={0}
-        />
-      </Paint>
-      <Rect x={0} y={0} width={width} height={height} />
-
-      {/* Secondary wave layer for more complexity */}
-      <Paint opacity={0.4}>
-        <ColorMatrix matrix={colorMatrix} />
-        <FractalNoise
-          freqX={0.008}
-          freqY={0.006}
-          octaves={2}
-          seed={seedProgress}
-          tileWidth={0}
-          tileHeight={0}
-        />
-      </Paint>
-      <Rect x={0} y={0} width={width} height={height} />
-
-      {/* Subtle gradient overlay for silk-like sheen */}
-      <Rect x={0} y={0} width={width} height={height} opacity={0.2}>
-        <LinearGradient
-          start={vec(0, 0)}
-          end={vec(width, height)}
-          colors={[
-            'rgba(255, 78, 0, 0.1)',  // Very subtle orange
-            'rgba(32, 28, 39, 0.3)',  // Purple-gray
-            'rgba(255, 78, 0, 0.05)', // Faint orange
-          ]}
-          positions={[0, 0.5, 1]}
-        />
-      </Rect>
+      {/* Gradient noise background */}
+      <Fill>
+        <Shader source={runtimeEffect} uniforms={uniforms} />
+      </Fill>
     </Canvas>
   );
 };
