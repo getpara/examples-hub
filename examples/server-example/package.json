@@ -1,19 +1,8 @@
 {
   "name": "capsule-server-example",
-  "version": "2.0.0-alpha.26",
   "description": "",
-  "main": "dist/index.js",
-  "private": true,
-  "types": "dist/index.d.ts",
-  "scripts": {
-    "build": "yarn tsc --outDir dist",
-    "start": "node dist/index.js",
-    "build-start": "yarn build && yarn start",
-    "dev": "concurrently \"yarn tsc --watch\" \"nodemon -q dist/index.js\""
-  },
-  "keywords": [],
+  "version": "2.0.0-alpha.26",
   "author": "",
-  "license": "ISC",
   "dependencies": {
     "@getpara/ethers-v6-integration": "2.0.0-alpha.26",
     "@getpara/server-sdk": "2.0.0-alpha.26",
@@ -35,12 +24,23 @@
     "@types/uuid": "^9.0.5",
     "concurrently": "^8.2.1",
     "nodemon": "^3.0.1",
-    "typescript": "^5.2.2"
+    "typescript": "^5.8.3"
   },
   "files": [
     "dist",
     "src",
     "package.json",
     "yarn.lock"
-  ]
+  ],
+  "keywords": [],
+  "license": "ISC",
+  "main": "dist/index.js",
+  "private": true,
+  "scripts": {
+    "build": "yarn tsc --outDir dist",
+    "build-start": "yarn build && yarn start",
+    "dev": "concurrently \"yarn tsc --watch\" \"nodemon -q dist/index.js\"",
+    "start": "node dist/index.js"
+  },
+  "types": "dist/index.d.ts"
 }

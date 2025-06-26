@@ -1,40 +1,38 @@
 {
   "name": "@getpara/web-sdk",
   "version": "2.0.0-alpha.26",
-  "type": "module",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "sideEffects": [
-    "wasm_exec.js"
-  ],
   "dependencies": {
     "@getpara/core-sdk": "2.0.0-alpha.26",
     "@getpara/user-management-client": "2.0.0-alpha.26",
     "@sentry/browser": "^9.1.0",
-    "base64url": "3.0.1",
+    "base64url": "^3.0.1",
     "buffer": "6.0.3",
-    "cbor-web": "8.1.0",
+    "cbor-web": "^9.0.2",
     "node-forge": "1.3.1",
     "ua-parser-js": "^2.0.2"
   },
-  "scripts": {
-    "build": "rm -rf dist && yarn typegen && node ./scripts/build.mjs && yarn post-build",
-    "typegen": "tsc --emitDeclarationOnly",
-    "old-build": "rm -rf dist && tsc && yarn post-build",
-    "post-build": "./scripts/post-build.sh",
-    "test": "vitest run --coverage"
-  },
   "devDependencies": {
     "@types/node-forge": "1.3.1",
-    "crypto-browserify": "3.12.0",
-    "stream-browserify": "3.0.0",
-    "typescript": "5.1.6",
-    "webpack": "5.76.3",
-    "webpack-cli": "5.0.1"
+    "crypto-browserify": "^3.12.0",
+    "stream-browserify": "^3.0.0",
+    "typescript": "^5.8.3"
   },
   "files": [
     "dist",
     "package.json"
   ],
-  "gitHead": "e6e791d4e4f9afd94f2093d6045d686b85e5a682"
+  "gitHead": "e6e791d4e4f9afd94f2093d6045d686b85e5a682",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "rm -rf dist && yarn typegen && node ./scripts/build.mjs && yarn post-build",
+    "old-build": "rm -rf dist && tsc && yarn post-build",
+    "post-build": "./scripts/post-build.sh",
+    "test": "vitest run --coverage",
+    "typegen": "tsc --emitDeclarationOnly"
+  },
+  "sideEffects": [
+    "wasm_exec.js"
+  ],
+  "type": "module",
+  "types": "dist/index.d.ts"
 }

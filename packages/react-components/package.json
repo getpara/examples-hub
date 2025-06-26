@@ -1,45 +1,45 @@
 {
   "name": "@getpara/react-components",
-  "version": "2.0.0-alpha.26",
   "description": "Capsule Core React Components",
-  "type": "module",
-  "main": "dist/index.js",
-  "types": "dist/types/index.d.ts",
-  "exports": {
-    ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/types/index.d.ts"
-    },
-    "./css/capsule-core.css": "./css/capsule-core.css"
-  },
-  "sideEffects": [
-    "*.css"
-  ],
-  "directories": {
-    "lib": "lib"
-  },
-  "files": [
-    "dist/",
-    "css/"
-  ],
-  "scripts": {
-    "old-build": "node scripts/preBuild.js && yarn copy && yarn tsc",
-    "build": "node scripts/preBuild.js && yarn copy && rm -rf dist && node ./scripts/build.mjs && yarn typegen",
-    "typegen": "tsc --emitDeclarationOnly",
-    "tsc": "tsc -p . --outDir ./dist",
-    "copy": "node scripts/copy.cjs"
-  },
+  "version": "2.0.0-alpha.26",
   "dependencies": {
     "@getpara/core-components": "2.0.0-alpha.26"
   },
   "devDependencies": {
     "@types/react": "^18.2.64",
-    "glob": "^11.0.0",
+    "glob": "^11.0.1",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "typescript": "^5.4.2"
+    "typescript": "^5.8.3"
   },
+  "directories": {
+    "lib": "lib"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./css/capsule-core.css": "./css/capsule-core.css"
+  },
+  "files": [
+    "dist/",
+    "css/"
+  ],
+  "main": "dist/index.js",
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "scripts": {
+    "build": "node scripts/preBuild.js && yarn copy && rm -rf dist && node ./scripts/build.mjs && yarn typegen",
+    "copy": "node scripts/copy.cjs",
+    "old-build": "node scripts/preBuild.js && yarn copy && yarn tsc",
+    "tsc": "tsc -p . --outDir ./dist",
+    "typegen": "tsc --emitDeclarationOnly"
+  },
+  "sideEffects": [
+    "*.css"
+  ],
+  "type": "module",
+  "types": "dist/types/index.d.ts"
 }

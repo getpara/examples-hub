@@ -1,23 +1,13 @@
 {
   "name": "capsule-external-wallet-example",
-  "private": true,
   "version": "2.0.0-alpha.26",
-  "type": "module",
-  "scripts": {
-    "dev": "vite --host",
-    "build": "rm -rf build && tsc && vite build",
-    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview",
-    "deploy-s3": "yarn && yarn build && aws s3 sync dist/ s3://$VITE_BUCKET_NAME --acl public-read --delete",
-    "deploy-sandbox": "VITE_ENVIRONMENT=SANDBOX VITE_BUCKET_NAME=capsule-rainbowkit-playground VITE_PARA_API_KEY=8ee2d015fbc6062a6e30bdc472f2946c yarn deploy-s3",
-    "postinstall": "yarn graz -g"
-  },
   "dependencies": {
-    "@cosmjs/cosmwasm-stargate": "<=0.31.3",
+    "@cosmjs/amino": "^0.31.3",
+    "@cosmjs/cosmwasm-stargate": "^0.31.3",
     "@cosmjs/launchpad": "*",
-    "@cosmjs/proto-signing": "<=0.31.3",
-    "@cosmjs/stargate": "<=0.33.1",
-    "@cosmjs/tendermint-rpc": "<=0.31.3",
+    "@cosmjs/proto-signing": "^0.31.3",
+    "@cosmjs/stargate": "^0.31.3",
+    "@cosmjs/tendermint-rpc": "^0.31.3",
     "@getpara/cosmos-wallet-connectors": "2.0.0-alpha.26",
     "@getpara/evm-wallet-connectors": "2.0.0-alpha.26",
     "@getpara/graz": "2.0.0-alpha.3",
@@ -25,10 +15,10 @@
     "@getpara/react-sdk": "2.0.0-alpha.26",
     "@getpara/solana-wallet-connectors": "2.0.0-alpha.26",
     "@noble/curves": "1.5.0",
-    "@solana-mobile/wallet-adapter-mobile": "2.2.0",
-    "@solana/wallet-adapter-base": "0.9.27",
-    "@solana/wallet-adapter-react": "0.15.39",
-    "@solana/wallet-adapter-walletconnect": "0.1.21",
+    "@solana-mobile/wallet-adapter-mobile": "^2.2.0",
+    "@solana/wallet-adapter-base": "^0.9.27",
+    "@solana/wallet-adapter-react": "^0.15.39",
+    "@solana/wallet-adapter-walletconnect": "^0.1.21",
     "@solana/web3.js": "^1.98.0",
     "@tanstack/react-query": "^5.74.0",
     "bs58": "6.0.0",
@@ -45,16 +35,27 @@
     "@typescript-eslint/eslint-plugin": "^7.15.0",
     "@typescript-eslint/parser": "^7.15.0",
     "@vitejs/plugin-react": "^4.3.1",
-    "eslint": "^8.57.0",
-    "eslint-plugin-react-hooks": "^4.6.2",
+    "eslint": "^9.21.0",
+    "eslint-plugin-react-hooks": "^5.0.0",
     "eslint-plugin-react-refresh": "^0.4.7",
     "eslint-plugin-storybook": "^0.8.0",
     "starknet": "6.11.0",
-    "typescript": "^5.2.2",
-    "vite": "^5.3.4",
+    "typescript": "^5.8.3",
+    "vite": "^5.3.5",
     "vite-plugin-node-polyfills": "^0.22.0"
   },
+  "private": true,
   "resolutions": {
     "styled-components": "^6"
-  }
+  },
+  "scripts": {
+    "build": "rm -rf build && tsc && vite build",
+    "deploy-s3": "yarn && yarn build && aws s3 sync dist/ s3://$VITE_BUCKET_NAME --acl public-read --delete",
+    "deploy-sandbox": "VITE_ENVIRONMENT=SANDBOX VITE_BUCKET_NAME=capsule-rainbowkit-playground VITE_PARA_API_KEY=8ee2d015fbc6062a6e30bdc472f2946c yarn deploy-s3",
+    "dev": "vite --host",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "postinstall": "yarn graz -g",
+    "preview": "vite preview"
+  },
+  "type": "module"
 }

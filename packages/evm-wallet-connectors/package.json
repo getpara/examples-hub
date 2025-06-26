@@ -1,43 +1,44 @@
 {
   "name": "@getpara/evm-wallet-connectors",
   "version": "2.0.0-alpha.26",
-  "type": "module",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "exports": {
-    ".": "./dist/index.js",
-    "./connectors": "./dist/wallets/connectors/index.js"
-  },
   "dependencies": {
     "@coinbase/wallet-sdk": "4.3.0",
     "@getpara/wagmi-v2-connector": "2.0.0-alpha.26",
     "@getpara/web-sdk": "2.0.0-alpha.26",
-    "viem": "^2.24.2",
-    "wagmi": "^2.14.16",
     "zustand": "^4.5.2",
     "zustand-sync-tabs": "^0.2.2"
   },
-  "scripts": {
-    "build": "rm -rf dist && yarn typegen && node ./scripts/build.mjs",
-    "typegen": "tsc --emitDeclarationOnly",
-    "test": "vitest run --coverage"
-  },
   "devDependencies": {
     "@getpara/react-common": "2.0.0-alpha.26",
-    "@tanstack/react-query": ">=5.0.0",
+    "@tanstack/react-query": "^5.74.0",
     "@types/react": "^18.0.31",
     "@types/react-dom": "^18.2.7",
-    "typescript": "^5.4.3",
-    "viem": "2.x",
-    "wagmi": "2.x"
+    "typescript": "^5.8.3",
+    "viem": "^2.24.2",
+    "wagmi": "^2.14.16"
   },
-  "peerDependencies": {
-    "react": ">=18",
-    "react-dom": ">=18"
+  "exports": {
+    ".": "./dist/index.js",
+    "./connectors": "./dist/wallets/connectors/index.js"
   },
   "files": [
     "dist",
     "package.json"
   ],
-  "gitHead": "10ecce9873131e6a1b114fb0642a94bb02040bef"
+  "gitHead": "10ecce9873131e6a1b114fb0642a94bb02040bef",
+  "main": "dist/index.js",
+  "peerDependencies": {
+    "@tanstack/react-query": ">=5.0.0",
+    "react": ">=18",
+    "react-dom": ">=18",
+    "viem": "2.x",
+    "wagmi": "^2.9.0"
+  },
+  "scripts": {
+    "build": "rm -rf dist && yarn typegen && node ./scripts/build.mjs",
+    "test": "vitest run --coverage",
+    "typegen": "tsc --emitDeclarationOnly"
+  },
+  "type": "module",
+  "types": "dist/index.d.ts"
 }

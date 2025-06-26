@@ -1,43 +1,43 @@
 {
   "name": "@getpara/react-common",
   "version": "2.0.0-alpha.26",
-  "type": "module",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "exports": {
-    ".": "./dist/index.js"
-  },
-  "sideEffects": [
-    "*.css"
-  ],
   "dependencies": {
     "@getpara/react-components": "2.0.0-alpha.26",
     "@getpara/web-sdk": "2.0.0-alpha.26",
     "@moonpay/moonpay-react": "^1.8.3",
     "@ramp-network/ramp-instant-sdk": "^4.0.5",
-    "libphonenumber-js": "^1.11.1",
+    "libphonenumber-js": "^1.11.7",
     "styled-components": "^6.1.8",
     "ua-parser-js": "^2.0.2"
-  },
-  "scripts": {
-    "build": "rm -rf dist && yarn typegen && node ./scripts/build.mjs",
-    "typegen": "tsc --emitDeclarationOnly"
   },
   "devDependencies": {
     "@types/react": "^18.0.31",
     "@types/react-dom": "^18.2.7",
-    "typescript": "^5.4.3"
+    "typescript": "^5.8.3"
   },
-  "peerDependencies": {
-    "react": "*",
-    "react-dom": "*"
+  "exports": {
+    ".": "./dist/index.js"
   },
   "files": [
     "dist",
     "package.json",
     "styles.css"
   ],
+  "main": "dist/index.js",
+  "peerDependencies": {
+    "react": "*",
+    "react-dom": "*"
+  },
   "resolutions": {
     "styled-components": "^6"
-  }
+  },
+  "scripts": {
+    "build": "rm -rf dist && yarn typegen && node ./scripts/build.mjs",
+    "typegen": "tsc --emitDeclarationOnly"
+  },
+  "sideEffects": [
+    "*.css"
+  ],
+  "type": "module",
+  "types": "dist/index.d.ts"
 }

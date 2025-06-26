@@ -1,29 +1,30 @@
 {
   "name": "@getpara/wagmi-v2-integration",
   "version": "2.0.0-alpha.26",
-  "type": "module",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "sideEffects": false,
   "dependencies": {
     "@getpara/react-sdk": "2.0.0-alpha.26",
     "@getpara/wagmi-v2-connector": "2.0.0-alpha.26"
   },
-  "scripts": {
-    "build": "rm -rf dist && yarn typegen && node ./scripts/build.mjs",
-    "typegen": "tsc --emitDeclarationOnly"
-  },
   "devDependencies": {
-    "typescript": "5.1.6"
-  },
-  "peerDependencies": {
-    "@tanstack/react-query": ">=5.0.0",
-    "react": "*",
-    "react-dom": "*"
+    "@tanstack/react-query": "^5.74.0",
+    "typescript": "^5.8.3"
   },
   "files": [
     "dist",
     "package.json"
   ],
-  "gitHead": "e6e791d4e4f9afd94f2093d6045d686b85e5a682"
+  "gitHead": "e6e791d4e4f9afd94f2093d6045d686b85e5a682",
+  "main": "dist/index.js",
+  "peerDependencies": {
+    "@tanstack/react-query": ">=5.0.0",
+    "react": "*",
+    "react-dom": "*"
+  },
+  "scripts": {
+    "build": "rm -rf dist && yarn typegen && node ./scripts/build.mjs",
+    "typegen": "tsc --emitDeclarationOnly"
+  },
+  "sideEffects": false,
+  "type": "module",
+  "types": "dist/index.d.ts"
 }

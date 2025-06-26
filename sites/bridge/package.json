@@ -1,21 +1,6 @@
 {
   "name": "capsule-js-bridge",
   "version": "1.12.0",
-  "main": "src/index.tsx",
-  "private": true,
-  "scripts": {
-    "build": "rm -rf build && tsc && vite build",
-    "build-for-deploy": "yarn --cwd ../.. lerna run build --scope=capsule-js-bridge --include-dependencies",
-    "build-sandbox": "VITE_ENV=sandbox yarn build-for-deploy",
-    "build-beta": "VITE_ENV=beta yarn build-for-deploy",
-    "build-prod": "VITE_ENV=prod yarn build-for-deploy",
-    "legacy-deploy-beta": "VITE_ENV=beta VITE_BUCKET_NAME=capsule-beta-js-bridge yarn legacy-deploy-s3",
-    "legacy-deploy-prod": "VITE_ENV=prod VITE_BUCKET_NAME=capsule-prod-js-bridge yarn legacy-deploy-s3",
-    "legacy-deploy-s3": "yarn && yarn build && aws s3 sync dist/ s3://$VITE_BUCKET_NAME --profile $VITE_ENV --delete",
-    "legacy-deploy-sandbox": "VITE_ENV=sandbox VITE_BUCKET_NAME=capsule-sandbox-js-bridge yarn legacy-deploy-s3",
-    "preview": "vite preview",
-    "start": "vite"
-  },
   "browserslist": [
     "chrome > 52",
     "opera > 39",
@@ -26,6 +11,9 @@
     "not op_mini all"
   ],
   "dependencies": {
+    "@cosmjs/amino": "^0.33.1",
+    "@cosmjs/encoding": "^0.33.1",
+    "@cosmjs/proto-signing": "^0.33.1",
     "@cosmjs/stargate": "^0.33.1",
     "@getpara/cosmjs-v0-integration": "1.12.0",
     "@getpara/ethers-v6-integration": "1.12.0",
@@ -34,19 +22,18 @@
     "@getpara/web-sdk": "1.12.0",
     "@metamask/eth-sig-util": "7.0.3",
     "@metamask/utils": "^8.1.0",
-    "@solana/web3.js": "1.98.0",
+    "@solana/web3.js": "^1.98.0",
     "base64url": "^3.0.1",
     "cbor-web": "^9.0.2",
     "ethers": "^6.13.5",
-    "loglevel": "^1.8.0",
+    "loglevel": "1.9.2",
     "node-forge": "^1.3.1",
     "react": "18.2.0",
     "react-circular-progressbar": "2.1.0",
     "react-dom": "18.2.0",
     "react-qr-code": "2.0.11",
     "react-use": "17.4.0",
-    "typescript": "4.9.5",
-    "webpack": "5.88.2"
+    "typescript": "^5.8.3"
   },
   "devDependencies": {
     "@types/node-forge": "^1.3.11",
@@ -54,13 +41,25 @@
     "@types/react-dom": "18.0.11",
     "@vitejs/plugin-react-swc": "^3.7.0",
     "crypto-browserify": "^3.12.0",
-    "react-scripts": "5.0.1",
     "serve": "^14.2.4",
     "stream-browserify": "^3.0.0",
-    "ts-loader": "9.4.2",
+    "ts-loader": "^9.5.1",
     "vite": "^5.3.5",
-    "vite-plugin-node-polyfills": "^0.22.0",
-    "webpack-cli": "5.1.4",
-    "webpack-dev-server": "4.15.1"
+    "vite-plugin-node-polyfills": "^0.22.0"
+  },
+  "main": "src/index.tsx",
+  "private": true,
+  "scripts": {
+    "build": "rm -rf build && tsc && vite build",
+    "build-beta": "VITE_ENV=beta yarn build-for-deploy",
+    "build-for-deploy": "yarn --cwd ../.. lerna run build --scope=capsule-js-bridge --include-dependencies",
+    "build-prod": "VITE_ENV=prod yarn build-for-deploy",
+    "build-sandbox": "VITE_ENV=sandbox yarn build-for-deploy",
+    "legacy-deploy-beta": "VITE_ENV=beta VITE_BUCKET_NAME=capsule-beta-js-bridge yarn legacy-deploy-s3",
+    "legacy-deploy-prod": "VITE_ENV=prod VITE_BUCKET_NAME=capsule-prod-js-bridge yarn legacy-deploy-s3",
+    "legacy-deploy-s3": "yarn && yarn build && aws s3 sync dist/ s3://$VITE_BUCKET_NAME --profile $VITE_ENV --delete",
+    "legacy-deploy-sandbox": "VITE_ENV=sandbox VITE_BUCKET_NAME=capsule-sandbox-js-bridge yarn legacy-deploy-s3",
+    "preview": "vite preview",
+    "start": "vite"
   }
 }

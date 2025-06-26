@@ -1,54 +1,8 @@
 {
   "name": "@getpara/react-native-wallet",
-  "version": "2.0.0-alpha.26",
   "description": "Para Wallet for React Native",
-  "homepage": "https://getpara.com",
+  "version": "2.0.0-alpha.26",
   "author": "Para Team <hello@getpara.com> (https://getpara.com)",
-  "main": "./dist/index.js",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "default": "./dist/index.js"
-    },
-    "./shim": {
-      "default": "./dist/shim.js"
-    },
-    "./dist/shim.js": {
-      "default": "./dist/shim.js"
-    }
-  },
-  "sideEffects": [
-    "./dist/shim.js"
-  ],
-  "react-native": {
-    ".": "./dist/index.js",
-    "./shim": "./dist/shim.js",
-    "./dist/shim.js": "./dist/shim.js"
-  },
-  "typesVersions": {
-    "*": {
-      "shim": [
-        "./dist/shim.d.ts"
-      ],
-      "dist/shim.js": [
-        "./dist/shim.d.ts"
-      ],
-      "*": [
-        "./dist/index.d.ts"
-      ]
-    }
-  },
-  "files": [
-    "dist",
-    "src",
-    "ios",
-    "android",
-    "cpp",
-    "*.podspec",
-    "signer.xcframework",
-    "signer.aar"
-  ],
   "dependencies": {
     "@getpara/core-sdk": "2.0.0-alpha.26",
     "@getpara/user-management-client": "2.0.0-alpha.26",
@@ -71,8 +25,32 @@
     "react-native-passkey": "3.1.0",
     "react-native-quick-base64": "2.1.2",
     "react-native-quick-crypto": "0.7.12",
-    "typescript": "^5.4.3"
+    "typescript": "^5.8.3"
   },
+  "exports": {
+    ".": {
+      "default": "./dist/index.js"
+    },
+    "./shim": {
+      "default": "./dist/shim.js"
+    },
+    "./dist/shim.js": {
+      "default": "./dist/shim.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src",
+    "ios",
+    "android",
+    "cpp",
+    "*.podspec",
+    "signer.xcframework",
+    "signer.aar"
+  ],
+  "homepage": "https://getpara.com",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
   "peerDependencies": {
     "@craftzdog/react-native-buffer": "*",
     "@react-native-async-storage/async-storage": "*",
@@ -88,9 +66,31 @@
   "publishConfig": {
     "access": "public"
   },
+  "react-native": {
+    ".": "./dist/index.js",
+    "./shim": "./dist/shim.js",
+    "./dist/shim.js": "./dist/shim.js"
+  },
   "scripts": {
     "build": "rm -rf dist && tsc",
     "compile-signer": "bash ./scripts/compileSigner.sh",
     "test": "vitest run --coverage"
+  },
+  "sideEffects": [
+    "./dist/shim.js"
+  ],
+  "types": "./dist/index.d.ts",
+  "typesVersions": {
+    "*": {
+      "shim": [
+        "./dist/shim.d.ts"
+      ],
+      "dist/shim.js": [
+        "./dist/shim.d.ts"
+      ],
+      "*": [
+        "./dist/index.d.ts"
+      ]
+    }
   }
 }

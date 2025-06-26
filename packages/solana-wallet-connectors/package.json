@@ -1,39 +1,43 @@
 {
   "name": "@getpara/solana-wallet-connectors",
   "version": "2.0.0-alpha.26",
-  "type": "module",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "exports": {
-    ".": "./dist/index.js",
-    "./connectors": "./dist/wallets/connectors/index.js"
-  },
-  "scripts": {
-    "build": "rm -rf dist && yarn typegen && node ./scripts/build.mjs",
-    "typegen": "tsc --emitDeclarationOnly",
-    "test": "vitest run --coverage"
-  },
   "dependencies": {
+    "@getpara/react-common": "2.0.0-alpha.26",
     "@getpara/web-sdk": "2.0.0-alpha.26",
-    "@solana-mobile/wallet-adapter-mobile": "2.2.0",
-    "@solana/wallet-adapter-base": "0.9.27",
-    "@solana/wallet-adapter-react": "0.15.39",
-    "@solana/wallet-adapter-walletconnect": "0.1.21",
     "bs58": "6.0.0"
   },
   "devDependencies": {
-    "@getpara/react-common": "2.0.0-alpha.26",
+    "@solana-mobile/wallet-adapter-mobile": "^2.2.0",
+    "@solana/wallet-adapter-base": "^0.9.27",
+    "@solana/wallet-adapter-react": "^0.15.39",
+    "@solana/wallet-adapter-walletconnect": "^0.1.21",
     "@types/react": "^18.0.31",
     "@types/react-dom": "^18.2.7",
-    "typescript": "^5.4.3"
+    "typescript": "^5.8.3"
   },
-  "peerDependencies": {
-    "react": ">=18",
-    "react-dom": ">=18"
+  "exports": {
+    ".": "./dist/index.js",
+    "./connectors": "./dist/wallets/connectors/index.js"
   },
   "files": [
     "dist",
     "package.json"
   ],
-  "gitHead": "10ecce9873131e6a1b114fb0642a94bb02040bef"
+  "gitHead": "10ecce9873131e6a1b114fb0642a94bb02040bef",
+  "main": "dist/index.js",
+  "peerDependencies": {
+    "@solana-mobile/wallet-adapter-mobile": "2.x",
+    "@solana/wallet-adapter-base": "0.x",
+    "@solana/wallet-adapter-react": "0.x",
+    "@solana/wallet-adapter-walletconnect": "0.x",
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
+  "scripts": {
+    "build": "rm -rf dist && yarn typegen && node ./scripts/build.mjs",
+    "test": "vitest run --coverage",
+    "typegen": "tsc --emitDeclarationOnly"
+  },
+  "type": "module",
+  "types": "dist/index.d.ts"
 }

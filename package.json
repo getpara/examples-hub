@@ -1,45 +1,5 @@
 {
   "name": "root",
-  "private": true,
-  "workspaces": [
-    "packages/*",
-    "sites/*",
-    "examples/*",
-    "workers/*"
-  ],
-  "lint-staged": {
-    "*.{js,jsx,ts,tsx}": [
-      "eslint --config eslint.config.js --cache --fix"
-    ]
-  },
-  "scripts": {
-    "setup-worker": "lerna run setup-worker --scope=para-portal && cd workers/mpc-worker && yarn build && cd ../..",
-    "build:dev": "lerna run build --scope=@getpara/* --scope=capsule-mpc-worker --scope=capsule-mpc-worker-server --concurrency 4",
-    "watch:affected": "node scripts/watch-affected.js",
-    "dev": "yarn build:dev; concurrently \"yarn start\" \"yarn watch:affected\"",
-    "build": "lerna run build --parallel --concurrency 2",
-    "lint": "eslint --config eslint.config.js './**/*.{js,jsx,ts,tsx}'",
-    "lint-fix": "eslint --config eslint.config.js --fix './**/*.{js,jsx,ts,tsx}'",
-    "start": "lerna run start --scope=capsule-legacy-example --scope=para-portal",
-    "start-server": "lerna run start --scope=capsule-server-example",
-    "start-bridge": "lerna run start --scope=capsule-js-bridge",
-    "start-demo": "lerna run dev --scope=modal-builder",
-    "start-dev-portal": "lerna run dev --scope=developer-portal",
-    "start-e2e": "lerna run start-e2e  --scope=capsule-legacy-example --scope=para-portal",
-    "start-e2e-portal": "lerna run start-e2e --scope=para-portal",
-    "lerna-version": "false && lerna version --tag-version-prefix=\"getpara-\" && yarn gen-changelog",
-    "lerna-publish": "false && lerna publish from-package --no-private",
-    "lerna-publish-dev": "lerna publish preminor --preid dev --dist-tag dev",
-    "alpha-version": "lerna version prerelease --preid alpha --no-push --no-git-tag-version && yarn gen-changelog-alpha",
-    "alpha-publish": "lerna publish from-package --no-private --dist-tag alpha",
-    "test": "lerna run test",
-    "e2e": "playwright test --headed",
-    "gen-changelog": "node ./scripts/gen-changelog.mjs --branch main",
-    "gen-changelog-alpha": "node ./scripts/gen-changelog.mjs --branch 2.0.0-alpha --alpha",
-    "single-example-hub-e2e": "playwright test --headed --config=example-hub-playwright.config.ts",
-    "e2e-examples-hub-script": "yarn && yarn build:dev && ts-node e2e/scripts/runExampleHubTests.ts",
-    "rm-getpara-yarn-links": "rm -rf ~/.config/yarn/link/@getpara"
-  },
   "devDependencies": {
     "@eslint/compat": "^1.2.7",
     "@playwright/test": "1.42.1",
@@ -55,7 +15,7 @@
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-prettier": "^5.2.3",
     "eslint-plugin-react": "^7.34.1",
-    "eslint-plugin-react-hooks": "^4.6.2",
+    "eslint-plugin-react-hooks": "^5.0.0",
     "eslint-plugin-storybook": "^0.8.0",
     "glob": "^11.0.1",
     "lerna": "^8.2.1",
@@ -64,11 +24,51 @@
     "ts-node": "^10.9.2",
     "vitest": "^3.0.9"
   },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --config eslint.config.js --cache --fix"
+    ]
+  },
+  "private": true,
   "resolutions": {
     "axios": "^1.8.4",
     "cross-spawn": "^7.0.6",
     "elliptic": "^6.6.1",
     "examples/capsule-legacy-example/react": "18.2.0",
     "nth-check": "^2.1.1"
-  }
+  },
+  "scripts": {
+    "alpha-publish": "lerna publish from-package --no-private --dist-tag alpha",
+    "alpha-version": "lerna version prerelease --preid alpha --no-push --no-git-tag-version && yarn gen-changelog-alpha",
+    "build": "lerna run build --parallel --concurrency 2",
+    "build:dev": "lerna run build --scope=@getpara/* --scope=capsule-mpc-worker --scope=capsule-mpc-worker-server --concurrency 4",
+    "dev": "yarn build:dev; concurrently \"yarn start\" \"yarn watch:affected\"",
+    "e2e": "playwright test --headed",
+    "e2e-examples-hub-script": "yarn && yarn build:dev && ts-node e2e/scripts/runExampleHubTests.ts",
+    "gen-changelog": "node ./scripts/gen-changelog.mjs --branch main",
+    "gen-changelog-alpha": "node ./scripts/gen-changelog.mjs --branch 2.0.0-alpha --alpha",
+    "lerna-publish": "false && lerna publish from-package --no-private",
+    "lerna-publish-dev": "lerna publish preminor --preid dev --dist-tag dev",
+    "lerna-version": "false && lerna version --tag-version-prefix=\"getpara-\" && yarn gen-changelog",
+    "lint": "eslint --config eslint.config.js './**/*.{js,jsx,ts,tsx}'",
+    "lint-fix": "eslint --config eslint.config.js --fix './**/*.{js,jsx,ts,tsx}'",
+    "rm-getpara-yarn-links": "rm -rf ~/.config/yarn/link/@getpara",
+    "setup-worker": "lerna run setup-worker --scope=para-portal && cd workers/mpc-worker && yarn build && cd ../..",
+    "single-example-hub-e2e": "playwright test --headed --config=example-hub-playwright.config.ts",
+    "start": "lerna run start --scope=capsule-legacy-example --scope=para-portal",
+    "start-bridge": "lerna run start --scope=capsule-js-bridge",
+    "start-demo": "lerna run dev --scope=modal-builder",
+    "start-dev-portal": "lerna run dev --scope=developer-portal",
+    "start-e2e": "lerna run start-e2e  --scope=capsule-legacy-example --scope=para-portal",
+    "start-e2e-portal": "lerna run start-e2e --scope=para-portal",
+    "start-server": "lerna run start --scope=capsule-server-example",
+    "test": "lerna run test",
+    "watch:affected": "node scripts/watch-affected.js"
+  },
+  "workspaces": [
+    "packages/*",
+    "sites/*",
+    "examples/*",
+    "workers/*"
+  ]
 }

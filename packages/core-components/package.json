@@ -1,39 +1,9 @@
 {
   "name": "@getpara/core-components",
-  "version": "2.0.0-alpha.26",
   "description": "Capsule Core Components",
-  "main": "dist/index.js",
-  "type": "module",
-  "types": "dist/types/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/types/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs.js"
-    }
-  },
-  "sideEffects": [
-    "*.css",
-    "*.scss"
-  ],
+  "version": "2.0.0-alpha.26",
   "collection": "dist/collection/collection-manifest.json",
   "collection:main": "dist/collection/index.js",
-  "files": [
-    "dist/",
-    "css/"
-  ],
-  "scripts": {
-    "build": "yarn build:assets && yarn build:css && stencil build && yarn appendLoaderExports",
-    "start": "yarn build:assets && yarn build:css && stencil build --dev --watch --serve",
-    "test": "stencil test --spec --clearCache",
-    "test.watch": "stencil test --spec --watchAll --clearCache",
-    "generate": "stencil generate",
-    "build:css": "sass --embed-sources src/css:./css",
-    "build:assets": "ts-node -T ./scripts/buildAssets.ts",
-    "appendLoaderExports": "ts-node -T ./scripts/appendLoaderExports.ts",
-    "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
-  },
   "dependencies": {
     "@stencil/core": "^4.7.0",
     "color-blend": "^4.0.0",
@@ -47,9 +17,9 @@
     "@chromatic-com/storybook": "^1.6.0",
     "@stencil/react-output-target": "^0.5.3",
     "@stencil/sass": "^3.0.10",
-    "@storybook/addon-essentials": "^8.1.11",
-    "@storybook/addon-interactions": "^8.1.11",
-    "@storybook/addon-links": "^8.1.11",
+    "@storybook/addon-essentials": "^8.6.4",
+    "@storybook/addon-interactions": "^8.6.4",
+    "@storybook/addon-links": "^8.6.4",
     "@storybook/addon-notes": "^5.3.21",
     "@storybook/addon-webpack5-compiler-swc": "^1.0.4",
     "@storybook/blocks": "^8.1.11",
@@ -64,8 +34,38 @@
     "rollup-plugin-dotenv": "^0.5.0",
     "sass": "^1.71.1",
     "stencil-inline-svg": "^1.1.0",
-    "storybook": "^8.1.11",
+    "storybook": "^8.6.4",
     "storybook-addon-stencil": "^0.2.1",
     "ts-node": "^10.9.2"
-  }
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs.js"
+    }
+  },
+  "files": [
+    "dist/",
+    "css/"
+  ],
+  "main": "dist/index.js",
+  "scripts": {
+    "appendLoaderExports": "ts-node -T ./scripts/appendLoaderExports.ts",
+    "build": "yarn build:assets && yarn build:css && stencil build && yarn appendLoaderExports",
+    "build-storybook": "storybook build",
+    "build:assets": "ts-node -T ./scripts/buildAssets.ts",
+    "build:css": "sass --embed-sources src/css:./css",
+    "generate": "stencil generate",
+    "start": "yarn build:assets && yarn build:css && stencil build --dev --watch --serve",
+    "storybook": "storybook dev -p 6006",
+    "test": "stencil test --spec --clearCache",
+    "test.watch": "stencil test --spec --watchAll --clearCache"
+  },
+  "sideEffects": [
+    "*.css",
+    "*.scss"
+  ],
+  "type": "module",
+  "types": "dist/types/index.d.ts"
 }
