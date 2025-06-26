@@ -54,6 +54,7 @@ export const VisibilityInput = forwardRef(
         }
         {...inputProps}
         type={isVisible ? 'text' : 'password'}
+        autoComplete="off"
       />
     );
   },

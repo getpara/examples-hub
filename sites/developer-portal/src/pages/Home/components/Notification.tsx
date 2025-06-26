@@ -74,7 +74,9 @@ export const Notification = React.forwardRef<HTMLDivElement, NotificationProps>(
               notification.title
             )}
             {typeof notification.title === 'string' ? (
-              <Typography className="para:text-sm">{notification.message}</Typography>
+              <Typography className="para:text-sm" variant="span">
+                {notification.message}
+              </Typography>
             ) : (
               notification.message
             )}

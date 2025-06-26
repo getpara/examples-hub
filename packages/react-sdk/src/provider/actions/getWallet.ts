@@ -15,5 +15,5 @@ export const getWallet = async (
     return null;
   }
 
-  return para.findWallet(selectedWallet?.id, selectedWallet?.type);
+  return para.findWallet(selectedWallet?.id, selectedWallet?.type) ?? null;
 };

@@ -81,6 +81,7 @@ export const KeyData = () => {
                       readOnly
                       className="para:disabled:opacity-100 para:text-ellipsis"
                       type="password"
+                      autoComplete="off"
                     />
                   ) : (
                     <VisibilityInput

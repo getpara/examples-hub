@@ -25,6 +25,14 @@ export const useOrganizationKeysQuery = <T>(projectId: string, select: (data: Ap
 
       const { data } = await getApiKeys(organizationId, projectId, ENV_VARS.environment);
 
+      // Sort: non-archived first (by createdAt asc), archived last (by createdAt asc)
+      data.keys.sort((a, b) => {
+        if (a.archived === b.archived) {
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        }
+        return a.archived ? 1 : -1;
+      });
+
       return data.keys;
     },
     select,

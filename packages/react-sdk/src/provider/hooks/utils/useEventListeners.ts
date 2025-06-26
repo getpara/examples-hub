@@ -20,6 +20,7 @@ import { useStore } from '../../stores/useStore.js';
 import { WALLET_BASE_KEY } from '../queries/useWallet.js';
 import { Callbacks } from '../../types/provider.js';
 import { WALLET_BALANCE_BASE_KEY } from '../queries/useWalletBalance.js';
+import { IS_FULLY_LOGGED_IN_BASE_KEY } from '../queries/useIsFullyLoggedIn.js';
 
 export const useEventListeners = ({
   onLogin,
@@ -39,6 +40,7 @@ export const useEventListeners = ({
   const { updateSelectedWallet } = useWalletState();
 
   const loginOrSetupListener = useCallback(() => {
+    queryClient.refetchQueries({ queryKey: [IS_FULLY_LOGGED_IN_BASE_KEY] });
     queryClient.refetchQueries({ queryKey: [ACCOUNT_BASE_KEY] });
     queryClient.refetchQueries({ queryKey: [WALLET_BASE_KEY] });
     queryClient.invalidateQueries({ queryKey: [WALLET_BALANCE_BASE_KEY], exact: false });
@@ -69,6 +71,7 @@ export const useEventListeners = ({
 
   const logoutListener = useCallback(
     (event: LogoutEvent) => {
+      queryClient.refetchQueries({ queryKey: [IS_FULLY_LOGGED_IN_BASE_KEY] });
       queryClient.refetchQueries({ queryKey: [ACCOUNT_BASE_KEY] });
       clearSelectedWallet();
       onLogout?.(event);
@@ -92,6 +95,7 @@ export const useEventListeners = ({
 
   const walletChangeListener = useCallback(
     (event: WalletsChangeEvent) => {
+      queryClient.refetchQueries({ queryKey: [IS_FULLY_LOGGED_IN_BASE_KEY] });
       queryClient.refetchQueries({ queryKey: [ACCOUNT_BASE_KEY] });
       updateSelectedWallet();
       onWalletsChange?.(event);
@@ -101,6 +105,7 @@ export const useEventListeners = ({
 
   const externalWalletChangeListener = useCallback(
     (event: ExternalWalletChangeEvent) => {
+      queryClient.refetchQueries({ queryKey: [IS_FULLY_LOGGED_IN_BASE_KEY] });
       queryClient.refetchQueries({ queryKey: [ACCOUNT_BASE_KEY] });
       updateSelectedWallet();
       onExternalWalletChange?.(event);
@@ -124,6 +129,7 @@ export const useEventListeners = ({
 
   const guestWalletsCreatedListener = useCallback(
     (event: GuestWalletsCreatedEvent) => {
+      queryClient.refetchQueries({ queryKey: [IS_FULLY_LOGGED_IN_BASE_KEY] });
       queryClient.refetchQueries({ queryKey: [ACCOUNT_BASE_KEY] });
       updateSelectedWallet();
       onGuestWalletsCreated?.(event);

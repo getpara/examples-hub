@@ -4,6 +4,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useReinstatePlan } from '../../../hooks/api/mutations/useReinstatePlan';
 import { useGetOrganizationSubscription } from '../../../hooks/api/queries/useOrganizationSubscription';
 import { differenceInCalendarDays } from 'date-fns';
+import { pluralize } from '../../../utils/pluralize';
 
 export const CancelWarning = () => {
   const { data: subscription } = useGetOrganizationSubscription();
@@ -12,8 +13,11 @@ export const CancelWarning = () => {
 
   const willCancel = subscription?.cancelAtPeriodEnd;
   const daysRemaining = subscription?.periodEnd
-    ? `${differenceInCalendarDays(new Date(subscription.periodEnd * 1000), new Date())} days`
+    ? differenceInCalendarDays(new Date(subscription.periodEnd * 1000), new Date())
     : undefined;
+
+  const daysRemainingString =
+    daysRemaining !== undefined ? `${daysRemaining} ${pluralize(daysRemaining, 'day')}` : undefined;
 
   const handleReinstateClick = async () => {
     await reinstatePlan(null, {
@@ -37,7 +41,7 @@ export const CancelWarning = () => {
           t={t}
           i18nKey="downgradeWarning.title"
           components={{ bold: <strong /> }}
-          values={{ daysRemaining: `${daysRemaining} days` }}
+          values={{ daysRemaining: daysRemainingString }}
         />
       </Typography>
       <Button variant="neutral" onClick={handleReinstateClick} isLoading={isReinstatingPlan} disabled={isReinstatingPlan}>
