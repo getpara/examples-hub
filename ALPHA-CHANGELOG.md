@@ -1,3 +1,41 @@
+# Release (Thu Jun 26 2025)
+
+## Package Versions
+- @getpara/web-sdk@2.0.0-alpha.27
+- @getpara/wagmi-v2-integration@2.0.0-alpha.27
+- @getpara/wagmi-v2-connector@2.0.0-alpha.27
+- @getpara/viem-v2-integration@2.0.0-alpha.27
+- @getpara/viem-v1-integration@2.0.0-alpha.27
+- @getpara/user-management-client@2.0.0-alpha.27
+- @getpara/solana-web3.js-v1-integration@2.0.0-alpha.27
+- @getpara/solana-wallet-connectors@2.0.0-alpha.27
+- @getpara/server-sdk@2.0.0-alpha.27
+- @getpara/react-sdk@2.0.0-alpha.27
+- @getpara/react-native-wallet@2.0.0-alpha.27
+- @getpara/react-components@2.0.0-alpha.27
+- @getpara/react-component-library@1.0.0-alpha.22
+- @getpara/react-common@2.0.0-alpha.27
+- @getpara/evm-wallet-connectors@2.0.0-alpha.27
+- @getpara/ethers-v6-integration@2.0.0-alpha.27
+- @getpara/ethers-v5-integration@2.0.0-alpha.27
+- @getpara/cosmos-wallet-connectors@2.0.0-alpha.27
+- @getpara/cosmjs-v0-integration@2.0.0-alpha.27
+- @getpara/core-sdk@2.0.0-alpha.27
+- @getpara/core-components@2.0.0-alpha.27
+
+### Features
+- Add Valora Wallet Connector (#1053) - bb8957320
+- Cosmos bridge implementation (#985) - 2f60814ec
+
+### Fixes
+- Make Apple Team ID link clickable in developer portal (#1050) - 67befed0f
+
+### Chores
+- Dev Portal - Jun 25 qa (#1054) - a14a7303f
+- Normalize dependencies (#1051) - 5008f51af
+- add seo tagging for sites (#1033) - b3e281786
+- Add ignore keyword to changelog gen (#1045) - b49ca6d55
+
 # Release (Mon Jun 23 2025)
 
 ## Package Versions

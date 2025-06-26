@@ -1,8 +1,8 @@
 {
   "name": "capsule-mpc-worker",
-  "version": "2.0.0-alpha.26",
+  "version": "2.0.0-alpha.27",
   "dependencies": {
-    "@getpara/web-sdk": "2.0.0-alpha.26"
+    "@getpara/web-sdk": "2.0.0-alpha.27"
   },
   "devDependencies": {
     "crypto-browserify": "^3.12.0",
