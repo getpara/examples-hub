@@ -3,10 +3,10 @@ import { walletStore } from "@/lib/store";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { uuid: string } }
+  { params }: { params: Promise<{ uuid: string }> }
 ): Promise<NextResponse> {
   try {
-    const uuid = params.uuid;
+    const { uuid } = await params;
 
     if (!uuid) {
       return NextResponse.json({ success: false, error: "Missing 'uuid' parameter" }, { status: 400 });
