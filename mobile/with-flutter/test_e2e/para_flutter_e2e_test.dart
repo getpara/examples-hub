@@ -317,7 +317,7 @@ void main() {
           
           if (authType == 'Email') {
             // Email authentication needs 1 text field
-            if (textFields.length >= 1) {
+            if (textFields.isNotEmpty) {
               print('✅ Email authentication form ready with ${textFields.length} fields');
               return;
             }
@@ -344,7 +344,7 @@ void main() {
           for (final element in staticTexts) {
             final text = await element.text;
             // Look for exact screen title match
-            if (text == '${authType} Authentication') {
+            if (text == '$authType Authentication') {
               print('✅ Found $authType authentication screen');
               break;
             }
@@ -478,7 +478,7 @@ void main() {
           for (final button in backButtons) {
             try {
               final label = await button.attributes['label'];
-              if (label != null && (label.toLowerCase().contains('back') || label == '<' || label == 'Back')) {
+              if (label.toLowerCase().contains('back') || label == '<' || label == 'Back') {
                 await button.click();
                 await Future.delayed(Duration(seconds: 1));
                 print('✅ Clicked back button: "$label"');
@@ -986,7 +986,7 @@ void main() {
             text.contains('Success')) {
           foundValidResult = true;
           resultMessage = text;
-          print('✅ Transaction signing successful (result: ${text.length > 50 ? text.substring(0, 50) + "..." : text})');
+          print('✅ Transaction signing successful (result: ${text.length > 50 ? "${text.substring(0, 50)}..." : text})');
           break;
         }
         
@@ -1008,7 +1008,7 @@ void main() {
         for (final element in textElements) {
           final text = await element.text;
           if (text.length > 10) {
-            print('📝 Found text: ${text.length > 50 ? text.substring(0, 50) + "..." : text}');
+            print('📝 Found text: ${text.length > 50 ? "${text.substring(0, 50)}..." : text}');
           }
         }
         throw Exception('❌ Transaction signing failed - no valid result found');
@@ -1361,7 +1361,7 @@ void main() {
             (text.contains('0x') && text.length > 20) || // Hex signature
             (text.startsWith('cosmos1') && text.length > 20))) { // Valid cosmos address
           successFound = true;
-          print('✅ Cosmos operation completed successfully - found: ${text.length > 50 ? text.substring(0, 50) + "..." : text}');
+          print('✅ Cosmos operation completed successfully - found: ${text.length > 50 ? "${text.substring(0, 50)}..." : text}');
           break;
         }
       }
@@ -1375,7 +1375,7 @@ void main() {
         for (final element in textElements) {
           final text = await element.text;
           if (text.length > 10) {
-            print('  - "${text.length > 50 ? text.substring(0, 50) + "..." : text}"');
+            print('  - "${text.length > 50 ? "${text.substring(0, 50)}..." : text}"');
           }
         }
         throw Exception('❌ Cosmos message signing failed - no success result found');
@@ -1523,13 +1523,13 @@ void main() {
         for (final element in textElements) {
           final text = await element.text;
           if (text.length > 10) {
-            print('  - "${text.length > 50 ? text.substring(0, 50) + "..." : text}"');
+            print('  - "${text.length > 50 ? "${text.substring(0, 50)}..." : text}"');
           }
         }
         throw Exception('❌ Cosmos transaction signing failed - no valid result found');
       }
       
-      print('✅ Cosmos transaction signing completed successfully: ${resultMessage != null && resultMessage.length > 100 ? resultMessage.substring(0, 100) + "..." : resultMessage}');
+      print('✅ Cosmos transaction signing completed successfully: ${resultMessage != null && resultMessage.length > 100 ? "${resultMessage.substring(0, 100)}..." : resultMessage}');
     }, timeout: Timeout(Duration(minutes: 2)));
 
     test('12 Cosmos Signing Method Validation Flow', () async {
@@ -1693,7 +1693,7 @@ void main() {
       if (!hasSuccess) {
         print('ℹ️ No specific signing results found, but signing methods are available');
       } else {
-        print('✅ Found signing result: ${resultMessage != null && resultMessage.length > 50 ? resultMessage.substring(0, 50) + "..." : resultMessage}');
+        print('✅ Found signing result: ${resultMessage != null && resultMessage.length > 50 ? "${resultMessage.substring(0, 50)}..." : resultMessage}');
       }
       
       print('✅ Cosmos signing method validation test completed successfully');
