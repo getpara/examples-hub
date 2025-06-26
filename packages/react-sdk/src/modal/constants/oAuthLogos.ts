@@ -148,6 +148,11 @@ export const ACCOUNT_TYPES: {
     name: 'Solflare',
     isExternalWallet: true,
   },
+  VALORA: {
+    logo: 'valora',
+    name: 'Valora',
+    isExternalWallet: true,
+  },
 };
 
 export function getAccountTypeName(

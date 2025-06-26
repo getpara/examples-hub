@@ -33,3 +33,4 @@ export { default as SolflareIcon } from './solflare.svg';
 export { default as OkxIcon } from './okx.svg';
 export { default as CosmostationIcon } from './cosmostation.svg';
 export { default as HahaIcon } from './haha.svg';
+export { default as ValoraIcon } from './valora.svg';

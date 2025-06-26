@@ -29,6 +29,7 @@ import {
   OkxIcon,
   CosmostationIcon,
   HahaIcon,
+  ValoraIcon,
 } from '../assets';
 import { AuthMethod, DropdownOption, ModalBuilderConfig, DraggableItemHeaderConfig, TAuthLayout } from '../types';
 
@@ -65,6 +66,7 @@ export const EXTERNAL_WALLET_CONFIGS: Partial<Record<TExternalWallet, DraggableI
   KEPLR: { logo: KeplrIcon, label: 'Keplr' },
   COSMOSTATION: { logo: CosmostationIcon, label: 'Cosmostation' },
   HAHA: { logo: HahaIcon, label: 'HaHa' },
+  VALORA: { logo: ValoraIcon, label: 'Valora' },
 };
 
 export const ONRAMPS_CONFIGS: Record<OnRampProvider, DraggableItemHeaderConfig> = {

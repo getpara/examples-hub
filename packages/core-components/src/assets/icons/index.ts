@@ -182,6 +182,7 @@ import UsdcBrand from './usdc-brand.svg';
 import UserCircle from './user-circle.svg';
 import UserPlus from './user-plus.svg';
 import User from './user.svg';
+import Valora from './valora.svg';
 import WalletConnect from './wallet-connect.svg';
 import Wallet from './wallet.svg';
 import X from './x.svg';
@@ -607,6 +608,7 @@ export const Icons = {
   userCircle: UserCircle,
   userPlus: UserPlus,
   user: User,
+  valora: Valora,
   walletConnect: WalletConnect,
   wallet: Wallet,
   x: X,
