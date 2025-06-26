@@ -13,7 +13,7 @@
   "dependencies": {
     "@getpara/cosmos-wallet-connectors": "2.0.0-alpha.26",
     "@getpara/evm-wallet-connectors": "2.0.0-alpha.26",
-    "@getpara/graz": "0.1.0",
+    "@getpara/graz": "2.0.0-alpha.3",
     "@getpara/react-sdk": "2.0.0-alpha.26",
     "@getpara/solana-wallet-connectors": "2.0.0-alpha.26",
     "@solana-mobile/wallet-adapter-mobile": "2.2.2",
