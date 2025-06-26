@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEthers } from "./useEthers";
 import { useClient } from "@getpara/react-sdk";
-import { constructTransaction, validateTransaction, serializeTransaction } from "@/utils";
+import { constructTransaction, validateTransaction, serializeTransaction } from "@/utils/transaction";
 
 interface TransactionParams {
   from: string;

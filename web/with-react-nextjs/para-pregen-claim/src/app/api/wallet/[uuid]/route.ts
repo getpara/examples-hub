@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { walletStore } from "@/lib/store";
 
-export async function GET(request: NextRequest): Promise<NextResponse> {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { uuid: string } }
+): Promise<NextResponse> {
   try {
-    const uuid = request.nextUrl.searchParams.get("uuid");
+    const uuid = params.uuid;
 
     if (!uuid) {
       return NextResponse.json({ success: false, error: "Missing 'uuid' parameter" }, { status: 400 });

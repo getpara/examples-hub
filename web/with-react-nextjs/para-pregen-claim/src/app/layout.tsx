@@ -1,4 +1,4 @@
-import "./globals.css";
+import "@/styles/globals.css";
 import { Providers } from "./Providers";
 
 export default function RootLayout({

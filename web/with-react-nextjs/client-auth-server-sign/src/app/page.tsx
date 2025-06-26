@@ -1,9 +1,14 @@
 "use client";
 import { useState } from "react";
 import { useAccount, useModal, useWallet } from "@getpara/react-sdk";
-import { BalanceCard, StatusAlert, TransactionHash, ConnectWalletCard, TransferForm } from "@/components/ui";
-import { useBalance, useServerTransaction } from "@/hooks";
-import { isValidEthereumAddress, isValidAmount } from "@/utils";
+import { BalanceCard } from "@/components/ui/BalanceCard";
+import { StatusAlert } from "@/components/ui/StatusAlert";
+import { TransactionHash } from "@/components/ui/TransactionHash";
+import { ConnectWalletCard } from "@/components/ui/ConnectWalletCard";
+import { TransferForm } from "@/components/ui/TransferForm";
+import { useBalance } from "@/hooks/useBalance";
+import { useServerTransaction } from "@/hooks/useServerTransaction";
+import { isValidEthereumAddress, isValidAmount } from "@/utils/validation";
 
 export default function Home() {
   const [to, setTo] = useState("");

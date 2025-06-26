@@ -21,23 +21,23 @@ export function StepCard({
   children,
 }: StepCardProps) {
   return (
-    <div className="flex flex-col w-full max-w-md p-4 border rounded-sm border-gray-300 gap-2">
+    <div className="flex flex-col w-full p-6 bg-white border border-gray-200 rounded-lg shadow-sm gap-3">
       <div className="flex items-center">
         <div
-          className={`w-8 h-8 flex items-center justify-center rounded-full text-white ${
-            isComplete ? "bg-green-600" : "bg-gray-500"
+          className={`w-8 h-8 flex items-center justify-center rounded-full text-white font-medium ${
+            isComplete ? "bg-gray-900" : "bg-gray-400"
           }`}>
           {stepNumber}
         </div>
-        <h2 className="ml-2 text-lg font-semibold">{title}</h2>
+        <h2 className="ml-3 text-lg font-semibold text-gray-900">{title}</h2>
       </div>
-      <p>{description}</p>
+      <p className="text-gray-600">{description}</p>
       {children}
       <button
         onClick={onClick}
         disabled={disabled}
-        className={`mt-2 px-4 py-2 rounded ${
-          disabled ? "bg-gray-300 text-gray-600" : "bg-blue-900 text-white hover:bg-blue-950"
+        className={`mt-3 px-4 py-2 rounded-md font-medium transition-colors ${
+          disabled ? "bg-gray-200 text-gray-400 cursor-not-allowed" : "bg-gray-900 text-white hover:bg-gray-700"
         }`}>
         {buttonLabel}
       </button>

@@ -1,7 +1,8 @@
 import "@/styles/globals.css";
 import "@getpara/react-sdk/styles.css";
-import { Header } from "@/components/layout";
-import { ParaProvider, QueryProvider } from "@/context";
+import Header from "@/components/layout/Header";
+import { ParaProvider } from "@/context/ParaProvider";
+import { QueryProvider } from "@/context/QueryProvider";
 
 export default function RootLayout({
   children,

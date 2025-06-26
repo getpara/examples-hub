@@ -1,24 +1,20 @@
 "use client";
 
-import { ParaProvider as ParaSDKProvider } from "@getpara/react-sdk";
+import { ParaProvider as ParaProviderBase } from "@getpara/react-sdk";
 import { API_KEY, ENVIRONMENT } from "@/config/constants";
 
-export function ParaProvider({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export function ParaProvider({ children }: { children: React.ReactNode }) {
   return (
-    <ParaSDKProvider
+    <ParaProviderBase
       paraClientConfig={{
         apiKey: API_KEY,
         env: ENVIRONMENT,
       }}
-      config={{ appName: "Para Modal Example" }}
+      config={{ appName: "Para Pregen Claim" }}
       paraModalConfig={{
         disableEmailLogin: false,
         disablePhoneLogin: false,
-        authLayout: ["AUTH:FULL", "EXTERNAL:FULL"],
+        authLayout: ["EXTERNAL:FULL"],
         oAuthMethods: ["APPLE", "DISCORD", "FACEBOOK", "FARCASTER", "GOOGLE", "TWITTER"],
         onRampTestMode: true,
         theme: {
@@ -37,6 +33,6 @@ export function ParaProvider({
         twoFactorAuthEnabled: false,
       }}>
       {children}
-    </ParaSDKProvider>
+    </ParaProviderBase>
   );
 }

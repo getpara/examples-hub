@@ -1,5 +1,5 @@
 import { ethers } from "ethers";
-import { SEPOLIA_RPC_URL } from "@/config";
+import { SEPOLIA_RPC_URL } from "@/config/constants";
 
 // Create a single shared provider instance
 const provider = new ethers.JsonRpcProvider(SEPOLIA_RPC_URL);
