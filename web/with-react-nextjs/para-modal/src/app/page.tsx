@@ -1,6 +1,6 @@
 "use client";
 
-import { useAccount, useCreateGuestWalletsState, useModal, useWallet } from "@getpara/react-sdk";
+import { useAccount, useCreateGuestWalletsState, useModal, useWallet , use from "@getpara/react-sdk";
 import "@getpara/react-sdk/styles.css";
 import { WalletDisplay } from "@/components/WalletDisplay";
 

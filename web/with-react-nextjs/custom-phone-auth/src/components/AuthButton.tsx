@@ -1,4 +1,4 @@
-import React from "react";
+"use client";
 
 interface AuthButtonProps {
   isLoading: boolean;
@@ -8,17 +8,19 @@ interface AuthButtonProps {
   children: React.ReactNode;
 }
 
-export const AuthButton: React.FC<AuthButtonProps> = ({
+export function AuthButton({
   isLoading,
   disabled,
   onClick,
   loadingText = "Loading...",
   children,
-}) => (
-  <button
-    disabled={disabled || isLoading}
-    onClick={onClick}
-    className="bg-blue-900 hover:bg-blue-950 text-white px-4 py-2 rounded-none w-full">
-    {isLoading ? loadingText : children}
-  </button>
-);
+}: AuthButtonProps) {
+  return (
+    <button
+      disabled={disabled || isLoading}
+      onClick={onClick}
+      className="w-full px-4 py-2 bg-gray-800 text-white rounded-none hover:bg-gray-900 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed font-medium">
+      {isLoading ? loadingText : children}
+    </button>
+  );
+}

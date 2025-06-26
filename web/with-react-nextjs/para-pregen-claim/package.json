@@ -10,8 +10,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@getpara/react-sdk": "1.16.0",
-    "@getpara/server-sdk": "1.16.0",
+    "@getpara/react-sdk": "2.0.0-alpha.26",
+    "@getpara/server-sdk": "2.0.0-alpha.26",
     "@tanstack/react-query": "5.66.0",
     "next": "15.1.5",
     "react": "^19.0.0",

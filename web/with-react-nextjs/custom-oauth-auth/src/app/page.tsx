@@ -1,143 +1,101 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { OAuthButtons } from "@/components/OAuthButtons";
-import { WalletDisplay } from "@/components/WalletDisplay";
-import { para } from "@/client/para";
-import { AuthStateLogin, AuthStateSignup, TOAuthMethod } from "@getpara/web-sdk";
+import { useState } from "react";
+import { useParaAccount } from "@/hooks/useParaAccount";
+import { useParaSignMessage } from "@/hooks/useParaSignMessage";
+import { useModal } from "@/context/ModalContext";
+import { StatusAlert } from "@/components/ui/StatusAlert";
+import { ConnectWalletCard } from "@/components/ui/ConnectWalletCard";
+import { SignMessageForm } from "@/components/ui/SignMessageForm";
+import { SignatureDisplay } from "@/components/ui/SignatureDisplay";
 
 export default function Home() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [isConnected, setIsConnected] = useState(false);
-  const [wallet, setWallet] = useState<string>("");
-  const [error, setError] = useState<string>("");
-  const popupWindow = useRef<Window | null>(null);
+  const [message, setMessage] = useState("Hello Para!");
+  const { openModal } = useModal();
+  const { isConnected, address } = useParaAccount();
+  const {
+    signMessageAsync,
+    isSigning,
+    signError,
+    signature,
+    reset,
+  } = useParaSignMessage();
 
-  const openPopup = (...args: Parameters<typeof window.open>) => {
-    popupWindow.current?.close();
-    return (popupWindow.current = window?.open(...args));
-  };
-
-  const getFirstWalletAddress = async (): Promise<string> => {
-    const wallets = Object.values(await para.getWallets());
-    return wallets?.[0]?.address || "unknown";
-  };
-
-  useEffect(() => {
-    const checkAuthentication = async () => {
-      setIsLoading(true);
-      setError("");
-
-      try {
-        const isAuthenticated = await para.isFullyLoggedIn();
-        setIsConnected(isAuthenticated);
-
-        if (isAuthenticated) {
-          setWallet(await getFirstWalletAddress());
-        }
-      } catch (err: any) {
-        setError(err.message || "Authentication check failed");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    checkAuthentication();
-  }, []);
-
-  const handleAuthState = async (authState: AuthStateLogin | AuthStateSignup) => {
-    const popupConfig = {
-      isCanceled: () => Boolean(popupWindow.current?.closed),
-    };
-
-    if (authState.stage === "signup") {
-      openPopup(authState.passkeyUrl, "signUpPopup", "popup=true");
-
-      const { walletIds, recoverySecret } = await para.waitForWalletCreation(popupConfig);
-      // check if walletids or recoverySecret is null
-      if (!walletIds || !recoverySecret) {
-        setError("Failed to create wallet");
-        return;
-      }
-    }
-
-    if (authState.stage === "login") {
-      openPopup(authState.passkeyUrl, "loginPopup", "popup=true");
-      await para.waitForLogin(popupConfig);
-    }
-  };
-
-  const handleAuthentication = async (method: TOAuthMethod) => {
-    setIsLoading(true);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
     try {
-      switch (method) {
-        case "FARCASTER":
-          await handleFarcasterAuth();
-          break;
-        case "TELEGRAM":
-          console.error("Telegram authentication is not supported in this example.");
-          break;
-        default:
-          await handleRegularOAuth(method);
-          break;
+      if (!isConnected) {
+        throw new Error("Please connect your wallet to sign a message.");
       }
+
+      await signMessageAsync({ message });
     } catch (error) {
-      console.error("Authentication error:", error);
-    } finally {
-      setIsLoading(false);
+      console.error("Signing error:", error);
     }
   };
 
-  const handleFarcasterAuth = async () => {
-    try {
-      const popupConfig = {
-        onConnectUri: (connectUri: string) => {
-          openPopup(connectUri, "farcasterConnectPopup", "popup=true");
-        },
-        isCanceled: () => Boolean(popupWindow.current?.closed),
-      };
-
-      const authState = await para.verifyFarcaster(popupConfig);
-      await handleAuthState(authState);
-    } catch (error) {
-      console.error("Farcaster auth error:", error);
+  // Reset signature when message changes
+  const handleMessageChange = (value: string) => {
+    setMessage(value);
+    if (signature) {
+      reset();
     }
   };
 
-  const handleRegularOAuth = async (method: Exclude<TOAuthMethod, "TELEGRAM" | "FARCASTER">) => {
-    try {
-      const popupConfig = {
-        method,
-        onOAuthUrl: (oAuthUrl: string) => {
-          openPopup(oAuthUrl, "oAuthPopup", "popup=true");
-        },
-        isCanceled: () => Boolean(popupWindow.current?.closed),
-      };
-
-      const authState = await para.verifyOAuth(popupConfig);
-      await handleAuthState(authState);
-    } catch (error) {
-      console.error("Regular OAuth error:", error);
-    }
+  // Derive status from signing state
+  const status = {
+    show: isSigning || !!signError || !!signature,
+    type: isSigning ? ("info" as const) : signError ? ("error" as const) : ("success" as const),
+    message: isSigning
+      ? "Signing message..."
+      : signError
+      ? signError.message || "Failed to sign message. Please try again."
+      : "Message signed successfully!",
   };
 
   return (
-    <main className="flex flex-col items-center justify-center min-h-screen gap-6 p-8">
-      <h1 className="text-2xl font-bold">Custom OAuth Auth + Para Example</h1>
-      <p className="max-w-md text-center">
-        This example demonstrates a minimal custom OAuth authentication flow using Para's SDK in a Next.js (App Router)
-        project.
-      </p>
+    <div className="container mx-auto px-4 py-12">
+      <div className="text-center mb-12">
+        <h1 className="text-4xl font-bold tracking-tight mb-4">Para Custom OAuth Auth Demo</h1>
+        <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+          Sign messages with your Para wallet using OAuth authentication. This demonstrates using Para&apos;s web-sdk
+          with custom React Query hooks and OAuth provider integration.
+        </p>
+      </div>
 
-      {isConnected ? (
-        <WalletDisplay walletAddress={wallet} />
+      {!isConnected ? (
+        <ConnectWalletCard onConnect={openModal} />
       ) : (
-        <OAuthButtons
-          onSelect={handleAuthentication}
-          isLoading={isLoading}
-        />
+        <div className="max-w-xl mx-auto">
+          <div className="mb-8 rounded-none border border-gray-200">
+            <div className="px-6 py-3 bg-gray-50 border-b border-gray-200">
+              <h3 className="text-sm font-medium text-gray-900">Connected Wallet</h3>
+            </div>
+            <div className="px-6 py-3">
+              <p className="text-sm text-gray-500">Address</p>
+              <p className="text-lg font-medium text-gray-900 font-mono">
+                {address?.slice(0, 6)}...{address?.slice(-4)}
+              </p>
+            </div>
+          </div>
+
+          <StatusAlert
+            show={status.show}
+            type={status.type}
+            message={status.message}
+          />
+
+          <SignMessageForm
+            message={message}
+            isLoading={isSigning}
+            onMessageChange={handleMessageChange}
+            onSubmit={handleSubmit}
+          />
+
+          {signature && "signature" in signature && <SignatureDisplay signature={signature.signature} />}
+        </div>
       )}
-      {error && <p className="text-red-500 text-sm text-center">{error}</p>}
-    </main>
+    </div>
   );
 }

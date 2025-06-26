@@ -1,4 +1,24 @@
+"use client";
+
 import "./globals.css";
+import { QueryProvider } from "@/context/QueryProvider";
+import { ModalProvider, useModal } from "@/context/ModalContext";
+import Header from "@/components/layout/Header";
+import { AuthModal } from "@/components/AuthModal";
+
+function LayoutContent({ children }: { children: React.ReactNode }) {
+  const { openModal } = useModal();
+
+  return (
+    <>
+      <Header onConnectClick={openModal} />
+      <main className="min-h-screen bg-gray-50">
+        {children}
+      </main>
+      <AuthModal />
+    </>
+  );
+}
 
 export default function RootLayout({
   children,
@@ -7,7 +27,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <QueryProvider>
+          <ModalProvider>
+            <LayoutContent>{children}</LayoutContent>
+          </ModalProvider>
+        </QueryProvider>
+      </body>
     </html>
   );
 }

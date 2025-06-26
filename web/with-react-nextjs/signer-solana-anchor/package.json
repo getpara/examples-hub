@@ -15,8 +15,8 @@
   },
   "dependencies": {
     "@coral-xyz/anchor": "0.31.0",
-    "@getpara/react-sdk": "1.16.0",
-    "@getpara/solana-web3.js-v1-integration": "1.16.0",
+    "@getpara/react-sdk": "2.0.0-alpha.26",
+    "@getpara/solana-web3.js-v1-integration": "2.0.0-alpha.26",
     "@solana/kit": "2.1.0",
     "@solana/spl-token": "0.4.13",
     "@solana/web3.js": "1.69.0",

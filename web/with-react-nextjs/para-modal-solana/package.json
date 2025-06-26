@@ -10,14 +10,14 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@solana-mobile/wallet-adapter-mobile": "2.1.5",
-    "@solana/wallet-adapter-base": "0.9.24",
-    "@solana/wallet-adapter-react": "0.15.36",
-    "@solana/wallet-adapter-walletconnect": "0.1.17",
-    "@solana/web3.js": "1.98.0",
-    "@tanstack/react-query": "5.71.5",
-    "@getpara/react-sdk": "1.16.0",
-    "@getpara/solana-wallet-connectors": "1.16.0",
+    "@solana-mobile/wallet-adapter-mobile": "2.2.2",
+    "@solana/wallet-adapter-base": "0.9.27",
+    "@solana/wallet-adapter-react": "0.15.39",
+    "@solana/wallet-adapter-walletconnect": "0.1.21",
+    "@solana/web3.js": "1.98.2",
+    "@tanstack/react-query": "5.81.2",
+    "@getpara/react-sdk": "2.0.0-alpha.26",
+    "@getpara/solana-wallet-connectors": "2.0.0-alpha.26",
     "next": "15.1.5",
     "react": "19.0.0",
     "react-dom": "19.0.0"

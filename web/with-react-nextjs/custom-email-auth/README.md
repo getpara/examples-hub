@@ -1,6 +1,6 @@
 # Para with Custom Email Auth Example
 
-This project is a simple example of using the Para SDK to create a custom email authentication flow.
+This example demonstrates a custom email authentication flow using Para's web-sdk with React Query hooks and a multi-step modal UI. It showcases how to build a custom authentication experience without relying on wagmi or other wallet connector libraries.
 
 ## Prerequisites
 
@@ -29,6 +29,36 @@ This project is a simple example of using the Para SDK to create a custom email 
     ```
 2.  Open [http://localhost:3000](https://www.google.com/search?q=http://localhost:3000) (or the port specified) with
     your browser to see the result.
+
+## Features
+
+- **Custom Email Authentication**: Multi-step email authentication flow with OTP verification
+- **React Query Integration**: Custom hooks wrapping Para SDK methods for better state management
+- **Modal UI**: Clean modal interface matching the connector-wagmi example style
+- **Message Signing**: Sign messages with your Para wallet after authentication
+- **No Wagmi Dependency**: Demonstrates direct usage of Para's web-sdk without wallet connector libraries
+
+## Project Structure
+
+```
+src/
+├── app/                    # Next.js app directory
+├── components/             # React components
+│   ├── ui/                # Reusable UI components
+│   ├── layout/            # Layout components (Header)
+│   └── AuthModal.tsx      # Multi-step authentication modal
+├── context/               # React contexts
+│   ├── QueryProvider.tsx  # React Query provider
+│   └── ModalContext.tsx   # Modal state management
+├── hooks/                 # Custom React hooks
+│   ├── useParaAuth.ts     # Authentication operations
+│   ├── useParaAccount.ts  # Account state management
+│   ├── useParaWallet.ts   # Wallet creation operations
+│   └── useParaSignMessage.ts # Message signing
+├── lib/para/              # Para SDK setup
+├── config/                # Configuration files
+└── utils/                 # Utility functions
+```
 
 ## Learn More
 

@@ -1,165 +1,101 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { para } from "@/client/para";
-import { EmailInput } from "@/components/EmailInput";
-import { OTPInput } from "@/components/OTPInput";
-import { AuthButton } from "@/components/AuthButton";
-import { WalletDisplay } from "@/components/WalletDisplay";
-
-enum Steps {
-  AUTH_INPUT = 0,
-  VERIFY = 1,
-  COMPLETE = 2,
-}
+import { useState } from "react";
+import { useParaAccount } from "@/hooks/useParaAccount";
+import { useParaSignMessage } from "@/hooks/useParaSignMessage";
+import { useModal } from "@/context/ModalContext";
+import { StatusAlert } from "@/components/ui/StatusAlert";
+import { ConnectWalletCard } from "@/components/ui/ConnectWalletCard";
+import { SignMessageForm } from "@/components/ui/SignMessageForm";
+import { SignatureDisplay } from "@/components/ui/SignatureDisplay";
 
 export default function Home() {
-  const [step, setStep] = useState<number>(0);
-  const [email, setEmail] = useState<string>("");
-  const [verificationCode, setVerificationCode] = useState<string>("");
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [wallet, setWallet] = useState<string>("");
-  const [error, setError] = useState<string>("");
+  const [message, setMessage] = useState("Hello Para!");
+  const { openModal } = useModal();
+  const { isConnected, address } = useParaAccount();
+  const {
+    signMessageAsync,
+    isSigning,
+    signError,
+    signature,
+    reset,
+  } = useParaSignMessage();
 
-  const popupWindow = useRef<Window | null>(null);
-  const openPopup = (...args: Parameters<typeof window.open>) => {
-    popupWindow.current?.close();
-    return (popupWindow.current = window?.open(...args));
-  };
-
-  const getFirstWalletAddress = async (): Promise<string> => {
-    const wallets = Object.values(await para.getWallets());
-    return wallets?.[0]?.address || "unknown";
-  };
-
-  useEffect(() => {
-    const checkAuthentication = async () => {
-      setIsLoading(true);
-      setError("");
-      try {
-        if (await para.isFullyLoggedIn()) {
-          setWallet(await getFirstWalletAddress());
-          setStep(Steps.COMPLETE);
-        }
-      } catch (err: any) {
-        setError(err.message || "Authentication check failed");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    checkAuthentication();
-  }, []);
-
-  const handleAuthenticateUser = async () => {
-    setIsLoading(true);
-    setError("");
-
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
     try {
-      const authState = await para.signUpOrLogIn({ auth: { email } });
-
-      if (authState.stage === "verify") {
-        setStep(Steps.VERIFY);
-        return;
+      if (!isConnected) {
+        throw new Error("Please connect your wallet to sign a message.");
       }
 
-      if (authState.stage === "login") {
-        openPopup(authState.passkeyUrl, "loginPopup", "popup=true");
-
-        const { needsWallet } = await para.waitForLogin({
-          isCanceled: () => popupWindow.current?.closed ?? true,
-        });
-
-        if (needsWallet) {
-          await para.createWallet({ type: "EVM", skipDistribute: false });
-        }
-
-        setWallet(await getFirstWalletAddress());
-        setStep(Steps.COMPLETE);
-      }
-    } catch (err: any) {
-      setError(err.message || "Authentication failed");
-    } finally {
-      setIsLoading(false);
+      await signMessageAsync({ message });
+    } catch (error) {
+      console.error("Signing error:", error);
     }
   };
 
-  const handleVerifyAndCreateWallet = async () => {
-    setIsLoading(true);
-    setError("");
-
-    try {
-      const authState = await para.verifyNewAccount({ verificationCode });
-      openPopup(authState.passkeyUrl, "signUpPopup", "popup=true");
-
-      await para.waitForWalletCreation({
-        isCanceled: () => Boolean(popupWindow.current?.closed),
-      });
-
-      setWallet(await getFirstWalletAddress());
-      setStep(Steps.COMPLETE);
-    } catch (err: any) {
-      setError(
-        err.message === "Invalid verification code"
-          ? "Verification code incorrect or expired"
-          : err.message || "Verification failed"
-      );
-    } finally {
-      setIsLoading(false);
+  // Reset signature when message changes
+  const handleMessageChange = (value: string) => {
+    setMessage(value);
+    if (signature) {
+      reset();
     }
+  };
+
+  // Derive status from signing state
+  const status = {
+    show: isSigning || !!signError || !!signature,
+    type: isSigning ? ("info" as const) : signError ? ("error" as const) : ("success" as const),
+    message: isSigning
+      ? "Signing message..."
+      : signError
+      ? signError.message || "Failed to sign message. Please try again."
+      : "Message signed successfully!",
   };
 
   return (
-    <main className="flex flex-col items-center justify-center min-h-screen gap-6 p-8">
-      <h1 className="text-2xl font-bold">Custom Email Auth + Para Example</h1>
-      <p className="max-w-md text-center">
-        This example demonstrates a minimal custom email authentication flow using Para's SDK in a Next.js (App Router)
-        project.
-      </p>
-      <div className="flex flex-col items-center justify-center gap-4 p-4 max-w-sm w-full">
-        {step < 2 && (
-          <h2 className="text-xl font-bold text-center">
-            {step === 0 ? "Custom Email Auth: Step 1" : "Custom Email Auth: Step 2"}
-          </h2>
-        )}
-
-        {step === Steps.AUTH_INPUT && (
-          <>
-            <EmailInput
-              disabled={isLoading}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            <AuthButton
-              isLoading={isLoading}
-              disabled={!email}
-              onClick={handleAuthenticateUser}>
-              Check or Create Account
-            </AuthButton>
-          </>
-        )}
-
-        {step === Steps.VERIFY && (
-          <>
-            <OTPInput
-              disabled={isLoading}
-              value={verificationCode}
-              onChange={setVerificationCode}
-            />
-            <AuthButton
-              isLoading={isLoading}
-              disabled={!verificationCode}
-              onClick={handleVerifyAndCreateWallet}
-              loadingText="Verifying...">
-              Verify Email & Create Wallet
-            </AuthButton>
-          </>
-        )}
-
-        {step === Steps.COMPLETE && <WalletDisplay walletAddress={wallet} />}
-
-        {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+    <div className="container mx-auto px-4 py-12">
+      <div className="text-center mb-12">
+        <h1 className="text-4xl font-bold tracking-tight mb-4">Para Custom Email Auth Demo</h1>
+        <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+          Sign messages with your Para wallet using email authentication. This demonstrates using Para&apos;s web-sdk
+          with custom React Query hooks and a multi-step authentication flow.
+        </p>
       </div>
-    </main>
+
+      {!isConnected ? (
+        <ConnectWalletCard onConnect={openModal} />
+      ) : (
+        <div className="max-w-xl mx-auto">
+          <div className="mb-8 rounded-none border border-gray-200">
+            <div className="px-6 py-3 bg-gray-50 border-b border-gray-200">
+              <h3 className="text-sm font-medium text-gray-900">Connected Wallet</h3>
+            </div>
+            <div className="px-6 py-3">
+              <p className="text-sm text-gray-500">Address</p>
+              <p className="text-lg font-medium text-gray-900 font-mono">
+                {address?.slice(0, 6)}...{address?.slice(-4)}
+              </p>
+            </div>
+          </div>
+
+          <StatusAlert
+            show={status.show}
+            type={status.type}
+            message={status.message}
+          />
+
+          <SignMessageForm
+            message={message}
+            isLoading={isSigning}
+            onMessageChange={handleMessageChange}
+            onSubmit={handleSubmit}
+          />
+
+          {signature && "signature" in signature && <SignatureDisplay signature={signature.signature} />}
+        </div>
+      )}
+    </div>
   );
 }
