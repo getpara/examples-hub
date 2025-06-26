@@ -79,7 +79,7 @@ class _ParaOAuthExampleState extends State<ParaOAuthExample> {
       // - Android: Add intent filter in AndroidManifest.xml
       final AuthState authState = await para.verifyOAuth(
         provider: provider,
-        deeplinkUrl: "paraflutter", // Just the scheme name, SDK handles formatting
+        appScheme: "paraflutter", // Just the scheme name, SDK handles formatting
       );
 
       _log("OAuth flow completed successfully. Final stage: ${authState.stage}");
