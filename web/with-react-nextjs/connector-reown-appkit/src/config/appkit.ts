@@ -6,7 +6,6 @@ import { paraConnector } from "@getpara/wagmi-v2-integration";
 import { para } from "@/client/para";
 import { chains } from "@/constants/chains";
 import { CreateConnectorFn } from "wagmi";
-import { metaMask } from 'wagmi/connectors';
 import { queryClient } from "@/client/queryClient";
 
 // Get projectId from https://cloud.reown.com
@@ -51,10 +50,9 @@ const connector = paraConnector({
   options: {},
 });
 
-// Create custom connectors array with Para first, then MetaMask
+// Create custom connectors array with only Para
 const connectors: CreateConnectorFn[] = [
-  connector as any,  // Para connector first
-  metaMask()         // MetaMask second
+  connector as any  // Only Para connector
 ];
 
 // Create wagmi adapter with custom connectors
@@ -81,4 +79,8 @@ export const appKit = createAppKit({
   enableEIP6963: false, // Disable browser wallet discovery
   enableInjected: false, // Disable injected wallet discovery
   enableWalletConnect: false, // Disable WalletConnect
+  enableCoinbase: false, // Disable Coinbase
+  defaultChain: chains[0], // Set default chain
+  allowUnsupportedChain: false,
+  allWallets: "HIDE", // Hide all wallets except custom ones
 });
