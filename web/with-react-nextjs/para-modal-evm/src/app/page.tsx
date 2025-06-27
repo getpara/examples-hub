@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { useAccount, useModal, useWallet, useSignMessage } from "@getpara/react-sdk";
+import { useAccount, useModal, useWallet, useSignMessage, useCreateWallet } from "@getpara/react-sdk";
 import { StatusAlert } from "@/components/ui/StatusAlert";
 import { ConnectWalletCard } from "@/components/ui/ConnectWalletCard";
 import { SignMessageForm } from "@/components/ui/SignMessageForm";
 import { SignatureDisplay } from "@/components/ui/SignatureDisplay";
+import { useWalletClient } from "wagmi";
 
 export default function Home() {
   const [message, setMessage] = useState("Hello Para!");
@@ -19,7 +20,7 @@ export default function Home() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!isConnected || !wallet?.id) {
       return;
     }
@@ -41,7 +42,11 @@ export default function Home() {
   // Derive status from signing state
   const status = {
     show: signMessageHook.isPending || !!signMessageHook.error || !!signMessageHook.data,
-    type: signMessageHook.isPending ? ("info" as const) : signMessageHook.error ? ("error" as const) : ("success" as const),
+    type: signMessageHook.isPending
+      ? ("info" as const)
+      : signMessageHook.error
+      ? ("error" as const)
+      : ("success" as const),
     message: signMessageHook.isPending
       ? "Signing message..."
       : signMessageHook.error
@@ -54,8 +59,8 @@ export default function Home() {
       <div className="text-center mb-12">
         <h1 className="text-4xl font-bold tracking-tight mb-4">Para Modal + EVM Wallets Demo</h1>
         <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-          Sign messages with your Para wallet or EVM wallets. This example demonstrates integration
-          with MetaMask, Coinbase, WalletConnect, Rainbow, Zerion, and Rabby wallets.
+          Sign messages with your Para wallet or EVM wallets. This example demonstrates integration with MetaMask,
+          Coinbase, WalletConnect, Rainbow, Zerion, and Rabby wallets.
         </p>
       </div>
 
@@ -88,7 +93,9 @@ export default function Home() {
             onSubmit={handleSubmit}
           />
 
-          {signMessageHook.data && "signature" in signMessageHook.data && <SignatureDisplay signature={signMessageHook.data.signature} />}
+          {signMessageHook.data && "signature" in signMessageHook.data && (
+            <SignatureDisplay signature={signMessageHook.data.signature} />
+          )}
         </div>
       )}
     </div>
