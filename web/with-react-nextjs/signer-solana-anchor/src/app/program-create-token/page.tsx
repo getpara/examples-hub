@@ -1,14 +1,15 @@
 "use client";
 
-import { usePara } from "@/components/ParaProvider";
+import { useParaSigner } from "@/hooks/useParaSigner";
 import { useState, useEffect } from "react";
 import * as anchor from "@coral-xyz/anchor";
 import { LAMPORTS_PER_SOL, SystemProgram } from "@solana/web3.js";
 import { TOKEN_2022_PROGRAM_ID } from "@solana/spl-token";
-import { TransferTokens } from "../idl/transfer_tokens";
-import idl from "../idl/transfer_tokens.json" assert { type: "json" };
+import { TransferTokens } from "@/idl/transfer_tokens";
+import idl from "@/idl/transfer_tokens.json" assert { type: "json" };
+import { useAccount, useWallet } from "@getpara/react-sdk";
 
-export default function ProgramDeploymentDemo() {
+export default function ProgramCreateTokenPage() {
   const [isCreateTokenLoading, setIsCreateTokenLoading] = useState(false);
   const [isBalanceLoading, setIsBalanceLoading] = useState(false);
   const [balance, setBalance] = useState<string | null>(null);
@@ -23,7 +24,9 @@ export default function ProgramDeploymentDemo() {
     message: string;
   }>({ show: false, type: "success", message: "" });
 
-  const { isConnected, walletId, address, signer, connection, anchorProvider } = usePara();
+  const { signer, connection, anchorProvider, isConnected, address } = useParaSigner();
+  const { data: wallet } = useWallet();
+  const walletId = wallet?.id;
 
   const fetchBalance = async () => {
     if (!address || !connection || !signer) return;
@@ -44,6 +47,7 @@ export default function ProgramDeploymentDemo() {
     if (address && connection && signer) {
       fetchBalance();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [address, connection, signer]);
 
   const createToken = async (e: React.FormEvent) => {
@@ -102,18 +106,20 @@ export default function ProgramDeploymentDemo() {
       setStatus({
         show: true,
         type: "success",
-        message: `Successfully created token "${tokenName}" (${tokenSymbol})!`,
+        message: "Token created successfully!",
       });
 
       await fetchBalance();
-    } catch (error: any) {
+
+      setTokenName("");
+      setTokenSymbol("");
+    } catch (error) {
       console.error("Error creating token:", error);
       setStatus({
         show: true,
         type: "error",
-        message: error instanceof Error ? error.message : "Failed to create token. Please try again.",
+        message: error instanceof Error ? error.message : "Error creating token. Please try again.",
       });
-      setCreatedMint(null);
     } finally {
       setIsCreateTokenLoading(false);
     }
@@ -122,11 +128,10 @@ export default function ProgramDeploymentDemo() {
   return (
     <div className="container mx-auto px-4">
       <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold tracking-tight mb-6">Solana Program Demo</h1>
+        <h1 className="text-4xl font-bold tracking-tight mb-6">Create Token Demo</h1>
         <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-          Create tokens using the deployed Solana program. This demo shows how to interact with the{" "}
-          <code className="font-mono text-sm bg-blue-50 text-blue-700 px-2 py-1 rounded-md">transfer_tokens</code>{" "}
-          program.
+          Deploy your own instance of a token program and create tokens. This demonstrates how to interact with
+          Anchor programs using the Para SDK.
         </p>
       </div>
 
@@ -143,14 +148,14 @@ export default function ProgramDeploymentDemo() {
             </button>
           </div>
           <div className="px-6 py-3">
-            <p className="text-sm text-gray-500 bg-gray-100 p-2 rounded-md mb-2">Network: Solana Devnet</p>
+            <p className="text-sm text-gray-500 bg-gray-100 p-2 rounded-none">Network: Devnet</p>
             <p className="text-lg font-medium text-gray-900">
               {!address
                 ? "Please connect your wallet"
                 : isBalanceLoading
                 ? "Loading..."
                 : balance
-                ? `${balance} SOL`
+                ? `${parseFloat(balance).toFixed(4)} SOL`
                 : "Unable to fetch balance"}
             </p>
           </div>
@@ -163,105 +168,85 @@ export default function ProgramDeploymentDemo() {
                 ? "bg-green-50 border-green-500 text-green-700"
                 : status.type === "error"
                 ? "bg-red-50 border-red-500 text-red-700"
-                : "bg-blue-50 border-blue-500 text-blue-700"
+                : "bg-gray-50 border-gray-500 text-gray-700"
             }`}>
             <p className="px-6 py-4 break-words">{status.message}</p>
           </div>
         )}
 
-        <div className="bg-white border border-gray-200 mb-8">
-          <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
-            <h3 className="text-lg font-medium text-gray-900">Create a New Token</h3>
-          </div>
-          <div className="p-6">
-            <form
-              onSubmit={createToken}
-              className="space-y-4">
-              <div className="space-y-2">
-                <label
-                  htmlFor="tokenName"
-                  className="block text-sm font-medium text-gray-700">
-                  Token Name
-                </label>
-                <input
-                  id="tokenName"
-                  type="text"
-                  value={tokenName}
-                  onChange={(e) => setTokenName(e.target.value)}
-                  placeholder="e.g. My Test Token"
-                  required
-                  disabled={isCreateTokenLoading}
-                  className="block w-full px-4 py-3 border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
-                />
-              </div>
-              <div className="space-y-2">
-                <label
-                  htmlFor="tokenSymbol"
-                  className="block text-sm font-medium text-gray-700">
-                  Token Symbol
-                </label>
-                <input
-                  id="tokenSymbol"
-                  type="text"
-                  value={tokenSymbol}
-                  onChange={(e) => setTokenSymbol(e.target.value)}
-                  placeholder="e.g. MTT"
-                  required
-                  disabled={isCreateTokenLoading}
-                  className="block w-full px-4 py-3 border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
-                />
-              </div>{" "}
-              <button
-                type="submit"
-                className="w-full rounded-none bg-blue-900 px-6 py-3 text-sm font-medium text-white hover:bg-blue-950 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={!isConnected || isCreateTokenLoading || !tokenName || !tokenSymbol}>
-                {isCreateTokenLoading ? "Creating Token..." : "Create Token"}
-              </button>
-            </form>
-          </div>
-        </div>
-
         {createdMint && (
-          <div className="space-y-4">
-            <div className="rounded-none border border-gray-200">
+          <div className="mb-6 p-4 bg-gray-50 border border-gray-300 rounded-none">
+            <p className="text-sm font-medium text-gray-700">Created Mint Address:</p>
+            <p className="font-mono text-xs break-all text-gray-600 mt-1">{createdMint}</p>
+          </div>
+        )}
+
+        <form
+          onSubmit={createToken}
+          className="space-y-4">
+          <div className="space-y-3">
+            <label
+              htmlFor="tokenName"
+              className="block text-sm font-medium text-gray-700">
+              Token Name
+            </label>
+            <input
+              id="tokenName"
+              type="text"
+              value={tokenName}
+              onChange={(e) => setTokenName(e.target.value)}
+              placeholder="My Token"
+              required
+              disabled={isCreateTokenLoading}
+              className="block w-full px-4 py-3 border border-gray-300 focus:border-gray-500 focus:ring-1 focus:ring-gray-500 outline-hidden transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
+            />
+          </div>
+
+          <div className="space-y-3">
+            <label
+              htmlFor="tokenSymbol"
+              className="block text-sm font-medium text-gray-700">
+              Token Symbol
+            </label>
+            <input
+              id="tokenSymbol"
+              type="text"
+              value={tokenSymbol}
+              onChange={(e) => setTokenSymbol(e.target.value)}
+              placeholder="MTK"
+              required
+              disabled={isCreateTokenLoading}
+              className="block w-full px-4 py-3 border border-gray-300 focus:border-gray-500 focus:ring-1 focus:ring-gray-500 outline-hidden transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="w-full rounded-none bg-gray-900 px-6 py-3 text-sm font-medium text-white hover:bg-gray-950 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={!tokenName || !tokenSymbol || isCreateTokenLoading}>
+            {isCreateTokenLoading ? "Creating Token..." : "Create Token"}
+          </button>
+
+          {transactionHash && (
+            <div className="mt-8 rounded-none border border-gray-200">
               <div className="flex justify-between items-center px-6 py-4 bg-gray-50 border-b border-gray-200">
-                <h3 className="text-sm font-medium text-gray-900">Mint Address:</h3>
+                <h3 className="text-sm font-medium text-gray-900">Transaction Hash:</h3>
                 <a
-                  href={`https://solscan.io/token/${createdMint}?cluster=devnet`}
+                  href={`https://solscan.io/tx/${transactionHash}?cluster=devnet`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-3 py-1 text-sm bg-blue-900 text-white hover:bg-blue-950 transition-colors rounded-none">
+                  className="px-3 py-1 text-sm bg-gray-900 text-white hover:bg-gray-950 transition-colors rounded-none">
                   View on Solscan
                 </a>
               </div>
               <div className="p-6">
                 <p className="text-sm font-mono break-all text-gray-600 bg-white p-4 border border-gray-200">
-                  {createdMint}
+                  {transactionHash}
                 </p>
               </div>
             </div>
-
-            {transactionHash && (
-              <div className="rounded-none border border-gray-200">
-                <div className="flex justify-between items-center px-6 py-4 bg-gray-50 border-b border-gray-200">
-                  <h3 className="text-sm font-medium text-gray-900">Transaction Hash:</h3>
-                  <a
-                    href={`https://solscan.io/tx/${transactionHash}?cluster=devnet`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-3 py-1 text-sm bg-blue-900 text-white hover:bg-blue-950 transition-colors rounded-none">
-                    View on Solscan
-                  </a>
-                </div>
-                <div className="p-6">
-                  <p className="text-sm font-mono break-all text-gray-600 bg-white p-4 border border-gray-200">
-                    {transactionHash}
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
+          )}
+        </form>
       </div>
     </div>
   );

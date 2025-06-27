@@ -1,9 +1,9 @@
 "use client";
 
-import { usePara } from "@/components/ParaProvider";
+import { useParaSigner } from "@/hooks/useParaSigner";
 import { useState, useEffect } from "react";
 import * as anchor from "@coral-xyz/anchor";
-import { LAMPORTS_PER_SOL, SystemProgram } from "@solana/web3.js";
+import { LAMPORTS_PER_SOL, SystemProgram, PublicKey } from "@solana/web3.js";
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   getAccount,
@@ -11,11 +11,12 @@ import {
   getMint,
   TOKEN_2022_PROGRAM_ID,
 } from "@solana/spl-token";
-import { TransferTokens } from "../idl/transfer_tokens";
-import idl from "../idl/transfer_tokens.json" assert { type: "json" };
-import { PROGRAM_ID } from ".";
+import { TransferTokens } from "@/idl/transfer_tokens";
+import idl from "@/idl/transfer_tokens.json" assert { type: "json" };
+import { PROGRAM_ID } from "@/config/constants";
+import { useAccount, useWallet } from "@getpara/react-sdk";
 
-export default function ProgramMintToken() {
+export default function ProgramMintTokenPage() {
   const [amount, setAmount] = useState("");
   const [recipient, setRecipient] = useState("");
   const [mintAccount, setMintAccount] = useState("");
@@ -31,7 +32,9 @@ export default function ProgramMintToken() {
     message: string;
   }>({ show: false, type: "success", message: "" });
 
-  const { isConnected, walletId, address, signer, connection, anchorProvider } = usePara();
+  const { signer, connection, anchorProvider, isConnected, address } = useParaSigner();
+  const { data: wallet } = useWallet();
+  const walletId = wallet?.id;
 
   const fetchBalances = async () => {
     if (!address || !connection || !signer) return;
@@ -48,36 +51,44 @@ export default function ProgramMintToken() {
           const mint = new anchor.web3.PublicKey(mintAccount);
           const userPubkey = signer.sender!;
 
-          const tokenAccountAddress = await getAssociatedTokenAddress(
-            mint,
-            userPubkey,
-            false, // allowOwnerOffCurve
-            TOKEN_2022_PROGRAM_ID // Use Token Extension Program
-          );
+          // Get associated token address
+          const ata = await getAssociatedTokenAddress(mint, userPubkey, false, TOKEN_2022_PROGRAM_ID);
+          setTokenAccount(ata.toString());
 
-          setTokenAccount(tokenAccountAddress.toString());
-
+          // Try to get token account info
           try {
-            try {
-              const accountInfo = await getAccount(connection, tokenAccountAddress, "confirmed", TOKEN_2022_PROGRAM_ID);
+            const tokenAccountInfo = await getAccount(connection, ata, "confirmed", TOKEN_2022_PROGRAM_ID);
+            
+            // Get mint info to get decimals
+            const mintInfo = await getMint(connection, mint, "confirmed", TOKEN_2022_PROGRAM_ID);
+            const decimals = mintInfo.decimals;
 
-              const mintInfo = await getMint(connection, mint, "confirmed", TOKEN_2022_PROGRAM_ID);
-
-              const decimals = mintInfo.decimals;
-              const uiAmount = Number(accountInfo.amount) / Math.pow(10, decimals);
-              setTokenBalance(uiAmount.toString());
-            } catch (error) {
-              // If token-2022 fails, try the original token program
-              const tokenAccountInfo = await connection.getTokenAccountBalance(tokenAccountAddress);
-              setTokenBalance(tokenAccountInfo.value.uiAmount?.toString() || "0");
+            // Convert raw balance to display balance
+            const rawBalance = tokenAccountInfo.amount;
+            console.log("Raw balance:", rawBalance.toString());
+            console.log("Decimals:", decimals);
+            
+            // Handle the balance as a string to avoid precision issues
+            const balanceStr = rawBalance.toString();
+            
+            // If the balance is shorter than or equal to decimals, it's a fractional amount
+            if (balanceStr.length <= decimals) {
+              const paddedBalance = balanceStr.padStart(decimals, '0');
+              const displayBalance = '0.' + paddedBalance.replace(/0+$/, '');
+              setTokenBalance(displayBalance === '0.' ? '0' : displayBalance);
+            } else {
+              // Split into whole and fractional parts
+              const wholePart = balanceStr.slice(0, -decimals);
+              const fractionalPart = balanceStr.slice(-decimals).replace(/0+$/, '');
+              const displayBalance = fractionalPart ? `${wholePart}.${fractionalPart}` : wholePart;
+              setTokenBalance(displayBalance);
             }
-          } catch (error) {
-            console.log("No token account found, balance is 0");
+          } catch (e) {
+            // Token account doesn't exist
             setTokenBalance("0");
           }
         } catch (error) {
-          console.error("Error fetching token account:", error);
-          setTokenAccount(null);
+          console.error("Error fetching token balance:", error);
           setTokenBalance(null);
         }
       }
@@ -93,23 +104,14 @@ export default function ProgramMintToken() {
     if (address && connection && signer) {
       fetchBalances();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [address, connection, signer, mintAccount]);
 
-  const handleMintToken = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setStatus({ show: false, type: "success", message: "" });
     setTxSignature("");
-
-    if (!signer || !connection) {
-      setStatus({
-        show: true,
-        type: "error",
-        message: "Signer or connection not available",
-      });
-      setIsLoading(false);
-      return;
-    }
 
     try {
       if (!isConnected) {
@@ -120,57 +122,68 @@ export default function ProgramMintToken() {
         throw new Error("No wallet ID found. Please reconnect your wallet.");
       }
 
-      if (!mintAccount) {
-        throw new Error("Please enter a mint account address.");
-      }
-
-      if (!recipient) {
-        throw new Error("Please enter a recipient address.");
-      }
-
-      // Validate amount
-      const amountValue = parseInt(amount);
-      if (isNaN(amountValue) || amountValue <= 0) {
-        throw new Error("Please enter a valid amount greater than 0.");
-      }
-
-      const mintPubkey = new anchor.web3.PublicKey(mintAccount);
-      const recipientPubkey = new anchor.web3.PublicKey(recipient);
-
-      if (!anchorProvider) {
+      if (!signer || !anchorProvider) {
         throw new Error("Anchor provider is not initialized. Please reconnect your wallet.");
       }
 
-      anchor.setProvider(anchorProvider);
+      if (!mintAccount || !recipient || !amount) {
+        throw new Error("Please fill in all fields.");
+      }
 
+      const mintPubkey = new PublicKey(mintAccount);
+      const recipientPubkey = new PublicKey(recipient);
+      
+      // Validate amount
+      const mintAmount = parseFloat(amount);
+      if (isNaN(mintAmount) || mintAmount <= 0) {
+        throw new Error("Please enter a valid amount greater than 0.");
+      }
+
+      anchor.setProvider(anchorProvider);
       const program = new anchor.Program(idl as TransferTokens, anchorProvider);
 
-      const signature = await program.methods
-        .mintToken(new anchor.BN(amountValue))
+      // Get mint info to get decimals
+      const mintInfo = await getMint(connection!, mintPubkey, "confirmed", TOKEN_2022_PROGRAM_ID);
+      const decimals = mintInfo.decimals;
+
+      // Convert display amount to raw amount
+      const rawAmount = new anchor.BN(mintAmount * Math.pow(10, decimals));
+
+      // Get associated token address for recipient
+      const recipientAta = await getAssociatedTokenAddress(
+        mintPubkey,
+        recipientPubkey,
+        false,
+        TOKEN_2022_PROGRAM_ID
+      );
+
+      const tx = await program.methods
+        .mintToken(rawAmount)
         .accounts({
-          mintAuthority: signer.sender!,
-          recipient: recipientPubkey,
+          payer: signer.sender!,
           mintAccount: mintPubkey,
+          associatedTokenAccount: recipientAta,
+          recipient: recipientPubkey,
+          rent: anchor.web3.SYSVAR_RENT_PUBKEY,
+          systemProgram: SystemProgram.programId,
           tokenProgram: TOKEN_2022_PROGRAM_ID,
           associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-          systemProgram: SystemProgram.programId,
         })
         .rpc();
 
-      setTxSignature(signature);
-
+      setTxSignature(tx);
       setStatus({
         show: true,
         type: "success",
         message: `Successfully minted ${amount} tokens to ${recipient}!`,
       });
 
-      // Refresh balances
       await fetchBalances();
 
-      // Reset form
+      // Clear form
       setAmount("");
-    } catch (error: any) {
+      setRecipient("");
+    } catch (error) {
       console.error("Error minting tokens:", error);
       setStatus({
         show: true,
@@ -185,71 +198,50 @@ export default function ProgramMintToken() {
   return (
     <div className="container mx-auto px-4">
       <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold tracking-tight mb-6">Mint Tokens Demo</h1>
+        <h1 className="text-4xl font-bold tracking-tight mb-6">Mint Token Demo</h1>
         <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-          This demo shows how to mint tokens using the transfer_tokens program deployed at address{" "}
-          {PROGRAM_ID.toString()}.
+          Interact with deployed programs to mint tokens. Learn how to call program methods and handle the responses.
         </p>
       </div>
 
       <div className="max-w-xl mx-auto">
         <div className="mb-8 rounded-none border border-gray-200">
           <div className="flex justify-between items-center px-6 py-3 bg-gray-50 border-b border-gray-200">
-            <h3 className="text-sm font-medium text-gray-900">Account Information:</h3>
+            <h3 className="text-sm font-medium text-gray-900">Balances:</h3>
             <button
               onClick={fetchBalances}
               disabled={isBalanceLoading || !address}
               className="p-1 text-gray-500 hover:text-gray-700 transition-colors disabled:opacity-50"
-              title="Refresh data">
+              title="Refresh balances">
               <span className={`inline-block ${isBalanceLoading ? "animate-spin" : ""}`}>🔄</span>
             </button>
           </div>
           <div className="px-6 py-3 space-y-2">
             <div>
-              <p className="text-sm text-gray-600">Your Address:</p>
-              <p className="text-sm font-mono break-all text-gray-900">
-                {!address ? "Please connect your wallet" : address}
-              </p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-600">SOL Balance:</p>
+              <p className="text-sm text-gray-500">SOL Balance:</p>
               <p className="text-lg font-medium text-gray-900">
                 {!address
-                  ? "Please connect your wallet"
+                  ? "Please connect wallet"
                   : isBalanceLoading
                   ? "Loading..."
                   : solBalance
                   ? `${solBalance} SOL`
-                  : "Unable to fetch balance"}
+                  : "Unable to fetch"}
               </p>
             </div>
             {mintAccount && (
-              <>
-                <div>
-                  <p className="text-sm text-gray-600">Token Account:</p>
-                  <p className="text-sm font-mono break-all text-gray-600">
-                    {!address
-                      ? "Please connect your wallet"
-                      : isBalanceLoading
-                      ? "Loading..."
-                      : tokenAccount
-                      ? tokenAccount
-                      : "Not created yet"}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Token Balance:</p>
-                  <p className="text-lg font-medium text-gray-900">
-                    {!address
-                      ? "Please connect your wallet"
-                      : isBalanceLoading
-                      ? "Loading..."
-                      : tokenBalance !== null
-                      ? tokenBalance
-                      : "Unable to fetch balance"}
-                  </p>
-                </div>
-              </>
+              <div>
+                <p className="text-sm text-gray-500">Token Balance:</p>
+                <p className="text-lg font-medium text-gray-900">
+                  {!address
+                    ? "Please connect wallet"
+                    : isBalanceLoading
+                    ? "Loading..."
+                    : tokenBalance !== null
+                    ? `${tokenBalance} tokens`
+                    : "Unable to fetch"}
+                </p>
+              </div>
             )}
           </div>
         </div>
@@ -261,14 +253,14 @@ export default function ProgramMintToken() {
                 ? "bg-green-50 border-green-500 text-green-700"
                 : status.type === "error"
                 ? "bg-red-50 border-red-500 text-red-700"
-                : "bg-blue-50 border-blue-500 text-blue-700"
+                : "bg-gray-50 border-gray-500 text-gray-700"
             }`}>
             <p className="px-6 py-4 break-words">{status.message}</p>
           </div>
         )}
 
         <form
-          onSubmit={handleMintToken}
+          onSubmit={handleSubmit}
           className="space-y-4">
           <div className="space-y-3">
             <label
@@ -281,10 +273,10 @@ export default function ProgramMintToken() {
               type="text"
               value={mintAccount}
               onChange={(e) => setMintAccount(e.target.value)}
-              placeholder="Enter mint account public key"
+              placeholder="Enter the token mint address"
               required
               disabled={isLoading}
-              className="block w-full px-4 py-3 border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
+              className="block w-full px-4 py-3 border border-gray-300 focus:border-gray-500 focus:ring-1 focus:ring-gray-500 outline-hidden transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
             />
           </div>
 
@@ -299,10 +291,10 @@ export default function ProgramMintToken() {
               type="text"
               value={recipient}
               onChange={(e) => setRecipient(e.target.value)}
-              placeholder="Enter recipient public key"
+              placeholder="Enter recipient's address"
               required
               disabled={isLoading}
-              className="block w-full px-4 py-3 border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
+              className="block w-full px-4 py-3 border border-gray-300 focus:border-gray-500 focus:ring-1 focus:ring-gray-500 outline-hidden transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
             />
           </div>
 
@@ -317,21 +309,18 @@ export default function ProgramMintToken() {
               type="number"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              placeholder="Enter amount to mint"
-              min="1"
+              placeholder="0"
+              step="0.01"
               required
               disabled={isLoading}
-              className="block w-full px-4 py-3 border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
+              className="block w-full px-4 py-3 border border-gray-300 focus:border-gray-500 focus:ring-1 focus:ring-gray-500 outline-hidden transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
             />
-            <p className="text-xs text-gray-500">
-              Note: The amount will be adjusted for decimals (9 decimals) in the contract
-            </p>
           </div>
 
           <button
             type="submit"
-            className="w-full rounded-none bg-blue-900 px-6 py-3 text-sm font-medium text-white hover:bg-blue-950 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={!mintAccount || !recipient || !amount || isLoading || !isConnected}>
+            className="w-full rounded-none bg-gray-900 px-6 py-3 text-sm font-medium text-white hover:bg-gray-950 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={!mintAccount || !recipient || !amount || isLoading}>
             {isLoading ? "Minting Tokens..." : "Mint Tokens"}
           </button>
 
@@ -343,7 +332,7 @@ export default function ProgramMintToken() {
                   href={`https://solscan.io/tx/${txSignature}?cluster=devnet`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-3 py-1 text-sm bg-blue-900 text-white hover:bg-blue-950 transition-colors rounded-none">
+                  className="px-3 py-1 text-sm bg-gray-900 text-white hover:bg-gray-950 transition-colors rounded-none">
                   View on Solscan
                 </a>
               </div>
