@@ -133,9 +133,9 @@ export type OAuthUrlParams = {
    */
   method: Exclude<TOAuthMethod, 'TELEGRAM' | 'FARCASTER'>;
   /**
-   * The deeplink URL to redirect to after OAuth is complete.
+   * The app scheme to redirect to after OAuth is complete.
    */
-  deeplinkUrl?: string;
+  appScheme?: string;
 };
 
 export type OAuthParams = OAuthUrlParams &

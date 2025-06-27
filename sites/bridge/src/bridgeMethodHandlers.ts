@@ -165,7 +165,7 @@ export const methodHandlers: Record<string, (para: ParaWeb, args: any[]) => Prom
   },
   getOAuthURL: async (para, args) => {
     logger.info('Getting OAuth URL...');
-    const oAuthUrl = await para.getOAuthURL({ method: args[0], deeplinkUrl: args[1] });
+    const oAuthUrl = await (para as any).getOAuthUrl({ method: args[0], appScheme: args[1] });
     return oAuthUrl;
   },
   getPregenWallets: async (para, args) => {

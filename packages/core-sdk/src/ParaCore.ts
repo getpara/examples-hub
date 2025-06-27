@@ -2287,12 +2287,12 @@ export abstract class ParaCore implements CoreInterface {
    *
    * @param {Object} opts the options object
    * @param {TOAuthMethod} opts.method the third-party service to use for OAuth.
-   * @param {string} [opts.deeplinkUrl] the deeplink to redirect to after the OAuth flow. This is for mobile only.
+   * @param {string} [opts.appScheme] the app scheme to redirect to after the OAuth flow. This is for mobile only.
    * @returns {string} the URL for the user to log in with OAuth.
    */
   async #getOAuthUrl({
     method,
-    deeplinkUrl,
+    appScheme,
     accountLinkInProgress,
     ...params
   }: CoreMethodParams<'getOAuthUrl'> & {
@@ -2306,7 +2306,7 @@ export abstract class ParaCore implements CoreInterface {
       params: {
         apiKey: this.ctx.apiKey,
         sessionLookupId,
-        deeplinkUrl,
+        appScheme,
         ...(accountLinkInProgress
           ? {
               linkedAccountId: this.accountLinkInProgress.id,
@@ -2337,7 +2337,7 @@ export abstract class ParaCore implements CoreInterface {
    */
   protected async verifyOAuthProcess({
     method,
-    deeplinkUrl,
+    appScheme,
     isCanceled = () => false,
     onCancel,
     onPoll,
@@ -2357,7 +2357,7 @@ export abstract class ParaCore implements CoreInterface {
         sessionLookupId = await this.#prepareLogin();
       }
 
-      const oAuthUrl = await this.#getOAuthUrl({ method, deeplinkUrl, sessionLookupId, accountLinkInProgress });
+      const oAuthUrl = await this.#getOAuthUrl({ method, appScheme, sessionLookupId, accountLinkInProgress });
 
       onOAuthUrl(oAuthUrl);
     } else {
