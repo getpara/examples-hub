@@ -17,7 +17,7 @@ struct ExampleApp: App {
         logger.info("Initializing with environment: \(config.environment.name), API key: \(String(config.apiKey.prefix(8)))...")
 
         // Initialize Para manager
-        let paraManager = ParaManager(environment: config.environment, apiKey: config.apiKey, deepLink: bundleId)
+        let paraManager = ParaManager(environment: config.environment, apiKey: config.apiKey, appScheme: bundleId)
         _paraManager = StateObject(wrappedValue: paraManager)
 
         // Initialize MetaMask Connector with configuration
