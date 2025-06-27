@@ -1,14 +1,25 @@
 "use client";
 
-import { useAccount, useModal, useWallet } from "@getpara/react-sdk";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useAccount, useModal, useWallet, useWalletState } from "@getpara/react-sdk";
+import { useEffect } from "react";
 
 export default function Header() {
   const pathname = usePathname();
   const { openModal } = useModal();
-  const { data: account } = useAccount();
   const { data: wallet } = useWallet();
+  const { data: account } = useAccount();
+  const { setSelectedWallet } = useWalletState();
+
+  useEffect(() => {
+    if (account?.isConnected && wallet?.type !== "SOLANA") {
+      const solanaWallet = account.wallets?.find((w: any) => w.type === "SOLANA");
+      if (solanaWallet) {
+        setSelectedWallet({ id: solanaWallet.id, type: "SOLANA" });
+      }
+    }
+  }, [account, wallet, setSelectedWallet]);
 
   return (
     <header className="border-b border-gray-200">
@@ -25,15 +36,15 @@ export default function Header() {
         <div>
           {account?.isConnected ? (
             <button
-              onClick={openModal}
-              className="px-4 py-2 bg-green-700 text-white rounded-none hover:bg-green-800 transition-colors">
+              onClick={() => openModal()}
+              className="px-4 py-2 bg-gray-700 text-white rounded-none hover:bg-gray-800 transition-colors text-sm font-medium cursor-pointer">
               Connected: {wallet?.address?.slice(0, 6)}...
               {wallet?.address?.slice(-4)}
             </button>
           ) : (
             <button
-              onClick={openModal}
-              className="px-4 py-2 bg-blue-900 text-white rounded-none hover:bg-blue-950 transition-colors">
+              onClick={() => openModal()}
+              className="px-4 py-2 bg-gray-900 text-white rounded-none hover:bg-gray-950 transition-colors text-sm font-medium cursor-pointer">
               Connect Wallet
             </button>
           )}

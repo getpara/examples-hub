@@ -1423,7 +1423,7 @@
     "@tailwindcss/oxide-win32-arm64-msvc" "4.1.10"
     "@tailwindcss/oxide-win32-x64-msvc" "4.1.10"
 
-"@tailwindcss/postcss@^4.1.10":
+"@tailwindcss/postcss@4.1.10":
   version "4.1.10"
   resolved "https://registry.npmjs.org/@tailwindcss/postcss/-/postcss-4.1.10.tgz#28e4edd9266a07e3fbfbdbf802563054c408d56b"
   integrity sha512-B+7r7ABZbkXJwpvt2VMnS6ujcDoR2OOcFaqrLIo1xbcdxje4Vf+VgJdBzNNbrAjBj/rLZ66/tlQ1knIGNLKOBQ==

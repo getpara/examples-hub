@@ -1,11 +1,11 @@
 "use client";
 
-import { useParaSigner } from "@/components/ParaSignerProvider";
+import { useParaSigner } from "@/hooks/useParaSigner";
 import { useAccount, useWallet } from "@getpara/react-sdk";
 import { LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
 import { useState, useEffect } from "react";
 
-export default function EthTransferDemo() {
+export default function SolTransferPage() {
   const [to, setTo] = useState("devwuNsNYACyiEYxRNqMNseBpNnGfnd4ZwNHL7sphqv"); // default send back to faucet
   const [amount, setAmount] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -41,10 +41,11 @@ export default function EthTransferDemo() {
   };
 
   useEffect(() => {
-    if (address) {
+    if (address && signer) {
       fetchBalance();
     }
-  }, [address]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [address, signer]);
 
   const constructTransaction = async (toAddress: string, solAmount: string): Promise<Transaction> => {
     if (!address || !connection) throw new Error("No sender address or connection available");
@@ -79,11 +80,8 @@ export default function EthTransferDemo() {
 
     try {
       const balanceLamports = await connection.getBalance(signer?.sender!);
-
       const transaction = await constructTransaction(toAddress, solAmount);
-
       const estimatedGas = await transaction.getEstimatedFee(connection);
-
       const totalCost = parseFloat(solAmount) * LAMPORTS_PER_SOL + estimatedGas!;
 
       if (totalCost > balanceLamports) {
@@ -193,6 +191,7 @@ export default function EthTransferDemo() {
       setIsLoading(false);
     }
   };
+
   return (
     <div className="container mx-auto px-4">
       <div className="text-center mb-8">
@@ -200,7 +199,7 @@ export default function EthTransferDemo() {
         <p className="text-xl text-gray-600 max-w-2xl mx-auto">
           Send SOL with your connected wallet. This demonstrates a basic SOL transfer using the Para SDK with
           solana-web3.js integration via the{" "}
-          <code className="font-mono text-sm bg-blue-50 text-blue-700 px-2 py-1 rounded-md">ParaSolanaWeb3Signer</code>{" "}
+          <code className="font-mono text-sm bg-gray-50 text-gray-700 px-2 py-1 rounded-none">ParaSolanaWeb3Signer</code>{" "}
           provider.
         </p>
       </div>
@@ -218,7 +217,7 @@ export default function EthTransferDemo() {
             </button>
           </div>
           <div className="px-6 py-3">
-            <p className="text-sm text-gray-500 bg-gray-100 p-2 rounded-md">Network: Devnet</p>
+            <p className="text-sm text-gray-500 bg-gray-100 p-2 rounded-none">Network: Devnet</p>
             <p className="text-lg font-medium text-gray-900">
               {!address
                 ? "Please connect your wallet"
@@ -238,7 +237,7 @@ export default function EthTransferDemo() {
                 ? "bg-green-50 border-green-500 text-green-700"
                 : status.type === "error"
                 ? "bg-red-50 border-red-500 text-red-700"
-                : "bg-blue-50 border-blue-500 text-blue-700"
+                : "bg-gray-50 border-gray-500 text-gray-700"
             }`}>
             <p className="px-6 py-4 break-words">{status.message}</p>
           </div>
@@ -261,7 +260,7 @@ export default function EthTransferDemo() {
               placeholder="5jHY..."
               required
               disabled={isLoading}
-              className="block w-full px-4 py-3 border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-hidden transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
+              className="block w-full px-4 py-3 border border-gray-300 focus:border-gray-500 focus:ring-1 focus:ring-gray-500 outline-hidden transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
             />
           </div>
 
@@ -280,13 +279,13 @@ export default function EthTransferDemo() {
               step="0.01"
               required
               disabled={isLoading}
-              className="block w-full px-4 py-3 border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-hidden transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
+              className="block w-full px-4 py-3 border border-gray-300 focus:border-gray-500 focus:ring-1 focus:ring-gray-500 outline-hidden transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
             />
           </div>
 
           <button
             type="submit"
-            className="w-full rounded-none bg-blue-900 px-6 py-3 text-sm font-medium text-white hover:bg-blue-950 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full rounded-none bg-gray-900 px-6 py-3 text-sm font-medium text-white hover:bg-gray-950 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={!to || !amount || isLoading}>
             {isLoading ? "Sending Transaction..." : "Send Transaction"}
           </button>
@@ -299,7 +298,7 @@ export default function EthTransferDemo() {
                   href={`https://solscan.io/tx/${txSignature}?cluster=devnet`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-3 py-1 text-sm bg-blue-900 text-white hover:bg-blue-950 transition-colors rounded-none">
+                  className="px-3 py-1 text-sm bg-gray-900 text-white hover:bg-gray-950 transition-colors rounded-none">
                   View on Solscan
                 </a>
               </div>
