@@ -1,0 +1,5 @@
+@import "./styles/globals.css";
+
+#para-modal > cpsl-auth-modal {
+  z-index: 9999999999;
+}
