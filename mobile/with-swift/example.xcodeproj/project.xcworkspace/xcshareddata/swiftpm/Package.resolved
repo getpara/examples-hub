@@ -15,8 +15,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/krzyzanowskim/CryptoSwift.git",
       "state" : {
-        "revision" : "729e01bc9b9dab466ac85f21fb9ee2bc1c61b258",
-        "version" : "1.8.4"
+        "revision" : "132f5b209cd0251067f29cdb59c97d9f8a63252a",
+        "version" : "1.8.5"
       }
     },
     {
@@ -24,8 +24,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/marmelroy/PhoneNumberKit",
       "state" : {
-        "revision" : "288b99e9e99926bc8be41220802df83c059fac9b",
-        "version" : "4.0.2"
+        "revision" : "16c847cbdb024a66cf330fa1d6c3d3e6fc827c50",
+        "version" : "4.1.1"
       }
     },
     {
@@ -51,8 +51,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/getpara/swift-sdk",
       "state" : {
-        "branch" : "cosmos",
-        "revision" : "0a4bb20f79bc0689a917448e2e4b134024a99a9a"
+        "branch" : "2.0.0-alpha",
+        "revision" : "d45cbe66fac1ec625c042230396c60e1fabd41f8"
       }
     },
     {

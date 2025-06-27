@@ -229,10 +229,10 @@ packages:
     dependency: transitive
     description:
       name: ed25519_hd_key
-      sha256: "31e191ec97492873067e46dc9cc0c7d55170559c83a478400feffa0627acaccf"
+      sha256: c5c9f11a03f5789bf9dcd9ae88d641571c802640851f1cacdb13123f171b3a26
       url: "https://pub.dev"
     source: hosted
-    version: "2.3.0"
+    version: "2.2.1"
   eip1559:
     dependency: transitive
     description:
