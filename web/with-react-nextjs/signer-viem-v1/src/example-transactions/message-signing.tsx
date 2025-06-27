@@ -1,7 +1,11 @@
 "use client";
 
+<<<<<<<< HEAD:web/with-react-nextjs/signer-viem-v2/src/example-transactions/message-signing.tsx
 import { useParaSigner } from "@/components/ParaSignerProvider";
 import { useAccount } from "@getpara/react-sdk";
+========
+import { usePara } from "@/components/ParaProvider";
+>>>>>>>> main:web/with-react-nextjs/signer-viem-v1/src/example-transactions/message-signing.tsx
 import { useState } from "react";
 import { verifyMessage } from "viem";
 
@@ -16,11 +20,15 @@ export default function MessageSigningDemo() {
     message: string;
   }>({ show: false, type: "success", message: "" });
 
+<<<<<<<< HEAD:web/with-react-nextjs/signer-viem-v2/src/example-transactions/message-signing.tsx
   const { data: account } = useAccount();
   const { walletClient, viemAccount } = useParaSigner();
 
   const isConnected = account?.isConnected;
   const address = viemAccount?.address;
+========
+  const { isConnected, walletId, walletClient, address } = usePara();
+>>>>>>>> main:web/with-react-nextjs/signer-viem-v1/src/example-transactions/message-signing.tsx
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -6,25 +6,19 @@
   "scripts": {
     "build": "tsc -b && vite build",
     "dev": "vite",
-    "postinstall": "npx graz --generate && npx setup-para",
+    "postinstall": "yarn graz --generate",
     "preview": "vite preview"
   },
   "dependencies": {
-<<<<<<< HEAD
-    "@getpara/cosmos-wallet-connectors": "alpha",
-    "@getpara/react-sdk": "alpha",
-    "@tanstack/react-query": "^5.0.0",
-=======
     "@cosmjs/cosmwasm-stargate": "0.33.1",
     "@cosmjs/launchpad": "0.27.1",
     "@cosmjs/proto-signing": "0.33.1",
     "@cosmjs/stargate": "0.33.1",
     "@cosmjs/tendermint-rpc": "0.33.1",
-    "@getpara/cosmos-wallet-connectors": "1.12.0",
+    "@getpara/cosmos-wallet-connectors": "1.16.0",
     "@getpara/graz": "0.1.0",
-    "@getpara/react-sdk": "1.12.0",
+    "@getpara/react-sdk": "1.16.0",
     "@leapwallet/cosmos-social-login-capsule-provider": "0.0.44",
->>>>>>> main
     "long": "5.2.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
@@ -47,6 +41,6 @@
     "vite-plugin-node-polyfills": "0.23.0"
   },
   "resolutions": {
-    "@getpara/react-sdk": "1.12.0"
+    "@getpara/react-sdk": "1.16.0"
   }
 }

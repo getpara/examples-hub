@@ -1,11 +1,10 @@
 "use client";
 
+import { usePara } from "@/components/ParaProvider";
 import { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import { PARA_TEST_TOKEN_CONTRACT_ADDRESS } from ".";
 import ParaTestToken from "@/contracts/artifacts/contracts/ParaTestToken.sol/ParaTestToken.json";
-import { useParaSigner } from "@/components/ParaSignerProvider";
-import { useAccount, useWallet } from "@getpara/react-sdk";
 
 type TokenAttestation = {
   holder: string;
@@ -35,18 +34,16 @@ export default function TypedDataSigningDemo() {
     message: string;
   }>({ show: false, type: "success", message: "" });
 
-  const { provider, signer } = useParaSigner();
-  const { data: account } = useAccount();
-  const { data: wallet } = useWallet();
+  const { isConnected, address, signer, provider } = usePara();
 
   const fetchTokenData = async () => {
-    if (!wallet?.address || !provider) return;
+    if (!address || !provider) return;
 
     setIsBalanceLoading(true);
     try {
       const contract = new ethers.Contract(PARA_TEST_TOKEN_CONTRACT_ADDRESS, ParaTestToken.abi, provider);
 
-      const balance = await contract.balanceOf(wallet?.address);
+      const balance = await contract.balanceOf(address);
       setTokenBalance(ethers.utils.formatEther(balance));
     } catch (error) {
       console.error("Error fetching token data:", error);
@@ -57,10 +54,10 @@ export default function TypedDataSigningDemo() {
   };
 
   useEffect(() => {
-    if (wallet?.address) {
+    if (address) {
       fetchTokenData();
     }
-  }, [wallet]);
+  }, [address]);
 
   const signAttestation = async () => {
     setIsLoading(true);
@@ -71,7 +68,7 @@ export default function TypedDataSigningDemo() {
     if (!signer || provider) return;
 
     try {
-      if (!account?.isConnected || !wallet?.address || provider) {
+      if (!isConnected || !address || provider) {
         throw new Error("Please connect your wallet.");
       }
 
@@ -82,11 +79,11 @@ export default function TypedDataSigningDemo() {
       const contract = new ethers.Contract(PARA_TEST_TOKEN_CONTRACT_ADDRESS, ParaTestToken.abi, provider!);
 
       const name = await contract.name();
-      const nonce = await contract.nonces(wallet?.address);
+      const nonce = await contract.nonces(address);
 
       // Create the attestation data
       const newAttestation: TokenAttestation = {
-        holder: wallet?.address,
+        holder: address,
         balance: tokenBalance,
         purpose,
         timestamp: Math.floor(Date.now() / 1000),
@@ -157,7 +154,7 @@ export default function TypedDataSigningDemo() {
             <h3 className="text-sm font-medium text-gray-900">Token Balance:</h3>
             <button
               onClick={fetchTokenData}
-              disabled={isBalanceLoading || !wallet?.address}
+              disabled={isBalanceLoading || !address}
               className="p-1 text-gray-500 hover:text-gray-700 transition-colors disabled:opacity-50"
               title="Refresh balance">
               <span className={`inline-block ${isBalanceLoading ? "animate-spin" : ""}`}>🔄</span>
@@ -166,7 +163,7 @@ export default function TypedDataSigningDemo() {
           <div className="px-6 py-3">
             <p className="text-sm text-gray-500 bg-gray-100 p-2 rounded-md">Network: Holesky</p>
             <p className="text-lg font-medium text-gray-900">
-              {!wallet?.address
+              {!address
                 ? "Please connect your wallet"
                 : isBalanceLoading
                 ? "Loading..."
@@ -210,7 +207,7 @@ export default function TypedDataSigningDemo() {
 
           <button
             onClick={signAttestation}
-            disabled={!account?.isConnected || isLoading || !tokenBalance}
+            disabled={!isConnected || isLoading || !tokenBalance}
             className="w-full rounded-none bg-blue-900 px-6 py-3 text-sm font-medium text-white hover:bg-blue-950 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
             {isLoading ? "Signing..." : "Sign Attestation"}
           </button>

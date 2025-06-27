@@ -9,8 +9,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@getpara/react-sdk": "1.12.0",
-    "@getpara/wagmi-v2-integration": "1.12.0",
+    "@getpara/react-sdk": "1.16.0",
+    "@getpara/wagmi-v2-integration": "1.16.0",
     "@tanstack/vue-query": "^5.74.3",
     "@wagmi/vue": "^0.1.15",
     "react": "^19.0.0",

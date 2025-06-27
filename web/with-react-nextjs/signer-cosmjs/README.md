@@ -1,8 +1,8 @@
-# Para Signing with Ethers Example
+# Para Signing with CosmJS Example
 
-This example demonstrates how to use the Para SDK with Ethers.js for signing messages and transactions. It provides
-multiple example transaction types using the Para Ethers v6 signer. Authentication is handled through the ParaModal
-before being able to sign.
+This example demonstrates how to use the Para SDK with CosmJS for signing messages and transactions. It provides
+multiple example transaction types using the Para CosmJS signer. Authentication is handled through the ParaModal before
+being able to sign.
 
 ## Prerequisites
 

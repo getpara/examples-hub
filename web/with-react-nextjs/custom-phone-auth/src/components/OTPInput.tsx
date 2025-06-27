@@ -1,4 +1,6 @@
-import React, { useRef, KeyboardEvent, ClipboardEvent } from "react";
+"use client";
+
+import { useRef, KeyboardEvent, ClipboardEvent } from "react";
 
 interface OTPInputProps {
   length?: number;
@@ -9,14 +11,14 @@ interface OTPInputProps {
   disabled?: boolean;
 }
 
-export const OTPInput: React.FC<OTPInputProps> = ({
+export function OTPInput({
   length = 6,
   value,
   onChange,
   onComplete,
   label = "Verification Code",
   disabled = false,
-}) => {
+}: OTPInputProps) {
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const otpArray = value.split("").concat(Array(length).fill("")).slice(0, length);
@@ -81,11 +83,11 @@ export const OTPInput: React.FC<OTPInputProps> = ({
             onKeyDown={(e) => handleKeyDown(index, e)}
             onPaste={handlePaste}
             disabled={disabled}
-            className="w-12 h-12 text-center border border-gray-300 rounded-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg disabled:bg-gray-100 disabled:cursor-not-allowed"
+            className="w-12 h-12 text-center border border-gray-300 rounded-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500 text-lg disabled:bg-gray-100 disabled:cursor-not-allowed"
             autoComplete="off"
           />
         ))}
       </div>
     </div>
   );
-};
+}

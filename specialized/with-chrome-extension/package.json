@@ -1,15 +1,29 @@
 {
+<<<<<<<< HEAD:web/with-react-vite/para-provider/package.json
+  "name": "para-provider",
+========
   "name": "with-chrome-extension",
+>>>>>>>> main:specialized/with-chrome-extension/package.json
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "postinstall": "npx setup-para"
   },
   "dependencies": {
+<<<<<<<< HEAD:web/with-react-vite/para-provider/package.json
+<<<<<<< HEAD:web/with-react-vite/signer-para/package.json
+    "@getpara/react-sdk": "alpha",
+    "@tanstack/react-query": "^5.0.0",
+=======
     "@getpara/react-sdk": "1.12.0",
+>>>>>>> main:web/with-react-vite/para-provider/package.json
+========
+    "@getpara/react-sdk": "1.16.0",
+>>>>>>>> main:specialized/with-chrome-extension/package.json
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },

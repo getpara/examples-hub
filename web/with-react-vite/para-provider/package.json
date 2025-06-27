@@ -1,21 +1,23 @@
 {
+<<<<<<<< HEAD:specialized/with-chrome-extension/package.json
+  "name": "with-chrome-extension",
+========
   "name": "para-provider",
+>>>>>>>> main:web/with-react-vite/para-provider/package.json
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "preview": "vite preview",
-    "postinstall": "npx setup-para"
+    "preview": "vite preview"
   },
   "dependencies": {
-<<<<<<< HEAD:web/with-react-vite/signer-para/package.json
-    "@getpara/react-sdk": "alpha",
-    "@tanstack/react-query": "^5.0.0",
-=======
+<<<<<<<< HEAD:specialized/with-chrome-extension/package.json
     "@getpara/react-sdk": "1.12.0",
->>>>>>> main:web/with-react-vite/para-provider/package.json
+========
+    "@getpara/react-sdk": "1.16.0",
+>>>>>>>> main:web/with-react-vite/para-provider/package.json
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
@@ -33,6 +35,7 @@
     "vite": "^6.1.0",
     "vite-plugin-node-polyfills": "0.23.0",
     "tailwindcss": "4.0.6",
-    "@tailwindcss/vite": "4.0.6"
+    "@tailwindcss/vite": "4.0.6",
+    "@types/chrome": "0.0.317"
   }
 }

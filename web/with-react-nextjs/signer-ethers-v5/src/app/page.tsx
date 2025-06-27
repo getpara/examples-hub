@@ -1,13 +1,12 @@
 "use client";
 
+import { usePara } from "@/components/ParaProvider";
 import { Card } from "@/components/Card";
 import Link from "next/link";
 import { transactionTypes } from "@/example-transactions";
-import { useAccount, useModal } from "@getpara/react-sdk";
 
 export default function Home() {
-  const { data: account } = useAccount();
-  const { openModal } = useModal();
+  const { isConnected, openModal } = usePara();
 
   return (
     <div className="container mx-auto px-4 py-12">
@@ -31,7 +30,7 @@ export default function Home() {
             description={transaction.description}
             path={transaction.path}>
             <div>
-              {account?.isConnected ? (
+              {isConnected ? (
                 <Link
                   href={`/demo/${id}`}
                   className="inline-flex w-full items-center justify-center rounded-none bg-blue-900 px-4 py-2 text-sm font-medium text-white hover:bg-blue-950 transition-colors mt-auto">

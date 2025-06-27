@@ -1,11 +1,10 @@
 "use client";
 
+import { usePara } from "@/components/ParaProvider";
 import { useState, useEffect } from "react";
 import { PARA_TEST_TOKEN_CONTRACT_ADDRESS } from ".";
 import ParaTestToken from "@/contracts/artifacts/contracts/ParaTestToken.sol/ParaTestToken.json";
 import { encodeFunctionData, formatEther, getContract, parseEther } from "viem";
-import { useParaSigner } from "@/components/ParaSignerProvider";
-import { useAccount, useWallet } from "@getpara/react-sdk";
 
 type Operation = {
   type: "mint" | "transfer";
@@ -25,11 +24,7 @@ export default function BatchedTransactionDemo() {
     message: string;
   }>({ show: false, type: "success", message: "" });
 
-  const { data: account } = useAccount();
-  const { walletClient, publicClient, viemAccount } = useParaSigner();
-
-  const isConnected = account?.isConnected;
-  const address = viemAccount?.address;
+  const { isConnected, address, walletClient, publicClient } = usePara();
 
   const fetchTokenData = async () => {
     if (!address) return;
@@ -94,6 +89,7 @@ export default function BatchedTransactionDemo() {
         throw new Error("Please connect your wallet.");
       }
 
+      // Create contract instance with both clients
       const contract = getContract({
         address: PARA_TEST_TOKEN_CONTRACT_ADDRESS,
         abi: ParaTestToken.abi,
@@ -101,6 +97,7 @@ export default function BatchedTransactionDemo() {
         walletClient: walletClient!,
       });
 
+      // Prepare calldata for each operation
       const calldata = operations.map((op) => {
         if (op.type === "mint") {
           return encodeFunctionData({
@@ -127,6 +124,8 @@ export default function BatchedTransactionDemo() {
         account: address,
       });
 
+      console.log("Transaction submitted:", hash);
+
       setTxHash(hash);
       setStatus({
         show: true,
@@ -134,9 +133,12 @@ export default function BatchedTransactionDemo() {
         message: "Transaction submitted. Waiting for confirmation...",
       });
 
-      await publicClient!.waitForTransactionReceipt({
+      // Wait for transaction to be mined
+      const receipt = await publicClient!.waitForTransactionReceipt({
         hash,
       });
+
+      console.log("Transaction confirmed:", receipt);
 
       setStatus({
         show: true,
@@ -144,6 +146,7 @@ export default function BatchedTransactionDemo() {
         message: "Batched operations executed successfully!",
       });
 
+      // Reset form and refresh data
       setOperations([{ type: "mint", recipient: "", amount: "" }]);
       await fetchTokenData();
     } catch (error) {

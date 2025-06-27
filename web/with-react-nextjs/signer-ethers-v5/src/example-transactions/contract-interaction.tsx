@@ -1,11 +1,10 @@
 "use client";
 
+import { usePara } from "@/components/ParaProvider";
 import { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import { PARA_TEST_TOKEN_CONTRACT_ADDRESS } from ".";
 import ParaTestToken from "@/contracts/artifacts/contracts/ParaTestToken.sol/ParaTestToken.json";
-import { useParaSigner } from "@/components/ParaSignerProvider";
-import { useAccount, useWallet } from "@getpara/react-sdk";
 
 export default function ContractInteractionDemo() {
   const [amount, setAmount] = useState("");
@@ -21,23 +20,24 @@ export default function ContractInteractionDemo() {
     message: string;
   }>({ show: false, type: "success", message: "" });
 
-  const { provider, signer } = useParaSigner();
-  const { data: account } = useAccount();
-  const { data: wallet } = useWallet();
+  const { isConnected, walletId, address, signer, provider } = usePara();
 
   const fetchContractData = async () => {
-    if (!wallet?.address || !provider) return;
+    if (!address || !provider) return;
 
     setIsBalanceLoading(true);
     try {
       const contract = new ethers.Contract(PARA_TEST_TOKEN_CONTRACT_ADDRESS, ParaTestToken.abi, provider);
 
-      const balance = await contract.balanceOf(!wallet?.address);
+      // Get token balance
+      const balance = await contract.balanceOf(address);
       setTokenBalance(ethers.utils.formatEther(balance));
 
-      const minted = await contract.mintedAmount(!wallet?.address);
+      // Get minted amount for address
+      const minted = await contract.mintedAmount(address);
       setMintedAmount(ethers.utils.formatEther(minted));
 
+      // Get mint limit
       const limit = await contract.MINT_LIMIT();
       setMintLimit(ethers.utils.formatEther(limit));
     } catch (error) {
@@ -51,10 +51,10 @@ export default function ContractInteractionDemo() {
   };
 
   useEffect(() => {
-    if (!wallet?.address) {
+    if (address) {
       fetchContractData();
     }
-  }, [wallet]);
+  }, [address]);
 
   const handleMint = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,15 +65,21 @@ export default function ContractInteractionDemo() {
     if (!signer) return;
 
     try {
-      if (!account?.isConnected) {
+      if (!isConnected) {
         throw new Error("Please connect your wallet to mint tokens.");
       }
 
+      if (!walletId) {
+        throw new Error("No wallet ID found. Please reconnect your wallet.");
+      }
+
+      // Validate amount
       const amountFloat = parseFloat(amount);
       if (isNaN(amountFloat) || amountFloat <= 0) {
         throw new Error("Please enter a valid amount greater than 0.");
       }
 
+      // Check if mint would exceed limit
       if (mintedAmount && mintLimit) {
         const currentMinted = parseFloat(mintedAmount);
         const limit = parseFloat(mintLimit);
@@ -95,7 +101,8 @@ export default function ContractInteractionDemo() {
         message: "Transaction submitted. Waiting for confirmation...",
       });
 
-      await tx.wait();
+      // Wait for transaction to be mined
+      const receipt = await tx.wait();
 
       setStatus({
         show: true,
@@ -134,7 +141,7 @@ export default function ContractInteractionDemo() {
             <h3 className="text-sm font-medium text-gray-900">Contract Information:</h3>
             <button
               onClick={fetchContractData}
-              disabled={isBalanceLoading || !!wallet?.address}
+              disabled={isBalanceLoading || !address}
               className="p-1 text-gray-500 hover:text-gray-700 transition-colors disabled:opacity-50"
               title="Refresh data">
               <span className={`inline-block ${isBalanceLoading ? "animate-spin" : ""}`}>🔄</span>
@@ -144,7 +151,7 @@ export default function ContractInteractionDemo() {
             <div>
               <p className="text-sm text-gray-600">Current Balance:</p>
               <p className="text-lg font-medium text-gray-900">
-                {!!wallet?.address
+                {!address
                   ? "Please connect your wallet"
                   : isBalanceLoading
                   ? "Loading..."
@@ -156,7 +163,7 @@ export default function ContractInteractionDemo() {
             <div>
               <p className="text-sm text-gray-600">Amount Minted:</p>
               <p className="text-lg font-medium text-gray-900">
-                {!!wallet?.address
+                {!address
                   ? "Please connect your wallet"
                   : isBalanceLoading
                   ? "Loading..."
@@ -199,14 +206,14 @@ export default function ContractInteractionDemo() {
               step="0.01"
               required
               disabled={isLoading}
-              className="block w-full px-4 py-3 border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-hidden transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
+              className="block w-full px-4 py-3 border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
             />
           </div>
 
           <button
             type="submit"
             className="w-full rounded-none bg-blue-900 px-6 py-3 text-sm font-medium text-white hover:bg-blue-950 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={!amount || isLoading || !account?.isConnected}>
+            disabled={!amount || isLoading || !isConnected}>
             {isLoading ? "Minting Tokens..." : "Mint Tokens"}
           </button>
 

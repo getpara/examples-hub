@@ -1,7 +1,14 @@
-import Header from "@/components/Header";
-import "./globals.css";
+import type { Metadata } from "next";
+import "@/styles/globals.css";
 import "@getpara/react-sdk/styles.css";
-import { Providers } from "./Providers";
+import Header from "@/components/layout/Header";
+import { ParaProvider } from "@/context/ParaProvider";
+import { QueryProvider } from "@/context/QueryProvider";
+
+export const metadata: Metadata = {
+  title: "Para Solana Web3 Integration",
+  description: "Solana Web3.js integration with Para SDK",
+};
 
 export default function RootLayout({
   children,
@@ -11,10 +18,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <Providers>
-          <Header />
-          <main>{children}</main>
-        </Providers>
+        <QueryProvider>
+          <ParaProvider>
+            <Header />
+            <main>{children}</main>
+          </ParaProvider>
+        </QueryProvider>
       </body>
     </html>
   );

@@ -1,10 +1,9 @@
 "use client";
 
+import { usePara } from "@/components/ParaProvider";
 import { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import ParaTestToken from "@/contracts/artifacts/contracts/ParaTestToken.sol/ParaTestToken.json";
-import { useParaSigner } from "@/components/ParaSignerProvider";
-import { useAccount, useWallet } from "@getpara/react-sdk";
 
 export default function ContractDeploymentDemo() {
   const [isLoading, setIsLoading] = useState(false);
@@ -21,16 +20,14 @@ export default function ContractDeploymentDemo() {
     message: string;
   }>({ show: false, type: "success", message: "" });
 
-  const { provider, signer } = useParaSigner();
-  const { data: account } = useAccount();
-  const { data: wallet } = useWallet();
+  const { isConnected, walletId, address, signer, provider } = usePara();
 
   const fetchBalance = async () => {
-    if (!wallet?.address || !provider) return;
+    if (!address || !provider) return;
 
     setIsBalanceLoading(true);
     try {
-      const balanceWei = await provider.getBalance(wallet?.address);
+      const balanceWei = await provider.getBalance(address);
       setBalance(ethers.utils.formatEther(balanceWei));
     } catch (error) {
       console.error("Error fetching balance:", error);
@@ -41,10 +38,10 @@ export default function ContractDeploymentDemo() {
   };
 
   useEffect(() => {
-    if (wallet?.address) {
+    if (address) {
       fetchBalance();
     }
-  }, [wallet]);
+  }, [address]);
 
   const deployContract = async () => {
     setIsLoading(true);
@@ -54,8 +51,12 @@ export default function ContractDeploymentDemo() {
     if (!signer) return;
 
     try {
-      if (!account?.isConnected) {
+      if (!isConnected) {
         throw new Error("Please connect your wallet to deploy the contract.");
+      }
+
+      if (!walletId) {
+        throw new Error("No wallet ID found. Please reconnect your wallet.");
       }
 
       const factory = new ethers.ContractFactory(ParaTestToken.abi, ParaTestToken.bytecode, signer);
@@ -95,6 +96,7 @@ export default function ContractDeploymentDemo() {
         message: "Contract deployed successfully!",
       });
 
+      // Refresh balance after deployment
       await fetchBalance();
     } catch (error) {
       console.error("Error deploying contract:", error);
@@ -125,7 +127,7 @@ export default function ContractDeploymentDemo() {
             <h3 className="text-sm font-medium text-gray-900">Current Balance:</h3>
             <button
               onClick={fetchBalance}
-              disabled={isBalanceLoading || !wallet?.address}
+              disabled={isBalanceLoading || !address}
               className="p-1 text-gray-500 hover:text-gray-700 transition-colors disabled:opacity-50"
               title="Refresh balance">
               <span className={`inline-block ${isBalanceLoading ? "animate-spin" : ""}`}>🔄</span>
@@ -134,7 +136,7 @@ export default function ContractDeploymentDemo() {
           <div className="px-6 py-3">
             <p className="text-sm text-gray-500 bg-gray-100 p-2 rounded-md mb-2">Network: Holesky</p>
             <p className="text-lg font-medium text-gray-900">
-              {!wallet?.address
+              {!address
                 ? "Please connect your wallet"
                 : isBalanceLoading
                 ? "Loading..."
@@ -161,7 +163,7 @@ export default function ContractDeploymentDemo() {
         <button
           onClick={deployContract}
           className="w-full rounded-none bg-blue-900 px-6 py-3 text-sm font-medium text-white hover:bg-blue-950 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          disabled={!account?.isConnected || isLoading}>
+          disabled={!isConnected || isLoading}>
           {isLoading ? "Deploying Contract..." : "Deploy Contract"}
         </button>
 

@@ -7,28 +7,28 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "postinstall": "npx setup-para"
+    "typecheck": "tsc --noEmit",
+    "postinstall": "yarn setup-para"
   },
   "dependencies": {
-    "@getpara/ethers-v6-integration": "alpha",
-    "@getpara/react-sdk": "alpha",
-    "@getpara/server-sdk": "alpha",
-    "@tanstack/react-query": "5.75.2",
-    "ethers": "6.13.7",
-    "next": "15.3.1",
-    "react": "19.1.0",
-    "react-dom": "19.1.0"
+    "@getpara/ethers-v6-integration": "2.0.0-alpha.26",
+    "@getpara/react-sdk": "2.0.0-alpha.26",
+    "@getpara/server-sdk": "2.0.0-alpha.26",
+    "@tanstack/react-query": "5.81.2",
+    "ethers": "6.14.4",
+    "next": "15.1.5",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.1.5",
+    "@tailwindcss/postcss": "4.1.10",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "eslint": "^9.29.0",
+    "eslint-config-next": "^15.3.4",
     "postcss": "^8",
-    "tailwindcss": "^4.1.5",
+    "tailwindcss": "^4.1.10",
     "typescript": "^5"
-  },
-  "engines": {
-    "node": ">=20.0.0"
   }
 }

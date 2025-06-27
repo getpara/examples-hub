@@ -633,17 +633,10 @@
     "@ethersproject/properties" "^5.8.0"
     "@ethersproject/strings" "^5.8.0"
 
-<<<<<<< HEAD:web/with-react-vite/signer-para/yarn.lock
-"@getpara/core-components@2.0.0-dev.0":
-  version "2.0.0-dev.0"
-  resolved "https://registry.yarnpkg.com/@getpara/core-components/-/core-components-2.0.0-dev.0.tgz#a85dae7baf5e543954328ac4c6fc0c4d8c6c20d0"
-  integrity sha512-PQ27WFvnFaJUU0bW90Y8pjzIPTIPCj9O5ObDHnS40zJeE6ig+NhOFyGfwJSf4yxRa0us7orN46D33IhiKrnZUA==
-=======
 "@getpara/core-components@1.12.0":
   version "1.12.0"
   resolved "https://registry.yarnpkg.com/@getpara/core-components/-/core-components-1.12.0.tgz#7b594b7d336fb32b8d488519d997aa235bf0e52f"
   integrity sha512-q9y1WXQn5StIR0foBlCssCfB1md++agdsk7D3pZcfz9Yr5UXYkXvNpjR2Bjw/Q07mu4eqfibRgqkPK4/0GAr2Q==
->>>>>>> main:specialized/with-chrome-extension/yarn.lock
   dependencies:
     "@stencil/core" "^4.7.0"
     color-blend "^4.0.0"
@@ -652,41 +645,21 @@
     inputmask "5.0.9"
     qrcode-with-logos "1.1.1"
 
-<<<<<<< HEAD:web/with-react-vite/signer-para/yarn.lock
-"@getpara/core-sdk@2.0.0-dev.0":
-  version "2.0.0-dev.0"
-  resolved "https://registry.yarnpkg.com/@getpara/core-sdk/-/core-sdk-2.0.0-dev.0.tgz#9c66eddedfb1f0fe30ae61fe4f9f6fe12205cfca"
-  integrity sha512-8xu+s2ENHoflWkSISNpqA34JlMz6zw35U63Hvkd4G8/GNyfIrCCXmhSFpOHtFtOZR+ZytPlTfpKseTPv5gXFng==
-=======
 "@getpara/core-sdk@1.12.0":
   version "1.12.0"
   resolved "https://registry.yarnpkg.com/@getpara/core-sdk/-/core-sdk-1.12.0.tgz#2c88cbc796f6a432bb014a0f865ea932bbb2e5a9"
   integrity sha512-r6UXdyqYPswIF96tDNB+hIFWRjAVrZTWcK64Zdlt1imLn7MqtwsQ1devvJ9D8xEBxjCB0lg1a0Uk9myRsAHV9A==
->>>>>>> main:specialized/with-chrome-extension/yarn.lock
   dependencies:
     "@celo/utils" "^8.0.2"
     "@cosmjs/encoding" "^0.32.4"
-<<<<<<< HEAD:web/with-react-vite/signer-para/yarn.lock
-    "@getpara/user-management-client" "2.0.0-dev.0"
-=======
     "@ethereumjs/util" "^9.1.0"
     "@getpara/user-management-client" "1.12.0"
->>>>>>> main:specialized/with-chrome-extension/yarn.lock
     "@noble/hashes" "^1.5.0"
     base64url "^3.0.1"
     libphonenumber-js "1.11.2"
     node-forge "^1.3.1"
     uuid "^11.1.0"
 
-<<<<<<< HEAD:web/with-react-vite/signer-para/yarn.lock
-"@getpara/react-common@2.0.0-dev.0":
-  version "2.0.0-dev.0"
-  resolved "https://registry.yarnpkg.com/@getpara/react-common/-/react-common-2.0.0-dev.0.tgz#b9b118a2962be40b626b5c5a5416c2ad51ff48b5"
-  integrity sha512-kxsDyuXg99/+RpRMteW2iWGsP42iy3YCTF5E9sFZ6gbN0oBzOtiFd/cleySb7kA9IeZGUhXldGiO6RYJquYe6w==
-  dependencies:
-    "@getpara/react-components" "2.0.0-dev.0"
-    "@getpara/web-sdk" "2.0.0-dev.0"
-=======
 "@getpara/react-common@1.12.0":
   version "1.12.0"
   resolved "https://registry.yarnpkg.com/@getpara/react-common/-/react-common-1.12.0.tgz#885471ca7bac3bdadb8fbc18a46d9594a95caf1f"
@@ -694,7 +667,6 @@
   dependencies:
     "@getpara/react-components" "1.12.0"
     "@getpara/web-sdk" "1.12.0"
->>>>>>> main:specialized/with-chrome-extension/yarn.lock
     "@moonpay/moonpay-react" "^1.8.3"
     "@ramp-network/ramp-instant-sdk" "^4.0.5"
     "@stripe/crypto" "^0.0.4"
@@ -703,23 +675,6 @@
     styled-components "^6.1.8"
     ua-parser-js "^2.0.2"
 
-<<<<<<< HEAD:web/with-react-vite/signer-para/yarn.lock
-"@getpara/react-components@2.0.0-dev.0":
-  version "2.0.0-dev.0"
-  resolved "https://registry.yarnpkg.com/@getpara/react-components/-/react-components-2.0.0-dev.0.tgz#7cf9b242937ff86d9dc21e2338e65ca0a001ec31"
-  integrity sha512-H7931GjISAKyGLMrtVOW7pXvhWjdAKARx4bUkw5PQ7ze7KanG8lCj7qSMFHFmwz41aorEIDx5UZKDMrOH60xdA==
-  dependencies:
-    "@getpara/core-components" "2.0.0-dev.0"
-
-"@getpara/react-sdk@2.0.0-dev.0":
-  version "2.0.0-dev.0"
-  resolved "https://registry.yarnpkg.com/@getpara/react-sdk/-/react-sdk-2.0.0-dev.0.tgz#d52d8603e4331baf59f49b6107d402d467895a32"
-  integrity sha512-DDMyjl8IrkYzI4DGfADs6OLb+QU+mF8Rhtav9oZm7vzwYx4XRRcnNruFRp+yvV5OewWJ24aO1oVuAc0T3YVI8w==
-  dependencies:
-    "@getpara/react-common" "2.0.0-dev.0"
-    "@getpara/react-components" "2.0.0-dev.0"
-    "@getpara/web-sdk" "2.0.0-dev.0"
-=======
 "@getpara/react-components@1.12.0":
   version "1.12.0"
   resolved "https://registry.yarnpkg.com/@getpara/react-components/-/react-components-1.12.0.tgz#1bb1902cbb614d4dcf7891009ed53dc9cea45fdf"
@@ -735,7 +690,6 @@
     "@getpara/react-common" "1.12.0"
     "@getpara/react-components" "1.12.0"
     "@getpara/web-sdk" "1.12.0"
->>>>>>> main:specialized/with-chrome-extension/yarn.lock
     "@tanstack/react-query" "^5.0.0"
     date-fns "^3.6.0"
     framer-motion "11.3.28"
@@ -744,32 +698,14 @@
     zustand "^4.5.2"
     zustand-sync-tabs "^0.2.2"
 
-<<<<<<< HEAD:web/with-react-vite/signer-para/yarn.lock
-"@getpara/user-management-client@2.0.0-dev.0":
-  version "2.0.0-dev.0"
-  resolved "https://registry.yarnpkg.com/@getpara/user-management-client/-/user-management-client-2.0.0-dev.0.tgz#bc1e65a14ed9b23f999fbb79d3acd2155f183be8"
-  integrity sha512-XCGOFjvxWTKIKrqziotxttvb9nPbvJSw2y2T1ixorfoG2R3yd8NqFGdb0DBeKo8O0AgZu9zxFfpKvF4CVGO8+A==
-=======
 "@getpara/user-management-client@1.12.0":
   version "1.12.0"
   resolved "https://registry.yarnpkg.com/@getpara/user-management-client/-/user-management-client-1.12.0.tgz#25dcb3d40c2e0cfabdbf21afe98609510ae2ac91"
   integrity sha512-fs/V+I+dDmApbLpfKKRssabHpA5E7k4bgbMSMlr2c4ALC9ZnmP68dt78Jkd5f2kcEwNj3+N8S3SPMso2uqtMuA==
->>>>>>> main:specialized/with-chrome-extension/yarn.lock
   dependencies:
     axios "^1.8.4"
     libphonenumber-js "1.11.2"
 
-<<<<<<< HEAD:web/with-react-vite/signer-para/yarn.lock
-"@getpara/web-sdk@2.0.0-dev.0":
-  version "2.0.0-dev.0"
-  resolved "https://registry.yarnpkg.com/@getpara/web-sdk/-/web-sdk-2.0.0-dev.0.tgz#c38153372311fe4ce23dc554ba06979645d22153"
-  integrity sha512-f2B3LCxRn/Biz/3R5BL+haYOWNltlapZX+K/HDYQVzO5nt5nVKCaYHA0Tbs/9IhoNKL0YTRUdhV59vLEY1PVyg==
-  dependencies:
-    "@getpara/core-sdk" "2.0.0-dev.0"
-    "@getpara/user-management-client" "2.0.0-dev.0"
-    "@sentry/browser" "^9.1.0"
-    assert "^2.1.0"
-=======
 "@getpara/web-sdk@1.12.0":
   version "1.12.0"
   resolved "https://registry.yarnpkg.com/@getpara/web-sdk/-/web-sdk-1.12.0.tgz#10c33a9a0f7096bf98c82ab66bce0b28e8093e85"
@@ -777,7 +713,6 @@
   dependencies:
     "@getpara/core-sdk" "1.12.0"
     "@getpara/user-management-client" "1.12.0"
->>>>>>> main:specialized/with-chrome-extension/yarn.lock
     base64url "3.0.1"
     buffer "6.0.3"
     cbor-web "8.1.0"

@@ -7,16 +7,10 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "check": "svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json",
-    "postinstall": "npx setup-para"
+    "check": "svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json"
   },
   "dependencies": {
-<<<<<<< HEAD
-    "@getpara/react-sdk": "alpha",
-    "@tanstack/react-query": "^5.0.0",
-=======
-    "@getpara/react-sdk": "1.12.0",
->>>>>>> main
+    "@getpara/react-sdk": "1.16.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },

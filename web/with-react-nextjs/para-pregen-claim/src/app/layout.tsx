@@ -1,5 +1,5 @@
-import "./globals.css";
-import { Providers } from "./Providers";
+import "@/styles/globals.css";
+import { QueryProvider, ParaProvider } from "@/context";
 
 export default function RootLayout({
   children,
@@ -9,7 +9,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <Providers>{children}</Providers>
+        <QueryProvider>
+          <ParaProvider>
+            {children}
+          </ParaProvider>
+        </QueryProvider>
       </body>
     </html>
   );

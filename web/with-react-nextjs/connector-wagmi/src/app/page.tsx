@@ -1,24 +1,124 @@
 "use client";
 
+import { useState } from "react";
+import { useAccount, useSendTransaction, useWaitForTransactionReceipt } from "wagmi";
+import { parseEther } from "viem";
 import "@getpara/react-sdk/styles.css";
-import { WalletDisplay } from "@/components/WalletDisplay";
-import { useAccount } from "wagmi";
-import { WalletConnectors } from "@/components/WalletConnectors";
+import { BalanceCard } from "@/components/ui/BalanceCard";
+import { StatusAlert } from "@/components/ui/StatusAlert";
+import { TransactionHash } from "@/components/ui/TransactionHash";
+import { ConnectWalletCard } from "@/components/ui/ConnectWalletCard";
+import { TransferForm } from "@/components/ui/TransferForm";
+import { useModal } from "@/context/ModalContext";
+import { isValidEthereumAddress, isValidAmount } from "@/utils/validation";
 
 export default function Home() {
-  const { address, isConnected } = useAccount();
+  const [to, setTo] = useState("");
+  const [amount, setAmount] = useState("");
+  const { openModal } = useModal();
+  const { isConnected, address } = useAccount();
+  const {
+    sendTransaction,
+    data: hash,
+    isPending: isSending,
+    isError: isSendError,
+    error: sendError,
+  } = useSendTransaction();
+
+  const {
+    isLoading: isConfirming,
+    isSuccess: isConfirmed,
+    isError: isConfirmError,
+    error: confirmError,
+  } = useWaitForTransactionReceipt({ hash });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      if (!isConnected) {
+        throw new Error("Please connect your wallet to send a transaction.");
+      }
+
+      if (!isValidEthereumAddress(to)) {
+        throw new Error("Invalid recipient address format.");
+      }
+
+      if (!isValidAmount(amount)) {
+        throw new Error("Please enter a valid amount greater than 0.");
+      }
+
+      const parsedAmount = parseEther(amount);
+
+      sendTransaction({
+        to: to as `0x${string}`,
+        value: parsedAmount,
+      });
+
+      // Reset form on successful submission
+      if (!isSendError && !isConfirmError) {
+        setTo("");
+        setAmount("");
+      }
+    } catch (error) {
+      console.error("Transaction error:", error);
+    }
+  };
+
+  // Derive status from transaction state
+  const isLoading = isSending || isConfirming;
+  const isError = isSendError || isConfirmError;
+  const error = sendError || confirmError;
+
+  const status = {
+    show: isLoading || isError || isConfirmed,
+    type: isLoading ? ("info" as const) : isError ? ("error" as const) : ("success" as const),
+    message: isSending
+      ? "Submitting transaction..."
+      : isConfirming
+      ? "Waiting for confirmation..."
+      : isError
+      ? error?.message || "Failed to send transaction. Please try again."
+      : "Transaction confirmed successfully!",
+  };
 
   return (
-    <main className="flex flex-col items-center justify-center min-h-screen gap-6 p-8">
-      <h1 className="text-2xl font-bold">Para + Wagmi Example</h1>
-      <p className="max-w-md text-center">
-        This minimal example demonstrates how to integrate the Para Modal using the Wagmi SDK in a Next.js (App Router)
-        project.
-      </p>
-      <p className="max-w-md text-center">
-        Use the Wagmi SDK when you're trying to create your own custom wallet connection modal.
-      </p>
-      {isConnected ? <WalletDisplay walletAddress={address} /> : <WalletConnectors />}
-    </main>
+    <div className="container mx-auto px-4 py-12">
+      <div className="text-center mb-12">
+        <h1 className="text-4xl font-bold tracking-tight mb-4">Para + Wagmi Demo</h1>
+        <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+          Send ETH with your connected wallet using Wagmi. This demonstrates using Para as a wallet connector alongside
+          other wallet options in a custom modal.
+        </p>
+      </div>
+
+      {!isConnected ? (
+        <ConnectWalletCard onConnect={openModal} />
+      ) : (
+        <div className="max-w-xl mx-auto">
+          <BalanceCard
+            address={address}
+            onRefresh={() => {}}
+          />
+
+          <StatusAlert
+            show={status.show}
+            type={status.type}
+            message={status.message}
+          />
+
+          <TransferForm
+            to={to}
+            amount={amount}
+            isLoading={isLoading}
+            onToChange={setTo}
+            onAmountChange={setAmount}
+            onSubmit={handleSubmit}
+          />
+
+          <TransactionHash txHash={hash || ""} />
+        </div>
+      )}
+    </div>
   );
 }

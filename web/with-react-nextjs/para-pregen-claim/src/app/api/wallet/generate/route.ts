@@ -1,18 +1,11 @@
 import { v4 as uuidv4 } from "uuid";
-import { Environment, Para } from "@getpara/server-sdk";
 import { walletStore } from "@/lib/store";
+import { getParaClient } from "@/lib/para/client";
 import { NextResponse } from "next/server";
 
-export async function GET() {
+export async function POST() {
   try {
-    if (!process.env.NEXT_PUBLIC_PARA_API_KEY) {
-      throw new Error("NEXT_PUBLIC_PARA_API_KEY is not defined in the environment variables");
-    }
-
-    const para = new Para(
-      (process.env.NEXT_PUBLIC_PARA_ENVIRONMENT as Environment) ?? Environment.BETA,
-      process.env.NEXT_PUBLIC_PARA_API_KEY
-    );
+    const para = getParaClient();
     const uuid = uuidv4();
 
     const hasPregenWallet = await para.hasPregenWallet({
