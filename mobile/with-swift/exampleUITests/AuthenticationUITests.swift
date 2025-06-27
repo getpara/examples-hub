@@ -222,7 +222,7 @@ class AuthenticationUITests: XCTestCase {
         XCTAssertTrue(webView2.waitForExistence(timeout: TestConstants.longTimeout), "Password login web view should appear")
 
         // Find password field for login
-        let passwordFieldLogin = webView2.secureTextFields["Enter a password"]
+        let passwordFieldLogin = webView2.secureTextFields["Enter password"]
         XCTAssertTrue(passwordFieldLogin.waitForExistence(timeout: TestConstants.defaultTimeout), "Login password field should exist")
 
         // Enter password

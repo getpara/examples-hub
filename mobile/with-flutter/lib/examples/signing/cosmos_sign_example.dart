@@ -293,7 +293,7 @@ class _CosmosSignExampleState extends State<CosmosSignExample> {
           ),
           const SizedBox(height: 16),
           ElevatedButton(
-            onPressed: (_isLoading || _messageController.text.isEmpty) ? null : _signMessage,
+            onPressed: _signMessage,
             child: const Text('Sign Message'),
           ),
         ],
