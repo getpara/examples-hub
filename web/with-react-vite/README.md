@@ -1,8 +1,12 @@
-# Para Modal + Multichain Wallets Example
+# Para Modal + Multichain Wallets Example (v2.0.0-alpha)
 
-This example demonstrates integrating External Wallets across multiple ecosystems (EVM, Solana, Cosmos) like Metamask,
-Phantom, and or Keplr, with the Para Modal for user authentication. It provides a minimal setup showing how to configure
-and trigger the modal for login flows using the Para React SDK.
+This example demonstrates the latest Para Modal alpha version (2.0.0-alpha.26) with comprehensive multichain support. It showcases seamless integration with wallets across multiple blockchain ecosystems:
+
+- **EVM**: MetaMask, WalletConnect, and other EVM-compatible wallets
+- **Solana**: Phantom, Solflare, and Solana Mobile Wallet Adapter
+- **Cosmos**: Keplr and other Cosmos ecosystem wallets
+
+The example provides a minimal setup showing how to configure and trigger the Para Modal for unified authentication flows across all supported chains.
 
 ## Prerequisites
 
