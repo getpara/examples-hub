@@ -1,12 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { useAccount, useModal, useWallet, useSignMessage, useCreateWallet } from "@getpara/react-sdk";
+import { useAccount, useModal, useWallet, useSignMessage } from "@getpara/react-sdk";
 import { StatusAlert } from "@/components/ui/StatusAlert";
 import { ConnectWalletCard } from "@/components/ui/ConnectWalletCard";
 import { SignMessageForm } from "@/components/ui/SignMessageForm";
 import { SignatureDisplay } from "@/components/ui/SignatureDisplay";
-import { useWalletClient } from "wagmi";
 
 export default function Home() {
   const [message, setMessage] = useState("Hello Para!");
