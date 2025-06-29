@@ -21,7 +21,7 @@ export function ParaProvider({
       }}
       externalWalletConfig={{
         wallets: ["GLOW", "PHANTOM", "BACKPACK", "SOLFLARE"],
-        createLinkedEmbeddedForExternalWallets: ["GLOW"],
+        createLinkedEmbeddedForExternalWallets: ["GLOW", "PHANTOM", "BACKPACK", "SOLFLARE"],
         solanaConnector: {
           config: {
             endpoint,

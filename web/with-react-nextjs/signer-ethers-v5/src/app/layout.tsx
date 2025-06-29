@@ -1,22 +1,13 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import { ParaProvider } from "@/components/ParaProvider";
-import Header from "@/components/Header";
-import "./globals.css";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+import { QueryProvider } from "@/context/QueryProvider";
+import { ParaProvider } from "@/context/ParaProvider";
+import Header from "@/components/layout/Header";
+import "@/styles/globals.css";
+import "@getpara/react-sdk/styles.css";
 
 export const metadata: Metadata = {
-  title: "Para Signing",
-  description: "An example showcasing how to sign with the Para SDK",
+  title: "Para Ethers v5 Signer",
+  description: "An example showcasing how to sign with the Para SDK using Ethers v5",
 };
 
 export default function RootLayout({
@@ -26,11 +17,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <ParaProvider>
-          <Header />
-          <main>{children}</main>
-        </ParaProvider>
+      <body className="antialiased">
+        <QueryProvider>
+          <ParaProvider>
+            <Header />
+            <main>{children}</main>
+          </ParaProvider>
+        </QueryProvider>
       </body>
     </html>
   );

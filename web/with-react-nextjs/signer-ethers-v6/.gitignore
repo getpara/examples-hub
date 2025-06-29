@@ -43,3 +43,6 @@ next-env.d.ts
 src/cache
 
 .next
+
+# Analysis documents
+ETHERS_V5_V6_COMPARISON.md

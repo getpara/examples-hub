@@ -4,31 +4,35 @@
   "private": true,
   "scripts": {
     "build": "next build",
-    "compile": "hardhat compile",
     "dev": "next dev",
     "lint": "next lint",
     "start": "next start",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "setup-para": "@getpara/cli setup",
+    "postinstall": "yarn setup-para"
   },
   "dependencies": {
     "@getpara/cosmjs-v0-integration": "2.0.0-alpha.26",
     "@getpara/react-sdk": "2.0.0-alpha.26",
     "@cosmjs/stargate": "0.33.1",
     "@cosmjs/cosmwasm-stargate": "0.33.1",
+    "@cosmjs/proto-signing": "0.33.1",
+    "@cosmjs/amino": "0.33.1",
+    "@tanstack/react-query": "5.81.2",
+    "@tanstack/react-query-devtools": "5.81.2",
     "next": "15.1.5",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
-    "@nomicfoundation/hardhat-ethers": "^3.0.8",
-    "@openzeppelin/contracts": "^5.2.0",
+    "@tailwindcss/postcss": "4.1.10",
     "@types/node": "^22.10.10",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "hardhat": "^2.22.18",
+    "eslint": "^8",
+    "eslint-config-next": "15.1.5",
     "postcss": "^8",
-    "tailwindcss": "^3.4.1",
-    "ts-node": "^10.9.2",
+    "tailwindcss": "^4.1.10",
     "typescript": "^5.7.3"
   }
 }
