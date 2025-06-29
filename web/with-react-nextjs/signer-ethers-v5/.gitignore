@@ -43,3 +43,6 @@ next-env.d.ts
 src/cache
 
 .next
+
+# Analysis documents
+TRANSACTION_ANALYSIS.md

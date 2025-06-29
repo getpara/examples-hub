@@ -43,3 +43,11 @@ next-env.d.ts
 src/cache
 
 .next
+
+# Hardhat files
+cache
+artifacts
+hardhat.config.js
+
+# Analysis documents
+COSMJS_REFACTOR.md

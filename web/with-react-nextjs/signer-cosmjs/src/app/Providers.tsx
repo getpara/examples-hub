@@ -1,45 +1,28 @@
 "use client";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { ParaProvider } from "@getpara/react-sdk";
-import { ParaSignerProvider } from "@/components/ParaSignerProvider";
-import { para } from "@/client/para";
+import { API_KEY, ENVIRONMENT } from "@/config/constants";
+import Header from "@/components/layout/Header";
 
 const queryClient = new QueryClient();
 
-export function Providers({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       <ParaProvider
-        paraClientConfig={para}
-        config={{ appName: "Para Modal Example" }}
-        paraModalConfig={{
-          disableEmailLogin: false,
-          disablePhoneLogin: false,
-          authLayout: ["AUTH:FULL"],
-          oAuthMethods: ["APPLE", "DISCORD", "FACEBOOK", "FARCASTER", "GOOGLE", "TWITTER"],
-          onRampTestMode: true,
-          theme: {
-            foregroundColor: "#2D3648",
-            backgroundColor: "#FFFFFF",
-            accentColor: "#0066CC",
-            darkForegroundColor: "#E8EBF2",
-            darkBackgroundColor: "#1A1F2B",
-            darkAccentColor: "#4D9FFF",
-            mode: "light",
-            borderRadius: "none",
-            font: "Inter",
-          },
-          logo: "/para.svg",
-          recoverySecretStepEnabled: true,
-          twoFactorAuthEnabled: false,
+        paraClientConfig={{
+          apiKey: API_KEY!,
+          env: ENVIRONMENT,
+        }}
+        config={{
+          appName: "Para + CosmJS Demo",
         }}>
-        <ParaSignerProvider>{children}</ParaSignerProvider>
+        <Header />
+        <main className="min-h-screen">{children}</main>
       </ParaProvider>
+      <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   );
 }
