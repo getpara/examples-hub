@@ -329,7 +329,6 @@ struct CosmosWalletView: View {
         }
     }
 
-
     private func checkSession() {
         isLoading = true
         Task {
@@ -457,38 +456,38 @@ struct CosmosWalletView: View {
         // For proto signing, we need actual protobuf-encoded bytes
         // This is a minimal valid SignDoc for demo purposes
         // In a real app, you'd use @cosmjs/proto-signing to construct this
-        
+
         // Create a minimal but valid SignDoc structure
         // SignDoc has: body_bytes (field 1), auth_info_bytes (field 2), chain_id (field 3), account_number (field 4)
         // This represents an empty transaction with minimal required fields
         let (chainId, _, _) = getChainConfig()
-        
+
         // Manually construct a minimal protobuf SignDoc
         // Field 1 (body_bytes): empty - tag 0x0A (field 1, wire type 2), length 0
-        // Field 2 (auth_info_bytes): empty - tag 0x12 (field 2, wire type 2), length 0  
+        // Field 2 (auth_info_bytes): empty - tag 0x12 (field 2, wire type 2), length 0
         // Field 3 (chain_id): actual chain ID - tag 0x1A (field 3, wire type 2)
         // Field 4 (account_number): 0 - tag 0x20 (field 4, wire type 0), value 0
-        
+
         var protobufBytes = Data()
-        
+
         // body_bytes (empty)
         protobufBytes.append(0x0A) // tag
         protobufBytes.append(0x00) // length 0
-        
+
         // auth_info_bytes (empty)
         protobufBytes.append(0x12) // tag
         protobufBytes.append(0x00) // length 0
-        
+
         // chain_id
         protobufBytes.append(0x1A) // tag
         let chainIdData = chainId.data(using: .utf8)!
         protobufBytes.append(UInt8(chainIdData.count)) // length
         protobufBytes.append(chainIdData) // chain ID string
-        
+
         // account_number (0)
         protobufBytes.append(0x20) // tag
         protobufBytes.append(0x00) // value 0
-        
+
         return protobufBytes.base64EncodedString()
     }
 

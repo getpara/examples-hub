@@ -21,8 +21,15 @@ class PhoneFormatter {
     ///   - stringvar: The phone number string to format (will be modified in-place)
     ///   - pattern: The pattern to apply (e.g., "### ### ####")
     ///   - replacementCharacter: The character in the pattern to replace with digits (typically "#")
-    static func applyPatternOnNumbers(_ stringvar: inout String, pattern: String, replacementCharacter: Character) {
+    ///   - limit: Maximum number of digits allowed (optional)
+    static func applyPatternOnNumbers(_ stringvar: inout String, pattern: String, replacementCharacter: Character, limit: Int? = nil) {
         var pureNumber = stringvar.replacingOccurrences(of: "[^0-9]", with: "", options: .regularExpression)
+        
+        // Enforce digit limit if provided
+        if let limit = limit, pureNumber.count > limit {
+            pureNumber = String(pureNumber.prefix(limit))
+        }
+        
         for index in 0 ..< pattern.count {
             guard index < pureNumber.count else {
                 stringvar = pureNumber

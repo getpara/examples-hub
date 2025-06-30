@@ -33,7 +33,7 @@ struct ExampleApp: App {
                 case .launch:
                     LaunchView()
                 case .authentication:
-                    AuthOptionsView()
+                    AuthView()
                         .environmentObject(paraManager)
                         .environmentObject(appRootManager)
                         .environmentObject(metaMaskConnector)
