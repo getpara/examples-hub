@@ -1,41 +1,69 @@
-# Para Modal + Multichain Wallets Example (v2.0.0-alpha)
+# Para Modal + React + Vite Example
 
-This example demonstrates the latest Para Modal alpha version (2.0.0-alpha.26) with comprehensive multichain support. It showcases seamless integration with wallets across multiple blockchain ecosystems:
+This example demonstrates the Para SDK integration with React and Vite, showcasing multichain wallet support across EVM (Ethereum, Polygon), Solana, and Cosmos ecosystems. It provides a minimal setup showing how to configure and trigger the Para Modal for unified authentication flows across all supported chains.
 
-- **EVM**: MetaMask, WalletConnect, and other EVM-compatible wallets
-- **Solana**: Phantom, Solflare, and Solana Mobile Wallet Adapter
-- **Cosmos**: Keplr and other Cosmos ecosystem wallets
+## Setup/Installation
 
-The example provides a minimal setup showing how to configure and trigger the Para Modal for unified authentication flows across all supported chains.
+### Environment Variables
+Create a `.env` file in the project root and add your Para API key:
+```env
+VITE_PARA_API_KEY=your_api_key_here
+VITE_PARA_ENVIRONMENT=beta
+VITE_WALLET_CONNECT_PROJECT_ID=your_walletconnect_project_id
+```
 
-## Prerequisites
+### Installation
+Install dependencies using your preferred package manager:
+```bash
+# npm
+npm install
 
-- **Para API Key**: Obtain your API key from the [Para Developer Portal](https://developer.getpara.com/). Create a
-  `.env` file in the project root (you can copy `.env.example`) and add your key, prefixing with `VITE_` to expose it to
-  client-side code:
-  ```env
-  VITE_PARA_API_KEY=your_api_key_here
-  ```
+# yarn
+yarn install
 
-## Installation
+# pnpm
+pnpm install
+```
 
-1. Install project dependencies using your preferred package manager: `bash npm install # or yarn install # or pnpm
-   install ```
+### Running the Development Server
+```bash
+# npm
+npm run dev
 
-## Running the Example
+# yarn
+yarn dev
 
-1.  Start the Vite development server:
-    ```bash
-    npm run dev
-    # or
-    yarn dev
-    # or
-    pnpm dev
-    ```
-2.  Open the local address provided by Vite (usually `http://localhost:5173` or similar) with your browser to see the
-    result and interact with the RainbowKit connector.
+# pnpm
+pnpm dev
+```
+
+## Key Dependencies
+
+- `@getpara/react-sdk`: 2.0.0-alpha.26
+- `@getpara/evm-wallet-connectors`: 2.0.0-alpha.26
+- `@getpara/cosmos-wallet-connectors`: 2.0.0-alpha.26
+- `@getpara/solana-wallet-connectors`: 2.0.0-alpha.26
+- `react`: 19.0.0
+- `react-dom`: 19.0.0
+- `vite`: ^6.1.0
+- `@tanstack/react-query`: 5.81.4
+- `wagmi`: 2.15.6
+- `viem`: 2.31.4
+
+## Key Files
+
+- `/src/context/ParaProvider.tsx` - Para SDK provider configuration with multichain support
+- `/src/context/QueryProvider.tsx` - React Query provider setup
+- `/src/components/ui/ConnectWalletCard.tsx` - Wallet connection UI component
+- `/src/components/ui/SignMessageForm.tsx` - Message signing functionality
+- `/src/config/constants.ts` - Environment configuration and constants
 
 ## Learn More
 
-For comprehensive guidance on using the Para SDK, setup details, and advanced features, please refer to the official
-documentation: [Para SDK documentation](https://docs.usepara.com/welcome)
+- [Para SDK Documentation](https://docs.getpara.com)
+- [Para Website](https://getpara.com)
+- [Para Developer Portal](https://developer.getpara.com)
+- [React Documentation](https://react.dev)
+- [Vite Documentation](https://vite.dev)
+- [Wagmi Documentation](https://wagmi.sh)
+- [TanStack Query Documentation](https://tanstack.com/query)
