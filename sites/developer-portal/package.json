@@ -54,7 +54,7 @@
   "scripts": {
     "build": "rm -rf dist && tsc && vite build",
     "build-beta": "VITE_STATSIG_CLIENT_KEY=client-6FzowqF52cFdzNeMY1hTDz7iTZtnjSoB7VU85ybV2fK VITE_ENVIRONMENT=BETA VITE_CAPSULE_API_KEY=7383ac52df5657defa63fb89ba443b97 yarn build-for-deploy",
-    "build-for-deploy": "yarn --cwd ../.. lerna run build --scope=developer-portal --include-dependencies",
+    "build-for-deploy": "cd ../../ && yarn build:dev && cd sites/developer-portal && yarn build",
     "build-prod": "VITE_STATSIG_CLIENT_KEY=client-6FzowqF52cFdzNeMY1hTDz7iTZtnjSoB7VU85ybV2fK VITE_ENVIRONMENT=PROD VITE_CAPSULE_API_KEY=36e481099ebcaad4beed4bed1ce98566 yarn build-for-deploy",
     "build-sandbox": "VITE_STATSIG_CLIENT_KEY=client-6FzowqF52cFdzNeMY1hTDz7iTZtnjSoB7VU85ybV2fK VITE_ENVIRONMENT=SANDBOX VITE_CAPSULE_API_KEY=8ee2d015fbc6062a6e30bdc472f2946c yarn build-for-deploy",
     "dev": "vite",

@@ -52,7 +52,7 @@
   "scripts": {
     "build": "rm -rf build && tsc && vite build",
     "build-beta": "VITE_ENV=beta yarn build-for-deploy",
-    "build-for-deploy": "yarn --cwd ../.. lerna run build --scope=capsule-js-bridge --include-dependencies",
+    "build-for-deploy": "cd ../../ && yarn build:dev && cd sites/bridge && yarn build",
     "build-prod": "VITE_ENV=prod yarn build-for-deploy",
     "build-sandbox": "VITE_ENV=sandbox yarn build-for-deploy",
     "legacy-deploy-beta": "VITE_ENV=beta VITE_BUCKET_NAME=capsule-beta-js-bridge yarn legacy-deploy-s3",
