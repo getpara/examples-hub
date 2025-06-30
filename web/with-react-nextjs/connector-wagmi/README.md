@@ -1,71 +1,55 @@
-# Para + Wagmi Connector Example
+# Connector Wagmi
 
-This example demonstrates how to use Para as a wallet connector with Wagmi in a Next.js application, allowing users to connect with Para alongside other wallet options like MetaMask and WalletConnect.
-
-## What This Example Shows
-
-- **Custom wallet modal** with Para as a connector option
-- **Wagmi hooks** for all blockchain interactions
-- **ETH transfers** on Sepolia testnet using wagmi's transaction hooks
-- **Balance management** with real-time updates
-- **Multiple wallet options** in a unified interface
-
-## Prerequisites
-
-- Node.js 18+ and npm/yarn
-- Para API Key from the [Para developer portal](https://developer.getpara.com)
-- WalletConnect Project ID (optional, for WalletConnect support)
+This example demonstrates how to integrate Para SDK as a Wagmi connector in a Next.js application. It shows how Para can work alongside traditional wallet options like MetaMask and WalletConnect in a custom wallet connection interface.
 
 ## Setup
 
-1. Install dependencies:
+### Environment Variables
 
-   ```bash
-   yarn install
-   ```
+Create a `.env.local` file in the root directory:
 
-2. Create a `.env.local` file:
+```env
+NEXT_PUBLIC_PARA_API_KEY=your_para_api_key
+NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID=your_wallet_connect_project_id
+```
 
-   ```env
-   NEXT_PUBLIC_PARA_API_KEY=your_api_key_here
-   NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID=your_wallet_connect_project_id
-   NEXT_PUBLIC_SEPOLIA_RPC_URL=https://ethereum-sepolia-rpc.publicnode.com
-   ```
+### Installation
 
-3. Run the development server:
+Install dependencies using your preferred package manager:
 
-   ```bash
-   yarn dev
-   ```
+```bash
+# npm
+npm install
 
-4. Open [http://localhost:3000](http://localhost:3000)
+# yarn
+yarn install
 
-## How It Works
+# pnpm
+pnpm install
+```
 
-1. **Connect Wallet**: Click "Connect Wallet" to open the custom modal
-2. **Choose Connector**: Select Para for social login or other wallet options
-3. **Send Transactions**: Enter recipient address and ETH amount
-4. **View Balance**: Real-time balance updates using wagmi's useBalance hook
-5. **Disconnect**: Click the connected address to open settings and disconnect
+## Key Dependencies
 
-## Key Features
+- `@getpara/react-sdk` (v2.0.0-alpha.26) - Para React SDK for wallet integration
+- `@getpara/wagmi-v2-integration` (v2.0.0-alpha.26) - Para Wagmi v2 connector
+- `@tanstack/react-query` (v5.81.2) - Data fetching and state management
+- `wagmi` (v2.15.6) - React hooks for Ethereum
+- `viem` (v2.31.4) - TypeScript interface for Ethereum
+- `next` (v15.1.5) - React framework
 
-- Custom modal implementation (not using Para's built-in modal)
-- Para works as a standard wagmi connector
-- All blockchain operations use wagmi hooks:
-  - `useAccount` for connection status
-  - `useConnect` / `useDisconnect` for wallet management
-  - `useSendTransaction` for sending ETH
-  - `useBalance` for fetching balances
+## Key Files
 
-## Scripts
-
-- `yarn dev` - Start development server
-- `yarn build` - Build for production
-- `yarn lint` - Run linter
-- `yarn typecheck` - Check TypeScript types
+- `src/config/wagmi.ts` - Wagmi configuration with Para connector
+- `src/lib/para/client.ts` - Para client initialization
+- `src/context/WagmiProvider.tsx` - Wagmi context provider
+- `src/components/ConnectWalletModal.tsx` - Custom wallet connection modal
+- `src/components/ui/TransferForm.tsx` - ETH transfer form component
 
 ## Learn More
 
-- [Para SDK Documentation](https://docs.usepara.com)
+- [Para Documentation](https://docs.getpara.com)
+- [Para Website](https://getpara.com)
+- [Para Developer Portal](https://developer.getpara.com)
 - [Wagmi Documentation](https://wagmi.sh)
+- [Viem Documentation](https://viem.sh)
+- [Next.js Documentation](https://nextjs.org/docs)

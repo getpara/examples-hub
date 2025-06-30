@@ -1,41 +1,56 @@
-# Para Pregen Wallet Example
+# Para Pregen Claim
 
-This project is a simple example of using the Para SDK for creating pregen wallets on the server while claiming them on
-the client post user authentication. The example randomly generates a UUID as the identifier for the pregen wallet which
-gets used on the server for creating a new wallet. This user share is submitted back to the client where its added tot
-he para client so it can be claimed.
+This example demonstrates how to implement pre-generated wallet creation and claiming with Para SDK in a Next.js application. It showcases server-side wallet generation using UUIDs as identifiers, which users can then claim after authentication on the client side.
 
-## Prerequisites
+## Setup
 
-- **Para API Key**: Obtain your API key from the Para developer portal. Create a `.env.local` file in the project root
-  (you can copy `.env.example`) and add your key, prefixing with `NEXT_PUBLIC_` to expose it to the browser:
-  ```env
-  NEXT_PUBLIC_PARA_API_KEY=your_api_key_here
-  ```
+### Environment Variables
 
-## Installation
+Create a `.env.local` file in the root directory:
 
-1.  Install project dependencies using your preferred package manager:
-    ```bash
-    npm install
-    # or
-    yarn install
-    ```
+```env
+NEXT_PUBLIC_PARA_API_KEY=your_para_api_key
+PARA_PRIVATE_KEY=your_para_private_key
+```
 
-## Running the Example
+### Installation
 
-1.  Start the Next.js development server:
-    ```bash
-    npm run dev
-    # or
-    yarn dev
-    ```
-2.  Open [http://localhost:3000](https://www.google.com/search?q=http://localhost:3000) (or the port specified) with
-    your browser to see the result.
+Install dependencies using your preferred package manager:
+
+```bash
+# npm
+npm install
+
+# yarn
+yarn install
+
+# pnpm
+pnpm install
+```
+
+## Key Dependencies
+
+- `@getpara/react-sdk` (v2.0.0-alpha.26) - Para React SDK for wallet integration
+- `@getpara/server-sdk` (v2.0.0-alpha.26) - Para Server SDK for server-side operations
+- `@getpara/cosmos-wallet-connectors` (v2.0.0-alpha.12) - Cosmos wallet connectors
+- `@getpara/evm-wallet-connectors` (v2.0.0-alpha.12) - EVM wallet connectors
+- `@getpara/solana-wallet-connectors` (v2.0.0-alpha.12) - Solana wallet connectors
+- `@tanstack/react-query` (v5.81.2) - Data fetching and state management
+- `next` (v15.1.5) - React framework
+
+## Key Files
+
+- `src/app/api/wallet/generate/route.ts` - API route for server-side wallet generation
+- `src/app/api/wallet/[uuid]/route.ts` - API route for retrieving wallet by UUID
+- `src/lib/para/client.ts` - Para client initialization
+- `src/lib/store.ts` - UUID storage management
+- `src/components/ui/StepCard.tsx` - Step-by-step UI component
+- `src/context/ParaProvider.tsx` - Para SDK React context provider
 
 ## Learn More
 
-For comprehensive guidance on using the Para SDK, setup details, and advanced features, please refer to the official
-documentation:
-
-[Para SDK documentation](https://docs.usepara.com/welcome)
+- [Para Documentation](https://docs.getpara.com)
+- [Para Website](https://getpara.com)
+- [Para Developer Portal](https://developer.getpara.com)
+- [React Query Documentation](https://tanstack.com/query/latest)
+- [Next.js Documentation](https://nextjs.org/docs)

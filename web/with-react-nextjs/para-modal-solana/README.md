@@ -1,37 +1,55 @@
-# Para Modal + Solana Wallets Example
+# Para Modal Solana
 
-This example demonstrates integrating Solana Wallets like Phantom with the Para Modal for user authentication. It
-provides a minimal setup showing how to configure and trigger the modal for login flows using the Para React SDK.
+This example demonstrates how to integrate Para Modal with Solana wallets in a Next.js application. It showcases wallet connection and message signing capabilities for popular Solana wallets like Phantom and Solflare through Para's React SDK.
 
-## Prerequisites
+## Setup
 
-- **Para API Key**: Obtain your API key from the [Para Developer Portal](https://developer.getpara.com/). Create a
-  `.env.local` file in the project root and add your key:
-  ```env
-  NEXT_PUBLIC_PARA_API_KEY=your_para_api_key_here
-  ```
+### Environment Variables
 
-## Installation
+Create a `.env.local` file in the root directory:
 
-1.  Install dependencies using your preferred package manager:
-    ```bash
-    npm install
-    # or
-    yarn install
-    ```
+```env
+NEXT_PUBLIC_PARA_API_KEY=your_para_api_key
+```
 
-## Running the Example
+### Installation
 
-1.  Start the development server:
-    ```bash
-    npm run dev
-    # or
-    yarn dev
-    ```
-2.  Open [http://localhost:3000](https://www.google.com/search?q=http://localhost:3000) (or the specified port) in your
-    browser.
+Install dependencies using your preferred package manager:
+
+```bash
+# npm
+npm install
+
+# yarn
+yarn install
+
+# pnpm
+pnpm install
+```
+
+## Key Dependencies
+
+- `@getpara/react-sdk` (v2.0.0-alpha.26) - Para React SDK for wallet integration
+- `@getpara/solana-wallet-connectors` (v2.0.0-alpha.26) - Solana wallet connectors for Para
+- `@solana/wallet-adapter-react` (v0.15.39) - React adapter for Solana wallets
+- `@solana/wallet-adapter-base` (v0.9.27) - Base adapter for Solana wallets
+- `@solana/web3.js` (v1.98.2) - Solana Web3 JavaScript API
+- `@tanstack/react-query` (v5.81.2) - Data fetching and state management
+- `next` (v15.1.5) - React framework
+- `react` (v19.0.0) - React library
+
+## Key Files
+
+- `src/context/ParaProvider.tsx` - Para SDK React context provider
+- `src/components/ui/ConnectWalletCard.tsx` - Wallet connection interface
+- `src/components/ui/SignMessageForm.tsx` - Message signing form component
+- `src/config/constants.ts` - Configuration constants
 
 ## Learn More
 
-For more detailed information on using the Para SDK and its features, please visit the official documentation:
-[Para Documentation](https://docs.getpara.com/)
+- [Para Documentation](https://docs.getpara.com)
+- [Para Website](https://getpara.com)
+- [Para Developer Portal](https://developer.getpara.com)
+- [Solana Documentation](https://docs.solana.com/)
+- [Solana Wallet Adapter Documentation](https://github.com/solana-labs/wallet-adapter)
+- [Next.js Documentation](https://nextjs.org/docs)

@@ -1,109 +1,57 @@
-# Reown AppKit + Next.js + Wagmi + Para Example
+# Connector Reown AppKit
 
-This example demonstrates how to integrate Reown AppKit with Next.js and Wagmi for wallet connectivity, featuring Para as a custom wagmi connector.
-
-## Features
-
-- 🔗 Connect to 600+ wallets
-- 🔐 Email and social login support
-- 🌐 Multi-chain support (Ethereum, Arbitrum, Optimism, Polygon, Base)
-- 📱 Responsive design
-- ⚡ Server-side rendering support
-- 🎨 Light theme with Tailwind CSS
-- 🔑 **Para Embedded Wallet Integration** - Custom wagmi connector for Para wallet
+This example demonstrates how to integrate Para SDK with Reown AppKit and Wagmi in a Next.js application. It showcases how Para can be used as a custom Wagmi connector alongside Reown AppKit's comprehensive wallet connection interface.
 
 ## Setup
 
-### 1. Install Dependencies
+### Environment Variables
+
+Create a `.env.local` file in the root directory:
+
+```env
+NEXT_PUBLIC_PARA_API_KEY=your_para_api_key
+NEXT_PUBLIC_PROJECT_ID=your_reown_project_id
+```
+
+### Installation
+
+Install dependencies using your preferred package manager:
 
 ```bash
+# npm
 npm install
+
+# yarn
+yarn install
+
+# pnpm
+pnpm install
 ```
 
-### 2. Configure Environment Variables
+## Key Dependencies
 
-Create a `.env.local` file in the root directory and add your project IDs:
+- `@getpara/react-sdk` (v2.0.0-alpha.26) - Para React SDK for wallet integration
+- `@getpara/wagmi-v2-integration` (v2.0.0-alpha.26) - Para Wagmi v2 connector
+- `@reown/appkit` (v1.7.11) - Reown's Web3 modal solution
+- `@reown/appkit-adapter-wagmi` (v1.7.11) - Wagmi adapter for Reown AppKit
+- `@tanstack/react-query` (v5.81.2) - Data fetching and state management
+- `viem` (v2.31.4) - TypeScript interface for Ethereum
+- `wagmi` (v2.15.6) - React hooks for Ethereum
+- `next` (v15.3.4) - React framework
 
-```bash
-# Reown Project ID
-NEXT_PUBLIC_PROJECT_ID=your_project_id_here
+## Key Files
 
-# Para API Key
-NEXT_PUBLIC_PARA_API_KEY=your_para_api_key_here
-```
+- `src/config/appkit.ts` - AppKit configuration with Para connector
+- `src/client/para.ts` - Para client initialization
+- `src/components/AppKitProvider.tsx` - AppKit provider wrapper component
+- `src/components/WalletDisplay.tsx` - Component for displaying wallet information
+- `src/constants/chains.ts` - Supported blockchain networks configuration
 
-- Get your Reown project ID from [https://cloud.reown.com](https://cloud.reown.com)
-- Get your Para API key from [Para Dashboard](https://para.io)
+## Learn More
 
-### 3. Run the Development Server
-
-```bash
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) to see the application.
-
-## Project Structure
-
-```
-src/
-├── app/
-│   ├── layout.tsx    # Root layout with AppKit providers
-│   ├── page.tsx      # Main page with connect button
-│   └── globals.css   # Global styles
-├── client/
-│   └── para.ts       # Para client initialization
-├── components/
-│   ├── AppKitProvider.tsx  # AppKit provider wrapper
-│   └── WalletDisplay.tsx   # Wallet info display component
-├── config/
-│   └── appkit.ts     # AppKit configuration with Para connector
-└── constants/
-    └── chains.ts     # Supported blockchain networks
-```
-
-## Key Components
-
-### AppKit Configuration (`src/config/appkit.ts`)
-- Initializes AppKit with wagmi adapter
-- Configures supported networks
-- Sets up metadata and features
-- **Integrates Para as a custom wagmi connector**
-
-### AppKitProvider (`src/components/AppKitProvider.tsx`)
-- Wraps the app with necessary providers
-- Handles SSR with initial state
-
-### WalletDisplay (`src/components/WalletDisplay.tsx`)
-- Shows connected wallet information
-- Displays address, network, and balance
-- Provides disconnect functionality
-
-## Usage
-
-1. Click "Connect Wallet" to open the AppKit modal
-2. Choose your preferred connection method:
-   - **Para Wallet** - Embedded wallet with email/phone/social login
-   - Wallet apps (MetaMask, WalletConnect, etc.)
-   - Email login (via Reown)
-   - Social login (Google, X, GitHub, Discord, Farcaster)
-3. Once connected, view your wallet details
-4. Use "Open Account Modal" to access additional features
-
-### Para Wallet Features
-When selecting Para from the wallet list:
-- Email authentication
-- Phone number authentication
-- Social logins (Google, Twitter, Discord, Facebook, Farcaster, Apple)
-- Embedded wallet - no extension required
-- Full wallet recovery options
-
-## Documentation
-
-- [Reown AppKit Docs](https://docs.reown.com/appkit/overview)
-- [Next.js Documentation](https://nextjs.org/docs)
+- [Para Documentation](https://docs.getpara.com)
+- [Para Website](https://getpara.com)
+- [Para Developer Portal](https://developer.getpara.com)
+- [Reown AppKit Documentation](https://docs.reown.com/appkit/overview)
 - [Wagmi Documentation](https://wagmi.sh)
-
-## License
-
-This example is open source and available under the MIT License.
+- [Next.js Documentation](https://nextjs.org/docs)
