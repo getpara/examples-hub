@@ -49,7 +49,7 @@ struct ConnectExternalWalletButton: View {
                         .frame(width: 24, height: 24)
                 }
 
-                Text(isConnecting ? "Connecting..." : "Connect \(walletName)")
+                Text(isConnecting ? "Connecting..." : "\(walletName)")
                     .font(.callout.weight(.semibold))
                     .foregroundColor(.white)
             }
@@ -78,37 +78,9 @@ struct ConnectExternalWalletButton: View {
 
 // MARK: - Preview
 
-#Preview("Wallet Buttons") {
-    VStack(spacing: 16) {
-        Text("Normal State")
-            .font(.headline)
-
-        ConnectExternalWalletButton(provider: .metamask) { provider in
-            print("Tapped \(provider)")
-        }
-        .padding(.horizontal)
-
-        Text("Connecting State")
-            .font(.headline)
-            .padding(.top)
-
-        ConnectExternalWalletButton(provider: .metamask) { _ in }
-            .onAppear {
-                // This will show the connecting state in preview
-            }
-            .padding(.horizontal)
-
-        Text("Different Sizes")
-            .font(.headline)
-            .padding(.top)
-
-        VStack(spacing: 8) {
-            ConnectExternalWalletButton(provider: .metamask) { _ in }
-                .frame(width: 200)
-
-            ConnectExternalWalletButton(provider: .metamask) { _ in }
-                .frame(width: 300)
-        }
+#Preview {
+    ConnectExternalWalletButton(provider: .metamask) { provider in
+        print("Tapped \(provider)")
     }
     .padding()
 }

@@ -26,6 +26,7 @@ struct AuthView: View {
     @State private var showErrorAlert = false
     @State private var errorMessage = ""
     @State private var currentAuthState: AuthState?
+    @State private var showWalletSelection = false
 
     @FocusState private var textFieldFocus: Bool
 
@@ -35,7 +36,7 @@ struct AuthView: View {
 
             Image(.paraLogo)
                 .resizable()
-                .frame(width: 75, height: 75)
+                .frame(width: 85, height: 85)
 
             Spacer()
 
@@ -68,6 +69,9 @@ struct AuthView: View {
                 OTPVerificationView(authState: authState, showOTP: $showOTP)
                     .interactiveDismissDisabled()
             }
+        }
+        .sheet(isPresented: $showWalletSelection) {
+            WalletSelectionSheet(showWalletSelection: $showWalletSelection, handleWalletConnect: handleWalletConnect)
         }
     }
 
@@ -106,8 +110,18 @@ struct AuthView: View {
     }
 
     private var walletSection: some View {
-        ConnectExternalWalletButton(provider: .metamask, action: handleWalletConnect)
-            .padding(.horizontal, 24)
+        Button(action: {
+            showWalletSelection = true
+        }) {
+            Text("Connect Wallet")
+                .font(.callout.weight(.semibold))
+                .foregroundColor(.black)
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(Color(.systemGray5))
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+        }
+        .padding(.horizontal, 24)
     }
 
     private var footerSection: some View {
@@ -137,7 +151,7 @@ struct AuthView: View {
                     .foregroundColor(.black)
             }
         }
-        .padding(.bottom, 30)
+        .padding(.bottom, 20)
     }
 
     // MARK: - Actions
@@ -205,4 +219,40 @@ struct AuthView: View {
 
 #Preview {
     AuthView()
+}
+
+// MARK: - Wallet Selection Sheet
+
+struct WalletSelectionSheet: View {
+    @Binding var showWalletSelection: Bool
+    let handleWalletConnect: (WalletProvider) -> Void
+    
+    var body: some View {
+        NavigationView {
+            VStack(spacing: 0) {
+                Text("Select a wallet")
+                    .font(.headline)
+                    .padding(.top, 20)
+                    .padding(.bottom, 30)
+                
+                VStack(spacing: 16) {
+                    ConnectExternalWalletButton(provider: .metamask) { provider in
+                        handleWalletConnect(provider)
+                        showWalletSelection = false
+                    }
+                    .padding(.horizontal, 24)
+                }
+                
+                Spacer()
+            }
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Cancel") {
+                        showWalletSelection = false
+                    }
+                }
+            }
+        }
+    }
 }
