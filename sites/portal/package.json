@@ -58,7 +58,7 @@
   "scripts": {
     "build": "rm -rf dist && tsc && vite build",
     "build-beta": "VITE_PARA_PORTAL_ID=4bdd84d3-7606-406f-8321-19721cac17a1 VITE_ENVIRONMENT=beta yarn build-for-deploy",
-    "build-for-deploy": "yarn build-mpc-workers && yarn check-wasm-file-exists && yarn check-mpc-worker-file-exists && cd ../.. && yarn build:dev && cd sites/portal && yarn build",
+    "build-for-deploy": "yarn build-mpc-workers && yarn check-mpc-worker-file-exists && cd ../.. && yarn build:dev && cd sites/portal && yarn build",
     "build-mpc-workers": "yarn --cwd ../.. lerna run build --scope=capsule-mpc-worker --scope=capsule-mpc-worker-server",
     "build-prod": "VITE_PARA_PORTAL_ID=1106a19e-0a78-4a26-b414-d6538b6a2064 VITE_ENVIRONMENT=prod yarn build-for-deploy",
     "build-sandbox": "VITE_PARA_PORTAL_ID=4bdd84d3-7606-406f-8321-19721cac17a1 VITE_ENVIRONMENT=sandbox yarn build-for-deploy",
