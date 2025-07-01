@@ -25,6 +25,7 @@ struct AuthView: View {
     @State private var showOTP = false
     @State private var showErrorAlert = false
     @State private var errorMessage = ""
+    @State private var currentAuthState: AuthState?
 
     @FocusState private var textFieldFocus: Bool
 
@@ -61,6 +62,12 @@ struct AuthView: View {
             Button("OK", role: .cancel) {}
         } message: {
             Text(errorMessage)
+        }
+        .sheet(isPresented: $showOTP) {
+            if let authState = currentAuthState {
+                OTPVerificationView(authState: authState, showOTP: $showOTP)
+                    .interactiveDismissDisabled()
+            }
         }
     }
 
@@ -160,6 +167,7 @@ struct AuthView: View {
                 switch state.stage {
                 case .verify:
                     // New user - navigate to verification
+                    currentAuthState = state
                     showOTP = true
 
                 case .login:

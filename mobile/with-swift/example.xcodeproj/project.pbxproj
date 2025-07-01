@@ -13,6 +13,7 @@
 		8F6A878F2E145BA100874160 /* ConnectExternalWalletButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F6A878E2E145B9D00874160 /* ConnectExternalWalletButton.swift */; };
 		8F6A87912E145C1900874160 /* ConnectSocialButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F6A87902E145C1400874160 /* ConnectSocialButton.swift */; };
 		8F6A87932E145EA200874160 /* CountryPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F6A87922E145E9F00874160 /* CountryPickerView.swift */; };
+		8F6A87C82E149E1A00874160 /* OTPVerificationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F6A87C72E149E1A00874160 /* OTPVerificationView.swift */; };
 		8F6AE66A2DC151040098F76B /* ChooseSignupMethodView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F6AE6692DC151040098F76B /* ChooseSignupMethodView.swift */; };
 		8FA007832D57EB0D009EF0C3 /* ParaConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FA007812D57EB0D009EF0C3 /* ParaConfig.swift */; };
 		8FA007862D57F1AA009EF0C3 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FA007842D57F1AA009EF0C3 /* Extensions.swift */; };
@@ -55,6 +56,7 @@
 		8F6A878E2E145B9D00874160 /* ConnectExternalWalletButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectExternalWalletButton.swift; sourceTree = "<group>"; };
 		8F6A87902E145C1400874160 /* ConnectSocialButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectSocialButton.swift; sourceTree = "<group>"; };
 		8F6A87922E145E9F00874160 /* CountryPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CountryPickerView.swift; sourceTree = "<group>"; };
+		8F6A87C72E149E1A00874160 /* OTPVerificationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OTPVerificationView.swift; sourceTree = "<group>"; };
 		8F6AE6692DC151040098F76B /* ChooseSignupMethodView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChooseSignupMethodView.swift; sourceTree = "<group>"; };
 		8F924CB92D824A1700938496 /* Example.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; name = Example.xctestplan; path = exampleUITests/Example.xctestplan; sourceTree = "<group>"; };
 		8FA007812D57EB0D009EF0C3 /* ParaConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParaConfig.swift; sourceTree = "<group>"; };
@@ -185,6 +187,7 @@
 		8FC8B8FC2D8B7AE10046C3DC /* UI */ = {
 			isa = PBXGroup;
 			children = (
+				8F6A87C72E149E1A00874160 /* OTPVerificationView.swift */,
 				8F6A87922E145E9F00874160 /* CountryPickerView.swift */,
 				8F6A87902E145C1400874160 /* ConnectSocialButton.swift */,
 				8F6A878E2E145B9D00874160 /* ConnectExternalWalletButton.swift */,
@@ -442,6 +445,7 @@
 				8F6A87912E145C1900874160 /* ConnectSocialButton.swift in Sources */,
 				8F6A878F2E145BA100874160 /* ConnectExternalWalletButton.swift in Sources */,
 				8FA007862D57F1AA009EF0C3 /* Extensions.swift in Sources */,
+				8F6A87C82E149E1A00874160 /* OTPVerificationView.swift in Sources */,
 				8F200F542DEFB08100B39BB4 /* AlertItem.swift in Sources */,
 				8FB1B21C2E0F4DE500B37B5E /* AuthView.swift in Sources */,
 				E86A475B2D1F13CB00546CC2 /* PhoneAuthView.swift in Sources */,

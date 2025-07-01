@@ -47,6 +47,7 @@ struct EmailPhoneInput: View {
             if shouldShowContinueButton {
                 continueButton
                     .transition(.opacity)
+                    .allowsHitTesting(true)
             }
         }
         .animation(.easeInOut(duration: 0.3), value: shouldShowContinueButton)
@@ -108,6 +109,7 @@ struct EmailPhoneInput: View {
 
     private var continueButton: some View {
         Button("Continue") {
+            print("Continue button tapped")
             let authValue: Auth = inputType == .phone ? .phone(formattedValue) : .email(formattedValue)
             onContinue(authValue)
         }
