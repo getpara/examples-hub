@@ -53,7 +53,7 @@ struct EmailPhoneInput: View {
 
     private var inputField: some View {
         HStack(spacing: 8) {
-            if inputType != .unknown && text.isEmpty {
+            if text.isEmpty {
                 inputIcon
             }
             
@@ -81,9 +81,12 @@ struct EmailPhoneInput: View {
     }
     
     private var inputIcon: some View {
-        Image(systemName: inputType == .email ? "envelope" : "phone")
-            .foregroundColor(.gray)
-            .transition(.scale.combined(with: .opacity))
+        HStack {
+            Image(systemName: "envelope")
+                .foregroundColor(.gray)
+            Image(systemName: "phone")
+                .foregroundColor(.gray)
+        }
     }
 
     private var countrySelector: some View {
@@ -105,12 +108,12 @@ struct EmailPhoneInput: View {
 
     private var continueButton: some View {
         Button("Continue", action: onContinue)
-            .font(.callout.weight(.medium))
-            .foregroundColor(.white)
+            .font(.headline)
+            .foregroundColor(isInputValid ? .white : .secondary)
             .frame(maxWidth: .infinity)
             .frame(height: 50)
-            .background(isInputValid ? .paraOrange : Color(.systemGray4))
-            .clipShape(Capsule())
+            .background(isInputValid ? .black : Color(.systemGray5))
+            .clipShape(RoundedRectangle(cornerRadius: 10))
             .disabled(!isInputValid)
     }
 
@@ -160,47 +163,7 @@ struct EmailPhoneInput: View {
     }
 }
 
-// MARK: - Country Picker
 
-struct CountryPickerView: View {
-    @Binding var selectedCode: String
-    @Binding var selectedFlag: String
-    @Binding var selectedPattern: String
-    @Binding var selectedLimit: Int
-    @Binding var isPresented: Bool
-    
-    @State private var searchText = ""
-    private let countries = CPData.allCountry
-    
-    private var filteredCountries: [CPData] {
-        searchText.isEmpty ? countries : countries.filter {
-            $0.name.localizedCaseInsensitiveContains(searchText)
-        }
-    }
-
-    var body: some View {
-        NavigationView {
-            List(filteredCountries) { country in
-                CountryRow(country: country) {
-                    selectedCode = String(country.dial_code.dropFirst())
-                    selectedFlag = country.flag
-                    selectedPattern = country.pattern
-                    selectedLimit = country.limit
-                    isPresented = false
-                }
-            }
-            .listStyle(.plain)
-            .searchable(text: $searchText, prompt: "Search countries")
-            .navigationTitle("Select Country")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Cancel") { isPresented = false }
-                }
-            }
-        }
-    }
-}
 
 struct CountryRow: View {
     let country: CPData
