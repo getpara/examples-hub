@@ -24,7 +24,6 @@
 		E8315DD82D5548F100FFF8C8 /* WalletsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8315DD72D5548F100FFF8C8 /* WalletsView.swift */; };
 		E8315DDA2D55717300FFF8C8 /* SolanaWalletView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8315DD92D55717300FFF8C8 /* SolanaWalletView.swift */; };
 		E8315DDC2D55717F00FFF8C8 /* CosmosWalletView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8315DDB2D55717F00FFF8C8 /* CosmosWalletView.swift */; };
-		E84DDFA92D593E1F007C6E39 /* OAuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E84DDFA82D593E1F007C6E39 /* OAuthView.swift */; };
 		E86A473F2D0CA0A400546CC2 /* EmailAuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E86A473E2D0CA0A400546CC2 /* EmailAuthView.swift */; };
 		E86A47412D0CA63700546CC2 /* AppRootManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E86A47402D0CA62F00546CC2 /* AppRootManager.swift */; };
 		E86A475B2D1F13CB00546CC2 /* PhoneAuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E86A475A2D1F13CB00546CC2 /* PhoneAuthView.swift */; };
@@ -70,7 +69,6 @@
 		E8315DD72D5548F100FFF8C8 /* WalletsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalletsView.swift; sourceTree = "<group>"; };
 		E8315DD92D55717300FFF8C8 /* SolanaWalletView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SolanaWalletView.swift; sourceTree = "<group>"; };
 		E8315DDB2D55717F00FFF8C8 /* CosmosWalletView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CosmosWalletView.swift; sourceTree = "<group>"; };
-		E84DDFA82D593E1F007C6E39 /* OAuthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAuthView.swift; sourceTree = "<group>"; };
 		E86A473E2D0CA0A400546CC2 /* EmailAuthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmailAuthView.swift; sourceTree = "<group>"; };
 		E86A47402D0CA62F00546CC2 /* AppRootManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRootManager.swift; sourceTree = "<group>"; };
 		E86A475A2D1F13CB00546CC2 /* PhoneAuthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneAuthView.swift; sourceTree = "<group>"; };
@@ -135,7 +133,6 @@
 				8F1708C42DA99E420070FE20 /* Email */,
 				8F1708C52DA99E4E0070FE20 /* Phone */,
 				8FA007872D581F08009EF0C3 /* ExternalWalletAuthView.swift */,
-				E84DDFA82D593E1F007C6E39 /* OAuthView.swift */,
 				8FA0078A2D5A7841009EF0C3 /* MetaMaskDemoView.swift */,
 			);
 			path = Auth;
@@ -451,7 +448,6 @@
 				8FA007832D57EB0D009EF0C3 /* ParaConfig.swift in Sources */,
 				8F6A87932E145EA200874160 /* CountryPickerView.swift in Sources */,
 				E86A47412D0CA63700546CC2 /* AppRootManager.swift in Sources */,
-				E84DDFA92D593E1F007C6E39 /* OAuthView.swift in Sources */,
 				E8315DD82D5548F100FFF8C8 /* WalletsView.swift in Sources */,
 				8FA0078B2D5A7841009EF0C3 /* MetaMaskDemoView.swift in Sources */,
 			);

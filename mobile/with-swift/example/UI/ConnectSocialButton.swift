@@ -5,25 +5,24 @@
 //  Created by Tyson Williams on 7/1/25.
 //
 
-import SwiftUI
 import ParaSwift
+import SwiftUI
 
 struct ConnectSocialButton: View {
     let provider: OAuthProvider
     let action: (OAuthProvider) -> Void
-    
-    
+
     private var image: ImageResource {
         switch provider {
         case .google:
-                .google
+            .google
         case .apple:
-                .apple
+            .apple
         case .discord:
-                .discord
+            .discord
         }
     }
-    
+
     var body: some View {
         Button(action: { action(provider) }) {
             Image(image)

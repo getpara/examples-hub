@@ -6,15 +6,15 @@
 //
 
 import Combine
-import SwiftUI
 import ParaSwift
+import SwiftUI
 
 struct AuthView: View {
     /// Main Para SDK manager for authentication operations
     @EnvironmentObject var paraManager: ParaManager
     /// Manages app navigation and authentication state
     @EnvironmentObject var appRootManager: AppRootManager
-    
+
     /// System URL opener for external links
     @Environment(\.openURL) private var openURL
     /// Controller for passkey/biometric authentication operations
@@ -22,27 +22,28 @@ struct AuthView: View {
     /// Session manager for OAuth provider web authentication flows
     @Environment(\.webAuthenticationSession) private var webAuthenticationSession
 
-    @State private var emailOrPhone = ""
+    @State private var showOTP = false
     @State private var showErrorAlert = false
     @State private var errorMessage = ""
+
     @FocusState private var textFieldFocus: Bool
-    
+
     var body: some View {
         VStack(spacing: 0) {
             Spacer()
-            
+
             Image(.paraLogo)
                 .resizable()
                 .frame(width: 75, height: 75)
-            
+
             Spacer()
-            
+
             Text("Sign Up or Log In")
                 .font(.title2)
                 .fontWeight(.semibold)
                 .foregroundColor(.black)
                 .padding(.bottom, 20)
-            
+
             VStack(spacing: 20) {
                 socialLoginSection
                 emailPhoneSection
@@ -50,19 +51,19 @@ struct AuthView: View {
                 walletSection
             }
             .padding(.bottom, 40)
-            
+
             footerSection
         }
         .onTapGesture {
             textFieldFocus = false
         }
         .alert("Authentication Error", isPresented: $showErrorAlert) {
-            Button("OK", role: .cancel) { }
+            Button("OK", role: .cancel) {}
         } message: {
             Text(errorMessage)
         }
     }
-    
+
     private var socialLoginSection: some View {
         HStack(spacing: 12) {
             ConnectSocialButton(provider: .google, action: handleSocialSignIn)
@@ -71,16 +72,15 @@ struct AuthView: View {
         }
         .padding(.horizontal, 24)
     }
-    
+
     private var emailPhoneSection: some View {
         EmailPhoneInput(
-            text: $emailOrPhone,
             isFocused: $textFieldFocus,
-            onContinue: handleContinue,
+            onContinue: handleEmailPhone
         )
         .padding(.horizontal, 24)
     }
-    
+
     private var dividerSection: some View {
         HStack {
             Rectangle()
@@ -97,34 +97,34 @@ struct AuthView: View {
         .padding(.horizontal, 24)
         .padding(.vertical, 8)
     }
-    
+
     private var walletSection: some View {
         ConnectExternalWalletButton(provider: .metamask, action: handleWalletConnect)
             .padding(.horizontal, 24)
     }
-    
+
     private var footerSection: some View {
         VStack(spacing: 8) {
             HStack(spacing: 4) {
                 Text("By logging in you agree to our")
                     .font(.caption)
                     .foregroundColor(.secondary)
-                
+
                 Text("Terms & Conditions")
                     .font(.caption)
                     .foregroundColor(.black)
             }
-            
+
             HStack(spacing: 4) {
                 Text("Powered by")
                     .font(.caption)
                     .foregroundColor(.secondary)
-                
+
                 Image(.paraLogo)
                     .resizable()
                     .frame(width: 12, height: 12)
                     .colorMultiply(.black)
-                
+
                 Text("Para")
                     .font(.caption.bold())
                     .foregroundColor(.black)
@@ -132,16 +132,16 @@ struct AuthView: View {
         }
         .padding(.bottom, 30)
     }
-    
+
     // MARK: - Actions
-    
+
     private func handleSocialSignIn(_ provider: OAuthProvider) {
         Task {
             do {
                 try await paraManager.handleOAuth(
                     provider: provider,
                     webAuthenticationSession: webAuthenticationSession,
-                    authorizationController: authorizationController
+                    authorizationController: authorizationController,
                 )
                 appRootManager.setAuthenticated(true)
             } catch {
@@ -150,11 +150,40 @@ struct AuthView: View {
             }
         }
     }
-    
-    private func handleContinue() {
-        // TODO: Handle email/phone sign in
+
+    private func handleEmailPhone(_ auth: Auth) {
+        Task {
+            do {
+                // Start authentication flow with Para SDK
+                let state = try await paraManager.initiateAuthFlow(auth: auth)
+
+                switch state.stage {
+                case .verify:
+                    // New user - navigate to verification
+                    showOTP = true
+
+                case .login:
+                    // Existing user - log them in with automatic method selection
+                    try await paraManager.handleLogin(
+                        authState: state,
+                        authorizationController: authorizationController,
+                        webAuthenticationSession: webAuthenticationSession,
+                    )
+                    appRootManager.setAuthenticated(true)
+
+                case .signup:
+                    // This shouldn't happen directly
+                    errorMessage = "Unexpected authentication state"
+                    showErrorAlert = true
+                }
+            } catch {
+                // Handle any errors
+                errorMessage = error.localizedDescription
+                showErrorAlert = true
+            }
+        }
     }
-    
+
     private func handleWalletConnect(_ provider: WalletProvider) {
         // TODO: Implement wallet connection based on provider
         switch provider {

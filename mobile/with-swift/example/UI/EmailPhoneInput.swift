@@ -7,12 +7,13 @@
 
 import Combine
 import SwiftUI
+import ParaSwift
 
 struct EmailPhoneInput: View {
-    @Binding var text: String
     @FocusState.Binding var isFocused: Bool
-    let onContinue: () -> Void
+    let onContinue: (Auth) -> Void
 
+    @State private var text = ""
     @State private var inputType: InputType = .unknown
     @State private var countryCode = "1"
     @State private var countryFlag = "🇺🇸"
@@ -106,14 +107,17 @@ struct EmailPhoneInput: View {
     }
 
     private var continueButton: some View {
-        Button("Continue", action: onContinue)
-            .font(.headline)
-            .foregroundColor(isInputValid ? .white : .secondary)
-            .frame(maxWidth: .infinity)
-            .frame(height: 50)
-            .background(isInputValid ? .black : Color(.systemGray5))
-            .clipShape(RoundedRectangle(cornerRadius: 10))
-            .disabled(!isInputValid)
+        Button("Continue") {
+            let authValue: Auth = inputType == .phone ? .phone(formattedValue) : .email(formattedValue)
+            onContinue(authValue)
+        }
+        .font(.headline)
+        .foregroundColor(isInputValid ? .white : .secondary)
+        .frame(maxWidth: .infinity)
+        .frame(height: 50)
+        .background(isInputValid ? .black : Color(.systemGray5))
+        .clipShape(RoundedRectangle(cornerRadius: 10))
+        .disabled(!isInputValid)
     }
     
     private var textContentType: UITextContentType? {
@@ -190,9 +194,8 @@ struct CountryRow: View {
         var body: some View {
             VStack {
                 EmailPhoneInput(
-                    text: $text,
                     isFocused: $isFocused,
-                    onContinue: { print("Continue tapped") },
+                    onContinue: { auth in print("Continue tapped with: \(auth)") }
                 )
                 .padding()
 

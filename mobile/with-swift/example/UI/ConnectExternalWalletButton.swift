@@ -1,5 +1,5 @@
 //
-//  ConnectWalletButton.swift
+//  ConnectExternalWalletButton.swift
 //  example
 //
 //  Created by Tyson Williams on 7/1/25.
@@ -17,21 +17,21 @@ struct ConnectExternalWalletButton: View {
     @State private var isConnecting = false
     @State private var error: Error?
     @State private var showError = false
-    
+
     private var walletImage: ImageResource {
         switch provider {
         case .metamask:
             .metamask
         }
     }
-    
+
     private var walletName: String {
         switch provider {
         case .metamask:
             "MetaMask"
         }
     }
-    
+
     var body: some View {
         Button(action: {
             if !isConnecting {
@@ -48,7 +48,7 @@ struct ConnectExternalWalletButton: View {
                         .resizable()
                         .frame(width: 24, height: 24)
                 }
-                
+
                 Text(isConnecting ? "Connecting..." : "Connect \(walletName)")
                     .font(.callout.weight(.semibold))
                     .foregroundColor(.white)
@@ -65,11 +65,11 @@ struct ConnectExternalWalletButton: View {
             Text(error?.localizedDescription ?? "Unknown error occurred")
         }
     }
-    
+
     func setConnecting(_ connecting: Bool) {
         isConnecting = connecting
     }
-    
+
     func setError(_ error: Error?) {
         self.error = error
         showError = error != nil
@@ -82,30 +82,30 @@ struct ConnectExternalWalletButton: View {
     VStack(spacing: 16) {
         Text("Normal State")
             .font(.headline)
-        
+
         ConnectExternalWalletButton(provider: .metamask) { provider in
             print("Tapped \(provider)")
         }
         .padding(.horizontal)
-        
+
         Text("Connecting State")
             .font(.headline)
             .padding(.top)
-        
+
         ConnectExternalWalletButton(provider: .metamask) { _ in }
             .onAppear {
                 // This will show the connecting state in preview
             }
             .padding(.horizontal)
-        
+
         Text("Different Sizes")
             .font(.headline)
             .padding(.top)
-        
+
         VStack(spacing: 8) {
             ConnectExternalWalletButton(provider: .metamask) { _ in }
                 .frame(width: 200)
-            
+
             ConnectExternalWalletButton(provider: .metamask) { _ in }
                 .frame(width: 300)
         }

@@ -13,10 +13,10 @@ struct CountryPickerView: View {
     @Binding var selectedPattern: String
     @Binding var selectedLimit: Int
     @Binding var isPresented: Bool
-    
+
     @State private var searchText = ""
     private let countries = CPData.allCountry
-    
+
     private var filteredCountries: [CPData] {
         searchText.isEmpty ? countries : countries.filter {
             $0.name.localizedCaseInsensitiveContains(searchText)
@@ -56,17 +56,17 @@ struct CountryPickerView: View {
         @State private var selectedPattern = "### ### ####"
         @State private var selectedLimit = 10
         @State private var isPresented = true
-        
+
         var body: some View {
             CountryPickerView(
                 selectedCode: $selectedCode,
                 selectedFlag: $selectedFlag,
                 selectedPattern: $selectedPattern,
                 selectedLimit: $selectedLimit,
-                isPresented: $isPresented
+                isPresented: $isPresented,
             )
         }
     }
-    
+
     return CountryPickerPreview()
 }

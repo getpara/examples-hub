@@ -24,12 +24,12 @@ class PhoneFormatter {
     ///   - limit: Maximum number of digits allowed (optional)
     static func applyPatternOnNumbers(_ stringvar: inout String, pattern: String, replacementCharacter: Character, limit: Int? = nil) {
         var pureNumber = stringvar.replacingOccurrences(of: "[^0-9]", with: "", options: .regularExpression)
-        
+
         // Enforce digit limit if provided
-        if let limit = limit, pureNumber.count > limit {
+        if let limit, pureNumber.count > limit {
             pureNumber = String(pureNumber.prefix(limit))
         }
-        
+
         for index in 0 ..< pattern.count {
             guard index < pureNumber.count else {
                 stringvar = pureNumber

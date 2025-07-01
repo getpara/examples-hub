@@ -47,26 +47,6 @@ struct AuthOptionsView: View {
                 }
                 .accessibilityIdentifier("phoneAuthButton")
 
-                // OAuth authentication option
-                NavigationLink(destination: OAuthView()) {
-                    HStack {
-                        Image(systemName: "person.crop.circle")
-                            .font(.title2)
-                            .foregroundColor(.purple)
-                            .frame(width: 35)
-
-                        VStack(alignment: .leading) {
-                            Text("OAuth")
-                                .font(.headline)
-                            Text("Sign in with social accounts")
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
-                        }
-                    }
-                    .padding(.vertical, 4)
-                }
-                .accessibilityIdentifier("oauthAuthButton")
-
                 // External wallet option
                 NavigationLink(destination: ExternalWalletAuthView()) {
                     HStack {
