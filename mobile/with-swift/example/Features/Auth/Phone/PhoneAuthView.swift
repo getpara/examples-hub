@@ -106,7 +106,12 @@ struct PhoneAuthView: View {
 
                 Task {
                     do {
-                        let formattedPhone = PhoneFormatter.formatForAPI(phoneNumber: phoneNumber, countryCode: countryCode)
+                        let digitsOnly = phoneNumber.replacingOccurrences(of: "[^0-9]", with: "", options: .regularExpression)
+                        guard let formattedPhone = ParaFormatting.formatPhoneNumber(phoneNumber: digitsOnly, countryCode: countryCode) else {
+                            errorMessage = "Invalid phone number format."
+                            isLoading = false
+                            return
+                        }
                         let state = try await paraManager.initiateAuthFlow(auth: .phone(formattedPhone))
                         authState = state
 

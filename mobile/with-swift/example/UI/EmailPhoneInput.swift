@@ -145,7 +145,8 @@ struct EmailPhoneInput: View {
     var formattedValue: String {
         switch inputType {
         case .phone:
-            PhoneFormatter.formatForAPI(phoneNumber: text, countryCode: countryCode)
+            let digitsOnly = text.replacingOccurrences(of: "[^0-9]", with: "", options: .regularExpression)
+            return ParaFormatting.formatPhoneNumber(phoneNumber: digitsOnly, countryCode: countryCode) ?? text
         case .email, .unknown:
             text
         }

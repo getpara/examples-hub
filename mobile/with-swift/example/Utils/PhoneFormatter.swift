@@ -42,15 +42,4 @@ class PhoneFormatter {
         }
         stringvar = pureNumber
     }
-
-    /// Formats a phone number for API use in the international format
-    /// - Parameters:
-    ///   - phoneNumber: The phone number to format (may contain formatting characters)
-    ///   - countryCode: The country code (without the plus sign)
-    /// - Returns: Formatted phone number in international format (+${countryCode}${phoneNumber})
-    static func formatForAPI(phoneNumber: String, countryCode: String) -> String {
-        // Normalize the phone number input by removing non-digit characters
-        let normalizedPhoneNumber = phoneNumber.replacingOccurrences(of: "[^0-9]", with: "", options: .regularExpression)
-        return "+\(countryCode)\(normalizedPhoneNumber)"
-    }
 }
