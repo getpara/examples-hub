@@ -8,6 +8,7 @@
 - `yarn test` - Run all unit tests
 - `yarn lint` - ESLint all packages
 - `yarn lint-fix` - Fix ESLint issues
+- `cd /sites/developer-portal && yarn legacy-deploy-sandbox` - Deploy dev portal to sandbox
 
 ## Key Architecture
 - **Monorepo:** Lerna-managed packages in `/packages/`

@@ -125,13 +125,24 @@ export const AndroidSetup = () => {
               <li>Use the Keytool command to extract the SHA-256 fingerprint from your keystore:</li>
             </ol>
           </span>
-          <CopyTextarea
-            value={`keytool -list -v \\\n-keystore <keystore path> \\\n-alias <key alias> \\\n-storepass <store password> \\\n-keypass <keypassword>`}
-            className="para:mt-2"
-            disabled
-            textareaClassName="para:disabled:opacity-100 para:disabled:cursor-text para:resize-none"
-            rows={5}
-          />
+          <div className="para:space-y-2">
+            <div className="para:text-sm para:font-medium">For debug builds:</div>
+            <CopyTextarea
+              value={`keytool -list -v -keystore ~/.android/debug.keystore`}
+              className="para:mt-1"
+              disabled
+              textareaClassName="para:disabled:opacity-100 para:disabled:cursor-text para:resize-none"
+              rows={1}
+            />
+            <div className="para:text-sm para:font-medium para:mt-4">For release builds:</div>
+            <CopyTextarea
+              value={`keytool -list -v -keystore <your_keystore_path>`}
+              className="para:mt-1"
+              disabled
+              textareaClassName="para:disabled:opacity-100 para:disabled:cursor-text para:resize-none"
+              rows={1}
+            />
+          </div>
         </div>
       </div>
     </>
