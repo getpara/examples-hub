@@ -6,16 +6,11 @@
 //
 
 import SwiftUI
-
-enum SocialProvider {
-    case google
-    case apple
-    case discord
-}
+import ParaSwift
 
 struct ConnectSocialButton: View {
-    let provider: SocialProvider
-    let action: (SocialProvider) -> Void
+    let provider: OAuthProvider
+    let action: (OAuthProvider) -> Void
     
     
     private var image: ImageResource {

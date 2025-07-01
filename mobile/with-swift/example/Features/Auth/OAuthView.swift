@@ -30,25 +30,25 @@ struct OAuthView: View {
         errorMessage = nil
         debugInfo = "Starting OAuth flow for provider: \(provider.rawValue)"
 
-        Task {
-            // Use the new handleOAuth method that encapsulates the entire flow
-            let result = await paraManager.handleOAuth(
-                provider: provider,
-                webAuthenticationSession: webAuthenticationSession,
-                authorizationController: authorizationController,
-            )
-
-            if result.success {
-                logger.debug("OAuth authentication successful")
-                debugInfo = "Authentication successful"
-                appRootManager.setAuthenticated(true)
-            } else {
-                logger.error("OAuth error: \(result.errorMessage ?? "Unknown error")")
-                errorMessage = result.errorMessage
-            }
-
-            isLoading = false
-        }
+//        Task {
+//            // Use the new handleOAuth method that encapsulates the entire flow
+//            let result = await paraManager.handleOAuth(
+//                provider: provider,
+//                webAuthenticationSession: webAuthenticationSession,
+//                authorizationController: authorizationController,
+//            )
+//
+//            if result.success {
+//                logger.debug("OAuth authentication successful")
+//                debugInfo = "Authentication successful"
+//                appRootManager.setAuthenticated(true)
+//            } else {
+//                logger.error("OAuth error: \(result.errorMessage ?? "Unknown error")")
+//                errorMessage = result.errorMessage
+//            }
+//
+//            isLoading = false
+//        }
     }
 
     var body: some View {

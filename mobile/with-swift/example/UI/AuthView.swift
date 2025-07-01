@@ -7,9 +7,24 @@
 
 import Combine
 import SwiftUI
+import ParaSwift
 
 struct AuthView: View {
+    /// Main Para SDK manager for authentication operations
+    @EnvironmentObject var paraManager: ParaManager
+    /// Manages app navigation and authentication state
+    @EnvironmentObject var appRootManager: AppRootManager
+    
+    /// System URL opener for external links
+    @Environment(\.openURL) private var openURL
+    /// Controller for passkey/biometric authentication operations
+    @Environment(\.authorizationController) private var authorizationController
+    /// Session manager for OAuth provider web authentication flows
+    @Environment(\.webAuthenticationSession) private var webAuthenticationSession
+
     @State private var emailOrPhone = ""
+    @State private var showErrorAlert = false
+    @State private var errorMessage = ""
     @FocusState private var textFieldFocus: Bool
     
     var body: some View {
@@ -40,6 +55,11 @@ struct AuthView: View {
         }
         .onTapGesture {
             textFieldFocus = false
+        }
+        .alert("Authentication Error", isPresented: $showErrorAlert) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(errorMessage)
         }
     }
     
@@ -115,15 +135,19 @@ struct AuthView: View {
     
     // MARK: - Actions
     
-    private func handleSocialSignIn(_ provider: SocialProvider) {
-        // TODO: Implement social sign in based on provider
-        switch provider {
-        case .google:
-            print("Google Sign In")
-        case .apple:
-            print("Apple Sign In")
-        case .discord:
-            print("Discord Sign In")
+    private func handleSocialSignIn(_ provider: OAuthProvider) {
+        Task {
+            do {
+                try await paraManager.handleOAuth(
+                    provider: provider,
+                    webAuthenticationSession: webAuthenticationSession,
+                    authorizationController: authorizationController
+                )
+                appRootManager.setAuthenticated(true)
+            } catch {
+                errorMessage = error.localizedDescription
+                showErrorAlert = true
+            }
         }
     }
     

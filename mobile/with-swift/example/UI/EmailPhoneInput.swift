@@ -63,7 +63,6 @@ struct EmailPhoneInput: View {
             
             TextField("Enter email or phone", text: $text)
                 .focused($isFocused)
-                .keyboardType(keyboardType)
                 .textContentType(textContentType)
                 .autocapitalization(.none)
                 .disableAutocorrection(true)
@@ -115,10 +114,6 @@ struct EmailPhoneInput: View {
             .background(isInputValid ? .black : Color(.systemGray5))
             .clipShape(RoundedRectangle(cornerRadius: 10))
             .disabled(!isInputValid)
-    }
-
-    private var keyboardType: UIKeyboardType {
-        inputType == .phone ? .phonePad : .emailAddress
     }
     
     private var textContentType: UITextContentType? {
