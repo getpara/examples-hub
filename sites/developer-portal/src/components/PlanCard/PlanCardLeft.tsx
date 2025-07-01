@@ -5,6 +5,7 @@ import { ENTERPRISE_PLAN_SLUG, MOST_POPULAR_PLAN_SLUG } from '../../utils/consta
 import { PlanCardType } from './PlanCard';
 import { Badge, Button, Typography } from '@getpara/react-component-library';
 import { Trans, useTranslation } from 'react-i18next';
+import { useOrganizationMemberCapabilities } from '../../hooks/api/queries/useOrganizationMember';
 
 interface PlanCardLeftProps extends Pick<PlanMetadata, 'name' | 'allowanceString' | 'footnote' | 'monthlyCost' | 'slug'> {
   isActive?: boolean;
@@ -30,6 +31,7 @@ export const PlanCardLeft = ({
   const { t } = useTranslation(['billing']);
   const { data: subscription } = useGetOrganizationSubscription();
   const { data: plan, isLoading: isPriceLoading } = usePlan(slug);
+  const { data: memberCapabilities } = useOrganizationMemberCapabilities();
 
   const isBillingType = type === 'billing';
   const isMostPopular = slug === MOST_POPULAR_PLAN_SLUG;
@@ -89,21 +91,23 @@ export const PlanCardLeft = ({
             )}
           </>
         )}
-        <Button
-          size="lg"
-          className="para:w-fit"
-          variant={(isBillingType && !isHigherPlanActive) || (!isBillingType && isMostPopular) ? 'default' : 'neutral'}
-          onClick={handleUpgradePlanClick}
-          disabled={disabled || isActive}
-        >
-          {isActive
-            ? t('plans.plan.buttons.current')
-            : isEnterprise && !enterprisePrice
-              ? t('plans.plan.buttons.enterpriseCTA')
-              : isBillingType && !isHigherPlanActive
-                ? t('plans.plan.buttons.upgrade')
-                : t('plans.plan.buttons.downgrade')}
-        </Button>
+        {(!isBillingType || memberCapabilities?.canUpdateOrganizationBilling) && (
+          <Button
+            size="lg"
+            className="para:w-fit"
+            variant={(isBillingType && !isHigherPlanActive) || (!isBillingType && isMostPopular) ? 'default' : 'neutral'}
+            onClick={handleUpgradePlanClick}
+            disabled={disabled || isActive}
+          >
+            {isActive
+              ? t('plans.plan.buttons.current')
+              : isEnterprise && !enterprisePrice
+                ? t('plans.plan.buttons.enterpriseCTA')
+                : isBillingType && !isHigherPlanActive
+                  ? t('plans.plan.buttons.upgrade')
+                  : t('plans.plan.buttons.downgrade')}
+          </Button>
+        )}
       </div>
       {footnote && (
         <div className="para:flex para:flex-1 para:items-end">
