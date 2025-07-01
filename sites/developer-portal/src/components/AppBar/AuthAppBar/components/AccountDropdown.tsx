@@ -48,7 +48,9 @@ const MENU_ITEMS: {
 
 export const AccountDropdown = () => {
   const { organizationId } = useParams();
-  const { data: account } = useAccount();
+  const {
+    embedded: { email },
+  } = useAccount();
   const [isOpen, setIsOpen] = useState(false);
   const { logout } = useLogout();
   const { data: capabilities } = useOrganizationMemberCapabilities();
@@ -65,12 +67,12 @@ export const AccountDropdown = () => {
           })}
         >
           <AvatarFallback className="para:bg-primary para:text-lg para:font-medium para:text-white">
-            {account?.email?.slice(0, 1).toUpperCase()}
+            {email?.slice(0, 1).toUpperCase()}
           </AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="para:z-[100000] para:rounded-sm" align="end">
-        <DropdownMenuLabel>{account?.email}</DropdownMenuLabel>
+        <DropdownMenuLabel>{email}</DropdownMenuLabel>
         {MENU_ITEMS.map(item =>
           (item.capabilityKey && capabilities?.[item.capabilityKey]) || !item.capabilityKey ? (
             <Link key={item.value} to={`${basePath}${item.value}`}>

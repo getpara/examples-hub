@@ -1,5 +1,6 @@
 import { Context, MutableRefObject } from 'react';
 import ParaWeb, { TWalletType } from '@getpara/web-sdk';
+import * as paraEvmLib from '@getpara/evm-wallet-connectors';
 import { EvmExternalWalletContextType, ParaEvmProvider, WalletList as EvmWalletList } from '@getpara/evm-wallet-connectors';
 import {
   CosmosExternalWalletContextType,
@@ -65,6 +66,8 @@ export interface ExternalWalletsSlice {
   externalWalletsWithFullAuth: TExternalWallet[];
   setExternalWalletsWithFullAuth: (_: TExternalWallet[]) => void;
 
+  evmLib: typeof paraEvmLib | undefined;
+  setEvmLib: (_: typeof paraEvmLib) => void;
   evmContext: Context<EvmExternalWalletContextType>;
   setEvmContext: (_: Context<EvmExternalWalletContextType>) => void;
   EvmProvider?: typeof ParaEvmProvider;

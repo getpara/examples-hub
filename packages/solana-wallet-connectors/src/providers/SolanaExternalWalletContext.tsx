@@ -13,8 +13,9 @@ import {
   type CommonWallet,
 } from '@getpara/react-common';
 import bs58 from 'bs58';
+import { externalHooks, TExternalHooks } from './externalHooks.js';
 
-export type SolanaExternalWalletContextType = ExternalWalletContextType;
+export type SolanaExternalWalletContextType = ExternalWalletContextType & TExternalHooks;
 
 export const SolanaExternalWalletContext = createContext<SolanaExternalWalletContextType>(defaultSolanaExternalWallet);
 
@@ -341,7 +342,7 @@ export function SolanaExternalWalletProvider({
   return (
     <SolanaExternalWalletContext.Provider
       value={useMemo(
-        () => ({ wallets, disconnect, signMessage, signVerificationMessage, requestInfo, disconnectBase }),
+        () => ({ wallets, disconnect, signMessage, signVerificationMessage, requestInfo, disconnectBase, ...externalHooks }),
         [wallets, disconnect, signMessage, signVerificationMessage, requestInfo, disconnectBase],
       )}
     >

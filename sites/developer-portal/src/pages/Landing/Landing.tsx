@@ -7,12 +7,12 @@ import { useState } from 'react';
 import { Loading } from './components/Loading';
 
 export const Landing = () => {
-  const { data: account } = useAccount();
+  const { isConnected } = useAccount();
 
   const [isLoading, setIsLoading] = useState(false);
 
   const handleModalClose = () => {
-    if (account?.isConnected) {
+    if (isConnected) {
       setIsLoading(true);
     }
   };

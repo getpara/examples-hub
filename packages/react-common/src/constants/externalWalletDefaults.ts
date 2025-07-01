@@ -11,6 +11,7 @@ export const defaultCosmosExternalWallet = {
   signVerificationMessage: () => Promise.resolve({}),
   requestInfo: () => Promise.resolve({} as any),
   disconnectBase: () => Promise.resolve(),
+  useAccount: () => undefined,
 };
 
 export const defaultEvmExternalWallet = {
@@ -28,6 +29,7 @@ export const defaultEvmExternalWallet = {
   getWalletBalance: () => Promise.resolve(undefined),
   requestInfo: () => Promise.resolve({} as ExternalWalletInfo),
   disconnectBase: () => Promise.resolve(),
+  useAccount: () => undefined,
 };
 
 export const defaultSolanaExternalWallet = {
@@ -37,4 +39,5 @@ export const defaultSolanaExternalWallet = {
   signVerificationMessage: () => Promise.resolve({}),
   requestInfo: () => Promise.resolve({} as ExternalWalletInfo),
   disconnectBase: () => Promise.resolve(),
+  useWallet: () => undefined,
 };

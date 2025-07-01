@@ -27,6 +27,7 @@ import {
   type SignResult,
 } from '@getpara/react-common';
 import { formatEthHexAddress } from '../utils/formatEthHexAddress.js';
+import { externalHooks, TExternalHooks } from './externalHooks.js';
 
 export type CosmosSignResult = SignResult & {
   cosmosPublicKeyHex?: string;
@@ -36,6 +37,7 @@ export type CosmosSignResult = SignResult & {
 
 export type CosmosExternalWalletContextType = ExternalWalletContextType<CosmosSignResult> &
   ChainManagement<string> &
+  TExternalHooks &
   ConnectParaEmbedded;
 
 export type CosmosExternalWalletProviderConfig = ExternalWalletProviderConfigBase;
@@ -457,6 +459,7 @@ export function CosmosExternalWalletProvider({
           signVerificationMessage,
           requestInfo,
           disconnectBase,
+          ...externalHooks,
         }),
         [
           wallets,

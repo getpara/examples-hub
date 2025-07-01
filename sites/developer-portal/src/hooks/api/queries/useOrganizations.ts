@@ -8,11 +8,13 @@ import { useAccount } from '@getpara/react-sdk';
 export const ORGANIZATIONS_QUERY_KEY = 'organizations';
 
 export const useOrganizationsQuery = <T>(select: (data: Organization[]) => T, retry?: boolean) => {
-  const { data: account } = useAccount();
-  const userId = account?.userId;
+  const {
+    isConnected,
+    embedded: { userId },
+  } = useAccount();
 
   return useQuery({
-    enabled: !!userId && account.isConnected,
+    enabled: !!userId && isConnected,
     queryKey: [ORGANIZATIONS_QUERY_KEY, userId],
     queryFn: async () => {
       if (!userId) {

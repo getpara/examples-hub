@@ -84,9 +84,9 @@ export const AccountSelect = () => {
 
   const { setSelectedWallet } = useWalletState();
   const { data: activeWallet } = useWallet();
-  const { data: account } = useAccount();
+  const { embedded } = useAccount();
 
-  const availableWallets = account?.wallets;
+  const availableWallets = embedded?.wallets;
 
   const isGuest = para.isGuestMode && activeWallet?.pregenIdentifierType === 'GUEST_ID';
 

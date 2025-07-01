@@ -1631,7 +1631,10 @@ export abstract class ParaCore implements CoreInterface {
     }
   }
 
-  get availableWallets(): Pick<Wallet, 'id' | 'type' | 'name' | 'address' | 'isExternal' | 'externalProviderId'>[] {
+  get availableWallets(): Pick<
+    Wallet,
+    'id' | 'type' | 'name' | 'address' | 'isExternal' | 'externalProviderId' | 'isExternalConnectionOnly'
+  >[] {
     return [
       ...[...this.currentWalletIdsArray, ...this.#guestWalletIdsArray]
         .map(([address, type]): [string, TWalletType, boolean] => [address, type, false])

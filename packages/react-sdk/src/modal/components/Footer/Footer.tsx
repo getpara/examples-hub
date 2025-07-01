@@ -7,10 +7,10 @@ import { getStepHasFooter } from '../../utils/steps.js';
 import { useAccount } from '../../../provider/index.js';
 
 export const Footer = () => {
-  const { data: account } = useAccount();
+  const { embedded } = useAccount();
   const currentStep = useModalStore(state => state.step);
 
-  const accountFooter = account?.isConnected && !account.isGuestMode;
+  const accountFooter = embedded?.isConnected && !embedded.isGuestMode;
   const showFooter = accountFooter || getStepHasFooter(currentStep);
 
   const Content = useMemo(() => {
@@ -50,7 +50,7 @@ export const Footer = () => {
         </PoweredByContainer>
       </>
     );
-  }, [account]);
+  }, [embedded]);
 
   if (!showFooter) {
     return null;

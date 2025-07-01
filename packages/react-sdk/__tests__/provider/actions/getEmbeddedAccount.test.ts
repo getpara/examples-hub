@@ -11,10 +11,10 @@ import {
   TEST_USER_ID,
   TEST_WALLET,
 } from '../../constants';
-import { getAccount } from '../../../src/provider/actions/getAccount';
+import { getEmbeddedAccount } from '../../../src/provider/actions/getEmbeddedAccount';
 import { extractAuthInfo } from '@getpara/user-management-client';
 
-describe('getAccount', () => {
+describe('getEmbeddedAccount', () => {
   const paraClient = new MockPara(Environment.DEV, API_KEY);
 
   afterEach(() => {
@@ -33,7 +33,7 @@ describe('getAccount', () => {
     it(`${authInfo.authType}: connected`, async () => {
       vi.spyOn(MockPara.prototype, 'authInfo', 'get').mockReturnValueOnce(authInfo);
 
-      const resp = await getAccount(paraClient);
+      const resp = await getEmbeddedAccount(paraClient);
 
       expect(resp).toStrictEqual({
         auth,

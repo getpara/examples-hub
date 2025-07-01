@@ -28,12 +28,12 @@ export const AuthMainStepContent = ({
 }: AuthMainStepContentProps) => {
   const { wallets } = useExternalWallets();
   const { createGuestWallets } = useAuthActions();
-  const { data: account } = useAccount();
+  const { embedded } = useAccount();
   const authLayout = useModalStore(state => state.authLayout);
   const setStep = useModalStore(state => state.setStep);
   const oAuthLogoVariant = useStore(state => state.oAuthLogoVariant);
   const isDark = useStore(state => state.modalConfig?.theme?.mode === 'dark');
-  const isGuestMode = account?.isConnected && account.isGuestMode;
+  const isGuestMode = embedded?.isConnected && embedded.isGuestMode;
 
   const useBrandedLogos = oAuthLogoVariant === 'default';
   const useDarkLogos = useBrandedLogos ? isDark : oAuthLogoVariant !== 'dark';

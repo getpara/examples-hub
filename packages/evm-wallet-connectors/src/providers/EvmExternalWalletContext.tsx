@@ -30,6 +30,7 @@ import {
 } from '@getpara/react-common';
 import { AuthState, ExternalWalletInfo, isMobile } from '@getpara/web-sdk';
 import { etherUnits, formatUnits } from 'viem';
+import { externalHooks, TExternalHooks } from './externalHooks.js';
 
 type SignOptions = Partial<
   Pick<Parameters<ReturnType<typeof useSignMessage>['signMessageAsync']>[0], 'account' | 'connector'>
@@ -38,7 +39,8 @@ type SignOptions = Partial<
 export type EvmExternalWalletContextType = ExternalWalletContextType &
   ChainManagement<number> &
   BalanceManagement &
-  ConnectParaEmbedded & {
+  ConnectParaEmbedded &
+  TExternalHooks & {
     username?: string;
     avatar?: string;
   };
@@ -565,6 +567,7 @@ export function EvmExternalWalletProvider({
         getWalletBalance,
         requestInfo,
         disconnectBase,
+        ...externalHooks,
       }}
     >
       {children}

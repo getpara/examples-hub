@@ -6,7 +6,10 @@ import { useAccount } from '@getpara/react-sdk';
 import { toast } from '@getpara/react-component-library';
 
 export const useSetSelectedOrganizationWithNavigation = (shouldRefetch: boolean) => {
-  const { data: account } = useAccount();
+  const {
+    isConnected,
+    embedded: { userId },
+  } = useAccount();
   const { organizationId } = useParams();
   const { data: allUserOrgs, error: allUserOrgsError, refetch: refetchOrgs } = useGetAllOrganizations(false);
   const setStoredSelectedOrganization = useAppStore(state => state.setSelectedOrganization);
@@ -16,7 +19,7 @@ export const useSetSelectedOrganizationWithNavigation = (shouldRefetch: boolean)
   const { pathname } = useLocation();
 
   const setSelectedOrganization = async () => {
-    if (!account?.isConnected) {
+    if (!isConnected) {
       return;
     }
 
@@ -39,7 +42,6 @@ export const useSetSelectedOrganizationWithNavigation = (shouldRefetch: boolean)
 
     // If user has any organizations, set selected to the first or the previously selected (if it's a valid org)
     if (_allUserOrgs?.length) {
-      const userId = account.userId;
       const storedOrgId = getSelectedOrganization(userId!);
       let selectedOrgId = organizationId ?? storedOrgId;
 

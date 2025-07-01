@@ -1,6 +1,6 @@
 import { useModal, useAccount } from '@getpara/react-sdk';
 import { SolanaProfile } from './SolanaProfile';
-import { CpslButton } from '@getpara/react-components';
+import { CpslButton, CpslText } from '@getpara/react-components';
 import styled from 'styled-components';
 import { EvmProfile } from './EvmProfile';
 import { CosmosProfile } from './CosmosProfile';
@@ -9,20 +9,24 @@ import { ParaProfile } from './ParaProfile';
 
 export const Content = () => {
   const { openModal } = useModal();
-  const { data: account } = useAccount();
+  const { isConnected, isLoading } = useAccount();
 
   return (
     <Container>
       <ConfigContainer>
         <ModalConfig />
       </ConfigContainer>
-      <InnerContainer>
-        <ParaProfile />
-        <EvmProfile />
-        <CosmosProfile />
-        <SolanaProfile />
-        <CpslButton onClick={openModal}>{!!account ? 'Open Modal' : 'Login'}</CpslButton>
-      </InnerContainer>
+      {isLoading ? (
+        <CpslText>Loading...</CpslText>
+      ) : (
+        <InnerContainer>
+          <ParaProfile />
+          <EvmProfile />
+          <CosmosProfile />
+          <SolanaProfile />
+          <CpslButton onClick={openModal}>{isConnected ? 'Open Modal' : 'Login'}</CpslButton>
+        </InnerContainer>
+      )}
     </Container>
   );
 };

@@ -300,7 +300,7 @@ function WagmiSendTransaction(): JSX.Element {
   );
 }
 
-function WagmiProfileComponent(): JSX.Element {
+const WagmiProfileComponent = React.memo(function WagmiProfileComponent(): JSX.Element {
   const { address, connector, isConnected } = useAccount();
   const { connect, connectors, error } = useConnect();
   const { disconnect } = useDisconnect();
@@ -348,7 +348,7 @@ function WagmiProfileComponent(): JSX.Element {
       {error && <Text>{error.message}</Text>}
     </VStack>
   );
-}
+});
 
 function WagmiComponent(): JSX.Element {
   const para = useClient<ParaLegacyExample>();
@@ -525,7 +525,12 @@ function AppInner({
     '@EXAMPLE-PARA/useFetchPregenWalletsOverride',
     false,
   );
-  const { data: paraAccount, isLoading: isAccountLoading } = useParaAccount();
+
+  const {
+    isConnected,
+    embedded: { isGuestMode },
+    isLoading: isAccountLoading,
+  } = useParaAccount();
   const { isPending: isCreateGuestWalletsPending } = useCreateGuestWalletsState();
   const [evmSigningTimeTakenMs, setEvmSigningTimeTakenMs] = useState<number | undefined>();
   const [testTxTimeTakenMs, setTestTxTimeTakenMs] = useState<number | undefined>();
@@ -578,7 +583,7 @@ function AppInner({
   }
 
   useEffect(() => {
-    if (paraAccount?.isConnected && !paraAccount?.isGuestMode) {
+    if (isConnected && !isGuestMode) {
       console.log(`exported session:\n${(para as ParaCore).exportSession()}`);
 
       if (para.authInfo?.authType === 'email' && pregenIdentifierType === 'EMAIL') {
@@ -589,7 +594,7 @@ function AppInner({
         setPregenIdentifier(para.phone);
       }
     }
-  }, [paraAccount, para.authInfo]);
+  }, [isConnected, isGuestMode, para.authInfo]);
 
   useEffect(() => {
     async function fetchPartners() {
@@ -1006,17 +1011,17 @@ function AppInner({
                 <Button colorScheme="green" isDisabled={!para} onClick={() => openModal()}>
                   Open Modal
                 </Button>
-                {paraAccount?.isConnected && (
+                {isConnected && (
                   <>
                     <Button
                       colorScheme="green"
                       onClick={async () => {
-                        await para?.logout({ clearPregenWallets: paraAccount.isGuestMode ? true : false });
+                        await para?.logout({ clearPregenWallets: isGuestMode ? true : false });
                       }}
                     >
                       Log Out
                     </Button>
-                    {!paraAccount.isGuestMode && (
+                    {!isGuestMode && (
                       <>
                         <Button
                           colorScheme="red"
@@ -1133,7 +1138,7 @@ function AppInner({
 
                     <Button
                       colorScheme="teal"
-                      isDisabled={!paraAccount?.isConnected || Object.values(para?.pregenIds || []).flat().length === 0}
+                      isDisabled={!isConnected || Object.values(para?.pregenIds || []).flat().length === 0}
                       onClick={async () => {
                         console.log(await para?.claimPregenWallets());
                         updateToString();
@@ -1145,10 +1150,10 @@ function AppInner({
                     <Button colorScheme="teal" onClick={checkIsSessionActive}>
                       Is Fully Logged In?
                     </Button>
-                    <Text>{paraAccount?.isConnected ? 'Fully Logged In!' : 'Log In Pending...'}</Text>
+                    <Text>{isConnected ? 'Fully Logged In!' : 'Log In Pending...'}</Text>
 
                     <Button
-                      isDisabled={!paraAccount?.isConnected}
+                      isDisabled={!isConnected}
                       colorScheme="teal"
                       onClick={async () => {
                         if (para) {
@@ -1161,7 +1166,7 @@ function AppInner({
                     </Button>
 
                     <Button
-                      isDisabled={!paraAccount?.isConnected || paraAccount.isGuestMode}
+                      isDisabled={!isConnected || isGuestMode}
                       colorScheme="teal"
                       onClick={async () => {
                         if (para) {

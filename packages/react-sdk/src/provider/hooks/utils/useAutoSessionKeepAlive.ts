@@ -7,7 +7,7 @@ const SESSION_REFRESH_THRESHOLD = 300000;
 
 export const useAutoSessionKeepAlive = ({ disabled }: { disabled?: boolean }) => {
   const client = useInternalClient();
-  const { data: account } = useAccount();
+  const { embedded } = useAccount();
   const { logoutAsync } = useLogout();
   const { keepSessionAliveAsync } = useKeepSessionAlive();
 
@@ -19,14 +19,14 @@ export const useAutoSessionKeepAlive = ({ disabled }: { disabled?: boolean }) =>
       return;
     }
 
-    if (account?.isConnected && !account.isGuestMode && client.externalWalletConnectionType !== 'CONNECTION_ONLY') {
+    if (embedded?.isConnected && !embedded.isGuestMode && client.externalWalletConnectionType !== 'CONNECTION_ONLY') {
       setupSessionMonitoring();
     } else {
       clearSessionMonitoring();
     }
 
     return () => clearSessionMonitoring();
-  }, [client, account, disabled]);
+  }, [client, embedded, disabled]);
 
   const getSessionExpiry = async (): Promise<Date | null> => {
     try {

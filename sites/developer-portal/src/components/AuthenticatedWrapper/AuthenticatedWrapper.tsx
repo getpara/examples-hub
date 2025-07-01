@@ -22,7 +22,7 @@ export const AuthenticatedWrapper = ({ requireOrgs, children }: AuthenticatedWra
   const inviteId = searchParams.get('invite');
   const [inviteOrgId, inviteMemberId] = inviteId?.split('|') ?? [];
   const { data: invite, isLoading: isLoadingInvite } = useGetInvite(inviteOrgId, inviteMemberId);
-  const { data: account, isLoading: isLoadingLoggedIn } = useAccount();
+  const { isConnected, isLoading: isLoadingLoggedIn } = useAccount();
   const { isLoading: isLoadingSubscription } = useGetOrganizationSubscription();
   const { isLoading: isLoadingPlans } = usePlans();
   const { isLoading: isLoadingMember } = useOrganizationMember();
@@ -35,7 +35,7 @@ export const AuthenticatedWrapper = ({ requireOrgs, children }: AuthenticatedWra
   // invite route useEffect
   useEffect(() => {
     if (isInvite && !isLoadingLoggedIn) {
-      if (account?.isConnected && !isLoadingInvite) {
+      if (isConnected && !isLoadingInvite) {
         if (!inviteId || (inviteId && !invite)) {
           toast.error('Invite not found', {
             description: 'Please try again. If the problem persists, contact Para support.',
@@ -44,28 +44,21 @@ export const AuthenticatedWrapper = ({ requireOrgs, children }: AuthenticatedWra
         }
       }
     }
-  }, [account?.isConnected, isLoadingInvite, isLoadingLoggedIn, inviteId, invite, setSelectedOrganization, isInvite]);
+  }, [isConnected, isLoadingInvite, isLoadingLoggedIn, inviteId, invite, setSelectedOrganization, isInvite]);
 
   // onboarding route useEffect
   useEffect(() => {
     if (isOnboarding && !isLoadingLoggedIn) {
-      if (account?.isConnected && !isLoadingOrgs && orgsWithAccess?.length) {
+      if (isConnected && !isLoadingOrgs && orgsWithAccess?.length) {
         setSelectedOrganization();
       }
     }
-  }, [
-    isLoadingLoggedIn,
-    isLoadingOrgs,
-    account?.isConnected,
-    isOnboarding,
-    orgsWithAccess?.length,
-    setSelectedOrganization,
-  ]);
+  }, [isLoadingLoggedIn, isLoadingOrgs, isConnected, isOnboarding, orgsWithAccess?.length, setSelectedOrganization]);
 
   // default route useEffect
   useEffect(() => {
     if (!isOnboarding && !isInvite && !isLoadingLoggedIn) {
-      if (account?.isConnected && !isLoadingOrgs && orgsWithAccess?.length) {
+      if (isConnected && !isLoadingOrgs && orgsWithAccess?.length) {
         setSelectedOrganization();
       }
     }
@@ -73,7 +66,7 @@ export const AuthenticatedWrapper = ({ requireOrgs, children }: AuthenticatedWra
     isInvite,
     isLoadingLoggedIn,
     isLoadingOrgs,
-    account?.isConnected,
+    isConnected,
     isOnboarding,
     orgsWithAccess?.length,
     setSelectedOrganization,
@@ -83,7 +76,7 @@ export const AuthenticatedWrapper = ({ requireOrgs, children }: AuthenticatedWra
     return <MainLoader />;
   }
 
-  if (!account?.isConnected) {
+  if (!isConnected) {
     logout();
     return null;
   }

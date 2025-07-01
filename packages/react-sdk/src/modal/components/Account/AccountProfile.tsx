@@ -1,6 +1,6 @@
 import { AccountTypeIcon, GradientScroll, StepContainer } from '../common.js';
 import { CpslButton, CpslIcon, CpslIdenticon, CpslText } from '@getpara/react-components';
-import { useAccount, useClient } from '../../../provider/index.js';
+import { useClient } from '../../../provider/index.js';
 import { useLinkedAccounts } from '../../../provider/hooks/index.js';
 import { getWalletDisplayName } from '../../utils/getWalletDisplayName.js';
 import { LinkedAccount as TLinkedAccount, truncateAddress } from '@getpara/web-sdk';
@@ -63,7 +63,6 @@ const Entry = ({
 
 export const AccountProfile = () => {
   const para = useClient();
-  const { data: account } = useAccount();
   const { data: linkedAccounts } = useLinkedAccounts();
   const { isEnabled, linkAccount, unlinkAccount } = useAccountLinking();
 
@@ -71,7 +70,7 @@ export const AccountProfile = () => {
     return null;
   }
 
-  const externalWallet = account?.externalWallet;
+  const externalWallet = para.authInfo?.externalWallet;
 
   return (
     <StepContainer $wide>
@@ -91,7 +90,7 @@ export const AccountProfile = () => {
               })}
             />
           ) : (
-            account?.wallets?.map(wallet => (
+            para?.availableWallets?.map(wallet => (
               <Entry
                 key={wallet.address}
                 icon={

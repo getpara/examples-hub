@@ -8,3 +8,4 @@ export type {
 } from './providers/ParaCosmosContext.js';
 export * from './wallets/connectors/index.js';
 export type { WalletList } from './types/Wallet.js';
+export type * from './types/ExternalHooks.js';

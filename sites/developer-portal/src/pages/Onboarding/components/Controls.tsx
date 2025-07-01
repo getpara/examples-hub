@@ -9,8 +9,9 @@ import { Button } from '@getpara/react-component-library';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 
 export const Controls = () => {
-  const { data: account } = useAccount();
-  const userId = account?.userId;
+  const {
+    embedded: { userId },
+  } = useAccount();
   const currentStep = useOnboardingStore(state => state.getStep(userId));
   const setStep = useOnboardingStore(state => state.setStep);
   const setDirection = useOnboardingStore(state => state.setDirection);

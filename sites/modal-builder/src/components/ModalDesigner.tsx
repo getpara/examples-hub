@@ -25,7 +25,7 @@ export const ModalDesigner: React.FC = () => {
   const [view] = useAtom(viewAtom);
   const [isMobileOverlayVisible, setIsMobileOverlayVisible] = useState(false);
 
-  const { data: account } = useAccount();
+  const { isConnected } = useAccount();
 
   useEffect(() => {
     const handleResize = () => {
@@ -82,7 +82,7 @@ export const ModalDesigner: React.FC = () => {
             <ErrorBoundary FallbackComponent={ErrorFallback}>
               <PreviewControlsRow>
                 <PreviewControls />
-                {account?.isConnected && (
+                {isConnected && (
                   <FadeInWrapper>
                     <AccountActionButtons />
                   </FadeInWrapper>

@@ -43,7 +43,7 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
   const { setSelectedWallet, updateSelectedWallet } = useWalletState();
   const setAuthStepRoute = useModalStore(state => state.setAuthStepRoute);
   const { signUpOrLogIn, isCreateGuestWalletsPending } = useAuthActions();
-  const { data: account, status: statusAccount } = useAccount();
+  const { isLoading: isAccountLoading, isConnected } = useAccount();
 
   const [isModalMounted, setIsModalMounted] = useState(false);
   const externalWallets = useStore(state => state.externalWallets);
@@ -123,7 +123,7 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
 
   // This will run on mount and on isOpen change but won't cause a rerender unless step or email changes
   const initModal = async (shouldAutoLogin?: boolean) => {
-    const isAccount = account?.isConnected,
+    const isAccount = isConnected,
       isGuest = (isAccount && para.isGuestMode) || isCreateGuestWalletsPending;
 
     switch (true) {
@@ -175,7 +175,7 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
   };
 
   useEffect(() => {
-    if (para && isOpen && statusAccount === 'success' && !isInitialized.current) {
+    if (para && isOpen && !isAccountLoading && !isInitialized.current) {
       initModal(isOpen);
       isInitialized.current = true;
     }
@@ -184,7 +184,7 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
       initModal();
       isInitialized.current = false;
     }
-  }, [para, isOpen, account, statusAccount]);
+  }, [para, isOpen, isAccountLoading]);
 
   useEffect(() => {
     let _authLayout = authLayout;
@@ -220,14 +220,14 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
   useEffect(() => {
     if (
       bareModal &&
-      account &&
-      !account.isConnected &&
+      !isAccountLoading &&
+      !isConnected &&
       !['signup', 'login'].includes(flow ?? '') &&
       refs.currentStep.current !== ModalStep.AUTH_MAIN
     ) {
       setStep(ModalStep.AUTH_MAIN);
     }
-  }, [bareModal, flow, account]);
+  }, [bareModal, flow, isConnected, isAccountLoading]);
 
   useEffect(() => {
     setAccountLinkOptions(propsSupportedAccountLinks ?? para?.supportedAccountLinks);

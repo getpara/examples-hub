@@ -22,9 +22,9 @@ export const AddFunds = () => {
   const setOnRampPurchase = useModalStore(state => state.setOnRampPurchase);
 
   const { data: activeWallet } = useWallet();
-  const { data: account } = useAccount();
+  const { embedded } = useAccount();
 
-  const isGuestMode = account?.isConnected && account.isGuestMode;
+  const isGuestMode = embedded?.isConnected && embedded.isGuestMode;
   const tabs = TABS.filter(
     ([enabledFlow, key]) => !!onRampConfig?.[key] && (!isGuestMode || enabledFlow === EnabledFlow.RECEIVE),
   );

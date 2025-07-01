@@ -26,8 +26,9 @@ interface QuestionInputProps {
 }
 
 export const QuestionInput = ({ question }: QuestionInputProps) => {
-  const { data: account } = useAccount();
-  const userId = account?.userId;
+  const {
+    embedded: { userId },
+  } = useAccount();
   const setInput = useOnboardingStore(state => state.setInput);
   const { control } = useFormContext<OnboardingAnswers>();
 

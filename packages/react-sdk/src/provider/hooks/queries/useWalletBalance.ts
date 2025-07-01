@@ -17,7 +17,7 @@ export const useWalletBalance = (args?: Partial<GetWalletBalanceParams>) => {
   const {
     selectedWallet: { type: selectedWalletType },
   } = useWalletState();
-  const { data: account } = useAccount();
+  const { embedded } = useAccount();
   const rpcUrl = useStore(state => state.rpcUrl);
   const { getWalletBalance: getExternalWalletBalance, chainId } = useExternalWallets();
 
@@ -39,7 +39,7 @@ export const useWalletBalance = (args?: Partial<GetWalletBalanceParams>) => {
       console.error('Error fetching wallet balance: ', err);
       return null;
     }
-  }, [account, selectedWallet, selectedWalletType, rpcUrl, getExternalWalletBalance]);
+  }, [embedded, selectedWallet, selectedWalletType, rpcUrl, getExternalWalletBalance]);
 
   return useQuery({
     queryKey: [
@@ -50,6 +50,6 @@ export const useWalletBalance = (args?: Partial<GetWalletBalanceParams>) => {
       selectedWallet?.isExternal ? chainId : '',
     ],
     queryFn: queryFn,
-    enabled: !!client && !!selectedWallet && !!rpcUrl && !!account?.isConnected,
+    enabled: !!client && !!selectedWallet && !!rpcUrl && !!embedded?.isConnected,
   });
 };

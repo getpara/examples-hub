@@ -25,13 +25,13 @@ export const Account = ({ onClose }: AccountProps) => {
   const hideWallets = useStore(state => state.modalConfig?.hideWallets);
   const { disconnectExternalWallet } = useExternalWallets();
   const para = useInternalClient();
-  const { data: account } = useAccount();
+  const { embedded } = useAccount();
   const { data: balance, isLoading: isBalanceLoading } = useWalletBalance();
   const { isEnabled } = useAccountLinking();
 
   const [isDisconnecting, setIsDisconnecting] = useState(false);
 
-  const isGuestMode = account?.isConnected && account.isGuestMode;
+  const isGuestMode = embedded.isConnected && embedded.isGuestMode;
   // Users using external wallets with connection only can't buy or withdraw
   // CONNECTION_ONLY wallets with no userId are wallets that have skipped Para and can't buy or withdraw
   const cantBuyAndWithdraw =

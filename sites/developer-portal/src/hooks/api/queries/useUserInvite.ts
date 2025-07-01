@@ -10,11 +10,13 @@ export const useUserInviteQuery = <T>(
   organizationId?: string,
   memberId?: string,
 ) => {
-  const { data: account } = useAccount();
-  const userId = account?.userId;
+  const {
+    isConnected,
+    embedded: { userId },
+  } = useAccount();
 
   return useQuery({
-    enabled: !!userId && !!organizationId && !!memberId && account.isConnected,
+    enabled: !!userId && !!organizationId && !!memberId && isConnected,
     queryKey: [USER_INVITE_QUERY_KEY, userId, organizationId, memberId],
     queryFn: async () => {
       if (!userId || !organizationId || !memberId) {

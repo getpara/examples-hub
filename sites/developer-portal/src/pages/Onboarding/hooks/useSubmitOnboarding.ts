@@ -12,9 +12,9 @@ import { useAccount } from '@getpara/react-sdk';
 import { toast } from '@getpara/react-component-library';
 
 export const useSubmitOnboarding = () => {
-  const { data: account } = useAccount();
-  const userId = account?.isConnected ? account.userId : undefined;
-  const email = account?.isConnected ? account.email : undefined;
+  const {
+    embedded: { userId, email },
+  } = useAccount();
   const { getValues } = useFormContext();
   const getInput = useOnboardingStore(state => state.getInput);
   const logoFile = useOnboardingStore(state => state.logoFile);

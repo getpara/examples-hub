@@ -40,8 +40,9 @@ export const ONBOARDING_TRANSITION: Transition = {
 export const Layout = () => {
   const { pathname } = useLocation();
   const [searchParams] = useSearchParams();
-  const { data: account } = useAccount();
-  const userId = account?.userId;
+  const {
+    embedded: { userId },
+  } = useAccount();
   const currentStep = useOnboardingStore(state => state.getStep(userId));
   const element = useOutlet();
 

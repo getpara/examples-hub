@@ -8,8 +8,9 @@ import { useAccount } from '@getpara/react-sdk';
 export const useCreateOrganization = (
   options?: MutationOptions<OrganizationResponse, Error, Omit<CreateOrganizationVars, 'userId'>, unknown>,
 ) => {
-  const { data: account } = useAccount();
-  const userId = account?.userId;
+  const {
+    embedded: { userId },
+  } = useAccount();
 
   return useMutation<OrganizationResponse, Error, Omit<CreateOrganizationVars, 'userId'>, unknown>({
     mutationFn: vars => createOrganization({ ...vars, userId: userId ?? '' }),

@@ -8,8 +8,9 @@ import { useAccount } from '@getpara/react-sdk';
 export const useRequestOrganizationAccess = (
   options?: MutationOptions<OrganizationResponse, Error, Omit<RequestOrganizationAccessVars, 'userId'>, unknown>,
 ) => {
-  const { data: account } = useAccount();
-  const userId = account?.userId;
+  const {
+    embedded: { userId },
+  } = useAccount();
 
   return useMutation<OrganizationResponse, Error, Omit<RequestOrganizationAccessVars, 'userId'>, unknown>({
     mutationFn: vars => requestOrganizationAccess({ ...vars, userId: userId ?? '' }),

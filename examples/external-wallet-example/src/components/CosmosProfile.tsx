@@ -3,11 +3,10 @@ import { ProfileInnerContainer, Card, OverflowText } from './common';
 import { useState } from 'react';
 import { getWallet, useAccount, useActiveWalletType } from '@getpara/graz';
 import { useCosmosStore } from '../stores/cosmosStore/useCosmosStore';
-import { cosmosChains } from '../App';
 
 export const CosmosProfile = () => {
   const selectedCosmosChainId = useCosmosStore(state => state.selectedChainId);
-  const { data: account } = useAccount({ multiChain: true, chains: cosmosChains });
+  const { data: account } = useAccount({ multiChain: true });
   const { walletType } = useActiveWalletType();
 
   const [message, setMessage] = useState<string>('');

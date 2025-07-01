@@ -5,8 +5,9 @@ import { AcceptInviteVars, acceptOrganizationInvite } from '../../../api/users/m
 import { useAccount } from '@getpara/react-sdk';
 
 export const useAcceptInvite = (options?: MutationOptions<boolean, Error, Omit<AcceptInviteVars, 'userId'>, unknown>) => {
-  const { data: account } = useAccount();
-  const userId = account?.userId;
+  const {
+    embedded: { userId },
+  } = useAccount();
 
   return useMutation<boolean, Error, Omit<AcceptInviteVars, 'userId'>, unknown>({
     mutationFn: vars =>

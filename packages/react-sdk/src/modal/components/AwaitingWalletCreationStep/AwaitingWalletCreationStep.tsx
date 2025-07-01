@@ -13,7 +13,7 @@ export const AwaitingWalletCreationStep = ({ isGuestMode = false }: Props) => {
   const hideWallets = useStore(state => state.modalConfig?.hideWallets);
   const [showInfoBox, setShowInfoBox] = useState(false);
   const showInfoBoxTimeout = useRef<number>();
-  const { data: account } = useAccount();
+  const { embedded } = useAccount();
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -31,7 +31,7 @@ export const AwaitingWalletCreationStep = ({ isGuestMode = false }: Props) => {
         heading={
           isGuestMode
             ? 'Creating Guest Account'
-            : account?.isGuestMode
+            : embedded?.isGuestMode
               ? hideWallets
                 ? 'Linking Guest Account'
                 : 'Linking Guest Wallet'

@@ -15,8 +15,9 @@ import { OnboardingAnswerOption } from '../../types/onboarding';
 
 export const Onboarding = () => {
   const form = useOnboardingForm();
-  const { data: account } = useAccount();
-  const userId = account?.userId;
+  const {
+    embedded: { userId },
+  } = useAccount();
   const currentStep = useOnboardingStore(state => state.getStep(userId));
   const setStep = useOnboardingStore(state => state.setStep);
   const direction = useOnboardingStore(state => state.direction);

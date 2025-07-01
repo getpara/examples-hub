@@ -17,7 +17,7 @@ export const Controls = ({ onClose }: ControlsProps) => {
   const hasPreviousStep = useModalStore(state => state.hasPreviousStep());
   const step = useModalStore(state => state.step);
   const goBack = useGoBack();
-  const { data: account } = useAccount();
+  const { isConnected } = useAccount();
 
   const shouldShowSelects = [
     ModalStep.ACCOUNT_MAIN,
@@ -43,7 +43,7 @@ export const Controls = ({ onClose }: ControlsProps) => {
         <CpslIcon icon="arrow" />
       </BackButton>
       <MiddleContainer>
-        {shouldShowSelects && account?.isConnected && (
+        {shouldShowSelects && isConnected && (
           <>
             <ChainSelect />
             <AccountSelect />

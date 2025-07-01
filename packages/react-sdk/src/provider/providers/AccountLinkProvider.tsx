@@ -106,7 +106,7 @@ const useVerifyExternalWalletLink = generateInternalMutation('verifyExternalWall
 export const AccountLinkProvider = ({ children }: PropsWithChildren) => {
   const para = useInternalClient();
   const queryClient = useQueryClient();
-  const { data: account } = useAccount();
+  const { embedded } = useAccount();
   const { data: coreAccountLinkInProgress } = useAccountLinkInProgress();
   const {
     wallet: connectedWallet,
@@ -151,7 +151,7 @@ export const AccountLinkProvider = ({ children }: PropsWithChildren) => {
   } = useVerifyExternalWalletLink();
 
   const isEnabled =
-    !!account?.isConnected && !account?.isGuestMode && (!account?.externalWallet || includeWalletVerification);
+    !!embedded?.isConnected && !embedded?.isGuestMode && (!para.authInfo?.externalWallet || includeWalletVerification);
 
   const [accountLinkInProgress, setAccountLinkInProgress] = useState<AccountLinkInProgress | undefined>(
     coreAccountLinkInProgress || undefined,

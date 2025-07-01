@@ -4,7 +4,7 @@ import { useAccount, useClient, useSignMessage, useWallet } from '@getpara/react
 import { useState } from 'react';
 
 export const ParaProfile = () => {
-  const { data: account } = useAccount();
+  const { embedded, external, connectionType, isConnected } = useAccount({ cosmos: { multiChain: true } });
   const { data: wallet } = useWallet();
   const { signMessageAsync, error } = useSignMessage();
   const paraClient = useClient();
@@ -29,21 +29,41 @@ export const ParaProfile = () => {
     }
   };
 
+  const embeddedConnected = embedded?.isConnected && embedded?.wallets?.some(w => !w.isExternal);
+  const evmConnected = external?.evm?.isConnected;
+  const cosmosConnected = external?.cosmos?.isConnected;
+  const solanaConnected = external?.solana?.isConnected;
+
   return (
     <Card>
       <ProfileInnerContainer>
         <CpslText variant="headingXS" weight="semiBold">
-          Para
+          Status
+        </CpslText>
+        <CpslText variant="bodyL" weight="semiBold">
+          Connection Type: {connectionType || ''}
+        </CpslText>
+        <CpslText variant="bodyL" weight="semiBold">
+          Embedded: {embeddedConnected ? 'Connected' : 'Not Connected'}
+        </CpslText>
+        <CpslText variant="bodyL" weight="semiBold">
+          EVM: {evmConnected ? 'Connected' : 'Not Connected'}
+        </CpslText>
+        <CpslText variant="bodyL" weight="semiBold">
+          Cosmos: {cosmosConnected ? 'Connected' : 'Not Connected'}
+        </CpslText>
+        <CpslText variant="bodyL" weight="semiBold">
+          Solana: {solanaConnected ? 'Connected' : 'Not Connected'}
         </CpslText>
         <CpslText>
-          Connected Para Wallet:{' '}
-          {account?.isConnected
+          Selected Wallet:{' '}
+          {isConnected
             ? wallet
               ? paraClient?.getDisplayAddress(wallet.id, { truncate: true, addressType: wallet.type })
               : 'No Wallet Selected'
             : 'Not Connected'}
         </CpslText>
-        {account?.isConnected && (
+        {isConnected && (
           <>
             <CpslInput
               placeholder="Message to sign"
@@ -59,7 +79,7 @@ export const ParaProfile = () => {
           </>
         )}
         <CpslButton
-          disabled={!account?.isConnected}
+          disabled={!isConnected}
           onClick={async () => {
             if (paraClient) {
               const jwtResponse = await paraClient.issueJwt();
@@ -70,7 +90,7 @@ export const ParaProfile = () => {
           Issue JWT
         </CpslButton>
         <CpslButton
-          disabled={!account?.isConnected}
+          disabled={!isConnected}
           onClick={async () => {
             if (paraClient) {
               const sess = await paraClient.getVerificationToken();

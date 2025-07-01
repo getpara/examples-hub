@@ -1,22 +1,19 @@
 import { Context } from 'react';
 import { ParaSolanaProvider, SolanaExternalWalletContextType, WalletList } from '@getpara/solana-wallet-connectors';
 import { SolanaExternalWalletContext } from './stubs/SolanaExternalWalletContextStub.js';
+import { getParaSolanaLib } from './getParaSolanaLib.js';
 
 export const getParaSolanaConnector = async () => {
-  let Provider: typeof ParaSolanaProvider | undefined,
-    context: Context<SolanaExternalWalletContextType> | undefined,
-    wallets: WalletList;
+  let Provider: typeof ParaSolanaProvider | undefined = undefined,
+    context: Context<SolanaExternalWalletContextType> | undefined = SolanaExternalWalletContext,
+    wallets: WalletList = [];
 
-  try {
-    // @ts-ignore
-    const lib = await import('@getpara/solana-wallet-connectors');
+  const { lib } = await getParaSolanaLib();
+
+  if (lib) {
     Provider = lib.ParaSolanaProvider;
     context = lib.SolanaExternalWalletContext;
     wallets = lib.allWallets;
-  } catch (e) {
-    Provider = undefined;
-    context = SolanaExternalWalletContext;
-    wallets = [];
   }
 
   return { Provider, context, wallets };

@@ -7,6 +7,9 @@ import { MockPara } from '../../mocks/mockCorePara';
 import { API_KEY } from '../../constants';
 import { OnRampStep } from '../../../src/modal/stores';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { EvmExternalWalletContext } from '../../../src/provider/external/stubs/EvmExternalWalletContextStub';
+import { CosmosExternalWalletContext } from '../../../src/provider/external/stubs/CosmosExternalWalletContextStub';
+import { SolanaExternalWalletContext } from '../../../src/provider/external/stubs/SolanaExternalWalletContextStub';
 
 const queryClient = new QueryClient();
 
@@ -14,6 +17,9 @@ vi.mock('../../../src/provider/stores/useStore.js', () => ({
   useStore: getter =>
     getter({
       client: new MockPara(Environment.DEV, API_KEY),
+      evmContext: EvmExternalWalletContext,
+      cosmosContext: CosmosExternalWalletContext,
+      solanaContext: SolanaExternalWalletContext,
     }),
 }));
 

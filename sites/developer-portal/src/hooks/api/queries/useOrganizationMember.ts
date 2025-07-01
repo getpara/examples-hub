@@ -8,13 +8,15 @@ import { useIsValidOrg } from '../../useIsValidOrgConfig';
 export const ORGANIZATION_MEMBER_QUERY_KEY = 'organizationMember';
 
 export const useOrganizationMemberQuery = <T>(select: (data: OrganizationMemberResponse | undefined) => T) => {
-  const { data: account } = useAccount();
-  const userId = account?.userId;
+  const {
+    isConnected,
+    embedded: { userId },
+  } = useAccount();
   const { organizationId } = useParams();
   const isOrgValid = useIsValidOrg(organizationId);
 
   return useQuery({
-    enabled: !!userId && isOrgValid && account.isConnected,
+    enabled: !!userId && isOrgValid && isConnected,
     queryKey: [ORGANIZATION_MEMBER_QUERY_KEY, organizationId, userId],
     queryFn: async () => {
       if (!userId || !organizationId) {

@@ -1,22 +1,19 @@
 import { Context } from 'react';
 import { CosmosExternalWalletContext } from './stubs/CosmosExternalWalletContextStub.js';
 import { CosmosExternalWalletContextType, ParaCosmosProvider, WalletList } from '@getpara/cosmos-wallet-connectors';
+import { getParaCosmosLib } from './getParaCosmosLib.js';
 
 export const getParaCosmosConnector = async () => {
-  let Provider: typeof ParaCosmosProvider | undefined,
-    context: Context<CosmosExternalWalletContextType> | undefined,
-    wallets: WalletList;
+  let Provider: typeof ParaCosmosProvider | undefined = undefined,
+    context: Context<CosmosExternalWalletContextType> | undefined = CosmosExternalWalletContext,
+    wallets: WalletList = [];
 
-  try {
-    // @ts-ignore
-    const lib = await import('@getpara/cosmos-wallet-connectors');
+  const { lib } = await getParaCosmosLib();
+
+  if (lib) {
     Provider = lib.ParaCosmosProvider;
     context = lib.CosmosExternalWalletContext;
     wallets = lib.allWallets;
-  } catch (e) {
-    Provider = undefined;
-    context = CosmosExternalWalletContext;
-    wallets = [];
   }
 
   return { Provider, context, wallets };

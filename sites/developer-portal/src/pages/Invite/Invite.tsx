@@ -14,8 +14,9 @@ export const Invite = ({ isOnboarding }: InviteProps) => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const inviteId = searchParams.get('invite');
-  const { data: account } = useAccount();
-  const userId = account?.userId;
+  const {
+    embedded: { userId },
+  } = useAccount();
   const [inviteOrgId, inviteMemberId] = inviteId?.split('|') ?? [];
   const setStep = useOnboardingStore(state => state.setStep);
 

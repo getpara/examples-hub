@@ -11,8 +11,8 @@ import { useAccount } from '@getpara/react-sdk';
 export const Layout = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { data: account, isLoading: isLoadingLoggedIn } = useAccount();
-  const isLoggedIn = account?.isConnected;
+  const { isConnected, isLoading: isLoadingLoggedIn } = useAccount();
+  const isLoggedIn = isConnected;
   const { data: allOrgs, isLoading: isLoadingOrgs, isRefetching: isRefetchingOrgs } = useGetAllOrganizations();
   const { setSelectedOrganization } = useSetSelectedOrganizationWithNavigation(false);
 

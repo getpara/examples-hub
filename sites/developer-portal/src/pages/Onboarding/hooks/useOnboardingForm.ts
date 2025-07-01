@@ -4,8 +4,9 @@ import { useOnboardingStore } from '../../../stores/onboarding/useOnboardingStor
 import { useAccount } from '@getpara/react-sdk';
 
 export const useOnboardingForm = () => {
-  const { data: account } = useAccount();
-  const userId = account?.userId;
+  const {
+    embedded: { userId },
+  } = useAccount();
   const defaultValues = useOnboardingStore(state => state.getInput(userId));
 
   const form = useForm<OnboardingAnswers>({
