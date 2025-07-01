@@ -25,18 +25,14 @@
 		E8315DD82D5548F100FFF8C8 /* WalletsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8315DD72D5548F100FFF8C8 /* WalletsView.swift */; };
 		E8315DDA2D55717300FFF8C8 /* SolanaWalletView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8315DD92D55717300FFF8C8 /* SolanaWalletView.swift */; };
 		E8315DDC2D55717F00FFF8C8 /* CosmosWalletView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8315DDB2D55717F00FFF8C8 /* CosmosWalletView.swift */; };
-		E86A473F2D0CA0A400546CC2 /* EmailAuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E86A473E2D0CA0A400546CC2 /* EmailAuthView.swift */; };
 		E86A47412D0CA63700546CC2 /* AppRootManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E86A47402D0CA62F00546CC2 /* AppRootManager.swift */; };
-		E86A475B2D1F13CB00546CC2 /* PhoneAuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E86A475A2D1F13CB00546CC2 /* PhoneAuthView.swift */; };
 		E86A475D2D1F162F00546CC2 /* CountryNumbers.json in Resources */ = {isa = PBXBuildFile; fileRef = E86A475C2D1F162F00546CC2 /* CountryNumbers.json */; };
 		E89B1D3C2D80A07D00676E3B /* web3swift in Frameworks */ = {isa = PBXBuildFile; productRef = E89B1D3B2D80A07D00676E3B /* web3swift */; };
 		E89B1D3F2D80A0AF00676E3B /* ParaSwift in Frameworks */ = {isa = PBXBuildFile; productRef = E89B1D3E2D80A0AF00676E3B /* ParaSwift */; };
-		E8C5B8662D272DCD00B151C4 /* VerifyPhoneView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8C5B8652D272DCD00B151C4 /* VerifyPhoneView.swift */; };
 		E8F93B2C2C21EBED006AA3F6 /* ExampleApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8F93B2B2C21EBED006AA3F6 /* ExampleApp.swift */; };
 		E8F93B302C21EBEE006AA3F6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E8F93B2F2C21EBEE006AA3F6 /* Assets.xcassets */; };
 		E8F93B332C21EBEE006AA3F6 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E8F93B322C21EBEE006AA3F6 /* Preview Assets.xcassets */; };
 		E8F93B3E2C21ECFB006AA3F6 /* AuthOptionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8F93B3D2C21ECFB006AA3F6 /* AuthOptionsView.swift */; };
-		E8F93B402C21ED00006AA3F6 /* VerifyEmailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8F93B3F2C21ED00006AA3F6 /* VerifyEmailView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -71,17 +67,13 @@
 		E8315DD72D5548F100FFF8C8 /* WalletsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalletsView.swift; sourceTree = "<group>"; };
 		E8315DD92D55717300FFF8C8 /* SolanaWalletView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SolanaWalletView.swift; sourceTree = "<group>"; };
 		E8315DDB2D55717F00FFF8C8 /* CosmosWalletView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CosmosWalletView.swift; sourceTree = "<group>"; };
-		E86A473E2D0CA0A400546CC2 /* EmailAuthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmailAuthView.swift; sourceTree = "<group>"; };
 		E86A47402D0CA62F00546CC2 /* AppRootManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRootManager.swift; sourceTree = "<group>"; };
-		E86A475A2D1F13CB00546CC2 /* PhoneAuthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneAuthView.swift; sourceTree = "<group>"; };
 		E86A475C2D1F162F00546CC2 /* CountryNumbers.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = CountryNumbers.json; sourceTree = "<group>"; };
-		E8C5B8652D272DCD00B151C4 /* VerifyPhoneView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerifyPhoneView.swift; sourceTree = "<group>"; };
 		E8F93B282C21EBED006AA3F6 /* example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = example.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E8F93B2B2C21EBED006AA3F6 /* ExampleApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExampleApp.swift; sourceTree = "<group>"; };
 		E8F93B2F2C21EBEE006AA3F6 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		E8F93B322C21EBEE006AA3F6 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		E8F93B3D2C21ECFB006AA3F6 /* AuthOptionsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AuthOptionsView.swift; sourceTree = "<group>"; };
-		E8F93B3F2C21ED00006AA3F6 /* VerifyEmailView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VerifyEmailView.swift; sourceTree = "<group>"; };
 		E8F93B432C21ED67006AA3F6 /* example.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = example.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -113,19 +105,8 @@
 			isa = PBXGroup;
 			children = (
 				8F6AE6692DC151040098F76B /* ChooseSignupMethodView.swift */,
-				E86A473E2D0CA0A400546CC2 /* EmailAuthView.swift */,
-				E8F93B3F2C21ED00006AA3F6 /* VerifyEmailView.swift */,
 			);
 			path = Email;
-			sourceTree = "<group>";
-		};
-		8F1708C52DA99E4E0070FE20 /* Phone */ = {
-			isa = PBXGroup;
-			children = (
-				E86A475A2D1F13CB00546CC2 /* PhoneAuthView.swift */,
-				E8C5B8652D272DCD00B151C4 /* VerifyPhoneView.swift */,
-			);
-			path = Phone;
 			sourceTree = "<group>";
 		};
 		8FA0077C2D56ECC9009EF0C3 /* Auth */ = {
@@ -133,7 +114,6 @@
 			children = (
 				E8F93B3D2C21ECFB006AA3F6 /* AuthOptionsView.swift */,
 				8F1708C42DA99E420070FE20 /* Email */,
-				8F1708C52DA99E4E0070FE20 /* Phone */,
 				8FA007872D581F08009EF0C3 /* ExternalWalletAuthView.swift */,
 				8FA0078A2D5A7841009EF0C3 /* MetaMaskDemoView.swift */,
 			);
@@ -429,10 +409,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E86A473F2D0CA0A400546CC2 /* EmailAuthView.swift in Sources */,
 				E8315DDA2D55717300FFF8C8 /* SolanaWalletView.swift in Sources */,
-				E8F93B402C21ED00006AA3F6 /* VerifyEmailView.swift in Sources */,
-				E8C5B8662D272DCD00B151C4 /* VerifyPhoneView.swift in Sources */,
 				8F6A878D2E134B2600874160 /* EmailPhoneInput.swift in Sources */,
 				8FC8B8FD2D8B7AE10046C3DC /* LaunchView.swift in Sources */,
 				E8315DDC2D55717F00FFF8C8 /* CosmosWalletView.swift in Sources */,
@@ -448,7 +425,6 @@
 				8F6A87C82E149E1A00874160 /* OTPVerificationView.swift in Sources */,
 				8F200F542DEFB08100B39BB4 /* AlertItem.swift in Sources */,
 				8FB1B21C2E0F4DE500B37B5E /* AuthView.swift in Sources */,
-				E86A475B2D1F13CB00546CC2 /* PhoneAuthView.swift in Sources */,
 				8FA007832D57EB0D009EF0C3 /* ParaConfig.swift in Sources */,
 				8F6A87932E145EA200874160 /* CountryPickerView.swift in Sources */,
 				E86A47412D0CA63700546CC2 /* AppRootManager.swift in Sources */,

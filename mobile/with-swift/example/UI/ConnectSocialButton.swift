@@ -28,9 +28,8 @@ struct ConnectSocialButton: View {
             Image(image)
                 .resizable()
                 .aspectRatio(contentMode: .fit)
-                .frame(height: 24)
-                .frame(maxWidth: .infinity)
-                .frame(height: 64)
+                .frame(width: 32, height: 32)
+                .frame(width: 110, height: 83)
                 .background(.lightGray)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
         }
