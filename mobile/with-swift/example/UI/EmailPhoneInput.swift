@@ -148,7 +148,7 @@ struct EmailPhoneInput: View {
             let digitsOnly = text.replacingOccurrences(of: "[^0-9]", with: "", options: .regularExpression)
             return ParaFormatting.formatPhoneNumber(phoneNumber: digitsOnly, countryCode: countryCode) ?? text
         case .email, .unknown:
-            text
+            return text
         }
     }
     
