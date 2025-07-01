@@ -24,8 +24,6 @@ struct OTPVerificationView: View {
     @State private var errorMessage = ""
     @FocusState private var isTextFieldFocused: Bool
     
-    private let numberOfDigits = 6
-    
     private var contactDisplay: String {
         if let email = authState.email {
             return email
@@ -69,7 +67,7 @@ struct OTPVerificationView: View {
                 
                 // Visual representation of OTP boxes
                 HStack(spacing: 12) {
-                    ForEach(0..<numberOfDigits) { index in
+                    ForEach(0..<6) { index in
                         OTPDigitView(
                             digit: getDigit(at: index),
                             isActive: isTextFieldFocused && otpText.count == index
@@ -113,7 +111,7 @@ struct OTPVerificationView: View {
             .background(Color.black)
             .foregroundColor(.white)
             .cornerRadius(25)
-            .disabled(isLoading || otpText.count < numberOfDigits)
+            .disabled(isLoading || otpText.count < 6)
             .padding(.horizontal, 24)
             .padding(.bottom, 40)
         }
@@ -130,8 +128,8 @@ struct OTPVerificationView: View {
         }
         .accessibilityElement(children: .combine)
         .accessibilityLabel("Verification code entry")
-        .accessibilityValue("\(otpText.count) of \(numberOfDigits) digits entered")
-        .accessibilityHint("Enter the \(numberOfDigits)-digit code sent to \(contactDisplay)")
+        .accessibilityValue("\(otpText.count) of \(6) digits entered")
+        .accessibilityHint("Enter the \(6)-digit code sent to \(contactDisplay)")
     }
     
     private func getDigit(at index: Int) -> String {
@@ -148,12 +146,12 @@ struct OTPVerificationView: View {
         }
         
         // Limit to numberOfDigits
-        if filtered.count > numberOfDigits {
-            otpText = String(filtered.prefix(numberOfDigits))
+        if filtered.count > 6 {
+            otpText = String(filtered.prefix(6))
         }
         
         // Auto-submit when all digits are entered
-        if otpText.count == numberOfDigits {
+        if otpText.count == 6 {
             Task {
                 await verifyCode()
             }
@@ -162,7 +160,7 @@ struct OTPVerificationView: View {
     
     private func verifyCode() async {
         let code = otpText
-        guard code.count == numberOfDigits else { return }
+        guard code.count == 6 else { return }
         
         isLoading = true
         errorMessage = ""

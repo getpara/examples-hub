@@ -10,6 +10,7 @@ import SwiftUI
 
 struct ConnectSocialButton: View {
     let provider: OAuthProvider
+    let isLoading: Bool
     let action: (OAuthProvider) -> Void
 
     private var image: ImageResource {
@@ -25,14 +26,23 @@ struct ConnectSocialButton: View {
 
     var body: some View {
         Button(action: { action(provider) }) {
-            Image(image)
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(width: 32, height: 32)
-                .frame(width: 110, height: 83)
-                .background(.lightGray)
-                .clipShape(RoundedRectangle(cornerRadius: 12))
+            ZStack {
+                if isLoading {
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle(tint: .gray))
+                        .scaleEffect(0.8)
+                } else {
+                    Image(image)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 32, height: 32)
+                }
+            }
+            .frame(width: 110, height: 83)
+            .background(.lightGray)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
         }
+        .disabled(isLoading)
     }
 }
 
@@ -40,9 +50,9 @@ struct ConnectSocialButton: View {
 
 #Preview("Social Buttons") {
     HStack(spacing: 12) {
-        ConnectSocialButton(provider: .google) { _ in }
-        ConnectSocialButton(provider: .apple) { _ in }
-        ConnectSocialButton(provider: .discord) { _ in }
+        ConnectSocialButton(provider: .google, isLoading: false) { _ in }
+        ConnectSocialButton(provider: .apple, isLoading: true) { _ in }
+        ConnectSocialButton(provider: .discord, isLoading: false) { _ in }
     }
     .padding()
 }

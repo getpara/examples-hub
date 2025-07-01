@@ -27,6 +27,7 @@ struct AuthView: View {
     @State private var errorMessage = ""
     @State private var currentAuthState: AuthState?
     @State private var showWalletSelection = false
+    @State private var loadingProvider: OAuthProvider?
 
     @FocusState private var textFieldFocus: Bool
 
@@ -77,9 +78,21 @@ struct AuthView: View {
 
     private var socialLoginSection: some View {
         HStack(spacing: 12) {
-            ConnectSocialButton(provider: .google, action: handleSocialSignIn)
-            ConnectSocialButton(provider: .apple, action: handleSocialSignIn)
-            ConnectSocialButton(provider: .discord, action: handleSocialSignIn)
+            ConnectSocialButton(
+                provider: .google,
+                isLoading: loadingProvider == .google,
+                action: handleSocialSignIn
+            )
+            ConnectSocialButton(
+                provider: .apple,
+                isLoading: loadingProvider == .apple,
+                action: handleSocialSignIn
+            )
+            ConnectSocialButton(
+                provider: .discord,
+                isLoading: loadingProvider == .discord,
+                action: handleSocialSignIn
+            )
         }
         .padding(.horizontal, 24)
     }
@@ -158,6 +171,9 @@ struct AuthView: View {
 
     private func handleSocialSignIn(_ provider: OAuthProvider) {
         Task {
+            loadingProvider = provider
+            defer { loadingProvider = nil }
+            
             do {
                 try await paraManager.handleOAuth(
                     provider: provider,
@@ -219,40 +235,4 @@ struct AuthView: View {
 
 #Preview {
     AuthView()
-}
-
-// MARK: - Wallet Selection Sheet
-
-struct WalletSelectionSheet: View {
-    @Binding var showWalletSelection: Bool
-    let handleWalletConnect: (WalletProvider) -> Void
-    
-    var body: some View {
-        NavigationView {
-            VStack(spacing: 0) {
-                Text("Select a wallet")
-                    .font(.headline)
-                    .padding(.top, 20)
-                    .padding(.bottom, 30)
-                
-                VStack(spacing: 16) {
-                    ConnectExternalWalletButton(provider: .metamask) { provider in
-                        handleWalletConnect(provider)
-                        showWalletSelection = false
-                    }
-                    .padding(.horizontal, 24)
-                }
-                
-                Spacer()
-            }
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Cancel") {
-                        showWalletSelection = false
-                    }
-                }
-            }
-        }
-    }
 }
