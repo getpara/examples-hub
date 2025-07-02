@@ -6,11 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@getpara/react-sdk": "^2.0.0-alpha.26",
-    "@getpara/wagmi-v2-integration": "^2.0.0-alpha.26",
+    "@getpara/react-sdk": "2.0.0-alpha.27",
+    "@getpara/wagmi-v2-integration": "2.0.0-alpha.27",
     "@reown/appkit": "^1.7.11",
     "@reown/appkit-adapter-wagmi": "^1.7.11",
     "@tanstack/react-query": "^5.81.2",

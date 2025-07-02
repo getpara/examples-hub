@@ -3,6 +3,7 @@
     @click="$emit('click')"
     :disabled="disabled || isLoading"
     :class="buttonClasses"
+    v-bind="$attrs"
   >
     <span v-if="isLoading" class="flex items-center justify-center gap-2">
       <span class="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>

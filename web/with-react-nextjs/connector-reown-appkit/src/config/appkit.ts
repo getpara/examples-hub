@@ -1,21 +1,30 @@
 "use client";
 import { createAppKit } from "@reown/appkit/react";
 import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
-import { AuthLayout } from "@getpara/react-sdk";
+import type { OAuthMethod } from "@getpara/react-sdk";
 import { paraConnector } from "@getpara/wagmi-v2-integration";
-import { para } from "@/client/para";
-import { chains } from "@/constants/chains";
+import { para } from "@/lib/para/client";
 import { CreateConnectorFn } from "wagmi";
-import { queryClient } from "@/client/queryClient";
+import { QueryClient } from "@tanstack/react-query";
+import { mainnet, arbitrum, optimism, polygon, base } from "wagmi/chains";
 
-// Get projectId from https://cloud.reown.com
+export const APP_NAME = "Reown AppKit + Para Example";
+export const APP_DESCRIPTION = "This example demonstrates how to integrate Para as a custom wagmi connector in Reown AppKit.";
+export const chains = [mainnet, arbitrum, optimism, polygon, base] as const;
+
 export const projectId = process.env.NEXT_PUBLIC_PROJECT_ID;
 
 if (!projectId) {
   throw new Error("NEXT_PUBLIC_PROJECT_ID is not set");
 }
 
-// Set up metadata
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60 * 1000,
+    },
+  },
+});
 const metadata = {
   name: "Reown AppKit Example",
   description: "Reown AppKit with Next.js and Wagmi",
@@ -23,14 +32,13 @@ const metadata = {
   icons: ["https://avatars.githubusercontent.com/u/179229932"],
 };
 
-// Create Para connector
 const connector = paraConnector({
   para: para,
   chains: [...chains],
   appName: "Reown AppKit with Para",
   logo: "/para.svg",
   queryClient,
-  oAuthMethods: ["APPLE", "DISCORD", "FACEBOOK", "FARCASTER", "GOOGLE", "TWITTER"],
+  oAuthMethods: ["APPLE", "DISCORD", "FACEBOOK", "FARCASTER", "GOOGLE", "TWITTER"] as OAuthMethod[],
   theme: {
     foregroundColor: "#2D3648",
     backgroundColor: "#FFFFFF",
@@ -45,17 +53,15 @@ const connector = paraConnector({
   onRampTestMode: true,
   disableEmailLogin: false,
   disablePhoneLogin: false,
-  authLayout: [AuthLayout.AUTH_FULL],
+  authLayout: ["AUTH:FULL"],
   recoverySecretStepEnabled: true,
   options: {},
 });
 
-// Create custom connectors array with only Para
 const connectors: CreateConnectorFn[] = [
-  connector as any  // Only Para connector
+  connector as CreateConnectorFn,
 ];
 
-// Create wagmi adapter with custom connectors
 export const wagmiAdapter = new WagmiAdapter({
   ssr: true,
   networks: [...chains],
@@ -63,7 +69,6 @@ export const wagmiAdapter = new WagmiAdapter({
   connectors,
 });
 
-// Create modal
 export const appKit = createAppKit({
   adapters: [wagmiAdapter],
   networks: [...chains],
@@ -71,16 +76,15 @@ export const appKit = createAppKit({
   metadata,
   features: {
     analytics: true,
-    email: false,  // Disable Reown's email option since Para has it
-    socials: false, // Disable Reown's social options since Para has them
+    email: false,
+    socials: false,
     emailShowWallets: false,
   },
   themeMode: "light",
-  enableEIP6963: false, // Disable browser wallet discovery
-  enableInjected: false, // Disable injected wallet discovery
-  enableWalletConnect: false, // Disable WalletConnect
-  enableCoinbase: false, // Disable Coinbase
-  defaultChain: chains[0], // Set default chain
+  enableEIP6963: false,
+  enableInjected: false,
+  enableWalletConnect: false,
+  enableCoinbase: false,
   allowUnsupportedChain: false,
-  allWallets: "HIDE", // Hide all wallets except custom ones
+  allWallets: "HIDE",
 });

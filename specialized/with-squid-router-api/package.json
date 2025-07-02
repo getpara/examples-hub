@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@0xsquid/sdk": "^2.9.4",
@@ -73,6 +74,8 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "cosmjs-types": "^0.9.0",
+    "eslint": "latest",
+    "eslint-config-next": "latest",
     "postcss": "^8",
     "tailwindcss": "^4.1.7",
     "typescript": "^5"

@@ -13,6 +13,7 @@
     {variant === 'primary' 
       ? 'bg-gray-800 text-white hover:bg-gray-900 disabled:bg-gray-400' 
       : 'border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50'}"
+  {...$$restProps}
 >
   {#if isLoading}
     <span class="flex items-center justify-center gap-2">

@@ -10,11 +10,11 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@getpara/cosmos-wallet-connectors": "^2.0.0-alpha.12",
-    "@getpara/evm-wallet-connectors": "^2.0.0-alpha.12",
-    "@getpara/react-sdk": "2.0.0-alpha.26",
-    "@getpara/server-sdk": "2.0.0-alpha.26",
-    "@getpara/solana-wallet-connectors": "^2.0.0-alpha.12",
+    "@getpara/cosmos-wallet-connectors": "2.0.0-alpha.27",
+    "@getpara/evm-wallet-connectors": "2.0.0-alpha.27",
+    "@getpara/react-sdk": "2.0.0-alpha.27",
+    "@getpara/server-sdk": "2.0.0-alpha.27",
+    "@getpara/solana-wallet-connectors": "2.0.0-alpha.27",
     "@solana/web3.js": "^1.98.2",
     "@tanstack/react-query": "5.81.2",
     "next": "15.1.5",

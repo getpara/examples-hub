@@ -90,6 +90,7 @@
         disabled={isLoading}
         onClick={() => handleOAuthAuthentication(method)}
         loadingText="Authenticating..."
+        data-testid={`social-auth-${method.toLowerCase()}`}
       >
         <span class="flex items-center justify-center gap-2">
           <img

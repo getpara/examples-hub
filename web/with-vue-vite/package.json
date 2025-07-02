@@ -11,7 +11,7 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "@getpara/web-sdk": "2.0.0-alpha.26",
+    "@getpara/web-sdk": "2.0.0-alpha.27",
     "vue": "^3.5.13"
   },
   "devDependencies": {

@@ -12,6 +12,7 @@
           :disabled="state.isLoading"
           placeholder="you@example.com"
           class="w-full px-3 py-2 border border-gray-300 rounded-none focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+          data-testid="email-input"
         />
       </div>
       
@@ -19,6 +20,7 @@
         :is-loading="state.isLoading"
         :disabled="!state.email"
         @click="handleEmailSubmit"
+        data-testid="continue-email-button"
       >
         Continue with Email
       </AuthButton>
@@ -40,6 +42,7 @@
           :disabled="!state.verificationCode || state.verificationCode.length !== 6"
           @click="handleVerification"
           loading-text="Verifying..."
+          data-testid="verify-wallet-button"
         >
           Verify & Create Wallet
         </AuthButton>

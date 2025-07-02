@@ -47,6 +47,7 @@
           {isLoading}
           onClick={handleLogout}
           loadingText="Logging out..."
+          data-testid="logout-button"
         >
           Logout
         </AuthButton>
@@ -60,6 +61,7 @@
             {activeTab === 'email' 
               ? 'text-gray-900 border-gray-900' 
               : 'text-gray-500 border-transparent hover:text-gray-700'}"
+          data-testid="email-tab"
         >
           Email
         </button>
@@ -69,6 +71,7 @@
             {activeTab === 'phone' 
               ? 'text-gray-900 border-gray-900' 
               : 'text-gray-500 border-transparent hover:text-gray-700'}"
+          data-testid="phone-tab"
         >
           Phone
         </button>

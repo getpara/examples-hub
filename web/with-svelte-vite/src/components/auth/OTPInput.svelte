@@ -58,7 +58,7 @@
   }
 </script>
 
-<div class="flex gap-2 justify-center">
+<div class="flex gap-2 justify-center" data-testid="otp-input">
   {#each values as _, index}
     <input
       bind:this={inputs[index]}
@@ -72,6 +72,7 @@
       on:paste={handlePaste}
       class="w-12 h-12 text-center text-xl font-semibold border border-gray-300 rounded-none focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
       aria-label={`Digit ${index + 1} of verification code`}
+      data-testid={`otp-input-${index}`}
     />
   {/each}
 </div>

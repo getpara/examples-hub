@@ -70,16 +70,18 @@
   </div>
   
   {#if !$isConnected}
-    <ConnectWalletCard onConnect={openModal} />
+    <div data-testid="not-logged-in">
+      <ConnectWalletCard onConnect={openModal} />
+    </div>
   {:else}
-    <div class="max-w-xl mx-auto">
+    <div class="max-w-xl mx-auto" data-testid="wallet-connected">
       <div class="mb-8 rounded-none border border-gray-200">
         <div class="px-6 py-3 bg-gray-50 border-b border-gray-200">
           <h3 class="text-sm font-medium text-gray-900">Connected Wallet</h3>
         </div>
         <div class="px-6 py-3">
           <p class="text-sm text-gray-500">Address</p>
-          <p class="text-lg font-medium text-gray-900 font-mono">
+          <p class="text-lg font-medium text-gray-900 font-mono" data-testid="wallet-address">
             {$address?.slice(0, 6)}...{$address?.slice(-4)}
           </p>
         </div>

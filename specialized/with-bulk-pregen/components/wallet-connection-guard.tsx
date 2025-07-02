@@ -17,7 +17,7 @@ export function WalletConnectionGuard({ children }: { children: React.ReactNode 
           You need to connect your wallet to access the bulk wallet generation functionality.
         </p>
         <Button
-          onClick={openModal}
+          onClick={() => openModal()}
           size="lg">
           <Wallet className="mr-2 h-5 w-5" />
           Connect Wallet
