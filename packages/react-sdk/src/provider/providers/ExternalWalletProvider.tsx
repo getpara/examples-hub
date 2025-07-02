@@ -57,7 +57,6 @@ export const defaultExternalWallet = {
   signMessage: () => Promise.resolve({} as unknown as any),
   isSigningMessage: false,
   getWalletBalance: () => Promise.resolve(undefined),
-  isExternalWalletVerifying: false,
   requestInfo: (_: TExternalWallet) => Promise.resolve({} as ExternalWalletInfo),
   disconnectBase: (_: TExternalWallet) => Promise.resolve(),
 };
@@ -81,7 +80,6 @@ type Value = Omit<ExternalWalletContextType<CosmosSignResult>, 'disconnect' | 's
     connectEmbeddedToExternalConnectors: () => Promise<void>;
     isSigningMessage: boolean;
     verifyWalletSignature: () => Promise<VerifyExternalWalletParams | undefined>;
-    isExternalWalletVerifying?: boolean;
     requestInfo: (_: TExternalWallet, __: TWalletType) => Promise<ExternalWalletInfo>;
   };
 
@@ -147,7 +145,6 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
 
   const [qrUri, setQrUri] = useState<string>();
   const [chainIdSwitchingTo, setChainIdSwitchingTo] = useState<string>();
-  const [isExternalWalletVerifying, setIsExternalWalletVerifying] = useState(false);
   const [isSigningMessage, setIsSigningMessage] = useState(false);
 
   // Filter any wallets that aren't included in the sort array, sort by the array then sort by installed extensions
@@ -267,7 +264,6 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
 
   const verifyWalletSignature = useCallback(async () => {
     setExternalWalletError();
-    setIsExternalWalletVerifying(true);
     const wallet = Object.values(para.externalWallets)[0];
     const walletType = wallet?.type;
 
@@ -352,31 +348,25 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
         break;
     }
 
-    if (verifyExternalWalletParams) {
-      if (!verifyExternalWalletParams?.externalWallet || !verifyExternalWalletParams?.signedMessage) {
-        console.error('No signature or address found on the verifyWalletSignature response.');
-        return;
-      }
-
-      try {
-        const d = await verifyExternalWallet(verifyExternalWalletParams);
-        if (wallet && externalWalletsWithFullAuth?.includes(wallet.name?.toUpperCase() as TExternalWallet)) {
-          onNewAuthState(d);
-        } else {
-          setStep(ModalStep.LOGIN_DONE);
-        }
-      } catch (e) {
-        console.error('Error verifying signature:', e);
-        setExternalWalletError(['Signature verification failed.']);
-      } finally {
-        setIsExternalWalletVerifying(false);
-      }
-
-      return verifyExternalWalletParams;
+    if (!verifyExternalWalletParams?.externalWallet || !verifyExternalWalletParams?.signedMessage) {
+      console.error('No signature or address found on the verifyWalletSignature response.');
+      setExternalWalletError(['Signature verification failed.']);
+      return;
     }
 
-    setIsExternalWalletVerifying(false);
-    return undefined;
+    try {
+      const d = await verifyExternalWallet(verifyExternalWalletParams);
+      if (wallet && externalWalletsWithFullAuth?.includes(wallet.name?.toUpperCase() as TExternalWallet)) {
+        await onNewAuthState(d);
+      } else {
+        setStep(ModalStep.LOGIN_DONE);
+      }
+    } catch (e) {
+      console.error('Error verifying signature:', e);
+      setExternalWalletError(['Signature verification failed.']);
+    }
+
+    return verifyExternalWalletParams;
   }, [cosmosSignVerificationMessage, evmSignVerificationMessage, solanaSignVerificationMessage, wallet]);
 
   const signMessage = useCallback(
@@ -658,7 +648,6 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
           signMessage,
           isSigningMessage,
           verifyWalletSignature,
-          isExternalWalletVerifying,
           getWalletBalance,
           requestInfo,
           disconnectBase,
@@ -681,7 +670,6 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
           signMessage,
           isSigningMessage,
           verifyWalletSignature,
-          isExternalWalletVerifying,
           getWalletBalance,
           requestInfo,
           disconnectBase,

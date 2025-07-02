@@ -7,8 +7,7 @@ import { useEffect, useRef } from 'react';
 
 export const ExternalWalletVerificationStep = () => {
   const effectRan = useRef(false);
-
-  const { isExternalWalletVerifying, verifyWalletSignature } = useExternalWallets();
+  const { verifyWalletSignature } = useExternalWallets();
   const externalWalletError = useModalStore(state => state.externalWalletError);
 
   useEffect(() => {
@@ -38,7 +37,7 @@ export const ExternalWalletVerificationStep = () => {
         )}
       </InnerStepContainer>
       <InnerStepContainer>
-        {isExternalWalletVerifying || !effectRan.current ? (
+        {!externalWalletError || !effectRan.current ? (
           <CpslSpinner />
         ) : (
           <CpslButton onClick={verifyWalletSignature}>Retry</CpslButton>
