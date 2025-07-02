@@ -153,6 +153,18 @@ describe('walletUtils', () => {
       expect(mockEd25519Sign).toBeCalledTimes(1);
       expect(mockEd25519Sign).toBeCalledWith(WALLET.share, expect.any(String), BASE64_BYTES, expect.any(Function));
     });
+    it('returns pending transaction ID when present', async () => {
+      mockPreSignMessage.mockResolvedValueOnce({
+        protocolId: WALLET.protocolId,
+        pendingTransactionId: WALLET.pendingTransactionId,
+      });
+      const resp = await ed25519Sign(TEST_CTX, WALLET.share, USER.id, WALLET.id, BASE64_BYTES);
+
+      expect(resp).toStrictEqual({ pendingTransactionId: WALLET.pendingTransactionId });
+      expect(mockPreSignMessage).toBeCalledTimes(1);
+      expect(mockPreSignMessage).toBeCalledWith(USER.id, WALLET.id, BASE64_BYTES, 'ED25519', undefined, expect.any(String));
+      expect(mockEd25519Sign).toBeCalledTimes(1);
+    });
     it('fail', async () => {
       mockEd25519Sign.mockImplementationOnce((_, __, ___, cb) => {
         cb('test error', undefined);

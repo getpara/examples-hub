@@ -108,7 +108,7 @@ export async function ed25519Sign(
   userId: string,
   walletId: string,
   base64Bytes: string,
-): Promise<{ signature: string }> {
+): Promise<SignatureRes> {
   const protocolId = uuid.v4();
   const preSignMessageRes = ctx.client.preSignMessage(userId, walletId, base64Bytes, 'ED25519', undefined, protocolId);
 
@@ -128,7 +128,10 @@ export async function ed25519Sign(
     }
   })();
 
-  await preSignMessageRes;
+  const { pendingTransactionId } = await preSignMessageRes;
+  if (pendingTransactionId) {
+    return { pendingTransactionId };
+  }
   return await signRes;
 }
 
