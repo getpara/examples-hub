@@ -15,28 +15,24 @@ export const ENV_VARS = {
         : 'production',
 };
 
-export const DOCS_LINK = 'https://docs.getpara.com/';
-export const PREGEN_DOCS_LINK = 'https://docs.getpara.com/integration-guides/wallet-pregeneration';
-export const BRANDING_DOCS_LINK = 'https://docs.getpara.com/customize-capsule/required-customization';
-export const ON_RAMP_DOCS_LINK = 'https://docs.getpara.com/customize-capsule/fiat-onramps';
-export const REACT_DOCS_LINK = 'https://docs.getpara.com/getting-started/initial-setup/web-modal-and-sdk-setup';
-export const WEB_DOCS_LINK = 'https://docs.getpara.com/getting-started/initial-setup/web-modal-and-sdk-setup';
-export const NODE_DOCS_LINK = 'https://docs.getpara.com/getting-started/initial-setup/server';
-export const REACT_NATIVE_DOCS_LINK = 'https://docs.getpara.com/getting-started/initial-setup/react-native';
-export const EXPO_DOCS_LINK = 'https://docs.getpara.com/getting-started/initial-setup/expo';
-export const FLUTTER_DOCS_LINK = 'https://docs.getpara.com/getting-started/initial-setup/flutter-setup';
-export const SWIFT_DOCS_LINK = 'https://docs.getpara.com/getting-started/initial-setup/swift-sdk-setup';
-export const REACT_NATIVE_SETUP_DOCS_LINK =
-  'https://docs.getpara.com/getting-started/initial-setup/react-native#project-setup';
-export const EXPO_SETUP_DOCS_LINK = 'https://docs.getpara.com/getting-started/initial-setup/expo#project-setup';
-export const FLUTTER_SETUP_DOCS_LINK = 'https://docs.getpara.com/getting-started/initial-setup/flutter-setup#project-setup';
+export const DOCS_LINK = 'https://docs.getpara.com/alpha/introduction/welcome';
+export const ON_RAMP_DOCS_LINK =
+  'https://docs.getpara.com/alpha/web/guides/customization/fiat-onramps#fiat-on-and-off-ramps';
+export const REACT_DOCS_LINK = 'https://docs.getpara.com/alpha/web/setup/react/overview';
+export const WEB_DOCS_LINK = 'https://docs.getpara.com/alpha/web/overview';
+export const NODE_DOCS_LINK = 'https://docs.getpara.com/alpha/server/overview';
+export const REACT_NATIVE_DOCS_LINK = 'https://docs.getpara.com/alpha/react-native/setup/react-native';
+export const EXPO_DOCS_LINK = 'https://docs.getpara.com/alpha/react-native/setup/expo';
+export const FLUTTER_DOCS_LINK = 'https://docs.getpara.com/alpha/flutter/overview';
+export const SWIFT_DOCS_LINK = 'https://docs.getpara.com/alpha/swift/overview';
 export const ADVANCED_MODAL_THEME_DOCS_LINK =
-  'https://docs.getpara.com/customize-para/modal-customization#advanced-theme-customization';
-export const TX_POPUPS_DOCS_LINK = 'https://docs.getpara.com/integration-guides/transaction-prompts';
-export const MODAL_CUSTOMIZATION_DOCS_LINK = 'https://docs.getpara.com/web/guides/customization/modal';
+  'https://docs.getpara.com/alpha/web/guides/customization/modal#advanced-theme-customization';
+export const TX_POPUPS_DOCS_LINK = 'https://docs.getpara.com/alpha/web/guides/permissions';
+export const MODAL_CUSTOMIZATION_DOCS_LINK = 'https://docs.getpara.com/alpha/web/guides/customization/modal';
 
-export const NEXT_EXTRA_DOCS_LINK = 'https://docs.getpara.com/troubleshooting/nextjs';
-export const VITE_EXTRA_DOCS_LINK = 'https://docs.getpara.com/troubleshooting/react-vite';
+export const NEXT_EXTRA_DOCS_LINK = 'https://docs.getpara.com/alpha/web/troubleshooting/nextjs';
+export const VITE_EXTRA_DOCS_LINK = 'https://docs.getpara.com/alpha/web/troubleshooting/react-vite';
+export const SVELTE_EXTRA_DOCS_LINK = 'https://docs.getpara.com/alpha/web/troubleshooting/svelte';
 
 export const MOBILE_SIZE = 767;
 
@@ -62,7 +58,6 @@ export const LINKEDIN_URL = 'https://www.linkedin.com/company/parahq';
 export const SUPPORT_URL = 'mailto:support@getpara.com';
 export const SCHEDULE_MEETING_LINK = 'https://getpara.com/talk-to-us';
 export const MODAL_DESIGNER_LINK = 'https://demo.getpara.com';
-export const MODAL_CONFIG_LINK = 'https://docs.getpara.com/customize-para/modal-customization';
 export const EXAMPLES_HUB_LINK = 'https://github.com/getpara/examples-hub';
 export const CALENDLY_LINK = 'https://calendly.com/d/ynr-2s7-g5f/capsule-partner-call';
 

@@ -3,14 +3,12 @@ import { Framework } from '../types/framework';
 import { REACT_CODE_SNIPPET, REACT_CODE_SNIPPET_1_X_X, SERVER_CODE_SNIPPET, WEB_CODE_SNIPPET } from './codeSnippets';
 import {
   EXPO_DOCS_LINK,
-  EXPO_SETUP_DOCS_LINK,
   FLUTTER_DOCS_LINK,
-  FLUTTER_SETUP_DOCS_LINK,
   NEXT_EXTRA_DOCS_LINK,
   NODE_DOCS_LINK,
   REACT_DOCS_LINK,
   REACT_NATIVE_DOCS_LINK,
-  REACT_NATIVE_SETUP_DOCS_LINK,
+  SVELTE_EXTRA_DOCS_LINK,
   SWIFT_DOCS_LINK,
   VITE_EXTRA_DOCS_LINK,
   WEB_DOCS_LINK,
@@ -113,32 +111,17 @@ export const getFrameworkDocsLink = (framework?: Framework) => {
   }
 };
 
-export const getFrameworkNativePasskeyDocsLink = (framework?: Framework) => {
-  switch (framework?.toUpperCase()) {
-    case Framework.FLUTTER: {
-      return FLUTTER_SETUP_DOCS_LINK;
-    }
-    case Framework.EXPO: {
-      return EXPO_SETUP_DOCS_LINK;
-    }
-    case Framework.REACT_NATIVE: {
-      return REACT_NATIVE_SETUP_DOCS_LINK;
-    }
-    default: {
-      return undefined;
-    }
-  }
-};
-
 export const getFrameworkExtraSetupLink = (framework?: Framework) => {
   switch (framework?.toUpperCase()) {
     case Framework.REACT:
-    case Framework.SVELTE:
     case Framework.VUE:
     case Framework.NODE:
     case Framework.DENO:
     case Framework.BUN: {
       return undefined;
+    }
+    case Framework.SVELTE: {
+      return SVELTE_EXTRA_DOCS_LINK;
     }
     case Framework.VITE: {
       return VITE_EXTRA_DOCS_LINK;
@@ -172,13 +155,13 @@ export const getFrameworkPackages = (framework?: Framework) => {
       return '@getpara/react-sdk';
     }
     case Framework.REACT_NATIVE: {
-      return '@getpara/react-native-wallet @usecapsule/react-native-passkey @react-native-async-storage/async-storage  react-native-get-random-values react-native-inappbrowser-reborn react-native-keychain react-native-modpow react-native-quick-base64 react-native-quick-crypto react-native-webview react-native-webview-crypto node-libs-react-native node-forge readable-stream text-encoding';
+      return '@getpara/react-native-wallet @react-native-async-storage/async-storage react-native-keychain react-native-modpow react-native-passkey react-native-quick-base64 @craftzdog/react-native-buffer react-native-quick-crypto readable-stream';
     }
     case Framework.EXPO: {
-      return '@getpara/react-native-wallet @usecapsule/react-native-passkey @react-native-async-storage/async-storage  @craftzdog/react-native-buffer expo-crypto react-native-get-random-values react-native-inappbrowser-reborn react-native-keychain react-native-modpow react-native-quick-base64 react-native-quick-crypto react-native-webview react-native-webview-crypto node-libs-react-native node-forge readable-stream text-encoding';
+      return '@getpara/react-native-wallet @react-native-async-storage/async-storage react-native-keychain react-native-modpow react-native-passkey react-native-quick-base64 @craftzdog/react-native-buffer react-native-quick-crypto';
     }
     case Framework.FLUTTER: {
-      return 'flutter pub add capsule';
+      return 'flutter pub add para';
     }
     case Framework.SWIFT: {
       return 'Follow the steps in the Install Guide.';

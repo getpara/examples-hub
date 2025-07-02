@@ -20,8 +20,8 @@ const PAGE_SUBTITLES: Record<string, ReactNode | undefined> = {
   'analytics': '',
   'branding': (
     <span>
-      These settings will be applied to <strong>Capsule Portal and Emails only</strong>. Customizing your Capsule Modal is
-      done with the Capsule SDK.
+      These settings will be applied to <strong>Para Portal and Emails only</strong>. Customizing your Para Modal is done
+      with the Para SDK.
     </span>
   ),
   'security':

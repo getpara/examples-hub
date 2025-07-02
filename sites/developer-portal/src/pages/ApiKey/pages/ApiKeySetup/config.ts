@@ -1,5 +1,5 @@
 import { FileText, LucideIcon, PaintbrushVertical } from 'lucide-react';
-import { MODAL_CONFIG_LINK, MODAL_DESIGNER_LINK } from '../../../../utils/constants';
+import { MODAL_CUSTOMIZATION_DOCS_LINK, MODAL_DESIGNER_LINK } from '../../../../utils/constants';
 
 export type OnboardingStepButton = {
   Icon?: LucideIcon;
@@ -39,7 +39,7 @@ const BRAND_ONBOARDING_STEP: OnboardingStep = {
   },
   secondaryButton: {
     text: 'Brand Guide',
-    to: MODAL_CONFIG_LINK,
+    to: MODAL_CUSTOMIZATION_DOCS_LINK,
     Icon: FileText,
     target: '_blank',
     isExternal: true,
@@ -57,7 +57,7 @@ const EXPLORE_ONBOARDING_STEP: OnboardingStep = {
   },
   secondaryButton: {
     text: 'Customize Para',
-    to: MODAL_CONFIG_LINK,
+    to: MODAL_CUSTOMIZATION_DOCS_LINK,
     Icon: FileText,
     target: '_blank',
     isExternal: true,
@@ -79,7 +79,7 @@ export const ONBOARDING_STEPS_WEB: OnboardingStep[] = [
     },
     secondaryButton: {
       text: 'Styling Guide',
-      to: MODAL_CONFIG_LINK,
+      to: MODAL_CUSTOMIZATION_DOCS_LINK,
       Icon: FileText,
       target: '_blank',
       isExternal: true,
