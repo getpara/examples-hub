@@ -102,7 +102,7 @@ export const AndroidSetup = () => {
                     {...field}
                     value={field.value ?? undefined}
                     placeholder="Paste SHA256 fingerprint here"
-                    className="para:resize-none para:h-[112px]"
+                    className="para:resize-none para:h-[112px] para:break-all"
                   />
                 </FormControl>
                 <FormMessage />
