@@ -1,33 +1,25 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
+import "@/styles/globals.css";
 import "@getpara/react-sdk/styles.css";
-import { AppKitProvider } from "@/components/AppKitProvider";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+import { AppKitProvider } from "@/context/AppKitProvider";
+import { AppWrapper } from "@/components/layout/AppWrapper";
 
 export const metadata: Metadata = {
-  title: "Reown AppKit Example",
-  description: "Reown AppKit with Next.js and Wagmi",
+  title: "Reown AppKit + Para",
+  description: "Reown AppKit integration with Para wallet connector",
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <AppKitProvider>{children}</AppKitProvider>
+      <body>
+        <AppKitProvider>
+          <AppWrapper>{children}</AppWrapper>
+        </AppKitProvider>
       </body>
     </html>
   );

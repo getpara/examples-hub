@@ -8,6 +8,7 @@
       :disabled="state.isLoading"
       @click="handleOAuthAuthentication(method)"
       loading-text="Authenticating..."
+      :data-testid="`social-auth-${method.toLowerCase()}`"
     >
       <span class="flex items-center justify-center gap-2">
         <img

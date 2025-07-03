@@ -1,4 +1,4 @@
-import { para, paraReady } from "./client/para";
+import { para, paraReady } from "@/lib/para/client";
 
 chrome.action.onClicked.addListener(async () => {
   try {

@@ -30,5 +30,22 @@
     "webNavigation",
     "cookies",
     "unlimitedStorage"
+  ],
+  "host_permissions": [
+    "https://*.getpara.com/*",
+    "https://*.usecapsule.com/*",
+    "wss://*.getpara.com/*",
+    "wss://*.usecapsule.com/*",
+    "https://*.ingest.sentry.io/*",
+    "https://*.ingest.us.sentry.io/*"
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["*.wasm", "*.js", "*.css", "assets/*"],
+      "matches": ["<all_urls>"]
+    }
   ]
 }

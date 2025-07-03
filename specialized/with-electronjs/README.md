@@ -1,220 +1,197 @@
-# Capsule Electron Example
+# Electron Desktop App with Para
 
-This repository demonstrates how to integrate Capsule into an Electron application.
+This example demonstrates how to integrate Para SDK in an Electron desktop application using Vite, React, and TypeScript. It showcases wallet connection and message signing within a native desktop environment with proper security configurations.
 
-## Table of Contents
+## Setup
 
-- [Running the Demo](#running-the-demo)
-- [Integrating Capsule into Your Electron Project](#integrating-capsule-into-your-electron-project)
-  - [1. Install Required Dependencies](#1-install-required-dependencies)
-  - [2. Configure Webpack](#2-configure-webpack)
-  - [3. Set up Content Security Policy (CSP)](#3-set-up-content-security-policy-csp)
-  - [4. Configure `webPreferences` in `main.js`](#4-configure-webpreferences-in-mainjs)
-  - [5. Implement Capsule in Your Renderer Process](#5-implement-capsule-in-your-renderer-process)
-- [Important Note on Passkeys](#important-note-on-passkeys)
-- [Support](#support)
+### Environment Variables
 
-## Running the Demo
+Create a `.env.local` file in the root directory:
 
-To test a working demo of Capsule integration in Electron:
+```env
+VITE_PARA_API_KEY=your_para_api_key
+VITE_PARA_ENVIRONMENT=BETA
+```
 
-1. Clone the repository:
+### Installation
 
-   ```bash
-   git clone https://github.com/your-username/capsule-electron-example.git
-   cd capsule-electron-example
-   ```
-
-2. Install dependencies:
-
-   ```bash
-   npm install
-   ```
-
-3. Start the application:
-   ```bash
-   npm start
-   ```
-
-## Integrating Capsule into Your Electron Project
-
-Follow these steps to integrate Capsule into your own Electron project:
-
-### 1. Install Required Dependencies
-
-Run the following command to install necessary packages:
+Install dependencies using your preferred package manager:
 
 ```bash
-npm install @usecapsule/react-sdk buffer crypto-browserify process react react-dom stream-browserify vm-browserify @babel/core @babel/preset-env @babel/preset-react babel-loader css-loader style-loader --save
+# npm
+npm install
+
+# yarn
+yarn install
+
+# pnpm
+pnpm install
 ```
 
-Adjust the command as needed if you're using a different package manager.
+## Key Dependencies
 
-### 2. Configure Webpack
+- `@getpara/react-sdk` (v2.0.0-alpha.26) - Para React SDK for wallet integration
+- `@tanstack/react-query` (v5.81.2) - Data fetching and state management
+- `electron` (v37.1.0) - Cross-platform desktop application framework
+- `@electron-forge/cli` (v7.8.1) - Electron build and packaging tools
+- `vite` (v5.4.19) - Fast build tool with hot module replacement
+- `react` (v19.1.0) - React library
+- `react-dom` (v19.1.0) - React DOM library
 
-Update your Webpack configurations to support React and necessary polyfills:
+## Key Files
 
-#### [webpack.main.config.js](webpack.main.config.js)
+- `src/main.ts` - Electron main process with CSP configuration
+- `src/context/ParaProvider.tsx` - Para SDK React context provider
+- `src/context/QueryProvider.tsx` - TanStack Query provider configuration
+- `src/app/App.tsx` - Main React application component
+- `src/renderer.tsx` - Renderer process entry point
+- `forge.config.ts` - Electron Forge configuration
 
-```javascript
-const webpack = require("webpack");
-const path = require("path");
+## Development
 
-module.exports = {
-  // ... other configurations
-  resolve: {
-    fallback: {
-      crypto: require.resolve("crypto-browserify"),
-      stream: require.resolve("stream-browserify"),
-      buffer: require.resolve("buffer/"),
-      vm: require.resolve("vm-browserify"),
-      process: require.resolve("process/browser"),
-    },
-  },
-  plugins: [
-    new webpack.ProvidePlugin({
-      Buffer: ["buffer", "Buffer"],
-      process: "process/browser",
-    }),
-  ],
-  // ... output configuration
-};
+### Running the Application
+
+Start the development server:
+
+```bash
+# npm
+npm start
+
+# yarn
+yarn start
+
+# pnpm
+pnpm start
 ```
 
-#### [webpack.renderer.config.js](webpack.renderer.config.js)
+### Type Checking
 
-```javascript
-const rules = require("./webpack.rules");
-const webpack = require("webpack");
+Run TypeScript type checking:
 
-// ... other configurations
+```bash
+# npm
+npm run typecheck
 
-module.exports = {
-  module: {
-    rules,
-  },
-  resolve: {
-    extensions: [".js", ".jsx"],
-    fallback: {
-      // Same fallback configuration as in webpack.main.config.js
-    },
-  },
-  plugins: [
-    // Same plugin configuration as in webpack.main.config.js
-  ],
-  // ... output configuration
-};
+# yarn
+yarn typecheck
+
+# pnpm
+pnpm typecheck
 ```
 
-#### [webpack.rules.js](webpack.rules.js)
+### Linting
 
-```javascript
-module.exports = [
-  // ... other rules
-  {
-    test: /\.jsx?$/,
-    exclude: /node_modules/,
-    use: {
-      loader: "babel-loader",
-      options: {
-        presets: ["@babel/preset-react"],
-      },
-    },
-  },
-];
+Run ESLint:
+
+```bash
+# npm
+npm run lint
+
+# yarn
+yarn lint
+
+# pnpm
+pnpm lint
 ```
 
-These configurations set up React support and provide necessary polyfills for crypto, buffer, and other Node.js core modules that are not available in the browser environment.
+## Building and Packaging
 
-### 3. Set up Content Security Policy (CSP)
+### Create Distributable
 
-#### In [index.html](src/index.html):
+Package the application for your current platform:
 
-Add this meta tag:
+```bash
+# npm
+npm run make
 
-```html
-<meta
-  http-equiv="Content-Security-Policy"
-  content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: https://api.beta.usecapsule.com https://app.beta.usecapsule.com; connect-src 'self' https://api.beta.usecapsule.com https://app.beta.usecapsule.com wss://mpc-network.beta.usecapsule.com https://product-assets.sandbox.usecapsule.com https://m.stripe.com; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self' https://rsms.me; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://crypto-js.stripe.com; frame-src https://js.stripe.com https://m.stripe.network https://m.stripe.com; worker-src 'self' blob:;" />
+# yarn
+yarn make
+
+# pnpm
+pnpm make
 ```
 
-#### In [main.js](src/main.js):
+This will create platform-specific installers in the `out` directory.
 
-Add this CSP configuration:
+### Create Unpacked Build
 
-```javascript
-const csp =
-  "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: https://api.beta.usecapsule.com https://app.beta.usecapsule.com; " +
-  // ... (rest of the CSP string)
+For testing purposes, you can create an unpacked build:
 
-  mainWindow.webContents.session.webRequest.onHeadersReceived((details, callback) => {
-    callback({
-      responseHeaders: {
-        ...details.responseHeaders,
-        "Content-Security-Policy": [csp],
-      },
-    });
-  });
+```bash
+# npm
+npm run package
+
+# yarn
+yarn package
+
+# pnpm
+pnpm package
 ```
 
-The CSP is necessary to allow connections to Capsule's servers and other required resources while maintaining security. It specifies which sources of content are allowed to be loaded and executed in your application.
+## Security Configuration
 
-### 4. Configure `webPreferences` in [main.js](src/main.js)
+This example includes important security configurations:
 
-Update your `BrowserWindow` creation:
+### Content Security Policy (CSP)
 
-```javascript
-const mainWindow = new BrowserWindow({
-  width: 800,
-  height: 600,
-  webPreferences: {
-    preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
-    nodeIntegration: true,
-    contextIsolation: false,
-    sandbox: false,
-  },
-});
+The main process configures CSP headers to allow:
+- Para API endpoints (`https://*.getpara.com`, `https://api.beta.usecapsule.com`)
+- WebSocket connections for real-time features
+- Stripe integration for payment processing
+- Required fonts and styles
+
+### Electron Security Best Practices
+
+- Context isolation is enabled
+- Node integration is disabled in renderer
+- Sandbox mode is enabled
+- Preload scripts are used for secure IPC communication
+
+## Architecture
+
+### Directory Structure
+
+```
+src/
+├── app/          # Main application components
+├── context/      # React context providers
+├── components/   # Reusable UI components
+├── config/       # Configuration files
+├── styles/       # Global styles
+├── lib/          # Utility libraries
+├── types/        # TypeScript type definitions
+├── main.ts       # Electron main process
+├── preload.ts    # Preload script
+└── renderer.tsx  # Renderer process entry
 ```
 
-These `webPreferences` settings are necessary to allow the renderer process to access Node.js APIs and communicate with the main process. While they reduce some security restrictions, they are required for Capsule to function properly in an Electron environment.
+### Process Model
 
-### 5. Implement Capsule in Your Renderer Process
+- **Main Process**: Handles window creation, CSP configuration, and system-level operations
+- **Renderer Process**: Runs the React application with Para SDK integration
+- **Preload Script**: Provides secure bridge between main and renderer processes
 
-To get started with Capsule in your renderer process:
+## Troubleshooting
 
-1. Create a Capsule client:
+### Common Issues
 
-   ```javascript
-   import Capsule, { Environment } from "@usecapsule/react-sdk";
+1. **Blank window on startup**
+   - Check the console for errors (View → Toggle Developer Tools)
+   - Ensure `.env.local` is properly configured with your API key
 
-   const capsule = new Capsule(Environment.BETA, "YOUR_API_KEY");
-   ```
+2. **Build failures**
+   - Clear node_modules and reinstall: `rm -rf node_modules && yarn install`
+   - Ensure you have the correct Node.js version (16+)
 
-2. Set up the Capsule Modal component:
+3. **CSP violations**
+   - Check the main.ts file for CSP configuration
+   - Ensure all required domains are whitelisted
 
-   ```javascript
-   import { CapsuleModal } from "@usecapsule/react-sdk";
+## Learn More
 
-   function YourComponent() {
-     const [isModalOpen, setIsModalOpen] = useState(false);
-
-     return (
-       <>
-         <button onClick={() => setIsModalOpen(true)}>Open Capsule Modal</button>
-         <CapsuleModal capsule={capsule} isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
-       </>
-     );
-   }
-   ```
-
-For a complete implementation guide, refer to the [renderer.js](src/renderer.js) file in this repository.
-
-## Important Note on Passkeys
-
-**Warning:** Passkeys are not currently supported directly in an Electron process due to Chromium limitations. For testing account creation and signup, it is recommended to use a mobile phone, which can utilize the phone's passkey functionality.
-
-We are working on an alternative password-based solution that will streamline this process in the future.
-
-## Support
-
-If you encounter any issues or have questions, please open an issue in this repository or contact Capsule support.
+- [Para Documentation](https://docs.getpara.com)
+- [Para Website](https://getpara.com)
+- [Para Developer Portal](https://developer.getpara.com)
+- [Electron Documentation](https://www.electronjs.org/docs)
+- [Electron Forge Documentation](https://www.electronforge.io)
+- [Vite Documentation](https://vitejs.dev)

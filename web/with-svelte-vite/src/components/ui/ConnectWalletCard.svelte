@@ -9,7 +9,8 @@
   </p>
   <button
     on:click={onConnect}
-    class="w-full px-6 py-3 bg-gray-900 text-white rounded-none hover:bg-gray-950 transition-colors font-medium">
+    class="w-full px-6 py-3 bg-gray-900 text-white rounded-none hover:bg-gray-950 transition-colors font-medium"
+    data-testid="open-modal-button">
     Connect with Para
   </button>
 </div>

@@ -28,7 +28,7 @@ export default function Header() {
             </Button>
           </div>
         ) : (
-          <Button onClick={openModal}>
+          <Button onClick={() => openModal()}>
             <Wallet className="mr-2 h-4 w-4" />
             Connect Wallet
           </Button>

@@ -25,11 +25,11 @@ const APP_PATHS: Record<
     },
     installCommand: 'yarn install:all',
   },
-  'web/with-vue-vite/para-modal': {
+  'web/with-vue-vite': {
     envVars: {
       VITE_PARA_API_KEY: SANDBOX_API_KEY_EVM,
       VITE_PARA_ENVIRONMENT: 'SANDBOX',
-      E2E_APP_DIR: 'web/with-vue-vite/para-modal',
+      E2E_APP_DIR: 'web/with-vue-vite',
       APP_PORT: '5173',
       APP_START_COMMAND: 'rm -rf node_modules/.vite && yarn dev --force',
     },
@@ -43,11 +43,20 @@ const APP_PATHS: Record<
       APP_START_COMMAND: 'yarn dev',
     },
   },
-  'web/with-react-vite/para-modal': {
+  'web/with-react-vite': {
     envVars: {
       VITE_PARA_API_KEY: SANDBOX_API_KEY_EVM,
       VITE_PARA_ENVIRONMENT: 'SANDBOX',
-      E2E_APP_DIR: 'web/with-react-vite/para-modal',
+      E2E_APP_DIR: 'web/with-react-vite',
+      APP_PORT: '5173',
+      APP_START_COMMAND: 'rm -rf node_modules/.vite && yarn dev --force',
+    },
+  },
+  'web/with-svelte-vite': {
+    envVars: {
+      VITE_PARA_API_KEY: SANDBOX_API_KEY_EVM,
+      VITE_PARA_ENVIRONMENT: 'SANDBOX',
+      E2E_APP_DIR: 'web/with-svelte-vite',
       APP_PORT: '5173',
       APP_START_COMMAND: 'rm -rf node_modules/.vite && yarn dev --force',
     },

@@ -1,5 +1,6 @@
-import { Environment, Para, WalletType } from "@getpara/server-sdk";
+import { WalletType } from "@getpara/server-sdk";
 import { walletStore } from "@/lib/store";
+import { getParaServerClient } from "@/lib/para/server-client";
 import { NextResponse } from "next/server";
 
 interface GenerateWalletRequestBody {
@@ -9,10 +10,6 @@ interface GenerateWalletRequestBody {
 
 export async function POST(request: Request) {
   try {
-    if (!process.env.PARA_API_KEY) {
-      throw new Error("PARA_API_KEY is not defined in the environment variables");
-    }
-
     const body: GenerateWalletRequestBody = await request.json();
     const { handle, type } = body;
 
@@ -24,12 +21,11 @@ export async function POST(request: Request) {
       throw new Error("Invalid or missing 'type' in request body. Must be 'twitter' or 'telegram'.");
     }
 
-    const para = new Para(Environment.BETA, process.env.PARA_API_KEY);
+    const para = getParaServerClient();
 
     const wallet = await para.createPregenWallet({
-      type: WalletType.EVM,
-      pregenIdentifier: handle.trim(),
-      pregenIdentifierType: type,
+      type: "EVM",
+      pregenId: type === "TWITTER" ? { xUsername: handle.trim() } : { telegramUserId: handle.trim() },
     });
 
     const userShare = await para.getUserShare();

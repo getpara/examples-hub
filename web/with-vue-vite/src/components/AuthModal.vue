@@ -18,6 +18,7 @@
             :is-loading="state.isLoading"
             @click="handleLogout"
             loading-text="Logging out..."
+            data-testid="logout-button"
           >
             Logout
           </AuthButton>
@@ -30,12 +31,14 @@
           <button
             @click="setActiveTab('email')"
             :class="tabClasses('email')"
+            data-testid="email-tab"
           >
             Email
           </button>
           <button
             @click="setActiveTab('phone')"
             :class="tabClasses('phone')"
+            data-testid="phone-tab"
           >
             Phone
           </button>

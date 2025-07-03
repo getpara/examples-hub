@@ -66,6 +66,7 @@
         disabled={isLoading}
         placeholder="you@example.com"
         class="w-full px-3 py-2 border border-gray-300 rounded-none focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+        data-testid="email-input"
       />
     </div>
     
@@ -73,6 +74,7 @@
       {isLoading}
       disabled={!email}
       onClick={handleEmailSubmit}
+      data-testid="continue-email-button"
     >
       Continue with Email
     </AuthButton>
@@ -95,6 +97,7 @@
         disabled={!verificationCode || verificationCode.length !== 6}
         onClick={handleVerification}
         loadingText="Verifying..."
+        data-testid="verify-wallet-button"
       >
         Verify & Create Wallet
       </AuthButton>

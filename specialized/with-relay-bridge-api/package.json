@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@getpara/react-sdk": "1.17.0",
@@ -73,6 +74,8 @@
     "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "eslint": "latest",
+    "eslint-config-next": "latest",
     "postcss": "^8",
     "tailwindcss": "^4.1.7",
     "typescript": "^5"

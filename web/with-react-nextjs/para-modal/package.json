@@ -11,7 +11,7 @@
     "postinstall": "yarn setup-para"
   },
   "dependencies": {
-    "@getpara/react-sdk": "2.0.0-alpha.26",
+    "@getpara/react-sdk": "2.0.0-alpha.27",
     "@tanstack/react-query": "5.81.2",
     "next": "15.1.5",
     "react": "^19.0.0",

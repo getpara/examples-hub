@@ -1,8 +1,5 @@
 {
   "name": "examples-hub",
-  "dependencies": {
-    "@tanstack/react-query": "^5.74.4"
-  },
   "devDependencies": {
     "@playwright/test": "1.52.0",
     "@tailwindcss/postcss": "4.1.10",
