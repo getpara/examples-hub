@@ -1,3 +1,44 @@
+# Release (Thu Jul 03 2025)
+
+## Package Versions
+- @getpara/web-sdk@2.0.0-alpha.28
+- @getpara/wagmi-v2-integration@2.0.0-alpha.28
+- @getpara/wagmi-v2-connector@2.0.0-alpha.28
+- @getpara/viem-v2-integration@2.0.0-alpha.28
+- @getpara/viem-v1-integration@2.0.0-alpha.28
+- @getpara/user-management-client@2.0.0-alpha.28
+- @getpara/solana-web3.js-v1-integration@2.0.0-alpha.28
+- @getpara/solana-wallet-connectors@2.0.0-alpha.28
+- @getpara/server-sdk@2.0.0-alpha.28
+- @getpara/react-sdk@2.0.0-alpha.28
+- @getpara/react-native-wallet@2.0.0-alpha.28
+- @getpara/react-components@2.0.0-alpha.28
+- @getpara/react-component-library@1.0.0-alpha.23
+- @getpara/react-common@2.0.0-alpha.28
+- @getpara/evm-wallet-connectors@2.0.0-alpha.28
+- @getpara/ethers-v6-integration@2.0.0-alpha.28
+- @getpara/ethers-v5-integration@2.0.0-alpha.28
+- @getpara/cosmos-wallet-connectors@2.0.0-alpha.28
+- @getpara/cosmjs-v0-integration@2.0.0-alpha.28
+- @getpara/core-sdk@2.0.0-alpha.28
+- @getpara/core-components@2.0.0-alpha.28
+
+### Features
+- Consolidate useAccount hooks (#1030) - 9ba30846a
+
+### Fixes
+- Dev Portal - sha256 textfield overflow (#1074) - 076c738e9
+- handle permissions denying solana signature requests (#1064) - 389e1bd2d
+- Portal - White default background  (#1069) - cbf7b9776
+- Dev Portal - References to Capsule (#1068) - 6a64a64df
+- External Wallet - Verification loading state (#1061) - 3f4093a9b
+- Dev Portal - billing button permissions (#1065) - 0d7285f74
+- fix build for codepipeline sites deploy jobs (#1058) - eb62cb7b3
+
+### Chores
+- update keytool command format in developer portal (#1055) - e6259bb0e
+- Rename deeplinkUrl to appScheme in OAuth parameters (#1056) - 431b1c02d
+
 # Release (Thu Jun 26 2025)
 
 ## Package Versions
