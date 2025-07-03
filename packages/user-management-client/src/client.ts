@@ -364,7 +364,7 @@ class Client {
     const res = await this.baseRequest.get<any>('/users/exists', {
       params: { ...auth },
     });
-    return res;
+    return res.data;
   };
 
   verifyTelegram = async (authObject: TelegramAuthResponse): Promise<VerifyTelegramResponse> => {

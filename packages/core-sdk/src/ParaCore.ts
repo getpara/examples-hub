@@ -150,6 +150,8 @@ export abstract class ParaCore implements CoreInterface {
 
   protected isNativePasskey: boolean = false;
 
+  protected isPartnerOptional?: boolean;
+
   get authInfo(): CoreAuthInfo | undefined {
     return this.#authInfo;
   }
@@ -758,7 +760,16 @@ export abstract class ParaCore implements CoreInterface {
       }
     }
 
-    const partner = await this.#assertPartner();
+    let partner: PartnerEntity | undefined = undefined;
+    try {
+      partner = await this.#assertPartner();
+    } catch (e) {
+      if (this.isPartnerOptional) {
+        partner = undefined;
+      } else {
+        throw e;
+      }
+    }
 
     const thisDevice = opts.thisDevice ?? {
       encryptionKey: getPublicKeyHex(this.loginEncryptionKeyPair),
@@ -767,7 +778,7 @@ export abstract class ParaCore implements CoreInterface {
 
     const params: Record<string, string | undefined | null> = {
       apiKey: this.ctx.apiKey,
-      partnerId: partner.id,
+      partnerId: partner?.id,
       portalFont: opts.portalTheme?.font || partner?.font || this.portalTheme?.font,
       portalBorderRadius: opts.portalTheme?.borderRadius || this.portalTheme?.borderRadius,
       portalThemeMode: opts.portalTheme?.mode || partner?.themeMode || this.portalTheme?.mode,
@@ -1709,6 +1720,10 @@ export abstract class ParaCore implements CoreInterface {
   }
 
   async #getPartner(partnerId: string): Promise<PartnerEntity> {
+    if (this.isPartnerOptional && !partnerId) {
+      return undefined;
+    }
+
     const res = await this.ctx.client.getPartner(partnerId);
 
     this.#partner = res.data.partner;
@@ -1717,9 +1732,15 @@ export abstract class ParaCore implements CoreInterface {
   }
 
   private async getPartnerURL(): Promise<string | undefined> {
-    const { portalUrl } = await this.#assertPartner();
-
-    return portalUrl;
+    try {
+      const { portalUrl } = await this.#assertPartner();
+      return portalUrl;
+    } catch (e) {
+      if (this.isPartnerOptional) {
+        return undefined;
+      }
+      throw e;
+    }
   }
 
   /**

@@ -168,10 +168,10 @@ const RecoveryEmailCollectionStep: React.FC = () => {
 
               para.clearStorage();
 
-              const userExists = await para.ctx.client.checkUserExists({
+              const { exists } = await para.ctx.client.checkUserExists({
                 phone: formatPhoneNumber(inputPhone, inputCountryCode),
               });
-              if (userExists) {
+              if (exists) {
                 setPhone(inputPhone);
                 setCountryCode(inputCountryCode);
                 setCurrentStep(ModalStep.VERIFICATION_CODE_PHONE);

@@ -3,6 +3,7 @@ import { ParaInternal } from '@getpara/react-common';
 
 export class ParaPortal extends ParaInternal {
   _pregenIds: PregenIds;
+  isPartnerOptional: boolean = true;
 
   get pregenIds(): PregenIds {
     return Object.keys({ ...super.pregenIds, ...this._pregenIds }).reduce(

@@ -1,8 +1,30 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { Environment } from '../../src/types';
-import { getBaseMPCNetworkUrl, getBaseUrl, initClient } from '../../src/external/userManagementClient';
+import { getBaseMPCNetworkUrl, getBaseUrl, getBaseOAuthUrl, initClient } from '../../src/external/userManagementClient';
 
 describe('userManagementClient', () => {
+  describe('getBaseOAuthUrl', () => {
+    it('gets correct url for dev', () => {
+      const resp = getBaseOAuthUrl(Environment.DEV);
+      expect(resp).toBe('http://localhost:8080/');
+    });
+    it('gets correct url for sandbox', () => {
+      const resp = getBaseOAuthUrl(Environment.SANDBOX);
+      expect(resp).toBe('https://api.sandbox.usecapsule.com/');
+    });
+    it('gets correct url for beta', () => {
+      const resp = getBaseOAuthUrl(Environment.BETA);
+      expect(resp).toBe('https://api.beta.usecapsule.com/');
+    });
+    it('gets correct url for prod', () => {
+      const resp = getBaseOAuthUrl(Environment.PROD);
+      expect(resp).toBe('https://api.usecapsule.com/');
+    });
+    it('throws error for unsupported env', () => {
+      expect(() => getBaseOAuthUrl('test' as Environment)).toThrowError('unsupported env: test');
+    });
+  });
+
   describe('getBaseUrl', () => {
     it('dev', () => {
       const resp = getBaseUrl(Environment.DEV);
