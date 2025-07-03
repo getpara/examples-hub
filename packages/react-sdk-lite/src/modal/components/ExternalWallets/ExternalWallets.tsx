@@ -192,8 +192,8 @@ const Badge = safeStyled.div<{ $variant: 'installed' | 'mobile'; $show: boolean 
 `;
 
 const InstalledIndicator = safeStyled.span`
-  width: 5px;
-  height: 5px;
+  width: 4px;
+  height: 4px;
   border-radius: 100%;
   background-color: var(--cpsl-color-utility-green);
 `;
