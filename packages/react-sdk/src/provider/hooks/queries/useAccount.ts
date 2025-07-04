@@ -166,7 +166,7 @@ export const useAccount = ({ cosmos }: UseAccountParameters = {}): UseAccountRet
         // If there are no embedded wallets, but external wallets are connected then the connection type is 'external'
         if (
           paraAccount.wallets.every(w => w.isExternal) &&
-          (evmAccount.isConnected || cosmosAccount.isConnected || solanaAdapter?.connected)
+          (evmAccount?.isConnected || cosmosAccount?.isConnected || solanaAdapter?.connected)
         ) {
           connectionType = 'external';
         }
@@ -177,10 +177,10 @@ export const useAccount = ({ cosmos }: UseAccountParameters = {}): UseAccountRet
 
       const connectedNetworks: ExternalNetwork[] = [];
 
-      if (evmAccount.isConnected) {
+      if (evmAccount?.isConnected) {
         connectedNetworks.push('evm');
       }
-      if (cosmosAccount.isConnected) {
+      if (cosmosAccount?.isConnected) {
         connectedNetworks.push('cosmos');
       }
       if (solanaAdapter?.connected) {
@@ -193,7 +193,18 @@ export const useAccount = ({ cosmos }: UseAccountParameters = {}): UseAccountRet
         embedded: { ...paraAccount, isConnected: isEmbeddedConnected as boolean },
         external: {
           connectedNetworks,
-          evm: evmAccount,
+          evm: evmAccount ?? {
+            address: undefined,
+            addresses: undefined,
+            chain: undefined,
+            chainId: undefined,
+            connector: undefined,
+            isConnected: false,
+            isReconnecting: false,
+            isConnecting: false,
+            isDisconnected: true,
+            status: 'disconnected',
+          },
           cosmos: pickCosmosAccount(cosmosAccount),
           solana: pickSolanaAdapter(solanaAdapter),
         },
