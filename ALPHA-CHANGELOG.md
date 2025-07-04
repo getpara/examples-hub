@@ -1,6 +1,36 @@
 # Release (Thu Jul 03 2025)
 
 ## Package Versions
+- @getpara/web-sdk@2.0.0-alpha.29
+- @getpara/wagmi-v2-integration@2.0.0-alpha.29
+- @getpara/wagmi-v2-connector@2.0.0-alpha.29
+- @getpara/viem-v2-integration@2.0.0-alpha.29
+- @getpara/viem-v1-integration@2.0.0-alpha.29
+- @getpara/user-management-client@2.0.0-alpha.29
+- @getpara/solana-web3.js-v1-integration@2.0.0-alpha.29
+- @getpara/solana-wallet-connectors@2.0.0-alpha.29
+- @getpara/server-sdk@2.0.0-alpha.29
+- @getpara/react-sdk@2.0.0-alpha.29
+- @getpara/react-native-wallet@2.0.0-alpha.29
+- @getpara/react-components@2.0.0-alpha.29
+- @getpara/react-component-library@1.0.0-alpha.24
+- @getpara/react-common@2.0.0-alpha.29
+- @getpara/evm-wallet-connectors@2.0.0-alpha.29
+- @getpara/ethers-v6-integration@2.0.0-alpha.29
+- @getpara/ethers-v5-integration@2.0.0-alpha.29
+- @getpara/cosmos-wallet-connectors@2.0.0-alpha.29
+- @getpara/cosmjs-v0-integration@2.0.0-alpha.29
+- @getpara/core-sdk@2.0.0-alpha.29
+- @getpara/core-components@2.0.0-alpha.29
+
+
+### Fixes
+- Disconnection & Valora QR (#1077) - 5374f8fe4
+- Fix recovery portal to work with alpha sdks (#1070) - 6ab335159
+
+# Release (Thu Jul 03 2025)
+
+## Package Versions
 - @getpara/web-sdk@2.0.0-alpha.28
 - @getpara/wagmi-v2-integration@2.0.0-alpha.28
 - @getpara/wagmi-v2-connector@2.0.0-alpha.28
