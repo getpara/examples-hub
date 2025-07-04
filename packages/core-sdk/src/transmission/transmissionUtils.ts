@@ -1,26 +1,31 @@
-import { Encrypt as ECIESEncrypt, Decrypt as ECIESDecrypt } from '@celo/utils/lib/ecies.js';
 import { Buffer } from 'buffer';
-import * as eutil from '@ethereumjs/util';
 import Client from '@getpara/user-management-client';
 import { randomBytes } from 'crypto';
+import { PrivateKey, decrypt, encrypt } from 'eciesjs';
 
 export async function upload(message: string, userManagementClient: Client) {
   let secret: string;
   let publicKeyUint8Array: Uint8Array;
-  while (true) {
+  let error: Error | null = null;
+  for (let i = 0; i < 20; i++) {
     try {
       secret = randomBytes(32).toString('hex');
-      // privateToPublic throws error when private key is larger than group order
+      // PrivateKey.fromHex throws error when private key is larger than group order
       // so we want to keep trying until we get a valid private key
-      publicKeyUint8Array = eutil.privateToPublic(Buffer.from(secret, 'hex'));
+      publicKeyUint8Array = PrivateKey.fromHex(secret).publicKey.toBytes(true);
       break;
     } catch (e) {
+      error = e as Error;
       continue;
     }
   }
+  if (!publicKeyUint8Array) {
+    throw new Error('Failed to generate public key: ' + error?.message);
+  }
 
-  const pubkey = Buffer.from(publicKeyUint8Array);
-  const data = ECIESEncrypt(pubkey, Buffer.from(message, 'ucs2')).toString('base64');
+  const data = Buffer.from(
+    encrypt(Buffer.from(publicKeyUint8Array).toString('hex'), new Uint8Array(Buffer.from(message, 'ucs2'))),
+  ).toString('base64');
 
   const {
     data: { id },
@@ -34,6 +39,6 @@ export async function retrieve(uriEncodedMessage: string, userManagementClient: 
   const response = await userManagementClient.tempTrasmission(id as string);
   const data = response.data.message;
   const buf = Buffer.from(data as string, 'base64');
-  const res = Buffer.from(ECIESDecrypt(Buffer.from(secret as string, 'hex'), buf).buffer).toString('ucs2');
+  const res = Buffer.from(decrypt(secret, new Uint8Array(buf))).toString('ucs2');
   return res;
 }

@@ -80,7 +80,6 @@ export class WebExamplePage {
 
       const page1 = await page1Promise;
       const authPortal = new AuthPortalPage(page1);
-      await this.page.waitForTimeout(500);
       credentials = await authPortal.setup(context);
     }
 
@@ -91,6 +90,7 @@ export class WebExamplePage {
       await this.page.getByRole('button', { name: 'I’ve saved my recovery secret' }).click();
     }
 
+    await this.page.waitForTimeout(500);
     if (is2FAEnabled) {
       await this.page.getByRole('button', { name: 'Continue' }).click();
       await this.page.getByRole('button', { name: 'Skip' }).click();
@@ -187,6 +187,10 @@ export class WebExamplePage {
       address,
       recoveredAddress,
     };
+  }
+
+  async enableRecoverySecret() {
+    await this.page.getByTestId('enable-recovery-secret-checkbox').click();
   }
 
   async logout({ openModalText = 'Open Modal' }: { openModalText?: string }) {

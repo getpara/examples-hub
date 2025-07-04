@@ -17,6 +17,7 @@
     "@chakra-ui/icons": "^2.1.1",
     "@chakra-ui/react": "^2.8.2",
     "@chakra-ui/system": "^2.6.2",
+    "@celo/utils": "^6.0.1",
     "@getpara/react-common": "2.0.0-alpha.29",
     "@getpara/react-components": "2.0.0-alpha.29",
     "@getpara/react-sdk": "2.0.0-alpha.29",
