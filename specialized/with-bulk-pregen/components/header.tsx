@@ -6,7 +6,7 @@ import { Wallet } from "lucide-react";
 
 export default function Header() {
   const { openModal } = useModal();
-  const { data: account } = useAccount();
+  const { isConnected } = useAccount();
   const { data: wallet } = useWallet();
   const { logout } = useLogout();
 
@@ -15,7 +15,7 @@ export default function Header() {
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
         <div className="font-bold text-xl">Wallet App</div>
 
-        {account?.isConnected ? (
+        {isConnected ? (
           <div className="flex items-center gap-2">
             <div className="text-sm bg-gray-100 px-3 py-1 rounded-full">
               {wallet?.address?.slice(0, 6) ?? "------"}...{wallet?.address?.slice(-4) ?? "----"}

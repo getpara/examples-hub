@@ -9,20 +9,20 @@ import { FullScreenLoader } from "@/components/FullScreenLoader";
 import { MAX_SMART_WALLETS_PER_EOA } from "@/constants/smart-wallet";
 
 export default function Home() {
-  const { data: account, isLoading } = useAccount();
+  const { isConnected, isLoading } = useAccount();
   const router = useRouter();
 
   useEffect(() => {
-    if (!isLoading && account?.isConnected) {
+    if (!isLoading && isConnected) {
       router.replace("/accounts");
     }
-  }, [account?.isConnected, isLoading, router]);
+  }, [isConnected, isLoading, router]);
 
   if (isLoading) {
     return <FullScreenLoader />;
   }
 
-  if (account?.isConnected) {
+  if (isConnected) {
     return <FullScreenLoader />;
   }
   return (

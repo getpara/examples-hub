@@ -11,11 +11,11 @@
     "postinstall": "yarn setup-para"
   },
   "dependencies": {
-    "@getpara/cosmos-wallet-connectors": "2.0.0-alpha.27",
-    "@getpara/evm-wallet-connectors": "2.0.0-alpha.27",
-    "@getpara/react-sdk": "2.0.0-alpha.27",
-    "@getpara/server-sdk": "2.0.0-alpha.27",
-    "@getpara/solana-wallet-connectors": "2.0.0-alpha.27",
+    "@getpara/cosmos-wallet-connectors": "2.0.0-alpha.29",
+    "@getpara/evm-wallet-connectors": "2.0.0-alpha.29",
+    "@getpara/react-sdk": "2.0.0-alpha.29",
+    "@getpara/server-sdk": "2.0.0-alpha.29",
+    "@getpara/solana-wallet-connectors": "2.0.0-alpha.29",
     "@hookform/resolvers": "3.9.1",
     "@radix-ui/react-accordion": "1.2.2",
     "@radix-ui/react-alert-dialog": "1.1.4",

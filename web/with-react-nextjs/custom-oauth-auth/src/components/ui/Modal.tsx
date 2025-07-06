@@ -6,9 +6,10 @@ interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   children: React.ReactNode;
+  "data-testid"?: string;
 }
 
-export function Modal({ isOpen, onClose, children }: ModalProps) {
+export function Modal({ isOpen, onClose, children, "data-testid": dataTestId }: ModalProps) {
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
@@ -27,7 +28,7 @@ export function Modal({ isOpen, onClose, children }: ModalProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="fixed inset-0 bg-black opacity-50" />
-      <div className="relative bg-white rounded-none border border-gray-200 p-6 max-w-md w-full mx-4 shadow-lg">
+      <div className="relative bg-white rounded-none border border-gray-200 p-6 max-w-md w-full mx-4 shadow-lg" data-testid={dataTestId}>
         {children}
       </div>
     </div>

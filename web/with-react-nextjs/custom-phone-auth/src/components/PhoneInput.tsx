@@ -22,6 +22,7 @@ export function PhoneInput({
       <div className="flex gap-2">
         <input
           type="text"
+          data-testid="auth-country-code-input"
           className="border border-gray-300 px-3 py-2 rounded-none w-20 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
           placeholder="+1"
           value={countryCode}
@@ -33,6 +34,7 @@ export function PhoneInput({
         />
         <input
           type="tel"
+          data-testid="auth-phone-input"
           className="border border-gray-300 px-3 py-2 rounded-none flex-1 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
           placeholder="123-456-7890"
           value={phoneNumber}

@@ -12,8 +12,8 @@
     "postinstall": "yarn setup-para"
   },
   "dependencies": {
-    "@getpara/cosmjs-v0-integration": "2.0.0-alpha.27",
-    "@getpara/react-sdk": "2.0.0-alpha.27",
+    "@getpara/cosmjs-v0-integration": "2.0.0-alpha.29",
+    "@getpara/react-sdk": "2.0.0-alpha.29",
     "@cosmjs/stargate": "0.33.1",
     "@cosmjs/cosmwasm-stargate": "0.33.1",
     "@cosmjs/proto-signing": "0.33.1",

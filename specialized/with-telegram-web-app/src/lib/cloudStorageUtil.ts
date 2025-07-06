@@ -32,7 +32,7 @@ const storeWithChunking = async (
         const chunkKey = `${baseKey}_chunk_${index}`;
         try {
           await store(chunkKey, chunk);
-        } catch (error) {
+        } catch {
           failedChunks.push({ index, value: chunk });
         }
       })

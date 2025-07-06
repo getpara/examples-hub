@@ -13,11 +13,11 @@
     "lint": "eslint . --max-warnings 0"
   },
   "dependencies": {
-    "@getpara/cosmos-wallet-connectors": "2.0.0-alpha.27",
-    "@getpara/evm-wallet-connectors": "2.0.0-alpha.27",
+    "@getpara/cosmos-wallet-connectors": "2.0.0-alpha.29",
+    "@getpara/evm-wallet-connectors": "2.0.0-alpha.29",
     "@getpara/graz": "2.0.0-alpha.3",
-    "@getpara/react-sdk": "2.0.0-alpha.27",
-    "@getpara/solana-wallet-connectors": "2.0.0-alpha.27",
+    "@getpara/react-sdk": "2.0.0-alpha.29",
+    "@getpara/solana-wallet-connectors": "2.0.0-alpha.29",
     "@solana-mobile/wallet-adapter-mobile": "2.2.2",
     "@solana/wallet-adapter-base": "0.9.27",
     "@solana/wallet-adapter-react": "0.15.39",

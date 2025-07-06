@@ -16,7 +16,7 @@ export default function MessageSigningPage() {
     message: string;
   }>({ show: false, type: "success", message: "" });
 
-  const { data: account } = useAccount();
+  const account = useAccount();
   const { signingClient } = useParaSigner();
   const address = useAccountAddress();
 

@@ -2,7 +2,7 @@ import { useCallback } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useSquidClient } from "./useSquidClient";
 import { useSigners } from "./useSigners";
-import { NETWORK_CONFIG, SupportedNetwork } from "@/constants";
+import { NETWORK_CONFIG, SupportedNetwork } from "@/config/constants";
 import { ethers, TransactionResponse } from "ethers";
 import { DepositAddressResponse, RouteResponse, SolanaTxResponse, TransactionResponses } from "@0xsquid/sdk/dist/types";
 import { TxRaw } from "cosmjs-types/cosmos/tx/v1beta1/tx";

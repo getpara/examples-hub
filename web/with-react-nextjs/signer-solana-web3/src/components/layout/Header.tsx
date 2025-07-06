@@ -9,17 +9,16 @@ export default function Header() {
   const pathname = usePathname();
   const { openModal } = useModal();
   const { data: wallet } = useWallet();
-  const { data: account } = useAccount();
+  const { isConnected } = useAccount();
   const { setSelectedWallet } = useWalletState();
 
   useEffect(() => {
-    if (account?.isConnected && wallet?.type !== "SOLANA") {
-      const solanaWallet = account.wallets?.find((w: any) => w.type === "SOLANA");
-      if (solanaWallet) {
-        setSelectedWallet({ id: solanaWallet.id, type: "SOLANA" });
-      }
+    if (isConnected && wallet?.type !== "SOLANA") {
+      // SDK now handles wallet selection internally
+      // Just ensure SOLANA wallet type is selected
+      setSelectedWallet({ id: "default", type: "SOLANA" });
     }
-  }, [account, wallet, setSelectedWallet]);
+  }, [isConnected, wallet, setSelectedWallet]);
 
   return (
     <header className="border-b border-gray-200">
@@ -34,7 +33,7 @@ export default function Header() {
           )}
         </nav>
         <div>
-          {account?.isConnected ? (
+          {isConnected ? (
             <button
               onClick={() => openModal()}
               className="px-4 py-2 bg-gray-700 text-white rounded-none hover:bg-gray-800 transition-colors text-sm font-medium cursor-pointer">

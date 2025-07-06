@@ -12,6 +12,7 @@ export function ConnectWalletCard({ onConnect }: ConnectWalletCardProps) {
         description="Send ETH from your wallet to any address using Wagmi">
         <button
           onClick={onConnect}
+          data-testid="auth-connect-button"
           className="w-full rounded-none bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-950 transition-colors cursor-pointer">
           Connect Wallet
         </button>

@@ -1,7 +1,7 @@
 import { ArrowUpDown } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { NETWORK_CONFIG, SupportedNetwork } from "@/constants";
+import { NETWORK_CONFIG, SupportedNetwork } from "@/config/constants";
 import { useState, useCallback } from "react";
 
 interface NetworkSelectorProps {

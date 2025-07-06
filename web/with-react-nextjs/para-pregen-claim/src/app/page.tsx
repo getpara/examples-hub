@@ -12,7 +12,7 @@ import { Header } from "@/components/layout/Header";
 export default function Home() {
   const { openModal } = useModal();
   const { data: wallet } = useWallet();
-  const { data: account, isLoading, error } = useAccount();
+  const { isConnected, isLoading } = useAccount();
 
   const [pregenUuid, setPregenUuid] = useState("");
   const [pregenWalletAddress, setPregenWalletAddress] = useState("");
@@ -58,7 +58,7 @@ export default function Home() {
           title="Generate Pregen Wallet"
           description="Create a new wallet on the server and store its user share. This is a pre-generated wallet."
           buttonLabel={isGenerating ? "Generating..." : "Generate Wallet"}
-          disabled={isGenerating || !!account?.isConnected}
+          disabled={isGenerating || isConnected}
           onClick={handleGeneratePregenWallet}
           isComplete={!!pregenUuid}>
           {pregenUuid && (
@@ -73,11 +73,11 @@ export default function Home() {
           title="Authenticate with Para"
           description="Sign in with Para to automatically claim your pre-generated wallet."
           buttonLabel="Open Para Modal"
-          disabled={!pregenUuid || isLoading || !!account?.isConnected}
+          disabled={!pregenUuid || isLoading || isConnected}
           onClick={openModal}
-          isComplete={!!account?.isConnected}
+          isComplete={isConnected}
         />
-          {account?.isConnected && (
+          {isConnected && (
             <Card className="mt-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Your Claimed Wallet</h3>
               <WalletDisplay walletAddress={wallet?.address} />
@@ -91,10 +91,10 @@ export default function Home() {
             </Card>
           )}
         </div>
-        {(error?.message || !!pregenError) && (
+        {pregenError && (
           <StatusAlert 
             type="error" 
-            message={error?.message || pregenError}
+            message={pregenError}
             className="max-w-2xl mt-4"
           />
         )}

@@ -31,7 +31,7 @@ export default function TokenTransferPage() {
     message: string;
   }>({ show: false, type: "success", message: "" });
 
-  const { data: account } = useAccount();
+  const account = useAccount();
   const { walletClient } = useParaSigner();
   const publicClient = useViemProvider();
   const address = useAccountAddress();

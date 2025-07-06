@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { SigningStargateClient } from "@cosmjs/stargate";
 import { ParaProtoSigner } from "@getpara/cosmjs-v0-integration";
-import { useAccount, useClient } from "@getpara/react-sdk";
+import { useAccount, useClient, useWallet } from "@getpara/react-sdk";
 import { GasPrice } from "@cosmjs/stargate";
 import { DEFAULT_CHAIN } from "@/config/chains";
 import { DEFAULT_GAS_PRICE } from "@/config/constants";
@@ -13,17 +13,18 @@ export function useParaSigner() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   
-  const { data: account } = useAccount();
+  const { isConnected } = useAccount();
   const client = useClient();
+  const { data: wallet } = useWallet();
 
   const connect = useCallback(async () => {
-    if (!account?.isConnected || !client) return;
+    if (!isConnected || !client) return;
 
     setLoading(true);
     setError(null);
     
     try {
-      const address = account.wallets?.[0]?.address;
+      const address = wallet?.address;
       if (!address) {
         throw new Error("No wallet address found");
       }
@@ -44,15 +45,15 @@ export function useParaSigner() {
     } finally {
       setLoading(false);
     }
-  }, [account, client]);
+  }, [isConnected, client, wallet]);
 
   useEffect(() => {
-    if (account?.isConnected && client) {
+    if (isConnected && client) {
       connect();
     } else {
       setSigningClient(null);
     }
-  }, [account?.isConnected, client, connect]);
+  }, [isConnected, client, connect]);
 
   return { signingClient, loading, error, reconnect: connect };
 }

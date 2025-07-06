@@ -5,10 +5,9 @@ import { WalletDisplay } from "@/components/WalletDisplay";
 export default function App() {
   const [error, setError] = useState<string>("");
   const { openModal } = useModal();
-  const { data: account, isLoading: accountLoading } = useAccount();
+  const { isConnected, isLoading: accountLoading } = useAccount();
   const { data: wallet } = useWallet();
 
-  const isConnected = account?.isConnected;
   const walletAddress = wallet?.address;
 
   if (accountLoading) {

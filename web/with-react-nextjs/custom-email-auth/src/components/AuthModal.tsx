@@ -135,7 +135,7 @@ export function AuthModal() {
   const isLoading = isSigningUpOrLoggingIn || isVerifying || isWaitingForLogin || isLoggingOut;
 
   return (
-    <Modal isOpen={isOpen} onClose={closeModal}>
+    <Modal isOpen={isOpen} onClose={closeModal} data-testid="auth-modal">
       <div className="space-y-4">
         <h2 className="text-xl font-bold">
           {isConnected ? "Account Settings" : 
@@ -156,6 +156,7 @@ export function AuthModal() {
             <button
               onClick={handleLogout}
               disabled={isLoggingOut}
+              data-testid="auth-logout-button"
               className="w-full px-4 py-2 bg-gray-800 text-white rounded-none hover:bg-gray-900 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed font-medium">
               {isLoggingOut ? "Logging out..." : "Logout"}
             </button>
@@ -168,11 +169,13 @@ export function AuthModal() {
                   disabled={isLoading}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  data-testid="auth-email-input"
                 />
                 <AuthButton
                   isLoading={isLoading}
                   disabled={!email}
-                  onClick={handleEmailSubmit}>
+                  onClick={handleEmailSubmit}
+                  data-testid="auth-submit-button">
                   Continue
                 </AuthButton>
               </>
@@ -192,7 +195,8 @@ export function AuthModal() {
                   isLoading={isLoading}
                   disabled={!verificationCode}
                   onClick={handleVerification}
-                  loadingText="Verifying...">
+                  loadingText="Verifying..."
+                  data-testid="auth-verify-button">
                   Verify & Create Wallet
                 </AuthButton>
               </>
@@ -215,6 +219,7 @@ export function AuthModal() {
 
         <button
           onClick={closeModal}
+          data-testid="modal-close-button"
           className="w-full px-4 py-2 text-gray-600 hover:text-gray-900 transition-colors text-sm">
           Cancel
         </button>

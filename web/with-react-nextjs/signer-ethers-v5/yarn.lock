@@ -755,10 +755,10 @@
   resolved "https://registry.yarnpkg.com/@fastify/busboy/-/busboy-2.1.1.tgz#b9da6a878a371829a0502c9b6c1c143ef6663f4d"
   integrity sha512-vBZP4NlzfOlerQTnba4aqZoMhE/a9HY7HRqoOPaETQcSQuWEIyZMHGfVu6w9wGtGK5fED5qRs2DteVCjOH60sA==
 
-"@getpara/core-components@2.0.0-alpha.26":
-  version "2.0.0-alpha.26"
-  resolved "https://registry.npmjs.org/@getpara/core-components/-/core-components-2.0.0-alpha.26.tgz#fbe266e9a5b65c9aa124c040500e1507bbd90717"
-  integrity sha512-63bdSQEJBUlM3jAdyPIGaSxMtg2Yx6RRcpBrFP94TaDjgaFNrzctH8RRezJlYFoLrVl3ueOAMiC0RsEO9oDIrA==
+"@getpara/core-components@2.0.0-alpha.29":
+  version "2.0.0-alpha.29"
+  resolved "https://registry.npmjs.org/@getpara/core-components/-/core-components-2.0.0-alpha.29.tgz#dbff3f1560246fb17dca0cba0e1e690650d15890"
+  integrity sha512-60pZtaL7GZ5w2jyL6IlL+15wvyiS6Pq1aNnqNvXKRE9/wIyoynpj8YJPcuPehf/z+E8zAOfiBTmKIUHGgOlMFA==
   dependencies:
     "@stencil/core" "^4.7.0"
     color-blend "^4.0.0"
@@ -767,83 +767,82 @@
     inputmask "5.0.9"
     qrcode-with-logos "1.1.1"
 
-"@getpara/core-sdk@2.0.0-alpha.26":
-  version "2.0.0-alpha.26"
-  resolved "https://registry.npmjs.org/@getpara/core-sdk/-/core-sdk-2.0.0-alpha.26.tgz#fa9c6b12a94ca9fc6bf2e4276b4967ee471d8b79"
-  integrity sha512-eeMAkw2v1w5HdTnceFQmXT7e+s/LRCks7FvCycSrWZaVZXRFp5p5XE71LOwfppMUJNVISNg60kOY+TXWE3L7jA==
+"@getpara/core-sdk@2.0.0-alpha.29":
+  version "2.0.0-alpha.29"
+  resolved "https://registry.npmjs.org/@getpara/core-sdk/-/core-sdk-2.0.0-alpha.29.tgz#e8982713bf71d5b0b978eec2f0198a8869893240"
+  integrity sha512-r3MVnT0V4aPN7T7PhyPPlBSAjYF8WcuEcg597a3+AZgH2JP9yMbMvWTypBx/jdQCR/oCEK4peL1DWQl+3ihtPw==
   dependencies:
     "@celo/utils" "^8.0.2"
     "@cosmjs/encoding" "^0.32.4"
     "@ethereumjs/util" "^9.1.0"
-    "@getpara/user-management-client" "2.0.0-alpha.26"
+    "@getpara/user-management-client" "2.0.0-alpha.29"
     "@noble/hashes" "^1.5.0"
     base64url "^3.0.1"
-    libphonenumber-js "1.11.2"
+    libphonenumber-js "^1.11.7"
     node-forge "^1.3.1"
     uuid "^11.1.0"
 
-"@getpara/ethers-v5-integration@2.0.0-alpha.26":
-  version "2.0.0-alpha.26"
-  resolved "https://registry.npmjs.org/@getpara/ethers-v5-integration/-/ethers-v5-integration-2.0.0-alpha.26.tgz#1c8428d31b2033f6d2ff7ee6a15766addf99113b"
-  integrity sha512-cZoJOECtJSQlbhHqvJSN/PZ+aS0dhQAgddbUWzlLqmAaeCSVCWbH7N/5/EdO0TybEMMtr2mrAX12lklLvUsu/Q==
+"@getpara/ethers-v5-integration@2.0.0-alpha.29":
+  version "2.0.0-alpha.29"
+  resolved "https://registry.npmjs.org/@getpara/ethers-v5-integration/-/ethers-v5-integration-2.0.0-alpha.29.tgz#fa39b62d52e8bbe14dd2123cfa82370b48b0abd4"
+  integrity sha512-OSBIt+6jE/88ye8O3dDbkGtF+fwXhtGdBKT4gHcvTgqDcrNkIMfwK7MfJQscLtZoThd0EpqZ9oe4228sETjt2Q==
   dependencies:
-    "@getpara/core-sdk" "2.0.0-alpha.26"
-    ethers "^5.8.0"
+    "@getpara/core-sdk" "2.0.0-alpha.29"
 
-"@getpara/react-common@2.0.0-alpha.26":
-  version "2.0.0-alpha.26"
-  resolved "https://registry.npmjs.org/@getpara/react-common/-/react-common-2.0.0-alpha.26.tgz#b6004c00de1f7928483872ba02cae8fc318ea016"
-  integrity sha512-HkWU4eODXgzdF03Gq35liBEQi6IOYYwT20ZnQboOZfRnnvxtzpdsUW0mFxvaYJIP7IR8kvDgXmyhARrwSlwd/A==
+"@getpara/react-common@2.0.0-alpha.29":
+  version "2.0.0-alpha.29"
+  resolved "https://registry.npmjs.org/@getpara/react-common/-/react-common-2.0.0-alpha.29.tgz#1a913353f2ee01aac84bdf4e955a0236d3cde758"
+  integrity sha512-azq9DU6kc2Eix51ZHEn9D+JE/qInuqBGz/k8ktB1xfkkbUHtrbnwi2/2m4471DjBFFm95JwyESdty2ZVQtuaiA==
   dependencies:
-    "@getpara/react-components" "2.0.0-alpha.26"
-    "@getpara/web-sdk" "2.0.0-alpha.26"
+    "@getpara/react-components" "2.0.0-alpha.29"
+    "@getpara/web-sdk" "2.0.0-alpha.29"
     "@moonpay/moonpay-react" "^1.8.3"
     "@ramp-network/ramp-instant-sdk" "^4.0.5"
-    libphonenumber-js "^1.11.1"
+    libphonenumber-js "^1.11.7"
     styled-components "^6.1.8"
     ua-parser-js "^2.0.2"
 
-"@getpara/react-components@2.0.0-alpha.26":
-  version "2.0.0-alpha.26"
-  resolved "https://registry.npmjs.org/@getpara/react-components/-/react-components-2.0.0-alpha.26.tgz#9db226d2218c98fe1576e9abf4db2e650334c1ef"
-  integrity sha512-+HtbIyp4JPMKwbQtoSqt8mhZibSgC22olOGhYH7bkJzLQJ8uoo9TDQ+MfvzPgX7E/NFI2CZASUu/kujlugtKWA==
+"@getpara/react-components@2.0.0-alpha.29":
+  version "2.0.0-alpha.29"
+  resolved "https://registry.npmjs.org/@getpara/react-components/-/react-components-2.0.0-alpha.29.tgz#2b59b6607d2298c8ca6187944dbd50cede41dcae"
+  integrity sha512-MChmG2DCuDMTficR14QnYPLyGJnyQEWi5QhhDcADXEe9dlxN3w+R6F6MlfzsvV1FPDeOv7Wo7mWH49u5HX9TYw==
   dependencies:
-    "@getpara/core-components" "2.0.0-alpha.26"
+    "@getpara/core-components" "2.0.0-alpha.29"
 
-"@getpara/react-sdk@2.0.0-alpha.26":
-  version "2.0.0-alpha.26"
-  resolved "https://registry.npmjs.org/@getpara/react-sdk/-/react-sdk-2.0.0-alpha.26.tgz#762c08e9fdae1c06381628b409531e43e5ba6176"
-  integrity sha512-sWX/Uu+3vJWv8gYHAtB/Pt9D7o7o0C57J+OXR6r0Uqw2ked49qY8ohAzxHvSgXduLrqYOz7sWtKcuL//n9PZPA==
+"@getpara/react-sdk@2.0.0-alpha.29":
+  version "2.0.0-alpha.29"
+  resolved "https://registry.npmjs.org/@getpara/react-sdk/-/react-sdk-2.0.0-alpha.29.tgz#8c81613f6c19e9278f2f47cf508e841dec933dd5"
+  integrity sha512-d+4artNAvAfKHkjAWQvFFzRBZWY0TMn63jVgtX7nww7yb5lSql89kvAwpZS2b953BSo8JTCuRt3BW6rGGPt7cg==
   dependencies:
-    "@getpara/react-common" "2.0.0-alpha.26"
-    "@getpara/react-components" "2.0.0-alpha.26"
-    "@getpara/web-sdk" "2.0.0-alpha.26"
+    "@getpara/react-common" "2.0.0-alpha.29"
+    "@getpara/react-components" "2.0.0-alpha.29"
+    "@getpara/web-sdk" "2.0.0-alpha.29"
     date-fns "^3.6.0"
-    framer-motion "11.3.28"
-    libphonenumber-js "^1.11.1"
+    framer-motion "^11.3.31"
+    libphonenumber-js "^1.11.7"
     styled-components "^6.1.8"
     zustand "^4.5.2"
     zustand-sync-tabs "^0.2.2"
 
-"@getpara/user-management-client@2.0.0-alpha.26":
-  version "2.0.0-alpha.26"
-  resolved "https://registry.npmjs.org/@getpara/user-management-client/-/user-management-client-2.0.0-alpha.26.tgz#2764e2712046086de054d717446ed92e850dfd4a"
-  integrity sha512-hS0yYda4XsQDDebI9Tx2Fugxucy9nbk+LF3O2edl52qOK2VB0vFuZbQZdHNzPqWNOTngDhgXLO8SXSWUEUxqEg==
+"@getpara/user-management-client@2.0.0-alpha.29":
+  version "2.0.0-alpha.29"
+  resolved "https://registry.npmjs.org/@getpara/user-management-client/-/user-management-client-2.0.0-alpha.29.tgz#b12626be744a1605c65e9916c9e39c4df75a6415"
+  integrity sha512-M5ijZsehYuSi65sc0kIRaCAF1SJrGEfWqd44uKBpw3VnmRprWbX69KxhiXzP68sL/otnIqB6/Wfz9TQPMc6plA==
   dependencies:
     axios "^1.8.4"
-    libphonenumber-js "1.11.2"
+    libphonenumber-js "^1.11.7"
 
-"@getpara/web-sdk@2.0.0-alpha.26":
-  version "2.0.0-alpha.26"
-  resolved "https://registry.npmjs.org/@getpara/web-sdk/-/web-sdk-2.0.0-alpha.26.tgz#b918d93d517781104b937550dde6045b3451332c"
-  integrity sha512-tPWE2k7Gb1o3UF0QennVyYK5GmXhj7JItiFmBRPwGs/TvYQexDoJDAiW++YX5P8aTwx1ZZs57Fmgy7yv00cYmQ==
+"@getpara/web-sdk@2.0.0-alpha.29":
+  version "2.0.0-alpha.29"
+  resolved "https://registry.npmjs.org/@getpara/web-sdk/-/web-sdk-2.0.0-alpha.29.tgz#214c03aa19d5cefcc38fb740c9f48933fb7f2b1c"
+  integrity sha512-XV1dCdSXJMEBoyDKZIq96yoMRdx/8pGOTXupx1UnP5AXdF/h8AJYsFJ1XnKNk0ECsEQsvzueFdzSFGjrh5rTUg==
   dependencies:
-    "@getpara/core-sdk" "2.0.0-alpha.26"
-    "@getpara/user-management-client" "2.0.0-alpha.26"
+    "@getpara/core-sdk" "2.0.0-alpha.29"
+    "@getpara/user-management-client" "2.0.0-alpha.29"
     "@sentry/browser" "^9.1.0"
-    base64url "3.0.1"
+    base64url "^3.0.1"
     buffer "6.0.3"
-    cbor-web "8.1.0"
+    cbor-web "^9.0.2"
     node-forge "1.3.1"
     ua-parser-js "^2.0.2"
 
@@ -2207,7 +2206,7 @@ base64-js@^1.3.0, base64-js@^1.3.1:
   resolved "https://registry.yarnpkg.com/base64-js/-/base64-js-1.5.1.tgz#1b1b440160a5bf7ad40b650f095963481903930a"
   integrity sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==
 
-base64url@3.0.1, base64url@^3.0.1:
+base64url@^3.0.1:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/base64url/-/base64url-3.0.1.tgz#6399d572e2bc3f90a9a8b22d5dbb0a32d33f788d"
   integrity sha512-ir1UPr3dkwexU7FdV8qBBbNDRUhMmIekYMFZfi+C/sLNnRESKPl23nB9b2pltqfOQNnGzsDdId90AEtG5tCx4A==
@@ -2412,10 +2411,10 @@ case@^1.6.3:
   resolved "https://registry.yarnpkg.com/case/-/case-1.6.3.tgz#0a4386e3e9825351ca2e6216c60467ff5f1ea1c9"
   integrity sha512-mzDSXIPaFwVDvZAHqZ9VlbyF4yyXRuX6IvB06WvPYkqJVO24kX1PPhv9bfpKNFZyxYFmmgo03HUiD8iklmJYRQ==
 
-cbor-web@8.1.0:
-  version "8.1.0"
-  resolved "https://registry.yarnpkg.com/cbor-web/-/cbor-web-8.1.0.tgz#c1148e91ca6bfc0f5c07c1df164854596e2e33d6"
-  integrity sha512-2hWHHMVrfffgoEmsAUh8vCxHoLa1vgodtC73+C5cSarkJlwTapnqAzcHINlP6Ej0DXuP4OmmJ9LF+JaNM5Lj/g==
+cbor-web@^9.0.2:
+  version "9.0.2"
+  resolved "https://registry.npmjs.org/cbor-web/-/cbor-web-9.0.2.tgz#1915f1ef1a72ea905db07480f71cf12ff601c661"
+  integrity sha512-N6gU2GsJS8RR5gy1d9wQcSPgn9FGJFY7KNvdDRlwHfz6kCxrQr2TDnrjXHmr6TFSl6Fd0FC4zRnityEldjRGvQ==
 
 chalk@^4.0.0, chalk@^4.1.0:
   version "4.1.2"
@@ -3239,7 +3238,7 @@ ethereumjs-util@^6.0.0, ethereumjs-util@^6.2.1:
     ethjs-util "0.1.6"
     rlp "^2.2.3"
 
-ethers@5.8.0, ethers@^5.8.0:
+ethers@5.8.0:
   version "5.8.0"
   resolved "https://registry.yarnpkg.com/ethers/-/ethers-5.8.0.tgz#97858dc4d4c74afce83ea7562fe9493cedb4d377"
   integrity sha512-DUq+7fHrCg1aPDFCHx6UIPb3nmt2XMpM7Y/g2gLhsl3lIBqeAfOJIl1qEvRf2uq3BiKxmh6Fh5pfp2ieyek7Kg==
@@ -3437,11 +3436,13 @@ fp-ts@^1.0.0:
   resolved "https://registry.yarnpkg.com/fp-ts/-/fp-ts-1.19.5.tgz#3da865e585dfa1fdfd51785417357ac50afc520a"
   integrity sha512-wDNqTimnzs8QqpldiId9OavWK2NptormjXnRJTQecNjzwfyp6P/8s/zG8e4h3ja3oqkKaY72UlTjQYt/1yXf9A==
 
-framer-motion@11.3.28:
-  version "11.3.28"
-  resolved "https://registry.yarnpkg.com/framer-motion/-/framer-motion-11.3.28.tgz#dbc5d51d9525a67b8030ba645323458364a94729"
-  integrity sha512-dqhoawipEAjqdv32zbv72sOMJZjol7dROWn7t/FOq23WXJ40O4OUybgnO2ldnuS+3YquSn8xO/KKRavZ+TBVOQ==
+framer-motion@^11.3.31:
+  version "11.18.2"
+  resolved "https://registry.npmjs.org/framer-motion/-/framer-motion-11.18.2.tgz#0c6bd05677f4cfd3b3bdead4eb5ecdd5ed245718"
+  integrity sha512-5F5Och7wrvtLVElIpclDT0CBzMVg3dL22B64aZwHtsIY8RB4mXICLrkajK4G9R+ieSAGcgrLeae2SeUTg2pr6w==
   dependencies:
+    motion-dom "^11.18.1"
+    motion-utils "^11.18.1"
     tslib "^2.4.0"
 
 fs-extra@^7.0.1:
@@ -4165,15 +4166,10 @@ levn@^0.4.1:
     prelude-ls "^1.2.1"
     type-check "~0.4.0"
 
-libphonenumber-js@1.11.2:
-  version "1.11.2"
-  resolved "https://registry.yarnpkg.com/libphonenumber-js/-/libphonenumber-js-1.11.2.tgz#9ddd7d1a1e1be0e7c596c7e09487c362b4f1210c"
-  integrity sha512-V9mGLlaXN1WETzqQvSu6qf6XVAr3nFuJvWsHcuzCCCo6xUKawwSxOPTpan5CGOSKTn5w/bQuCZcLPJkyysgC3w==
-
-libphonenumber-js@^1.11.1:
-  version "1.11.18"
-  resolved "https://registry.yarnpkg.com/libphonenumber-js/-/libphonenumber-js-1.11.18.tgz#0ce5188a76487fae01afdf318255783cde36501e"
-  integrity sha512-okMm/MCoFrm1vByeVFLBdkFIXLSHy/AIK2AEGgY3eoicfWZeOZqv3GfhtQgICkzs/tqorAMm3a4GBg5qNCrqzg==
+libphonenumber-js@^1.11.7:
+  version "1.12.9"
+  resolved "https://registry.npmjs.org/libphonenumber-js/-/libphonenumber-js-1.12.9.tgz#25626cd825225b326a514a142aaa26717286c4b0"
+  integrity sha512-VWwAdNeJgN7jFOD+wN4qx83DTPMVPPAUyx9/TUkBXKLiNkuWWk6anV0439tgdtwaJDrEdqkvdN22iA6J4bUCZg==
 
 lightningcss-darwin-arm64@1.30.1:
   version "1.30.1"
@@ -4438,6 +4434,18 @@ mocha@^10.0.0:
     yargs "^16.2.0"
     yargs-parser "^20.2.9"
     yargs-unparser "^2.0.0"
+
+motion-dom@^11.18.1:
+  version "11.18.1"
+  resolved "https://registry.npmjs.org/motion-dom/-/motion-dom-11.18.1.tgz#e7fed7b7dc6ae1223ef1cce29ee54bec826dc3f2"
+  integrity sha512-g76KvA001z+atjfxczdRtw/RXOM3OMSdd1f4DL77qCTF/+avrRJiawSG4yDibEQ215sr9kpinSlX2pCTJ9zbhw==
+  dependencies:
+    motion-utils "^11.18.1"
+
+motion-utils@^11.18.1:
+  version "11.18.1"
+  resolved "https://registry.npmjs.org/motion-utils/-/motion-utils-11.18.1.tgz#671227669833e991c55813cf337899f41327db5b"
+  integrity sha512-49Kt+HKjtbJKLtgO/LKj9Ld+6vw9BjH5d9sc40R/kVyH8GLAXgT42M2NnuPcJNuA3s9ZfZBUcwIgpmZWGEE+hA==
 
 ms@^2.1.1, ms@^2.1.3:
   version "2.1.3"

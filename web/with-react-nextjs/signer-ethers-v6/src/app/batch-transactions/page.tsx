@@ -27,7 +27,7 @@ export default function BatchTransactionsPage() {
   }>({ show: false, type: "success", message: "" });
 
   const { signer, provider } = useParaSigner();
-  const { data: account } = useAccount();
+  const account = useAccount();
   const { data: wallet } = useWallet();
   const address = wallet?.address;
   const isConnected = account?.isConnected;

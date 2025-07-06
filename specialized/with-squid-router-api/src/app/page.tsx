@@ -1,9 +1,8 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { AuthLayout, OAuthMethod, ParaModal, useAccount, useModal } from "@getpara/react-sdk";
-import "@getpara/react-sdk/styles.css";
-import { SupportedNetwork, NETWORK_CONFIG, ASSET_DETAILS } from "@/constants";
+import { useAccount, useWallet, useModal } from "@getpara/react-sdk";
+import { SupportedNetwork, NETWORK_CONFIG, ASSET_DETAILS } from "@/config/constants";
 import { useSquidBridge } from "@/hooks/useSquidBridge";
 import { useTokenBalance } from "@/hooks/useTokenBalance";
 import { TransactionProcessing } from "@/components/TransactionProcessing";
@@ -32,7 +31,8 @@ type StepType =
 
 export default function Home() {
   const { openModal } = useModal();
-  const { data: account } = useAccount();
+  const { isConnected } = useAccount();
+  const { data: wallet } = useWallet();
   const { useQuote, executeBridge, isExecuting } = useSquidBridge();
   const { ethereumEthers, baseEthers, solanaSvm } = useSigners();
 
@@ -102,7 +102,7 @@ export default function Home() {
 
   const isBridgeStateValid = useCallback((): boolean => {
     return !!(
-      account?.isConnected &&
+      isConnected &&
       originNetwork &&
       destNetwork &&
       parsedAmount > 0 &&
@@ -116,7 +116,7 @@ export default function Home() {
       !quoteError
     );
   }, [
-    account?.isConnected,
+    isConnected,
     originNetwork,
     destNetwork,
     parsedAmount,
@@ -254,7 +254,7 @@ export default function Home() {
 
           <div className="flex-1">
             <BridgeForm
-              isConnected={account?.isConnected || false}
+              isConnected={isConnected || false}
               isValid={isBridgeStateValid()}
               onConnect={openModal}
               onBridge={handleBridge}>
@@ -267,7 +267,7 @@ export default function Home() {
                 destAddress={destAddress}
                 originBalance={originBalance}
                 destBalance={destBalance}
-                isConnected={account?.isConnected || false}
+                isConnected={isConnected || false}
                 onOriginChange={setOriginNetwork}
                 onDestChange={setDestNetwork}
               />
@@ -275,7 +275,7 @@ export default function Home() {
               <AmountInput
                 amount={amount}
                 usdValue={usdValue}
-                isConnected={account?.isConnected || false}
+                isConnected={isConnected || false}
                 onAmountChange={setAmount}
                 onMaxClick={handleMaxClick}
               />
@@ -303,35 +303,6 @@ export default function Home() {
         </div>
       </div>
 
-      <ParaModal
-        disableEmailLogin={false}
-        disablePhoneLogin={false}
-        authLayout={[AuthLayout.AUTH_FULL]}
-        oAuthMethods={[
-          OAuthMethod.APPLE,
-          OAuthMethod.DISCORD,
-          OAuthMethod.FACEBOOK,
-          OAuthMethod.FARCASTER,
-          OAuthMethod.GOOGLE,
-          OAuthMethod.TWITTER,
-        ]}
-        onRampTestMode={false}
-        theme={{
-          foregroundColor: "#2D3648",
-          backgroundColor: "#FFFFFF",
-          accentColor: "#0066CC",
-          darkForegroundColor: "#E8EBF2",
-          darkBackgroundColor: "#1A1F2B",
-          darkAccentColor: "#4D9FFF",
-          mode: "light",
-          borderRadius: "lg",
-          font: "Inter",
-        }}
-        appName="Para Modal Example"
-        logo="/para.svg"
-        recoverySecretStepEnabled={true}
-        twoFactorAuthEnabled={false}
-      />
     </div>
   );
 }

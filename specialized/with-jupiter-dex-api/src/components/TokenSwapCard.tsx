@@ -4,12 +4,18 @@ import { useState, useEffect } from "react";
 import { ArrowUpDownIcon } from "lucide-react";
 import SwapAmountInput from "@/components/ui/SwapAmountInput";
 import TransactionDetailsCollapsible from "@/components/ui/TransactionDetailsCollapsible";
-import { usePara } from "./ParaProvider";
+import { useAccount, useModal, useWallet } from "@getpara/react-sdk";
+import { useSolanaWeb3 } from "@/hooks/useSolanaWeb3";
 import { VersionedTransaction } from "@solana/web3.js";
 import { Token, TokenApiResponse } from "@/types";
 
 export default function TokenSwapCard() {
-  const { signer, connection, isConnected, openModal, address } = usePara();
+  const { openModal } = useModal();
+  const { isConnected } = useAccount();
+  const { data: wallet } = useWallet();
+  const { signer, connection } = useSolanaWeb3();
+  
+  const address = wallet?.address || null;
 
   const [tokens, setTokens] = useState<Token[]>([]);
   const [isLoading, setIsLoading] = useState(true);

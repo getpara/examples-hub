@@ -1,12 +1,13 @@
 "use client";
 
-import { useAccount } from "@getpara/react-sdk";
+import { useAccount, useWallet } from "@getpara/react-sdk";
 
 export function useAccountAddress() {
-  const { data: account } = useAccount();
+  const { isConnected } = useAccount();
+  const { data: wallet } = useWallet();
   
-  const address = account?.isConnected && account.wallets?.[0]?.address 
-    ? account.wallets[0].address as `0x${string}` 
+  const address = isConnected && wallet?.address 
+    ? wallet.address as `0x${string}` 
     : null;
 
   return address;

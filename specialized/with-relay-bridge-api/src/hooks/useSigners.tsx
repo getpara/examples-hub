@@ -1,144 +1,130 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+"use client";
+
+import { useMemo, useEffect, useState } from "react";
 import { useAccount, useClient } from "@getpara/react-sdk";
 import { createParaAccount, createParaViemClient } from "@getpara/viem-v2-integration";
 import { createPublicClient, http, PublicClient, WalletClient } from "viem";
 import { sepolia, baseSepolia } from "viem/chains";
 import { ParaSolanaWeb3Signer } from "@getpara/solana-web3.js-v1-integration";
 import { Connection } from "@solana/web3.js";
-import { NETWORK_CONFIG } from "@/constants";
-
-interface SignerData {
-  ethereumViem: {
-    publicClient: PublicClient | null;
-    walletClient: WalletClient | null;
-    address: string | null;
-    isInitialized: boolean;
-  };
-  baseViem: {
-    publicClient: PublicClient | null;
-    walletClient: WalletClient | null;
-    address: string | null;
-    isInitialized: boolean;
-  };
-  solanaSvm: {
-    signer: ParaSolanaWeb3Signer | null;
-    connection: Connection | null;
-    address: string | null;
-    isInitialized: boolean;
-  };
-}
-
-const SIGNERS_QUERY_KEY = ["globalSigners"];
-
-async function initializeSigners(para: any, account: any): Promise<SignerData> {
-  const signerData: SignerData = {
-    ethereumViem: { publicClient: null, walletClient: null, address: null, isInitialized: false },
-    baseViem: { publicClient: null, walletClient: null, address: null, isInitialized: false },
-    solanaSvm: { signer: null, connection: null, address: null, isInitialized: false },
-  };
-
-  if (!para || !account?.isConnected) {
-    return signerData;
-  }
-
-  try {
-    const ethereumChain = sepolia;
-    const ethereumConfig = NETWORK_CONFIG.ethereum;
-    const ethereumAccount = createParaAccount(para);
-    const ethereumWalletClient = createParaViemClient(para, {
-      account: ethereumAccount,
-      chain: ethereumChain,
-      transport: http(ethereumConfig.rpcUrl),
-    });
-    const ethereumPublicClient = createPublicClient({
-      chain: ethereumChain,
-      transport: http(ethereumConfig.rpcUrl),
-    });
-
-    signerData.ethereumViem = {
-      walletClient: ethereumWalletClient,
-      publicClient: ethereumPublicClient as PublicClient,
-      address: ethereumAccount.address,
-      isInitialized: true,
-    };
-  } catch (error) {
-    console.error("[Global Signers] Ethereum initialization error:", error);
-  }
-
-  try {
-    const baseChain = baseSepolia;
-    const baseConfig = NETWORK_CONFIG.base;
-    const baseAccount = createParaAccount(para);
-    const baseWalletClient = createParaViemClient(para, {
-      account: baseAccount,
-      chain: baseChain,
-      transport: http(baseConfig.rpcUrl),
-    });
-    const basePublicClient = createPublicClient({
-      chain: baseChain,
-      transport: http(baseConfig.rpcUrl),
-    });
-
-    signerData.baseViem = {
-      walletClient: baseWalletClient,
-      publicClient: basePublicClient as PublicClient,
-      address: baseAccount.address,
-      isInitialized: true,
-    };
-  } catch (error) {
-    console.error("[Global Signers] Base initialization error:", error);
-  }
-
-  try {
-    const solanaConfig = NETWORK_CONFIG.solana;
-    const solanaConnection = new Connection(solanaConfig.rpcUrl, "confirmed");
-    const solanaSigner = new ParaSolanaWeb3Signer(para, solanaConnection);
-    const publicKey = await solanaSigner.sender;
-
-    if (publicKey) {
-      signerData.solanaSvm = {
-        signer: solanaSigner,
-        connection: solanaConnection,
-        address: publicKey.toBase58(),
-        isInitialized: true,
-      };
-    }
-  } catch (error) {
-    console.error("[Global Signers] Solana initialization error:", error);
-  }
-
-  return signerData;
-}
+import { NETWORK_CONFIG } from "@/config/constants";
 
 export function useSigners() {
-  const para = useClient();
-  const { data: account } = useAccount();
-  const queryClient = useQueryClient();
+  const client = useClient();
+  const { isConnected } = useAccount();
 
-  const {
-    data: signers = {
-      ethereumViem: { publicClient: null, walletClient: null, address: null, isInitialized: false },
-      baseViem: { publicClient: null, walletClient: null, address: null, isInitialized: false },
-      solanaSvm: { signer: null, connection: null, address: null, isInitialized: false },
-    } as SignerData,
-  } = useQuery({
-    queryKey: [...SIGNERS_QUERY_KEY, account?.isConnected],
-    queryFn: () => initializeSigners(para, account),
-    enabled: !!para && !!account?.isConnected,
-    staleTime: Infinity,
-    gcTime: Infinity,
-  });
+  // Ethereum signer setup
+  const ethereumViem = useMemo(() => {
+    if (!client || !isConnected) {
+      return { publicClient: null, walletClient: null, address: null, isInitialized: false };
+    }
 
-  const clearSigners = () => {
-    queryClient.setQueryData(SIGNERS_QUERY_KEY, {
-      ethereumViem: { publicClient: null, walletClient: null, address: null, isInitialized: false },
-      baseViem: { publicClient: null, walletClient: null, address: null, isInitialized: false },
-      solanaSvm: { signer: null, connection: null, address: null, isInitialized: false },
-    });
-  };
+    try {
+      const ethereumChain = sepolia;
+      const ethereumConfig = NETWORK_CONFIG.ethereum;
+      const ethereumAccount = createParaAccount(client);
+      const ethereumWalletClient = createParaViemClient(client, {
+        account: ethereumAccount,
+        chain: ethereumChain,
+        transport: http(ethereumConfig.rpcUrl),
+      });
+      const ethereumPublicClient = createPublicClient({
+        chain: ethereumChain,
+        transport: http(ethereumConfig.rpcUrl),
+      });
+
+      return {
+        walletClient: ethereumWalletClient,
+        publicClient: ethereumPublicClient as PublicClient,
+        address: ethereumAccount.address,
+        isInitialized: true,
+      };
+    } catch (error) {
+      console.error("[Ethereum Signer] Initialization error:", error);
+      return { publicClient: null, walletClient: null, address: null, isInitialized: false };
+    }
+  }, [client, isConnected]);
+
+  // Base signer setup
+  const baseViem = useMemo(() => {
+    if (!client || !isConnected) {
+      return { publicClient: null, walletClient: null, address: null, isInitialized: false };
+    }
+
+    try {
+      const baseChain = baseSepolia;
+      const baseConfig = NETWORK_CONFIG.base;
+      const baseAccount = createParaAccount(client);
+      const baseWalletClient = createParaViemClient(client, {
+        account: baseAccount,
+        chain: baseChain,
+        transport: http(baseConfig.rpcUrl),
+      });
+      const basePublicClient = createPublicClient({
+        chain: baseChain,
+        transport: http(baseConfig.rpcUrl),
+      });
+
+      return {
+        walletClient: baseWalletClient,
+        publicClient: basePublicClient as PublicClient,
+        address: baseAccount.address,
+        isInitialized: true,
+      };
+    } catch (error) {
+      console.error("[Base Signer] Initialization error:", error);
+      return { publicClient: null, walletClient: null, address: null, isInitialized: false };
+    }
+  }, [client, isConnected]);
+
+  // Solana address state
+  const [solanaAddress, setSolanaAddress] = useState<string | null>(null);
+
+  // Solana signer setup
+  const solanaSvm = useMemo(() => {
+    if (!client || !isConnected) {
+      return { signer: null, connection: null, address: null, isInitialized: false };
+    }
+
+    try {
+      const solanaConfig = NETWORK_CONFIG.solana;
+      const solanaConnection = new Connection(solanaConfig.rpcUrl, "confirmed");
+      const solanaSigner = new ParaSolanaWeb3Signer(client, solanaConnection);
+
+      return {
+        signer: solanaSigner,
+        connection: solanaConnection,
+        address: solanaAddress,
+        isInitialized: true,
+      };
+    } catch (error) {
+      console.error("[Solana Signer] Initialization error:", error);
+      return { signer: null, connection: null, address: null, isInitialized: false };
+    }
+  }, [client, isConnected, solanaAddress]);
+
+  // Get Solana address asynchronously
+  useEffect(() => {
+    if (solanaSvm.signer && isConnected) {
+      const getSolanaAddress = async () => {
+        try {
+          const publicKey = await solanaSvm.signer.sender;
+          if (publicKey) {
+            setSolanaAddress(publicKey.toBase58());
+          }
+        } catch (error) {
+          console.error("[Solana Signer] Error getting address:", error);
+        }
+      };
+      getSolanaAddress();
+    } else {
+      setSolanaAddress(null);
+    }
+  }, [solanaSvm.signer, isConnected]);
 
   return {
-    ...signers,
-    clearSigners,
+    ethereumViem,
+    baseViem,
+    solanaSvm,
   };
 }

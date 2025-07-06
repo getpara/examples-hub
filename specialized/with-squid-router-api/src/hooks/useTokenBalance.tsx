@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { NETWORK_CONFIG, SupportedNetwork } from "@/constants";
+import { NETWORK_CONFIG, SupportedNetwork } from "@/config/constants";
 import { PublicKey } from "@solana/web3.js";
 import { ethers } from "ethers";
 import { useSigners } from "./useSigners";

@@ -13,7 +13,7 @@ export const Route = createFileRoute('/')({
 function Home() {
   const [message, setMessage] = useState('')
 
-  const { data: account } = useAccount()
+  const { isConnected } = useAccount()
   const { data: wallet } = useWallet()
   const { openModal } = useModal()
   const signMessageHook = useSignMessage()
@@ -60,7 +60,7 @@ function Home() {
 
         <StatusAlert show={status.show} type={status.type} message={status.message} />
 
-        {!account?.isConnected ? (
+        {!isConnected ? (
           <ConnectWalletCard onConnect={openModal} />
         ) : (
           <>

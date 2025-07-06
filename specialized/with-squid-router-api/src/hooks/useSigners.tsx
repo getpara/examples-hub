@@ -1,10 +1,10 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useAccount, useClient } from "@getpara/react-sdk";
+import { useAccount, useWallet, useClient } from "@getpara/react-sdk";
 import { ParaEthersSigner } from "@getpara/ethers-v6-integration";
 import { ethers } from "ethers";
 import { ParaSolanaWeb3Signer } from "@getpara/solana-web3.js-v1-integration";
 import { Connection } from "@solana/web3.js";
-import { NETWORK_CONFIG } from "@/constants";
+import { NETWORK_CONFIG } from "@/config/constants";
 
 interface SignerData {
   ethereumEthers: {
@@ -29,14 +29,14 @@ interface SignerData {
 
 const SIGNERS_QUERY_KEY = ["globalSigners"];
 
-async function initializeSigners(para: any, account: any): Promise<SignerData> {
+async function initializeSigners(para: any): Promise<SignerData> {
   const signerData: SignerData = {
     ethereumEthers: { provider: null, signer: null, address: null, isInitialized: false },
     baseEthers: { provider: null, signer: null, address: null, isInitialized: false },
     solanaSvm: { signer: null, connection: null, address: null, isInitialized: false },
   };
 
-  if (!para || !account?.isConnected) {
+  if (!para) {
     return signerData;
   }
 
@@ -95,7 +95,8 @@ async function initializeSigners(para: any, account: any): Promise<SignerData> {
 
 export function useSigners() {
   const para = useClient();
-  const { data: account } = useAccount();
+  const { isConnected } = useAccount();
+  const { data: wallet } = useWallet();
   const queryClient = useQueryClient();
 
   const {
@@ -105,9 +106,9 @@ export function useSigners() {
       solanaSvm: { signer: null, connection: null, address: null, isInitialized: false },
     } as SignerData,
   } = useQuery({
-    queryKey: [...SIGNERS_QUERY_KEY, account?.isConnected],
-    queryFn: () => initializeSigners(para, account),
-    enabled: !!para && !!account?.isConnected,
+    queryKey: [...SIGNERS_QUERY_KEY, isConnected],
+    queryFn: () => initializeSigners(para),
+    enabled: !!para && !!isConnected,
     staleTime: Infinity,
     gcTime: Infinity,
   });

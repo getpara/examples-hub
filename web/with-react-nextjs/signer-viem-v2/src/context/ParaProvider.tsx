@@ -9,7 +9,7 @@ import "@getpara/react-sdk/styles.css";
 
 // Create a custom hook for viem-specific functionality
 import { createContext, useContext, useEffect, useState } from "react";
-import { useAccount, useClient } from "@getpara/react-sdk";
+import { useAccount, useClient, useWallet } from "@getpara/react-sdk";
 
 interface ViemContextType {
   publicClient: PublicClient | null;
@@ -20,10 +20,10 @@ interface ViemContextType {
 const ViemContext = createContext<ViemContextType | undefined>(undefined);
 
 export function ViemProvider({ children }: { children: React.ReactNode }) {
-  const accountQuery = useAccount();
+  const { isConnected } = useAccount();
+  const { data: wallet } = useWallet();
   const para = useClient();
-  const isConnected = accountQuery.data?.isConnected ?? false;
-  const address = accountQuery.data?.wallets?.[0]?.address as `0x${string}` | undefined;
+  const address = wallet?.address as `0x${string}` | undefined;
   const [publicClient, setPublicClient] = useState<PublicClient | null>(null);
   const [walletClient, setWalletClient] = useState<WalletClient | null>(null);
   const [localAccount, setLocalAccount] = useState<LocalAccount | null>(null);

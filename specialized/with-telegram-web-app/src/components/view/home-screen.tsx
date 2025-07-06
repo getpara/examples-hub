@@ -51,7 +51,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ setScreen }) => {
       setAddress(address);
       const balance = await provider.getBalance(address);
       setPortfolioValue(ethers.formatEther(balance));
-    } catch (error) {
+    } catch {
       setError("Failed to fetch balance");
     } finally {
       setIsLoading(false);
@@ -64,7 +64,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ setScreen }) => {
       const details = await para.getWallets();
       setWalletDetails(details);
       setShowWalletDetails(true);
-    } catch (error) {
+    } catch {
       setError("Failed to fetch wallet details");
     }
   };

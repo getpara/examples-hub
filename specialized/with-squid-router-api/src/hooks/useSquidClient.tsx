@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Squid } from "@0xsquid/sdk";
-import { SQUID_INTEGRATOR_ID } from "@/constants";
+import { SQUID_INTEGRATOR_ID } from "@/config/constants";
 
 let squidInstance: Squid | null = null;
 

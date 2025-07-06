@@ -27,7 +27,7 @@ export default function PermitSigningPage() {
     s: string;
   } | null>(null);
 
-  const { data: account } = useAccount();
+  const account = useAccount();
   const { walletClient } = useParaSigner();
   const publicClient = useViemProvider();
   const address = useAccountAddress();

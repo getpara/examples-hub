@@ -41,7 +41,7 @@ const TransactionScreen: React.FC<TransactionScreenProps> = ({ setScreen }) => {
         const estimatedFeeEth = ethers.formatEther(estimatedFeeWei);
         setEstimatedFee(estimatedFeeEth);
       }
-    } catch (error) {
+    } catch {
       setGas("21000");
       setEstimatedFee("");
     }
@@ -66,7 +66,7 @@ const TransactionScreen: React.FC<TransactionScreenProps> = ({ setScreen }) => {
           return;
         }
         setAddress(address);
-      } catch (error) {
+      } catch {
         setError("Failed to fetch address");
       }
     };

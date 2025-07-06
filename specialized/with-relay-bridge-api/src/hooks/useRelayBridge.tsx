@@ -4,7 +4,7 @@ import { type Execute, type ProgressData } from "@reservoir0x/relay-sdk";
 import { adaptSolanaWallet } from "@reservoir0x/relay-solana-wallet-adapter";
 import { useRelayClient } from "./useRelayClient";
 import { useSigners } from "./useSigners";
-import { NETWORK_CONFIG, SupportedNetwork } from "@/constants";
+import { NETWORK_CONFIG, SupportedNetwork } from "@/config/constants";
 import { parseUnits } from "viem";
 
 interface QuoteParams {

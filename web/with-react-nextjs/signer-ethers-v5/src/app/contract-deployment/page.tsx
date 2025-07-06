@@ -22,7 +22,7 @@ export default function ContractDeploymentPage() {
     message: string;
   }>({ show: false, type: "success", message: "" });
 
-  const { data: account } = useAccount();
+  const account = useAccount();
   const { data: wallet } = useWallet();
   const { signer, provider } = useParaSigner();
 

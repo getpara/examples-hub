@@ -21,7 +21,7 @@ export default function AtomTransferPage() {
     message: string;
   }>({ show: false, type: "success", message: "" });
 
-  const { data: account } = useAccount();
+  const account = useAccount();
   const { signingClient } = useParaSigner();
   const { queryClient } = useCosmosQueryClient();
   const address = useAccountAddress();

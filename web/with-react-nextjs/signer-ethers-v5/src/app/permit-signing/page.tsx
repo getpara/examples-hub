@@ -28,7 +28,7 @@ export default function PermitSigningPage() {
     s: string;
   } | null>(null);
 
-  const { data: account } = useAccount();
+  const account = useAccount();
   const { data: wallet } = useWallet();
   const { signer, provider } = useParaSigner();
 

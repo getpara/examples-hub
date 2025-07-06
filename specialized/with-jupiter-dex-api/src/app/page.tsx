@@ -1,10 +1,12 @@
 "use client";
 
-import { usePara } from "@/components/ParaProvider";
+import { useAccount } from "@getpara/react-sdk";
+import { useSolanaWeb3 } from "@/hooks/useSolanaWeb3";
 import TokenSwapCard from "@/components/TokenSwapCard";
 
 export default function Home() {
-  const { isConnected, connection } = usePara();
+  const { isConnected } = useAccount();
+  const { connection } = useSolanaWeb3();
 
   return (
     <div className="container mx-auto px-4 py-12">

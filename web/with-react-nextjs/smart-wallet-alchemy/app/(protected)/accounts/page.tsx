@@ -46,7 +46,7 @@ export default function AccountsPage() {
   const router = useRouter();
   const { openModal } = useModal();
   const { data: wallet } = useWallet();
-  const { data: account, isLoading: isAccountLoading } = useAccount();
+  const { isConnected, isLoading: isAccountLoading } = useAccount();
   const {
     data: smartWallets,
     isLoading: isWalletsLoading,
@@ -63,7 +63,7 @@ export default function AccountsPage() {
     router.push(`/accounts/${address}`);
   };
 
-  if (!account?.isConnected && !isAccountLoading) {
+  if (!isConnected && !isAccountLoading) {
     return (
       <div className="container mx-auto py-8 px-4 flex-1 flex flex-col items-center justify-center z-0">
         <Card className="w-full max-w-md text-center">

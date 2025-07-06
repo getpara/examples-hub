@@ -19,7 +19,7 @@ export default function SolTransferPage() {
   }>({ show: false, type: "success", message: "" });
 
   const { signer, connection, anchorProvider, address } = useParaSigner();
-  const { data: account } = useAccount();
+  const account = useAccount();
   const { data: wallet } = useWallet();
 
   const isConnected = account?.isConnected;

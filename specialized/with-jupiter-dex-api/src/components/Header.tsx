@@ -2,11 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { usePara } from "./ParaProvider";
+import { useAccount, useModal, useWallet, useLogout } from "@getpara/react-sdk";
 
 export default function Header() {
   const pathname = usePathname();
-  const { isConnected, openModal, address } = usePara();
+  const { openModal } = useModal();
+  const { isConnected } = useAccount();
+  const { data: wallet } = useWallet();
+  const { logout } = useLogout();
 
   return (
     <header className="border-b border-gray-200">
@@ -23,13 +26,13 @@ export default function Header() {
         <div>
           {isConnected ? (
             <button
-              onClick={openModal}
+              onClick={() => openModal()}
               className="px-4 py-2 bg-green-700 text-white rounded-none hover:bg-green-800 transition-colors">
-              Connected: {address?.slice(0, 6)}...{address?.slice(-4)}
+              Connected: {wallet?.address?.slice(0, 6)}...{wallet?.address?.slice(-4)}
             </button>
           ) : (
             <button
-              onClick={openModal}
+              onClick={() => openModal()}
               className="px-4 py-2 bg-blue-900 text-white rounded-none hover:bg-blue-950 transition-colors">
               Connect Wallet
             </button>

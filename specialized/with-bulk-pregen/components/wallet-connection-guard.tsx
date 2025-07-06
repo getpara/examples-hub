@@ -7,9 +7,9 @@ import { Wallet } from "lucide-react";
 import { useAccount, useModal } from "@getpara/react-sdk";
 
 export function WalletConnectionGuard({ children }: { children: React.ReactNode }) {
-  const { data: account } = useAccount();
+  const { isConnected } = useAccount();
   const { openModal } = useModal();
-  if (!account?.isConnected) {
+  if (!isConnected) {
     return (
       <div className="flex flex-col items-center justify-center py-16 px-4 border rounded-lg bg-gray-50">
         <h2 className="text-2xl font-semibold mb-4">Connect Your Wallet</h2>

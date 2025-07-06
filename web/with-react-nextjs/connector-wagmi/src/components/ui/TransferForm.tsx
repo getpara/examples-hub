@@ -9,7 +9,7 @@ interface TransferFormProps {
 
 export function TransferForm({ to, amount, isLoading, onToChange, onAmountChange, onSubmit }: TransferFormProps) {
   return (
-    <form onSubmit={onSubmit} className="rounded-none border border-gray-200">
+    <form onSubmit={onSubmit} data-testid="transfer-form" className="rounded-none border border-gray-200">
       <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
         <h3 className="text-lg font-medium text-gray-900">Transfer ETH</h3>
       </div>
@@ -21,6 +21,7 @@ export function TransferForm({ to, amount, isLoading, onToChange, onAmountChange
           <input
             id="to"
             type="text"
+            data-testid="tx-to-input"
             value={to}
             onChange={(e) => onToChange(e.target.value)}
             placeholder="0x..."
@@ -35,6 +36,7 @@ export function TransferForm({ to, amount, isLoading, onToChange, onAmountChange
           <input
             id="amount"
             type="text"
+            data-testid="tx-amount-input"
             value={amount}
             onChange={(e) => onAmountChange(e.target.value)}
             placeholder="0.001"
@@ -44,6 +46,7 @@ export function TransferForm({ to, amount, isLoading, onToChange, onAmountChange
         </div>
         <button
           type="submit"
+          data-testid="tx-submit-button"
           disabled={isLoading}
           className="w-full rounded-none bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-950 disabled:bg-gray-400 transition-colors cursor-pointer">
           {isLoading ? "Sending..." : "Send Transaction"}

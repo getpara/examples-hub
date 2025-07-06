@@ -64,9 +64,8 @@ const transactionTypes = [
 ];
 
 export default function Home() {
-  const account = useAccount();
+  const { isConnected } = useAccount();
   const { openModal } = useModal();
-  const isConnected = account.data?.isConnected ?? false;
 
   return (
     <div className="container mx-auto px-4 py-12">

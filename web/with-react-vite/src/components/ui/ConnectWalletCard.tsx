@@ -11,6 +11,7 @@ export function ConnectWalletCard({ onConnect }: ConnectWalletCardProps) {
       </p>
       <button
         onClick={onConnect}
+        data-testid="auth-connect-button"
         className="w-full px-6 py-3 bg-gray-900 text-white rounded-none hover:bg-gray-950 transition-colors font-medium">
         Connect with Para
       </button>
