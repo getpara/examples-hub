@@ -9,7 +9,6 @@ import WalletContext from '../../contexts/WalletContext';
 import VerifyCode from '../../../assets/verifyCode';
 import PhoneContext from '../../contexts/PhoneContext';
 import { usePara } from '../../../components/ParaContext';
-import { decryptWithFallback } from '../../../utils/legacyDecryption';
 
 type RecoverWalletWithSecretStepProps = {
   setWebAuthURLForCreate: (webAuthURLForCreate: string | null) => void;
@@ -46,7 +45,7 @@ const RecoverWalletWithSecretStep: React.FC<RecoverWalletWithSecretStepProps> = 
       .map(ks => {
         // Ignoring shares with an error here these error should be old shares with a different recovery secret
         try {
-          const decryptedShare = decryptWithFallback(recoveryPrivateKeyContainer, ks.encryptedShare);
+          const decryptedShare = recoveryPrivateKeyContainer.decrypt(ks.encryptedShare);
           return { walletId: ks.walletId, decryptedShare };
         } catch (e) {
           return undefined;

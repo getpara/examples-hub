@@ -4,12 +4,12 @@ import { defineConfig, devices } from '@playwright/test';
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
-  timeout: 250000,
+  timeout: 120000,
   testDir: './e2e/tests',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: 1,
+  workers: undefined,
   reporter: [['html']],
   use: {
     baseURL: 'http://127.0.0.1:3002',

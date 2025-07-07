@@ -21,7 +21,6 @@ const RecoveryBiometricsSetup: React.FC<RecoveryBiometricsSetupProps> = ({ url }
       </Text>
       <Box cursor="pointer" backgroundColor="brand.dimmed" borderRadius="12px" padding="18px">
         <QRCode
-          data-testid="qr-code"
           value={url}
           size={180}
           fgColor={fgColor}

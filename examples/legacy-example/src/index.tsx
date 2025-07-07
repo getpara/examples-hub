@@ -488,7 +488,6 @@ function AppInner({
   const [onRampTestMode, setOnRampTestMode] = useLocalStorage('@EXAMPLE-PARA/onRampTestMode', true);
   const [isGuestModeEnabled, setIsGuestModeEnabled] = useLocalStorage('@EXAMPLE-PARA/isGuestModeEnabled', false);
   const [hideWallets, setHideWallets] = useLocalStorage('@EXAMPLE-PARA/hideWallets', false);
-  const [enableRecoverySecret, setEnableRecoverySecret] = useLocalStorage('@EXAMPLE-PARA/enableRecoverySecret', false);
 
   const [pregenIdentifier, setPregenIdentifier] = useState('');
   const [pregenIdentifierType, setPregenIdentifierType] = useState<TPregenIdentifierType>('EMAIL');
@@ -978,16 +977,6 @@ function AppInner({
                 </Text>
                 <Checkbox isChecked={hideWallets} onChange={e => setHideWallets(e.currentTarget.checked)} />
               </HStack>
-              <HStack>
-                <Text width={'15%'}>
-                  <strong>Enable Recovery Secret:</strong>
-                </Text>
-                <Checkbox
-                  isChecked={enableRecoverySecret}
-                  onChange={e => setEnableRecoverySecret(e.currentTarget.checked)}
-                  data-testid="enable-recovery-secret-checkbox"
-                />
-              </HStack>
 
               <HStack>
                 <Text width={'15%'}>
@@ -1458,7 +1447,6 @@ const App = () => {
   const [onRampTestMode] = useLocalStorage('@EXAMPLE-PARA/onRampTestMode', true);
   const [isGuestModeEnabled] = useLocalStorage('@EXAMPLE-PARA/isGuestModeEnabled', true);
   const [hideWallets] = useLocalStorage('@EXAMPLE-PARA/hideWallets', false);
-  const [enableRecoverySecret] = useLocalStorage('@EXAMPLE-PARA/enableRecoverySecret', false);
   const [defaultIdentifier] = useLocalStorage('@EXAMPLE-PARA/defaultIdentifier', undefined);
 
   const [pregenUserShare] = useLocalStorage('@EXAMPLE-PARA/pregenUserShare', undefined);
@@ -1507,7 +1495,6 @@ const App = () => {
           hideWallets,
           onRampTestMode,
           isGuestModeEnabled,
-          recoverySecretStepEnabled: enableRecoverySecret,
           oAuthMethods: ['GOOGLE', 'TELEGRAM', 'FACEBOOK', 'APPLE', 'TWITTER', 'DISCORD', 'FARCASTER'],
         }}
         callbacks={{

@@ -4,19 +4,19 @@ import { Environment } from '../../src/types/index.js';
 import { initClient } from '../../src/external/userManagementClient.js';
 import { mockTempTransmission, mockTempTransmissionInit } from '../mocks/mockUserManagementClient.js';
 import { TEMP_TRANSMISSION_INIT_ID } from '../constants.js';
-import { PrivateKey } from 'eciesjs';
+import * as eutils from '@ethereumjs/util';
 
-vi.mock('crypto', async importOriginal => {
-  const actual = await importOriginal<typeof import('crypto')>();
+// Workaround for vi.spyOn issue: https://github.com/aelbore/esbuild-jest/issues/26#issuecomment-968853688
+vi.mock('@ethereumjs/util', async importOriginal => {
+  const actual = await importOriginal();
   return {
+    __esModule: true,
+    // @ts-ignore
     ...actual,
-    randomBytes: vi.fn(actual.randomBytes),
   };
 });
 
-import { randomBytes } from 'crypto';
-
-const TEST_CLIENT = initClient({ env: Environment.DEV });
+const TEST_CLIENT = initClient({ apiKey: 'test-key-123', env: Environment.DEV });
 
 describe('transmissionUtils', () => {
   afterEach(() => {
@@ -28,20 +28,19 @@ describe('transmissionUtils', () => {
 
       expect(mockTempTransmissionInit).toBeCalledTimes(1);
       expect(mockTempTransmissionInit).toBeCalledWith(expect.stringMatching(/./));
-      expect(mockTempTransmissionInit).toBeCalledWith(expect.stringMatching(/.{140}/));
+      expect(mockTempTransmissionInit).toBeCalledWith(expect.stringMatching(/.{164}/));
       expect(resp).toStrictEqual(expect.stringContaining(TEMP_TRANSMISSION_INIT_ID));
     });
     it('fail in loop', async () => {
-      vi.spyOn(PrivateKey, 'fromHex').mockImplementationOnce(() => {
+      vi.spyOn(eutils, 'privateToPublic').mockImplementationOnce(() => {
         throw new Error('test error');
       });
 
       const resp = await upload('test', TEST_CLIENT);
 
       expect(mockTempTransmissionInit).toBeCalledTimes(1);
-      expect(randomBytes).toBeCalledTimes(2);
       expect(mockTempTransmissionInit).toBeCalledWith(expect.stringMatching(/./));
-      expect(mockTempTransmissionInit).toBeCalledWith(expect.stringMatching(/.{140}/));
+      expect(mockTempTransmissionInit).toBeCalledWith(expect.stringMatching(/.{164}/));
       expect(resp).toStrictEqual(expect.stringContaining(TEMP_TRANSMISSION_INIT_ID));
     });
   });

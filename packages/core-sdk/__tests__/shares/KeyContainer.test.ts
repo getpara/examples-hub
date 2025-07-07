@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { KeyContainer } from '../../src';
 import { WALLET, WALLET_KEYSHARE } from '../constants';
-import * as eciesjs from 'eciesjs';
+import * as celoUtils from '@celo/utils/lib/ecies.js';
 
 const TEST_BACKUP_STRING = 'test';
 
@@ -70,7 +70,7 @@ describe('KeyContainer', () => {
         expect(decryptResp).toBe(TEST_BACKUP_STRING);
       });
       it('fail - encrypt', () => {
-        vi.spyOn(eciesjs, 'encrypt').mockImplementationOnce(() => {
+        vi.spyOn(celoUtils, 'Encrypt').mockImplementationOnce(() => {
           throw new Error('test error');
         });
 
@@ -79,7 +79,7 @@ describe('KeyContainer', () => {
         expect(() => keyContainer.encryptForSelf(TEST_BACKUP_STRING)).toThrowError('Error encrypting backup');
       });
       it('fail - decrypt', () => {
-        vi.spyOn(eciesjs, 'decrypt').mockImplementationOnce(() => {
+        vi.spyOn(celoUtils, 'Decrypt').mockImplementationOnce(() => {
           throw new Error('test error');
         });
 
@@ -89,7 +89,7 @@ describe('KeyContainer', () => {
         expect(() => keyContainer.decrypt(encryptResp)).toThrowError('Error decrypting backup');
       });
       it('fail - encryptWithPublicKey', () => {
-        vi.spyOn(eciesjs, 'encrypt').mockImplementationOnce(() => {
+        vi.spyOn(celoUtils, 'Encrypt').mockImplementationOnce(() => {
           throw new Error('test error');
         });
 
