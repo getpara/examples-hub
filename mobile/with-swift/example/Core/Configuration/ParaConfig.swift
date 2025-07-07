@@ -1,60 +1,19 @@
 import Foundation
-import os.log
 import ParaSwift
 
-/// Configuration for the Para SDK and related services
+/// Configuration for the Para SDK
 struct ParaConfig {
     let environment: ParaEnvironment
     let apiKey: String
-
-    private static let logger = Logger(subsystem: "com.para.example", category: "ParaConfig")
-
-    /// Creates a configuration from environment variables
-    static func fromEnvironment() -> ParaConfig {
-        ParaConfig(
-            environment: loadEnvironment(),
-            apiKey: loadApiKey()
-        )
-    }
-
-    /// Loads the Para environment from PARA_ENVIRONMENT variable
-    private static func loadEnvironment() -> ParaEnvironment {
-        let envName = ProcessInfo.processInfo.environment["PARA_ENVIRONMENT"]?.lowercased() ?? "sandbox"
-
-        switch envName {
-        case "dev":
-            return createDevEnvironment()
-        case "sandbox":
-            return .sandbox
-        case "prod":
-            return .prod
-        default:
-            return .beta
+    
+    init(apiKey: String, environment: ParaEnvironment = .sandbox) {
+        // PARA_API_KEY environment variable overrides provided key
+        if let envKey = ProcessInfo.processInfo.environment["PARA_API_KEY"], !envKey.isEmpty {
+            self.apiKey = envKey
+        } else {
+            self.apiKey = apiKey
         }
+        
+        self.environment = environment
     }
-
-    /// Creates a dev environment with custom configuration if provided
-    private static func createDevEnvironment() -> ParaEnvironment {
-        let relyingPartyId = ProcessInfo.processInfo.environment["PARA_DEV_RELYING_PARTY_ID"] ?? "dev.usecapsule.com"
-        let jsBridgeUrl = ProcessInfo.processInfo.environment["PARA_DEV_JS_BRIDGE_URL"].flatMap { URL(string: $0) }
-        return .dev(relyingPartyId: relyingPartyId, jsBridgeUrl: jsBridgeUrl)
-    }
-
-    /// Loads the API key from runtime environment or build-time injection
-    private static func loadApiKey() -> String {
-        // First try runtime environment (works for local development with Xcode schemes)
-        if let envApiKey = ProcessInfo.processInfo.environment["PARA_API_KEY"], !envApiKey.isEmpty {
-            logger.info("Using API key from runtime environment")
-            return envApiKey
-        }
-
-        // Fallback to build-time injected value (works for TestFlight builds)
-        if let bundleApiKey = Bundle.main.object(forInfoDictionaryKey: "APIKey") as? String, !bundleApiKey.isEmpty {
-            logger.info("Using API key from app bundle")
-            return bundleApiKey
-        }
-
-        fatalError("Missing API key. Set PARA_API_KEY environment variable or ensure build-time injection is configured.")
-    }
-
 }
