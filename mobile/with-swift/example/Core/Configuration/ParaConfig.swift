@@ -6,7 +6,6 @@ import ParaSwift
 struct ParaConfig {
     let environment: ParaEnvironment
     let apiKey: String
-    let rpcUrl: String
 
     private static let logger = Logger(subsystem: "com.para.example", category: "ParaConfig")
 
@@ -14,8 +13,7 @@ struct ParaConfig {
     static func fromEnvironment() -> ParaConfig {
         ParaConfig(
             environment: loadEnvironment(),
-            apiKey: loadApiKey(),
-            rpcUrl: loadRpcUrl(),
+            apiKey: loadApiKey()
         )
     }
 
@@ -59,9 +57,4 @@ struct ParaConfig {
         fatalError("Missing API key. Set PARA_API_KEY environment variable or ensure build-time injection is configured.")
     }
 
-    /// Loads the RPC URL from PARA_RPC_URL variable or uses default
-    private static func loadRpcUrl() -> String {
-        ProcessInfo.processInfo.environment["PARA_RPC_URL"] ??
-            "https://sepolia.infura.io/v3/961364684c7346c080994baab1469ea8"
-    }
 }
