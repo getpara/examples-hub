@@ -14,8 +14,8 @@ struct ExampleApp: App {
             environment: .sandbox
         )
         
-        // Para uses bundle ID as app scheme
-        let appScheme = Bundle.main.bundleIdentifier ?? ""
+        // Para app scheme for deep linking
+        let appScheme = "paraswift"
 
         // Initialize Para manager
         let paraManager = ParaManager(
@@ -44,7 +44,7 @@ struct ExampleApp: App {
             }
             .onOpenURL { url in
                 // Handle MetaMask deep links
-                if url.scheme == Bundle.main.bundleIdentifier, url.host == "mmsdk" {
+                if url.scheme == "paraswift", url.host == "mmsdk" {
                     MetaMaskConnector.handleDeepLink(url)
                 }
             }

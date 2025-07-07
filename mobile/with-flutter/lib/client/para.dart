@@ -11,7 +11,7 @@ final config = ParaConfiguration(
 // Initialize Para using configuration
 final para = Para.fromConfig(
   config: config.toParaConfig(),
-  appScheme: 'com.usecapsule.example.flutter',  // Uses bundle ID as app scheme
+  appScheme: 'paraflutter',  // Para app scheme for deep linking
 );
 
 // External wallet connectors
