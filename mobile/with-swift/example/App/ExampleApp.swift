@@ -14,7 +14,8 @@ struct ExampleApp: App {
             environment: .sandbox
         )
         
-        let appScheme = Bundle.main.bundleIdentifier ?? ""  // Para uses bundle ID as app scheme
+        // Para uses bundle ID as app scheme
+        let appScheme = Bundle.main.bundleIdentifier ?? ""
 
         // Initialize Para manager
         let paraManager = ParaManager(
