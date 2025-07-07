@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { getUtf8Encoder } from "@solana/codecs-strings";
 import nacl from "tweetnacl";
+import bs58 from "bs58";
 import { useAccount, useWallet } from "@getpara/react-sdk";
 import { useParaSigner } from "@/hooks/useParaSigner";
 import { SignatureBytes } from "@solana/kit";
@@ -55,8 +56,7 @@ export default function MessageSigningPage() {
       const signatureResult = await signer.signMessages([{ content: messageBytes, signatures: {} }]);
       const signatureBytes = signatureResult[0][signer.address];
       // Convert signature bytes to base58 string
-      const bs58 = await import('bs58');
-      const signatureBase58 = bs58.default.encode(signatureBytes);
+      const signatureBase58 = bs58.encode(signatureBytes);
 
       setSignature(signatureBase58);
       setStatus({
@@ -81,8 +81,7 @@ export default function MessageSigningPage() {
       if (!message || !signature || !signer) return;
 
       const messageBytes = new Uint8Array(getUtf8Encoder().encode(message));
-      const base58 = await import('bs58');
-      const signatureBytes = base58.default.decode(signature) as SignatureBytes;
+      const signatureBytes = bs58.decode(signature) as SignatureBytes;
       const publicKeyBuffer = signer.sender;
       
       const isValid = nacl.sign.detached.verify(messageBytes, signatureBytes, publicKeyBuffer);
