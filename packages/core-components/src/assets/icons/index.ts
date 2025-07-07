@@ -15,6 +15,7 @@ import Backpack from './backpack.svg';
 import BackupKit from './backup-kit.svg';
 import Bank from './bank.svg';
 import BaseBrand from './base-brand.svg';
+import BeraBrand from './bera-brand.svg';
 import Brush from './brush.svg';
 import CeloBrand from './celo-brand.svg';
 import CheckCircleFilled from './check-circle-filled.svg';
@@ -441,6 +442,7 @@ export const Icons = {
   backupKit: BackupKit,
   bank: Bank,
   baseBrand: BaseBrand,
+  beraBrand: BeraBrand,
   brush: Brush,
   celoBrand: CeloBrand,
   checkCircleFilled: CheckCircleFilled,

@@ -66,6 +66,7 @@ export const NETWORKS: Networks = Object.entries({
   [Network.CELO]: { name: 'Celo', icon: 'celoBrand' },
   [Network.SOLANA_DEVNET]: { name: 'Solana Devnet', icon: 'solana' },
   [Network.NOBLE]: { name: 'Noble', icon: 'nobleBrand' },
+  [Network.BERACHAIN]: { name: 'Berachain', icon: 'beraBrand' },
 }).reduce((acc: Networks, [key, entry]) => {
   return {
     ...acc,
@@ -95,6 +96,7 @@ export const ON_RAMP_ASSETS: Record<
   [OnRampAsset.CUSD]: { name: 'Celo Dollar', code: 'CUSD', icon: 'celoBrand' },
   [OnRampAsset.CEUR]: { name: 'Celo Euro', code: 'CEUR', icon: 'celoBrand' },
   [OnRampAsset.CREAL]: { name: 'Celo Real', code: 'CREAL', icon: 'celoBrand' },
+  [OnRampAsset.BERA]: { name: 'Berachain', code: 'BERA', icon: 'beraBrand' },
 }).reduce((acc: OnRampAssets, [key, entry]) => {
   return {
     ...acc,

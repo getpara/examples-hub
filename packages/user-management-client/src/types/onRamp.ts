@@ -17,6 +17,7 @@ export enum OnRampAsset {
   CUSD = 'CUSD',
   CEUR = 'CEUR',
   CREAL = 'CREAL',
+  BERA = 'BERA',
 }
 
 export enum OnRampPurchaseStatus {
