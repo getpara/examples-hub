@@ -1139,7 +1139,7 @@
   resolved "https://registry.yarnpkg.com/@solana/promises/-/promises-2.1.1.tgz#70d45b43ef2330bdf7986dfaa85732da13b2a2d8"
   integrity sha512-8M+QBgJAQD0nhHzaezwwHH4WWfJEBPiiPAjMNBbbbTHA8+oYFIGgY1HwDUePK8nrT1Q1dX3gC+epBCqBi/nnGg==
 
-"@solana/rpc-api@2.1.1":
+"@solana/rpc-api@2.1.1", "@solana/rpc-api@^2.1.1":
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/@solana/rpc-api/-/rpc-api-2.1.1.tgz#21b777e6272775a5d0de0bc65b47fb564b462a55"
   integrity sha512-MTBuoRA9HtxW+CRpj1Ls5XVhDe00g8mW2Ib4/0k6ThFS0+cmjf+O78d8hgjQMqTtuzzSLZ4355+C7XEAuzSQ4g==
@@ -1166,7 +1166,7 @@
   resolved "https://registry.yarnpkg.com/@solana/rpc-spec-types/-/rpc-spec-types-2.1.1.tgz#91e7a30f02d9dd9b78e9834a820d93754a0ea327"
   integrity sha512-3/G/MTi/c70TVZcB0DJjh5AGV7xqOYrjrpnIg+rLZuH65qHMimWiTHj0k8lxTzRMrN06Ed0+Q7SCw9hO/grTHA==
 
-"@solana/rpc-spec@2.1.1":
+"@solana/rpc-spec@2.1.1", "@solana/rpc-spec@^2.1.1":
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/@solana/rpc-spec/-/rpc-spec-2.1.1.tgz#3f1800d7a23db71c8051520756b8cc7ef74d14fc"
   integrity sha512-3Hd21XpaKtW3tG0oXAUlc1k0hX7/eqHpf8Gg744sr9G3ib5gT7EopcZRsH5LdESgS0nbv/c75TznCXjaUyRi+g==
@@ -1235,7 +1235,7 @@
     "@solana/rpc-spec-types" "2.1.1"
     "@solana/rpc-types" "2.1.1"
 
-"@solana/rpc-transport-http@2.1.1":
+"@solana/rpc-transport-http@2.1.1", "@solana/rpc-transport-http@^2.1.1":
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/@solana/rpc-transport-http/-/rpc-transport-http-2.1.1.tgz#d1c82f644705823bcf2813c724b8978bb24d0dab"
   integrity sha512-Wp7018VaPqhodQjQTDlCM7vTYlm3AdmRyvPZiwv5uzFgnC8B0xhEZW+ZSt1zkSXS6WrKqtufobuBFGtfG6v5KQ==
@@ -1955,6 +1955,11 @@ base-x@^4.0.0:
   resolved "https://registry.yarnpkg.com/base-x/-/base-x-4.0.1.tgz#817fb7b57143c501f649805cb247617ad016a885"
   integrity sha512-uAZ8x6r6S3aUM9rbHGVOIsR15U/ZSc82b3ymnCPsT45Gk1DDvhDPdIgB5MrhirZWt+5K0EEPQH985kNqZgNPFw==
 
+base-x@^5.0.0:
+  version "5.0.1"
+  resolved "https://registry.yarnpkg.com/base-x/-/base-x-5.0.1.tgz#16bf35254be1df8aca15e36b7c1dda74b2aa6b03"
+  integrity sha512-M7uio8Zt++eg3jPj+rHMfCC+IuygQHHCOU+IYsVtik6FWjuYpVt/+MRKcgsAMHh8mMFAwnB+Bs+mTrFiXjMzKg==
+
 base64-js@^1.3.0, base64-js@^1.3.1:
   version "1.5.1"
   resolved "https://registry.npmjs.org/base64-js/-/base64-js-1.5.1.tgz#1b1b440160a5bf7ad40b650f095963481903930a"
@@ -2028,6 +2033,13 @@ bs58@^5.0.0:
   integrity sha512-r+ihvQJvahgYT50JD05dyJNKlmmSlMoOGwn1lCcEzanPglg7TxYjioQUYehQ9mAR/+hOSd2jRc/Z2y5UxBymvQ==
   dependencies:
     base-x "^4.0.0"
+
+bs58@^6.0.0:
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/bs58/-/bs58-6.0.0.tgz#a2cda0130558535dd281a2f8697df79caaf425d8"
+  integrity sha512-PD0wEnEYg6ijszw/u8s+iI3H17cTymlrwkKhDhPZq+Sokl3AU4htyBFTjAeNAlCCmg0f53g6ih3jATyCKftTfw==
+  dependencies:
+    base-x "^5.0.0"
 
 buffer@6.0.3:
   version "6.0.3"

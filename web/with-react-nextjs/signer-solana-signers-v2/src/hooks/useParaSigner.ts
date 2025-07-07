@@ -8,7 +8,7 @@ import { useSolana } from "./useSolana";
 export function useParaSigner() {
   const { data: account } = useAccount();
   const client = useClient();
-  const { rpc, rpcUrl } = useSolana();
+  const { rpc, paraRpc, rpcUrl } = useSolana();
   const [signer, setSigner] = useState<ParaSolanaSigner | null>(null);
 
   useEffect(() => {
@@ -16,13 +16,9 @@ export function useParaSigner() {
       try {
         const newSigner = createParaSolanaSigner({
           para: client as any,
-          rpcUrl: rpcUrl,
+          rpc: paraRpc, // Pass the Para-compatible RPC client instance
         });
         
-        console.log("Created Para signer with:", {
-          address: newSigner.address,
-          rpcUrl: rpcUrl
-        });
         setSigner(newSigner);
       } catch (error) {
         console.error("Failed to initialize Para signer:", error);
@@ -31,7 +27,7 @@ export function useParaSigner() {
     } else {
       setSigner(null);
     }
-  }, [account?.isConnected, rpc, client, rpcUrl]);
+  }, [account?.isConnected, rpc, client, paraRpc]);
 
   return {
     signer,
