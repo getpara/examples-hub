@@ -6,8 +6,8 @@
 //
 
 import Combine
-import SwiftUI
 import ParaSwift
+import SwiftUI
 
 struct EmailPhoneInput: View {
     @FocusState.Binding var isFocused: Bool
@@ -24,26 +24,26 @@ struct EmailPhoneInput: View {
     enum InputType {
         case email, phone, unknown
     }
-    
+
     private var shouldShowContinueButton: Bool {
         isFocused && !text.isEmpty
     }
-    
+
     private var isInputValid: Bool {
         switch inputType {
         case .email:
-            return isValidEmail(text)
+            isValidEmail(text)
         case .phone:
-            return isValidPhone(text)
+            isValidPhone(text)
         case .unknown:
-            return false
+            false
         }
     }
 
     var body: some View {
         VStack(spacing: 12) {
             inputField
-            
+
             if shouldShowContinueButton {
                 continueButton
                     .transition(.opacity)
@@ -58,11 +58,11 @@ struct EmailPhoneInput: View {
             if text.isEmpty {
                 inputIcon
             }
-            
+
             if inputType == .phone {
                 countrySelector
             }
-            
+
             TextField("Enter email or phone", text: $text)
                 .focused($isFocused)
                 .textContentType(textContentType)
@@ -80,7 +80,7 @@ struct EmailPhoneInput: View {
         .clipShape(RoundedRectangle(cornerRadius: 8))
         .animation(.easeInOut(duration: 0.15), value: inputType)
     }
-    
+
     private var inputIcon: some View {
         HStack {
             Image(systemName: "envelope")
@@ -102,7 +102,7 @@ struct EmailPhoneInput: View {
                 selectedFlag: $countryFlag,
                 selectedPattern: $countryPattern,
                 selectedLimit: $countryLimit,
-                isPresented: $showCountryPicker
+                isPresented: $showCountryPicker,
             )
         }
     }
@@ -121,14 +121,14 @@ struct EmailPhoneInput: View {
         .clipShape(RoundedRectangle(cornerRadius: 10))
         .disabled(!isInputValid)
     }
-    
+
     private var textContentType: UITextContentType? {
         inputType == .phone ? .telephoneNumber : .emailAddress
     }
 
     private func updateInputType() {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
-        
+
         if trimmed.isEmpty {
             inputType = .unknown
         } else if trimmed.contains("@") {
@@ -139,11 +139,11 @@ struct EmailPhoneInput: View {
             inputType = .unknown
         }
     }
-    
+
     private func formatPhoneNumber() {
         PhoneFormatter.applyPatternOnNumbers(&text, pattern: countryPattern, replacementCharacter: "#", limit: countryLimit)
     }
-    
+
     var formattedValue: String {
         switch inputType {
         case .phone:
@@ -153,34 +153,32 @@ struct EmailPhoneInput: View {
             return text
         }
     }
-    
+
     private func isValidEmail(_ email: String) -> Bool {
         let emailRegex = #"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"#
         return NSPredicate(format: "SELF MATCHES %@", emailRegex).evaluate(with: email)
     }
-    
+
     private func isValidPhone(_ phone: String) -> Bool {
         let digitsOnly = phone.replacingOccurrences(of: "[^0-9]", with: "", options: .regularExpression)
         return digitsOnly.count == countryLimit
     }
 }
 
-
-
 struct CountryRow: View {
     let country: CPData
     let onTap: () -> Void
-    
+
     var body: some View {
         HStack {
             Text(country.flag)
                 .font(.title2)
-            
+
             Text(country.name)
                 .font(.headline)
-            
+
             Spacer()
-            
+
             Text(country.dial_code)
                 .foregroundColor(.secondary)
         }
@@ -198,7 +196,7 @@ struct CountryRow: View {
             VStack {
                 EmailPhoneInput(
                     isFocused: $isFocused,
-                    onContinue: { auth in print("Continue tapped with: \(auth)") }
+                    onContinue: { auth in print("Continue tapped with: \(auth)") },
                 )
                 .padding()
 

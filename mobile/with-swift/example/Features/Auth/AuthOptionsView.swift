@@ -7,7 +7,6 @@ struct AuthOptionsView: View {
     var body: some View {
         NavigationStack {
             List {
-
                 // External wallet option
                 NavigationLink(destination: ExternalWalletAuthView()) {
                     HStack {

@@ -72,7 +72,9 @@ struct AuthView: View {
             }
         }
         .sheet(isPresented: $showWalletSelection) {
-            WalletSelectionSheet(showWalletSelection: $showWalletSelection, handleWalletConnect: handleWalletConnect)
+            NavigationStack {
+                ExternalWalletAuthView()
+            }
         }
     }
 
@@ -81,17 +83,17 @@ struct AuthView: View {
             ConnectSocialButton(
                 provider: .google,
                 isLoading: loadingProvider == .google,
-                action: handleSocialSignIn
+                action: handleSocialSignIn,
             )
             ConnectSocialButton(
                 provider: .apple,
                 isLoading: loadingProvider == .apple,
-                action: handleSocialSignIn
+                action: handleSocialSignIn,
             )
             ConnectSocialButton(
                 provider: .discord,
                 isLoading: loadingProvider == .discord,
-                action: handleSocialSignIn
+                action: handleSocialSignIn,
             )
         }
         .padding(.horizontal, 24)
@@ -100,7 +102,7 @@ struct AuthView: View {
     private var emailPhoneSection: some View {
         EmailPhoneInput(
             isFocused: $textFieldFocus,
-            onContinue: handleEmailPhone
+            onContinue: handleEmailPhone,
         )
         .padding(.horizontal, 24)
     }
@@ -173,7 +175,7 @@ struct AuthView: View {
         Task {
             loadingProvider = provider
             defer { loadingProvider = nil }
-            
+
             do {
                 try await paraManager.handleOAuth(
                     provider: provider,
@@ -219,14 +221,6 @@ struct AuthView: View {
                 errorMessage = error.localizedDescription
                 showErrorAlert = true
             }
-        }
-    }
-
-    private func handleWalletConnect(_ provider: WalletProvider) {
-        // TODO: Implement wallet connection based on provider
-        switch provider {
-        case .metamask:
-            print("MetaMask Connect")
         }
     }
 }

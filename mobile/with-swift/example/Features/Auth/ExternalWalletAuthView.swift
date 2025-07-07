@@ -12,6 +12,7 @@ struct ExternalWalletAuthView: View {
     @EnvironmentObject private var paraManager: ParaManager
     @EnvironmentObject private var appRootManager: AppRootManager
     @EnvironmentObject private var metaMaskConnector: MetaMaskConnector
+    @Environment(\.dismiss) private var dismiss
 
     @State private var isConnecting = false
     @State private var error: Error?
@@ -54,6 +55,14 @@ struct ExternalWalletAuthView: View {
             MetaMaskDemoView()
         }
         .navigationTitle("External Wallet")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button("Cancel") {
+                    dismiss()
+                }
+            }
+        }
     }
 
     private func connectMetaMask() {

@@ -5,13 +5,13 @@
 //  Created by Tyson Williams on 7/1/25.
 //
 
-import SwiftUI
 import ParaSwift
+import SwiftUI
 
 struct WalletSelectionSheet: View {
     @Binding var showWalletSelection: Bool
     let handleWalletConnect: (WalletProvider) -> Void
-    
+
     var body: some View {
         NavigationView {
             VStack(spacing: 0) {
@@ -19,7 +19,7 @@ struct WalletSelectionSheet: View {
                     .font(.headline)
                     .padding(.top, 20)
                     .padding(.bottom, 30)
-                
+
                 VStack(spacing: 16) {
                     ConnectExternalWalletButton(provider: .metamask) { provider in
                         handleWalletConnect(provider)
@@ -27,7 +27,7 @@ struct WalletSelectionSheet: View {
                     }
                     .padding(.horizontal, 24)
                 }
-                
+
                 Spacer()
             }
             .navigationBarTitleDisplayMode(.inline)
@@ -49,6 +49,6 @@ struct WalletSelectionSheet: View {
         showWalletSelection: .constant(true),
         handleWalletConnect: { provider in
             print("Selected wallet: \(provider)")
-        }
+        },
     )
 }
