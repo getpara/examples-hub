@@ -14,11 +14,14 @@ struct ExampleApp: App {
             environment: .sandbox
         )
         
-        // App Initialization
-        let bundleId = Bundle.main.bundleIdentifier ?? ""
+        let appScheme = Bundle.main.bundleIdentifier ?? ""  // Para uses bundle ID as app scheme
 
         // Initialize Para manager
-        let paraManager = ParaManager(environment: config.environment, apiKey: config.apiKey, appScheme: bundleId)
+        let paraManager = ParaManager(
+            environment: config.environment, 
+            apiKey: config.apiKey, 
+            appScheme: appScheme
+        )
         _paraManager = StateObject(wrappedValue: paraManager)
     }
 
