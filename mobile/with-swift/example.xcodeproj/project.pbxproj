@@ -10,11 +10,9 @@
 		8F200F542DEFB08100B39BB4 /* AlertItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F200F532DEFB08100B39BB4 /* AlertItem.swift */; };
 		8F4302572DE8DE9000186768 /* EVMWalletView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F4302562DE8DE9000186768 /* EVMWalletView.swift */; };
 		8F6A878D2E134B2600874160 /* EmailPhoneInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F6A878C2E134B2600874160 /* EmailPhoneInput.swift */; };
-		8F6A878F2E145BA100874160 /* ConnectExternalWalletButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F6A878E2E145B9D00874160 /* ConnectExternalWalletButton.swift */; };
 		8F6A87912E145C1900874160 /* ConnectSocialButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F6A87902E145C1400874160 /* ConnectSocialButton.swift */; };
 		8F6A87932E145EA200874160 /* CountryPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F6A87922E145E9F00874160 /* CountryPickerView.swift */; };
 		8F6A87C82E149E1A00874160 /* OTPVerificationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F6A87C72E149E1A00874160 /* OTPVerificationView.swift */; };
-		8F6A87CA2E14AD7A00874160 /* WalletSelectionSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F6A87C92E14AD7500874160 /* WalletSelectionSheet.swift */; };
 		8F6AE66A2DC151040098F76B /* ChooseSignupMethodView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F6AE6692DC151040098F76B /* ChooseSignupMethodView.swift */; };
 		8FA007832D57EB0D009EF0C3 /* ParaConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FA007812D57EB0D009EF0C3 /* ParaConfig.swift */; };
 		8FA007862D57F1AA009EF0C3 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FA007842D57F1AA009EF0C3 /* Extensions.swift */; };
@@ -33,7 +31,6 @@
 		E8F93B2C2C21EBED006AA3F6 /* ExampleApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8F93B2B2C21EBED006AA3F6 /* ExampleApp.swift */; };
 		E8F93B302C21EBEE006AA3F6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E8F93B2F2C21EBEE006AA3F6 /* Assets.xcassets */; };
 		E8F93B332C21EBEE006AA3F6 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E8F93B322C21EBEE006AA3F6 /* Preview Assets.xcassets */; };
-		E8F93B3E2C21ECFB006AA3F6 /* AuthOptionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8F93B3D2C21ECFB006AA3F6 /* AuthOptionsView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -50,11 +47,9 @@
 		8F200F532DEFB08100B39BB4 /* AlertItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertItem.swift; sourceTree = "<group>"; };
 		8F4302562DE8DE9000186768 /* EVMWalletView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EVMWalletView.swift; sourceTree = "<group>"; };
 		8F6A878C2E134B2600874160 /* EmailPhoneInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmailPhoneInput.swift; sourceTree = "<group>"; };
-		8F6A878E2E145B9D00874160 /* ConnectExternalWalletButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectExternalWalletButton.swift; sourceTree = "<group>"; };
 		8F6A87902E145C1400874160 /* ConnectSocialButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectSocialButton.swift; sourceTree = "<group>"; };
 		8F6A87922E145E9F00874160 /* CountryPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CountryPickerView.swift; sourceTree = "<group>"; };
 		8F6A87C72E149E1A00874160 /* OTPVerificationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OTPVerificationView.swift; sourceTree = "<group>"; };
-		8F6A87C92E14AD7500874160 /* WalletSelectionSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalletSelectionSheet.swift; sourceTree = "<group>"; };
 		8F6AE6692DC151040098F76B /* ChooseSignupMethodView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChooseSignupMethodView.swift; sourceTree = "<group>"; };
 		8F924CB92D824A1700938496 /* Example.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; name = Example.xctestplan; path = exampleUITests/Example.xctestplan; sourceTree = "<group>"; };
 		8FA007812D57EB0D009EF0C3 /* ParaConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParaConfig.swift; sourceTree = "<group>"; };
@@ -75,7 +70,6 @@
 		E8F93B2B2C21EBED006AA3F6 /* ExampleApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExampleApp.swift; sourceTree = "<group>"; };
 		E8F93B2F2C21EBEE006AA3F6 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		E8F93B322C21EBEE006AA3F6 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
-		E8F93B3D2C21ECFB006AA3F6 /* AuthOptionsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AuthOptionsView.swift; sourceTree = "<group>"; };
 		E8F93B432C21ED67006AA3F6 /* example.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = example.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -103,19 +97,11 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		8F1708C42DA99E420070FE20 /* Email */ = {
-			isa = PBXGroup;
-			children = (
-				8F6AE6692DC151040098F76B /* ChooseSignupMethodView.swift */,
-			);
-			path = Email;
-			sourceTree = "<group>";
-		};
 		8FA0077C2D56ECC9009EF0C3 /* Auth */ = {
 			isa = PBXGroup;
 			children = (
-				E8F93B3D2C21ECFB006AA3F6 /* AuthOptionsView.swift */,
-				8F1708C42DA99E420070FE20 /* Email */,
+				8FB1B21B2E0F4DE500B37B5E /* AuthView.swift */,
+				8F6AE6692DC151040098F76B /* ChooseSignupMethodView.swift */,
 				8FA007872D581F08009EF0C3 /* ExternalWalletAuthView.swift */,
 				8FA0078A2D5A7841009EF0C3 /* MetaMaskDemoView.swift */,
 			);
@@ -141,41 +127,13 @@
 			path = Resources;
 			sourceTree = "<group>";
 		};
-		8FA007802D56ED9D009EF0C3 /* Managers */ = {
-			isa = PBXGroup;
-			children = (
-				E86A47402D0CA62F00546CC2 /* AppRootManager.swift */,
-			);
-			path = Managers;
-			sourceTree = "<group>";
-		};
-		8FA007822D57EB0D009EF0C3 /* Configuration */ = {
-			isa = PBXGroup;
-			children = (
-				8FA007812D57EB0D009EF0C3 /* ParaConfig.swift */,
-			);
-			path = Configuration;
-			sourceTree = "<group>";
-		};
-		8FA007852D57F1AA009EF0C3 /* Utils */ = {
-			isa = PBXGroup;
-			children = (
-				8F200F532DEFB08100B39BB4 /* AlertItem.swift */,
-				8FA007842D57F1AA009EF0C3 /* Extensions.swift */,
-			);
-			path = Utils;
-			sourceTree = "<group>";
-		};
 		8FC8B8FC2D8B7AE10046C3DC /* UI */ = {
 			isa = PBXGroup;
 			children = (
-				8F6A87C92E14AD7500874160 /* WalletSelectionSheet.swift */,
 				8F6A87C72E149E1A00874160 /* OTPVerificationView.swift */,
 				8F6A87922E145E9F00874160 /* CountryPickerView.swift */,
 				8F6A87902E145C1400874160 /* ConnectSocialButton.swift */,
-				8F6A878E2E145B9D00874160 /* ConnectExternalWalletButton.swift */,
 				8F6A878C2E134B2600874160 /* EmailPhoneInput.swift */,
-				8FB1B21B2E0F4DE500B37B5E /* AuthView.swift */,
 				8FC8B8FB2D8B7AE10046C3DC /* LaunchView.swift */,
 			);
 			path = UI;
@@ -185,32 +143,17 @@
 			isa = PBXGroup;
 			children = (
 				E8F93B2B2C21EBED006AA3F6 /* ExampleApp.swift */,
+				8FA007812D57EB0D009EF0C3 /* ParaConfig.swift */,
+				E86A47402D0CA62F00546CC2 /* AppRootManager.swift */,
 			);
 			path = App;
-			sourceTree = "<group>";
-		};
-		8FE94DE22DA9AC31009CBD28 /* Core */ = {
-			isa = PBXGroup;
-			children = (
-				8FA007822D57EB0D009EF0C3 /* Configuration */,
-				8FA007802D56ED9D009EF0C3 /* Managers */,
-				8FA007852D57F1AA009EF0C3 /* Utils */,
-			);
-			path = Core;
-			sourceTree = "<group>";
-		};
-		8FE94DE32DA9ACDA009CBD28 /* Features */ = {
-			isa = PBXGroup;
-			children = (
-				8FA0077C2D56ECC9009EF0C3 /* Auth */,
-				8FA0077D2D56ECDA009EF0C3 /* Wallet */,
-			);
-			path = Features;
 			sourceTree = "<group>";
 		};
 		8FFEAD192DC5675100103C14 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				8F200F532DEFB08100B39BB4 /* AlertItem.swift */,
+				8FA007842D57F1AA009EF0C3 /* Extensions.swift */,
 				8FFEAD182DC5675100103C14 /* PhoneFormatter.swift */,
 			);
 			path = Utils;
@@ -223,7 +166,6 @@
 				E8F93B2A2C21EBED006AA3F6 /* example */,
 				8FE93AA82D80F58C00CE018E /* exampleUITests */,
 				E8F93B292C21EBED006AA3F6 /* Products */,
-				E8F93B3A2C21EC8C006AA3F6 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -239,13 +181,13 @@
 		E8F93B2A2C21EBED006AA3F6 /* example */ = {
 			isa = PBXGroup;
 			children = (
-				8FFEAD192DC5675100103C14 /* Utils */,
-				8FE94DE32DA9ACDA009CBD28 /* Features */,
-				8FE94DE22DA9AC31009CBD28 /* Core */,
+				8FE94DE12DA9AC1E009CBD28 /* App */,
+				8FA0077C2D56ECC9009EF0C3 /* Auth */,
+				8FA0077D2D56ECDA009EF0C3 /* Wallet */,
 				8FC8B8FC2D8B7AE10046C3DC /* UI */,
+				8FFEAD192DC5675100103C14 /* Utils */,
 				8FA007892D58387F009EF0C3 /* Info.plist */,
 				E8F93B432C21ED67006AA3F6 /* example.entitlements */,
-				8FE94DE12DA9AC1E009CBD28 /* App */,
 				E8F93B2F2C21EBEE006AA3F6 /* Assets.xcassets */,
 				E8F93B312C21EBEE006AA3F6 /* Preview Content */,
 				8FA0077F2D56ECFB009EF0C3 /* Resources */,
@@ -259,13 +201,6 @@
 				E8F93B322C21EBEE006AA3F6 /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
-			sourceTree = "<group>";
-		};
-		E8F93B3A2C21EC8C006AA3F6 /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -418,12 +353,10 @@
 				E8315DDC2D55717F00FFF8C8 /* CosmosWalletView.swift in Sources */,
 				8F4302572DE8DE9000186768 /* EVMWalletView.swift in Sources */,
 				E8F93B2C2C21EBED006AA3F6 /* ExampleApp.swift in Sources */,
-				E8F93B3E2C21ECFB006AA3F6 /* AuthOptionsView.swift in Sources */,
 				8FA007882D581F0D009EF0C3 /* ExternalWalletAuthView.swift in Sources */,
 				8FFEAD1A2DC5675100103C14 /* PhoneFormatter.swift in Sources */,
 				8F6AE66A2DC151040098F76B /* ChooseSignupMethodView.swift in Sources */,
 				8F6A87912E145C1900874160 /* ConnectSocialButton.swift in Sources */,
-				8F6A878F2E145BA100874160 /* ConnectExternalWalletButton.swift in Sources */,
 				8FA007862D57F1AA009EF0C3 /* Extensions.swift in Sources */,
 				8F6A87C82E149E1A00874160 /* OTPVerificationView.swift in Sources */,
 				8F200F542DEFB08100B39BB4 /* AlertItem.swift in Sources */,
@@ -431,7 +364,6 @@
 				8FA007832D57EB0D009EF0C3 /* ParaConfig.swift in Sources */,
 				8F6A87932E145EA200874160 /* CountryPickerView.swift in Sources */,
 				E86A47412D0CA63700546CC2 /* AppRootManager.swift in Sources */,
-				8F6A87CA2E14AD7A00874160 /* WalletSelectionSheet.swift in Sources */,
 				E8315DD82D5548F100FFF8C8 /* WalletsView.swift in Sources */,
 				8FA0078B2D5A7841009EF0C3 /* MetaMaskDemoView.swift in Sources */,
 			);
