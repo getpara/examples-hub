@@ -1,31 +1,42 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useAccount, useWallet } from "@getpara/react-sdk";
 import { useParaSigner } from "@/hooks/useParaSigner";
-import { useTransaction } from "@/hooks/useTransaction";
-import { LoadingSpinner } from "@/components/LoadingSpinner";
-import { formatLamportsToSol, validateSolanaAddress, validateSolAmount } from "@/utils/validation";
-import { ESTIMATED_CONFIRMATION_TIME_MS, LAMPORTS_PER_SOL } from "@/config/constants";
+import { useAccount, useWallet } from "@getpara/react-sdk";
+import { Address } from "@solana/addresses";
+import { 
+  createTransactionMessage, 
+  appendTransactionMessageInstruction, 
+  setTransactionMessageFeePayer, 
+  setTransactionMessageLifetimeUsingBlockhash,
+  pipe,
+  lamports,
+  Signature
+} from "@solana/kit";
+import { compileTransaction, getBase64EncodedWireTransaction } from "@solana/transactions";
+import { getTransferSolInstruction } from "@solana-program/system";
+import { useState, useEffect } from "react";
+
+const LAMPORTS_PER_SOL = BigInt(1000000000);
 
 export default function SolTransferPage() {
-  const [to, setTo] = useState("");
+  const [to, setTo] = useState("devwuNsNYACyiEYxRNqMNseBpNnGfnd4ZwNHL7sphqv"); // default send back to faucet
   const [amount, setAmount] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const [isBalanceLoading, setIsBalanceLoading] = useState(false);
   const [balance, setBalance] = useState<string | null>(null);
-  
+  const [txSignature, setTxSignature] = useState("");
+  const [status, setStatus] = useState<{
+    show: boolean;
+    type: "success" | "error" | "info";
+    message: string;
+  }>({ show: false, type: "success", message: "" });
+
   const { signer, rpc } = useParaSigner();
   const { data: account } = useAccount();
   const { data: wallet } = useWallet();
-  const { status, error, signature, estimatedFee, sendTransaction, reset } = useTransaction();
-  
+
   const address = wallet?.address;
   const isConnected = account?.isConnected;
-
-  // Real-time validation states
-  const addressValidation = validateSolanaAddress(to);
-  const amountValidation = validateSolAmount(amount);
-  const isFormValid = to && amount && addressValidation.isValid && amountValidation.isValid;
 
   const fetchBalance = async () => {
     if (!address || !rpc || !signer) return;
@@ -33,7 +44,7 @@ export default function SolTransferPage() {
     setIsBalanceLoading(true);
     try {
       const response = await rpc.getBalance(signer.address).send();
-      setBalance(formatLamportsToSol(response.value));
+      setBalance((Number(response.value) / Number(LAMPORTS_PER_SOL)).toFixed(4));
     } catch (error) {
       console.error("Error fetching balance:", error);
       setBalance(null);
@@ -49,63 +60,162 @@ export default function SolTransferPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [address, signer]);
 
-  // Refresh balance after successful transaction
-  useEffect(() => {
-    if (status === "confirmed") {
-      fetchBalance();
+  const constructTransaction = async (toAddress: string, solAmount: string) => {
+    if (!address || !rpc || !signer) throw new Error("No sender address or RPC client available");
+
+    try {
+      const amountLamports = lamports(BigInt(parseFloat(solAmount) * Number(LAMPORTS_PER_SOL)));
+
+      const response = await rpc.getLatestBlockhash().send();
+      const { blockhash, lastValidBlockHeight } = response.value;
+      
+      const transferInstruction = getTransferSolInstruction({
+        source: signer,
+        destination: toAddress as Address,
+        amount: amountLamports,
+      });
+
+      const transactionMessage = pipe(
+        createTransactionMessage({ version: "legacy" }),
+        (tx) => setTransactionMessageFeePayer(signer.address, tx),
+        (tx) => setTransactionMessageLifetimeUsingBlockhash({ blockhash, lastValidBlockHeight }, tx),
+        (tx) => appendTransactionMessageInstruction(transferInstruction, tx)
+      );
+
+      return compileTransaction(transactionMessage);
+    } catch (error) {
+      console.error("Error constructing transaction:", error);
+      throw error;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [status]);
+  };
+
+  const validateTransaction = async (toAddress: string, solAmount: string): Promise<boolean> => {
+    if (!address || !rpc || !signer) throw new Error("No sender address or RPC client available");
+
+    try {
+      const response = await rpc.getBalance(signer.address).send();
+      const balanceLamports = response.value;
+      const amountLamports = parseFloat(solAmount) * Number(LAMPORTS_PER_SOL);
+      const estimatedFee = 5000; // Rough estimate for transfer transaction
+      const totalCost = amountLamports + estimatedFee;
+
+      if (totalCost > Number(balanceLamports)) {
+        const requiredSol = (totalCost / Number(LAMPORTS_PER_SOL)).toFixed(4);
+        const availableSol = (Number(balanceLamports) / Number(LAMPORTS_PER_SOL)).toFixed(4);
+        throw new Error(
+          `Insufficient balance. Transaction requires approximately ${requiredSol} SOL, but you have only ${availableSol} SOL available.`
+        );
+      }
+
+      return true;
+    } catch (error) {
+      throw error;
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isFormValid || !isConnected || !signer) return;
-    
-    await sendTransaction(to, amount);
-  };
+    setIsLoading(true);
+    setStatus({ show: false, type: "success", message: "" });
+    setTxSignature("");
 
-  const handleReset = () => {
-    reset();
-    setTo("");
-    setAmount("");
-  };
+    try {
+      if (!isConnected) {
+        setStatus({
+          show: true,
+          type: "error",
+          message: "Please connect your wallet to send a transaction.",
+        });
+        return;
+      }
 
-  const getStatusMessage = () => {
-    switch (status) {
-      case "validating":
-        return "Validating transaction...";
-      case "building":
-        return "Building transaction...";
-      case "signing":
-        return "Signing transaction...";
-      case "sending":
-        return "Sending transaction...";
-      case "confirming":
-        return `Confirming transaction (est. ${ESTIMATED_CONFIRMATION_TIME_MS / 1000}s)...`;
-      case "confirmed":
-        return "Transaction confirmed successfully!";
-      default:
-        return null;
-    }
-  };
+      if (!signer) {
+        setStatus({
+          show: true,
+          type: "error",
+          message: "No signer found. Please reconnect your wallet.",
+        });
+        return;
+      }
 
-  const getErrorMessage = () => {
-    if (!error) return null;
-    
-    switch (error.code) {
-      case "NO_SIGNER":
-        return "Please connect your wallet to send a transaction.";
-      case "INVALID_ADDRESS":
-      case "INVALID_AMOUNT":
-        return error.message;
-      case "INSUFFICIENT_BALANCE":
-        return error.message;
-      case "TIMEOUT":
-        return "Transaction took too long to confirm. Please check the explorer.";
-      case "NETWORK_ERROR":
-        return "Network error. Please check your connection and try again.";
-      default:
-        return error.message || "Transaction failed. Please try again.";
+      if (!to || to.length < 32) {
+        setStatus({
+          show: true,
+          type: "error",
+          message: "Invalid recipient address format.",
+        });
+        return;
+      }
+
+      const amountFloat = parseFloat(amount);
+      if (isNaN(amountFloat) || amountFloat <= 0) {
+        setStatus({
+          show: true,
+          type: "error",
+          message: "Please enter a valid amount greater than 0.",
+        });
+        return;
+      }
+
+      await validateTransaction(to, amount);
+
+      const tx = await constructTransaction(to, amount);
+      console.log("Constructed transaction:", tx);
+
+      // Sign and send transaction
+      const signedTxs = await signer.modifyAndSignTransactions([tx]);
+      const signedTx = signedTxs[0];
+      
+      const serializedTx = getBase64EncodedWireTransaction(signedTx);
+      
+      const txResponse = await rpc.sendTransaction(serializedTx, {
+        encoding: "base64",
+        skipPreflight: false,
+        preflightCommitment: "processed"
+      }).send();
+      
+      console.log("Transaction submitted:", txResponse);
+
+      setTxSignature(txResponse as string);
+      setStatus({
+        show: true,
+        type: "info",
+        message: "Transaction submitted. Waiting for confirmation...",
+      });
+
+      let receipt = null;
+
+      while (!receipt) {
+        const signature = txResponse as unknown as Signature;
+        receipt = await rpc?.getSignatureStatuses([signature], {
+          searchTransactionHistory: true,
+        }).send();
+        if (receipt?.value?.[0]?.confirmationStatus === "confirmed" || receipt?.value?.[0]?.confirmationStatus === "finalized") {
+          break;
+        }
+        await new Promise((resolve) => setTimeout(resolve, 500));
+      }
+      console.log("Transaction confirmed:", receipt);
+
+      setStatus({
+        show: true,
+        type: "success",
+        message: "Transaction confirmed and executed successfully!",
+      });
+
+      await fetchBalance();
+
+      setTo("");
+      setAmount("");
+    } catch (error) {
+      console.error("Error sending transaction:", error);
+      setStatus({
+        show: true,
+        type: "error",
+        message: error instanceof Error ? error.message : "Failed to send transaction. Please try again.",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -141,48 +251,32 @@ export default function SolTransferPage() {
                 : isBalanceLoading
                 ? "Loading..."
                 : balance
-                ? `${balance} SOL`
+                ? `${parseFloat(balance).toFixed(4)} SOL`
                 : "Unable to fetch balance"}
             </p>
           </div>
         </div>
 
-        {/* Status Messages */}
-        {(status !== "idle" && status !== "error") && (
-          <div className="mb-4 rounded-none border bg-gray-50 border-gray-500 text-gray-700">
-            <div className="px-6 py-4 flex items-center gap-3">
-              <LoadingSpinner />
-              <span>{getStatusMessage()}</span>
-            </div>
+        {status.show && (
+          <div
+            className={`mb-4 rounded-none border ${
+              status.type === "success"
+                ? "bg-green-50 border-green-500 text-green-700"
+                : status.type === "error"
+                ? "bg-red-50 border-red-500 text-red-700"
+                : "bg-gray-50 border-gray-500 text-gray-700"
+            }`}>
+            <p className="px-6 py-4 break-words">{status.message}</p>
           </div>
         )}
 
-        {/* Error Messages */}
-        {error && (
-          <div className="mb-4 rounded-none border bg-red-50 border-red-500 text-red-700">
-            <p className="px-6 py-4 break-words">{getErrorMessage()}</p>
-          </div>
-        )}
-
-        {/* Success Message */}
-        {status === "confirmed" && signature && (
-          <div className="mb-4 rounded-none border bg-green-50 border-green-500 text-green-700">
-            <div className="px-6 py-4">
-              <p className="mb-2">Transaction confirmed successfully!</p>
-              <a
-                href={`https://solscan.io/tx/${signature}?cluster=devnet`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm underline hover:no-underline">
-                View on Solscan →
-              </a>
-            </div>
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-4">
           <div className="space-y-3">
-            <label htmlFor="to" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="to"
+              className="block text-sm font-medium text-gray-700">
               Recipient Address
             </label>
             <input
@@ -190,60 +284,58 @@ export default function SolTransferPage() {
               type="text"
               value={to}
               onChange={(e) => setTo(e.target.value)}
-              placeholder="Enter Solana address"
+              placeholder="5jHY..."
               required
-              disabled={status !== "idle" && status !== "error"}
-              className="block w-full px-4 py-3 border border-gray-300 focus:border-gray-500 focus:ring-1 focus:ring-gray-500 outline-none transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
+              disabled={isLoading}
+              className="block w-full px-4 py-3 border border-gray-300 focus:border-gray-500 focus:ring-1 focus:ring-gray-500 outline-hidden transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
             />
-            {to && !addressValidation.isValid && (
-              <p className="text-sm text-red-600">{addressValidation.error}</p>
-            )}
           </div>
 
           <div className="space-y-3">
-            <div className="flex justify-between items-center">
-              <label htmlFor="amount" className="block text-sm font-medium text-gray-700">
-                Amount (SOL)
-              </label>
-              {estimatedFee && (
-                <span className="text-sm text-gray-500">
-                  Est. fee: {formatLamportsToSol(estimatedFee, 6)} SOL
-                </span>
-              )}
-            </div>
+            <label
+              htmlFor="amount"
+              className="block text-sm font-medium text-gray-700">
+              Amount (SOL)
+            </label>
             <input
               id="amount"
               type="number"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               placeholder="0.0"
-              step="0.000000001"
+              step="0.01"
               required
-              disabled={status !== "idle" && status !== "error"}
-              className="block w-full px-4 py-3 border border-gray-300 focus:border-gray-500 focus:ring-1 focus:ring-gray-500 outline-none transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
+              disabled={isLoading}
+              className="block w-full px-4 py-3 border border-gray-300 focus:border-gray-500 focus:ring-1 focus:ring-gray-500 outline-hidden transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
             />
-            {amount && !amountValidation.isValid && (
-              <p className="text-sm text-red-600">{amountValidation.error}</p>
-            )}
           </div>
 
-          <div className="flex gap-3">
-            <button
-              type="submit"
-              className="flex-1 rounded-none bg-gray-900 px-6 py-3 text-sm font-medium text-white hover:bg-gray-950 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={!isFormValid || !isConnected || status !== "idle"}>
-              {status === "idle" || status === "error" ? "Send Transaction" : "Processing..."}
-            </button>
-            
-            {status === "confirmed" && (
-              <button
-                type="button"
-                onClick={handleReset}
-                className="rounded-none bg-gray-200 px-6 py-3 text-sm font-medium text-gray-700 hover:bg-gray-300 transition-colors">
-                New Transfer
-              </button>
-            )}
-          </div>
+          <button
+            type="submit"
+            className="w-full rounded-none bg-gray-900 px-6 py-3 text-sm font-medium text-white hover:bg-gray-950 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={!to || !amount || isLoading}>
+            {isLoading ? "Sending Transaction..." : "Send Transaction"}
+          </button>
+
+          {txSignature && (
+            <div className="mt-8 rounded-none border border-gray-200">
+              <div className="flex justify-between items-center px-6 py-4 bg-gray-50 border-b border-gray-200">
+                <h3 className="text-sm font-medium text-gray-900">Transaction Signature:</h3>
+                <a
+                  href={`https://solscan.io/tx/${txSignature}?cluster=devnet`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-3 py-1 text-sm bg-gray-900 text-white hover:bg-gray-950 transition-colors rounded-none">
+                  View on Solscan
+                </a>
+              </div>
+              <div className="p-6">
+                <p className="text-sm font-mono break-all text-gray-600 bg-white p-4 border border-gray-200">
+                  {txSignature}
+                </p>
+              </div>
+            </div>
+          )}
         </form>
       </div>
     </div>
