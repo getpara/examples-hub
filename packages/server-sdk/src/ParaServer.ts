@@ -23,6 +23,10 @@ export class Para extends ParaCore {
     }
   }
 
+  protected async ready() {
+    this.isReady = true;
+  }
+
   protected getPlatformUtils(): PlatformUtils {
     return new ServerUtils();
   }

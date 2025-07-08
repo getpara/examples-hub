@@ -34,7 +34,7 @@ export const ExternalWalletNetworkSelectStep = () => {
     setSelectedExternalWalletId(wallet.internalId);
     setStep(ModalStep.EX_WALLET_SELECTED);
 
-    if (wallet.installed) {
+    if (wallet.installed || wallet.internalId === 'FARCASTER') {
       connectExternalWallet(wallet);
     } else if (wallet.isMobile) {
       connectExternalWallet(wallet, true);

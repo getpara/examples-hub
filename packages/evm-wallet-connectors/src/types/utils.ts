@@ -27,6 +27,7 @@ export type WalletProviderFlags =
   | 'isDawn'
   | 'isEnkrypt'
   | 'isExodus'
+  | 'isFarcaster'
   | 'isFrame'
   | 'isFrontier'
   | 'isGamestop'

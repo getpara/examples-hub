@@ -13,6 +13,9 @@ describe('ParaServer', () => {
       expect(para.ctx.apiKey).toBe(apiKey);
       expect(para.wallets).toEqual({});
       expect(await para.isPasskeySupported()).toBe(false);
+
+      await (para as unknown as any).ready(); // Force ready to be called for testing
+      expect(para.isReady).toBe(true);
     });
   });
 

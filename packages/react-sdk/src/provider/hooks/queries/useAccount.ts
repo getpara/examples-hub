@@ -43,6 +43,10 @@ type ExternalNetwork = 'evm' | 'cosmos' | 'solana';
  */
 export type UseAccountReturn = {
   /**
+   * Indicates whether the client's first-time setup is complete.
+   */
+  isReady: boolean;
+  /**
    *  Indicates whether there is a wallet connected (either embedded, external or both).
    */
   isConnected: boolean;
@@ -154,6 +158,8 @@ export const useAccount = ({ cosmos }: UseAccountParameters = {}): UseAccountRet
     enabled: isSuccess && !!client,
     queryKey: [ACCOUNT_BASE_KEY, isFullyLoggedIn ?? null, client?.userId, evmQueryKeys, cosmosQueryKeys, solanaQueryKeys],
     queryFn: async () => {
+      const isReady = client.isReady;
+
       const paraAccount = await getEmbeddedAccount(client);
 
       let connectionType: ConnectionType = 'none';
@@ -188,6 +194,7 @@ export const useAccount = ({ cosmos }: UseAccountParameters = {}): UseAccountRet
       }
 
       return {
+        isReady,
         isConnected: paraAccount.isConnected as boolean,
         connectionType,
         embedded: { ...paraAccount, isConnected: isEmbeddedConnected as boolean },
@@ -213,6 +220,7 @@ export const useAccount = ({ cosmos }: UseAccountParameters = {}): UseAccountRet
   });
 
   const defaultResp: UseAccountReturn = {
+    isReady: false,
     isConnected: false,
     connectionType: 'none',
     isLoading,

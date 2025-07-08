@@ -30,8 +30,10 @@
     "recharts": "^2.15.1",
     "statsig-react": "^2.0.0",
     "styled-components": "^6.1.8",
-    "zod": "3.24.2",
     "zustand": "^4.5.2"
+  },
+  "peerDependencies": {
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.0.9",

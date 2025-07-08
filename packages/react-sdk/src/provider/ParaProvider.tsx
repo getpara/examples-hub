@@ -136,7 +136,7 @@ export const ParaProvider = forwardRef<
       <ExternalWalletWrapper config={externalWalletConfig}>
         <AccountLinkProvider>
           {children}
-          {!config.disableEmbeddedModal && <ParaModal ref={ref} />}
+          {!config.disableEmbeddedModal && client.isReady && <ParaModal ref={ref} />}
         </AccountLinkProvider>
       </ExternalWalletWrapper>
     </AuthProvider>

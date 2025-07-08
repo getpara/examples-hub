@@ -2,12 +2,12 @@ version: 0.2
 
 env:
   variables:
-    NODE_VERSION: "20.15.1"
+    NODE_VERSION: '20.19.3'
 
 phases:
   install:
     runtime-versions:
-      nodejs: 20.15.1
+      nodejs: 20.19.3
     commands:
       - echo "Checking environment variables:"
       - env

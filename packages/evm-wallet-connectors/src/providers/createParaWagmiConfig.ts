@@ -34,6 +34,7 @@ export function createParaWagmiConfig<
   const wcMetadata = computeWalletConnectMetaData({ appName, appDescription, appUrl, appIcon });
   const walletFactories = resolveWalletList(wallets);
   const baseConnectors = connectorsForWallets(walletFactories, {
+    para,
     projectId,
     appName,
     appDescription,

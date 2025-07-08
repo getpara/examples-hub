@@ -108,6 +108,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
     getWalletBalance: evmGetWalletBalance,
     requestInfo: evmRequestInfo,
     disconnectBase: evmDisconnectBase,
+    farcasterStatus: evmFarcasterStatus,
   } = useContext(evmContext);
   const {
     wallets: solanaWallets,
@@ -149,7 +150,11 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
 
   // Filter any wallets that aren't included in the sort array, sort by the array then sort by installed extensions
   const wallets = [...evmWallets, ...solanaWallets, ...cosmosWallets]
-    .filter(w => externalWallets.includes(w.id.toUpperCase() as TExternalWallet))
+    .filter(
+      w =>
+        (w.internalId !== 'FARCASTER' || para?.isFarcasterMiniApp) &&
+        externalWallets.includes(w.id.toUpperCase() as TExternalWallet),
+    )
     .sort(
       (a, b) =>
         externalWallets.indexOf(a.id.toUpperCase() as TExternalWallet) -
@@ -626,6 +631,43 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
       await connectEmbeddedToExternalConnectors();
     };
   }, [connectEmbeddedToExternalConnectors]);
+
+  useEffect(() => {
+    async function loginFarcasterMiniApp() {
+      if (para.isReady && para.isFarcasterMiniApp) {
+        const isEvm = para.supportedWalletTypes.some(({ type }) => type === 'EVM');
+
+        const isAwaitingEvmLogin =
+          isEvm &&
+          evmFarcasterStatus?.isConnected &&
+          !Object.values(para.externalWallets || {}).some(
+            w => w.type === 'EVM' && w.externalProviderId === 'FARCASTER' && w.address === evmFarcasterStatus.address,
+          );
+
+        const isAwaitingLogin = isAwaitingEvmLogin;
+
+        if (isAwaitingLogin) {
+          await para.loginExternalWallet({
+            externalWallet: [
+              ...(isAwaitingEvmLogin
+                ? [
+                    {
+                      type: 'EVM',
+                      provider: 'Farcaster',
+                      providerId: 'FARCASTER',
+                      address: evmFarcasterStatus.address,
+                      isConnectionOnly: true,
+                    } as ExternalWalletInfo,
+                  ]
+                : []),
+            ],
+          });
+        }
+      }
+    }
+
+    loginFarcasterMiniApp();
+  }, [para.isReady, para.isFarcasterMiniApp, evmFarcasterStatus]);
 
   return (
     <ExternalWalletContext.Provider

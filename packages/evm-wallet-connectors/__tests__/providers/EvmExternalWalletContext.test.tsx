@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { vi, describe, expect, it } from 'vitest';
 
 import { render } from '@testing-library/react';
 import { ParaEvmProvider } from '../../src/providers/ParaEvmContext';
@@ -12,6 +12,12 @@ import { MockPara } from '../mocks/mockCorePara';
 import { API_KEY, TEST_WALLET } from '../constants';
 
 const queryClient = new QueryClient();
+
+vi.mock('@farcaster/miniapp-sdk', () => ({ sdk: undefined }));
+
+vi.mock('@farcaster/miniapp-wagmi-connector', () => ({
+  farcasterMiniApp: undefined,
+}));
 
 const ConnectMockWallet = () => {
   const { wallets, chainId } = useContext(EvmExternalWalletContext);
@@ -41,7 +47,11 @@ const ConnectMockWallet = () => {
 };
 
 describe('<ParaEvmProvider />', () => {
-  it('connects to mock wallet', () => {
+  it('connects to mock wallet', async () => {
+    const para = new MockPara(Environment.DEV, API_KEY);
+
+    await (para as unknown as any).ready();
+
     render(
       <QueryClientProvider client={queryClient}>
         <ParaEvmProvider
@@ -51,7 +61,7 @@ describe('<ParaEvmProvider />', () => {
           }}
           internalConfig={{
             onSwitchWallet: () => {},
-            para: new MockPara(Environment.DEV, API_KEY),
+            para,
             walletsWithFullAuth: [],
             connectedWallet: undefined,
           }}

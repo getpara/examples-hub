@@ -28,6 +28,11 @@ export class MockPara extends ParaCore {
   verifyFarcasterLink = super.verifyFarcasterLink;
   verifyExternalWalletLink = super.verifyExternalWalletLink;
   verifyOAuthLink = super.verifyOAuthLink;
+
+  ready = (): Promise<void> => {
+    this.isReady = true;
+    return Promise.resolve();
+  };
 }
 
 export class MockParaAsync extends MockPara {

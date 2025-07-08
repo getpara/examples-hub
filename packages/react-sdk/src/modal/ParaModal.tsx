@@ -123,6 +123,9 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
 
   // This will run on mount and on isOpen change but won't cause a rerender unless step or email changes
   const initModal = async (shouldAutoLogin?: boolean) => {
+    if (!para.isReady) {
+      return;
+    }
     const isAccount = isConnected,
       isGuest = (isAccount && para.isGuestMode) || isCreateGuestWalletsPending;
 
@@ -175,16 +178,16 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
   };
 
   useEffect(() => {
-    if (para && isOpen && !isAccountLoading && !isInitialized.current) {
+    if (para?.isReady && isOpen && !isAccountLoading && !isInitialized.current) {
       initModal(isOpen);
       isInitialized.current = true;
     }
 
-    if (para && !isOpen && isInitialized.current) {
+    if (para?.isReady && !isOpen && isInitialized.current) {
       initModal();
       isInitialized.current = false;
     }
-  }, [para, isOpen, isAccountLoading]);
+  }, [para?.isReady, isOpen, isAccountLoading]);
 
   useEffect(() => {
     let _authLayout = authLayout;

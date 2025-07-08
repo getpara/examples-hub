@@ -57,10 +57,13 @@ describe('ParaMobile', () => {
     paraMobile = new ParaMobile(Environment.BETA, 'test_api_key');
   });
 
-  it('should create an instance of ParaMobile and set env and apiKey', () => {
+  it('should create an instance of ParaMobile and set env and apiKey', async () => {
     expect(paraMobile).toBeInstanceOf(ParaMobile);
     expect(paraMobile.ctx.env).toBe(Environment.BETA);
     expect(paraMobile.ctx.apiKey).toBe('test_api_key');
+
+    await (paraMobile as unknown as any).ready(); // Force ready to be called for testing
+    expect(paraMobile.isReady).toBe(true);
   });
 
   it('should use ReactNativeUtils as the platform utils', () => {

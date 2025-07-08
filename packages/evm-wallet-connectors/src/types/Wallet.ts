@@ -3,6 +3,7 @@ import { WalletConnectParameters } from 'wagmi/connectors';
 import { CoinbaseWalletOptions } from '../wallets/connectors/coinbase/coinbase.js';
 import { WalletConnectWalletOptions } from '../wallets/connectors/walletConnect/walletConnect.js';
 import { type WalletMetadata } from '@getpara/react-common';
+import ParaWeb from '@getpara/web-sdk';
 
 export type Wallet = {
   createConnector?: (walletDetails: WalletDetailsParams) => CreateConnectorFn;
@@ -11,6 +12,8 @@ export type Wallet = {
 } & WalletMetadata;
 
 export interface DefaultWalletOptions {
+  para?: ParaWeb;
+  createFarcasterConnector?: () => any;
   projectId: string;
   walletConnectParameters?: ParaWalletConnectParameters;
 }

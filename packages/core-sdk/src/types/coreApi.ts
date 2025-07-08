@@ -281,7 +281,7 @@ export type CoreMethods = Record<CoreMethodName, { params?: unknown; response?: 
       /**
        * The external wallet information to use for login.
        */
-      externalWallet: ExternalWalletInfo;
+      externalWallet: ExternalWalletInfo | ExternalWalletInfo[];
     };
     response: AuthStateVerifyOrLogin;
   };

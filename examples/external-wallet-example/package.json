@@ -8,6 +8,8 @@
     "@cosmjs/proto-signing": "^0.31.3",
     "@cosmjs/stargate": "^0.31.3",
     "@cosmjs/tendermint-rpc": "^0.31.3",
+    "@farcaster/miniapp-sdk": "^0.1.2",
+    "@farcaster/miniapp-wagmi-connector": "^1.0.0",
     "@getpara/cosmos-wallet-connectors": "2.0.0-alpha.29",
     "@getpara/evm-wallet-connectors": "2.0.0-alpha.29",
     "@getpara/graz": "2.0.0-alpha.3",

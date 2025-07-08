@@ -17,6 +17,14 @@
     "stream-browserify": "^3.0.0",
     "typescript": "^5.8.3"
   },
+  "peerDependencies": {
+    "@farcaster/miniapp-sdk": "^0.1.2"
+  },
+  "peerDependenciesMeta": {
+    "@farcaster/miniapp-sdk": {
+      "optional": true
+    }
+  },
   "files": [
     "dist",
     "package.json"

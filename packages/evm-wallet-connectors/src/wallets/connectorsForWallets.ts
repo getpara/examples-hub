@@ -5,12 +5,15 @@ import type { ParaWalletConnectParameters, Wallet } from '../types/Wallet.js';
 import { computeWalletConnectMetaData } from '../utils/computeWalletConnectMetaData.js';
 import { omitUndefinedValues } from '../utils/omitUndefinedValues.js';
 import { TExternalWallet } from '@getpara/react-common';
+import ParaWeb from '@getpara/web-sdk';
 
 export interface WalletListItem extends Wallet {
   index: number;
 }
 
 export interface ConnectorsForWalletsParameters {
+  para: ParaWeb;
+  createFarcasterConnector?: () => any;
   projectId: string;
   appName: string;
   appDescription?: string;
@@ -21,7 +24,16 @@ export interface ConnectorsForWalletsParameters {
 
 export const connectorsForWallets = (
   walletList: WalletList,
-  { projectId, walletConnectParameters, appName, appDescription, appUrl, appIcon }: ConnectorsForWalletsParameters,
+  {
+    para,
+    projectId,
+    walletConnectParameters,
+    appName,
+    appDescription,
+    appUrl,
+    appIcon,
+    createFarcasterConnector,
+  }: ConnectorsForWalletsParameters,
 ): CreateConnectorFn[] => {
   if (!walletList.length) {
     return [];
@@ -43,6 +55,7 @@ export const connectorsForWallets = (
     index++;
 
     const wallet = createWallet({
+      para,
       projectId,
       appName,
       appIcon,
@@ -57,6 +70,7 @@ export const connectorsForWallets = (
         metadata: walletConnectMetaData,
         ...walletConnectParameters,
       },
+      createFarcasterConnector,
     });
 
     const walletListItem = {

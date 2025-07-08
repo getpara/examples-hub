@@ -7,6 +7,8 @@ import { ParaProvider } from '@getpara/react-sdk';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useModalStateStore } from './stores/modalStateStore/useModalStateStore';
 import { useCosmosStore } from './stores/cosmosStore/useCosmosStore';
+import { useEffect } from 'react';
+import { sdk } from '@farcaster/miniapp-sdk';
 
 const queryClient = new QueryClient();
 
@@ -55,6 +57,10 @@ export const App = () => {
   const externalWallets = useModalStateStore(state => state.externalWallets);
   const externalWalletConnectionOnly = useModalStateStore(state => state.externalWalletConnectionOnly);
   const externalWalletIncludeVerification = useModalStateStore(state => state.externalWalletIncludeVerification);
+
+  useEffect(() => {
+    sdk.actions.ready();
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>

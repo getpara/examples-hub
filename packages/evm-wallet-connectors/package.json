@@ -28,11 +28,17 @@
   "gitHead": "10ecce9873131e6a1b114fb0642a94bb02040bef",
   "main": "dist/index.js",
   "peerDependencies": {
+    "@farcaster/miniapp-wagmi-connector": "^1.0.0",
     "@tanstack/react-query": ">=5.0.0",
     "react": ">=18",
     "react-dom": ">=18",
     "viem": "2.x",
     "wagmi": "^2.9.0"
+  },
+  "peerDependenciesMeta": {
+    "@farcaster/miniapp-wagmi-connector": {
+      "optional": true
+    }
   },
   "scripts": {
     "build": "rm -rf dist && yarn typegen && node ./scripts/build.mjs",

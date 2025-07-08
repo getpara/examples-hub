@@ -100,6 +100,7 @@ export const EVM_WALLETS = [
   'RAINBOW',
   'COINBASE',
   'WALLETCONNECT',
+  'FARCASTER',
   'ZERION',
   'SAFE',
   'RABBY',

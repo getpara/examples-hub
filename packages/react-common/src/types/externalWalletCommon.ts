@@ -87,6 +87,10 @@ export type BalanceManagement<B = string> = {
   getWalletBalance: () => Promise<B | undefined>;
 };
 
+export type FarcasterMiniAppManagement = {
+  farcasterStatus: { isConnected: false; address?: undefined } | { isConnected: true; address: string } | undefined;
+};
+
 export type ExternalWalletContextType<S extends SignResult = SignResult> = {
   wallets: CommonWallet[];
   disconnect: () => Promise<void>;

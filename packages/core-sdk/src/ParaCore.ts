@@ -152,6 +152,8 @@ export abstract class ParaCore implements CoreInterface {
 
   protected isPartnerOptional?: boolean;
 
+  isReady: boolean = false;
+
   get authInfo(): CoreAuthInfo | undefined {
     return this.#authInfo;
   }
@@ -1157,6 +1159,10 @@ export abstract class ParaCore implements CoreInterface {
   };
 
   async touchSession(regenerate = false): Promise<SessionInfo> {
+    if (!this.isReady) {
+      await this.ready();
+    }
+
     const session = await this.ctx.client.touchSession(regenerate);
 
     if (
@@ -1306,6 +1312,8 @@ export abstract class ParaCore implements CoreInterface {
     await this.touchSession();
   }
 
+  protected abstract ready(): Promise<void>;
+
   async #setAuthInfo(authInfo: CoreAuthInfo): Promise<void> {
     this.#authInfo = authInfo;
     await this.localStorageSetItem(constants.LOCAL_STORAGE_AUTH_INFO, JSON.stringify(authInfo));
@@ -1392,31 +1400,31 @@ export abstract class ParaCore implements CoreInterface {
    * @param externalAddress - External wallet address to set.
    * @param externalType - Type of external wallet to set.
    */
-  async setExternalWallet({
-    address,
-    type,
-    provider,
-    providerId,
-    addressBech32,
-    withFullParaAuth,
-    isConnectionOnly,
-    withVerification,
-  }: ExternalWalletInfo): Promise<void> {
+  async setExternalWallet(externalWallet: ExternalWalletInfo[] | ExternalWalletInfo): Promise<void> {
     // Can change this to continue storing existing external wallets if/when we want to allow multiple connected external wallets
-    this.externalWallets = {
-      [address]: {
-        id: address,
-        address: addressBech32 ?? address,
-        type,
-        name: provider,
-        isExternal: true,
-        isExternalWithParaAuth: withFullParaAuth,
-        externalProviderId: providerId,
-        signer: '',
-        isExternalConnectionOnly: isConnectionOnly,
-        isExternalWithVerification: withVerification,
+    this.externalWallets = (Array.isArray(externalWallet) ? externalWallet : [externalWallet]).reduce(
+      (
+        acc: Record<string, Wallet>,
+        { address, type, provider, providerId, addressBech32, withFullParaAuth, isConnectionOnly, withVerification },
+      ) => {
+        return {
+          ...acc,
+          [address]: {
+            id: address,
+            address: addressBech32 ?? address,
+            type,
+            name: provider,
+            isExternal: true,
+            isExternalWithParaAuth: withFullParaAuth,
+            externalProviderId: providerId,
+            signer: '',
+            isExternalConnectionOnly: isConnectionOnly,
+            isExternalWithVerification: withVerification,
+          },
+        };
       },
-    };
+      {},
+    );
     this.setExternalWallets(this.externalWallets);
     dispatchEvent(ParaEvent.EXTERNAL_WALLET_CHANGE_EVENT, null);
   }
@@ -1834,14 +1842,27 @@ export abstract class ParaCore implements CoreInterface {
     externalWallet,
     ...urlOptions
   }: CoreMethodParams<'loginExternalWallet'>): CoreMethodResponse<'loginExternalWallet'> {
-    if (this.externalWalletConnectionOnly || externalWallet.isConnectionOnly) {
+    const externalWallets = Array.isArray(externalWallet) ? externalWallet : [externalWallet];
+
+    if (this.externalWalletConnectionOnly || externalWallets.every(wallet => wallet.isConnectionOnly)) {
       // withFullParaAuth cannot be used if using connection only wallets
-      externalWallet.withFullParaAuth = false;
-      await this.setExternalWallet(externalWallet);
+      await this.setExternalWallet(
+        externalWallets.map(wallet => ({
+          ...wallet,
+          withFullParaAuth: false,
+        })),
+      );
       return Promise.resolve({
         userId: constants.EXTERNAL_WALLET_CONNECTION_ONLY_USER_ID,
       }) as CoreMethodResponse<'loginExternalWallet'>;
     }
+
+    if (Array.isArray(externalWallet)) {
+      throw new Error(
+        'Cannot authenticate multiple external wallets at once. To connect multiple wallets at once, use CONNECTION_ONLY mode.',
+      );
+    }
+
     this.requireApiKey();
 
     const serverAuthState = await this.ctx.client.loginExternalWallet({ externalWallet });
@@ -3605,6 +3626,10 @@ export abstract class ParaCore implements CoreInterface {
     dispatchEvent(ParaEvent.LOGOUT_EVENT, null);
   }
 
+  protected get toStringAdditions(): Record<string, unknown> {
+    return {};
+  }
+
   /**
    * Converts to a string, removing sensitive data when logging this class.
    *
@@ -3644,6 +3669,8 @@ export abstract class ParaCore implements CoreInterface {
       wallets: redactedWallets,
       externalWallets: redactedExternalWallets,
       loginEncryptionKeyPair: this.loginEncryptionKeyPair ? '[REDACTED]' : undefined,
+      isReady: this.isReady,
+      ...this.toStringAdditions,
       ctx: {
         apiKey: this.ctx.apiKey,
         disableWorkers: this.ctx.disableWorkers,
@@ -3657,6 +3684,13 @@ export abstract class ParaCore implements CoreInterface {
     };
 
     return `Para ${JSON.stringify(obj, null, 2)}`;
+  }
+
+  protected devLog(...s: string[]) {
+    if (this.ctx.env === Environment.DEV || this.ctx.env === Environment.SANDBOX) {
+      // eslint-disable-next-line no-console
+      console.log(...s);
+    }
   }
 
   protected async getNewCredentialAndUrl({
@@ -3769,7 +3803,7 @@ export abstract class ParaCore implements CoreInterface {
     await this.assertIsAuthSet();
 
     if (!!externalWallet) {
-      await this.setExternalWallet(externalWallet);
+      await this.setExternalWallet([externalWallet]);
     }
 
     if (!!userId) {

@@ -12,6 +12,7 @@ import { useExternalWallets } from '../../../provider/providers/ExternalWalletPr
 import { useStore } from '../../../provider/stores/useStore.js';
 import { useAuthActions } from '../../../provider/providers/AuthProvider.js';
 import { useAccount } from '../../../provider/index.js';
+import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
 
 interface AuthMainStepContentProps {
   oAuthMethods?: TOAuthMethod[];
@@ -26,6 +27,7 @@ export const AuthMainStepContent = ({
   disablePhoneLogin,
   isGuestModeEnabled = false,
 }: AuthMainStepContentProps) => {
+  const para = useInternalClient();
   const { wallets } = useExternalWallets();
   const { createGuestWallets } = useAuthActions();
   const { embedded } = useAccount();
@@ -49,65 +51,69 @@ export const AuthMainStepContent = ({
   const Content = useMemo(() => {
     const methods: [ReactNode, string][] = [];
 
-    authLayout?.forEach(layout => {
-      switch (layout) {
-        case AuthLayout.AUTH_FULL: {
-          methods.push([
-            <AuthOptions
-              key="authFull"
-              oAuthMethods={oAuthMethods}
-              disableEmailLogin={disableEmailLogin}
-              disablePhoneLogin={disablePhoneLogin}
-              isGuestModeEnabled={isGuestModeEnabled}
-            />,
-            layout,
-          ]);
+    if (para.isFarcasterMiniApp) {
+      methods.push([<ExternalWallets key="externalWallets" />, 'EXTERNAL:FULL']);
+    } else {
+      authLayout?.forEach(layout => {
+        switch (layout) {
+          case AuthLayout.AUTH_FULL: {
+            methods.push([
+              <AuthOptions
+                key="authFull"
+                oAuthMethods={oAuthMethods}
+                disableEmailLogin={disableEmailLogin}
+                disablePhoneLogin={disablePhoneLogin}
+                isGuestModeEnabled={isGuestModeEnabled}
+              />,
+              layout,
+            ]);
 
-          break;
-        }
-        case AuthLayout.AUTH_CONDENSED: {
-          const icons: IconType[] = [];
-
-          oAuthMethods?.forEach(method => icons.push(ACCOUNT_TYPES[method][useBrandedLogos ? 'logoBranded' : 'logo']!));
-
-          methods.push([
-            <CondensedButton onClick={handleCondensedAuthClick} variant="tertiary" fullWidth key="authCondensed">
-              <IconGroupSpacer slot="start" icons={[]} $isDark={useDarkLogos} />
-              Sign Up or Login
-              <StyledIconGroup slot="end" icons={icons.splice(0, 3)} $isDark={useDarkLogos} />
-            </CondensedButton>,
-            layout,
-          ]);
-
-          break;
-        }
-        case AuthLayout.EXTERNAL_FULL: {
-          if (!!wallets.length) {
-            methods.push([<ExternalWallets key="externalWallets" />, layout]);
+            break;
           }
-          break;
-        }
-        case AuthLayout.EXTERNAL_CONDENSED: {
-          const icons: string[] = [];
+          case AuthLayout.AUTH_CONDENSED: {
+            const icons: IconType[] = [];
 
-          wallets?.forEach(wallet => icons.push(wallet.iconUrl));
+            oAuthMethods?.forEach(method => icons.push(ACCOUNT_TYPES[method][useBrandedLogos ? 'logoBranded' : 'logo']!));
 
-          methods.push([
-            <CondensedButton onClick={handleCondensedExternalClick} variant="tertiary" fullWidth key="authCondensed">
-              <IconGroupSpacer slot="start" icons={[]} $isDark={useDarkLogos} />
-              Connect Wallet
-              <StyledIconGroup slot="end" icons={icons.splice(0, 3)} $isDark={useDarkLogos} />
-            </CondensedButton>,
-            layout,
-          ]);
+            methods.push([
+              <CondensedButton onClick={handleCondensedAuthClick} variant="tertiary" fullWidth key="authCondensed">
+                <IconGroupSpacer slot="start" icons={[]} $isDark={useDarkLogos} />
+                Sign Up or Login
+                <StyledIconGroup slot="end" icons={icons.splice(0, 3)} $isDark={useDarkLogos} />
+              </CondensedButton>,
+              layout,
+            ]);
 
-          break;
+            break;
+          }
+          case AuthLayout.EXTERNAL_FULL: {
+            if (!!wallets.length) {
+              methods.push([<ExternalWallets key="externalWallets" />, layout]);
+            }
+            break;
+          }
+          case AuthLayout.EXTERNAL_CONDENSED: {
+            const icons: string[] = [];
+
+            wallets?.forEach(wallet => icons.push(wallet.iconUrl));
+
+            methods.push([
+              <CondensedButton onClick={handleCondensedExternalClick} variant="tertiary" fullWidth key="authCondensed">
+                <IconGroupSpacer slot="start" icons={[]} $isDark={useDarkLogos} />
+                Connect Wallet
+                <StyledIconGroup slot="end" icons={icons.splice(0, 3)} $isDark={useDarkLogos} />
+              </CondensedButton>,
+              layout,
+            ]);
+
+            break;
+          }
+          default: {
+            break;
+          }
         }
-        default: {
-          break;
-        }
-      }
-    });
+      });
+    }
 
     return (
       <>
@@ -119,12 +125,12 @@ export const AuthMainStepContent = ({
         ))}
       </>
     );
-  }, [oAuthMethods, disableEmailLogin, disablePhoneLogin, isGuestModeEnabled, wallets, authLayout]);
+  }, [para.isFarcasterMiniApp, oAuthMethods, disableEmailLogin, disablePhoneLogin, isGuestModeEnabled, wallets, authLayout]);
 
   return (
     <Container data-testid="main-auth-step-content">
       {Content}
-      {isGuestModeEnabled && !isGuestMode && (
+      {isGuestModeEnabled && !isGuestMode && !para.isFarcasterMiniApp && (
         <GuestMode
           href="#"
           isDark={isDark}

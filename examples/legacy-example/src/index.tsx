@@ -57,6 +57,7 @@ import { coinbaseWallet, walletConnect } from 'wagmi/connectors';
 import { PregenAuth } from '@getpara/user-management-client';
 import { toast } from 'react-toastify';
 import { ParaLegacyExample } from './ParaLegacyExample';
+import { sdk } from '@farcaster/miniapp-sdk';
 
 const queryClient = new QueryClient();
 
@@ -765,6 +766,10 @@ function AppInner({
     !!walletId && para?.wallets[walletId]?.scheme !== 'ED25519',
     !!walletId && para?.wallets[walletId]?.scheme === 'ED25519',
   ];
+
+  useEffect(() => {
+    sdk.actions.ready();
+  }, []);
 
   if (isAccountLoading) {
     return null;

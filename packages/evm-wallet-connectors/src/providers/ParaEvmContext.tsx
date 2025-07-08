@@ -1,5 +1,5 @@
-import { PropsWithChildren, useMemo, useRef } from 'react';
-import { createConfig, CreateConfigParameters, WagmiProvider, WagmiProviderProps } from 'wagmi';
+import { PropsWithChildren, useEffect, useMemo, useRef, useState } from 'react';
+import { Config, createConfig as createWagmiConfig, CreateConfigParameters, WagmiProvider, WagmiProviderProps } from 'wagmi';
 import { WalletList } from '../types/Wallet.js';
 import { connectorsForWallets } from '../wallets/connectorsForWallets.js';
 import { Chain, http, Transport } from 'viem';
@@ -10,6 +10,7 @@ import { paraConnector } from '@getpara/wagmi-v2-connector';
 import { setWagmiConfig, getWagmiConfig } from '../stores/wagmiConfigStore.js';
 import { TExternalWallet } from '@getpara/react-common';
 import { resolveWalletList } from '../utils/resolveWalletList.js';
+import { farcasterWallet } from '../wallets/connectors/index.js';
 
 export interface ParaEvmProviderConfig<
   chains extends readonly [Chain, ...Chain[]],
@@ -64,7 +65,6 @@ export function ParaEvmProvider<
   config: _config,
   wagmiProviderProps,
 }: ParaEvmProviderProps<chains, transports> & PropsWithChildren) {
-  const prevWallets = useRef(null);
   const para = internalConfig.para;
 
   const {
@@ -73,12 +73,17 @@ export function ParaEvmProvider<
     appDescription,
     appIcon,
     appUrl,
-    wallets,
+    wallets: propsWallets,
     chains,
     transports,
     paraConnectorOptions,
     ...wagmiConfigParams
   } = _config;
+
+  const propsWalletList = useMemo(() => {
+    return resolveWalletList(propsWallets ?? []);
+  }, [propsWallets]);
+  const prevWallets = useRef(propsWalletList);
 
   const paraConnectorInstance = useMemo(() => {
     return paraConnector({
@@ -90,20 +95,21 @@ export function ParaEvmProvider<
     });
   }, [para]);
 
-  // Memoizing the config with no deps here so it stays constant after the first render
-  const config = useMemo(() => {
-    if (!prevWallets.current) {
-      prevWallets.current = wallets;
-    }
+  const createConfig = (walletList: WalletList, createFarcasterConnector?: (() => any) | null) => {
     // If a config already exists, return it to avoid re-creating
     // This is for apps that use the createParaWagmiConfig factory function so they have access to the config outside of the provider lifecycle
     const existing = getWagmiConfig();
-    if (existing && prevWallets.current === wallets) return existing;
+    if (existing && prevWallets.current === walletList) {
+      return existing;
+    }
+
+    prevWallets.current = walletList;
 
     // If no config exists, create a new one
     const wcMetadata = computeWalletConnectMetaData({ appName, appDescription, appUrl, appIcon });
-    const walletFactories = resolveWalletList(wallets);
-    const baseConnectors = connectorsForWallets(walletFactories, {
+    const baseConnectors = connectorsForWallets(walletList, {
+      para,
+      createFarcasterConnector,
       projectId,
       appName,
       appDescription,
@@ -112,7 +118,7 @@ export function ParaEvmProvider<
       walletConnectParameters: { metadata: wcMetadata },
     });
     const allConnectors = [...baseConnectors, paraConnectorInstance];
-    const createdConfig = createConfig({
+    const createdConfig = createWagmiConfig({
       ssr: true,
       ...wagmiConfigParams,
       chains,
@@ -122,10 +128,37 @@ export function ParaEvmProvider<
 
     // Set the config so it can be accessed outside of the hook lifecycle but still within the lifecycle of the provider
     setWagmiConfig(createdConfig);
-    prevWallets.current = wallets;
 
     return createdConfig;
-  }, [wallets, paraConnectorInstance]);
+  };
+
+  const [config, setConfig] = useState<Config | null>(null);
+
+  useEffect(() => {
+    if (!para.isReady) {
+      return;
+    }
+
+    const initializeConfig = async () => {
+      if (para.isFarcasterMiniApp) {
+        let createFarcasterConnector: (() => any) | null = null;
+        try {
+          // @ts-ignore
+          createFarcasterConnector = (await import('@farcaster/miniapp-wagmi-connector')).farcasterMiniApp ?? undefined;
+        } catch (e) {}
+
+        setConfig(createConfig([...propsWalletList, farcasterWallet], createFarcasterConnector));
+      } else {
+        setConfig(createConfig([...propsWalletList]));
+      }
+    };
+
+    initializeConfig();
+  }, [para.isFarcasterMiniApp, para.isReady, propsWalletList]);
+
+  if (!config) {
+    return null;
+  }
 
   return (
     <WagmiProvider config={config} {...wagmiProviderProps}>

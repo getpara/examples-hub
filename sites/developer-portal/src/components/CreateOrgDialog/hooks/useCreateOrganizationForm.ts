@@ -64,6 +64,5 @@ export const useCreateOrganizationForm = (onSuccess: () => void) => {
       },
     );
   };
-
   return { form, onSubmit, isUpdatingOrg, isUploadingLogo };
 };

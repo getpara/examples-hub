@@ -286,6 +286,7 @@ describe('ParaCore - utils', () => {
       currentWalletIds: para.currentWalletIds,
       guestWalletIds: {},
       isGuestMode: false,
+      isReady: false,
       externalWallets: Object.fromEntries(
         Object.entries(para.externalWallets).map(([id, wallet]) => [
           id,

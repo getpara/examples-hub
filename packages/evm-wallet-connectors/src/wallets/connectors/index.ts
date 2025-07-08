@@ -1,3 +1,4 @@
+import { farcasterWallet } from './farcaster/farcaster.js';
 import { metaMaskWallet } from './metaMask/metaMask.js';
 import { rainbowWallet } from './rainbow/rainbow.js';
 import { walletConnectWallet } from './walletConnect/walletConnect.js';
@@ -12,6 +13,7 @@ import { phantomWallet } from './phantom/phantom.js';
 import { valoraWallet } from './valora/valora.js';
 
 export {
+  farcasterWallet,
   metaMaskWallet,
   rainbowWallet,
   walletConnectWallet,

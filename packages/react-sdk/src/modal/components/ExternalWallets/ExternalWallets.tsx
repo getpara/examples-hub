@@ -7,10 +7,12 @@ import { useState } from 'react';
 import { hasEmbeddedAuth } from '../../utils/authLayoutHelpers.js';
 import { useExternalWallets } from '../../../provider/providers/ExternalWalletProvider.js';
 import { type CommonWallet } from '@getpara/react-common';
+import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
 
 const HAS_MORE_LENGTH = 3;
 
 export const ExternalWallets = () => {
+  const para = useInternalClient();
   const { wallets: allWallets, connectExternalWallet } = useExternalWallets();
   const setSelectedExternalWalletId = useModalStore(state => state.setSelectedExternalWalletId);
   const setStep = useModalStore(state => state.setStep);
@@ -20,9 +22,12 @@ export const ExternalWallets = () => {
   const [search, setSearch] = useState('');
 
   // Deduplicate wallets by ID and keep the first occurrence
-  const dedupedWallets = Array.from(new Set(allWallets.map(wallet => wallet.id))).map(id => {
-    return allWallets.find(wallet => wallet.id === id) as CommonWallet;
-  });
+  const dedupedWallets = Array.from(new Set(allWallets.map(wallet => wallet.id)))
+    .map(id => {
+      return allWallets.find(wallet => wallet.id === id) as CommonWallet;
+    })
+    .filter(wallet => !para.isFarcasterMiniApp || wallet.internalId === 'FARCASTER');
+
   const hasMore = dedupedWallets.length > HAS_MORE_LENGTH;
   const walletsToShow =
     showAll || !hasMore

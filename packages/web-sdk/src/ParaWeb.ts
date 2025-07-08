@@ -4,6 +4,10 @@ import { WebUtils } from './WebUtils.js';
 import { isPasskeySupported } from './utils/isPasskeySupported.js';
 
 export class Para extends ParaCore {
+  farcasterSdk = undefined;
+  isReady = false;
+  isFarcasterMiniApp = false;
+
   constructor(env: Environment, apiKey?: string, opts?: ConstructorOpts) {
     super(env, apiKey, opts);
 
@@ -17,6 +21,41 @@ export class Para extends ParaCore {
       });
     }
   }
+
+  protected async ready() {
+    if (!this.isReady) {
+      try {
+        // @ts-ignore
+        this.farcasterSdk = (await import('@farcaster/miniapp-sdk'))?.sdk ?? undefined;
+
+        if (!this.farcasterSdk?.isInMiniApp) {
+          throw new Error('Farcaster SDK not detected or failed to load');
+        }
+
+        this.devLog('Farcaster SDK detected and loaded successfully.', this.farcasterSdk);
+      } catch (e) {
+        this.devLog(e);
+      }
+
+      if (!!this.farcasterSdk?.isInMiniApp) {
+        this.devLog('Initializing Farcaster SDK...');
+        this.isFarcasterMiniApp = await this.farcasterSdk.isInMiniApp();
+
+        if (this.isFarcasterMiniApp) {
+          this.externalWalletConnectionOnly = true;
+        }
+      }
+
+      this.isReady = true;
+    }
+  }
+
+  protected get toStringAdditions() {
+    return {
+      isFarcasterMiniApp: this.isFarcasterMiniApp,
+    };
+  }
+
   protected getPlatformUtils() {
     return new WebUtils();
   }

@@ -18,6 +18,7 @@ import { normalize } from 'viem/ens';
 import { useExternalWalletStore } from '../stores/useStore.js';
 import {
   defaultEvmExternalWallet,
+  FarcasterMiniAppManagement,
   type BalanceManagement,
   type ChainManagement,
   type CommonChain,
@@ -43,7 +44,7 @@ export type EvmExternalWalletContextType = ExternalWalletContextType &
   TExternalHooks & {
     username?: string;
     avatar?: string;
-  };
+  } & FarcasterMiniAppManagement;
 
 export const EvmExternalWalletContext = createContext<EvmExternalWalletContextType>(defaultEvmExternalWallet);
 
@@ -147,11 +148,13 @@ export function EvmExternalWalletProvider({
       !!wagmiAddress &&
       !storedExternalWallet &&
       connectedConnector?.id !== 'para' &&
-      !isLinkingAccount.current
+      !isLinkingAccount.current &&
+      para.isReady &&
+      !para.isFarcasterMiniApp
     ) {
       reset();
     }
-  }, [isConnected, isLocalConnecting, wagmiAddress, connectedConnector]);
+  }, [isConnected, isLocalConnecting, wagmiAddress, connectedConnector, para.isReady, para.isFarcasterMiniApp]);
 
   useEffect(() => {
     const storedExternalWallet = Object.values(para.externalWallets || {})[0];
@@ -529,6 +532,20 @@ export function EvmExternalWalletProvider({
 
   const username = useMemo(() => ensName ?? wagmiAddress, [ensName, wagmiAddress]);
 
+  const farcasterStatus = useMemo(() => {
+    const connection = connections.find(
+      c => (c.connector.paraDetails as ParaDetails | undefined)?.internalId === 'FARCASTER',
+    );
+
+    if (!connection) {
+      return undefined;
+    }
+
+    const address = connection?.accounts?.[0];
+
+    return address ? { isConnected: true as const, address } : { isConnected: false as const };
+  }, [connections]);
+
   const connectParaEmbedded = useCallback(async (): Promise<{ result?: unknown; error?: string }> => {
     const paraConnectorInstance = connectors.find(c => c.id === 'para');
     if (!paraConnectorInstance) {
@@ -567,6 +584,7 @@ export function EvmExternalWalletProvider({
         getWalletBalance,
         requestInfo,
         disconnectBase,
+        farcasterStatus,
         ...externalHooks,
       }}
     >
