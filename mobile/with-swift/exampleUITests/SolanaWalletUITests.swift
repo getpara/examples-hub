@@ -83,31 +83,12 @@ class SolanaWalletUITests: XCTestCase {
         // Ensure we start from a logged out state
         TestHelper.ensureLoggedOut(app: app)
 
-        // Wait for main screen
-        let emailButton = app.buttons["emailAuthButton"]
-        XCTAssertTrue(emailButton.waitForExistence(timeout: TestConstants.longTimeout))
-
-        // Start email signup
-        emailButton.tap()
-
-        // Enter email
-        let emailField = app.textFields["emailInputField"]
-        emailField.tap()
-        emailField.typeText(testEmail)
-        app.buttons["continueButton"].tap()
-
-        // Verify email
-        XCTAssertTrue(app.navigationBars["Verify Email"].waitForExistence(timeout: TestConstants.defaultTimeout))
-        enterVerificationCode(app: app)
-        app.buttons["verifyButton"].tap()
-
-        // Choose passkey
-        XCTAssertTrue(app.navigationBars["Secure Your Account"].waitForExistence(timeout: TestConstants.defaultTimeout))
-        app.buttons["passkeyButton"].tap()
-
-        // Complete biometric setup
-        performBiometricAuthentication(app: app)
-        waitForWalletsView(app: app)
+        // Perform email authentication with passkey
+        TestHelper.performEmailAuthWithPasskey(app: app, email: testEmail)
+        
+        // Wait for wallets view
+        let walletsView = app.otherElements["walletsView"]
+        XCTAssertTrue(walletsView.waitForExistence(timeout: TestConstants.longTimeout))
 
         // Switch to Solana
         app.buttons["Solana"].tap()

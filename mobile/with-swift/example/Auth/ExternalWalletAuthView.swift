@@ -11,12 +11,13 @@ import SwiftUI
 struct ExternalWalletAuthView: View {
     @EnvironmentObject private var paraManager: ParaManager
     @EnvironmentObject private var appRootManager: AppRootManager
-    @EnvironmentObject private var metaMaskConnector: MetaMaskConnector
+    @Environment(\.dismiss) private var dismiss
 
     @State private var isConnecting = false
     @State private var error: Error?
     @State private var showError = false
     @State private var showMetaMask = false
+    @State private var metaMaskConnector: MetaMaskConnector?
 
     var body: some View {
         VStack(spacing: 20) {
@@ -51,9 +52,20 @@ struct ExternalWalletAuthView: View {
             Text(error?.localizedDescription ?? "Unknown error occurred")
         }
         .navigationDestination(isPresented: $showMetaMask) {
-            MetaMaskDemoView()
+            if let connector = metaMaskConnector {
+                MetaMaskDemoView()
+                    .environmentObject(connector)
+            }
         }
         .navigationTitle("External Wallet")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button("Cancel") {
+                    dismiss()
+                }
+            }
+        }
     }
 
     private func connectMetaMask() {
@@ -61,7 +73,22 @@ struct ExternalWalletAuthView: View {
 
         Task {
             do {
-                try await metaMaskConnector.connect()
+                // Initialize MetaMask connector if needed
+                if metaMaskConnector == nil {
+                    let bundleId = Bundle.main.bundleIdentifier ?? ""
+                    let config = MetaMaskConfig(
+                        appName: "ExampleApp",
+                        appId: bundleId,
+                        apiVersion: "1.0",
+                    )
+                    metaMaskConnector = MetaMaskConnector(
+                        para: paraManager,
+                        appUrl: "https://\(bundleId)",
+                        config: config,
+                    )
+                }
+
+                try await metaMaskConnector?.connect()
                 showMetaMask = true
             } catch {
                 self.error = error
@@ -73,12 +100,9 @@ struct ExternalWalletAuthView: View {
 }
 
 #Preview {
-    ExternalWalletAuthView()
-        .environmentObject(ParaManager(environment: .sandbox, apiKey: "preview-key"))
-        .environmentObject(AppRootManager())
-        .environmentObject(MetaMaskConnector(
-            para: ParaManager(environment: .sandbox, apiKey: "preview-key"),
-            appUrl: "https://example.com",
-            config: MetaMaskConfig(appName: "Example App", appId: "example-app"),
-        ))
+    NavigationStack {
+        ExternalWalletAuthView()
+            .environmentObject(ParaManager(environment: .sandbox, apiKey: "preview-key"))
+            .environmentObject(AppRootManager())
+    }
 }
