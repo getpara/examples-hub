@@ -23,7 +23,9 @@ export class CustomAuthExamplePage {
 
   async openAuthModal() {
     await this.page.waitForTimeout(500);
-    await this.page.getByTestId('open-modal-button').click();
+    // Try both possible button test IDs (Vue uses open-modal-button, Svelte uses auth-connect-button)
+    const openModalButton = await this.page.getByTestId('open-modal-button').or(this.page.getByTestId('auth-connect-button'));
+    await openModalButton.click();
     await this.page.waitForTimeout(1000);
   }
 
@@ -70,6 +72,61 @@ export class CustomAuthExamplePage {
     };
   }
 
+  async createUserWithEmailAndPassword({
+    context,
+    email,
+    password = 'abc123@-$}"',
+  }: {
+    context: BrowserContext;
+    email?: string;
+    password?: string;
+  }) {
+    const userEmail = email || getRandomEmail();
+    
+    // Switch to email tab if needed
+    await this.page.getByTestId('email-tab').click();
+    await this.page.waitForTimeout(300);
+
+    // Enter email
+    await this.page.getByTestId('email-input').fill(userEmail);
+    await this.page.getByTestId('continue-email-button').click();
+    
+    // Wait for OTP screen
+    await this.page.waitForTimeout(3000);
+    
+    // Enter OTP code (123456 for test environment)
+    for (let i = 0; i < 6; i++) {
+      await this.page.getByTestId(`otp-input-${i}`).fill((i + 1).toString());
+    }
+    
+    // Handle password creation popup
+    const popupPromise = this.page.waitForEvent('popup');
+    await this.page.getByTestId('verify-wallet-button').click();
+    
+    const popup = await popupPromise;
+    const authPortal = new AuthPortalPage(popup);
+    
+    // Choose password option in popup
+    await popup.getByRole('button', { name: 'Choose Password' }).click();
+    await popup.getByRole('textbox', { name: 'Enter password' }).click();
+    await popup.getByRole('textbox', { name: 'Enter password' }).fill(password);
+    await popup.getByRole('textbox', { name: 'Confirm password' }).click();
+    await popup.getByRole('textbox', { name: 'Confirm password' }).fill(password);
+    await popup.getByRole('button', { name: 'Save Password' }).click();
+    
+    // Wait for popup to close
+    await popup.waitForEvent('close');
+    
+    // Wait for modal to close and wallet to be connected
+    await this.page.waitForTimeout(2000);
+    await expect(this.page.getByTestId('wallet-connected')).toBeVisible();
+    
+    return {
+      email: userEmail,
+      password,
+    };
+  }
+
   async loginWithEmail({
     context,
     credential,
@@ -92,6 +149,41 @@ export class CustomAuthExamplePage {
     const popup = await popupPromise;
     const authPortal = new AuthPortalPage(popup);
     await authPortal.login(context, credential);
+    
+    // Wait for login to complete
+    await this.page.waitForTimeout(2000);
+    await expect(this.page.getByTestId('wallet-connected')).toBeVisible();
+  }
+
+  async loginWithEmailAndPassword({
+    email,
+    password,
+  }: {
+    email: string;
+    password: string;
+  }) {
+    // Enter email
+    await this.page.getByTestId('email-tab').click();
+    await this.page.waitForTimeout(300);
+    await this.page.getByTestId('email-input').fill(email);
+    await this.page.getByTestId('continue-email-button').click();
+    
+    // Handle password login popup
+    const popupPromise = this.page.waitForEvent('popup');
+    await this.page.waitForTimeout(1000);
+    
+    const popup = await popupPromise;
+    
+    // Click Login button
+    await popup.getByRole('button', { name: 'Login' }).click();
+    
+    // Enter password in the popup
+    await popup.getByRole('textbox', { name: 'Enter password' }).click();
+    await popup.getByRole('textbox', { name: 'Enter password' }).fill(password);
+    await popup.getByRole('button', { name: 'Continue' }).click();
+    
+    // Wait for popup to close
+    await popup.waitForEvent('close');
     
     // Wait for login to complete
     await this.page.waitForTimeout(2000);
@@ -148,17 +240,22 @@ export class CustomAuthExamplePage {
 
   async signMessage(message: string): Promise<string | null> {
     // Fill in the message
-    await this.page.locator('#message').fill(message);
+    const messageInput = await this.page.getByTestId('sign-message-input');
+    await messageInput.click();
+    await messageInput.clear();
+    await messageInput.fill(message);
     
     // Click sign button
     await this.page.getByTestId('sign-message-button').click();
     
-    // Wait for signature
-    await this.page.waitForTimeout(2000);
+    // Wait for signature to appear
+    const signatureDisplay = await this.page.waitForSelector('[data-testid="sign-signature-display"]', {
+      state: 'visible',
+      timeout: 10000
+    });
     
     // Get signature from the page
-    const signatureElement = await this.page.locator('.font-mono').first();
-    const signature = await signatureElement.textContent();
+    const signature = await signatureDisplay.textContent();
     
     return signature;
   }

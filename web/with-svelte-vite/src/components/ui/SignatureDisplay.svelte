@@ -7,7 +7,7 @@
     <h3 class="text-sm font-medium text-gray-900">Signature</h3>
   </div>
   <div class="px-6 py-3">
-    <p class="text-sm text-gray-600 font-mono break-all">
+    <p class="text-sm text-gray-600 font-mono break-all" data-testid="sign-signature-display">
       {signature}
     </p>
   </div>

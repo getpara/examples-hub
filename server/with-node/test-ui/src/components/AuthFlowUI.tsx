@@ -314,6 +314,7 @@ const AuthFlowUI: React.FC = () => {
               <button
                 onClick={() => handleAuthTypeSelect("pregen")}
                 disabled={loading}
+                data-testid="pregen-flow-button"
                 className="w-full p-4 bg-white border-2 border-gray-200 rounded-lg flex items-center justify-between hover:border-blue-500 transition-colors disabled:opacity-50">
                 <div>
                   <h3 className="font-medium">Pre-Generated Wallet Flow</h3>
@@ -328,6 +329,7 @@ const AuthFlowUI: React.FC = () => {
               <button
                 onClick={() => handleAuthTypeSelect("session")}
                 disabled={loading}
+                data-testid="session-flow-button"
                 className="w-full p-4 bg-white border-2 border-gray-200 rounded-lg flex items-center justify-between hover:border-blue-500 transition-colors disabled:opacity-50">
                 <div>
                   <h3 className="font-medium">Session Flow Client</h3>
@@ -360,6 +362,7 @@ const AuthFlowUI: React.FC = () => {
                   id="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  data-testid="email-input"
                   className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Enter user's email"
                 />
@@ -371,6 +374,7 @@ const AuthFlowUI: React.FC = () => {
                     setError("");
                     setStep("initial");
                   }}
+                  data-testid="back-to-auth-type-button"
                   className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100">
                   Back
                 </button>
@@ -378,6 +382,7 @@ const AuthFlowUI: React.FC = () => {
                   type="button"
                   onClick={handleEmailSubmit}
                   disabled={loading || !email}
+                  data-testid={authType === "pregen" ? "create-verify-wallet-button" : "authenticate-button"}
                   className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center disabled:opacity-50 disabled:cursor-not-allowed">
                   {loading ? (
                     <>
@@ -413,6 +418,7 @@ const AuthFlowUI: React.FC = () => {
                   key={api.id}
                   onClick={() => handleAPISelect(api.id)}
                   disabled={step === "call-api"}
+                  data-testid={`api-button-${api.id}`}
                   className={`p-3 bg-white border-2 rounded-lg text-left hover:border-blue-500 transition-colors ${
                     selectedAPI === api.id && step === "call-api"
                       ? "border-blue-600 ring-2 ring-blue-300"
@@ -442,6 +448,7 @@ const AuthFlowUI: React.FC = () => {
 
                 {result && (
                   <div
+                    data-testid={result.success ? "api-result-success" : "api-result-error"}
                     className={`p-4 rounded-lg ${
                       result.success ? "bg-green-50 border border-green-200" : "bg-red-50 border border-red-200"
                     } mb-4`}>
@@ -453,7 +460,7 @@ const AuthFlowUI: React.FC = () => {
                         />
                         <div className="flex-1 min-w-0">
                           <h3 className="font-semibold text-green-800">Success!</h3>
-                          <pre className="mt-2 text-xs bg-white p-2 rounded overflow-auto max-h-48 whitespace-pre-wrap break-words">
+                          <pre data-testid="api-result-data" className="mt-2 text-xs bg-white p-2 rounded overflow-auto max-h-48 whitespace-pre-wrap break-words">
                             {JSON.stringify(result.data, null, 2)}
                           </pre>
                         </div>
@@ -461,7 +468,7 @@ const AuthFlowUI: React.FC = () => {
                     ) : (
                       <div className="text-red-800">
                         <h3 className="font-semibold">Error</h3>
-                        <p className="mt-1 break-words">{result.message}</p>
+                        <p data-testid="api-result-error-message" className="mt-1 break-words">{result.message}</p>
                       </div>
                     )}
                   </div>
@@ -475,12 +482,14 @@ const AuthFlowUI: React.FC = () => {
                         setError("");
                         setStep("api-selection");
                       }}
+                      data-testid="choose-different-api-button"
                       className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100 text-sm">
                       Choose different API
                     </button>
                     <button
                       onClick={callSelectedAPI}
                       disabled={loading}
+                      data-testid={`call-api-button-${selectedAPI}`}
                       className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center">
                       {`Call ${getApiDisplayName(selectedAPI)} API Again`}
                     </button>
@@ -494,12 +503,14 @@ const AuthFlowUI: React.FC = () => {
                         setError("");
                         setStep("api-selection");
                       }}
+                      data-testid="back-to-api-selection-button"
                       className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100 text-sm">
                       Back to API Selection
                     </button>
                     <button
                       onClick={callSelectedAPI}
                       disabled={loading}
+                      data-testid={`call-api-button-${selectedAPI}`}
                       className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center">
                       {`Call ${getApiDisplayName(selectedAPI)} API`}
                     </button>
@@ -516,6 +527,7 @@ const AuthFlowUI: React.FC = () => {
             <div className="mt-8 border-t pt-4">
               <button
                 onClick={resetFlow}
+                data-testid="start-over-button"
                 className="text-sm text-gray-600 hover:text-blue-600">
                 Start Over
               </button>

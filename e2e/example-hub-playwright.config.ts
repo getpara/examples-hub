@@ -13,7 +13,7 @@ export default defineConfig({
   reporter: [['html']],
   use: {
     baseURL: `http://localhost:${process.env.APP_PORT}`,
-
+    headless: true,
     trace: 'retain-on-failure',
     video: 'retain-on-failure',
   },

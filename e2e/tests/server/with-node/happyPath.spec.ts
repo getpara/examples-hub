@@ -8,7 +8,7 @@ const MOCK_EMAIL = 'teste2e+node@test.getpara.com';
 const MOCK_CREDENTIAL = {
   credentialId: '3IObcR06qEP2aLNik33r+Wxi75yJuYuV2B5/AjYcyFI=',
   isResidentCredential: true,
-  rpId: 'app.sandbox.usecapsule.com',
+  rpId: 'app.beta.usecapsule.com',
   privateKey:
     'MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgOG6YXvNzsqeJ+rs/C4W4lFOsN5Fen7XrEXvra+yRAtihRANCAAR+fA+MAG9iGVubgUub+CqojrSTXX+g5uqA3u02GsJum2YAxJAl7qhd+h88MgMBzo64lvqNjarJvms+iVSatjF5',
   userHandle: 'e5XeO+i1zARiVXLp/WHo7a5P7LxVW7BgqO8a5pjFPhU=',
@@ -41,7 +41,7 @@ test.describe('para modal', () => {
     const page = await context.newPage();
     await webauthn.setIsUserVerifyingPlatformAuthenticatorAvailable(page);
     await page.goto('/');
-    await page.getByRole('button', { name: 'Pre-Generated Wallet Flow' }).click();
+    await page.getByTestId('pregen-flow-button').click();
 
     const randomHexString = crypto.randomBytes(5).toString('hex');
     const email = `teste2e+${randomHexString}@test.usecapsule.com`;
@@ -55,11 +55,11 @@ test.describe('para modal', () => {
     await page.getByRole('button', { name: 'Start Over' }).click();
     await page.getByRole('button', { name: 'Session Flow Client' }).click();
 
-    await page.getByPlaceholder("Enter user's email").click();
-    await page.getByPlaceholder("Enter user's email").fill(MOCK_EMAIL);
+    await page.getByTestId('email-input').click();
+    await page.getByTestId('email-input').fill(MOCK_EMAIL);
     const page1Promise = page.waitForEvent('popup');
     await page.waitForTimeout(500);
-    await page.getByRole('button', { name: 'Authenticate' }).click();
+    await page.getByTestId('authenticate-button').click();
 
     const page1 = await page1Promise;
     const page1Url = page1.url();

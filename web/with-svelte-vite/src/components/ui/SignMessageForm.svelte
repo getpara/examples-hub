@@ -14,6 +14,7 @@
       id="message"
       value={message}
       on:input={(e) => onMessageChange(e.currentTarget.value)}
+      data-testid="sign-message-input"
       class="w-full px-4 py-2 border border-gray-300 rounded-none focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
       rows="4"
       placeholder="Enter your message here..."></textarea>

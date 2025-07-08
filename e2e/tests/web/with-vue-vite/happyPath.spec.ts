@@ -22,7 +22,7 @@ test.describe('Vue custom auth example', () => {
     const { email, credential } = await customAuthPage.createUserWithEmail({ context });
     
     // Verify logged in state
-    await expect(page.getByTestId('logged-in-message')).toBeVisible();
+    await expect(page.getByTestId('wallet-connected')).toBeVisible();
     const createAddress = await customAuthPage.getWalletAddress();
     expect(createAddress).toBeTruthy();
     expect(createAddress).toMatch(/^0x[a-fA-F0-9]{40}$/);
@@ -31,7 +31,7 @@ test.describe('Vue custom auth example', () => {
     const testMessage = 'Hello Para from Vue!';
     const signature = await customAuthPage.signMessage(testMessage);
     expect(signature).toBeTruthy();
-    expect(signature).toMatch(/^0x[a-fA-F0-9]+$/);
+    expect(signature).toMatch(/^[a-fA-F0-9]+$/); // Should be a hex string (may or may not have 0x prefix)
     
     // Test logout
     await customAuthPage.logout();

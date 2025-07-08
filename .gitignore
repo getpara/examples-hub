@@ -29,8 +29,14 @@ jspm_packages/
 
 # dotenv environment variables file
 .env
+.env.*
+!.env.example
+.env.local
+.env.development
 .env.test
 .env.production
+.env.beta
+.env.sandbox
 
 # Next.js
 .next/
@@ -157,3 +163,8 @@ playwright-report
 test-results
 
 Claude.md
+
+# act (GitHub Actions local runner)
+.actrc
+.github/workflows/event.json
+.act/

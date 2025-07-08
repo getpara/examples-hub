@@ -13,6 +13,9 @@
     "lint": "eslint . --max-warnings 0"
   },
   "dependencies": {
+    "@cosmjs/cosmwasm-stargate": "^0.33.1",
+    "@cosmjs/stargate": "^0.33.1",
+    "@cosmjs/tendermint-rpc": "^0.33.1",
     "@getpara/cosmos-wallet-connectors": "2.0.0-alpha.29",
     "@getpara/evm-wallet-connectors": "2.0.0-alpha.29",
     "@getpara/graz": "2.0.0-alpha.3",

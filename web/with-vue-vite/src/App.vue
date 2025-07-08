@@ -31,6 +31,7 @@
             id="message"
             v-model="message"
             rows="3"
+            data-testid="sign-message-input"
             class="w-full px-3 py-2 border border-gray-300 rounded-none focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
             placeholder="Enter your message here..."
           />
@@ -47,7 +48,7 @@
       
       <div v-if="signature" class="p-4 bg-gray-50 border border-gray-200 rounded-none">
         <h3 class="text-sm font-medium text-gray-900 mb-2">Signature</h3>
-        <p class="text-xs font-mono text-gray-700 break-all">{{ signature }}</p>
+        <p class="text-xs font-mono text-gray-700 break-all" data-testid="sign-signature-display">{{ signature }}</p>
       </div>
       
       <div v-if="signError" class="p-4 bg-gray-100 border border-gray-300 rounded-none">
