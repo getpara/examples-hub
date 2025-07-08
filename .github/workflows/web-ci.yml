@@ -1,0 +1,319 @@
+name: Web CI
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'web/**'
+      - '.github/workflows/web-ci.yml'
+      - '.env.ci'
+      - 'package.json'
+      - 'yarn.lock'
+  
+  push:
+    branches: [main]
+    paths:
+      - 'web/**'
+      - '.github/workflows/web-ci.yml'
+      - '.env.ci'
+      - 'package.json'
+      - 'yarn.lock'
+  
+  workflow_dispatch:
+    inputs:
+      skip_build:
+        description: 'Skip build step (faster iteration)'
+        type: boolean
+        default: false
+      skip_e2e:
+        description: 'Skip E2E tests'
+        type: boolean
+        default: false
+
+concurrency:
+  group: web-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "20.19.0"
+
+jobs:
+  # Collect all projects in web folder
+  collect-projects:
+    runs-on: ubuntu-latest
+    outputs:
+      projects: ${{ steps.collect.outputs.projects }}
+      e2e-matrix: ${{ steps.collect.outputs.e2e-matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Collect projects
+        id: collect
+        run: |
+          # Find all projects with package.json in web folder
+          projects="["
+          first=true
+          
+          for framework_dir in web/*; do
+            if [ -d "$framework_dir" ]; then
+              framework_name=$(basename "$framework_dir")
+              
+              # Check if framework dir itself has package.json (single project)
+              if [ -f "$framework_dir/package.json" ]; then
+                if [ "$first" != "true" ]; then projects+=","; fi
+                projects+="{\"path\":\"$framework_dir\",\"name\":\"$framework_name\"}"
+                first=false
+              else
+                # Check subdirectories for multiple projects
+                for project_dir in $framework_dir/*; do
+                  if [ -d "$project_dir" ] && [ -f "$project_dir/package.json" ]; then
+                    project_name=$(basename "$project_dir")
+                    if [ "$first" != "true" ]; then projects+=","; fi
+                    projects+="{\"path\":\"$project_dir\",\"name\":\"$framework_name/$project_name\"}"
+                    first=false
+                  fi
+                done
+              fi
+            fi
+          done
+          
+          projects+="]"
+          echo "projects=$projects" >> $GITHUB_OUTPUT
+          
+          # E2E matrix (framework level only)
+          e2e_matrix='[{"framework":"react-vite","name":"React Vite"},{"framework":"react-nextjs","name":"React Next.js"},{"framework":"vue","name":"Vue"},{"framework":"svelte","name":"Svelte"}]'
+          echo "e2e-matrix=$e2e_matrix" >> $GITHUB_OUTPUT
+          
+          # Debug output
+          echo "Found projects:"
+          echo "$projects" | jq .
+
+  # Test all projects - combined job for efficiency
+  test-project:
+    needs: collect-projects
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 3  # Limit concurrent jobs to manage resources
+      matrix:
+        project: ${{ fromJson(needs.collect-projects.outputs.projects) }}
+    
+    name: Test ${{ matrix.project.name }}
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install yarn
+        run: npm install -g yarn
+
+      - name: Load CI environment variables
+        run: |
+          if [ -f .env.ci ]; then
+            cat .env.ci >> $GITHUB_ENV
+          fi
+
+      - name: Test Project
+        id: test
+        run: |
+          cd ${{ matrix.project.path }}
+          
+          # Initialize result tracking
+          PROJECT_NAME="${{ matrix.project.name }}"
+          LINT_STATUS="⏭️ skipped"
+          TYPECHECK_STATUS="⏭️ skipped"
+          BUILD_STATUS="⏭️ skipped"
+          FAILED=false
+          START_TIME=$(date +%s)
+          
+          # Create summary header for this project
+          echo "### Testing: $PROJECT_NAME" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Install dependencies
+          echo "📦 Installing dependencies..."
+          if yarn install --frozen-lockfile; then
+            echo "✅ Dependencies installed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Failed to install dependencies" >> $GITHUB_STEP_SUMMARY
+            FAILED=true
+            exit 1
+          fi
+          
+          # Lint
+          if grep -q '"lint"' package.json; then
+            echo ""
+            echo "🔍 Running lint..."
+            if yarn lint; then
+              LINT_STATUS="✅ passed"
+              echo "- Lint: ✅ passed" >> $GITHUB_STEP_SUMMARY
+            else
+              LINT_STATUS="❌ failed"
+              FAILED=true
+              echo "- Lint: ❌ failed" >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            echo "- Lint: ⏭️ no script" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          # Typecheck
+          if grep -q '"typecheck"' package.json; then
+            echo ""
+            echo "📝 Running typecheck..."
+            if yarn typecheck; then
+              TYPECHECK_STATUS="✅ passed"
+              echo "- Typecheck: ✅ passed" >> $GITHUB_STEP_SUMMARY
+            else
+              TYPECHECK_STATUS="❌ failed"
+              FAILED=true
+              echo "- Typecheck: ❌ failed" >> $GITHUB_STEP_SUMMARY
+              # Skip build if typecheck fails
+              echo "⏭️ Skipping build due to typecheck failure"
+              BUILD_STATUS="⏭️ skipped (typecheck failed)"
+              echo "- Build: ⏭️ skipped (typecheck failed)" >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            echo "- Typecheck: ⏭️ no script" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          # Build (only if typecheck passed or doesn't exist)
+          if [[ "$TYPECHECK_STATUS" != "❌ failed" ]] && [[ "${{ github.event.inputs.skip_build }}" != "true" ]]; then
+            if grep -q '"build"' package.json; then
+              echo ""
+              echo "🔨 Running build..."
+              if yarn build; then
+                BUILD_STATUS="✅ passed"
+                echo "- Build: ✅ passed" >> $GITHUB_STEP_SUMMARY
+              else
+                BUILD_STATUS="❌ failed"
+                FAILED=true
+                echo "- Build: ❌ failed" >> $GITHUB_STEP_SUMMARY
+              fi
+            else
+              echo "- Build: ⏭️ no script" >> $GITHUB_STEP_SUMMARY
+            fi
+          fi
+          
+          # Calculate execution time
+          END_TIME=$(date +%s)
+          DURATION=$((END_TIME - START_TIME))
+          echo "- Duration: ${DURATION}s" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Cleanup
+          echo ""
+          echo "🧹 Cleaning up node_modules..."
+          rm -rf node_modules
+          
+          # Set outputs for summary
+          echo "project_name=$PROJECT_NAME" >> $GITHUB_OUTPUT
+          echo "lint_status=$LINT_STATUS" >> $GITHUB_OUTPUT
+          echo "typecheck_status=$TYPECHECK_STATUS" >> $GITHUB_OUTPUT
+          echo "build_status=$BUILD_STATUS" >> $GITHUB_OUTPUT
+          echo "duration=$DURATION" >> $GITHUB_OUTPUT
+          
+          if [ "$FAILED" = true ]; then
+            echo "failed=true" >> $GITHUB_OUTPUT
+            exit 1
+          else
+            echo "failed=false" >> $GITHUB_OUTPUT
+          fi
+
+  # E2E tests
+  e2e:
+    needs: [collect-projects, test-project]
+    if: |
+      always() && 
+      needs.collect-projects.result == 'success' &&
+      github.event.inputs.skip_e2e != 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        framework: ${{ fromJson(needs.collect-projects.outputs.e2e-matrix) }}
+    
+    name: E2E ${{ matrix.framework.name }}
+    
+    env:
+      PARA_API_KEY_BETA: ${{ secrets.PARA_API_KEY_BETA }}
+      PARA_API_KEY_SANDBOX: ${{ secrets.PARA_API_KEY_SANDBOX }}
+      PARA_ENVIRONMENT: BETA
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install yarn
+        run: npm install -g yarn
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Install Playwright
+        run: npx playwright install chromium
+
+      - name: Run E2E Tests
+        id: e2e-test
+        run: |
+          echo "### E2E Test: ${{ matrix.framework.name }}" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ matrix.framework.framework }}" = "react-nextjs" ]; then
+            xvfb-run yarn test:react-nextjs
+          else
+            xvfb-run yarn test:${{ matrix.framework.framework }}
+          fi
+          
+          if [ $? -eq 0 ]; then
+            echo "✅ E2E tests passed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ E2E tests failed" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
+
+      - name: Upload Playwright Report
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report-${{ matrix.framework.framework }}
+          path: playwright-report/
+          retention-days: 7
+
+  # Summary job
+  summary:
+    if: always()
+    needs: [test-project, e2e]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate Summary
+        run: |
+          echo "# 📊 Web CI Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Overall status
+          PROJECT_STATUS="${{ needs.test-project.result }}"
+          E2E_STATUS="${{ needs.e2e.result }}"
+          
+          echo "## Overall Status" >> $GITHUB_STEP_SUMMARY
+          echo "| Component | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Project Tests | ${{ needs.test-project.result == 'success' && '✅ Passed' || needs.test-project.result == 'failure' && '❌ Failed' || '⏭️ Skipped' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| E2E Tests | ${{ needs.e2e.result == 'success' && '✅ Passed' || needs.e2e.result == 'failure' && '❌ Failed' || '⏭️ Skipped' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Final result
+          if [ "$PROJECT_STATUS" = "success" ] && [ "$E2E_STATUS" = "success" ]; then
+            echo "## ✅ All checks passed!" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "## ❌ Some checks failed" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Please check the individual job logs for details." >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi

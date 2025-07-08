@@ -1,0 +1,18 @@
+{
+  "pull_request": {
+    "number": 1,
+    "head": {
+      "ref": "feature-branch",
+      "sha": "1234567890abcdef"
+    },
+    "base": {
+      "ref": "main"
+    }
+  },
+  "repository": {
+    "name": "examples-hub",
+    "owner": {
+      "login": "your-org"
+    }
+  }
+}
