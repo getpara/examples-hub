@@ -15,8 +15,8 @@
     "postinstall": "yarn setup-para"
   },
   "dependencies": {
-    "@getpara/react-sdk": "2.0.0-alpha.26",
-    "@getpara/solana-signers-v2-integration": "2.0.0-alpha.26",
+    "@getpara/react-sdk": "2.0.0-alpha.31",
+    "@getpara/solana-signers-v2-integration": "2.0.0-alpha.31",
     "@solana-program/system": "^0.7.0",
     "@solana/addresses": "^2.1.1",
     "@solana/codecs-strings": "^2.1.1",
