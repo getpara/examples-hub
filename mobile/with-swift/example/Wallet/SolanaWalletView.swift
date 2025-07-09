@@ -350,24 +350,6 @@ struct SolanaWalletView: View {
                 .background(Color(.systemBackground))
                 .cornerRadius(16)
                 .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
-
-                // Logout
-                Button("Logout") {
-                    Task {
-                        isLoading = true
-                        do {
-                            try await paraManager.logout()
-                            appRootManager.currentRoot = .authentication
-                        } catch {
-                            result = ("Error", "Failed to logout: \(error.localizedDescription)")
-                        }
-                        isLoading = false
-                    }
-                }
-                .buttonStyle(.bordered)
-                .tint(.red)
-                .disabled(isLoading)
-                .padding(.top, 12)
             }
             .padding()
         }

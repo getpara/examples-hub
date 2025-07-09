@@ -46,8 +46,6 @@ struct EmailPhoneInput: View {
 
             if shouldShowContinueButton {
                 continueButton
-                    .transition(.opacity)
-                    .allowsHitTesting(true)
             }
         }
         .animation(.easeInOut(duration: 0.3), value: shouldShowContinueButton)

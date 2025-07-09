@@ -67,7 +67,6 @@ struct CosmosWalletView: View {
                 messageSigningCard
                 transactionOperationsCard
                 walletManagementCard
-                logoutButton
             }
             .padding()
         }
@@ -259,14 +258,6 @@ struct CosmosWalletView: View {
         }
     }
 
-    private var logoutButton: some View {
-        Button("Logout", action: logout)
-            .buttonStyle(.bordered)
-            .tint(.red)
-            .disabled(isLoading)
-            .padding(.top, 12)
-    }
-
     // MARK: - Actions
 
     private func copyAddress() {
@@ -351,19 +342,6 @@ struct CosmosWalletView: View {
                 showResult("Wallets", addresses.joined(separator: "\n"))
             } catch {
                 showResult("Error", "Failed to fetch wallets: \(error.localizedDescription)")
-            }
-            isLoading = false
-        }
-    }
-
-    private func logout() {
-        isLoading = true
-        Task {
-            do {
-                try await paraManager.logout()
-                appRootManager.currentRoot = .authentication
-            } catch {
-                showResult("Error", "Failed to logout: \(error.localizedDescription)")
             }
             isLoading = false
         }

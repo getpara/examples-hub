@@ -291,8 +291,15 @@ struct WalletsView: View {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Logout") {
                         Task {
-                            try! await paraManager.logout()
-                            appRootManager.setAuthenticated(false)
+                            do {
+                                await MainActor.run {
+                                    appRootManager.setAuthenticated(false)
+                                }
+                                try await paraManager.logout()
+                            } catch {
+                                // Handle logout error - could show an alert or log the error
+                                print("Logout failed: \(error.localizedDescription)")
+                            }
                         }
                     }
                     .accessibilityIdentifier("logoutButton")
