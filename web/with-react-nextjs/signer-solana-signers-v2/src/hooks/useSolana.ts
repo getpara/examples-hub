@@ -16,6 +16,5 @@ export function useSolana() {
   return {
     rpc: kitRpc, // For general usage (transaction utilities)
     paraRpc: paraRpc, // For Para signer
-    rpcUrl: DEVNET_RPC_URL,
   };
 }

@@ -6,9 +6,9 @@ import { createParaSolanaSigner, ParaSolanaSigner } from "@getpara/solana-signer
 import { useSolana } from "./useSolana";
 
 export function useParaSigner() {
-  const { data: account } = useAccount();
+  const account = useAccount();
   const client = useClient();
-  const { rpc, paraRpc, rpcUrl } = useSolana();
+  const { rpc, paraRpc } = useSolana();
   const [signer, setSigner] = useState<ParaSolanaSigner | null>(null);
 
   useEffect(() => {

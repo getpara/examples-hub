@@ -30,8 +30,8 @@ pnpm install
 
 ## Key Dependencies
 
-- `@getpara/react-sdk` (v2.0.0-alpha.26) - Para React SDK for wallet integration
-- `@getpara/solana-signers-v2-integration` (v2.0.0-alpha.27) - Para Solana v2 signer integration
+- `@getpara/react-sdk` (v2.0.0-alpha.31) - Para React SDK for wallet integration
+- `@getpara/solana-signers-v2-integration` (v2.0.0-alpha.31) - Para Solana v2 signer integration
 - `@solana/kit` (^2.1.1) - Modern Solana JavaScript SDK
 - `@solana/addresses` (^2.1.1) - Solana address utilities
 - `@solana/keys` (^2.1.1) - Solana key utilities

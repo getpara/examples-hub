@@ -19,7 +19,7 @@ export default function MessageSigningPage() {
   }>({ show: false, type: "success", message: "" });
 
   const { signer } = useParaSigner();
-  const { data: account } = useAccount();
+  const account = useAccount();
   const { data: wallet } = useWallet();
 
   const walletId = wallet?.id;

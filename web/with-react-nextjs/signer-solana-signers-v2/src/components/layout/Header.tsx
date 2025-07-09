@@ -9,12 +9,12 @@ export default function Header() {
   const pathname = usePathname();
   const { openModal } = useModal();
   const { data: wallet } = useWallet();
-  const { data: account } = useAccount();
+  const account = useAccount();
   const { setSelectedWallet } = useWalletState();
 
   useEffect(() => {
     if (account?.isConnected && wallet?.type !== "SOLANA") {
-      const solanaWallet = account.wallets?.find((w: any) => w.type === "SOLANA");
+      const solanaWallet = account.embedded.wallets?.find((w: any) => w.type === "SOLANA");
       if (solanaWallet) {
         setSelectedWallet({ id: solanaWallet.id, type: "SOLANA" });
       }
