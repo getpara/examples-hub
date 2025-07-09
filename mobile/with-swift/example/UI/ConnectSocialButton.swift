@@ -39,7 +39,7 @@ struct ConnectSocialButton: View {
                 }
             }
             .frame(width: 110, height: 83)
-            .background(.lightGray)
+            .background(Color("paraLightGray"))
             .clipShape(RoundedRectangle(cornerRadius: 12))
         }
         .disabled(isLoading)
