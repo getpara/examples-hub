@@ -1,10 +1,10 @@
 {
   "name": "@getpara/cosmos-wallet-connectors",
-  "version": "2.0.0-alpha.30",
+  "version": "2.0.0-alpha.31",
   "dependencies": {
     "@getpara/graz": "2.0.0-alpha.3",
-    "@getpara/react-common": "2.0.0-alpha.30",
-    "@getpara/web-sdk": "2.0.0-alpha.30",
+    "@getpara/react-common": "2.0.0-alpha.31",
+    "@getpara/web-sdk": "2.0.0-alpha.31",
     "@leapwallet/cosmos-social-login-capsule-provider": "^0.0.41",
     "starknet": "^6.11.0",
     "zustand": "^4.5.2",

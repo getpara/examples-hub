@@ -1,17 +1,17 @@
 {
   "name": "@getpara/solana-signers-v2-integration",
-  "version": "2.0.0-alpha.30",
+  "version": "2.0.0-alpha.31",
   "dependencies": {
-    "@getpara/core-sdk": "2.0.0-alpha.30",
+    "@getpara/core-sdk": "2.0.0-alpha.31",
     "bs58": "^6.0.0"
   },
   "devDependencies": {
-    "@solana/signers": "^2.2.1",
     "@solana/addresses": "^2.2.1",
-    "@solana/transactions": "^2.2.1",
     "@solana/keys": "^2.2.1",
     "@solana/rpc-api": "^2.2.1",
     "@solana/rpc-spec": "^2.2.1",
+    "@solana/signers": "^2.2.1",
+    "@solana/transactions": "^2.2.1",
     "typescript": "^5.8.3"
   },
   "exports": {
@@ -28,12 +28,12 @@
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
   "peerDependencies": {
-    "@solana/signers": "2.x",
     "@solana/addresses": "2.x",
-    "@solana/transactions": "2.x",
     "@solana/keys": "2.x",
     "@solana/rpc-api": "2.x",
-    "@solana/rpc-spec": "2.x"
+    "@solana/rpc-spec": "2.x",
+    "@solana/signers": "2.x",
+    "@solana/transactions": "2.x"
   },
   "scripts": {
     "build": "rm -rf dist && node ./scripts/build.mjs && yarn build:types",

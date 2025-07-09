@@ -1,3 +1,36 @@
+# Release (Wed Jul 09 2025)
+
+## Package Versions
+- @getpara/web-sdk@2.0.0-alpha.31
+- @getpara/wagmi-v2-integration@2.0.0-alpha.31
+- @getpara/wagmi-v2-connector@2.0.0-alpha.31
+- @getpara/viem-v2-integration@2.0.0-alpha.31
+- @getpara/viem-v1-integration@2.0.0-alpha.31
+- @getpara/user-management-client@2.0.0-alpha.31
+- @getpara/solana-web3.js-v1-integration@2.0.0-alpha.31
+- @getpara/solana-wallet-connectors@2.0.0-alpha.31
+- @getpara/solana-signers-v2-integration@2.0.0-alpha.31
+- @getpara/server-sdk@2.0.0-alpha.31
+- @getpara/react-sdk@2.0.0-alpha.31
+- @getpara/react-native-wallet@2.0.0-alpha.31
+- @getpara/react-components@2.0.0-alpha.31
+- @getpara/react-component-library@1.0.0-alpha.26
+- @getpara/react-common@2.0.0-alpha.31
+- @getpara/evm-wallet-connectors@2.0.0-alpha.31
+- @getpara/ethers-v6-integration@2.0.0-alpha.31
+- @getpara/ethers-v5-integration@2.0.0-alpha.31
+- @getpara/cosmos-wallet-connectors@2.0.0-alpha.31
+- @getpara/cosmjs-v0-integration@2.0.0-alpha.31
+- @getpara/core-sdk@2.0.0-alpha.31
+- @getpara/core-components@2.0.0-alpha.31
+
+### Features
+- Add @solana/signers Para signer (#1066) - e069275b2
+
+### Fixes
+- Password Iframe State Issues (#1086) - 0ebc25de9
+- OAuth Password Iframe Closing (#1083) - 8ab2a0e2a
+
 # Release (Tue Jul 08 2025)
 
 ## Package Versions
