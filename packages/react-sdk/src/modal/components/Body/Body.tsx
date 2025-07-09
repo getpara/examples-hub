@@ -40,6 +40,7 @@ import { AccountProfileLinkOptions } from '../Account/AccountProfileLinkOptions.
 import { AccountProfileLink } from '../Account/AccountProfileLink.js';
 import { AccountProfileUnlink } from '../Account/AccountProfileUnlink.js';
 import { ExternalWalletNetworkSelectStep } from '../ExternalWalletNetworkSelectStep/ExternalWalletNetworkSelectStep.js';
+import { AwaitingIFrameStep } from '../AwaitingIFrameStep/AwaitingIFrameStep.js';
 
 interface BodyProps {
   oAuthMethods?: TOAuthMethod[];
@@ -199,6 +200,9 @@ export const Body = ({
       }
       case ModalStep.EX_WALLET_NETWORK_SELECT: {
         return <ExternalWalletNetworkSelectStep />;
+      }
+      case ModalStep.AWAITING_IFRAME: {
+        return <AwaitingIFrameStep />;
       }
       default: {
         if (IFrameSteps.includes(currentStep)) {

@@ -4,16 +4,17 @@ import { CpslButton, CpslIcon, CpslInput, CpslText } from '@getpara/react-compon
 import { useEffect, useState } from 'react';
 import { CpslInputCustomEvent, InputInputEventDetail } from '@getpara/core-components';
 import { passwordCreation } from '../../utils/passwordCreation';
-import { REDIRECT_TIMEOUT } from '../../constants';
 import { ModalSuccess } from '../../components/ModalSuccess';
 import { useModalOutletContext } from '../../hooks/useModalOutletContext';
 import { usePara } from '../../components';
 import { useExtractedParams } from '../../hooks/useExtractedParams';
 import { validateCallbackUrl } from '../../utils/validateCallbackUrl';
+import { useCloseWindow } from '../../hooks/useCloseWindow';
 
 export const PasswordCreation = () => {
   const para = usePara();
   const { partnerId, userId, passwordId } = useExtractedParams<{ userId: string; partnerId: string; passwordId: string }>();
+  const closeWindow = useCloseWindow();
 
   const [password, setPassword] = useState<string>();
   const [passwordVerification, setPasswordVerification] = useState<string>();
@@ -82,9 +83,7 @@ export const PasswordCreation = () => {
         window.location.href = nativeCallbackUrl;
       } else {
         // Otherwise, close the window after a delay
-        setTimeout(() => {
-          window.close();
-        }, REDIRECT_TIMEOUT);
+        closeWindow(true);
       }
     } catch (e) {
       console.error(e);

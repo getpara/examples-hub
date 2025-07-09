@@ -44,6 +44,8 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
   const setAuthStepRoute = useModalStore(state => state.setAuthStepRoute);
   const { signUpOrLogIn, isCreateGuestWalletsPending } = useAuthActions();
   const { isLoading: isAccountLoading, isConnected } = useAccount();
+  const setIFrameUrl = useModalStore(state => state.setIFrameUrl);
+  const setIsIFrameReady = useModalStore(state => state.setIsIFrameReady);
 
   const [isModalMounted, setIsModalMounted] = useState(false);
   const externalWallets = useStore(state => state.externalWallets);
@@ -126,6 +128,9 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
     if (!para.isReady) {
       return;
     }
+    setIFrameUrl(undefined);
+    setIsIFrameReady(false);
+
     const isAccount = isConnected,
       isGuest = (isAccount && para.isGuestMode) || isCreateGuestWalletsPending;
 

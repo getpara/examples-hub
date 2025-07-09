@@ -48,6 +48,7 @@ export const useStepTitle = () => {
       [ModalStep.ACCOUNT_PROFILE_LIST]: 'Link Account',
       [ModalStep.ACCOUNT_PROFILE_ADD]: 'Link Account',
       [ModalStep.ACCOUNT_PROFILE_REMOVE]: 'Unlink Account',
+      [ModalStep.AWAITING_IFRAME]: isLogin ? 'Login' : 'Sign Up',
     }),
     [isLogin, chainId, hideWallets],
   );

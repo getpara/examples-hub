@@ -40,6 +40,7 @@ export enum ModalStep {
   ACCOUNT_PROFILE_ADD = 'ACCOUNT_PROFILE_ADD',
   ACCOUNT_PROFILE_LIST = 'ACCOUNT_PROFILE_LIST',
   ACCOUNT_PROFILE_REMOVE = 'ACCOUNT_PROFILE_REMOVE',
+  AWAITING_IFRAME = 'AWAITING_IFRAME',
 }
 
 export type ModalStepPropU = keyof typeof ModalStep | ModalStep;
@@ -77,6 +78,7 @@ export const RESET_TO_AUTH_STEPS = [
   ModalStep.AWAITING_BIOMETRIC_CREATION,
   ModalStep.PASSWORD_CREATION,
   ModalStep.AWAITING_PASSWORD_CREATION,
+  ModalStep.AWAITING_IFRAME,
   ModalStep.BIOMETRIC_LOGIN,
   ModalStep.EMBEDDED_PASSWORD_LOGIN,
   ModalStep.AWAITING_BIOMETRIC_LOGIN,
@@ -150,6 +152,7 @@ enum SignUpModalStep {
   ADD_FUNDS_AWAITING = 'ADD_FUNDS_AWAITING',
   ADD_FUNDS_SUCCESS = 'ADD_FUNDS_SUCCESS',
   ADD_FUNDS_FAILURE = 'ADD_FUNDS_FAILURE',
+  AWAITING_IFRAME = 'AWAITING_IFRAME',
 }
 
 export const SignUpPreviousStep: {
@@ -181,6 +184,7 @@ export const SignUpPreviousStep: {
   [SignUpModalStep.ADD_FUNDS_AWAITING]: ModalStep.ADD_FUNDS_BUY,
   [SignUpModalStep.ADD_FUNDS_SUCCESS]: undefined,
   [SignUpModalStep.ADD_FUNDS_FAILURE]: undefined,
+  [SignUpModalStep.AWAITING_IFRAME]: ModalStep.BIOMETRIC_CREATION,
 };
 
 export const GuestPreviousStep: {
@@ -221,6 +225,7 @@ enum LoginModalStep {
   ADD_FUNDS_AWAITING = 'ADD_FUNDS_AWAITING',
   ADD_FUNDS_SUCCESS = 'ADD_FUNDS_SUCCESS',
   ADD_FUNDS_FAILURE = 'ADD_FUNDS_FAILURE',
+  AWAITING_IFRAME = 'AWAITING_IFRAME',
 }
 
 export const LoginPreviousStep: {
@@ -251,6 +256,7 @@ export const LoginPreviousStep: {
   [LoginModalStep.ADD_FUNDS_AWAITING]: ModalStep.ADD_FUNDS_BUY,
   [LoginModalStep.ADD_FUNDS_SUCCESS]: undefined,
   [LoginModalStep.ADD_FUNDS_FAILURE]: undefined,
+  [SignUpModalStep.AWAITING_IFRAME]: ModalStep.BIOMETRIC_LOGIN,
 };
 
 export const getStepHasFooter = (step: ModalStep): boolean => {

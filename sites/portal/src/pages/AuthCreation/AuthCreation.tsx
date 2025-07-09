@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 
 import { authCreation, AuthCreationParams } from '../../utils/authCreation';
-import { AuthCreationStep, REDIRECT_TIMEOUT } from '../../constants';
+import { AuthCreationStep } from '../../constants';
 import { Body } from './components/Body';
 import { Card, CardContent } from '../../components/common';
 import { ModalHeader } from '../../components/ModalHeader';
@@ -9,10 +9,12 @@ import { usePara } from '../../components/ParaContext';
 import { useExtractedParams } from '../../hooks/useExtractedParams';
 import { AuthExtras, AuthParams, extractAuthInfo } from '@getpara/user-management-client';
 import { isPasskeySupported } from '@getpara/web-sdk';
+import { useCloseWindow } from '../../hooks/useCloseWindow';
 
 export const AuthCreation = () => {
   const para = usePara();
   const [step, setStep] = useState<AuthCreationStep>(AuthCreationStep.MANUAL_CREATION);
+  const closeWindow = useCloseWindow();
 
   const params = useExtractedParams<AuthCreationParams & AuthParams & AuthExtras>();
   const authInfo = params?.authInfo ?? {
@@ -31,9 +33,7 @@ export const AuthCreation = () => {
       await authCreation(para, { ...params, authInfo });
 
       setStep(AuthCreationStep.SUCCESS);
-      setTimeout(function () {
-        window.close();
-      }, REDIRECT_TIMEOUT);
+      closeWindow(true);
     } catch (err) {
       if (
         err.message?.toLowerCase().includes('the operation either timed out or was not allowed') ||

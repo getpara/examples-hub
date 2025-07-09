@@ -3,7 +3,7 @@ import { Heading, SpinnerContainer, StepContainer, InnerStepContainer } from '..
 
 interface WaitingProps {
   heading: string;
-  subheading: string;
+  subheading?: string;
 }
 
 export const Waiting = ({ heading, subheading }: WaitingProps) => {
@@ -16,9 +16,11 @@ export const Waiting = ({ heading, subheading }: WaitingProps) => {
         <Heading variant="headingS" weight="bold">
           {heading}
         </Heading>
-        <CpslText variant="bodyS" color="secondary" weight="medium">
-          {subheading}
-        </CpslText>
+        {subheading && (
+          <CpslText variant="bodyS" color="secondary" weight="medium">
+            {subheading}
+          </CpslText>
+        )}
       </InnerStepContainer>
     </StepContainer>
   );

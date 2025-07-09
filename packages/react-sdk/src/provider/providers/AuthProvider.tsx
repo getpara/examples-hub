@@ -26,6 +26,7 @@ import {
   AuthState,
   AuthStateSignup,
   AuthStateLogin,
+  getPortalBaseURL,
 } from '@getpara/web-sdk';
 import { useInternalClient } from '../../provider/hooks/utils/useInternalClient.js';
 import { ParaModalProps } from '../../modal/types/modalProps.js';
@@ -143,6 +144,28 @@ export function AuthProvider({
     return !!stepNow && !steps.includes(stepNow);
   };
 
+  const setupListener = () => {
+    window.addEventListener('message', function handleMessage(event) {
+      const portalBase = getPortalBaseURL(para.ctx);
+
+      if (!event.origin.startsWith(portalBase)) {
+        return; // Ignore messages from untrusted origins
+      }
+
+      if (event.data?.type === 'CLOSE_WINDOW') {
+        // Handle your event
+        if (event.data.success) {
+          setAuthStepRoute();
+          setIFrameUrl();
+          setIsIFrameReady(false);
+          setStep(ModalStep.AWAITING_IFRAME);
+        }
+        // Remove the listener after handling the matching event
+        window.removeEventListener('message', handleMessage);
+      }
+    });
+  };
+
   const signup = () => {
     if (typeof window !== 'undefined') {
       refs.poll.current = {
@@ -155,6 +178,9 @@ export function AuthProvider({
                   ModalStep.BIOMETRIC_CREATION,
                   ModalStep.AWAITING_BIOMETRIC_CREATION,
                   ModalStep.PASSWORD_CREATION,
+                  ModalStep.AWAITING_IFRAME,
+                  ModalStep.VERIFICATIONS,
+                  ModalStep.EXTERNAL_WALLET_VERIFICATION,
                 ]),
               onPoll: () => {
                 goBackIfPopupClosedOnSteps([ModalStep.AWAITING_BIOMETRIC_CREATION]);
@@ -207,6 +233,8 @@ export function AuthProvider({
           });
           break;
         case AuthMethod.PASSWORD:
+          setupListener();
+
           if (isIFrameReady) {
             setStep(ModalStep.PASSWORD_CREATION);
           } else {
@@ -224,6 +252,8 @@ export function AuthProvider({
     if (authState.isWalletSelectionNeeded || authState.passkeyUrl) {
       setStep(ModalStep.BIOMETRIC_LOGIN);
     } else {
+      setupListener();
+
       setIFrameUrl(authState.passwordUrl!);
       setIsIFrameReady(false);
       setStep(ModalStep.EMBEDDED_PASSWORD_LOGIN);
@@ -240,6 +270,7 @@ export function AuthProvider({
                 ModalStep.EMBEDDED_PASSWORD_LOGIN,
                 ModalStep.AWAITING_BIOMETRIC_LOGIN,
                 ModalStep.AWAITING_PASSWORD_LOGIN,
+                ModalStep.AWAITING_IFRAME,
               ]),
             onPoll: () => {
               goBackIfPopupClosedOnSteps([
