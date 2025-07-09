@@ -85,7 +85,7 @@ class CosmosWalletUITests: XCTestCase {
 
         // Perform email authentication with passkey
         TestHelper.performEmailAuthWithPasskey(app: app, email: testEmail)
-        
+
         // Wait for wallets view
         let walletsView = app.otherElements["walletsView"]
         XCTAssertTrue(walletsView.waitForExistence(timeout: TestConstants.longTimeout))

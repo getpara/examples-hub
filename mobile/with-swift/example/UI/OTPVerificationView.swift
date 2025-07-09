@@ -22,6 +22,7 @@ struct OTPVerificationView: View {
     @State private var isLoading = false
     @State private var showError = false
     @State private var errorMessage = ""
+    @State private var statusMessage = ""
     @FocusState private var isTextFieldFocused: Bool
 
     private var contactDisplay: String {
@@ -39,97 +40,125 @@ struct OTPVerificationView: View {
     }
 
     var body: some View {
-        VStack(spacing: 24) {
-            // Header
-            Text(isEmailAuth ? "Verify Email" : "Verify Phone")
-                .font(.title2)
-                .fontWeight(.semibold)
-                .padding(.top, 40)
-
-            Text("Please enter the code we sent to \(contactDisplay)")
-                .font(.footnote)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal)
-
-            // OTP Input Fields
-            ZStack {
-                // Hidden TextField that captures all input
-                TextField("", text: $otpText)
-                    .keyboardType(.numberPad)
-                    .textContentType(.oneTimeCode) // Enable SMS auto-fill
-                    .focused($isTextFieldFocused)
-                    .opacity(0.001)
-                    .blendMode(.screen)
-                    .onChange(of: otpText) { newValue in
-                        handleTextChange(newValue)
-                    }
-
-                // Visual representation of OTP boxes
-                HStack(spacing: 12) {
-                    ForEach(0 ..< 6) { index in
-                        OTPDigitView(
-                            digit: getDigit(at: index),
-                            isActive: isTextFieldFocused && otpText.count == index,
-                        )
-                    }
-                }
-                .onTapGesture {
-                    isTextFieldFocused = true
-                }
-            }
-            .padding(.vertical, 20)
-
-            // Resend Link
-            Button("Didn't receive a code? Resend") {
-                Task {
-                    await resendCode()
-                }
-            }
-            .font(.footnote)
-            .foregroundColor(.gray)
-            .disabled(isLoading)
-
-            Spacer()
-
-            // Continue Button
-            Button {
-                Task {
-                    await verifyCode()
-                }
-            } label: {
-                if isLoading {
+        ZStack {
+            if isLoading, !statusMessage.isEmpty {
+                // Simple loading view
+                VStack(spacing: 24) {
                     ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                } else {
-                    Text("Next: Setup Passkey")
-                        .fontWeight(.medium)
+                        .progressViewStyle(CircularProgressViewStyle())
+                        .scaleEffect(1.5)
+
+                    Text(statusMessage)
+                        .font(.body)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
                 }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(Color(UIColor.systemBackground))
+            } else {
+                // OTP entry view
+                VStack(spacing: 24) {
+                    // Header
+                    Text(isEmailAuth ? "Verify Email" : "Verify Phone")
+                        .font(.title2)
+                        .fontWeight(.semibold)
+                        .padding(.top, 40)
+
+                    Text("Please enter the code we sent to \(contactDisplay)")
+                        .font(.footnote)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal)
+
+                    // OTP Input Fields
+                    ZStack {
+                        // Hidden TextField that captures all input
+                        TextField("", text: $otpText)
+                            .keyboardType(.numberPad)
+                            .textContentType(.oneTimeCode) // Enable SMS auto-fill
+                            .focused($isTextFieldFocused)
+                            .opacity(0.001)
+                            .blendMode(.screen)
+                            .onChange(of: otpText) { newValue in
+                                handleTextChange(newValue)
+                            }
+
+                        // Visual representation of OTP boxes
+                        HStack(spacing: 12) {
+                            ForEach(0 ..< 6) { index in
+                                OTPDigitView(
+                                    digit: getDigit(at: index),
+                                    isActive: isTextFieldFocused && otpText.count == index,
+                                )
+                            }
+                        }
+                        .onTapGesture {
+                            isTextFieldFocused = true
+                        }
+                    }
+                    .padding(.vertical, 20)
+
+                    // Resend Link
+                    Button("Didn't receive a code? Resend") {
+                        Task {
+                            await resendCode()
+                        }
+                    }
+                    .font(.footnote)
+                    .foregroundColor(.gray)
+                    .disabled(isLoading)
+
+                    // Status message
+                    if !statusMessage.isEmpty {
+                        Text(statusMessage)
+                            .font(.footnote)
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.center)
+                            .transition(.opacity)
+                    }
+
+                    Spacer()
+
+                    // Continue Button
+                    Button {
+                        Task {
+                            await verifyCode()
+                        }
+                    } label: {
+                        if isLoading {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                        } else {
+                            Text("Next: Setup Passkey")
+                                .fontWeight(.medium)
+                        }
+                    }
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 50)
+                    .background(Color.black)
+                    .foregroundColor(.white)
+                    .cornerRadius(25)
+                    .disabled(isLoading || otpText.count < 6)
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 40)
+                }
+                .onAppear {
+                    // Auto-focus the hidden text field after a small delay
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        isTextFieldFocused = true
+                    }
+                }
+                .alert("Error", isPresented: $showError) {
+                    Button("OK", role: .cancel) {}
+                } message: {
+                    Text(errorMessage)
+                }
+                .accessibilityElement(children: .combine)
+                .accessibilityLabel("Verification code entry")
+                .accessibilityValue("\(otpText.count) of \(6) digits entered")
+                .accessibilityHint("Enter the \(6)-digit code sent to \(contactDisplay)")
             }
-            .frame(maxWidth: .infinity)
-            .frame(height: 50)
-            .background(Color.black)
-            .foregroundColor(.white)
-            .cornerRadius(25)
-            .disabled(isLoading || otpText.count < 6)
-            .padding(.horizontal, 24)
-            .padding(.bottom, 40)
         }
-        .onAppear {
-            // Auto-focus the hidden text field after a small delay
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                isTextFieldFocused = true
-            }
-        }
-        .alert("Error", isPresented: $showError) {
-            Button("OK", role: .cancel) {}
-        } message: {
-            Text(errorMessage)
-        }
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("Verification code entry")
-        .accessibilityValue("\(otpText.count) of \(6) digits entered")
-        .accessibilityHint("Enter the \(6)-digit code sent to \(contactDisplay)")
     }
 
     private func getDigit(at index: Int) -> String {
@@ -171,14 +200,24 @@ struct OTPVerificationView: View {
             switch resultState.stage {
             case .signup:
                 // New user - proceed to passkey setup
-                try await paraManager.handleSignup(
-                    authState: resultState,
-                    method: .passkey,
-                    authorizationController: authorizationController,
-                    webAuthenticationSession: webAuthenticationSession,
-                )
-                appRootManager.setAuthenticated(true)
-                showOTP = false
+                statusMessage = "Creating your wallet..."
+
+                do {
+                    try await paraManager.handleSignup(
+                        authState: resultState,
+                        method: .passkey,
+                        authorizationController: authorizationController,
+                        webAuthenticationSession: webAuthenticationSession,
+                    )
+
+                    // Now navigate after everything is complete
+                    appRootManager.setAuthenticated(true)
+                    showOTP = false
+                } catch {
+                    errorMessage = error.localizedDescription
+                    showError = true
+                    statusMessage = ""
+                }
 
             case .login:
                 // Existing user verified - log them in
@@ -200,6 +239,7 @@ struct OTPVerificationView: View {
         }
 
         isLoading = false
+        statusMessage = ""
     }
 
     private func resendCode() async {
@@ -213,6 +253,7 @@ struct OTPVerificationView: View {
         }
 
         isLoading = false
+        statusMessage = ""
     }
 }
 

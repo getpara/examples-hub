@@ -418,7 +418,7 @@ struct EVMWalletView: View {
             }
             .padding()
         }
-        .navigationTitle("EVM Wallet (Sepolia)")
+        .navigationTitle("EVM Wallet")
         .alert(item: Binding(
             get: { result.map { AlertItem(title: $0.title, message: $0.message) } },
             set: { _ in result = nil },

@@ -26,7 +26,7 @@ enum TestConstants {
 
     static func generateUniqueEmail() -> String {
         let randomLetters = "abcdefghijklmnopqrstuvwxyz"
-        let randomString = String((0..<6).map { _ in randomLetters.randomElement()! })
+        let randomString = String((0 ..< 6).map { _ in randomLetters.randomElement()! })
         return "test\(randomString)@\(emailDomain)"
     }
 }
@@ -60,52 +60,52 @@ enum TestHelper {
         let emailPhoneField = app.textFields["Enter email or phone"]
         _ = emailPhoneField.waitForExistence(timeout: TestConstants.longTimeout)
     }
-    
+
     // MARK: - Static Authentication Helpers (for class setup)
-    
+
     static func performEmailAuthWithPasskey(app: XCUIApplication, email: String) {
         // Enter email in unified field
         let emailPhoneField = app.textFields["Enter email or phone"]
         _ = emailPhoneField.waitForExistence(timeout: TestConstants.defaultTimeout)
         emailPhoneField.tap()
-        
+
         // Clear and type email
         if let existingText = emailPhoneField.value as? String, !existingText.isEmpty {
             let deleteString = String(repeating: XCUIKeyboardKey.delete.rawValue, count: existingText.count)
             emailPhoneField.typeText(deleteString)
         }
         emailPhoneField.typeText(email)
-        
+
         // Continue button appears after typing
         let continueButton = app.buttons["Continue"]
         _ = continueButton.waitForExistence(timeout: TestConstants.defaultTimeout)
         continueButton.tap()
-        
+
         // Wait for OTP verification view
         _ = app.staticTexts["Verify Email"].waitForExistence(timeout: TestConstants.defaultTimeout)
-        
+
         // Enter OTP code - find the field that has keyboard focus
         sleep(1) // Give OTP field time to get focus
         let otpField = app.textFields.element(boundBy: 1) // Second text field is the OTP field
         _ = otpField.waitForExistence(timeout: TestConstants.defaultTimeout)
         otpField.tap()
         otpField.typeText(TestConstants.verificationCode)
-        
+
         // After entering 6 digits, it auto-submits
         sleep(2) // Wait for auto-submission
-        
+
         // Complete biometric authentication
         performBiometricAuthentication(app: app)
     }
-    
+
     private static func performBiometricAuthentication(app: XCUIApplication) {
         let window = app.windows.firstMatch
         let screenWidth = window.frame.size.width
         let screenHeight = window.frame.size.height
-        
+
         let normalizedX = (screenWidth / 2) / screenWidth
         let normalizedY = (screenHeight - 100) / screenHeight
-        
+
         let tapCoordinate = window.coordinate(withNormalizedOffset: CGVector(dx: normalizedX, dy: normalizedY))
         sleep(5)
         tapCoordinate.tap()
@@ -159,9 +159,8 @@ extension XCTestCase {
         sleep(1)
     }
 
-    
     // MARK: - Authentication Flow Helpers
-    
+
     /// Performs complete email authentication flow with passkey
     func performEmailAuthWithPasskey(app: XCUIApplication, email: String) {
         // Enter email in unified field
@@ -169,15 +168,15 @@ extension XCTestCase {
         XCTAssertTrue(emailPhoneField.waitForExistence(timeout: TestConstants.defaultTimeout))
         emailPhoneField.tap()
         emailPhoneField.typeText(email)
-        
+
         // Continue button appears after typing
         let continueButton = app.buttons["Continue"]
         XCTAssertTrue(continueButton.waitForExistence(timeout: TestConstants.defaultTimeout))
         continueButton.tap()
-        
+
         // Wait for OTP verification view
         XCTAssertTrue(app.staticTexts["Verify Email"].waitForExistence(timeout: TestConstants.defaultTimeout))
-        
+
         // Enter OTP code - find the field that has keyboard focus
         sleep(1) // Give OTP field time to get focus
         let otpField = app.textFields.element(boundBy: 1) // Second text field is the OTP field
@@ -185,11 +184,11 @@ extension XCTestCase {
         otpField.tap()
         otpField.typeText(TestConstants.verificationCode)
         sleep(1)
-        
+
         // Complete biometric authentication
         performBiometricAuthentication(app: app)
     }
-    
+
     /// Performs complete phone authentication flow with passkey
     func performPhoneAuthWithPasskey(app: XCUIApplication, phone: String) {
         // Enter phone in unified field
@@ -197,15 +196,15 @@ extension XCTestCase {
         XCTAssertTrue(emailPhoneField.waitForExistence(timeout: TestConstants.defaultTimeout))
         emailPhoneField.tap()
         emailPhoneField.typeText(phone)
-        
+
         // Continue button appears after typing
         let continueButton = app.buttons["Continue"]
         XCTAssertTrue(continueButton.waitForExistence(timeout: TestConstants.defaultTimeout))
         continueButton.tap()
-        
+
         // Wait for OTP verification view
         XCTAssertTrue(app.staticTexts["Verify Phone"].waitForExistence(timeout: TestConstants.defaultTimeout))
-        
+
         // Enter OTP code - find the field that has keyboard focus
         sleep(1) // Give OTP field time to get focus
         let otpField = app.textFields.element(boundBy: 1) // Second text field is the OTP field
@@ -213,11 +212,11 @@ extension XCTestCase {
         otpField.tap()
         otpField.typeText(TestConstants.verificationCode)
         sleep(1)
-        
+
         // Complete biometric authentication
         performBiometricAuthentication(app: app)
     }
-    
+
     /// Performs login flow for existing user
     func performLoginFlow(app: XCUIApplication, credential: String) {
         // Enter email or phone in unified field
@@ -225,12 +224,12 @@ extension XCTestCase {
         XCTAssertTrue(emailPhoneField.waitForExistence(timeout: TestConstants.defaultTimeout))
         emailPhoneField.tap()
         emailPhoneField.typeText(credential)
-        
+
         // Continue button appears after typing
         let continueButton = app.buttons["Continue"]
         XCTAssertTrue(continueButton.waitForExistence(timeout: TestConstants.defaultTimeout))
         continueButton.tap()
-        
+
         // Perform biometric authentication for login
         performBiometricAuthenticationForLogin(app: app)
     }
