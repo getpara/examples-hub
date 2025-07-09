@@ -1,3 +1,42 @@
+# Release (Tue Jul 08 2025)
+
+## Package Versions
+- @getpara/web-sdk@2.0.0-alpha.30
+- @getpara/wagmi-v2-integration@2.0.0-alpha.30
+- @getpara/wagmi-v2-connector@2.0.0-alpha.30
+- @getpara/viem-v2-integration@2.0.0-alpha.30
+- @getpara/viem-v1-integration@2.0.0-alpha.30
+- @getpara/user-management-client@2.0.0-alpha.30
+- @getpara/solana-web3.js-v1-integration@2.0.0-alpha.30
+- @getpara/solana-wallet-connectors@2.0.0-alpha.30
+- @getpara/server-sdk@2.0.0-alpha.30
+- @getpara/react-sdk@2.0.0-alpha.30
+- @getpara/react-native-wallet@2.0.0-alpha.30
+- @getpara/react-components@2.0.0-alpha.30
+- @getpara/react-component-library@1.0.0-alpha.25
+- @getpara/react-common@2.0.0-alpha.30
+- @getpara/evm-wallet-connectors@2.0.0-alpha.30
+- @getpara/ethers-v6-integration@2.0.0-alpha.30
+- @getpara/ethers-v5-integration@2.0.0-alpha.30
+- @getpara/cosmos-wallet-connectors@2.0.0-alpha.30
+- @getpara/cosmjs-v0-integration@2.0.0-alpha.30
+- @getpara/core-sdk@2.0.0-alpha.30
+- @getpara/core-components@2.0.0-alpha.30
+
+### Features
+- Support Farcaster mini app evm wallets (#1079) - 446c132e1
+
+### Fixes
+- Revert "refactor
+
+### Chores
+- Add Berachain onramp settings (#1076) - 8bc5a7d30
+
+
+
+### Refactors
+- use eciesjs for all ecies operations (#972) - 94681242b
+
 # Release (Thu Jul 03 2025)
 
 ## Package Versions
