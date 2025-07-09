@@ -29,10 +29,10 @@ export const ParaProfile = () => {
     }
   };
 
-  const embeddedConnected = embedded?.isConnected && embedded?.wallets?.some(w => !w.isExternal);
-  const evmConnected = external?.evm?.isConnected;
-  const cosmosConnected = external?.cosmos?.isConnected;
-  const solanaConnected = external?.solana?.isConnected;
+  const embeddedConnected = isConnected && embedded?.isConnected && embedded?.wallets?.some(w => !w.isExternal);
+  const evmConnected = isConnected && external?.evm?.isConnected;
+  const cosmosConnected = isConnected && external?.cosmos?.isConnected;
+  const solanaConnected = isConnected && external?.solana?.isConnected;
 
   return (
     <Card>

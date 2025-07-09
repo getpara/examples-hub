@@ -102,6 +102,7 @@ export function AuthProvider({
   const setStep = useModalStore(state => state.setStep);
   const setAuthStepRoute = useModalStore(state => state.setAuthStepRoute);
   const setIFrameUrl = useModalStore(state => state.setIFrameUrl);
+  const setIsIFrameReady = useModalStore(state => state.setIsIFrameReady);
   const iFrameUrl = useModalStore(state => state.iFrameUrl);
   const loginState = useModalStore(state => state.getLoginState());
   const signupState = useModalStore(state => state.getSignupState());
@@ -210,6 +211,7 @@ export function AuthProvider({
             setStep(ModalStep.PASSWORD_CREATION);
           } else {
             setIFrameUrl(authState.passwordUrl!);
+            setIsIFrameReady(false);
             setAuthStepRoute(ModalStep.PASSWORD_CREATION);
           }
           break;
@@ -223,6 +225,7 @@ export function AuthProvider({
       setStep(ModalStep.BIOMETRIC_LOGIN);
     } else {
       setIFrameUrl(authState.passwordUrl!);
+      setIsIFrameReady(false);
       setStep(ModalStep.EMBEDDED_PASSWORD_LOGIN);
     }
 
@@ -298,6 +301,7 @@ export function AuthProvider({
   );
 
   const onNewAuthState = async (authState: AuthState) => {
+    refs.popupWindow.current = null;
     setAuthState(authState);
 
     switch (authState.stage) {
@@ -320,6 +324,7 @@ export function AuthProvider({
 
           if (isPassword) {
             setIFrameUrl(authState.passwordUrl!);
+            setIsIFrameReady(false);
           }
 
           signup();
