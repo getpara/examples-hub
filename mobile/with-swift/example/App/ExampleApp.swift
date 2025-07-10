@@ -8,11 +8,8 @@ struct ExampleApp: App {
     @StateObject private var appRootManager = AppRootManager()
 
     init() {
-        // Para Configuration
-        let config = ParaConfig(
-            apiKey: "YOUR_API_KEY_HERE", // Get from: http://developer.getpara.com
-            environment: .sandbox,
-        )
+        // Para Configuration - loads from environment variables or Info.plist
+        let config = ParaConfig.fromEnvironment()
 
         // Para app scheme for deep linking
         let appScheme = "paraswift"
@@ -21,7 +18,7 @@ struct ExampleApp: App {
         let paraManager = ParaManager(
             environment: config.environment,
             apiKey: config.apiKey,
-            appScheme: appScheme,
+            appScheme: appScheme
         )
         _paraManager = StateObject(wrappedValue: paraManager)
     }

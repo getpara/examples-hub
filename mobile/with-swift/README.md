@@ -17,9 +17,18 @@ A sample iOS wallet app demonstrating the [Para Swift SDK](https://github.com/ge
    open example.xcodeproj
    ```
 
-2. **Set environment variables** in Xcode scheme (Product → Scheme → Edit Scheme → Arguments):
-   - `PARA_API_KEY`: Your API key from [Para Developer Portal](https://developer.getpara.com/)
-   - `PARA_ENVIRONMENT`: beta
+2. **Configure Para SDK** - Choose one of these methods:
+
+   **Option A: Quick Start (Recommended for new developers)**
+   - Open `example/App/ParaConfig.swift`
+   - Paste your API key in the `hardcodedApiKey` variable
+   - Set `hardcodedEnvironment` to "sandbox", "beta", or "prod"
+   
+   **Option B: Environment Variables (For CI/CD)**
+   - Go to Product → Scheme → Edit Scheme → Arguments
+   - Add environment variables:
+     - `PARA_API_KEY`: Your API key from [Para Developer Portal](https://developer.getpara.com/)
+     - `PARA_ENVIRONMENT`: sandbox, beta, or prod
 
 3. **Configure Xcode project:**
    - Go to **Signing & Capabilities** → Select your development team
@@ -41,7 +50,7 @@ A sample iOS wallet app demonstrating the [Para Swift SDK](https://github.com/ge
 To explore the SDK integration, check out these key files:
 - **Authentication**: `example/Auth/AuthView.swift`
 - **Wallet Operations**: `example/Wallet/EVMWalletView.swift`, `SolanaWalletView.swift`
-- **SDK Configuration**: `example/App/ExampleApp.swift`
+- **SDK Configuration**: `example/App/ParaConfig.swift`, `example/App/ExampleApp.swift`
 - **MetaMask Integration**: `example/Auth/MetaMaskDemoView.swift`
 
 ## Beta Testing
