@@ -10,7 +10,7 @@ struct ExampleApp: App {
     init() {
         // Para Configuration
         let config = ParaConfig(
-            apiKey: "YOUR_API_KEY_HERE", // Get from: http://developer.getpara.com
+            apiKey: "12e3517d125169ea9847d0da5bdcd9c9", // Get from: http://developer.getpara.com
             environment: .sandbox,
         )
 
