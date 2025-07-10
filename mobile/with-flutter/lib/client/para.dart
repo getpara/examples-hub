@@ -1,15 +1,20 @@
 import 'package:para/para.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import '../config/para_config.dart';
 
-final environment = dotenv.env['PARA_ENV'] ?? 'beta';
-final apiKey = dotenv.env['PARA_API_KEY'] ?? (throw Exception('PARA_API_KEY not found in .env file'));
-
-final para = Para(
-  environment: environment == 'sandbox' ? Environment.sandbox : Environment.beta,
-  apiKey: apiKey,
-  appScheme: 'com.usecapsule.example.flutter',
+// Para Configuration
+final config = ParaConfiguration(
+  apiKey: dotenv.env['PARA_API_KEY'] ?? 'YOUR_API_KEY_HERE',  // Get from: http://developer.getpara.com
+  environment: dotenv.env['PARA_ENV'] == 'sandbox' ? Environment.sandbox : Environment.beta,
 );
 
+// Initialize Para using configuration
+final para = Para.fromConfig(
+  config: config.toParaConfig(),
+  appScheme: 'paraflutter',  // Para app scheme for deep linking
+);
+
+// External wallet connectors
 final phantomConnector = ParaPhantomConnector(para: para, appUrl: "https://usecapsule.com", appScheme: "paraflutter");
 
 final metamaskConnector = ParaMetaMaskConnector(para: para, appUrl: "https://usecapsule.com", appScheme: "paraflutter");

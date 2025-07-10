@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "postinstall": "yarn setup-para"
   },
   "dependencies": {
     "@getpara/react-sdk": "2.0.0-alpha.29",

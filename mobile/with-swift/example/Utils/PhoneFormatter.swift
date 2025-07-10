@@ -21,8 +21,15 @@ class PhoneFormatter {
     ///   - stringvar: The phone number string to format (will be modified in-place)
     ///   - pattern: The pattern to apply (e.g., "### ### ####")
     ///   - replacementCharacter: The character in the pattern to replace with digits (typically "#")
-    static func applyPatternOnNumbers(_ stringvar: inout String, pattern: String, replacementCharacter: Character) {
+    ///   - limit: Maximum number of digits allowed (optional)
+    static func applyPatternOnNumbers(_ stringvar: inout String, pattern: String, replacementCharacter: Character, limit: Int? = nil) {
         var pureNumber = stringvar.replacingOccurrences(of: "[^0-9]", with: "", options: .regularExpression)
+
+        // Enforce digit limit if provided
+        if let limit, pureNumber.count > limit {
+            pureNumber = String(pureNumber.prefix(limit))
+        }
+
         for index in 0 ..< pattern.count {
             guard index < pureNumber.count else {
                 stringvar = pureNumber
@@ -34,16 +41,5 @@ class PhoneFormatter {
             pureNumber.insert(patternCharacter, at: stringIndex)
         }
         stringvar = pureNumber
-    }
-
-    /// Formats a phone number for API use in the international format
-    /// - Parameters:
-    ///   - phoneNumber: The phone number to format (may contain formatting characters)
-    ///   - countryCode: The country code (without the plus sign)
-    /// - Returns: Formatted phone number in international format (+${countryCode}${phoneNumber})
-    static func formatForAPI(phoneNumber: String, countryCode: String) -> String {
-        // Normalize the phone number input by removing non-digit characters
-        let normalizedPhoneNumber = phoneNumber.replacingOccurrences(of: "[^0-9]", with: "", options: .regularExpression)
-        return "+\(countryCode)\(normalizedPhoneNumber)"
     }
 }

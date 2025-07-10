@@ -81,45 +81,8 @@ class EVMWalletUITests: XCTestCase {
         // Ensure we start from a logged out state
         TestHelper.ensureLoggedOut(app: app)
 
-        // Wait for main screen
-        let emailButton = app.buttons["emailAuthButton"]
-        _ = emailButton.waitForExistence(timeout: TestConstants.longTimeout)
-
-        // Start email signup
-        emailButton.tap()
-
-        // Enter email
-        let emailField = app.textFields["emailInputField"]
-        emailField.tap()
-        emailField.typeText(testEmail)
-        app.buttons["continueButton"].tap()
-
-        // Verify email
-        _ = app.navigationBars["Verify Email"].waitForExistence(timeout: TestConstants.defaultTimeout)
-        let codeInput = app.textFields["verificationCodeField"]
-        _ = codeInput.waitForExistence(timeout: TestConstants.defaultTimeout)
-        codeInput.tap()
-        codeInput.typeText(TestConstants.verificationCode)
-        app.buttons["verifyButton"].tap()
-
-        // Choose passkey
-        _ = app.navigationBars["Secure Your Account"].waitForExistence(timeout: TestConstants.defaultTimeout)
-        app.buttons["passkeyButton"].tap()
-
-        // Complete biometric setup
-        let window = app.windows.firstMatch
-        let screenWidth = window.frame.size.width
-        let screenHeight = window.frame.size.height
-
-        let normalizedX = (screenWidth / 2) / screenWidth
-        let normalizedY = (screenHeight - 100) / screenHeight
-
-        let tapCoordinate = window.coordinate(withNormalizedOffset: CGVector(dx: normalizedX, dy: normalizedY))
-        sleep(5)
-        tapCoordinate.tap()
-        sleep(2)
-        Biometrics.successfulAuthentication()
-        sleep(1)
+        // Perform email authentication with passkey
+        TestHelper.performEmailAuthWithPasskey(app: app, email: testEmail)
 
         // Wait for wallets view
         let walletsView = app.otherElements["walletsView"]
