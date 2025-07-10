@@ -2068,6 +2068,10 @@ export abstract class ParaCore implements CoreInterface {
    **/
   async isFullyLoggedIn(): CoreMethodResponse<'isFullyLoggedIn'> {
     if (this.externalWalletConnectionType === 'CONNECTION_ONLY') {
+      if (!this.isReady) {
+        await this.ready();
+      }
+
       return true;
     }
 
