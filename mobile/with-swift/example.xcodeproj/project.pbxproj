@@ -46,8 +46,6 @@
 /* Begin PBXFileReference section */
 		8F200F532DEFB08100B39BB4 /* AlertItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertItem.swift; sourceTree = "<group>"; };
 		8F4302562DE8DE9000186768 /* EVMWalletView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EVMWalletView.swift; sourceTree = "<group>"; };
-		8F5D7E352E203247001C77C6 /* Secrets.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Secrets.xcconfig; sourceTree = "<group>"; };
-		8F5D7E372E203463001C77C6 /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
 		8F6A878C2E134B2600874160 /* EmailPhoneInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmailPhoneInput.swift; sourceTree = "<group>"; };
 		8F6A87902E145C1400874160 /* ConnectSocialButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectSocialButton.swift; sourceTree = "<group>"; };
 		8F6A87922E145E9F00874160 /* CountryPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CountryPickerView.swift; sourceTree = "<group>"; };
@@ -183,8 +181,6 @@
 		E8F93B2A2C21EBED006AA3F6 /* example */ = {
 			isa = PBXGroup;
 			children = (
-				8F5D7E372E203463001C77C6 /* Config.xcconfig */,
-				8F5D7E352E203247001C77C6 /* Secrets.xcconfig */,
 				8FE94DE12DA9AC1E009CBD28 /* App */,
 				8FA0077C2D56ECC9009EF0C3 /* Auth */,
 				8FA0077D2D56ECDA009EF0C3 /* Wallet */,
@@ -429,7 +425,6 @@
 		};
 		E8F93B342C21EBEE006AA3F6 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 8F5D7E352E203247001C77C6 /* Secrets.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -494,7 +489,6 @@
 		};
 		E8F93B352C21EBEE006AA3F6 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 8F5D7E372E203463001C77C6 /* Config.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
