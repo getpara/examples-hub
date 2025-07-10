@@ -1,0 +1,11 @@
+// Config.xcconfig
+// Default configuration file for Para SDK
+// 
+// For local development, create a Secrets.xcconfig file with your actual values
+// For Xcode Cloud, these will be overridden by environment variables
+
+// Placeholder for API key - DO NOT PUT REAL KEYS HERE
+PARA_API_KEY = 
+
+// Default environment
+PARA_ENVIRONMENT = sandbox

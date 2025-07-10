@@ -18,10 +18,14 @@ A sample iOS wallet app demonstrating the [Para Swift SDK](https://github.com/ge
    ```
 
 2. **Configure Para SDK:**
-   - Open `example/Secrets.xcconfig`
-   - Replace `YOUR_API_KEY_HERE` with your API key from [Para Developer Portal](https://developer.getpara.com/)
+   
+   **For local development:**
+   - Copy `example/Config.xcconfig` to `example/Secrets.xcconfig`
+   - Add your API key from [Para Developer Portal](https://developer.getpara.com/)
    - Set `PARA_ENVIRONMENT` to sandbox, beta, or prod
    - In Xcode: Select your project → Info tab → Configurations → Set both Debug and Release to use "Secrets"
+   
+   **Note**: `Secrets.xcconfig` is gitignored. Use `Config.xcconfig` as the template.
 
 3. **Configure Xcode project:**
    - Go to **Signing & Capabilities** → Select your development team
