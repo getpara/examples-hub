@@ -17,18 +17,11 @@ A sample iOS wallet app demonstrating the [Para Swift SDK](https://github.com/ge
    open example.xcodeproj
    ```
 
-2. **Configure Para SDK** - Choose one of these methods:
-
-   **Option A: Quick Start (Recommended for new developers)**
-   - Open `example/App/ParaConfig.swift`
-   - Paste your API key in the `hardcodedApiKey` variable
-   - Set `hardcodedEnvironment` to "sandbox", "beta", or "prod"
-   
-   **Option B: Environment Variables (For CI/CD)**
-   - Go to Product → Scheme → Edit Scheme → Arguments
-   - Add environment variables:
-     - `PARA_API_KEY`: Your API key from [Para Developer Portal](https://developer.getpara.com/)
-     - `PARA_ENVIRONMENT`: sandbox, beta, or prod
+2. **Configure Para SDK:**
+   - Open `example/Secrets.xcconfig`
+   - Replace `YOUR_API_KEY_HERE` with your API key from [Para Developer Portal](https://developer.getpara.com/)
+   - Set `PARA_ENVIRONMENT` to sandbox, beta, or prod
+   - In Xcode: Select your project → Info tab → Configurations → Set both Debug and Release to use "Secrets"
 
 3. **Configure Xcode project:**
    - Go to **Signing & Capabilities** → Select your development team
@@ -59,6 +52,18 @@ Use these test credentials in `beta` environment:
 - **Email**: Any address ending in `@test.getpara.com`
 - **Phone**: US numbers like `(425)-555-1234`
 - **OTP**: Any 6-digit code
+
+## Xcode Cloud Configuration
+
+For TestFlight and App Store builds:
+
+1. **Set Environment Variables in Xcode Cloud workflow:**
+   - `PARA_API_KEY`: Your Para API key
+   - `PARA_ENVIRONMENT`: sandbox, beta, or prod
+
+2. **How it works**: Xcode Cloud automatically exposes environment variables as build settings, which are then injected into Info.plist during the build. No custom scripts needed!
+
+3. **Security**: The `Secrets.xcconfig` file is gitignored to prevent accidental API key commits.
 
 ## Documentation
 

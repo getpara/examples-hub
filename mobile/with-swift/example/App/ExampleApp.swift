@@ -18,7 +18,7 @@ struct ExampleApp: App {
         let paraManager = ParaManager(
             environment: config.environment,
             apiKey: config.apiKey,
-            appScheme: appScheme
+            appScheme: appScheme,
         )
         _paraManager = StateObject(wrappedValue: paraManager)
     }
