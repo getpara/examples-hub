@@ -135,6 +135,8 @@ export const ModalLayout = () => {
       }
     }
     getPartner();
+
+    (window.opener || window.parent)?.postMessage({ type: 'LOADED' }, '*');
   }, []);
 
   if (!partner) return null;
