@@ -1,8 +1,13 @@
 // Config.xcconfig
 // Default configuration file for Para SDK
 // 
-// For local development, create a Secrets.xcconfig file with your actual values
-// For Xcode Cloud, these will be overridden by environment variables
+// For local development:
+// 1. Copy this file to Secrets.xcconfig
+// 2. Add your actual API key to Secrets.xcconfig
+// 3. Set Debug configuration to use Secrets.xcconfig
+//
+// For Xcode Cloud/Release builds:
+// Environment variables automatically override these empty values
 
 // Placeholder for API key - DO NOT PUT REAL KEYS HERE
 PARA_API_KEY = 

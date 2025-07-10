@@ -9,8 +9,6 @@
 /* Begin PBXBuildFile section */
 		8F200F542DEFB08100B39BB4 /* AlertItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F200F532DEFB08100B39BB4 /* AlertItem.swift */; };
 		8F4302572DE8DE9000186768 /* EVMWalletView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F4302562DE8DE9000186768 /* EVMWalletView.swift */; };
-		8F5D7E362E203247001C77C6 /* Secrets.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 8F5D7E352E203247001C77C6 /* Secrets.xcconfig */; };
-		8F5D7E382E203463001C77C6 /* Config.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 8F5D7E372E203463001C77C6 /* Config.xcconfig */; };
 		8F6A878D2E134B2600874160 /* EmailPhoneInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F6A878C2E134B2600874160 /* EmailPhoneInput.swift */; };
 		8F6A87912E145C1900874160 /* ConnectSocialButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F6A87902E145C1400874160 /* ConnectSocialButton.swift */; };
 		8F6A87932E145EA200874160 /* CountryPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F6A87922E145E9F00874160 /* CountryPickerView.swift */; };
@@ -312,8 +310,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8F5D7E362E203247001C77C6 /* Secrets.xcconfig in Resources */,
-				8F5D7E382E203463001C77C6 /* Config.xcconfig in Resources */,
 				E86A475D2D1F162F00546CC2 /* CountryNumbers.json in Resources */,
 				E8F93B332C21EBEE006AA3F6 /* Preview Assets.xcassets in Resources */,
 				E8F93B302C21EBEE006AA3F6 /* Assets.xcassets in Resources */,
