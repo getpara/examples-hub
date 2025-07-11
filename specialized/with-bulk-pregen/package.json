@@ -13,7 +13,7 @@
   "dependencies": {
     "@getpara/cosmos-wallet-connectors": "2.0.0-alpha.32",
     "@getpara/evm-wallet-connectors": "2.0.0-alpha.32",
-    "@getpara/react-sdk": "2.0.0-alpha.30",
+    "@getpara/react-sdk": "2.0.0-alpha.32",
     "@getpara/server-sdk": "2.0.0-alpha.32",
     "@getpara/solana-wallet-connectors": "2.0.0-alpha.32",
     "@hookform/resolvers": "3.9.1",

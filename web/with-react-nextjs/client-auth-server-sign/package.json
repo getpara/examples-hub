@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@getpara/ethers-v6-integration": "2.0.0-alpha.32",
-    "@getpara/react-sdk": "2.0.0-alpha.30",
+    "@getpara/react-sdk": "2.0.0-alpha.32",
     "@getpara/server-sdk": "2.0.0-alpha.32",
     "@tanstack/react-query": "5.81.2",
     "ethers": "6.14.4",

@@ -12,12 +12,12 @@
     "postinstall": "yarn setup-para"
   },
   "dependencies": {
-    "@getpara/cosmjs-v0-integration": "2.0.0-alpha.32",
-    "@getpara/react-sdk": "2.0.0-alpha.30",
-    "@cosmjs/stargate": "0.33.1",
+    "@cosmjs/amino": "0.33.1",
     "@cosmjs/cosmwasm-stargate": "0.33.1",
     "@cosmjs/proto-signing": "0.33.1",
-    "@cosmjs/amino": "0.33.1",
+    "@cosmjs/stargate": "0.33.1",
+    "@getpara/cosmjs-v0-integration": "2.0.0-alpha.32",
+    "@getpara/react-sdk": "2.0.0-alpha.32",
     "@tanstack/react-query": "5.81.2",
     "@tanstack/react-query-devtools": "5.81.2",
     "next": "15.1.5",

@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@getpara/react-sdk": "2.0.0-alpha.30",
+    "@getpara/react-sdk": "2.0.0-alpha.32",
     "@getpara/solana-web3.js-v1-integration": "2.0.0-alpha.32",
     "@getpara/viem-v2-integration": "2.0.0-alpha.32",
     "@hookform/resolvers": "^3.9.1",

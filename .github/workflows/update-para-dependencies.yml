@@ -42,7 +42,7 @@ jobs:
           cache: 'yarn'
 
       - name: Install root dependencies
-        run: yarn install --immutable --network-timeout 60000
+        run: yarn install --mode=update-lockfile --network-timeout 60000
 
       - name: Check for available updates
         id: check_updates
@@ -75,9 +75,8 @@ jobs:
           
           # Extract commit message from the script output
           if grep -A 20 "💬 Suggested commit message:" update_results.log > /dev/null; then
-            sed -n '/💬 Suggested commit message:/,/---/p' update_results.log | \
-              sed '1d;$d' | \
-              sed '/^-\+$/d' > commit_message.txt
+            sed -n '/💬 Suggested commit message:/,/^-\+$/p' update_results.log | \
+              sed '1d;$d' > commit_message.txt
             
             # Set multiline output
             echo "commit_message<<EOF" >> $GITHUB_OUTPUT
