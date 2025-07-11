@@ -1,0 +1,206 @@
+name: Update Para Dependencies
+
+on:
+  # Manual trigger for testing
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (check only, no changes)'
+        type: boolean
+        default: false
+      create_pr:
+        description: 'Create pull request if updates found'
+        type: boolean
+        default: false
+  
+  # Nightly schedule (disabled for initial testing)
+  # schedule:
+  #   - cron: '0 2 * * *'  # Run at 2 AM UTC daily
+
+env:
+  NODE_VERSION: "20.19.0"
+  YARN_CACHE_FOLDER: ~/.yarn-cache
+
+jobs:
+  update-dependencies:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'yarn'
+
+      - name: Install yarn
+        run: npm install -g yarn
+
+      - name: Install root dependencies
+        run: yarn install --frozen-lockfile --network-timeout 60000
+
+      - name: Check for available updates
+        id: check_updates
+        run: |
+          echo "🔍 Checking for available @getpara/* dependency updates..."
+          
+          # Run check-only mode first
+          node scripts/update-para-dependencies.js --check-only > update_check.log 2>&1
+          
+          # Check if any updates are available
+          if grep -q "Dependencies updated:" update_check.log; then
+            echo "updates_available=true" >> $GITHUB_OUTPUT
+            echo "✅ Updates are available"
+          else
+            echo "updates_available=false" >> $GITHUB_OUTPUT
+            echo "✅ All dependencies are up to date"
+          fi
+          
+          # Show the check results
+          cat update_check.log
+
+      - name: Apply dependency updates
+        if: steps.check_updates.outputs.updates_available == 'true' && !inputs.dry_run
+        id: apply_updates
+        run: |
+          echo "🔄 Applying dependency updates..."
+          
+          # Apply the updates
+          node scripts/update-para-dependencies.js > update_results.log 2>&1
+          
+          # Extract commit message from the script output
+          if grep -A 20 "💬 Suggested commit message:" update_results.log > /dev/null; then
+            sed -n '/💬 Suggested commit message:/,/---/p' update_results.log | \
+              sed '1d;$d' | \
+              sed '/^-\+$/d' > commit_message.txt
+            
+            # Set multiline output
+            echo "commit_message<<EOF" >> $GITHUB_OUTPUT
+            cat commit_message.txt >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+            
+            echo "changes_made=true" >> $GITHUB_OUTPUT
+          else
+            echo "changes_made=false" >> $GITHUB_OUTPUT
+          fi
+          
+          # Show the results
+          cat update_results.log
+
+
+      - name: Commit changes
+        if: steps.apply_updates.outputs.changes_made == 'true' && !inputs.dry_run
+        id: commit_changes
+        run: |
+          # Configure git
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          
+          # Add all changes
+          git add .
+          
+          # Check if there are any changes to commit
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            echo "committed=false" >> $GITHUB_OUTPUT
+          else
+            # Commit with the generated message
+            git commit -F commit_message.txt
+            echo "committed=true" >> $GITHUB_OUTPUT
+            
+            # Get the commit hash
+            commit_hash=$(git rev-parse HEAD)
+            echo "commit_hash=$commit_hash" >> $GITHUB_OUTPUT
+            
+            echo "✅ Changes committed successfully"
+          fi
+
+      - name: Push changes
+        if: steps.commit_changes.outputs.committed == 'true' && !inputs.dry_run
+        run: |
+          # Push to current branch (improvements-and-automation)
+          git push origin HEAD
+          echo "✅ Changes pushed to branch"
+
+      - name: Create Pull Request
+        if: steps.commit_changes.outputs.committed == 'true' && inputs.create_pr && !inputs.dry_run
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: ${{ steps.apply_updates.outputs.commit_message }}
+          title: "chore: update @getpara/* dependencies to latest alpha versions"
+          body: |
+            ## 🔄 Automated Dependency Update
+            
+            This PR updates @getpara/* packages to their latest alpha versions.
+            
+            ### Changes Made
+            ${{ steps.apply_updates.outputs.commit_message }}
+            
+            ### Verification
+            - [ ] All package.json files have been updated
+            - [ ] Yarn.lock files have been refreshed
+            - [ ] Dependencies are consistent across the monorepo
+            
+            ### Testing
+            This change was generated by the automated dependency update workflow.
+            Please verify that:
+            1. All examples still build correctly
+            2. E2E tests pass
+            3. No breaking changes were introduced
+            
+            ---
+            *This PR was created automatically by the GitHub Action workflow.*
+          branch: "automated-para-deps-update-${{ github.run_number }}"
+          base: "2.0.0-alpha"
+          delete-branch: true
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## 📊 Dependency Update Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ steps.check_updates.outputs.updates_available }}" == "true" ]; then
+            echo "✅ Updates were available and processed" >> $GITHUB_STEP_SUMMARY
+            
+            if [ "${{ inputs.dry_run }}" == "true" ]; then
+              echo "🔍 **Dry run mode** - No changes were made" >> $GITHUB_STEP_SUMMARY
+            elif [ "${{ steps.commit_changes.outputs.committed }}" == "true" ]; then
+              echo "✅ Changes committed successfully" >> $GITHUB_STEP_SUMMARY
+              if [ "${{ inputs.create_pr }}" == "true" ]; then
+                echo "📝 Pull request created" >> $GITHUB_STEP_SUMMARY
+              else
+                echo "📝 Changes pushed to current branch (no PR created)" >> $GITHUB_STEP_SUMMARY
+              fi
+            else
+              echo "❌ No changes were committed" >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            echo "🎉 All @getpara/* dependencies are already up to date!" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Workflow Configuration" >> $GITHUB_STEP_SUMMARY
+          echo "- Dry run: ${{ inputs.dry_run }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Create PR: ${{ inputs.create_pr }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Target branch: 2.0.0-alpha" >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-update-logs
+          path: |
+            update_check.log
+            update_results.log
+            commit_message.txt
+          retention-days: 7
