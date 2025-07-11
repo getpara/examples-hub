@@ -1,5 +1,10 @@
 {
   "name": "examples-hub",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0",
+    "yarn": ">=4.0.0"
+  },
   "devDependencies": {
     "@playwright/test": "1.52.0",
     "@tailwindcss/postcss": "4.1.10",
@@ -24,5 +29,6 @@
     "test:vue": "ts-node e2e/scripts/runTest.ts vue",
     "test:svelte": "ts-node e2e/scripts/runTest.ts svelte",
     "test:node": "ts-node e2e/scripts/runTest.ts node"
-  }
+  },
+  "packageManager": "yarn@4.9.2"
 }

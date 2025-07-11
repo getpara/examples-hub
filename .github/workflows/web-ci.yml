@@ -9,6 +9,8 @@ on:
       - '.env.ci'
       - 'package.json'
       - 'yarn.lock'
+      - '.yarnrc.yml'
+      - '.yarn/**'
   
   push:
     branches: [main]
@@ -18,6 +20,8 @@ on:
       - '.env.ci'
       - 'package.json'
       - 'yarn.lock'
+      - '.yarnrc.yml'
+      - '.yarn/**'
   
   workflow_dispatch:
     inputs:
@@ -114,8 +118,6 @@ jobs:
           cache: 'yarn'
           cache-dependency-path: '**/yarn.lock'
 
-      - name: Install yarn
-        run: npm install -g yarn
 
       - name: Load CI environment variables
         run: |
@@ -142,7 +144,7 @@ jobs:
           
           # Install dependencies with optimizations
           echo "📦 Installing dependencies..."
-          if yarn install --frozen-lockfile --network-timeout 60000 --cache-folder $YARN_CACHE_FOLDER; then
+          if yarn install --immutable --network-timeout 60000 --cache-folder $YARN_CACHE_FOLDER; then
             echo "✅ Dependencies installed" >> $GITHUB_STEP_SUMMARY
           else
             echo "❌ Failed to install dependencies" >> $GITHUB_STEP_SUMMARY
@@ -261,11 +263,9 @@ jobs:
           cache: 'yarn'
           cache-dependency-path: '**/yarn.lock'
 
-      - name: Install yarn
-        run: npm install -g yarn
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile --network-timeout 60000 --cache-folder $YARN_CACHE_FOLDER
+        run: yarn install --immutable --network-timeout 60000 --cache-folder $YARN_CACHE_FOLDER
 
       - name: Install Playwright
         run: npx playwright install chromium

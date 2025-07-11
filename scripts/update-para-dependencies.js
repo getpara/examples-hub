@@ -247,11 +247,11 @@ function updateYarnLockFiles(directories, dryRun = false) {
       if (!dryRun) {
         console.log(`  🔄 Updating ${relativeDir}...`);
         
-        // Run yarn install to update the lock file
-        execSync("yarn install", { 
+        // Update yarn.lock without downloading dependencies (Yarn 4.x feature)
+        execSync("yarn install --mode=update-lockfile", { 
           cwd: dir,
           stdio: "pipe", // Suppress yarn output for cleaner logs
-          timeout: 120000 // 2 minute timeout
+          timeout: 30000 // Reduced timeout since no downloads
         });
         
         console.log(`  ✅ Updated yarn.lock in ${relativeDir}`);
