@@ -37,6 +37,7 @@ jspm_packages/
 .env.production
 .env.beta
 .env.sandbox
+.env.ci
 
 # Next.js
 .next/

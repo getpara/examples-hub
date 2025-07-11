@@ -4,13 +4,11 @@
     "@playwright/test": "1.52.0",
     "@tailwindcss/postcss": "4.1.10",
     "@types/node": "^22.15.21",
-    "dotenv": "^16.3.1",
+    "dotenv": "^17.1.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
   },
   "scripts": {
-    "e2e-examples-hub-script": "ts-node e2e/scripts/runExampleHubTests.ts",
-    "single-example-hub-e2e": "playwright test --config=e2e/example-hub-playwright.config.ts",
     "test:all": "ts-node e2e/scripts/runAllTests.ts --sequential",
     "test:all:parallel": "ts-node e2e/scripts/runAllTests.ts",
     "test:react-vite": "ts-node e2e/scripts/runTest.ts react-vite",

@@ -81,7 +81,7 @@ jobs:
           echo "projects=$projects" >> $GITHUB_OUTPUT
           
           # E2E matrix (framework level only)
-          e2e_matrix='[{"framework":"react-vite","name":"React Vite"},{"framework":"react-nextjs","name":"React Next.js"},{"framework":"vue","name":"Vue"},{"framework":"svelte","name":"Svelte"}]'
+          e2e_matrix='[{"framework":"react-vite","name":"React Vite"},{"framework":"react-nextjs","name":"React Next.js","test_target":"react-nextjs"},{"framework":"vue","name":"Vue"},{"framework":"svelte","name":"Svelte"}]'
           echo "e2e-matrix=$e2e_matrix" >> $GITHUB_OUTPUT
           
           # Debug output
@@ -265,11 +265,9 @@ jobs:
         run: |
           echo "### E2E Test: ${{ matrix.framework.name }}" >> $GITHUB_STEP_SUMMARY
           
-          if [ "${{ matrix.framework.framework }}" = "react-nextjs" ]; then
-            xvfb-run yarn test:react-nextjs
-          else
-            xvfb-run yarn test:${{ matrix.framework.framework }}
-          fi
+          # Use test_target if specified, otherwise use framework name
+          TEST_TARGET="${{ matrix.framework.test_target || matrix.framework.framework }}"
+          xvfb-run yarn test:$TEST_TARGET
           
           if [ $? -eq 0 ]; then
             echo "✅ E2E tests passed" >> $GITHUB_STEP_SUMMARY

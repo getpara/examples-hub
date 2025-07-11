@@ -456,17 +456,10 @@
     "@ethersproject/properties" "^5.7.0"
     "@ethersproject/strings" "^5.7.0"
 
-<<<<<<< Updated upstream
-"@getpara/core-components@2.0.0-alpha.29":
-  version "2.0.0-alpha.29"
-  resolved "https://registry.npmjs.org/@getpara/core-components/-/core-components-2.0.0-alpha.29.tgz#dbff3f1560246fb17dca0cba0e1e690650d15890"
-  integrity sha512-60pZtaL7GZ5w2jyL6IlL+15wvyiS6Pq1aNnqNvXKRE9/wIyoynpj8YJPcuPehf/z+E8zAOfiBTmKIUHGgOlMFA==
-=======
-"@getpara/core-components@2.0.0-alpha.27":
-  version "2.0.0-alpha.27"
-  resolved "https://registry.npmjs.org/@getpara/core-components/-/core-components-2.0.0-alpha.27.tgz#f83df002d264f379885bc62dd0d9fda6d20ad28d"
-  integrity sha512-QYgXTl1GkAz7Vy2oY55qOm8HlAnSex0z9tYOz8evuH00YmC7xvZw6VmZxkZM1Gh11m9kdWVOEE3kKTVCrgpqzw==
->>>>>>> Stashed changes
+"@getpara/core-components@2.0.0-alpha.32":
+  version "2.0.0-alpha.32"
+  resolved "https://registry.npmjs.org/@getpara/core-components/-/core-components-2.0.0-alpha.32.tgz#60e8802baaac097ddadb9d9602780f42d488a0fb"
+  integrity sha512-sOrV56fPPneZLzsNe7JwYfbxM0lWSHfQ3kCPn/tRwqLKseawlc+vOgHsaTBlZA7hoCztllpkyp9iKAwqYjzl0w==
   dependencies:
     "@stencil/core" "^4.7.0"
     color-blend "^4.0.0"
@@ -475,110 +468,60 @@
     inputmask "5.0.9"
     qrcode-with-logos "1.1.1"
 
-<<<<<<< Updated upstream
-"@getpara/core-sdk@2.0.0-alpha.29":
-  version "2.0.0-alpha.29"
-  resolved "https://registry.npmjs.org/@getpara/core-sdk/-/core-sdk-2.0.0-alpha.29.tgz#e8982713bf71d5b0b978eec2f0198a8869893240"
-  integrity sha512-r3MVnT0V4aPN7T7PhyPPlBSAjYF8WcuEcg597a3+AZgH2JP9yMbMvWTypBx/jdQCR/oCEK4peL1DWQl+3ihtPw==
-=======
-"@getpara/core-sdk@2.0.0-alpha.27":
-  version "2.0.0-alpha.27"
-  resolved "https://registry.npmjs.org/@getpara/core-sdk/-/core-sdk-2.0.0-alpha.27.tgz#1843f3425b558ac5d74fd517c7be376c9fea9f27"
-  integrity sha512-nlEXjz/ENNboGOgeClbxqZbn2o/AG2ZQG68/Zu4TMM0Xup0qmiHKZouKuk4Wv/nhTJXjBlgirWHH6yj3VmmUDQ==
->>>>>>> Stashed changes
+"@getpara/core-sdk@2.0.0-alpha.32":
+  version "2.0.0-alpha.32"
+  resolved "https://registry.npmjs.org/@getpara/core-sdk/-/core-sdk-2.0.0-alpha.32.tgz#4a983dc3a1927a6f32419ffb743e2bc5f64a6769"
+  integrity sha512-YZyBc9VCnqrBwzvybDXzsI63FVELKbG4Sbb7ez/IQAcrThn14RPWOdL8RZrJYZ0cUkrbmQ1EMljyplXyUfpStQ==
   dependencies:
     "@celo/utils" "^8.0.2"
     "@cosmjs/encoding" "^0.32.4"
     "@ethereumjs/util" "^9.1.0"
-<<<<<<< Updated upstream
-    "@getpara/user-management-client" "2.0.0-alpha.29"
-=======
-    "@getpara/user-management-client" "2.0.0-alpha.27"
->>>>>>> Stashed changes
+    "@getpara/user-management-client" "2.0.0-alpha.32"
     "@noble/hashes" "^1.5.0"
     base64url "^3.0.1"
     libphonenumber-js "^1.11.7"
     node-forge "^1.3.1"
     uuid "^11.1.0"
 
-<<<<<<< Updated upstream
-"@getpara/evm-wallet-connectors@2.0.0-alpha.29":
-  version "2.0.0-alpha.29"
-  resolved "https://registry.npmjs.org/@getpara/evm-wallet-connectors/-/evm-wallet-connectors-2.0.0-alpha.29.tgz#b2aa56d413504d352db0e43597d1ba0a6bec748a"
-  integrity sha512-/MOeVWKIUS2vfEvngREY+Mc2jeCfwiXkPGJF1XzLUfqusUWJjZ+WQ9B35/ILs2BvRS2dhPdzVxX/acNtB4fYJQ==
+"@getpara/evm-wallet-connectors@2.0.0-alpha.32":
+  version "2.0.0-alpha.32"
+  resolved "https://registry.npmjs.org/@getpara/evm-wallet-connectors/-/evm-wallet-connectors-2.0.0-alpha.32.tgz#b4613652b2e23c4894a831869c3979c8f01abe05"
+  integrity sha512-cFJz8DVtDkEzqv+6P/1j+8lVgVNrBIRX2FocNtpSgdr6G9efNc8GydshoRXTuYBMh7J8oCQ2rl9VI4oX7G4S+Q==
   dependencies:
     "@coinbase/wallet-sdk" "4.3.0"
-    "@getpara/wagmi-v2-connector" "2.0.0-alpha.29"
-    "@getpara/web-sdk" "2.0.0-alpha.29"
+    "@getpara/wagmi-v2-connector" "2.0.0-alpha.32"
+    "@getpara/web-sdk" "2.0.0-alpha.32"
     zustand "^4.5.2"
     zustand-sync-tabs "^0.2.2"
 
-"@getpara/react-common@2.0.0-alpha.29":
-  version "2.0.0-alpha.29"
-  resolved "https://registry.npmjs.org/@getpara/react-common/-/react-common-2.0.0-alpha.29.tgz#1a913353f2ee01aac84bdf4e955a0236d3cde758"
-  integrity sha512-azq9DU6kc2Eix51ZHEn9D+JE/qInuqBGz/k8ktB1xfkkbUHtrbnwi2/2m4471DjBFFm95JwyESdty2ZVQtuaiA==
+"@getpara/react-common@2.0.0-alpha.32":
+  version "2.0.0-alpha.32"
+  resolved "https://registry.npmjs.org/@getpara/react-common/-/react-common-2.0.0-alpha.32.tgz#022389d6ab361efbf4e3c0e11c532d8fd223b539"
+  integrity sha512-D+IUAWQG7xhsp9JVjRUenw6xLfgNqbIt/0fRWwkERnWN3Kz0j3a37uOuy1s8hG5BvfG7V9vQjVNGyZCJ9nLPrA==
   dependencies:
-    "@getpara/react-components" "2.0.0-alpha.29"
-    "@getpara/web-sdk" "2.0.0-alpha.29"
-=======
-"@getpara/evm-wallet-connectors@2.0.0-alpha.27":
-  version "2.0.0-alpha.27"
-  resolved "https://registry.npmjs.org/@getpara/evm-wallet-connectors/-/evm-wallet-connectors-2.0.0-alpha.27.tgz#86800454d93ddee66de171eedf1001efc193159a"
-  integrity sha512-xFFsXUR6O578UTciz6BrjO58fTjMnUWfmRCWtid8bDhNWZoTStRbNj/ANY7ZcdhN9FDEmESuBaeTfoFu+WhTfw==
-  dependencies:
-    "@coinbase/wallet-sdk" "4.3.0"
-    "@getpara/wagmi-v2-connector" "2.0.0-alpha.27"
-    "@getpara/web-sdk" "2.0.0-alpha.27"
-    zustand "^4.5.2"
-    zustand-sync-tabs "^0.2.2"
-
-"@getpara/react-common@2.0.0-alpha.27":
-  version "2.0.0-alpha.27"
-  resolved "https://registry.npmjs.org/@getpara/react-common/-/react-common-2.0.0-alpha.27.tgz#103e6ef6e9cc2a163bdac0e22f6e29d43023ffbb"
-  integrity sha512-+ffBbFc9k8gWmQwRfqc4fxppQGM3KamFfkLx3YAM7sC9gl6+DwG22mit4WesEEdLMa/LB2473duegKy6WiZK4g==
-  dependencies:
-    "@getpara/react-components" "2.0.0-alpha.27"
-    "@getpara/web-sdk" "2.0.0-alpha.27"
->>>>>>> Stashed changes
+    "@getpara/react-components" "2.0.0-alpha.32"
+    "@getpara/web-sdk" "2.0.0-alpha.32"
     "@moonpay/moonpay-react" "^1.8.3"
     "@ramp-network/ramp-instant-sdk" "^4.0.5"
     libphonenumber-js "^1.11.7"
     styled-components "^6.1.8"
     ua-parser-js "^2.0.2"
 
-<<<<<<< Updated upstream
-"@getpara/react-components@2.0.0-alpha.29":
-  version "2.0.0-alpha.29"
-  resolved "https://registry.npmjs.org/@getpara/react-components/-/react-components-2.0.0-alpha.29.tgz#2b59b6607d2298c8ca6187944dbd50cede41dcae"
-  integrity sha512-MChmG2DCuDMTficR14QnYPLyGJnyQEWi5QhhDcADXEe9dlxN3w+R6F6MlfzsvV1FPDeOv7Wo7mWH49u5HX9TYw==
+"@getpara/react-components@2.0.0-alpha.32":
+  version "2.0.0-alpha.32"
+  resolved "https://registry.npmjs.org/@getpara/react-components/-/react-components-2.0.0-alpha.32.tgz#bee7688f2991ec7ce3288db736a89b207d9d729e"
+  integrity sha512-ec9kyfgAS+zd+gqUl0opqS2y3EpEYhunsUI/l7TyMSOsHgHlx67vUiZsDcaGBRfEyarztVpwbQlqhPz5OrZn9Q==
   dependencies:
-    "@getpara/core-components" "2.0.0-alpha.29"
+    "@getpara/core-components" "2.0.0-alpha.32"
 
-"@getpara/react-sdk@2.0.0-alpha.29":
-  version "2.0.0-alpha.29"
-  resolved "https://registry.npmjs.org/@getpara/react-sdk/-/react-sdk-2.0.0-alpha.29.tgz#8c81613f6c19e9278f2f47cf508e841dec933dd5"
-  integrity sha512-d+4artNAvAfKHkjAWQvFFzRBZWY0TMn63jVgtX7nww7yb5lSql89kvAwpZS2b953BSo8JTCuRt3BW6rGGPt7cg==
+"@getpara/react-sdk@2.0.0-alpha.32":
+  version "2.0.0-alpha.32"
+  resolved "https://registry.npmjs.org/@getpara/react-sdk/-/react-sdk-2.0.0-alpha.32.tgz#7e08ab2e7e78fc0f014c28bfbed6765d8f7e5647"
+  integrity sha512-N2L7YgEEqjJC+9aM6OC2764opEn7/9ns1aTQiqqo5HaCk7ztU5B0QV84dc5LNpVJTd1J6ELgENFYTuuAVRikGw==
   dependencies:
-    "@getpara/react-common" "2.0.0-alpha.29"
-    "@getpara/react-components" "2.0.0-alpha.29"
-    "@getpara/web-sdk" "2.0.0-alpha.29"
-=======
-"@getpara/react-components@2.0.0-alpha.27":
-  version "2.0.0-alpha.27"
-  resolved "https://registry.npmjs.org/@getpara/react-components/-/react-components-2.0.0-alpha.27.tgz#40ca430817e93c9eb384cf101b190ced9d790e5a"
-  integrity sha512-LRcOsfB77rAh/YFWV7XVJG+7Z7x6op5A89bXm0XQg5JtakqmjbkquExd73eKAtEwyuy4oY/hbz4rZD2mPwDpcg==
-  dependencies:
-    "@getpara/core-components" "2.0.0-alpha.27"
-
-"@getpara/react-sdk@2.0.0-alpha.27":
-  version "2.0.0-alpha.27"
-  resolved "https://registry.npmjs.org/@getpara/react-sdk/-/react-sdk-2.0.0-alpha.27.tgz#b17d4a1214124b48ac79c7bc1b26e1112b39a336"
-  integrity sha512-9ryG4XaX6czKyBb4bYAxBz5mjsZpSSKhl5YrAuTHPa7Nqs0TLnZbFGIgGd0FdGyuPufU9acom6UXJGuRNmuhZw==
-  dependencies:
-    "@getpara/react-common" "2.0.0-alpha.27"
-    "@getpara/react-components" "2.0.0-alpha.27"
-    "@getpara/web-sdk" "2.0.0-alpha.27"
->>>>>>> Stashed changes
+    "@getpara/react-common" "2.0.0-alpha.32"
+    "@getpara/react-components" "2.0.0-alpha.32"
+    "@getpara/web-sdk" "2.0.0-alpha.32"
     date-fns "^3.6.0"
     framer-motion "^11.3.31"
     libphonenumber-js "^1.11.7"
@@ -586,68 +529,36 @@
     zustand "^4.5.2"
     zustand-sync-tabs "^0.2.2"
 
-<<<<<<< Updated upstream
-"@getpara/user-management-client@2.0.0-alpha.29":
-  version "2.0.0-alpha.29"
-  resolved "https://registry.npmjs.org/@getpara/user-management-client/-/user-management-client-2.0.0-alpha.29.tgz#b12626be744a1605c65e9916c9e39c4df75a6415"
-  integrity sha512-M5ijZsehYuSi65sc0kIRaCAF1SJrGEfWqd44uKBpw3VnmRprWbX69KxhiXzP68sL/otnIqB6/Wfz9TQPMc6plA==
-=======
-"@getpara/user-management-client@2.0.0-alpha.27":
-  version "2.0.0-alpha.27"
-  resolved "https://registry.npmjs.org/@getpara/user-management-client/-/user-management-client-2.0.0-alpha.27.tgz#47cfe2186dbe8becf1977503e1e234cbe4c413da"
-  integrity sha512-djbJ1M6QdpUtm2lMlqyW/iNjIxnNjTAH6/v1DAq5ePEo4lQD2OCREJUbMJ6llz/qLi51KtKDOE+eLg1o7VCrPA==
->>>>>>> Stashed changes
+"@getpara/user-management-client@2.0.0-alpha.32":
+  version "2.0.0-alpha.32"
+  resolved "https://registry.npmjs.org/@getpara/user-management-client/-/user-management-client-2.0.0-alpha.32.tgz#516894df842f00d1eb80e88d5ad38f35fdb8a65a"
+  integrity sha512-B5gl3ZmaJ+WspZOsWxb5SlDuI1FmxoTAPxDkN2kBaNtYrRTSNDeARhJgRIZ9T2mJ/SAPff38/5mOtjpsePH1+w==
   dependencies:
     axios "^1.8.4"
     libphonenumber-js "^1.11.7"
 
-<<<<<<< Updated upstream
-"@getpara/viem-v2-integration@2.0.0-alpha.29":
-  version "2.0.0-alpha.29"
-  resolved "https://registry.npmjs.org/@getpara/viem-v2-integration/-/viem-v2-integration-2.0.0-alpha.29.tgz#f06109df277d7eb66a5fe35e914e8d0ff4abf2bb"
-  integrity sha512-7dpP3IcC8Z6tBbn93ZdRIsMFtVFUdPM7b8HVg4RY28TjxAdBsS6Ol9UrK+wNnJCfdqE7qKrBqzsLQxStSeM+hg==
+"@getpara/viem-v2-integration@2.0.0-alpha.32":
+  version "2.0.0-alpha.32"
+  resolved "https://registry.npmjs.org/@getpara/viem-v2-integration/-/viem-v2-integration-2.0.0-alpha.32.tgz#41bb2e04fd33255590eca1d97a4ce88d57e2e0fe"
+  integrity sha512-hW4W0uyVoXWAlEpBc04JFEnM8Yu4lu9ys+po15y83E5fl9vNUlbfATqb1D93bb6hFDH4PElhxuFasZtiye3kCA==
   dependencies:
-    "@getpara/core-sdk" "2.0.0-alpha.29"
+    "@getpara/core-sdk" "2.0.0-alpha.32"
 
-"@getpara/wagmi-v2-connector@2.0.0-alpha.29":
-  version "2.0.0-alpha.29"
-  resolved "https://registry.npmjs.org/@getpara/wagmi-v2-connector/-/wagmi-v2-connector-2.0.0-alpha.29.tgz#80ddd322ec468c5664a56604d22bf61196b9d30d"
-  integrity sha512-2vnr6V48GJmqjQ8tUjvOnsN5fTD1CxRgg0cb4wEG7lo/CEsUrxlCa218LPaQVCv6ioCUWrQNFz0f7DV1Cjt6nQ==
+"@getpara/wagmi-v2-connector@2.0.0-alpha.32":
+  version "2.0.0-alpha.32"
+  resolved "https://registry.npmjs.org/@getpara/wagmi-v2-connector/-/wagmi-v2-connector-2.0.0-alpha.32.tgz#dbc606066f67de1c8a1587e77a74dfa8fc9e2195"
+  integrity sha512-qW/F9xzpDPnMln7Q46g1ON/nR20jNFrHr9qQZgyb9V1fViQWazGGbEGqgn3y7y/j65sFAyyBintz+H5QgiKcrA==
   dependencies:
-    "@getpara/viem-v2-integration" "2.0.0-alpha.29"
-    "@getpara/web-sdk" "2.0.0-alpha.29"
+    "@getpara/viem-v2-integration" "2.0.0-alpha.32"
+    "@getpara/web-sdk" "2.0.0-alpha.32"
 
-"@getpara/web-sdk@2.0.0-alpha.29":
-  version "2.0.0-alpha.29"
-  resolved "https://registry.npmjs.org/@getpara/web-sdk/-/web-sdk-2.0.0-alpha.29.tgz#214c03aa19d5cefcc38fb740c9f48933fb7f2b1c"
-  integrity sha512-XV1dCdSXJMEBoyDKZIq96yoMRdx/8pGOTXupx1UnP5AXdF/h8AJYsFJ1XnKNk0ECsEQsvzueFdzSFGjrh5rTUg==
+"@getpara/web-sdk@2.0.0-alpha.32":
+  version "2.0.0-alpha.32"
+  resolved "https://registry.npmjs.org/@getpara/web-sdk/-/web-sdk-2.0.0-alpha.32.tgz#1370490afc2eba7d3c9f5568bd35612637db4c0b"
+  integrity sha512-x8SeSVrPz2ncuUVUOaZom2/QQY90760SMucrMsek4IlDrRPel3BQuMAz6EwmxmtguWOBzHAoJdcJ5dEhJVWUdA==
   dependencies:
-    "@getpara/core-sdk" "2.0.0-alpha.29"
-    "@getpara/user-management-client" "2.0.0-alpha.29"
-=======
-"@getpara/viem-v2-integration@2.0.0-alpha.27":
-  version "2.0.0-alpha.27"
-  resolved "https://registry.npmjs.org/@getpara/viem-v2-integration/-/viem-v2-integration-2.0.0-alpha.27.tgz#b6579065be5cf5bf4ff37d1d0f7d038a558c1c26"
-  integrity sha512-+B9poVkuWbSc8R+2IPeQ30M0QJ4EIThUABCreCrN+tDVXKwqnTSwJhq4FrE9Vzd04aE+ZysaJYuY9R4dB4Laeg==
-  dependencies:
-    "@getpara/core-sdk" "2.0.0-alpha.27"
-
-"@getpara/wagmi-v2-connector@2.0.0-alpha.27":
-  version "2.0.0-alpha.27"
-  resolved "https://registry.npmjs.org/@getpara/wagmi-v2-connector/-/wagmi-v2-connector-2.0.0-alpha.27.tgz#244191fbcb155029fe4dc8de5ace9ca7d17a3114"
-  integrity sha512-F0D4gsAVqk21hgjLGTjfi3MNFFbu+JzvmO/Ue7kNQMVFQEh4pj0eG+VVibkOVJ47K5/agB39m7UYvek2SlgGVw==
-  dependencies:
-    "@getpara/viem-v2-integration" "2.0.0-alpha.27"
-    "@getpara/web-sdk" "2.0.0-alpha.27"
-
-"@getpara/web-sdk@2.0.0-alpha.27":
-  version "2.0.0-alpha.27"
-  resolved "https://registry.npmjs.org/@getpara/web-sdk/-/web-sdk-2.0.0-alpha.27.tgz#13beb5924801c87cea4a65f5dedd77f694ebc094"
-  integrity sha512-iyuyS4g5DY2lr+yxQgr8HoA0RmYgc3EihJxBBz+o4FcFdTU0296li4mDIjYH6thU5u8VwUjaO4LApAdgFX3jCA==
-  dependencies:
-    "@getpara/core-sdk" "2.0.0-alpha.27"
-    "@getpara/user-management-client" "2.0.0-alpha.27"
->>>>>>> Stashed changes
+    "@getpara/core-sdk" "2.0.0-alpha.32"
+    "@getpara/user-management-client" "2.0.0-alpha.32"
     "@sentry/browser" "^9.1.0"
     base64url "^3.0.1"
     buffer "6.0.3"
