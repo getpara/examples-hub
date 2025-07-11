@@ -1,4 +1,4 @@
-import { writable, derived } from 'svelte/store';
+import { writable, derived, get } from 'svelte/store';
 import { para } from '@/lib/para/client';
 
 interface AccountState {
@@ -60,8 +60,7 @@ export async function checkAuthentication() {
 
 // Sign message
 export async function signMessage(message: string): Promise<any> {
-  const state = accountState;
-  const currentState = (state as any).value || initialState;
+  const currentState = get(accountState);
   
   if (!currentState.isConnected) {
     throw new Error('Not connected');

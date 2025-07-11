@@ -492,36 +492,36 @@
     "@ethersproject/properties" "^5.7.0"
     "@ethersproject/strings" "^5.7.0"
 
-"@getpara/core-sdk@2.0.0-alpha.29":
-  version "2.0.0-alpha.29"
-  resolved "https://registry.npmjs.org/@getpara/core-sdk/-/core-sdk-2.0.0-alpha.29.tgz#e8982713bf71d5b0b978eec2f0198a8869893240"
-  integrity sha512-r3MVnT0V4aPN7T7PhyPPlBSAjYF8WcuEcg597a3+AZgH2JP9yMbMvWTypBx/jdQCR/oCEK4peL1DWQl+3ihtPw==
+"@getpara/core-sdk@2.0.0-alpha.32":
+  version "2.0.0-alpha.32"
+  resolved "https://registry.npmjs.org/@getpara/core-sdk/-/core-sdk-2.0.0-alpha.32.tgz#4a983dc3a1927a6f32419ffb743e2bc5f64a6769"
+  integrity sha512-YZyBc9VCnqrBwzvybDXzsI63FVELKbG4Sbb7ez/IQAcrThn14RPWOdL8RZrJYZ0cUkrbmQ1EMljyplXyUfpStQ==
   dependencies:
     "@celo/utils" "^8.0.2"
     "@cosmjs/encoding" "^0.32.4"
     "@ethereumjs/util" "^9.1.0"
-    "@getpara/user-management-client" "2.0.0-alpha.29"
+    "@getpara/user-management-client" "2.0.0-alpha.32"
     "@noble/hashes" "^1.5.0"
     base64url "^3.0.1"
     libphonenumber-js "^1.11.7"
     node-forge "^1.3.1"
     uuid "^11.1.0"
 
-"@getpara/user-management-client@2.0.0-alpha.29":
-  version "2.0.0-alpha.29"
-  resolved "https://registry.npmjs.org/@getpara/user-management-client/-/user-management-client-2.0.0-alpha.29.tgz#b12626be744a1605c65e9916c9e39c4df75a6415"
-  integrity sha512-M5ijZsehYuSi65sc0kIRaCAF1SJrGEfWqd44uKBpw3VnmRprWbX69KxhiXzP68sL/otnIqB6/Wfz9TQPMc6plA==
+"@getpara/user-management-client@2.0.0-alpha.32":
+  version "2.0.0-alpha.32"
+  resolved "https://registry.npmjs.org/@getpara/user-management-client/-/user-management-client-2.0.0-alpha.32.tgz#516894df842f00d1eb80e88d5ad38f35fdb8a65a"
+  integrity sha512-B5gl3ZmaJ+WspZOsWxb5SlDuI1FmxoTAPxDkN2kBaNtYrRTSNDeARhJgRIZ9T2mJ/SAPff38/5mOtjpsePH1+w==
   dependencies:
     axios "^1.8.4"
     libphonenumber-js "^1.11.7"
 
-"@getpara/web-sdk@2.0.0-alpha.29":
-  version "2.0.0-alpha.29"
-  resolved "https://registry.npmjs.org/@getpara/web-sdk/-/web-sdk-2.0.0-alpha.29.tgz#214c03aa19d5cefcc38fb740c9f48933fb7f2b1c"
-  integrity sha512-XV1dCdSXJMEBoyDKZIq96yoMRdx/8pGOTXupx1UnP5AXdF/h8AJYsFJ1XnKNk0ECsEQsvzueFdzSFGjrh5rTUg==
+"@getpara/web-sdk@2.0.0-alpha.32":
+  version "2.0.0-alpha.32"
+  resolved "https://registry.npmjs.org/@getpara/web-sdk/-/web-sdk-2.0.0-alpha.32.tgz#1370490afc2eba7d3c9f5568bd35612637db4c0b"
+  integrity sha512-x8SeSVrPz2ncuUVUOaZom2/QQY90760SMucrMsek4IlDrRPel3BQuMAz6EwmxmtguWOBzHAoJdcJ5dEhJVWUdA==
   dependencies:
-    "@getpara/core-sdk" "2.0.0-alpha.29"
-    "@getpara/user-management-client" "2.0.0-alpha.29"
+    "@getpara/core-sdk" "2.0.0-alpha.32"
+    "@getpara/user-management-client" "2.0.0-alpha.32"
     "@sentry/browser" "^9.1.0"
     base64url "^3.0.1"
     buffer "6.0.3"

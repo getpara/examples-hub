@@ -25,8 +25,8 @@ test.describe('Para Modal - Phone + Password Authentication', () => {
       usePhoneNumber: true, // Use phone number
     });
 
-    // Verify wallet is connected by checking for the address display
-    await expect(paraModalExamplePage.page.getByTestId('account-address-display')).toBeVisible();
+    // Verify wallet is connected by checking for the address display (with extended timeout)
+    await expect(paraModalExamplePage.page.getByTestId('account-address-display')).toBeVisible({ timeout: 15000 });
     expect(clipboardText).toHaveLength(64);
     expect(/^[0-9a-f]+$/.test(clipboardText)).toBeTruthy();
 

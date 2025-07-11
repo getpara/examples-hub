@@ -5,47 +5,83 @@ import * as webauthn from '../../../helpers/webAuthn';
 
 test.describe('Vue custom auth example', () => {
   test('happy path - email authentication flow', async ({ browser }) => {
-    const context = await browser.newContext({
-      permissions: ['clipboard-write', 'clipboard-read'],
-    });
-    const page = await context.newPage();
-    await webauthn.setIsUserVerifyingPlatformAuthenticatorAvailable(page);
+    console.log('🚀 Starting Vue E2E test - Email authentication flow');
     
-    const customAuthPage = new CustomAuthExamplePage(page);
-    await customAuthPage.visit();
+    // ===== PHASE 1: User Creation with Fresh Context =====
+    const createContext = await browser.newContext({
+      permissions: ['clipboard-write', 'clipboard-read'],
+      storageState: { cookies: [], origins: [] },
+      locale: 'en-US',
+      timezoneId: 'America/New_York',
+      httpCredentials: undefined,
+      extraHTTPHeaders: {},
+    });
+    const createPage = await createContext.newPage();
+    await webauthn.setIsUserVerifyingPlatformAuthenticatorAvailable(createPage);
+    
+    const createAuthPage = new CustomAuthExamplePage(createPage);
+    await createAuthPage.visit();
     
     // Verify initial state
-    await expect(page.getByTestId('not-logged-in')).toBeVisible();
+    await expect(createPage.getByTestId('not-logged-in')).toBeVisible();
     
     // Open auth modal and create user
-    await customAuthPage.openAuthModal();
-    const { email, credential } = await customAuthPage.createUserWithEmail({ context });
+    await createAuthPage.openAuthModal();
+    const { email, credential } = await createAuthPage.createUserWithEmail({ context: createContext });
     
     // Verify logged in state
-    await expect(page.getByTestId('wallet-connected')).toBeVisible();
-    const createAddress = await customAuthPage.getWalletAddress();
+    await expect(createPage.getByTestId('wallet-connected')).toBeVisible();
+    const createAddress = await createAuthPage.getWalletAddress();
     expect(createAddress).toBeTruthy();
     expect(createAddress).toMatch(/^0x[a-fA-F0-9]{40}$/);
     
     // Test message signing
+    console.log('🔄 Testing message signing...');
     const testMessage = 'Hello Para from Vue!';
-    const signature = await customAuthPage.signMessage(testMessage);
+    const signature = await createAuthPage.signMessage(testMessage);
     expect(signature).toBeTruthy();
-    expect(signature).toMatch(/^[a-fA-F0-9]+$/); // Should be a hex string (may or may not have 0x prefix)
+    expect(signature).toMatch(/^[a-fA-F0-9]+$/);
     
     // Test logout
-    await customAuthPage.logout();
-    await expect(page.getByTestId('not-logged-in')).toBeVisible();
+    console.log('🔄 Testing logout...');
+    await createAuthPage.logout();
+    await expect(createPage.getByTestId('not-logged-in')).toBeVisible();
     
-    // Test login with existing account
-    await page.reload();
-    await customAuthPage.openAuthModal();
-    await customAuthPage.loginWithEmail({ context, credential, email });
+    // Close the creation context completely
+    console.log('🔄 Closing creation context and clearing all state...');
+    await createContext.close();
     
-    // Verify same address after login
-    const loginAddress = await customAuthPage.getWalletAddress();
+    // ===== PHASE 2: Login with Completely Fresh Context =====
+    console.log('🔄 Creating fresh context for login test...');
+    const loginContext = await browser.newContext({
+      permissions: ['clipboard-write', 'clipboard-read'],
+      storageState: { cookies: [], origins: [] },
+      locale: 'en-US',
+      timezoneId: 'America/New_York',
+      httpCredentials: undefined,
+      extraHTTPHeaders: {},
+    });
+    const loginPage = await loginContext.newPage();
+    await webauthn.setIsUserVerifyingPlatformAuthenticatorAvailable(loginPage);
+    
+    const loginAuthPage = new CustomAuthExamplePage(loginPage);
+    await loginAuthPage.visit();
+    
+    // Verify fresh initial state
+    await expect(loginPage.getByTestId('not-logged-in')).toBeVisible();
+    
+    // Test login with the same user credentials
+    console.log('🔄 Testing login with existing account in fresh context...');
+    await loginAuthPage.openAuthModal();
+    await loginAuthPage.loginWithEmail({ context: loginContext, credential, email });
+    
+    // Verify same address after login in fresh context
+    const loginAddress = await loginAuthPage.getWalletAddress();
     expect(loginAddress).toBe(createAddress);
     
-    await context.close();
+    console.log('✅ Vue E2E test completed successfully');
+    
+    // Cleanup: ensure login context is properly closed
+    await loginContext.close();
   });
 });

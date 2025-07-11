@@ -32,7 +32,7 @@ export function SignMessageForm({
         </div>
         <button
           type="submit"
-          data-testid="sign-submit-button"
+          data-testid="sign-message-button"
           disabled={!message.trim() || isLoading}
           className="w-full px-4 py-2 bg-gray-900 text-white rounded-none hover:bg-gray-950 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed font-medium">
           {isLoading ? "Signing..." : "Sign Message"}

@@ -8,6 +8,7 @@ const ADDRESS_IDENTIFIER = 'Address';
 
 test.describe('Para Modal - Phone + Passkey Authentication', () => {
   test('happy path - create and login with phone and passkey', async ({ browser }) => {
+    console.log('🚀 Starting React Next.js Para Modal E2E test - Phone + Passkey');
     const context = await browser.newContext({
       permissions: ['clipboard-write', 'clipboard-read'], // grant clipboard read/write permissions
     });
@@ -41,6 +42,7 @@ test.describe('Para Modal - Phone + Passkey Authentication', () => {
     expect(loginAddressText).toBe(createAddressText);
 
     // Test message signing
+    console.log('🔄 Testing message signing...');
     const testMessage = 'Hello Para E2E Test with Phone + Passkey!';
     const signature = await paraModalExamplePage.signMessage(testMessage);
     
@@ -48,5 +50,7 @@ test.describe('Para Modal - Phone + Passkey Authentication', () => {
     expect(signature).toBeTruthy();
     expect(signature.length).toBeGreaterThan(0);
     expect(signature).toMatch(/^[a-fA-F0-9]+$/); // Should be a hex string (may or may not have 0x prefix)
+    
+    console.log('✅ React Next.js Para Modal E2E test completed successfully');
   });
 });

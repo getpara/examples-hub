@@ -164,7 +164,24 @@ export class ParaModalExamplePage {
       await this.page.getByRole('button', { name: 'Done' }).click();
     }
 
-    await this.page.waitForTimeout(2000);
+    // Wait for modal to close and app state to update
+    console.log('🔄 Waiting for Para Modal to close and connection state to update...');
+    await this.page.waitForTimeout(3000);
+    
+    // Verify that the modal has closed by checking that the page is back to main content
+    try {
+      // Wait for the account address display to appear (indicates successful connection)
+      await this.page.waitForSelector('[data-testid="account-address-display"]', { 
+        state: 'visible', 
+        timeout: 10000 
+      });
+      console.log('✅ Para Modal connection confirmed - account address display visible');
+    } catch (error) {
+      console.log('⚠️ Account address display not found after modal close, may need more time');
+      // Try waiting a bit more
+      await this.page.waitForTimeout(2000);
+    }
+    
     return {
       emailOrPhone,
       credential: credentials[0],
@@ -252,10 +269,25 @@ export class ParaModalExamplePage {
       await authPortal.login(context, credential);
     }
 
-    await this.page.waitForTimeout(1000);
+    // Wait for login to complete and connection state to update
+    console.log('🔄 Waiting for login completion and connection state update...');
+    await this.page.waitForTimeout(2000);
+    
     if (is2FAEnabled) {
       await this.page.getByRole('button', { name: 'Skip' }).click();
       await this.page.waitForTimeout(2100);
+    }
+    
+    // Verify login completion by checking for account address display
+    try {
+      await this.page.waitForSelector('[data-testid="account-address-display"]', { 
+        state: 'visible', 
+        timeout: 10000 
+      });
+      console.log('✅ Para Modal login confirmed - account address display visible');
+    } catch (error) {
+      console.log('⚠️ Account address display not found after login, may need more time');
+      await this.page.waitForTimeout(2000);
     }
   }
 

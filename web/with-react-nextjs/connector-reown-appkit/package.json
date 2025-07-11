@@ -11,7 +11,7 @@
     "postinstall": "yarn setup-para"
   },
   "dependencies": {
-    "@getpara/react-sdk": "2.0.0-alpha.29",
+    "@getpara/react-sdk": "2.0.0-alpha.32",
     "@getpara/wagmi-v2-integration": "2.0.0-alpha.29",
     "@reown/appkit": "^1.7.11",
     "@reown/appkit-adapter-wagmi": "^1.7.11",

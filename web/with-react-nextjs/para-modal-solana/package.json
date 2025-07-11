@@ -11,8 +11,8 @@
     "postinstall": "yarn setup-para"
   },
   "dependencies": {
-    "@getpara/react-sdk": "2.0.0-alpha.29",
-    "@getpara/solana-wallet-connectors": "2.0.0-alpha.29",
+    "@getpara/react-sdk": "2.0.0-alpha.32",
+    "@getpara/solana-wallet-connectors": "2.0.0-alpha.32",
     "@solana-mobile/wallet-adapter-mobile": "2.2.2",
     "@solana/wallet-adapter-base": "0.9.27",
     "@solana/wallet-adapter-react": "0.15.39",

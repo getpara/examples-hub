@@ -16,6 +16,20 @@ export default defineConfig({
     headless: true,
     trace: 'retain-on-failure',
     video: 'retain-on-failure',
+    // Ensure complete test isolation
+    storageState: { cookies: [], origins: [] },
+    // Clear browser cache and other state
+    launchOptions: {
+      args: [
+        '--disable-background-timer-throttling',
+        '--disable-backgrounding-occluded-windows',
+        '--disable-renderer-backgrounding',
+        '--disable-features=TranslateUI',
+        '--disable-ipc-flooding-protection',
+        '--disable-web-security',
+        '--disable-features=VizDisplayCompositor',
+      ],
+    },
   },
 
   projects: [

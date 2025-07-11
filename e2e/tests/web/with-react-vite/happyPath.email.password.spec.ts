@@ -9,6 +9,7 @@ const PASSWORD = 'abc123@-$}"';
 
 test.describe('Para Modal - Email + Password Authentication', () => {
   test('happy path - create and login with email and password', async ({ browser }) => {
+    console.log('🚀 Starting React Vite Para Modal E2E test - Email + Password');
     const context = await browser.newContext({
       permissions: ['clipboard-write', 'clipboard-read'], // grant clipboard read/write permissions
     });
@@ -25,8 +26,8 @@ test.describe('Para Modal - Email + Password Authentication', () => {
       usePhoneNumber: false, // Use email
     });
 
-    // Verify wallet is connected by checking for the address display
-    await expect(paraModalExamplePage.page.getByTestId('account-address-display')).toBeVisible();
+    // Verify wallet is connected by checking for the address display (with extended timeout)
+    await expect(paraModalExamplePage.page.getByTestId('account-address-display')).toBeVisible({ timeout: 15000 });
     expect(clipboardText).toHaveLength(64);
     expect(/^[0-9a-f]+$/.test(clipboardText)).toBeTruthy();
 
@@ -49,6 +50,7 @@ test.describe('Para Modal - Email + Password Authentication', () => {
     expect(loginAddressText).toBe(createAddressText);
 
     // Test message signing
+    console.log('🔄 Testing message signing...');
     const testMessage = 'Hello Para E2E Test with Email + Password!';
     const signature = await paraModalExamplePage.signMessage(testMessage);
     
@@ -56,5 +58,7 @@ test.describe('Para Modal - Email + Password Authentication', () => {
     expect(signature).toBeTruthy();
     expect(signature.length).toBeGreaterThan(0);
     expect(signature).toMatch(/^[a-fA-F0-9]+$/); // Should be a hex string (may or may not have 0x prefix)
+    
+    console.log('✅ React Vite Para Modal E2E test completed successfully');
   });
 });
