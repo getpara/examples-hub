@@ -1,3 +1,36 @@
+# Release (Thu Jul 10 2025)
+
+## Package Versions
+- @getpara/web-sdk@2.0.0-alpha.32
+- @getpara/wagmi-v2-integration@2.0.0-alpha.32
+- @getpara/wagmi-v2-connector@2.0.0-alpha.32
+- @getpara/viem-v2-integration@2.0.0-alpha.32
+- @getpara/viem-v1-integration@2.0.0-alpha.32
+- @getpara/user-management-client@2.0.0-alpha.32
+- @getpara/solana-web3.js-v1-integration@2.0.0-alpha.32
+- @getpara/solana-wallet-connectors@2.0.0-alpha.32
+- @getpara/solana-signers-v2-integration@2.0.0-alpha.32
+- @getpara/server-sdk@2.0.0-alpha.32
+- @getpara/react-sdk@2.0.0-alpha.32
+- @getpara/react-native-wallet@2.0.0-alpha.32
+- @getpara/react-components@2.0.0-alpha.32
+- @getpara/react-component-library@1.0.0-alpha.27
+- @getpara/react-common@2.0.0-alpha.32
+- @getpara/evm-wallet-connectors@2.0.0-alpha.32
+- @getpara/ethers-v6-integration@2.0.0-alpha.32
+- @getpara/ethers-v5-integration@2.0.0-alpha.32
+- @getpara/cosmos-wallet-connectors@2.0.0-alpha.32
+- @getpara/cosmjs-v0-integration@2.0.0-alpha.32
+- @getpara/core-sdk@2.0.0-alpha.32
+- @getpara/core-components@2.0.0-alpha.32
+
+
+### Fixes
+- Missing ready call (#1092) - 56068f017
+
+### Chores
+- Improve iframe loading (#1089) - ad0134fbf
+
 # Release (Wed Jul 09 2025)
 
 ## Package Versions

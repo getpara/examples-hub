@@ -1,8 +1,8 @@
 {
   "name": "@getpara/viem-v2-integration",
-  "version": "2.0.0-alpha.31",
+  "version": "2.0.0-alpha.32",
   "dependencies": {
-    "@getpara/core-sdk": "2.0.0-alpha.31"
+    "@getpara/core-sdk": "2.0.0-alpha.32"
   },
   "devDependencies": {
     "typescript": "^5.8.3",

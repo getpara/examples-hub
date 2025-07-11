@@ -1,9 +1,9 @@
 {
   "name": "@getpara/wagmi-v2-integration",
-  "version": "2.0.0-alpha.31",
+  "version": "2.0.0-alpha.32",
   "dependencies": {
-    "@getpara/react-sdk": "2.0.0-alpha.31",
-    "@getpara/wagmi-v2-connector": "2.0.0-alpha.31"
+    "@getpara/react-sdk": "2.0.0-alpha.32",
+    "@getpara/wagmi-v2-connector": "2.0.0-alpha.32"
   },
   "devDependencies": {
     "@tanstack/react-query": "^5.74.0",

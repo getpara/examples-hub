@@ -1,6 +1,6 @@
 {
   "name": "para-portal",
-  "version": "2.0.0-alpha.31",
+  "version": "2.0.0-alpha.32",
   "browserslist": {
     "production": [
       ">0.2%",
@@ -17,11 +17,11 @@
     "@chakra-ui/icons": "^2.1.1",
     "@chakra-ui/react": "^2.8.2",
     "@chakra-ui/system": "^2.6.2",
-    "@getpara/react-common": "2.0.0-alpha.31",
-    "@getpara/react-components": "2.0.0-alpha.31",
-    "@getpara/react-sdk": "2.0.0-alpha.31",
-    "@getpara/user-management-client": "2.0.0-alpha.31",
-    "@getpara/web-sdk": "2.0.0-alpha.31",
+    "@getpara/react-common": "2.0.0-alpha.32",
+    "@getpara/react-components": "2.0.0-alpha.32",
+    "@getpara/react-sdk": "2.0.0-alpha.32",
+    "@getpara/user-management-client": "2.0.0-alpha.32",
+    "@getpara/web-sdk": "2.0.0-alpha.32",
     "@sentry/react": "^9.12.0",
     "@stripe/crypto": "^0.0.4",
     "@stripe/stripe-js": "^7.3.1",
