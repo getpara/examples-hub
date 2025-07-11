@@ -22,7 +22,7 @@ export class Para extends ParaCore {
     }
   }
 
-  protected async ready() {
+  async ready() {
     if (!this.isReady) {
       try {
         // @ts-ignore
@@ -46,6 +46,7 @@ export class Para extends ParaCore {
         }
       }
 
+      console.log('isReady: true');
       this.isReady = true;
     }
   }

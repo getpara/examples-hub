@@ -24,6 +24,7 @@ import {
   ParaSolanaProviderConfigNoWallets,
 } from './externalWalletProviders.js';
 import { type TExternalWallet } from '@getpara/react-common';
+import { FarcasterMiniAppConfig } from '../stores/types.js';
 
 export type Callbacks = {
   onLogout?: (event: LogoutEvent) => void;
@@ -56,6 +57,10 @@ export type ParaProviderConfig = {
    * RPC url to use for retrieving the embedded wallet balance
    */
   rpcUrl?: string;
+  /**
+   * Configuration options for Farcaster mini-apps.
+   */
+  farcasterMiniAppConfig?: FarcasterMiniAppConfig;
 };
 
 export type ExternalWalletConfig<

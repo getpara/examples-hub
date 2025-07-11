@@ -34,6 +34,8 @@ export const ParaProvider = forwardRef<
   const modalConfig = useStore(state => state.modalConfig);
   const setAppName = useStore(state => state.setAppName);
   const appName = useStore(state => state.appName);
+  const setFarcasterMiniAppConfig = useStore(state => state.setFarcasterMiniAppConfig);
+  const farcasterMiniAppConfig = useStore(state => state.farcasterMiniAppConfig);
   const rpcUrl = useStore(state => state.rpcUrl);
   const setRpcUrl = useStore(state => state.setRpcUrl);
   const setProviderProps = useStore(state => state.setProviderProps);
@@ -55,6 +57,12 @@ export const ParaProvider = forwardRef<
   useEffect(() => {
     if (appName !== config.appName) setAppName(config.appName);
   }, [config.appName]);
+
+  useEffect(() => {
+    if (farcasterMiniAppConfig !== config.farcasterMiniAppConfig) {
+      setFarcasterMiniAppConfig(config.farcasterMiniAppConfig);
+    }
+  }, [config.farcasterMiniAppConfig]);
 
   useEffect(() => {
     if (modalConfig !== paraModalConfig) setModalConfig(paraModalConfig);
@@ -119,6 +127,14 @@ export const ParaProvider = forwardRef<
 
     setClient(newClient);
   }, [paraClientConfig]);
+
+  useEffect(() => {
+    if (client && !client.isReady) {
+      client.ready().catch(err => {
+        console.error('Error initializing Para client:', err);
+      });
+    }
+  }, [client]);
 
   if (!client) {
     return null;

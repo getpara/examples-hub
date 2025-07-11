@@ -16,6 +16,14 @@ import { ModalStep, ParaModalProps } from '../../modal/index.js';
 import { OAuthLogoVariantType } from '../../modal/types/modalProps.js';
 import { type TExternalWallet } from '@getpara/react-common';
 
+export type FarcasterMiniAppConfig = {
+  /**
+   * Whether to disable automatic sign-in via the Farcaster user's existing miniapp wallet(s).
+   *
+   * If disabled, the Para Modal's will open to its normal sign-in screen, along with a "Continue with Farcaster" button allowing them to connect their mini-app wallets.
+   */
+  disableAutoConnect?: boolean;
+};
 export interface ClientSlice {
   client?: ParaWeb;
   setClient: (_: ParaWeb) => void;
@@ -24,6 +32,9 @@ export interface ClientSlice {
 export interface ConfigSlice {
   appName: string;
   setAppName: (_: string) => void;
+
+  farcasterMiniAppConfig?: FarcasterMiniAppConfig;
+  setFarcasterMiniAppConfig: (_?: FarcasterMiniAppConfig) => void;
 }
 
 export interface AnalyticsSlice {

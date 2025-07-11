@@ -33,13 +33,13 @@ describe('getEmbeddedAccount', () => {
     it(`${authInfo.authType}: connected`, async () => {
       vi.spyOn(MockPara.prototype, 'authInfo', 'get').mockReturnValueOnce(authInfo);
 
-      const resp = await getEmbeddedAccount(paraClient);
+      const resp = await getEmbeddedAccount(paraClient, true);
 
       expect(resp).toStrictEqual({
+        isConnected: true,
         auth,
         authType: authInfo.authType,
         identifier: authInfo.identifier,
-        isConnected: true,
         isGuestMode: false,
         ...auth,
         wallets: [TEST_WALLET],

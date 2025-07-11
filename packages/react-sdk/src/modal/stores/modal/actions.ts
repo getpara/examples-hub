@@ -26,10 +26,15 @@ export const getActions = (set: StoreApi<ModalStore>['setState'], get: StoreApi<
   setStep: step => {
     const onModalStepChange = get().onModalStepChange;
     const previousStep = get().step;
+    const refs = get().refs;
 
     set({ step });
 
     onModalStepChange?.({ previousStep, currentStep: step, canGoBack: get().hasPreviousStep() });
+
+    if (step === ModalStep.ACCOUNT_MAIN) {
+      refs.wasSignedIn.current = true;
+    }
   },
   decrementStep: () => {
     const currentStep = get().step;

@@ -9,7 +9,7 @@ import { DEFAULTS } from './constants/defaults.js';
 import { useGoBack } from './hooks/useGoBack.js';
 import { safeStyled } from '@getpara/react-common';
 import { hasEmbeddedAuth, hasExternalWallet } from './utils/authLayoutHelpers.js';
-import { useAccount, useModal, useWalletState } from '../provider/index.js';
+import { useAccount, useModal, useParaStatus, useWalletState } from '../provider/index.js';
 import { useInternalClient } from '../provider/hooks/utils/useInternalClient.js';
 import { useExternalWallets } from '../provider/providers/ExternalWalletProvider.js';
 import { useStore } from '../provider/stores/useStore.js';
@@ -43,6 +43,7 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
   const { setSelectedWallet, updateSelectedWallet } = useWalletState();
   const setAuthStepRoute = useModalStore(state => state.setAuthStepRoute);
   const { signUpOrLogIn, isCreateGuestWalletsPending } = useAuthActions();
+  const { isReady, isFarcasterMiniApp } = useParaStatus();
   const { isLoading: isAccountLoading, isConnected } = useAccount();
   const setIFrameUrl = useModalStore(state => state.setIFrameUrl);
   const setIsIFrameReady = useModalStore(state => state.setIsIFrameReady);
@@ -125,7 +126,7 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
 
   // This will run on mount and on isOpen change but won't cause a rerender unless step or email changes
   const initModal = async (shouldAutoLogin?: boolean) => {
-    if (!para.isReady) {
+    if (!isReady) {
       return;
     }
     setIFrameUrl(undefined);
@@ -157,8 +158,10 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
         }
 
         // Disconnect external wallets if the user is not longer logged in
-        await disconnectExternalWallet();
-        setSelectedWallet({ id: undefined, type: undefined });
+        if (!isFarcasterMiniApp) {
+          await disconnectExternalWallet();
+          setSelectedWallet({ id: undefined, type: undefined });
+        }
 
         if (shouldAutoLogin) {
           if (defaultAuthIdentifier && para.authInfo?.identifier !== defaultAuthIdentifier) {
@@ -183,16 +186,16 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
   };
 
   useEffect(() => {
-    if (para?.isReady && isOpen && !isAccountLoading && !isInitialized.current) {
+    if (isReady && isOpen && !isAccountLoading && !isInitialized.current) {
       initModal(isOpen);
       isInitialized.current = true;
     }
 
-    if (para?.isReady && !isOpen && isInitialized.current) {
+    if (isReady && !isOpen && isInitialized.current) {
       initModal();
       isInitialized.current = false;
     }
-  }, [para?.isReady, isOpen, isAccountLoading]);
+  }, [isReady, isOpen, isAccountLoading]);
 
   useEffect(() => {
     let _authLayout = authLayout;

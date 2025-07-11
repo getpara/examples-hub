@@ -60,6 +60,7 @@ describe('ParaModal', () => {
 
   it('renders first screen', async () => {
     const para = new Para(Environment.DEV, 'apikey123');
+    await (para as unknown as any).ready();
     render(
       <QueryClientProvider client={queryClient}>
         <ParaProvider

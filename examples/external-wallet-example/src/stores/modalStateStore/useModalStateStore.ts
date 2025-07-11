@@ -21,6 +21,7 @@ interface ModalStateState {
   externalWalletConnectionOnly: boolean;
   externalWalletIncludeVerification: boolean;
   linkAccountArgs: Parameters<ReturnType<typeof useLinkAccount>['linkAccount']>[0];
+  farcasterDisableAutoConnect: boolean;
 }
 
 export interface ModalStateActions {
@@ -41,6 +42,7 @@ const DEFAULT_STATE: ModalStateState = {
   externalWalletConnectionOnly: false,
   externalWalletIncludeVerification: false,
   linkAccountArgs: undefined,
+  farcasterDisableAutoConnect: false,
 };
 
 export const useModalStateStore = create<ModalStateStore>()(
@@ -64,6 +66,7 @@ export const useModalStateStore = create<ModalStateStore>()(
         mode: state.mode,
         externalWalletConnectionOnly: state.externalWalletConnectionOnly,
         externalWalletIncludeVerification: state.externalWalletIncludeVerification,
+        farcasterDisableAutoConnect: state.farcasterDisableAutoConnect,
       }),
     },
   ),

@@ -82,5 +82,7 @@ export class MockPara extends ParaInternal {
   userId = TEST_USER_ID;
   currentWalletIds = TEST_CURRENT_WALLET_IDS;
 
+  isReady = true;
+
   getOAuthURL = vi.fn().mockResolvedValue('https://example.com');
 }

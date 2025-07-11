@@ -28,8 +28,15 @@ export type Account =
       isGuestMode: false;
     } & AccountValue);
 
-export const getEmbeddedAccount = async (para?: ParaWeb, _isConnected?: boolean): Promise<Account> => {
-  if (!!para && para.isGuestMode) {
+export const getEmbeddedAccount = (para: ParaWeb | undefined, isFullyLoggedIn: boolean | undefined): Account => {
+  switch (true) {
+    case !para:
+    case !para?.isReady:
+    case isFullyLoggedIn === undefined:
+      return { isConnected: false };
+  }
+
+  if (para.isGuestMode) {
     return {
       isConnected: true,
       isGuestMode: true,
@@ -37,97 +44,45 @@ export const getEmbeddedAccount = async (para?: ParaWeb, _isConnected?: boolean)
     };
   }
 
-  const isConnected = !!para && (_isConnected ?? (await para?.isFullyLoggedIn()));
-
-  if (isConnected) {
-    const authInfo = para.authInfo;
-
-    const value: Account = {
-      auth: authInfo?.auth,
-      authType: authInfo?.authType,
-      identifier: authInfo?.identifier,
-      userId: para.userId,
-      wallets: para.availableWallets,
-      isConnected: true,
-      isGuestMode: false,
-    } as Account;
-
-    if (authInfo) {
-      switch (authInfo.authType) {
-        case 'email':
-          value.email = authInfo.identifier;
-          break;
-        case 'phone':
-          value.phone = authInfo.identifier as `+${number}`;
-          break;
-        case 'farcaster':
-          value.farcasterUsername = authInfo.identifier;
-          break;
-        case 'telegram':
-          value.telegramUserId = authInfo.identifier;
-          break;
-        case 'externalWallet':
-          value.externalWalletAddress = authInfo.identifier;
-          break;
-        default:
-          break;
-      }
-    }
-
-    return value;
+  if (!isFullyLoggedIn) {
+    return {
+      isConnected: false,
+    };
   }
 
-  return { isConnected: false };
+  const authInfo = para.authInfo;
+
+  const value: Account = {
+    auth: authInfo?.auth,
+    authType: authInfo?.authType,
+    identifier: authInfo?.identifier,
+    userId: para.userId,
+    wallets: para.availableWallets,
+    isConnected: true,
+    isGuestMode: false,
+  } as Account;
+
+  if (authInfo) {
+    switch (authInfo.authType) {
+      case 'email':
+        value.email = authInfo.identifier;
+        break;
+      case 'phone':
+        value.phone = authInfo.identifier as `+${number}`;
+        break;
+      case 'farcaster':
+        value.farcasterUsername = authInfo.identifier;
+        break;
+      case 'telegram':
+        value.telegramUserId = authInfo.identifier;
+        break;
+      case 'externalWallet':
+        value.externalWalletAddress = authInfo.identifier;
+        break;
+      default:
+        break;
+    }
+  }
+
+  return value;
 };
-
-// import ParaWeb, { PrimaryAuthInfo } from '@getpara/web-sdk';
-
-// export const getAccount = async (para?: ParaWeb, isConnected?: boolean, wagmiConfig?: WagmiConfig): Promise<Account> => {
-//   const value: Account & {
-//     externalWallets: {
-//       evm?: GetAccountReturnType;
-//     };
-//   };
-
-//   const isConnected = !!para && (await para?.isFullyLoggedIn());
-
-//   if (isConnected) {
-//     const authInfo = para.authInfo;
-
-//     const value: Account = {
-//       auth: authInfo?.auth,
-//       authType: authInfo?.authType,
-//       identifier: authInfo?.identifier,
-//       userId: para.userId,
-//       wallets: para.availableWallets,
-//       isConnected: true,
-//       isGuestMode: false,
-//     } as Account;
-
-//     if (authInfo) {
-//       switch (authInfo.authType) {
-//         case 'email':
-//           value.email = authInfo.identifier;
-//           break;
-//         case 'phone':
-//           value.phone = authInfo.identifier as `+${number}`;
-//           break;
-//         case 'farcaster':
-//           value.farcasterUsername = authInfo.identifier;
-//           break;
-//         case 'telegram':
-//           value.telegramUserId = authInfo.identifier;
-//           break;
-//         case 'externalWallet':
-//           value.externalWalletAddress = authInfo.identifier;
-//           break;
-//         default:
-//           break;
-//       }
-//     }
-
-//     return value;
-//   }
-
-//   return { isConnected: false };
-// };

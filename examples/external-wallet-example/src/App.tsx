@@ -57,6 +57,7 @@ export const App = () => {
   const externalWallets = useModalStateStore(state => state.externalWallets);
   const externalWalletConnectionOnly = useModalStateStore(state => state.externalWalletConnectionOnly);
   const externalWalletIncludeVerification = useModalStateStore(state => state.externalWalletIncludeVerification);
+  const farcasterDisableAutoConnect = useModalStateStore(state => state.farcasterDisableAutoConnect);
 
   useEffect(() => {
     sdk.actions.ready();
@@ -72,6 +73,11 @@ export const App = () => {
         config={{
           appName: 'Para External Wallet Example',
           rpcUrl: 'https://sepolia.drpc.org',
+          farcasterMiniAppConfig: farcasterDisableAutoConnect
+            ? {
+                disableAutoConnect: true,
+              }
+            : undefined,
         }}
         paraModalConfig={{
           oAuthMethods: oAuthMethods,

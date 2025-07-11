@@ -164,7 +164,13 @@ export class WebExamplePage {
       .selectOption('WAGMI');
     await this.page.waitForTimeout(1000);
     await this.page.reload();
-    await this.page.waitForTimeout(1000);
+    await this.page.waitForTimeout(6000);
+    try {
+      const paraButton = this.page.locator('button:text("Para")');
+
+      await paraButton.waitFor({ timeout: 3000 });
+      await paraButton.click();
+    } catch (e) {}
   }
 
   async switchToDefaultView() {

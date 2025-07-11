@@ -72,7 +72,7 @@ export class ParaMobile extends ParaCore {
     }
   }
 
-  protected async ready() {
+  async ready() {
     this.isReady = true;
   }
 

@@ -23,7 +23,7 @@ export class Para extends ParaCore {
     }
   }
 
-  protected async ready() {
+  async ready() {
     this.isReady = true;
   }
 

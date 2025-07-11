@@ -10,7 +10,7 @@ export const useIsFullyLoggedIn = () => {
   const client = useInternalClient();
 
   return useQuery({
-    enabled: !!client,
+    enabled: !!client?.isReady,
     staleTime: 5000,
     queryKey: [IS_FULLY_LOGGED_IN_BASE_KEY, client?.userId ?? null],
     queryFn: async () => (await client?.isFullyLoggedIn()) ?? false,

@@ -4,7 +4,7 @@ import { useInternalClient } from '../hooks/utils/useInternalClient.js';
 import { useStore } from '../stores/useStore.js';
 import { ModalStep } from '../../modal/index.js';
 import { useModalStore } from '../../modal/stores/index.js';
-import { useVerifyExternalWallet, useWalletState } from '../hooks/index.js';
+import { useAccount, useParaStatus, useVerifyExternalWallet, useWalletState } from '../hooks/index.js';
 import {
   BalanceManagement,
   ChainManagement,
@@ -59,6 +59,7 @@ export const defaultExternalWallet = {
   getWalletBalance: () => Promise.resolve(undefined),
   requestInfo: (_: TExternalWallet) => Promise.resolve({} as ExternalWalletInfo),
   disconnectBase: (_: TExternalWallet) => Promise.resolve(),
+  connectFarcasterMiniApp: () => Promise.resolve(),
 };
 
 type Value = Omit<ExternalWalletContextType<CosmosSignResult>, 'disconnect' | 'signVerificationMessage' | 'requestInfo'> &
@@ -81,11 +82,15 @@ type Value = Omit<ExternalWalletContextType<CosmosSignResult>, 'disconnect' | 's
     isSigningMessage: boolean;
     verifyWalletSignature: () => Promise<VerifyExternalWalletParams | undefined>;
     requestInfo: (_: TExternalWallet, __: TWalletType) => Promise<ExternalWalletInfo>;
+    connectFarcasterMiniApp: () => Promise<void>;
   };
 
 export const ExternalWalletContext = createContext<Value>(defaultExternalWallet);
 
 export function ExternalWalletProvider({ children }: PropsWithChildren) {
+  const { isReady, isFarcasterMiniApp } = useParaStatus();
+  const { isConnected } = useAccount();
+  const farcasterMiniAppConfig = useStore(state => state.farcasterMiniAppConfig);
   const evmContext = useStore(state => state.evmContext);
   const cosmosContext = useStore(state => state.cosmosContext);
   const solanaContext = useStore(state => state.solanaContext);
@@ -139,6 +144,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
   const selectedExternalWalletId = useModalStore(state => state.selectedExternalWalletId);
   const setExternalWalletError = useModalStore(state => state.setExternalWalletError);
   const setIsUsingMobileConnector = useModalStore(state => state.setIsUsingMobileConnector);
+  const refs = useModalStore(state => state.refs);
   const para = useInternalClient();
   const { setSelectedWallet } = useWalletState();
   const { onNewAuthState } = useAuthActions();
@@ -492,6 +498,33 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
     [isExternalWalletConnecting, externalWalletsWithFullAuth, connectionOnly, includeWalletVerification],
   );
 
+  const connectFarcasterMiniApp = async () => {
+    const evmWallet = para.supportedWalletTypes.find(({ type }) => type === 'EVM')
+      ? evmWallets.find(w => w.internalId === 'FARCASTER')
+      : undefined;
+
+    if (evmWallet) {
+      const isConnected = evmFarcasterStatus?.isConnected && !!evmFarcasterStatus.address;
+      if (isConnected) {
+        await para.loginExternalWallet({
+          externalWallet: [
+            {
+              type: 'EVM',
+              provider: 'Farcaster',
+              providerId: 'FARCASTER',
+              address: evmFarcasterStatus.address,
+              isConnectionOnly: true,
+            } as ExternalWalletInfo,
+          ],
+        });
+
+        setStep(ModalStep.LOGIN_DONE);
+      } else {
+        await connectExternalWallet(evmWallet, false, true);
+      }
+    }
+  };
+
   const requestInfo = async (providerId: TExternalWallet, type: TWalletType) => {
     switch (type) {
       case 'EVM': {
@@ -633,41 +666,16 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
   }, [connectEmbeddedToExternalConnectors]);
 
   useEffect(() => {
-    async function loginFarcasterMiniApp() {
-      if (para.isReady && para.isFarcasterMiniApp) {
-        const isEvm = para.supportedWalletTypes.some(({ type }) => type === 'EVM');
-
-        const isAwaitingEvmLogin =
-          isEvm &&
-          evmFarcasterStatus?.isConnected &&
-          !Object.values(para.externalWallets || {}).some(
-            w => w.type === 'EVM' && w.externalProviderId === 'FARCASTER' && w.address === evmFarcasterStatus.address,
-          );
-
-        const isAwaitingLogin = isAwaitingEvmLogin;
-
-        if (isAwaitingLogin) {
-          await para.loginExternalWallet({
-            externalWallet: [
-              ...(isAwaitingEvmLogin
-                ? [
-                    {
-                      type: 'EVM',
-                      provider: 'Farcaster',
-                      providerId: 'FARCASTER',
-                      address: evmFarcasterStatus.address,
-                      isConnectionOnly: true,
-                    } as ExternalWalletInfo,
-                  ]
-                : []),
-            ],
-          });
-        }
-      }
+    if (
+      isReady &&
+      isFarcasterMiniApp &&
+      !isConnected &&
+      !farcasterMiniAppConfig?.disableAutoConnect &&
+      !refs.wasSignedIn.current
+    ) {
+      connectFarcasterMiniApp();
     }
-
-    loginFarcasterMiniApp();
-  }, [para.isReady, para.isFarcasterMiniApp, evmFarcasterStatus]);
+  }, [isReady, isConnected, isFarcasterMiniApp, farcasterMiniAppConfig]);
 
   return (
     <ExternalWalletContext.Provider
@@ -693,6 +701,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
           getWalletBalance,
           requestInfo,
           disconnectBase,
+          connectFarcasterMiniApp,
         }),
         [
           wallets,
@@ -715,6 +724,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
           getWalletBalance,
           requestInfo,
           disconnectBase,
+          connectFarcasterMiniApp,
         ],
       )}
     >

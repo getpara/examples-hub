@@ -43,10 +43,6 @@ type ExternalNetwork = 'evm' | 'cosmos' | 'solana';
  */
 export type UseAccountReturn = {
   /**
-   * Indicates whether the client's first-time setup is complete.
-   */
-  isReady: boolean;
-  /**
    *  Indicates whether there is a wallet connected (either embedded, external or both).
    */
   isConnected: boolean;
@@ -65,7 +61,10 @@ export type UseAccountReturn = {
   /**
    * The embedded account object. Use this instead of the deprecated top-level properties.
    */
-  embedded: Omit<Account, 'isConnected' | 'isGuestMode'> & { isConnected: boolean; isGuestMode?: boolean };
+  embedded: Omit<Account, 'isReady' | 'isFarcasterMiniApp' | 'isConnected' | 'isGuestMode'> & {
+    isConnected: boolean;
+    isGuestMode?: boolean;
+  };
   /**
    * Connected external wallet account data.
    */
@@ -156,11 +155,16 @@ export const useAccount = ({ cosmos }: UseAccountParameters = {}): UseAccountRet
 
   const { data, isLoading } = useQuery({
     enabled: isSuccess && !!client,
-    queryKey: [ACCOUNT_BASE_KEY, isFullyLoggedIn ?? null, client?.userId, evmQueryKeys, cosmosQueryKeys, solanaQueryKeys],
-    queryFn: async () => {
-      const isReady = client.isReady;
-
-      const paraAccount = await getEmbeddedAccount(client);
+    queryKey: [
+      ACCOUNT_BASE_KEY,
+      isFullyLoggedIn ?? null,
+      client?.userId ?? null,
+      evmQueryKeys,
+      cosmosQueryKeys,
+      solanaQueryKeys,
+    ],
+    queryFn: () => {
+      const paraAccount = getEmbeddedAccount(client, isFullyLoggedIn);
 
       let connectionType: ConnectionType = 'none';
 
@@ -194,7 +198,6 @@ export const useAccount = ({ cosmos }: UseAccountParameters = {}): UseAccountRet
       }
 
       return {
-        isReady,
         isConnected: paraAccount.isConnected as boolean,
         connectionType,
         embedded: { ...paraAccount, isConnected: isEmbeddedConnected as boolean },
@@ -220,7 +223,6 @@ export const useAccount = ({ cosmos }: UseAccountParameters = {}): UseAccountRet
   });
 
   const defaultResp: UseAccountReturn = {
-    isReady: false,
     isConnected: false,
     connectionType: 'none',
     isLoading,

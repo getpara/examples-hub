@@ -1312,7 +1312,12 @@ export abstract class ParaCore implements CoreInterface {
     await this.touchSession();
   }
 
-  protected abstract ready(): Promise<void>;
+  /**
+   * Call this method to perform initial setup for the `ParaCore` instance.
+   *
+   * This method will be called automatically if you use the React `ParaProvider` or when you call any methods that request an updated session.
+   */
+  abstract ready(): Promise<void>;
 
   async #setAuthInfo(authInfo: CoreAuthInfo): Promise<void> {
     this.#authInfo = authInfo;
