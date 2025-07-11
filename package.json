@@ -14,6 +14,9 @@
     "typescript": "^5.8.3"
   },
   "scripts": {
+    "install:all": "node scripts/install-all-dependencies.js",
+    "lint:all": "node scripts/lint-all-projects.js",
+    "clean": "find . -name 'node_modules' -type d -prune -exec rm -rf {} +",
     "test:all": "ts-node e2e/scripts/runAllTests.ts --sequential",
     "test:all:parallel": "ts-node e2e/scripts/runAllTests.ts",
     "test:react-vite": "ts-node e2e/scripts/runTest.ts react-vite",
