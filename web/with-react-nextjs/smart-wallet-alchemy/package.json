@@ -16,7 +16,7 @@
     "@account-kit/infra": "^4.43.1",
     "@account-kit/smart-contracts": "^4.43.1",
     "@getpara/evm-wallet-connectors": "2.0.0-alpha.32",
-    "@getpara/react-sdk": "2.0.0-alpha.32",
+    "@getpara/react-sdk": "2.0.0-alpha.30",
     "@getpara/viem-v2-integration": "2.0.0-alpha.32",
     "@hookform/resolvers": "^5.1.1",
     "@radix-ui/react-accordion": "^1.2.11",

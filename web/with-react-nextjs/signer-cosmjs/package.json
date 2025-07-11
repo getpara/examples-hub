@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@getpara/cosmjs-v0-integration": "2.0.0-alpha.32",
-    "@getpara/react-sdk": "2.0.0-alpha.32",
+    "@getpara/react-sdk": "2.0.0-alpha.30",
     "@cosmjs/stargate": "0.33.1",
     "@cosmjs/cosmwasm-stargate": "0.33.1",
     "@cosmjs/proto-signing": "0.33.1",

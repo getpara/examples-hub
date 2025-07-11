@@ -55,8 +55,8 @@ jobs:
           # Run check-only mode first
           node scripts/update-para-dependencies.js --check-only > update_check.log 2>&1
           
-          # Check if any updates are available
-          if grep -q "Dependencies updated:" update_check.log; then
+          # Check if any updates are available by looking for the update summary
+          if grep -q "📦 Package Updates:" update_check.log; then
             echo "updates_available=true" >> $GITHUB_OUTPUT
             echo "✅ Updates are available"
           else

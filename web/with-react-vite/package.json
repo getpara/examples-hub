@@ -19,7 +19,7 @@
     "@getpara/cosmos-wallet-connectors": "2.0.0-alpha.32",
     "@getpara/evm-wallet-connectors": "2.0.0-alpha.32",
     "@getpara/graz": "2.0.0-alpha.3",
-    "@getpara/react-sdk": "2.0.0-alpha.32",
+    "@getpara/react-sdk": "2.0.0-alpha.30",
     "@getpara/solana-wallet-connectors": "2.0.0-alpha.32",
     "@solana-mobile/wallet-adapter-mobile": "2.2.2",
     "@solana/wallet-adapter-base": "0.9.27",
