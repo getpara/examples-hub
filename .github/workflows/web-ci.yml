@@ -36,6 +36,9 @@ concurrency:
 
 env:
   NODE_VERSION: "20.19.0"
+  # Improve caching and performance
+  YARN_CACHE_FOLDER: ~/.yarn-cache
+  NODE_OPTIONS: "--max-old-space-size=4096"
 
 jobs:
   # Collect all projects in web folder
@@ -92,9 +95,10 @@ jobs:
   test-project:
     needs: collect-projects
     runs-on: ubuntu-latest
+    timeout-minutes: 15  # Per-job timeout to prevent hangs
     strategy:
       fail-fast: false
-      max-parallel: 3  # Limit concurrent jobs to manage resources
+      max-parallel: 5  # Increased for better throughput while managing resources
       matrix:
         project: ${{ fromJson(needs.collect-projects.outputs.projects) }}
     
@@ -107,6 +111,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
+          cache: 'yarn'
+          cache-dependency-path: '**/yarn.lock'
 
       - name: Install yarn
         run: npm install -g yarn
@@ -134,9 +140,9 @@ jobs:
           echo "### Testing: $PROJECT_NAME" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           
-          # Install dependencies
+          # Install dependencies with optimizations
           echo "📦 Installing dependencies..."
-          if yarn install --frozen-lockfile; then
+          if yarn install --frozen-lockfile --network-timeout 60000 --cache-folder $YARN_CACHE_FOLDER; then
             echo "✅ Dependencies installed" >> $GITHUB_STEP_SUMMARY
           else
             echo "❌ Failed to install dependencies" >> $GITHUB_STEP_SUMMARY
@@ -231,8 +237,10 @@ jobs:
       needs.collect-projects.result == 'success' &&
       github.event.inputs.skip_e2e != 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 20  # E2E tests need more time
     strategy:
       fail-fast: false
+      max-parallel: 2  # Limit E2E parallelism for stability
       matrix:
         framework: ${{ fromJson(needs.collect-projects.outputs.e2e-matrix) }}
     
@@ -250,12 +258,14 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
+          cache: 'yarn'
+          cache-dependency-path: '**/yarn.lock'
 
       - name: Install yarn
         run: npm install -g yarn
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: yarn install --frozen-lockfile --network-timeout 60000 --cache-folder $YARN_CACHE_FOLDER
 
       - name: Install Playwright
         run: npx playwright install chromium
