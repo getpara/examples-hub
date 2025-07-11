@@ -42,6 +42,7 @@
     "alpha-version": "lerna version prerelease --preid alpha --no-push --no-git-tag-version && yarn gen-changelog-alpha",
     "build": "lerna run build --parallel --concurrency 2",
     "build:dev": "lerna run build --scope=@getpara/* --scope=capsule-mpc-worker --scope=capsule-mpc-worker-server --concurrency 4",
+    "check-bundle-size": "node scripts/check-bundle-size.js",
     "dev": "yarn build:dev; concurrently \"yarn start\" \"yarn watch:affected\"",
     "e2e": "playwright test --headed",
     "e2e-examples-hub-script": "yarn && yarn build:dev && ts-node e2e/scripts/runExampleHubTests.ts",

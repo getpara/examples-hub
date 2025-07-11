@@ -31,3 +31,4 @@ playwright-report
 test-results
 .DS_Store
 sites/bridge-v2/.claude/settings.local.json
+.bundle-size-temp
