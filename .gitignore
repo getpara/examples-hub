@@ -165,6 +165,5 @@ test-results
 Claude.md
 
 # act (GitHub Actions local runner)
-.actrc
 .github/workflows/event.json
 .act/
