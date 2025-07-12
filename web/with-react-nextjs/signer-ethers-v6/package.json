@@ -9,7 +9,7 @@
     "lint": "next lint",
     "start": "next start",
     "typecheck": "tsc --noEmit",
-    "postinstall": "yarn setup-para"
+    "postinstall": "npx setup-para"
   },
   "dependencies": {
     "@getpara/ethers-v6-integration": "2.0.0-alpha.32",

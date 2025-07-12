@@ -24,6 +24,7 @@ env:
 jobs:
   update-dependencies:
     runs-on: ubuntu-latest
+    timeout-minutes: 10  # Prevent hanging on network issues or long-running processes
     permissions:
       contents: write
       pull-requests: write
@@ -46,6 +47,7 @@ jobs:
 
       - name: Check for available updates
         id: check_updates
+        timeout-minutes: 5
         run: |
           echo "🔍 Checking for available @getpara/* dependency updates..."
           
@@ -67,6 +69,7 @@ jobs:
       - name: Apply dependency updates
         if: steps.check_updates.outputs.updates_available == 'true' && !inputs.dry_run
         id: apply_updates
+        timeout-minutes: 5
         run: |
           echo "🔄 Applying dependency updates..."
           
@@ -121,6 +124,7 @@ jobs:
 
       - name: Push changes
         if: steps.commit_changes.outputs.committed == 'true' && !inputs.dry_run
+        timeout-minutes: 2
         run: |
           # Push to current branch (improvements-and-automation)
           git push origin HEAD

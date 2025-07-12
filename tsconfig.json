@@ -1,25 +1,10 @@
 {
   "compilerOptions": {
-    "target": "es6",
-    "module": "es6",
-    "moduleResolution": "node",
-    "lib": ["es6"],
-    "allowSyntheticDefaultImports": true,
-    "declaration": true,
-    "declarationMap": false,
-    "sourceMap": false,
-    "forceConsistentCasingInFileNames": true,
-    "noEmit": false,
-    "noFallthroughCasesInSwitch": true,
-    "strict": false,
-    "skipLibCheck": true,
+    "moduleDetection": "force",
+    "module": "Preserve",
     "esModuleInterop": true,
+    "allowJs": true,
     "isolatedModules": true,
-    "allowJs": true
-  },
-  "ts-node": {
-    "compilerOptions": {
-      "module": "commonjs"
-    }
+    "skipLibCheck": true
   }
 }

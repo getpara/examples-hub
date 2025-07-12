@@ -11,13 +11,8 @@
 # Reuse containers for faster runs
 --reuse
 
-# Use local .env file for secrets
+# Use same .env file as local development
 --secret-file .env
-
-# Secrets for E2E tests
-# Replace these placeholder values with your actual API keys
--s PARA_API_KEY_BETA=your-beta-api-key-here
--s PARA_API_KEY_SANDBOX=your-sandbox-api-key-here
 
 # Match GitHub environment
 --env RUNNER_OS=Linux
@@ -26,5 +21,4 @@
 --env CI=true
 --env GITHUB_ACTIONS=true
 
-# Default event type
---eventpath .github/workflows/event.json
+# Remove eventpath since we specify events in package.json scripts

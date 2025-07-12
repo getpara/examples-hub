@@ -67,8 +67,9 @@ function shouldUpdateVersion(currentVersion, latestVersion) {
  * @param {string} dir - The current directory to process
  * @param {Object} versionMap - Map of package names to latest versions
  * @param {number} currentDepth - The current depth of traversal
+ * @param {boolean} diffOnly - Only process files that need updates
  */
-function traverseDirectories(dir, versionMap, currentDepth = 0) {
+function traverseDirectories(dir, versionMap, currentDepth = 0, diffOnly = false) {
   // Stop if we've reached the maximum depth
   if (currentDepth > MAX_DEPTH) {
     return;
@@ -80,7 +81,7 @@ function traverseDirectories(dir, versionMap, currentDepth = 0) {
 
     // Check if there's a package.json in this directory
     if (items.includes("package.json")) {
-      updatePackageJson(path.join(dir, "package.json"), versionMap);
+      updatePackageJson(path.join(dir, "package.json"), versionMap, diffOnly);
     }
 
     // Continue traversing subdirectories
@@ -93,7 +94,7 @@ function traverseDirectories(dir, versionMap, currentDepth = 0) {
 
       // Check if it's a directory
       if (fs.statSync(itemPath).isDirectory()) {
-        traverseDirectories(itemPath, versionMap, currentDepth + 1);
+        traverseDirectories(itemPath, versionMap, currentDepth + 1, diffOnly);
       }
     }
   } catch (error) {
@@ -102,13 +103,52 @@ function traverseDirectories(dir, versionMap, currentDepth = 0) {
 }
 
 /**
+ * Check if package.json has any @getpara dependencies that need updates
+ * @param {string} filePath - Path to the package.json file
+ * @param {Object} versionMap - Map of package names to latest versions
+ * @returns {boolean} True if file has dependencies that need updates
+ */
+function hasUpdatesNeeded(filePath, versionMap) {
+  try {
+    const packageData = JSON.parse(fs.readFileSync(filePath, "utf8"));
+    const sectionsToCheck = ["dependencies", "devDependencies", "peerDependencies", "optionalDependencies"];
+    
+    for (const section of sectionsToCheck) {
+      if (packageData[section]) {
+        for (const dep of Object.keys(packageData[section])) {
+          if (dep.startsWith("@getpara/") && versionMap[dep]) {
+            const currentVersion = packageData[section][dep];
+            const latestVersion = versionMap[dep];
+            
+            if (shouldUpdateVersion(currentVersion, latestVersion)) {
+              return true;
+            }
+          }
+        }
+      }
+    }
+    
+    return false;
+  } catch (error) {
+    // If we can't read the file, include it in processing
+    return true;
+  }
+}
+
+/**
  * Update package.json file to change @getpara/* dependency versions
  * @param {string} filePath - Path to the package.json file
  * @param {Object} versionMap - Map of package names to latest versions
+ * @param {boolean} diffOnly - Only process files that need updates
  */
-function updatePackageJson(filePath, versionMap) {
+function updatePackageJson(filePath, versionMap, diffOnly = false) {
   try {
     filesChecked++;
+
+    // Skip files that don't need updates if in diff-only mode
+    if (diffOnly && !hasUpdatesNeeded(filePath, versionMap)) {
+      return;
+    }
 
     // Read and parse package.json
     const packageData = JSON.parse(fs.readFileSync(filePath, "utf8"));
@@ -316,11 +356,13 @@ Usage: node update-para-dependencies.js [mode]
 Modes:
   (no args)    - Fetch latest alpha versions and update all @getpara/* dependencies
   --check-only - Check for available updates without making changes
+  --diff-only  - Only process files where versions don't match target (faster incremental updates)
   --help, -h   - Show this help message
 
 Examples:
   node update-para-dependencies.js
   node update-para-dependencies.js --check-only
+  node update-para-dependencies.js --diff-only
 `);
     process.exit(0);
   }
@@ -335,13 +377,15 @@ Examples:
     }
     
     console.log(`\n📦 Found ${Object.keys(versionMap).length} packages with alpha versions`);
-    console.log("🔄 Scanning for package.json files to update...");
-    console.log("---------------------------------------------------");
-
-    if (mode === "--check-only") {
+    
+    if (mode === "--diff-only") {
+      console.log("🚀 INCREMENTAL MODE - Only processing files with version differences");
+    } else if (mode === "--check-only") {
       console.log("🔍 CHECK ONLY MODE - No files will be modified");
-      console.log("---------------------------------------------------");
+    } else {
+      console.log("🔄 Scanning for package.json files to update...");
     }
+    console.log("---------------------------------------------------");
 
     // Create a mock update for check-only mode
     const originalWriteFileSync = fs.writeFileSync;
@@ -349,7 +393,8 @@ Examples:
       fs.writeFileSync = () => {}; // No-op for check mode
     }
 
-    traverseDirectories(rootDir, versionMap);
+    const isDiffOnly = mode === "--diff-only";
+    traverseDirectories(rootDir, versionMap, 0, isDiffOnly);
     
     // Restore original function
     fs.writeFileSync = originalWriteFileSync;

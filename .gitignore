@@ -30,14 +30,13 @@ jspm_packages/
 # dotenv environment variables file
 .env
 .env.*
-!.env.example
+!.env.*.example
 .env.local
 .env.development
 .env.test
 .env.production
 .env.beta
 .env.sandbox
-.env.ci
 
 # Next.js
 .next/

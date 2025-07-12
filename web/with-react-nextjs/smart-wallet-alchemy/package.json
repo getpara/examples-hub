@@ -9,7 +9,7 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "validate": "yarn typecheck && yarn lint && yarn build",
-    "postinstall": "yarn setup-para"
+    "postinstall": "npx setup-para"
   },
   "dependencies": {
     "@aa-sdk/core": "^4.43.1",

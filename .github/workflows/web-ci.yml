@@ -4,9 +4,24 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - 'web/**'
+      - 'web/**/src/**'           # Source code changes
+      - 'web/**/package.json'     # Dependencies
+      - 'web/**/tsconfig*.json'   # TypeScript configuration
+      - 'web/**/vite.config.*'    # Vite configuration
+      - 'web/**/next.config.*'    # Next.js configuration
+      - 'web/**/tailwind.config.*' # Tailwind configuration
+      - 'web/**/postcss.config.*' # PostCSS configuration
+      - 'web/**/*.ts'             # TypeScript files
+      - 'web/**/*.tsx'            # React TypeScript files
+      - 'web/**/*.js'             # JavaScript files
+      - 'web/**/*.jsx'            # React JavaScript files
+      - 'web/**/*.vue'            # Vue files
+      - 'web/**/*.svelte'         # Svelte files
+      - 'web/**/*.css'            # CSS files
+      - 'web/**/*.scss'           # SCSS files
+      - 'web/**/*.html'           # HTML files
       - '.github/workflows/web-ci.yml'
-      - '.env.ci'
+      - '.env.ci.example'
       - 'package.json'
       - 'yarn.lock'
       - '.yarnrc.yml'
@@ -15,9 +30,24 @@ on:
   push:
     branches: [main]
     paths:
-      - 'web/**'
+      - 'web/**/src/**'           # Source code changes
+      - 'web/**/package.json'     # Dependencies
+      - 'web/**/tsconfig*.json'   # TypeScript configuration
+      - 'web/**/vite.config.*'    # Vite configuration
+      - 'web/**/next.config.*'    # Next.js configuration
+      - 'web/**/tailwind.config.*' # Tailwind configuration
+      - 'web/**/postcss.config.*' # PostCSS configuration
+      - 'web/**/*.ts'             # TypeScript files
+      - 'web/**/*.tsx'            # React TypeScript files
+      - 'web/**/*.js'             # JavaScript files
+      - 'web/**/*.jsx'            # React JavaScript files
+      - 'web/**/*.vue'            # Vue files
+      - 'web/**/*.svelte'         # Svelte files
+      - 'web/**/*.css'            # CSS files
+      - 'web/**/*.scss'           # SCSS files
+      - 'web/**/*.html'           # HTML files
       - '.github/workflows/web-ci.yml'
-      - '.env.ci'
+      - '.env.ci.example'
       - 'package.json'
       - 'yarn.lock'
       - '.yarnrc.yml'
@@ -102,7 +132,7 @@ jobs:
     timeout-minutes: 15  # Per-job timeout to prevent hangs
     strategy:
       fail-fast: false
-      max-parallel: 5  # Increased for better throughput while managing resources
+      max-parallel: 4  # Limit concurrent jobs for resource management
       matrix:
         project: ${{ fromJson(needs.collect-projects.outputs.projects) }}
     
@@ -118,11 +148,23 @@ jobs:
           cache: 'yarn'
           cache-dependency-path: '**/yarn.lock'
 
+      - name: Cache build artifacts
+        uses: actions/cache@v4
+        with:
+          path: |
+            **/.next
+            **/dist
+            **/build
+            **/.vite
+            **/.nuxt
+          key: build-artifacts-${{ runner.os }}-${{ matrix.project.name }}-${{ hashFiles(format('{0}/package.json', matrix.project.path), format('{0}/src/**', matrix.project.path), format('{0}/**/*.ts', matrix.project.path), format('{0}/**/*.tsx', matrix.project.path), format('{0}/**/*.js', matrix.project.path), format('{0}/**/*.jsx', matrix.project.path), format('{0}/**/*.vue', matrix.project.path), format('{0}/**/*.svelte', matrix.project.path)) }}
+          restore-keys: |
+            build-artifacts-${{ runner.os }}-${{ matrix.project.name }}-
 
       - name: Load CI environment variables
         run: |
-          if [ -f .env.ci ]; then
-            cat .env.ci >> $GITHUB_ENV
+          if [ -f .env.ci.example ]; then
+            cat .env.ci.example >> $GITHUB_ENV
           fi
 
       - name: Test Project
@@ -156,7 +198,7 @@ jobs:
           if grep -q '"lint"' package.json; then
             echo ""
             echo "🔍 Running lint..."
-            if yarn lint; then
+            if timeout 300 yarn lint; then
               LINT_STATUS="✅ passed"
               echo "- Lint: ✅ passed" >> $GITHUB_STEP_SUMMARY
             else
@@ -172,7 +214,7 @@ jobs:
           if grep -q '"typecheck"' package.json; then
             echo ""
             echo "📝 Running typecheck..."
-            if yarn typecheck; then
+            if timeout 300 yarn typecheck; then
               TYPECHECK_STATUS="✅ passed"
               echo "- Typecheck: ✅ passed" >> $GITHUB_STEP_SUMMARY
             else
@@ -193,7 +235,7 @@ jobs:
             if grep -q '"build"' package.json; then
               echo ""
               echo "🔨 Running build..."
-              if yarn build; then
+              if timeout 300 yarn build; then
                 BUILD_STATUS="✅ passed"
                 echo "- Build: ✅ passed" >> $GITHUB_STEP_SUMMARY
               else
@@ -268,10 +310,12 @@ jobs:
         run: yarn install --immutable --network-timeout 60000 --cache-folder $YARN_CACHE_FOLDER
 
       - name: Install Playwright
+        timeout-minutes: 3
         run: npx playwright install chromium
 
       - name: Run E2E Tests
         id: e2e-test
+        timeout-minutes: 15
         run: |
           echo "### E2E Test: ${{ matrix.framework.name }}" >> $GITHUB_STEP_SUMMARY
           

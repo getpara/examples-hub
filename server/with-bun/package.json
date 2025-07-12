@@ -11,7 +11,10 @@
     "dev:server": "bun run server.ts",
     "dev": "bun run build:dev && bun run dev:server",
     "test": "bun test",
-    "build": "bun build ./server.ts --outdir ./dist --target node"
+    "build": "bun build ./server.ts --outdir ./dist --target node",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "typecheck": "bun --bun tsc --noEmit"
   },
   "dependencies": {
     "@alchemy/aa-core": "3.19.0",
@@ -27,8 +30,12 @@
     "viem": "2.8.6"
   },
   "devDependencies": {
+    "@eslint/js": "^9.0.0",
     "@types/bun": "1.1.11",
     "@types/node": "22.7.6",
-    "typescript": "5.6.3"
+    "eslint": "^9.0.0",
+    "globals": "^15.0.0",
+    "typescript": "5.6.3",
+    "typescript-eslint": "^8.0.0"
   }
 }

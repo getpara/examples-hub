@@ -11,7 +11,7 @@
     "publish": "electron-forge publish",
     "lint": "eslint --ext .ts,.tsx .",
     "typecheck": "tsc --noEmit",
-    "postinstall": "yarn setup-para"
+    "postinstall": "npx setup-para"
   },
   "keywords": [],
   "author": {

@@ -1,4 +1,5 @@
 import crypto from "crypto";
+import { execSync } from "child_process";
 
 export interface TestAppConfig {
   path: string;
@@ -7,6 +8,21 @@ export interface TestAppConfig {
   startCommand: string;
   installCommand?: string;
   framework: "react-vite" | "react-nextjs" | "vue" | "svelte" | "node" | "deno" | "bun";
+}
+
+export interface CLIArgs {
+  framework?: string;
+  testType?: string;
+  isSequential: boolean;
+  isHeaded: boolean;
+  isDiffOnly: boolean;
+  remainingArgs: string[];
+}
+
+export interface TestResult {
+  appName: string;
+  success: boolean;
+  error?: string;
 }
 
 export interface TestEnvironment {
@@ -140,6 +156,123 @@ export function getTestConfig(appName: string): TestAppConfig {
       APP_START_COMMAND: config.startCommand,
     },
   };
+}
+
+// Shared utilities for test execution
+let testFailed = false;
+
+export function setTestFailed(failed: boolean): void {
+  testFailed = failed;
+}
+
+export function getTestFailed(): boolean {
+  return testFailed;
+}
+
+// Utility function to execute shell commands
+export function runCommand(cmd: string, cwd?: string, env?: Record<string, string>): void {
+  console.log(`Running: ${cmd} ${cwd ? `in ${cwd}` : ""}`);
+  try {
+    execSync(cmd, { 
+      stdio: "inherit", 
+      cwd, 
+      env: { ...process.env, ...env } 
+    });
+  } catch (error) {
+    console.error(`Error executing: ${cmd}`, (error as Error).message);
+    setTestFailed(true);
+    throw new Error(`Command failed: ${cmd}`);
+  }
+}
+
+// Async wrapper for runCommand to work with Promise.all
+export async function runCommandAsync(cmd: string, cwd?: string, env?: Record<string, string>): Promise<void> {
+  return new Promise((resolve, reject) => {
+    try {
+      runCommand(cmd, cwd, env);
+      resolve();
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
+
+// Parse command line arguments
+export function parseCliArgs(args: string[]): CLIArgs {
+  const framework = args.find(arg => !arg.startsWith("--"));
+  const testType = args.find((arg, index) => {
+    const prevArg = args[index - 1];
+    return prevArg && !prevArg.startsWith("--") && !arg.startsWith("--");
+  });
+  
+  return {
+    framework,
+    testType,
+    isSequential: args.includes("--sequential") || process.env.E2E_SEQUENTIAL === "true",
+    isHeaded: args.includes("--headed") || process.env.E2E_HEADED === "true",
+    isDiffOnly: args.includes("--diff-only"),
+    remainingArgs: args.filter(arg => !["--sequential", "--headed", "--diff-only"].includes(arg))
+  };
+}
+
+// Framework path mapping for change detection
+export const FRAMEWORK_PATHS: Record<string, string[]> = {
+  "react-vite": ["web/with-react-vite/", "web/", "e2e/tests/web/with-react-vite/"],
+  "react-nextjs": ["web/with-react-nextjs/", "web/", "e2e/tests/web/with-react-nextjs/"],
+  "vue": ["web/with-vue-vite/", "web/", "e2e/tests/web/with-vue-vite/"],
+  "svelte": ["web/with-svelte-vite/", "web/", "e2e/tests/web/with-svelte-vite/"],
+  "node": ["server/with-node/", "server/", "e2e/tests/server/with-node/"]
+};
+
+// Function to detect changed frameworks using git diff
+export function detectChangedFrameworks(isDiffOnly: boolean): string[] {
+  if (!isDiffOnly) {
+    return Object.keys(APP_CONFIGS); // Return all frameworks if not using diff mode
+  }
+
+  try {
+    // Get changed files since last commit
+    const gitDiff = execSync("git diff --name-only HEAD~1 HEAD", { 
+      encoding: "utf8",
+      stdio: "pipe"
+    }).trim();
+    
+    if (!gitDiff) {
+      console.log("🔍 No changes detected, running all frameworks");
+      return Object.keys(APP_CONFIGS);
+    }
+
+    const changedFiles = gitDiff.split("\n");
+    const changedFrameworks = new Set<string>();
+
+    // Check which frameworks have changed files
+    for (const [framework, paths] of Object.entries(FRAMEWORK_PATHS)) {
+      const hasChanges = changedFiles.some(file => 
+        paths.some(frameworkPath => file.startsWith(frameworkPath))
+      );
+      
+      if (hasChanges) {
+        changedFrameworks.add(framework);
+      }
+    }
+
+    // Always include frameworks that match the filter
+    const availableFrameworks = Object.keys(APP_CONFIGS);
+    const matchingFrameworks = Array.from(changedFrameworks).filter(framework =>
+      availableFrameworks.some(available => available.includes(framework))
+    );
+
+    if (matchingFrameworks.length === 0) {
+      console.log("🔍 No framework changes detected, skipping E2E tests");
+      return [];
+    }
+
+    console.log("🔍 Detected changes in frameworks:", matchingFrameworks.join(", "));
+    return matchingFrameworks;
+  } catch (error) {
+    console.warn("⚠️ Failed to detect changes, running all frameworks:", (error as Error).message);
+    return Object.keys(APP_CONFIGS);
+  }
 }
 
 // Validate environment setup

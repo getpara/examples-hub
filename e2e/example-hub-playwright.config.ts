@@ -4,12 +4,12 @@ import { defineConfig, devices } from '@playwright/test';
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
-  timeout: 120000,
+  timeout: 60000, // Reduced from 120s for faster feedback
   testDir: `../e2e/tests/${process.env.E2E_APP_DIR}`,
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: undefined,
+  workers: 4, // Explicit limit aligned with other parallel operations
   reporter: [['html']],
   use: {
     baseURL: `http://localhost:${process.env.APP_PORT}`,
@@ -28,6 +28,9 @@ export default defineConfig({
         '--disable-ipc-flooding-protection',
         '--disable-web-security',
         '--disable-features=VizDisplayCompositor',
+        '--no-first-run',
+        '--disable-default-apps',
+        '--disable-sync',
       ],
     },
   },

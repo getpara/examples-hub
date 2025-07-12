@@ -7,7 +7,10 @@
     "dev:server": "deno serve --watch --allow-env --env-file=.env --allow-ffi --allow-sys --allow-write --allow-net --allow-run --allow-read --unstable-net --unstable-worker-options --unstable-node-globals --unstable-detect-cjs --no-check server.ts",
     "dev": "deno task build:dev && deno task dev:server",
     "test": "deno test",
-    "build": "deno compile --allow-env --env-file=.env --allow-ffi --allow-sys --allow-write --allow-net --allow-run --allow-read --unstable-net --unstable-worker-options --unstable-node-globals --unstable-detect-cjs --no-check --output ./dist/server server.ts"
+    "build": "deno compile --allow-env --env-file=.env --allow-ffi --allow-sys --allow-write --allow-net --allow-run --allow-read --unstable-net --unstable-worker-options --unstable-node-globals --unstable-detect-cjs --no-check --output ./dist/server server.ts",
+    "lint": "deno lint",
+    "lint:fix": "deno lint --fix",
+    "typecheck": "deno check server.ts"
   },
   "imports": {
     "@alchemy/aa-alchemy": "npm:@alchemy/aa-alchemy@3.19.0",
@@ -26,5 +29,14 @@
     "viem": "npm:viem@2.8.6",
     "@sentry/node": "npm:@sentry/node@9.21.0"
   },
-  "nodeModulesDir": "auto"
+  "nodeModulesDir": "auto",
+  "lint": {
+    "rules": {
+      "tags": ["recommended"]
+    },
+    "exclude": ["test-ui/", "dist/", "public/"]
+  },
+  "fmt": {
+    "exclude": ["test-ui/", "dist/", "public/"]
+  }
 }

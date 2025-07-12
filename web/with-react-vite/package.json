@@ -6,9 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "postinstall": "yarn graz --generate && yarn setup-para",
+    "postinstall": "yarn graz --generate && npx setup-para",
     "preview": "vite preview",
-    "setup-para": "echo 'Para SDK setup complete'",
     "typecheck": "tsc --noEmit",
     "lint": "eslint . --max-warnings 0"
   },

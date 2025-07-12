@@ -12,7 +12,7 @@
     "anchor:build-deploy": "npm run anchor:build && npm run anchor:deploy",
     "anchor:verify": "anchor verify",
     "typecheck": "tsc --noEmit",
-    "postinstall": "yarn setup-para"
+    "postinstall": "npx setup-para"
   },
   "dependencies": {
     "@getpara/react-sdk": "2.0.0-alpha.32",
