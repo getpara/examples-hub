@@ -1,7 +1,6 @@
 import { Outlet, useNavigate, useSearchParams } from 'react-router-dom';
 import { useGetAllOrganizations } from '../../hooks/api/queries/useOrganizations';
 import { useEffect } from 'react';
-import { MainLoader } from '../../components/MainLoader';
 import { ErrorBoundary as SentryErrorBoundary } from '@sentry/react';
 import { ErrorBoundary } from '../../components/ErrorBoundary/ErrorBoundary';
 import { LandingAppBar } from '../../components/AppBar/LandingAppBar';
@@ -11,7 +10,7 @@ import { useAccount } from '@getpara/react-sdk';
 export const Layout = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { isConnected, isLoading: isLoadingLoggedIn } = useAccount();
+  const { isConnected } = useAccount();
   const isLoggedIn = isConnected;
   const { data: allOrgs, isLoading: isLoadingOrgs, isRefetching: isRefetchingOrgs } = useGetAllOrganizations();
   const { setSelectedOrganization } = useSetSelectedOrganizationWithNavigation(false);
@@ -27,10 +26,6 @@ export const Layout = () => {
       }
     }
   }, [isLoggedIn, isLoadingOrgs, navigate, setSelectedOrganization, allOrgs?.length, isRefetchingOrgs, searchParams]);
-
-  if (isLoadingLoggedIn || isLoadingOrgs || isRefetchingOrgs) {
-    return <MainLoader />;
-  }
 
   if (isLoggedIn) {
     return null;
