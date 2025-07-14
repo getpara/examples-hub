@@ -113,14 +113,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.4.0"
-  circle_flags:
-    dependency: transitive
-    description:
-      name: circle_flags
-      sha256: "875cd64e607b46838ce429e2f7cc88c615f8514181d2d0f9e73de37ba3fb2f52"
-      url: "https://pub.dev"
-    source: hosted
-    version: "5.0.0"
   cli_config:
     dependency: transitive
     description:
@@ -209,14 +201,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "7.0.2"
-  diacritic:
-    dependency: transitive
-    description:
-      name: diacritic
-      sha256: "12981945ec38931748836cd76f2b38773118d0baef3c68404bdfde9566147876"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.1.6"
   dotenv:
     dependency: "direct dev"
     description:
@@ -249,6 +233,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.2"
+  equatable:
+    dependency: transitive
+    description:
+      name: equatable
+      sha256: "567c64b3cb4cf82397aac55f4f0cbd3ca20d77c6c03bedbc4ceaddc08904aef7"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.7"
   fake_async:
     dependency: transitive
     description:
@@ -286,14 +278,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  flutter_country_selector:
-    dependency: transitive
-    description:
-      name: flutter_country_selector
-      sha256: "814bddd55153cfbce221e94c67005412ae72364e04e4685f260e6335abc76fc9"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.11"
   flutter_dotenv:
     dependency: "direct main"
     description:
@@ -374,11 +358,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "5.0.0"
-  flutter_localizations:
-    dependency: transitive
-    description: flutter
-    source: sdk
-    version: "0.0.0"
   flutter_svg:
     dependency: "direct main"
     description:
@@ -485,14 +464,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.1.2"
-  intl:
-    dependency: transitive
+  intl_phone_number_input:
+    dependency: "direct main"
     description:
-      name: intl
-      sha256: d6f56758b7d3014a48af9701c085700aac781a92a87a62b1333b46d8879661cf
+      name: intl_phone_number_input
+      sha256: "1c4328713a9503ab26a1fdbb6b00b4cada68c18aac922b35bedbc72eff1297c3"
       url: "https://pub.dev"
     source: hosted
-    version: "0.19.0"
+    version: "0.7.4"
   io:
     dependency: transitive
     description:
@@ -549,6 +528,30 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.1"
+  libphonenumber_platform_interface:
+    dependency: transitive
+    description:
+      name: libphonenumber_platform_interface
+      sha256: f801f6c65523f56504b83f0890e6dad584ab3a7507dca65fec0eed640afea40f
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.4.2"
+  libphonenumber_plugin:
+    dependency: transitive
+    description:
+      name: libphonenumber_plugin
+      sha256: c615021d9816fbda2b2587881019ed595ecdf54d999652d7e4cce0e1f026368c
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.3"
+  libphonenumber_web:
+    dependency: transitive
+    description:
+      name: libphonenumber_web
+      sha256: "8186f420dbe97c3132283e52819daff1e55d60d6db46f7ea5ac42f42a28cc2ef"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.2"
   lints:
     dependency: transitive
     description:
@@ -748,14 +751,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.1.0"
-  phone_form_field:
-    dependency: "direct main"
-    description:
-      name: phone_form_field
-      sha256: "14f3c6f0c6c2a49087d4f6c002157f359c3a37ede06fe4bb78ce89c162a305c7"
-      url: "https://pub.dev"
-    source: hosted
-    version: "9.2.5"
   phone_numbers_parser:
     dependency: transitive
     description:
