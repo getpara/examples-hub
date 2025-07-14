@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:intl_phone_number_input/intl_phone_number_input.dart';
+import 'package:flutter/services.dart';
 
 class EmailPhoneInput extends StatefulWidget {
   final Function(String value, bool isPhone) onSubmit;
@@ -17,15 +17,12 @@ class _EmailPhoneInputState extends State<EmailPhoneInput> {
   final TextEditingController _controller = TextEditingController();
   final FocusNode _focusNode = FocusNode();
   bool _isPhone = false;
-  bool _showContinue = false;
-  PhoneNumber _phoneNumber = PhoneNumber(isoCode: 'US');
   String? _errorText;
 
   @override
   void initState() {
     super.initState();
     _controller.addListener(_onTextChanged);
-    _focusNode.addListener(_onFocusChanged);
   }
 
   @override
@@ -43,26 +40,40 @@ class _EmailPhoneInputState extends State<EmailPhoneInput> {
     });
   }
 
-  void _onFocusChanged() {
-    setState(() {
-      _showContinue = _focusNode.hasFocus && _controller.text.isNotEmpty;
-    });
-  }
 
   bool _detectIsPhone(String text) {
-    return text.isNotEmpty && 
-           !text.contains('@') && 
-           text.contains(RegExp(r'[0-9]'));
+    // Simple detection: starts with + or digit, contains mostly digits
+    final cleanText = text.trim();
+    if (cleanText.isEmpty) return false;
+    if (cleanText.contains('@')) return false;
+    
+    // Check if it looks like a phone number
+    final digitsOnly = cleanText.replaceAll(RegExp(r'[^\d+]'), '');
+    return digitsOnly.length >= 7 && 
+           (cleanText.startsWith('+') || RegExp(r'^\d').hasMatch(cleanText));
   }
 
   bool _isValidEmail(String email) {
     return RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
   }
 
+  String _formatPhoneNumber(String phone) {
+    // Basic formatting for display
+    String digits = phone.replaceAll(RegExp(r'[^\d+]'), '');
+    
+    // If it doesn't start with +, assume US number
+    if (!digits.startsWith('+')) {
+      digits = '+1$digits';
+    }
+    
+    return digits;
+  }
+
   bool _isValidInput() {
     final text = _controller.text.trim();
     if (_isPhone) {
-      return text.replaceAll(RegExp(r'[^\d]'), '').length >= 7;
+      final digits = text.replaceAll(RegExp(r'[^\d]'), '');
+      return digits.length >= 10; // Minimum for most phone numbers
     } else {
       return _isValidEmail(text);
     }
@@ -77,7 +88,8 @@ class _EmailPhoneInputState extends State<EmailPhoneInput> {
     }
 
     if (_isPhone) {
-      widget.onSubmit(_phoneNumber.phoneNumber ?? _controller.text, true);
+      final formattedPhone = _formatPhoneNumber(_controller.text);
+      widget.onSubmit(formattedPhone, true);
     } else {
       widget.onSubmit(_controller.text.trim(), false);
     }
@@ -87,73 +99,41 @@ class _EmailPhoneInputState extends State<EmailPhoneInput> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        if (_isPhone)
-          InternationalPhoneNumberInput(
-            onInputChanged: (PhoneNumber number) {
-              _phoneNumber = number;
-            },
-            textFieldController: _controller,
-            focusNode: _focusNode,
-            formatInput: true,
-            keyboardType: TextInputType.phone,
-            inputDecoration: InputDecoration(
-              hintText: 'Phone number',
-              errorText: _errorText,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              filled: true,
-              fillColor: Theme.of(context).colorScheme.surface.withValues(alpha: 0.1),
+        TextField(
+          controller: _controller,
+          focusNode: _focusNode,
+          keyboardType: _isPhone ? TextInputType.phone : TextInputType.emailAddress,
+          autocorrect: false,
+          inputFormatters: _isPhone ? [
+            FilteringTextInputFormatter.allow(RegExp(r'[\d+\-\(\)\s]')),
+          ] : null,
+          decoration: InputDecoration(
+            hintText: _isPhone ? 'Phone number' : 'Enter email or phone',
+            errorText: _errorText,
+            prefixIcon: Icon(
+              _isPhone ? Icons.phone_outlined : Icons.email_outlined,
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
             ),
-            selectorConfig: const SelectorConfig(
-              selectorType: PhoneInputSelectorType.BOTTOM_SHEET,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
             ),
-            initialValue: _phoneNumber,
-          )
-        else
-          TextField(
-            controller: _controller,
-            focusNode: _focusNode,
-            keyboardType: TextInputType.emailAddress,
-            autocorrect: false,
-            decoration: InputDecoration(
-              hintText: 'Enter email or phone',
-              errorText: _errorText,
-              prefixIcon: Icon(
-                Icons.email_outlined,
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              filled: true,
-              fillColor: Theme.of(context).colorScheme.surface.withValues(alpha: 0.1),
-            ),
+            filled: true,
+            fillColor: Theme.of(context).colorScheme.surface.withValues(alpha: 0.1),
           ),
-        
-        AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          height: _showContinue ? 60 : 0,
-          child: AnimatedOpacity(
-            duration: const Duration(milliseconds: 200),
-            opacity: _showContinue ? 1.0 : 0.0,
-            child: Padding(
-              padding: const EdgeInsets.only(top: 12),
-              child: SizedBox(
-                width: double.infinity,
-                height: 48,
-                child: ElevatedButton(
-                  onPressed: _isValidInput() ? _handleSubmit : null,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).colorScheme.primary,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  child: const Text('Continue'),
-                ),
+        ),
+        const SizedBox(height: 12),
+        SizedBox(
+          width: double.infinity,
+          height: 48,
+          child: ElevatedButton(
+            onPressed: _isValidInput() ? _handleSubmit : null,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
               ),
             ),
+            child: const Text('Continue'),
           ),
         ),
       ],
