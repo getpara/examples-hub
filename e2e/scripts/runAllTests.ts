@@ -12,7 +12,8 @@ import {
   setTestFailed,
   getTestFailed,
   TestResult,
-  CLIArgs
+  CLIArgs,
+  TEST_PATTERNS
 } from "./testConfig";
 
 // Simple concurrency limiter for parallel execution
@@ -80,7 +81,12 @@ async function runSingleTest(framework: string, testType?: string): Promise<void
     // Build test path
     let testPath = `e2e/tests/${config.path}`;
     if (testType) {
-      testPath += `/happyPath.${testType}.spec.ts`;
+      const pattern = TEST_PATTERNS[testType as keyof typeof TEST_PATTERNS];
+      if (pattern && pattern !== "*.spec.ts") {
+        testPath += `/${pattern}`;
+      } else {
+        testPath += `/happyPath.${testType}.spec.ts`; // fallback for compatibility
+      }
     }
 
     // Build Playwright command

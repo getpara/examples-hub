@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 
-const fs = require("fs");
-const path = require("path");
-const { fetchAllLatestAlphaVersions } = require("./fetch-latest-alpha-versions.js");
+import fs from 'fs';
+import path from 'path';
+import { execSync } from 'child_process';
+import { fetchAllLatestAlphaVersions } from './fetch-latest-alpha-versions.js';
 
 // Maximum depth to traverse (0 = root, 1 = one level deep, etc.)
 const MAX_DEPTH = 3;
@@ -14,9 +15,9 @@ const rootDir = process.cwd();
 let filesChecked = 0;
 let filesUpdated = 0;
 let depsUpdated = 0;
-let updatedFiles = [];
-let updateSummary = {};
-let directoriesToUpdateLocks = new Set();
+let updatedFiles: Array<{ path: string; updates: Array<{ package: string; from: string; to: string; section: string }> }> = [];
+let updateSummary: Record<string, { from: string; to: string; files: string[] }> = {};
+let directoriesToUpdateLocks = new Set<string>();
 
 /**
  * Compare version strings to determine if an update is needed
@@ -24,7 +25,7 @@ let directoriesToUpdateLocks = new Set();
  * @param {string} latestVersion - Latest version (e.g., "2.0.0-alpha.32")
  * @returns {boolean} True if update is needed
  */
-function shouldUpdateVersion(currentVersion, latestVersion) {
+function shouldUpdateVersion(currentVersion: string, latestVersion: string): boolean {
   // Remove any prefix characters like ^, ~, >=
   const cleanCurrent = currentVersion.replace(/^[\^~>=<]+/, "");
   const cleanLatest = latestVersion.replace(/^[\^~>=<]+/, "");
@@ -62,14 +63,8 @@ function shouldUpdateVersion(currentVersion, latestVersion) {
   return parseInt(latestAlpha) > parseInt(currentAlpha);
 }
 
-/**
- * Traverse directories recursively up to MAX_DEPTH
- * @param {string} dir - The current directory to process
- * @param {Object} versionMap - Map of package names to latest versions
- * @param {number} currentDepth - The current depth of traversal
- * @param {boolean} diffOnly - Only process files that need updates
- */
-function traverseDirectories(dir, versionMap, currentDepth = 0, diffOnly = false) {
+// Traverse directories recursively up to MAX_DEPTH
+function traverseDirectories(dir: string, versionMap: Record<string, string>, currentDepth = 0, diffOnly = false): void {
   // Stop if we've reached the maximum depth
   if (currentDepth > MAX_DEPTH) {
     return;
@@ -108,7 +103,7 @@ function traverseDirectories(dir, versionMap, currentDepth = 0, diffOnly = false
  * @param {Object} versionMap - Map of package names to latest versions
  * @returns {boolean} True if file has dependencies that need updates
  */
-function hasUpdatesNeeded(filePath, versionMap) {
+function hasUpdatesNeeded(filePath: string, versionMap: Record<string, string>): boolean {
   try {
     const packageData = JSON.parse(fs.readFileSync(filePath, "utf8"));
     const sectionsToCheck = ["dependencies", "devDependencies", "peerDependencies", "optionalDependencies"];
@@ -135,13 +130,8 @@ function hasUpdatesNeeded(filePath, versionMap) {
   }
 }
 
-/**
- * Update package.json file to change @getpara/* dependency versions
- * @param {string} filePath - Path to the package.json file
- * @param {Object} versionMap - Map of package names to latest versions
- * @param {boolean} diffOnly - Only process files that need updates
- */
-function updatePackageJson(filePath, versionMap, diffOnly = false) {
+// Update package.json file to change @getpara/* dependency versions
+function updatePackageJson(filePath: string, versionMap: Record<string, string>, diffOnly = false): void {
   try {
     filesChecked++;
 
@@ -153,7 +143,7 @@ function updatePackageJson(filePath, versionMap, diffOnly = false) {
     // Read and parse package.json
     const packageData = JSON.parse(fs.readFileSync(filePath, "utf8"));
     let fileUpdated = false;
-    const fileUpdates = [];
+    const fileUpdates: Array<{ package: string; from: string; to: string; section: string }> = [];
 
     // Define sections to check for dependencies
     const sectionsToCheck = ["dependencies", "devDependencies", "peerDependencies", "optionalDependencies"];
@@ -232,13 +222,13 @@ function printUpdateSummary() {
     console.log(`\n  ${pkg}:`);
     console.log(`    ${info.from} → ${info.to}`);
     console.log(`    Updated in ${info.files.length} files:`);
-    info.files.forEach(file => console.log(`      - ${file}`));
+    info.files.forEach((file: string) => console.log(`      - ${file}`));
   });
   
   console.log("\n📁 Files Updated:");
-  updatedFiles.forEach(file => {
+  updatedFiles.forEach((file: { path: string; updates: Array<{ package: string; from: string; to: string; section: string }> }) => {
     console.log(`\n  ${file.path}:`);
-    file.updates.forEach(update => {
+    file.updates.forEach((update: { package: string; from: string; to: string; section: string }) => {
       console.log(`    - ${update.package}: ${update.from} → ${update.to} (${update.section})`);
     });
   });
@@ -252,13 +242,8 @@ function printUpdateSummary() {
   console.log("=".repeat(80));
 }
 
-/**
- * Update yarn.lock files in directories that had package.json changes
- * @param {Set} directories - Set of directory paths to update
- * @param {boolean} dryRun - Whether this is a dry run
- */
-function updateYarnLockFiles(directories, dryRun = false) {
-  const { execSync } = require("child_process");
+// Update yarn.lock files in directories that had package.json changes
+function updateYarnLockFiles(directories: Set<string>, dryRun = false): void {
   
   if (directories.size === 0) {
     console.log("🔒 No yarn.lock files need updating");
@@ -271,7 +256,7 @@ function updateYarnLockFiles(directories, dryRun = false) {
   let successCount = 0;
   let failureCount = 0;
   
-  directories.forEach(dir => {
+  directories.forEach((dir: string) => {
     const relativeDir = dir.replace(rootDir, ".") || ".";
     
     // Check if yarn.lock exists in this directory
@@ -428,7 +413,7 @@ Examples:
 }
 
 // Export functions for use by other scripts
-module.exports = {
+export {
   shouldUpdateVersion,
   traverseDirectories,
   updatePackageJson,
@@ -436,6 +421,6 @@ module.exports = {
 };
 
 // Run main if this script is executed directly
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   main();
 }

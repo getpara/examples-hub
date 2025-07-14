@@ -1,13 +1,11 @@
 #!/usr/bin/env node
 
-const https = require("https");
+import https from 'https';
 
 /**
  * Fetch the latest alpha version for a given @getpara package from npm registry
- * @param {string} packageName - The @getpara package name
- * @returns {Promise<string|null>} Latest alpha version or null if not found
  */
-async function fetchLatestAlphaVersion(packageName) {
+async function fetchLatestAlphaVersion(packageName: string): Promise<string | null> {
   return new Promise((resolve) => {
     const registryUrl = `https://registry.npmjs.org/${packageName}`;
     
@@ -77,9 +75,8 @@ async function fetchLatestAlphaVersion(packageName) {
 
 /**
  * Fetch latest alpha versions for all known @getpara packages
- * @returns {Promise<Object>} Object mapping package names to latest alpha versions
  */
-async function fetchAllLatestAlphaVersions() {
+async function fetchAllLatestAlphaVersions(): Promise<Record<string, string>> {
   // Known @getpara packages (discovered from package.json analysis)
   const getparaPackages = [
     "@getpara/core-sdk",
@@ -146,12 +143,12 @@ async function main() {
 }
 
 // Export functions for use by other scripts
-module.exports = {
+export {
   fetchLatestAlphaVersion,
   fetchAllLatestAlphaVersions
 };
 
 // Run main if this script is executed directly
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   main();
 }

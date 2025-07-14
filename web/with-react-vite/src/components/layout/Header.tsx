@@ -29,7 +29,7 @@ export function Header() {
               </button>
             ) : (
               <button
-                onClick={openModal}
+                onClick={() => openModal()}
                 className="px-4 py-2 bg-gray-900 text-white rounded-none hover:bg-gray-950 transition-colors text-sm font-medium"
                 data-testid="header-connect-button"
               >

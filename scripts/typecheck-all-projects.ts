@@ -1,25 +1,27 @@
 #!/usr/bin/env node
 
 /**
- * lint-all-projects.js
- * Runs lint and typecheck across all projects in the examples-hub monorepo
- * Skips projects that don't have these scripts configured
+ * typecheck-all-projects.js
+ * Runs typecheck across all projects in the examples-hub monorepo
+ * Skips projects that don't have typecheck scripts configured
  * Supports parallel execution with concurrency limits
  */
 
-const { execSync } = require('child_process');
-const fs = require('fs');
-const path = require('path');
+import { execSync } from 'child_process';
+import fs from 'fs';
+import path from 'path';
 
 // Simple concurrency limiter
 class ConcurrencyLimiter {
-  constructor(limit) {
+  private limit: number;
+  private running: number = 0;
+  private queue: Array<{ task: () => Promise<any>; resolve: (value: any) => void; reject: (reason?: any) => void }> = [];
+
+  constructor(limit: number) {
     this.limit = limit;
-    this.running = 0;
-    this.queue = [];
   }
 
-  async run(task) {
+  async run(task: () => Promise<any>): Promise<any> {
     return new Promise((resolve, reject) => {
       this.queue.push({ task, resolve, reject });
       this.process();
@@ -32,7 +34,9 @@ class ConcurrencyLimiter {
     }
 
     this.running++;
-    const { task, resolve, reject } = this.queue.shift();
+    const queueItem = this.queue.shift();
+    if (!queueItem) return;
+    const { task, resolve, reject } = queueItem;
 
     try {
       const result = await task();
@@ -49,7 +53,7 @@ class ConcurrencyLimiter {
 function findProjectDirectories() {
   const projectDirs = new Set();
   
-  function traverse(dir, depth = 0) {
+  function traverse(dir: string, depth = 0) {
     if (depth > 4) return;
     
     const skipDirs = ['node_modules', '.next', '.output', 'dist', '.yarn', 'build', '.cache', '.git'];
@@ -83,7 +87,7 @@ function findProjectDirectories() {
   return Array.from(projectDirs).sort();
 }
 
-function hasScript(dir, scriptName) {
+function hasScript(dir: string, scriptName: string): boolean {
   try {
     const packageJsonPath = path.join(dir, 'package.json');
     const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
@@ -93,65 +97,39 @@ function hasScript(dir, scriptName) {
   }
 }
 
-async function runLintAndTypecheck() {
-  console.log('🔍 Running lint and typecheck across all projects (parallel execution)');
+async function runTypecheckAll() {
+  console.log('📝 Running typecheck across all projects (parallel execution)');
   console.log('============================================================');
   
   const projectDirs = findProjectDirectories();
-  const concurrencyLimit = 4; // Lower limit for lint/typecheck to avoid overwhelming CPU
+  const concurrencyLimit = 4;
   const limiter = new ConcurrencyLimiter(concurrencyLimit);
   
   let total = 0;
-  let lintPassed = 0;
-  let lintFailed = 0;
-  let lintSkipped = 0;
   let typecheckPassed = 0;
   let typecheckFailed = 0;
   let typecheckSkipped = 0;
   
-  const lintTasks = [];
-  const typecheckTasks = [];
+  const typecheckTasks: Promise<{ dir: string; type: string; status: string; error?: string }>[] = [];
   
-  // Prepare lint tasks
+  // Prepare typecheck tasks
   for (const dir of projectDirs) {
     total++;
     
-    if (hasScript(dir, 'lint')) {
+    if (hasScript(dir as string, 'typecheck')) {
       const task = async () => {
-        console.log(`🔍 Running lint: ${dir}`);
-        try {
-          execSync('yarn lint', {
-            cwd: dir,
-            stdio: 'pipe',
-            timeout: 60000
-          });
-          console.log(`✅ Lint passed: ${dir}`);
-          return { dir, type: 'lint', status: 'passed' };
-        } catch (error) {
-          console.log(`❌ Lint failed: ${dir}`);
-          return { dir, type: 'lint', status: 'failed', error: error.message.split('\n')[0] };
-        }
-      };
-      lintTasks.push(limiter.run(task));
-    } else {
-      lintSkipped++;
-      console.log(`⏭️ Lint skipped (no script): ${dir}`);
-    }
-    
-    if (hasScript(dir, 'typecheck')) {
-      const task = async () => {
-        console.log(`📝 Running typecheck: ${dir}`);
+        console.log(`📝 Running typecheck: ${dir as string}`);
         try {
           execSync('yarn typecheck', {
-            cwd: dir,
+            cwd: dir as string,
             stdio: 'pipe',
-            timeout: 60000
+            timeout: 300000 // 5 minute timeout per typecheck
           });
           console.log(`✅ Typecheck passed: ${dir}`);
-          return { dir, type: 'typecheck', status: 'passed' };
+          return { dir: dir as string, type: 'typecheck', status: 'passed' } as const;
         } catch (error) {
           console.log(`❌ Typecheck failed: ${dir}`);
-          return { dir, type: 'typecheck', status: 'failed', error: error.message.split('\n')[0] };
+          return { dir: dir as string, type: 'typecheck', status: 'failed', error: error.message.split('\n')[0] } as const;
         }
       };
       typecheckTasks.push(limiter.run(task));
@@ -161,38 +139,24 @@ async function runLintAndTypecheck() {
     }
   }
   
-  console.log(`\n🔄 Starting parallel lint and typecheck (max ${concurrencyLimit} concurrent)...`);
+  console.log(`\n🔄 Starting parallel typecheck (max ${concurrencyLimit} concurrent)...`);
   
   // Execute all tasks in parallel
-  const allTasks = [...lintTasks, ...typecheckTasks];
-  const results = await Promise.all(allTasks);
+  const results = await Promise.all(typecheckTasks);
   
   // Count results
   for (const result of results) {
-    if (result.type === 'lint') {
-      if (result.status === 'passed') {
-        lintPassed++;
-      } else {
-        lintFailed++;
-      }
-    } else if (result.type === 'typecheck') {
-      if (result.status === 'passed') {
-        typecheckPassed++;
-      } else {
-        typecheckFailed++;
-      }
+    if (result.status === 'passed') {
+      typecheckPassed++;
+    } else {
+      typecheckFailed++;
     }
   }
   
   console.log('');
   console.log('============================================================');
-  console.log('📊 Lint & Typecheck Summary:');
+  console.log('📊 Typecheck Summary:');
   console.log(`   Total projects: ${total}`);
-  console.log('');
-  console.log('   Lint Results:');
-  console.log(`     ✅ Passed: ${lintPassed}`);
-  console.log(`     ❌ Failed: ${lintFailed}`);
-  console.log(`     ⏭️ Skipped: ${lintSkipped}`);
   console.log('');
   console.log('   Typecheck Results:');
   console.log(`     ✅ Passed: ${typecheckPassed}`);
@@ -200,22 +164,22 @@ async function runLintAndTypecheck() {
   console.log(`     ⏭️ Skipped: ${typecheckSkipped}`);
   console.log('============================================================');
   
-  if (lintFailed > 0 || typecheckFailed > 0) {
-    console.log('⚠️ Some checks failed. Review the output above for details.');
+  if (typecheckFailed > 0) {
+    console.log('⚠️ Some typechecks failed. Review the output above for details.');
     process.exit(1);
   } else {
-    console.log('🎉 All lint and typecheck operations completed successfully!');
+    console.log('🎉 All typecheck operations completed successfully!');
     process.exit(0);
   }
 }
 
 // Handle command line arguments
 if (process.argv.includes('--help') || process.argv.includes('-h')) {
-  console.log('Usage: node lint-all-projects.js');
+  console.log('Usage: node typecheck-all-projects.js');
   console.log('');
-  console.log('Runs lint and typecheck on all projects that have these scripts configured');
-  console.log('Skips projects without lint/typecheck scripts');
+  console.log('Runs typecheck on all projects that have typecheck scripts configured');
+  console.log('Skips projects without typecheck scripts');
   process.exit(0);
 }
 
-runLintAndTypecheck();
+runTypecheckAll();

@@ -7,19 +7,21 @@
  * Supports parallel execution with concurrency limits
  */
 
-const { execSync } = require('child_process');
-const fs = require('fs');
-const path = require('path');
+import { execSync } from 'child_process';
+import fs from 'fs';
+import path from 'path';
 
 // Simple concurrency limiter
 class ConcurrencyLimiter {
-  constructor(limit) {
+  private limit: number;
+  private running: number = 0;
+  private queue: Array<{ task: () => Promise<any>; resolve: (value: any) => void; reject: (reason?: any) => void }> = [];
+
+  constructor(limit: number) {
     this.limit = limit;
-    this.running = 0;
-    this.queue = [];
   }
 
-  async run(task) {
+  async run(task: () => Promise<any>): Promise<any> {
     return new Promise((resolve, reject) => {
       this.queue.push({ task, resolve, reject });
       this.process();
@@ -32,7 +34,9 @@ class ConcurrencyLimiter {
     }
 
     this.running++;
-    const { task, resolve, reject } = this.queue.shift();
+    const queueItem = this.queue.shift();
+    if (!queueItem) return;
+    const { task, resolve, reject } = queueItem;
 
     try {
       const result = await task();
@@ -49,7 +53,7 @@ class ConcurrencyLimiter {
 function findProjectDirectories() {
   const projectDirs = new Set();
   
-  function traverse(dir, depth = 0) {
+  function traverse(dir: string, depth = 0) {
     // Limit traversal depth to avoid infinite loops
     if (depth > 4) return;
     
@@ -88,16 +92,16 @@ function findProjectDirectories() {
 }
 
 // Retry function with exponential backoff
-async function retryInstall(installCommand, dir, maxRetries = 3) {
+async function retryInstall(installCommand: string, dir: string, maxRetries = 3): Promise<{ success: boolean; error?: string }> {
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       execSync(installCommand, {
-        cwd: dir,
+        cwd: dir as string,
         stdio: 'pipe',
         timeout: 120000 // 2 minute timeout per project
       });
       return { success: true };
-    } catch (error) {
+    } catch (error: any) {
       if (attempt === maxRetries) {
         return { success: false, error: error.message.split('\n')[0] };
       }
@@ -105,6 +109,7 @@ async function retryInstall(installCommand, dir, maxRetries = 3) {
       await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, attempt - 1)));
     }
   }
+  return { success: false, error: 'Max retries exceeded' };
 }
 
 async function installDependencies() {
@@ -118,35 +123,35 @@ async function installDependencies() {
   let total = 0;
   let success = 0;
   let failed = 0;
-  const results = [];
-  const retryQueue = [];
+  const results: Array<{ dir: string; status: string; reason?: string; packageManager?: string; error?: string; wasRetry?: boolean }> = [];
+  const retryQueue: Array<{ dir: string; installCommand: string; packageManager: string }> = [];
   
   // Prepare installation tasks
-  const installTasks = [];
+  const installTasks: Promise<{ dir: string; status: string; packageManager: string; error?: string }>[] = [];
   
   for (const dir of projectDirs) {
     // Check if package.json exists (should exist due to our search)
-    const packageJsonPath = path.join(dir, 'package.json');
+    const packageJsonPath = path.join(dir as string, 'package.json');
     if (!fs.existsSync(packageJsonPath)) {
-      results.push({ dir, status: 'skipped', reason: 'no package.json' });
+      results.push({ dir: dir as string, status: 'skipped', reason: 'no package.json' });
       continue;
     }
     
     // Determine which package manager to use based on project type
-    let installCommand = 'yarn install --network-timeout 60000 --mode=update-lockfile';
+    let installCommand = 'yarn install --network-timeout 60000';
     let packageManager = 'yarn';
     
-    if (dir.includes('server/with-bun')) {
+    if ((dir as string).includes('server/with-bun')) {
       installCommand = 'bun install';
       packageManager = 'bun';
-    } else if (dir.includes('server/with-deno')) {
+    } else if ((dir as string).includes('server/with-deno')) {
       // Deno projects typically don't need install, but check if they have deps
-      const packageJson = JSON.parse(fs.readFileSync(path.join(dir, 'package.json'), 'utf8'));
+      const packageJson = JSON.parse(fs.readFileSync(path.join(dir as string, 'package.json'), 'utf8'));
       if (packageJson.scripts && packageJson.scripts.install) {
         installCommand = 'deno task install';
         packageManager = 'deno';
       } else {
-        results.push({ dir, status: 'skipped', reason: 'Deno project with no install script' });
+        results.push({ dir: dir as string, status: 'skipped', reason: 'Deno project with no install script' });
         continue;
       }
     }
@@ -155,18 +160,18 @@ async function installDependencies() {
     
     // Create installation task
     const task = async () => {
-      console.log(`📦 Processing: ${dir}`);
+      console.log(`📦 Processing: ${dir as string}`);
       console.log(`🔄 Running ${packageManager} install...`);
       
-      const result = await retryInstall(installCommand, dir, 2); // Initial attempt with only 2 retries
+      const result = await retryInstall(installCommand, dir as string, 2); // Initial attempt with only 2 retries
       
-      if (result.success) {
-        console.log(`✅ Success: ${dir}`);
-        return { dir, status: 'success', packageManager };
+      if (result?.success) {
+        console.log(`✅ Success: ${dir as string}`);
+        return { dir: dir as string, status: 'success', packageManager };
       } else {
-        console.log(`⏳ Queuing for retry: ${dir}`);
-        retryQueue.push({ dir, installCommand, packageManager });
-        return { dir, status: 'queued_for_retry', error: result.error, packageManager };
+        console.log(`⏳ Queuing for retry: ${dir as string}`);
+        retryQueue.push({ dir: dir as string, installCommand, packageManager });
+        return { dir: dir as string, status: 'queued_for_retry', error: result?.error, packageManager };
       }
     };
     
@@ -186,7 +191,7 @@ async function installDependencies() {
     console.log(`   Found ${retryQueue.length} projects that need retry`);
     
     const retryLimiter = new ConcurrencyLimiter(2); // Reduce concurrency for retries
-    const retryTasks = [];
+    const retryTasks: Promise<{ dir: string; status: string; packageManager: string; wasRetry: boolean; error?: string }>[] = [];
     
     for (let i = 0; i < retryQueue.length; i++) {
       const { dir, installCommand, packageManager } = retryQueue[i];
@@ -200,13 +205,13 @@ async function installDependencies() {
         console.log(`🔄 Retry attempt for: ${dir}`);
         const result = await retryInstall(installCommand, dir, 4); // More retries for queued items
         
-        if (result.success) {
+        if (result?.success) {
           console.log(`✅ Retry success: ${dir}`);
           return { dir, status: 'success', packageManager, wasRetry: true };
         } else {
           console.log(`❌ Retry failed: ${dir}`);
-          console.log(`   Final error: ${result.error}`);
-          return { dir, status: 'failed', error: result.error, packageManager, wasRetry: true };
+          console.log(`   Final error: ${result?.error}`);
+          return { dir, status: 'failed', error: result?.error, packageManager, wasRetry: true };
         }
       };
       

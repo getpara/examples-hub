@@ -1,4 +1,4 @@
-import { defineConfig, devices } from '@playwright/test';
+import { defineConfig, devices } from "@playwright/test";
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -9,36 +9,36 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: 4, // Explicit limit aligned with other parallel operations
-  reporter: [['html']],
+  workers: 4,
+  reporter: [["html"]],
   use: {
     baseURL: `http://localhost:${process.env.APP_PORT}`,
-    headless: true,
-    trace: 'retain-on-failure',
-    video: 'retain-on-failure',
+    headless: false,
+    trace: "retain-on-failure",
+    video: "retain-on-failure",
     // Ensure complete test isolation
     storageState: { cookies: [], origins: [] },
     // Clear browser cache and other state
     launchOptions: {
       args: [
-        '--disable-background-timer-throttling',
-        '--disable-backgrounding-occluded-windows',
-        '--disable-renderer-backgrounding',
-        '--disable-features=TranslateUI',
-        '--disable-ipc-flooding-protection',
-        '--disable-web-security',
-        '--disable-features=VizDisplayCompositor',
-        '--no-first-run',
-        '--disable-default-apps',
-        '--disable-sync',
+        "--disable-background-timer-throttling",
+        "--disable-backgrounding-occluded-windows",
+        "--disable-renderer-backgrounding",
+        "--disable-features=TranslateUI",
+        "--disable-ipc-flooding-protection",
+        "--disable-web-security",
+        "--disable-features=VizDisplayCompositor",
+        "--no-first-run",
+        "--disable-default-apps",
+        "--disable-sync",
       ],
     },
   },
 
   projects: [
     {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      name: "chromium",
+      use: { ...devices["Desktop Chrome"] },
     },
   ],
 

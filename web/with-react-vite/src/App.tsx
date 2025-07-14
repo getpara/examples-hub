@@ -17,7 +17,7 @@ export default function Home() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!isConnected || !wallet?.id) {
       return;
     }
@@ -28,7 +28,6 @@ export default function Home() {
     });
   };
 
-  // Reset signature when message changes
   const handleMessageChange = (value: string) => {
     setMessage(value);
     if (signMessageHook.data) {
@@ -36,10 +35,13 @@ export default function Home() {
     }
   };
 
-  // Derive status from signing state
   const status = {
     show: signMessageHook.isPending || !!signMessageHook.error || !!signMessageHook.data,
-    type: signMessageHook.isPending ? ("info" as const) : signMessageHook.error ? ("error" as const) : ("success" as const),
+    type: signMessageHook.isPending
+      ? ("info" as const)
+      : signMessageHook.error
+      ? ("error" as const)
+      : ("success" as const),
     message: signMessageHook.isPending
       ? "Signing message..."
       : signMessageHook.error
@@ -50,13 +52,13 @@ export default function Home() {
   return (
     <>
       <Header />
-      
+
       <div className="container mx-auto px-4 py-12">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold tracking-tight mb-4">Para Custom Auth Demo</h1>
           <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-            Sign messages with your Para wallet using email, phone, or social authentication. 
-            This demonstrates using Para's web-sdk with native React components and a unified authentication flow.
+            Sign messages with your Para wallet using email, phone, or social authentication. This demonstrates using
+            Para's web-sdk with native React components and a unified authentication flow.
           </p>
         </div>
 
@@ -65,14 +67,18 @@ export default function Home() {
             <ConnectWalletCard onConnect={openModal} />
           </div>
         ) : (
-          <div className="max-w-xl mx-auto" data-testid="wallet-connected">
+          <div
+            className="max-w-xl mx-auto"
+            data-testid="wallet-connected">
             <div className="mb-8 rounded-none border border-gray-200">
               <div className="px-6 py-3 bg-gray-50 border-b border-gray-200">
                 <h3 className="text-sm font-medium text-gray-900">Connected Wallet</h3>
               </div>
               <div className="px-6 py-3">
                 <p className="text-sm text-gray-500">Address</p>
-                <p className="text-lg font-medium text-gray-900 font-mono" data-testid="wallet-address">
+                <p
+                  className="text-lg font-medium text-gray-900 font-mono"
+                  data-testid="wallet-address">
                   {address?.slice(0, 6)}...{address?.slice(-4)}
                 </p>
               </div>
@@ -91,7 +97,9 @@ export default function Home() {
               onSubmit={handleSubmit}
             />
 
-            {signMessageHook.data && "signature" in signMessageHook.data && <SignatureDisplay signature={signMessageHook.data.signature} />}
+            {signMessageHook.data && "signature" in signMessageHook.data && (
+              <SignatureDisplay signature={signMessageHook.data.signature} />
+            )}
           </div>
         )}
       </div>

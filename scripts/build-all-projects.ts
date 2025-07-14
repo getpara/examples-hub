@@ -7,19 +7,21 @@
  * Supports parallel execution with concurrency limits
  */
 
-const { execSync } = require('child_process');
-const fs = require('fs');
-const path = require('path');
+import { execSync } from 'child_process';
+import fs from 'fs';
+import path from 'path';
 
 // Simple concurrency limiter
 class ConcurrencyLimiter {
-  constructor(limit) {
+  private limit: number;
+  private running: number = 0;
+  private queue: Array<{ task: () => Promise<any>; resolve: (value: any) => void; reject: (reason?: any) => void }> = [];
+
+  constructor(limit: number) {
     this.limit = limit;
-    this.running = 0;
-    this.queue = [];
   }
 
-  async run(task) {
+  async run(task: () => Promise<any>): Promise<any> {
     return new Promise((resolve, reject) => {
       this.queue.push({ task, resolve, reject });
       this.process();
@@ -32,7 +34,9 @@ class ConcurrencyLimiter {
     }
 
     this.running++;
-    const { task, resolve, reject } = this.queue.shift();
+    const queueItem = this.queue.shift();
+    if (!queueItem) return;
+    const { task, resolve, reject } = queueItem;
 
     try {
       const result = await task();
@@ -49,7 +53,7 @@ class ConcurrencyLimiter {
 function findProjectDirectories() {
   const projectDirs = new Set();
   
-  function traverse(dir, depth = 0) {
+  function traverse(dir: string, depth = 0) {
     if (depth > 4) return;
     
     const skipDirs = ['node_modules', '.next', '.output', 'dist', '.yarn', 'build', '.cache', '.git'];
@@ -83,7 +87,7 @@ function findProjectDirectories() {
   return Array.from(projectDirs).sort();
 }
 
-function hasScript(dir, scriptName) {
+function hasScript(dir: string, scriptName: string): boolean {
   try {
     const packageJsonPath = path.join(dir, 'package.json');
     const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
@@ -106,26 +110,37 @@ async function runBuildAll() {
   let buildFailed = 0;
   let buildSkipped = 0;
   
-  const buildTasks = [];
+  const buildTasks: Promise<{ dir: string; type: string; status: string; error?: string }>[] = [];
   
   // Prepare build tasks
   for (const dir of projectDirs) {
     total++;
     
-    if (hasScript(dir, 'build')) {
+    if (hasScript(dir as string, 'build')) {
       const task = async () => {
         console.log(`🔨 Running build: ${dir}`);
         try {
           execSync('yarn build', {
-            cwd: dir,
+            cwd: dir as string,
             stdio: 'pipe',
             timeout: 300000 // 5 minute timeout per build
           });
-          console.log(`✅ Build passed: ${dir}`);
-          return { dir, type: 'build', status: 'passed' };
+          
+          // Clean up dist/build directories after successful build
+          try {
+            execSync('find . -path "*/node_modules" -prune -o \\( -name "dist" -o -name "build" -o -name ".next" -o -name ".output" \\) -type d -print -exec rm -rf {} + 2>/dev/null || true', {
+              cwd: dir as string,
+              stdio: 'pipe'
+            });
+            console.log(`✅ Build passed and cleaned: ${dir}`);
+          } catch (cleanError) {
+            console.log(`✅ Build passed (cleanup warning): ${dir}`);
+          }
+          
+          return { dir, type: 'build', status: 'passed' } as const;
         } catch (error) {
           console.log(`❌ Build failed: ${dir}`);
-          return { dir, type: 'build', status: 'failed', error: error.message.split('\n')[0] };
+          return { dir, type: 'build', status: 'failed', error: error.message.split('\n')[0] } as const;
         }
       };
       buildTasks.push(limiter.run(task));

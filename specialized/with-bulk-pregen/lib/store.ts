@@ -1,4 +1,4 @@
-import { Wallet } from "@getpara/react-sdk";
+import { type Wallet } from "@getpara/server-sdk";
 
 declare global {
   var _walletStore: WalletStore | undefined;

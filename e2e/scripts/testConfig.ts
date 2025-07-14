@@ -130,10 +130,10 @@ export const APP_CONFIGS: Record<string, TestAppConfig> = {
 
 // Test file patterns
 export const TEST_PATTERNS = {
-  "email-password": "happyPath.email.password.spec.ts",
-  "email-passkey": "happyPath.email.passkey.spec.ts",
-  "phone-password": "happyPath.phone.password.spec.ts",
-  "phone-passkey": "happyPath.phone.passkey.spec.ts",
+  "email-password": "happyPath.email-password.spec.ts",
+  "email-passkey": "happyPath.email-passkey.spec.ts",
+  "phone-password": "happyPath.phone-password.spec.ts",
+  "phone-passkey": "happyPath.phone-passkey.spec.ts",
   "all": "*.spec.ts",
 };
 
