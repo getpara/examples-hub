@@ -24,6 +24,7 @@ dependencies:
   url_launcher: ^6.3.1
   phone_form_field: ^9.2.5
   http: ^1.4.0
+  shared_preferences: ^2.3.0
 dependency_overrides:
   pinenacl: 0.6.0
 
@@ -39,6 +40,7 @@ flutter:
   uses-material-design: true
   assets:
     - .env
+    - lib/assets/app_icon.png
     - lib/assets/farcaster.svg
     - lib/assets/metamask_icon.svg
     - lib/assets/phantom_icon.svg
