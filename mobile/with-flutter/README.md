@@ -22,7 +22,6 @@ building your Flutter application with Para.
 
 ## Installation
 
-<<<<<<< HEAD
 > **Note**: Full passkey functionality on iOS requires a valid Apple Developer Account and a registered bundle ID
 > matching the Team ID provided to Para. For Android, passkey functionality requires a device with secure lock screen
 > and biometric authentication enabled, plus Google Play Services with an active Google account.
@@ -120,7 +119,7 @@ var authState = await para.signUpOrLogIn(auth: {'email': email});
 if (authState.stage == AuthStage.verify) {
 
   // Verify email with OTP
-  authState = await para.verifyNewAccount(verificationCode: code);
+  authState = await para.verifyOtp(otp: code);
 
   // Set up passkey
   await para.generatePasskey(identifier: email, biometricsId: signupState.passkeyId);
@@ -143,7 +142,7 @@ var authState = await para.signUpOrLogIn(auth: {'phone': phone});
 if (authState.stage == AuthStage.verify) {
 
   // Verify email with OTP
-  authState = await para.verifyNewAccount(verificationCode: code);
+  authState = await para.verifyOtp(otp: code);
 
   // Set up passkey
   await para.generatePasskey(identifier: phone, biometricsId: signupState.passkeyId);
@@ -278,12 +277,6 @@ if (result is SuccessfulSignatureResult) {
 > packages. The core integration point remains Para's `signMessage` method.
 
 ---
-=======
-1.  Install Flutter dependencies:
-    ```bash
-    flutter pub get
-    ```
->>>>>>> main
 
 ## Running the Example
 

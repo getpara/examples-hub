@@ -95,8 +95,7 @@ class _AuthScreenState extends State<AuthScreen> {
 
   Future<void> _handleOTPVerification(AuthState authState, String otp) async {
     try {
-      final verifiedState = await para.verifyAuth(
-        authState: authState,
+      final verifiedState = await para.verifyOtp(
         otp: otp,
       );
       
