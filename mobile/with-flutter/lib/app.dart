@@ -16,6 +16,7 @@ class ParaApp extends StatefulWidget {
 
 class _ParaAppState extends State<ParaApp> {
   AppState _state = AppState.launch;
+  bool _showLaunchScreen = true;
 
   @override
   void initState() {
@@ -24,45 +25,49 @@ class _ParaAppState extends State<ParaApp> {
   }
 
   Future<void> _checkAuthStatus() async {
-    await Future.delayed(const Duration(seconds: 1)); // Brief launch screen
-    
+    // Quick check of stored auth state (like Swift)
     final prefs = await SharedPreferences.getInstance();
-    final hasSession = prefs.getString('para_session') != null;
+    final isAuthenticated = prefs.getBool('isAuthenticated') ?? false;
     
-    if (hasSession) {
-      try {
-        // Try to fetch wallets to validate session
-        await para.fetchWallets();
-        setState(() => _state = AppState.home);
-        return;
-      } catch (_) {
-        // Session invalid, clear it
-        await prefs.remove('para_session');
-      }
-    }
-    
-    setState(() => _state = AppState.auth);
+    // Set initial state immediately based on stored value
+    setState(() {
+      _state = isAuthenticated ? AppState.home : AppState.auth;
+    });
+  }
+
+  void _onLaunchAnimationComplete() {
+    setState(() {
+      _showLaunchScreen = false;
+    });
   }
 
   void _onAuthSuccess() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('para_session', 'active');
+    await prefs.setBool('isAuthenticated', true);
     setState(() => _state = AppState.home);
   }
 
   void _onLogout() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('para_session');
+    await prefs.setBool('isAuthenticated', false);
     await para.logout();
     setState(() => _state = AppState.auth);
   }
 
   @override
   Widget build(BuildContext context) {
-    return switch (_state) {
-      AppState.launch => const LaunchScreen(),
-      AppState.auth => AuthScreen(onSuccess: _onAuthSuccess),
-      AppState.home => HomeScreen(onLogout: _onLogout),
-    };
+    return Stack(
+      children: [
+        // Main app content
+        switch (_state) {
+          AppState.launch => const SizedBox.shrink(),
+          AppState.auth => AuthScreen(onSuccess: _onAuthSuccess),
+          AppState.home => HomeScreen(onLogout: _onLogout),
+        },
+        // Launch screen overlay
+        if (_showLaunchScreen)
+          LaunchScreen(onAnimationComplete: _onLaunchAnimationComplete),
+      ],
+    );
   }
 }
