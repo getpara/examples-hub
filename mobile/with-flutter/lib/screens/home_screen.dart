@@ -22,10 +22,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _validateSession() async {
     try {
-      // Background validation
-      await para.fetchWallets();
+      // Background validation using currentUser
+      final user = await para.currentUser();
+      if (!user.isLoggedIn) {
+        // Session invalid, logout
+        if (mounted) {
+          widget.onLogout();
+        }
+      }
     } catch (_) {
-      // Session invalid, logout
+      // Error checking user, logout
       if (mounted) {
         widget.onLogout();
       }

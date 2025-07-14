@@ -95,7 +95,10 @@ class _AuthScreenState extends State<AuthScreen> {
 
   Future<void> _handleOTPVerification(AuthState authState, String otp) async {
     try {
-      final verifiedState = await para.verifyNewAccount(verificationCode: otp);
+      final verifiedState = await para.verifyAuth(
+        authState: authState,
+        otp: otp,
+      );
       
       if (verifiedState.stage == AuthStage.signup && mounted) {
         // Need to choose signup method
@@ -103,7 +106,7 @@ class _AuthScreenState extends State<AuthScreen> {
         // For now, automatically choose passkey
         await para.handleSignup(
           authState: verifiedState,
-          method: SignupMethod.passkey,
+          signupMethod: SignupMethod.passkey,
           webAuthenticationSession: _webAuthSession,
         );
         widget.onSuccess();
