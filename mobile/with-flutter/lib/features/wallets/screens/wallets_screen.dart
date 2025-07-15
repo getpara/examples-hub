@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:para/para.dart';
 import '../../../client/para.dart';
 import '../widgets/wallet_card.dart';
-import '../models/wallet_model.dart';
+import 'details/evm_wallet_view.dart';
+import 'details/solana_wallet_view.dart';
+import 'details/cosmos_wallet_view.dart';
 
 class WalletsScreen extends StatefulWidget {
   final VoidCallback onLogout;
@@ -158,9 +160,24 @@ class _WalletsScreenState extends State<WalletsScreen> {
   }
 
   void _navigateToWalletDetail(Wallet wallet) {
-    // TODO: Navigate to wallet detail screen
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Wallet detail for ${wallet.formattedAddress}')),
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) {
+          switch (wallet.type) {
+            case WalletType.evm:
+              return EVMWalletView(wallet: wallet);
+            case WalletType.solana:
+              return SolanaWalletView(wallet: wallet);
+            case WalletType.cosmos:
+              return CosmosWalletView(wallet: wallet);
+            default:
+              return Scaffold(
+                appBar: AppBar(title: const Text('Unknown Wallet')),
+                body: const Center(child: Text('Unknown wallet type')),
+              );
+          }
+        },
+      ),
     );
   }
 
