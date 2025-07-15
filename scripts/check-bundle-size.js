@@ -95,12 +95,12 @@ const BUNDLE_CONFIG = {
     },
     "@getpara/solana-wallet-connectors": {
       thresholds: {
-        raw: "19KB",
-        minified: "19KB",
+        raw: "20KB",
+        minified: "20KB",
         gzipped: "8KB"
       },
       entry: "dist/index.js",
-      external: ["@solana-mobile/wallet-adapter-mobile", "@solana/wallet-adapter-base", "@solana/wallet-adapter-react", "@solana/wallet-adapter-walletconnect", "react", "react-dom", "@farcaster/miniapp-sdk"]
+      external: ["@solana-mobile/wallet-adapter-mobile", "@solana/wallet-adapter-base", "@solana/wallet-adapter-react", "@solana/wallet-adapter-walletconnect", "react", "react-dom", "@farcaster/mini-app-solana", "@farcaster/miniapp-sdk"]
     },
     "@getpara/ethers-v5-integration": {
       thresholds: {

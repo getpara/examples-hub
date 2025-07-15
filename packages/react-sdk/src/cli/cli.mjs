@@ -10,6 +10,7 @@ const PACKAGES_TO_STUB = [
   '@getpara/solana-wallet-connectors',
   '@farcaster/miniapp-sdk',
   '@farcaster/miniapp-wagmi-connector',
+  '@farcaster/mini-app-solana',
 ];
 
 const checkForPackages = async () => {

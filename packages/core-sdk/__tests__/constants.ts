@@ -99,6 +99,7 @@ export const PARTNER = {
 };
 
 export const EXTERNAL_WALLET: ExternalWalletInfo = {
+  partnerId: PARTNER.id,
   address: '0x1aD2B053b8c6b1592cB645DEfadf105F34d8C6e1',
   type: 'EVM' as TWalletType,
   provider: 'metamask',

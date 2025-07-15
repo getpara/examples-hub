@@ -1406,30 +1406,88 @@ export abstract class ParaCore implements CoreInterface {
    * @param externalType - Type of external wallet to set.
    */
   async setExternalWallet(externalWallet: ExternalWalletInfo[] | ExternalWalletInfo): Promise<void> {
+    const { id: partnerId, supportedWalletTypes } = await this.#assertPartner();
     // Can change this to continue storing existing external wallets if/when we want to allow multiple connected external wallets
-    this.externalWallets = (Array.isArray(externalWallet) ? externalWallet : [externalWallet]).reduce(
+    (this.externalWallets = (Array.isArray(externalWallet) ? externalWallet : [externalWallet]).reduce(
       (
         acc: Record<string, Wallet>,
-        { address, type, provider, providerId, addressBech32, withFullParaAuth, isConnectionOnly, withVerification },
+        {
+          partnerId: wPartnerId,
+          address,
+          type,
+          provider,
+          providerId,
+          addressBech32,
+          withFullParaAuth,
+          isConnectionOnly,
+          withVerification,
+        },
       ) => {
-        return {
-          ...acc,
-          [address]: {
-            id: address,
-            address: addressBech32 ?? address,
-            type,
-            name: provider,
-            isExternal: true,
-            isExternalWithParaAuth: withFullParaAuth,
-            externalProviderId: providerId,
-            signer: '',
-            isExternalConnectionOnly: isConnectionOnly,
-            isExternalWithVerification: withVerification,
-          },
-        };
+        if (partnerId === wPartnerId && supportedWalletTypes.some(({ type: supportedType }) => supportedType === type)) {
+          return {
+            ...acc,
+            [address]: {
+              id: address,
+              partnerId,
+              address: addressBech32 ?? address,
+              type,
+              name: provider,
+              isExternal: true,
+              isExternalWithParaAuth: withFullParaAuth,
+              externalProviderId: providerId,
+              signer: '',
+              isExternalConnectionOnly: isConnectionOnly,
+              isExternalWithVerification: withVerification,
+            },
+          };
+        }
+        return acc;
       },
       {},
-    );
+    )),
+      this.setExternalWallets(this.externalWallets);
+    dispatchEvent(ParaEvent.EXTERNAL_WALLET_CHANGE_EVENT, null);
+  }
+
+  protected async addExternalWallets(externalWallets: ExternalWalletInfo[]) {
+    const { id: partnerId, supportedWalletTypes } = await this.#assertPartner();
+    // Can change this to continue storing existing external wallets if/when we want to allow multiple connected external wallets
+    this.externalWallets = {
+      ...Object.entries(this.externalWallets).reduce((acc: Record<string, Wallet>, [address, wallet]) => {
+        if (partnerId === wallet.partnerId && supportedWalletTypes.some(({ type }) => type === wallet.type)) {
+          return {
+            ...acc,
+            [address]: wallet,
+          };
+        }
+        return acc;
+      }, {}),
+      ...externalWallets.reduce(
+        (
+          acc: Record<string, Wallet>,
+          { address, type, provider, providerId, addressBech32, withFullParaAuth, isConnectionOnly, withVerification },
+        ) => {
+          return {
+            ...acc,
+            [address]: {
+              id: address,
+              partnerId,
+              address: addressBech32 ?? address,
+              type,
+              name: provider,
+              isExternal: true,
+              isExternalWithParaAuth: withFullParaAuth,
+              externalProviderId: providerId,
+              signer: '',
+              isExternalConnectionOnly: isConnectionOnly,
+              isExternalWithVerification: withVerification,
+            },
+          };
+        },
+        {},
+      ),
+    };
+
     this.setExternalWallets(this.externalWallets);
     dispatchEvent(ParaEvent.EXTERNAL_WALLET_CHANGE_EVENT, null);
   }
@@ -1851,7 +1909,7 @@ export abstract class ParaCore implements CoreInterface {
 
     if (this.externalWalletConnectionOnly || externalWallets.every(wallet => wallet.isConnectionOnly)) {
       // withFullParaAuth cannot be used if using connection only wallets
-      await this.setExternalWallet(
+      await this.addExternalWallets(
         externalWallets.map(wallet => ({
           ...wallet,
           withFullParaAuth: false,

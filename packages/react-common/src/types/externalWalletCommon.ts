@@ -88,7 +88,11 @@ export type BalanceManagement<B = string> = {
 };
 
 export type FarcasterMiniAppManagement = {
-  farcasterStatus: { isConnected: false; address?: undefined } | { isConnected: true; address: string } | undefined;
+  farcasterStatus:
+    | { isPresent: false }
+    | { isPresent: true; isConnected: false; address?: undefined }
+    | { isPresent: true; isConnected: true; address: string }
+    | undefined;
 };
 
 export type ExternalWalletContextType<S extends SignResult = SignResult> = {

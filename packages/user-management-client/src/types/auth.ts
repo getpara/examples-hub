@@ -234,6 +234,7 @@ export type ServerAuthStateLogin = ServerAuthStateBase & {
 export type VerifyThirdPartyAuth = ServerAuthStateSignup | ServerAuthStateLogin;
 
 export type ExternalWalletInfo = {
+  partnerId: string;
   address: string;
   type: ExternalWalletType;
   provider?: string;

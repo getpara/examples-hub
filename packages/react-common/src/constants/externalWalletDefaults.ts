@@ -30,7 +30,7 @@ export const defaultEvmExternalWallet = {
   requestInfo: () => Promise.resolve({} as ExternalWalletInfo),
   disconnectBase: () => Promise.resolve(),
   useAccount: () => undefined,
-  farcasterStatus: undefined,
+  farcasterStatus: { isPresent: false as const },
 };
 
 export const defaultSolanaExternalWallet = {
@@ -41,4 +41,5 @@ export const defaultSolanaExternalWallet = {
   requestInfo: () => Promise.resolve({} as ExternalWalletInfo),
   disconnectBase: () => Promise.resolve(),
   useWallet: () => undefined,
+  farcasterStatus: { isPresent: false as const },
 };

@@ -46,7 +46,6 @@ export class Para extends ParaCore {
         }
       }
 
-      console.log('isReady: true');
       this.isReady = true;
     }
   }

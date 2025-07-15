@@ -132,6 +132,7 @@ export function CosmosExternalWalletProvider({
       const storedExternalWallet = para.externalWallets[changeResp.ethAddress ?? ''];
       const { provider, providerId } = getProvider(walletType);
       para.setExternalWallet({
+        partnerId: para.partnerId,
         address: changeResp.ethAddress,
         type: 'COSMOS',
         provider,
@@ -155,6 +156,7 @@ export function CosmosExternalWalletProvider({
     try {
       return await para.loginExternalWallet({
         externalWallet: {
+          partnerId: para.partnerId,
           address,
           type: 'COSMOS',
           provider,
@@ -316,6 +318,7 @@ export function CosmosExternalWalletProvider({
       const { provider, providerId } = getProvider(walletType);
 
       return {
+        partnerId: para.partnerId,
         type: 'COSMOS',
         address,
         addressBech32,

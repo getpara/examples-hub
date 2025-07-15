@@ -26,12 +26,18 @@
   "gitHead": "10ecce9873131e6a1b114fb0642a94bb02040bef",
   "main": "dist/index.js",
   "peerDependencies": {
+    "@farcaster/mini-app-solana": "^1.0.0",
     "@solana-mobile/wallet-adapter-mobile": "2.x",
     "@solana/wallet-adapter-base": "0.x",
     "@solana/wallet-adapter-react": "0.x",
     "@solana/wallet-adapter-walletconnect": "0.x",
     "react": ">=18",
     "react-dom": ">=18"
+  },
+  "peerDependenciesMeta": {
+    "@farcaster/mini-app-solana": {
+      "optional": true
+    }
   },
   "scripts": {
     "build": "rm -rf dist && yarn typegen && node ./scripts/build.mjs",

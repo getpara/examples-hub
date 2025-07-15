@@ -1,4 +1,4 @@
-import { PropsWithChildren, createContext, useEffect, useMemo, useRef } from 'react';
+import { PropsWithChildren, createContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { Adapter, isIosAndRedirectable, WalletReadyState } from '@solana/wallet-adapter-base';
 import { AuthState, ExternalWalletInfo } from '@getpara/web-sdk';
@@ -8,16 +8,21 @@ import {
   ExternalWalletContextType,
   ExternalWalletProviderConfig,
   ExternalWalletProviderConfigBase,
+  FarcasterMiniAppManagement,
   SignArgs,
   TExternalWallet,
   type CommonWallet,
 } from '@getpara/react-common';
 import bs58 from 'bs58';
 import { externalHooks, TExternalHooks } from './externalHooks.js';
+import { farcasterWallet } from '../wallets/connectors/index.js';
 
-export type SolanaExternalWalletContextType = ExternalWalletContextType & TExternalHooks;
+export type SolanaExternalWalletContextType = ExternalWalletContextType & TExternalHooks & FarcasterMiniAppManagement;
 
-export const SolanaExternalWalletContext = createContext<SolanaExternalWalletContextType>(defaultSolanaExternalWallet);
+export const SolanaExternalWalletContext = createContext<SolanaExternalWalletContextType>({
+  ...defaultSolanaExternalWallet,
+  farcasterStatus: undefined,
+});
 
 export type SolanaExternalWalletProviderConfig = ExternalWalletProviderConfigBase;
 
@@ -48,6 +53,8 @@ export function SolanaExternalWalletProvider({
   const solanaAddressRef = useRef<typeof solanaAddress | undefined>(solanaAddress);
   const verificationMessage = useRef<string>();
 
+  const [isFarcasterSetup, setIsFarcasterSetup] = useState(false);
+
   const reset = async () => {
     await disconnect();
     await para.logout();
@@ -72,6 +79,7 @@ export function SolanaExternalWalletProvider({
     try {
       return await para.loginExternalWallet({
         externalWallet: {
+          partnerId: para.partnerId,
           address,
           type: 'SOLANA',
           provider: providerName,
@@ -287,6 +295,7 @@ export function SolanaExternalWalletProvider({
       const address = await connectBase(adapter);
 
       const externalWallet: ExternalWalletInfo = {
+        partnerId: para.partnerId,
         address,
         type: 'SOLANA',
         providerId: wallet.internalId,
@@ -325,7 +334,7 @@ export function SolanaExternalWalletProvider({
 
   const getWallet = (name: string) => wallets.find(w => w.name === name);
 
-  const wallets = walletFns.map(walletFn => {
+  const createWallet = (walletFn: CreateWalletFn): CommonWallet => {
     const metaData = walletFn();
     const adapter = getAdapter(metaData.name);
 
@@ -337,13 +346,81 @@ export function SolanaExternalWalletProvider({
         adapter && (adapter?.readyState === WalletReadyState.Installed || adapter?.readyState === WalletReadyState.Loadable),
       ...metaData,
     } as CommonWallet;
-  });
+  };
+
+  const [wallets, setWallets] = useState(() => walletFns.map(createWallet));
+
+  const farcasterStatus = useMemo(() => {
+    if (!isFarcasterSetup) {
+      return undefined;
+    }
+
+    const farcasterAdapter = getAdapter('Farcaster');
+
+    if (!farcasterAdapter) {
+      return {
+        isPresent: false as const,
+      };
+    }
+
+    return farcasterAdapter.connected && farcasterAdapter.publicKey
+      ? {
+          isPresent: true as const,
+          isConnected: true as const,
+          address: farcasterAdapter.publicKey.toString(),
+        }
+      : {
+          isPresent: true as const,
+          isConnected: false as const,
+        };
+  }, [isFarcasterSetup, adapters]);
+
+  useEffect(() => {
+    const detectFarcaster = async () => {
+      if (para.isFarcasterMiniApp) {
+        try {
+          // @ts-ignore
+          await import('@farcaster/mini-app-solana');
+        } catch (e) {}
+      }
+    };
+
+    detectFarcaster();
+  }, [para.isFarcasterMiniApp]);
+
+  useEffect(() => {
+    const setupFarcaster = async () => {
+      const adapter = getAdapter('Farcaster');
+      if (para.isFarcasterMiniApp && !wallets.some(w => w.internalId === 'FARCASTER') && !!adapter) {
+        const wallet = createWallet(farcasterWallet);
+
+        setWallets(prev => [...prev, wallet]);
+
+        if (para.supportedWalletTypes.some(({ type }) => type === 'SOLANA')) {
+          await connectBase(adapter, true);
+        }
+
+        setIsFarcasterSetup(true);
+      }
+    };
+
+    setupFarcaster();
+  }, [para.isFarcasterMiniApp, wallets, adapters]);
 
   return (
     <SolanaExternalWalletContext.Provider
       value={useMemo(
-        () => ({ wallets, disconnect, signMessage, signVerificationMessage, requestInfo, disconnectBase, ...externalHooks }),
-        [wallets, disconnect, signMessage, signVerificationMessage, requestInfo, disconnectBase],
+        () => ({
+          wallets,
+          disconnect,
+          signMessage,
+          signVerificationMessage,
+          requestInfo,
+          disconnectBase,
+          farcasterStatus,
+          ...externalHooks,
+        }),
+        [wallets, disconnect, signMessage, signVerificationMessage, requestInfo, farcasterStatus, disconnectBase],
       )}
     >
       {children}

@@ -1,7 +1,19 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocalStorage } from 'usehooks-ts';
 import ReactDOM from 'react-dom/client';
-import { Box, Button, ChakraProvider, Checkbox, Container, HStack, Input, Select, Text, VStack } from '@chakra-ui/react';
+import {
+  Box,
+  Button,
+  ChakraProvider,
+  Checkbox,
+  Container,
+  HStack,
+  Input,
+  Select,
+  Stack,
+  Text,
+  VStack,
+} from '@chakra-ui/react';
 import { useDebounce } from 'use-debounce';
 import Web3 from 'web3';
 import { SigningStargateClient } from '@cosmjs/stargate';
@@ -1046,7 +1058,7 @@ function AppInner({
                   </>
                 )}
               </HStack>
-              <HStack alignItems="flex-start">
+              <Stack direction={['column', 'row']} alignItems="flex-start">
                 <VStack w={{ base: '100%', md: '500px' }} align="left">
                   <>
                     <Button
@@ -1424,7 +1436,7 @@ function AppInner({
                     {para?.toString()}
                   </Box>
                 </Box>
-              </HStack>
+              </Stack>
             </VStack>
           )}
         </Container>
@@ -1458,6 +1470,8 @@ const App = () => {
   const [useFetchPregenWalletsOverride] = useLocalStorage('@EXAMPLE-PARA/useFetchPregenWalletsOverride', false);
   const [currentStepOverride, setCurrentStepOverride] = useState<ModalStepProp | undefined>(undefined);
 
+  const isMounted = useRef(false);
+
   async function fetchPregenWalletsOverride(_opts: { pregenId: PregenAuth }): Promise<{ userShare?: string }> {
     return Promise.resolve({ userShare: pregenUserShare });
   }
@@ -1471,6 +1485,18 @@ const App = () => {
       }),
     [selectedEnv, selectedApiKey, useDKLS, simulateNoPasskey],
   );
+
+  useEffect(() => {
+    if (isMounted.current) {
+      para.logout().then(() => {
+        window.location.reload();
+      });
+    }
+  }, [selectedEnv, selectedApiKey, useDKLS]);
+
+  useEffect(() => {
+    isMounted.current = true;
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>

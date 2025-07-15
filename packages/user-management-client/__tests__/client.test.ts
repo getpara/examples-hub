@@ -305,6 +305,7 @@ describe('Client', () => {
     it('loginExternalWallet', async () => {
       const body = {
         externalWallet: {
+          partnerId: 'partnerId',
           address: 'external-address',
           type: 'EVM' as TWalletType,
           provider: 'metamask',
@@ -330,6 +331,7 @@ describe('Client', () => {
     it('verifyExternalWallet', async () => {
       const body = {
         externalWallet: {
+          partnerId: 'partnerId',
           address: externalWalletAddress,
           type: 'EVM' as TWalletType,
           provider: 'metamask',

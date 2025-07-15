@@ -11,7 +11,7 @@ export const farcasterWallet = ({ para, createFarcasterConnector }: DefaultWalle
     iconUrl: icon,
     installed: para?.isReady && para?.isFarcasterMiniApp,
     isExtension: true,
-    downloadUrl: 'https://warpcast.xyz/',
+    downloadUrl: 'https://farcaster.xyz/',
     createConnector: (walletDetails: WalletDetailsParams) =>
       createConnector(config => ({
         ...createFarcasterConnector()(config),

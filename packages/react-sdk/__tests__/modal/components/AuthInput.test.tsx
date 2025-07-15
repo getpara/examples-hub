@@ -10,7 +10,11 @@ import { Auth, Environment } from '@getpara/web-sdk';
 import { API_KEY } from '../../constants.js';
 const queryClient = new QueryClient();
 
+let para: MockPara;
+
 async function setup(defaultAuth?: Auth<'email' | 'phone'>) {
+  para = new MockPara(Environment.DEV, API_KEY);
+
   defineCustomElements(window);
 
   const renderer = render(
@@ -39,7 +43,7 @@ async function setup(defaultAuth?: Auth<'email' | 'phone'>) {
 }
 
 const DEFAULT_STORE_RESP = {
-  client: new MockPara(Environment.DEV, API_KEY),
+  client: para,
 };
 
 const mocks = vi.hoisted(() => {
@@ -47,6 +51,8 @@ const mocks = vi.hoisted(() => {
     useStore: vi.fn(getter => getter(DEFAULT_STORE_RESP)),
   };
 });
+
+vi.mock('@farcaster/miniapp-sdk', () => undefined);
 
 vi.mock('../../../src/provider/stores/useStore.js', () => ({
   useStore: mocks.useStore,

@@ -46,7 +46,10 @@ export type EvmExternalWalletContextType = ExternalWalletContextType &
     avatar?: string;
   } & FarcasterMiniAppManagement;
 
-export const EvmExternalWalletContext = createContext<EvmExternalWalletContextType>(defaultEvmExternalWallet);
+export const EvmExternalWalletContext = createContext<EvmExternalWalletContextType>({
+  ...defaultEvmExternalWallet,
+  farcasterStatus: undefined,
+});
 
 export type EvmExternalWalletProviderConfig = ExternalWalletProviderConfigBase;
 
@@ -283,6 +286,7 @@ export function EvmExternalWalletProvider({
 
       return await para.loginExternalWallet({
         externalWallet: {
+          partnerId: para.partnerId,
           address,
           type: 'EVM',
           provider,
@@ -419,6 +423,7 @@ export function EvmExternalWalletProvider({
       const address = await connectBase(connector);
 
       return {
+        partnerId: para.partnerId,
         address,
         type: 'EVM',
         providerId: connector.paraDetails?.internalId,
@@ -538,12 +543,14 @@ export function EvmExternalWalletProvider({
     );
 
     if (!connection) {
-      return undefined;
+      return { isPresent: false as const };
     }
 
     const address = connection?.accounts?.[0];
 
-    return address ? { isConnected: true as const, address } : { isConnected: false as const };
+    return address
+      ? { isPresent: true as const, isConnected: true as const, address }
+      : { isPresent: true as const, isConnected: false as const };
   }, [connections]);
 
   const connectParaEmbedded = useCallback(async (): Promise<{ result?: unknown; error?: string }> => {

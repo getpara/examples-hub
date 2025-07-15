@@ -4,7 +4,7 @@ import { useInternalClient } from '../hooks/utils/useInternalClient.js';
 import { useStore } from '../stores/useStore.js';
 import { ModalStep } from '../../modal/index.js';
 import { useModalStore } from '../../modal/stores/index.js';
-import { useAccount, useParaStatus, useVerifyExternalWallet, useWalletState } from '../hooks/index.js';
+import { useAccount, useModal, useParaStatus, useVerifyExternalWallet, useWalletState } from '../hooks/index.js';
 import {
   BalanceManagement,
   ChainManagement,
@@ -89,6 +89,7 @@ export const ExternalWalletContext = createContext<Value>(defaultExternalWallet)
 
 export function ExternalWalletProvider({ children }: PropsWithChildren) {
   const { isReady, isFarcasterMiniApp } = useParaStatus();
+  const { closeModal } = useModal();
   const { isConnected } = useAccount();
   const farcasterMiniAppConfig = useStore(state => state.farcasterMiniAppConfig);
   const evmContext = useStore(state => state.evmContext);
@@ -122,6 +123,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
     signVerificationMessage: solanaSignVerificationMessage,
     requestInfo: solanaRequestInfo,
     disconnectBase: solanaDisconnectBase,
+    farcasterStatus: solanaFarcasterStatus,
   } = useContext(solanaContext);
   const {
     wallets: cosmosWallets,
@@ -307,6 +309,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
             // If signature is returned address, cosmosPublicKeyHex and cosmosSigner will also be returned
             verifyExternalWalletParams = {
               externalWallet: {
+                partnerId: para.partnerId!,
                 type: 'COSMOS',
                 address,
                 addressBech32,
@@ -328,6 +331,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
           } else if (signature && address) {
             verifyExternalWalletParams = {
               externalWallet: {
+                partnerId: para.partnerId!,
                 type: 'EVM',
                 address,
                 ...defaultWalletInfo,
@@ -346,6 +350,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
           } else if (signature && address) {
             verifyExternalWalletParams = {
               externalWallet: {
+                partnerId: para.partnerId!,
                 type: 'SOLANA',
                 address,
                 ...defaultWalletInfo,
@@ -503,25 +508,49 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
       ? evmWallets.find(w => w.internalId === 'FARCASTER')
       : undefined;
 
-    if (evmWallet) {
-      const isConnected = evmFarcasterStatus?.isConnected && !!evmFarcasterStatus.address;
-      if (isConnected) {
-        await para.loginExternalWallet({
-          externalWallet: [
-            {
-              type: 'EVM',
-              provider: 'Farcaster',
-              providerId: 'FARCASTER',
-              address: evmFarcasterStatus.address,
-              isConnectionOnly: true,
-            } as ExternalWalletInfo,
-          ],
-        });
+    const solanaWallet = para.supportedWalletTypes.find(({ type }) => type === 'SOLANA')
+      ? solanaWallets.find(w => w.internalId === 'FARCASTER')
+      : undefined;
 
-        setStep(ModalStep.LOGIN_DONE);
-      } else {
-        await connectExternalWallet(evmWallet, false, true);
+    if (evmWallet || solanaWallet) {
+      const loginWallets: ExternalWalletInfo[] = [];
+      if (evmWallet && evmFarcasterStatus?.isPresent) {
+        const isEvmConnected = evmFarcasterStatus.isConnected && !!evmFarcasterStatus.address;
+        if (isEvmConnected) {
+          loginWallets.push({
+            type: 'EVM',
+            provider: 'Farcaster',
+            providerId: 'FARCASTER',
+            address: evmFarcasterStatus.address,
+            isConnectionOnly: true,
+          } as ExternalWalletInfo);
+        } else {
+          await connectExternalWallet(evmWallet, false, true);
+        }
       }
+      if (solanaWallet && solanaFarcasterStatus?.isPresent) {
+        const isSolanaConnected = solanaFarcasterStatus.isConnected && !!solanaFarcasterStatus.address;
+
+        if (isSolanaConnected) {
+          loginWallets.push({
+            type: 'SOLANA',
+            provider: 'Farcaster',
+            providerId: 'FARCASTER',
+            address: solanaFarcasterStatus.address,
+            isConnectionOnly: true,
+          } as ExternalWalletInfo);
+        } else {
+          await connectExternalWallet(solanaWallet, false, true);
+        }
+      }
+
+      if (loginWallets.length > 0) {
+        await para.loginExternalWallet({
+          externalWallet: loginWallets,
+        });
+      }
+
+      closeModal();
     }
   };
 
@@ -671,11 +700,15 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
       isFarcasterMiniApp &&
       !isConnected &&
       !farcasterMiniAppConfig?.disableAutoConnect &&
-      !refs.wasSignedIn.current
+      !refs.wasSignedIn.current &&
+      !refs.initialFarcasterConnected.current &&
+      !!evmFarcasterStatus &&
+      !!solanaFarcasterStatus
     ) {
+      refs.initialFarcasterConnected.current = true;
       connectFarcasterMiniApp();
     }
-  }, [isReady, isConnected, isFarcasterMiniApp, farcasterMiniAppConfig]);
+  }, [isReady, isConnected, isFarcasterMiniApp, farcasterMiniAppConfig, evmFarcasterStatus, solanaFarcasterStatus]);
 
   return (
     <ExternalWalletContext.Provider
