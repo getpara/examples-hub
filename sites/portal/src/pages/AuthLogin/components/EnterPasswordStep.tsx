@@ -88,7 +88,7 @@ export const EnterPasswordStep = ({ error, onLoginClick, isEmbedded }: EnterPass
         <CpslButton fullWidth disabled={isProcessing || password === ''} onClick={onSubmit}>
           {isEmbedded ? 'Login' : 'Continue'}
         </CpslButton>
-        <Link href={recoveryUrl}>
+        <Link href={recoveryUrl} target={isEmbedded ? '_blank' : undefined}>
           <LinkText>{isEmbedded ? 'I’m having trouble logging in' : 'I’m having trouble logging into my wallet'}</LinkText>
         </Link>
       </ButtonContainer>
