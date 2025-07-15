@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:app_links/app_links.dart';
-import 'package:flutter/material.dart';
 import '../config/deep_link_constants.dart';
 
 /// Service for handling deep links in the Para Flutter example app.
@@ -35,21 +34,17 @@ class DeepLinkService {
     try {
       final initialLink = await _appLinks.getInitialLink();
       if (initialLink != null) {
-        debugPrint('Initial deep link: $initialLink');
         _handleDeepLink(initialLink);
       }
     } catch (e) {
-      debugPrint('Error getting initial link: $e');
+      // Silently ignore initial link errors
     }
     
     // Listen for incoming links while app is running
     _linkSubscription = _appLinks.uriLinkStream.listen(
-      (uri) {
-        debugPrint('Incoming deep link: $uri');
-        _handleDeepLink(uri);
-      },
-      onError: (error) {
-        debugPrint('Error listening for deep links: $error');
+      _handleDeepLink,
+      onError: (_) {
+        // Silently ignore deep link errors
       },
     );
   }

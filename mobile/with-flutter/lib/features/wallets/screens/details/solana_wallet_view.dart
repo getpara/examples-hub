@@ -283,30 +283,6 @@ class _SolanaWalletViewState extends State<SolanaWalletView> {
     }
   }
   
-  Future<void> _checkSession() async {
-    setState(() => _isLoading = true);
-    try {
-      final user = await para.currentUser();
-      _showResult('Session Status', 'Session Active: ${user.isLoggedIn}');
-    } catch (e) {
-      _showResult('Error', 'Failed to check session: $e');
-    } finally {
-      setState(() => _isLoading = false);
-    }
-  }
-  
-  Future<void> _fetchWallets() async {
-    setState(() => _isLoading = true);
-    try {
-      final wallets = await para.fetchWallets();
-      final addresses = wallets.map((w) => w.address ?? 'No Address').join('\n');
-      _showResult('Wallets', addresses);
-    } catch (e) {
-      _showResult('Error', 'Failed to fetch wallets: $e');
-    } finally {
-      setState(() => _isLoading = false);
-    }
-  }
   
   void _showFundingInstructions() {
     final address = widget.wallet.address;
@@ -536,50 +512,6 @@ class _SolanaWalletViewState extends State<SolanaWalletView> {
                                 padding: const EdgeInsets.symmetric(vertical: 16),
                               ),
                               child: const Text('Sign Transaction'),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-                // Wallet Management Card
-                _buildCard(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Wallet Management',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: ElevatedButton(
-                              onPressed: _isLoading ? null : _checkSession,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.grey[300],
-                                foregroundColor: Colors.black,
-                                padding: const EdgeInsets.symmetric(vertical: 16),
-                              ),
-                              child: const Text('Check Session'),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: ElevatedButton(
-                              onPressed: _isLoading ? null : _fetchWallets,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.grey[300],
-                                foregroundColor: Colors.black,
-                                padding: const EdgeInsets.symmetric(vertical: 16),
-                              ),
-                              child: const Text('Fetch Wallets'),
                             ),
                           ),
                         ],
