@@ -4,6 +4,7 @@ import 'client/para.dart';
 import 'screens/launch_screen.dart';
 import 'screens/auth_screen.dart';
 import 'screens/home_screen.dart';
+import 'services/deep_link_service.dart';
 
 enum AppState { launch, auth, home }
 
@@ -17,12 +18,20 @@ class ParaApp extends StatefulWidget {
 class _ParaAppState extends State<ParaApp> {
   AppState _state = AppState.launch;
   bool _showLaunchScreen = true;
+  final _deepLinkService = DeepLinkService();
 
   @override
   void initState() {
     super.initState();
     _initializePara();
     _checkAuthStatus();
+    _initializeDeepLinks();
+  }
+  
+  @override
+  void dispose() {
+    _deepLinkService.dispose();
+    super.dispose();
   }
   
   Future<void> _initializePara() async {
@@ -43,6 +52,74 @@ class _ParaAppState extends State<ParaApp> {
     setState(() {
       _state = isAuthenticated ? AppState.home : AppState.auth;
     });
+  }
+  
+  Future<void> _initializeDeepLinks() async {
+    await _deepLinkService.initialize(
+      onDeepLinkReceived: _handleDeepLink,
+    );
+  }
+  
+  void _handleDeepLink(Uri uri) {
+    debugPrint('App received deep link: $uri');
+    
+    // Validate the scheme first
+    if (uri.scheme != 'paraflutter') {
+      debugPrint('Invalid scheme: ${uri.scheme}');
+      return;
+    }
+    
+    try {
+      // Handle Para callback URLs
+      if (DeepLinkService.isParaCallback(uri)) {
+        // Para SDK should handle these automatically through web view
+        debugPrint('Para callback URL detected');
+        _showSnackBar('Processing authentication callback...');
+      }
+      
+      // Handle wallet connection URLs
+      else if (DeepLinkService.isWalletConnectionCallback(uri)) {
+        debugPrint('Wallet connection URL detected');
+        
+        // Validate and extract address parameter
+        final address = uri.queryParameters['address'];
+        if (address != null && address.isNotEmpty) {
+          _showSnackBar('Connecting to wallet: ${_truncateAddress(address)}');
+          
+          // Navigate to wallets screen if authenticated
+          if (_state == AppState.home) {
+            // In a real app, you would navigate to the appropriate screen
+            debugPrint('Would navigate to wallet connection with address: $address');
+          }
+        } else {
+          _showSnackBar('Invalid wallet connection link');
+        }
+      }
+      
+      // Handle other custom deep links
+      else {
+        debugPrint('Unknown deep link path: ${uri.path}');
+        _showSnackBar('Unrecognized deep link');
+      }
+    } catch (e) {
+      debugPrint('Error handling deep link: $e');
+      _showSnackBar('Error processing link');
+    }
+  }
+  
+  String _truncateAddress(String address) {
+    if (address.length <= 12) return address;
+    return '${address.substring(0, 6)}...${address.substring(address.length - 4)}';
+  }
+  
+  void _showSnackBar(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        duration: const Duration(seconds: 2),
+      ),
+    );
   }
 
   void _onLaunchAnimationComplete() {
@@ -66,18 +143,20 @@ class _ParaAppState extends State<ParaApp> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        // Main app content
-        switch (_state) {
-          AppState.launch => const SizedBox.shrink(),
-          AppState.auth => AuthScreen(onSuccess: _onAuthSuccess),
-          AppState.home => HomeScreen(onLogout: _onLogout),
-        },
-        // Launch screen overlay
-        if (_showLaunchScreen)
-          LaunchScreen(onAnimationComplete: _onLaunchAnimationComplete),
-      ],
+    return Scaffold(
+      body: Stack(
+        children: [
+          // Main app content
+          switch (_state) {
+            AppState.launch => const SizedBox.shrink(),
+            AppState.auth => AuthScreen(onSuccess: _onAuthSuccess),
+            AppState.home => HomeScreen(onLogout: _onLogout),
+          },
+          // Launch screen overlay
+          if (_showLaunchScreen)
+            LaunchScreen(onAnimationComplete: _onLaunchAnimationComplete),
+        ],
+      ),
     );
   }
 }

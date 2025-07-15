@@ -5,6 +5,7 @@ import '../widgets/wallet_card.dart';
 import 'details/evm_wallet_view.dart';
 import 'details/solana_wallet_view.dart';
 import 'details/cosmos_wallet_view.dart';
+import 'wallet_connect_demo.dart';
 
 class WalletsScreen extends StatefulWidget {
   final VoidCallback onLogout;
@@ -204,6 +205,16 @@ class _WalletsScreenState extends State<WalletsScreen> {
           ),
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.link, color: Colors.black),
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const WalletConnectDemo(),
+                ),
+              );
+            },
+          ),
           TextButton(
             onPressed: widget.onLogout,
             child: const Text(
