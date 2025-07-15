@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../client/para.dart';
+import '../features/wallets/screens/wallets_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final VoidCallback onLogout;
@@ -40,19 +41,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Wallets'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: widget.onLogout,
-          ),
-        ],
-      ),
-      body: const Center(
-        child: Text('Home - Wallets will go here'),
-      ),
-    );
+    // Directly show the WalletsScreen since this is the main home screen
+    return WalletsScreen(onLogout: widget.onLogout);
   }
 }

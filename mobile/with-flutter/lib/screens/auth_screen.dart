@@ -69,7 +69,6 @@ class _AuthScreenState extends State<AuthScreen> {
       await Future.delayed(const Duration(milliseconds: 500));
       
       final auth = isPhone ? Auth.phone(value) : Auth.email(value);
-      print('Attempting auth with: ${auth.toJson()}'); // Debug log
       final authState = await para.initiateAuthFlow(auth: auth);
 
       if (authState.stage == AuthStage.verify && mounted) {
