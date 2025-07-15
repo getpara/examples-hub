@@ -21,7 +21,17 @@ class _ParaAppState extends State<ParaApp> {
   @override
   void initState() {
     super.initState();
+    _initializePara();
     _checkAuthStatus();
+  }
+  
+  Future<void> _initializePara() async {
+    // Initialize Para by making a simple call to trigger bridge setup
+    try {
+      await para.currentUser();
+    } catch (_) {
+      // Ignore errors - we just want to trigger initialization
+    }
   }
 
   Future<void> _checkAuthStatus() async {

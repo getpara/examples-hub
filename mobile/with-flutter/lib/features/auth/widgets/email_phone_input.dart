@@ -104,21 +104,23 @@ class _EmailPhoneInputState extends State<EmailPhoneInput> {
           focusNode: _focusNode,
           keyboardType: _isPhone ? TextInputType.phone : TextInputType.emailAddress,
           autocorrect: false,
+          style: const TextStyle(color: Colors.black),
           inputFormatters: _isPhone ? [
             FilteringTextInputFormatter.allow(RegExp(r'[\d+\-\(\)\s]')),
           ] : null,
           decoration: InputDecoration(
             hintText: _isPhone ? 'Phone number' : 'Enter email or phone',
+            hintStyle: TextStyle(color: Colors.grey[600]),
             errorText: _errorText,
             prefixIcon: Icon(
               _isPhone ? Icons.phone_outlined : Icons.email_outlined,
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+              color: Colors.grey[600],
             ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
             ),
             filled: true,
-            fillColor: Theme.of(context).colorScheme.surface.withValues(alpha: 0.1),
+            fillColor: Colors.grey[100],
           ),
         ),
         const SizedBox(height: 12),
@@ -128,12 +130,21 @@ class _EmailPhoneInputState extends State<EmailPhoneInput> {
           child: ElevatedButton(
             onPressed: _isValidInput() ? _handleSubmit : null,
             style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.primary,
+              backgroundColor: Colors.black,
+              foregroundColor: Colors.white,
+              disabledBackgroundColor: Colors.grey[300],
+              disabledForegroundColor: Colors.grey[600],
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
             ),
-            child: const Text('Continue'),
+            child: const Text(
+              'Continue',
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 16,
+              ),
+            ),
           ),
         ),
       ],
