@@ -463,7 +463,7 @@ class _CosmosWalletViewState extends State<CosmosWalletView> {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -487,7 +487,7 @@ class _CosmosWalletViewState extends State<CosmosWalletView> {
             'Wallet Address',
             style: TextStyle(
               fontSize: 14,
-              color: Colors.grey[600],
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -495,7 +495,7 @@ class _CosmosWalletViewState extends State<CosmosWalletView> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.grey[100],
+              color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Row(
@@ -506,7 +506,7 @@ class _CosmosWalletViewState extends State<CosmosWalletView> {
                     style: TextStyle(
                       fontFamily: 'SF Mono',
                       fontSize: 12,
-                      color: address != null ? Colors.black : Colors.grey[600],
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -527,13 +527,13 @@ class _CosmosWalletViewState extends State<CosmosWalletView> {
             children: [
               Text(
                 'Balance:',
-                style: TextStyle(color: Colors.grey[600]),
+                style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
               ),
               Text(
                 _balance ?? (_isLoading ? 'Loading...' : 'Tap refresh →'),
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  color: _balance != null ? Colors.black : Colors.grey[600],
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
               IconButton(
@@ -554,7 +554,7 @@ class _CosmosWalletViewState extends State<CosmosWalletView> {
                   icon: const Icon(Icons.add_circle_outline),
                   label: Text('Fund Wallet (${_currentConfig.name})'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange,
+                    backgroundColor: Colors.blue,
                     foregroundColor: Colors.white,
                   ),
                 ),
@@ -585,15 +585,15 @@ class _CosmosWalletViewState extends State<CosmosWalletView> {
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
-              color: Colors.black87,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 16),
           DropdownButtonFormField<String>(
               value: _selectedChain,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 16,
-                color: Colors.black87,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
               decoration: InputDecoration(
                 border: OutlineInputBorder(
@@ -609,18 +609,18 @@ class _CosmosWalletViewState extends State<CosmosWalletView> {
                   borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
                 ),
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: Theme.of(context).colorScheme.surface,
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               ),
-              dropdownColor: Colors.white,
+              dropdownColor: Theme.of(context).colorScheme.surface,
               items: _chainConfigs.entries.map((entry) {
                 return DropdownMenuItem(
                   value: entry.key,
                   child: Text(
                     entry.value.name,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 16,
-                      color: Colors.black87,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                 );
@@ -647,20 +647,20 @@ class _CosmosWalletViewState extends State<CosmosWalletView> {
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
-              color: Colors.black87,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 16),
           TextField(
             onChanged: (value) => setState(() => _messageToSign = value),
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 16,
-              color: Colors.black87,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
             decoration: InputDecoration(
               hintText: 'Enter a message to sign',
               hintStyle: TextStyle(
-                color: Colors.grey[500],
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
                 fontSize: 16,
               ),
               border: OutlineInputBorder(
@@ -676,7 +676,7 @@ class _CosmosWalletViewState extends State<CosmosWalletView> {
                 borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
               ),
               filled: true,
-              fillColor: Colors.white,
+              fillColor: Theme.of(context).colorScheme.surface,
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             ),
           ),
@@ -722,7 +722,7 @@ class _CosmosWalletViewState extends State<CosmosWalletView> {
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
-              color: Colors.black87,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 16),
@@ -797,7 +797,7 @@ class _CosmosWalletViewState extends State<CosmosWalletView> {
           ),
           if (_isLoading)
             Container(
-              color: Colors.black.withAlpha((255 * 0.2).round()),
+              color: Colors.black.withValues(alpha: 0.2),
               child: const Center(
                 child: CircularProgressIndicator(),
               ),
