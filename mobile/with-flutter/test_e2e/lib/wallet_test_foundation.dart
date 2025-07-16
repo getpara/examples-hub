@@ -294,50 +294,41 @@ class WalletTestHelper {
     
     for (int attempt = 0; attempt < 15; attempt++) {
       try {
-        // Check for navigation bar title "Wallets"
-        final navBars = await driver.findElements(AppiumBy.className('XCUIElementTypeNavigationBar')).toList();
-        for (final navBar in navBars) {
-          try {
-            final name = await navBar.attributes['name'];
-            if (name == 'Wallets') {
-              print('✅ Wallets view found (nav bar)');
-              return;
-            }
-          } catch (e) {
-            // Continue checking
+        // Simple check: Look for "Wallets" title and "Logout" button
+        bool hasWalletsTitle = false;
+        bool hasLogoutButton = false;
+        
+        // Check for "Wallets" title
+        final staticTexts = await driver.findElements(AppiumBy.className('XCUIElementTypeStaticText')).toList();
+        for (final element in staticTexts) {
+          final text = await element.text;
+          if (text == 'Wallets') {
+            hasWalletsTitle = true;
+            break;
           }
         }
         
-        // Check for wallet-related text elements
-        final elements = await driver.findElements(AppiumBy.className('XCUIElementTypeStaticText')).toList();
-        for (final element in elements) {
-          final text = await element.text;
-          if (text == 'Wallets' || text == 'SOLANA' || text == 'COSMOS' || text == 'EVM' || 
-              text.contains('Add Wallet') || text.contains('Logout')) {
-            print('✅ Wallets view found (text: $text)');
-            return;
+        // Check for "Logout" button
+        final buttons = await driver.findElements(AppiumBy.className('XCUIElementTypeButton')).toList();
+        for (final button in buttons) {
+          final label = await button.attributes['label'];
+          if (label == 'Logout') {
+            hasLogoutButton = true;
+            break;
           }
         }
         
-        // Check for wallet address patterns (base58, bech32, hex)
-        for (final element in elements) {
-          final text = await element.text;
-          if (text.length > 20 && (
-              RegExp(r'^[1-9A-HJ-NP-Za-km-z]{32,44}$').hasMatch(text) || // Solana
-              RegExp(r'^[a-z]+1[a-z0-9]{38,58}$').hasMatch(text) || // Cosmos
-              RegExp(r'^0x[a-fA-F0-9]{40}$').hasMatch(text) || // EVM
-              text.contains('...') // Truncated addresses
-          )) {
-            print('✅ Wallets view found (address pattern: $text)');
-            return;
-          }
+        // Success if we find both key elements
+        if (hasWalletsTitle && hasLogoutButton) {
+          print('✅ Wallets view found (title: $hasWalletsTitle, logout: $hasLogoutButton)');
+          return;
         }
         
       } catch (e) {
         // Continue waiting
       }
       
-      if (attempt % 5 == 0) {
+      if (attempt % 3 == 0) {
         print('⏳ Still waiting for wallets view... (attempt ${attempt + 1}/15)');
       }
       

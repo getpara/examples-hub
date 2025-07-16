@@ -186,6 +186,7 @@ class _WalletsScreenState extends State<WalletsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: const Key('wallets_screen'),
       backgroundColor: const Color(0xFFFBF9F7),
       appBar: AppBar(
         backgroundColor: const Color(0xFFFBF9F7),
