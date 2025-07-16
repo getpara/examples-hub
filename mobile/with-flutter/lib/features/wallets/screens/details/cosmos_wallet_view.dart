@@ -589,12 +589,7 @@ class _CosmosWalletViewState extends State<CosmosWalletView> {
             ),
           ),
           const SizedBox(height: 16),
-          Theme(
-            data: Theme.of(context).copyWith(
-              canvasColor: Colors.white,
-              cardColor: Colors.white,
-            ),
-            child: DropdownButtonFormField<String>(
+          DropdownButtonFormField<String>(
               value: _selectedChain,
               style: const TextStyle(
                 fontSize: 16,
@@ -603,15 +598,15 @@ class _CosmosWalletViewState extends State<CosmosWalletView> {
               decoration: InputDecoration(
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey[300]!),
+                  borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey[300]!),
+                  borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.blue[400]!, width: 2),
+                  borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
                 ),
                 filled: true,
                 fillColor: Colors.white,
@@ -636,7 +631,6 @@ class _CosmosWalletViewState extends State<CosmosWalletView> {
                   _reinitializeSigner();
                 }
               },
-            ),
           ),
         ],
       ),
@@ -671,15 +665,15 @@ class _CosmosWalletViewState extends State<CosmosWalletView> {
               ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Colors.grey[300]!),
+                borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Colors.grey[300]!),
+                borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Colors.blue[400]!, width: 2),
+                borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
               ),
               filled: true,
               fillColor: Colors.white,
@@ -704,14 +698,11 @@ class _CosmosWalletViewState extends State<CosmosWalletView> {
                 ),
                 elevation: 2,
               ),
-              child: Text(
+              child: const Text(
                 'Sign Message',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: _isLoading || _messageToSign.isEmpty
-                      ? Colors.grey[600]
-                      : Colors.white,
                 ),
               ),
             ),
@@ -770,15 +761,16 @@ class _CosmosWalletViewState extends State<CosmosWalletView> {
   
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.grey[50],
+        backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.black),
-        title: const Text(
+        iconTheme: IconThemeData(color: theme.colorScheme.onSurface),
+        title: Text(
           'Cosmos Wallet',
-          style: TextStyle(color: Colors.black),
+          style: TextStyle(color: theme.colorScheme.onSurface),
         ),
       ),
       body: Stack(

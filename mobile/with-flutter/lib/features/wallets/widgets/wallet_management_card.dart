@@ -66,6 +66,7 @@ class _WalletManagementCardState extends State<WalletManagementCard> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: Theme.of(context).colorScheme.surface,
         title: Text(title),
         content: SingleChildScrollView(
           child: Text(message),
@@ -86,11 +87,11 @@ class _WalletManagementCardState extends State<WalletManagementCard> {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withAlpha((255 * 0.05).round()),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 5,
             offset: const Offset(0, 2),
           ),
@@ -99,11 +100,12 @@ class _WalletManagementCardState extends State<WalletManagementCard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Wallet Management',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 16),

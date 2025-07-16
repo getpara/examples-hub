@@ -328,7 +328,7 @@ class _EVMWalletViewState extends State<EVMWalletView> {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -345,14 +345,14 @@ class _EVMWalletViewState extends State<EVMWalletView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
-        backgroundColor: Colors.grey[50],
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.black),
-        title: const Text(
+        iconTheme: IconThemeData(color: Theme.of(context).colorScheme.onSurface),
+        title: Text(
           'EVM Wallet',
-          style: TextStyle(color: Colors.black),
+          style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
         ),
       ),
       body: Stack(
@@ -366,15 +366,18 @@ class _EVMWalletViewState extends State<EVMWalletView> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         'Wallet Address',
-                        style: TextStyle(fontSize: 14, color: Colors.grey),
+                        style: TextStyle(
+                          fontSize: 14, 
+                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                        ),
                       ),
                       const SizedBox(height: 8),
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: Colors.grey[100],
+                          color: Theme.of(context).colorScheme.surfaceContainerHighest,
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Row(
@@ -385,7 +388,9 @@ class _EVMWalletViewState extends State<EVMWalletView> {
                                 style: TextStyle(
                                   fontFamily: 'SF Mono',
                                   fontSize: 12,
-                                  color: widget.wallet.address != null ? Colors.black : Colors.grey[600],
+                                  color: widget.wallet.address != null 
+                                    ? Theme.of(context).colorScheme.onSurface
+                                    : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                                 ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -406,11 +411,16 @@ class _EVMWalletViewState extends State<EVMWalletView> {
                         children: [
                           Text(
                             'Balance:',
-                            style: TextStyle(color: Colors.grey[600]),
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                            ),
                           ),
                           Text(
                             _balance ?? (_isLoading ? 'Loading...' : 'Tap refresh →'),
-                            style: const TextStyle(fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
                           ),
                           IconButton(
                             icon: const Icon(Icons.refresh, size: 18),
@@ -465,30 +475,30 @@ class _EVMWalletViewState extends State<EVMWalletView> {
                       const SizedBox(height: 16),
                       TextField(
                         onChanged: (value) => setState(() => _messageToSign = value),
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 16,
-                          color: Colors.black87,
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                         decoration: InputDecoration(
                           hintText: 'Enter a message to sign',
                           hintStyle: TextStyle(
-                            color: Colors.grey[500],
+                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
                             fontSize: 16,
                           ),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: Colors.grey[300]!),
+                            borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: Colors.grey[300]!),
+                            borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: Colors.blue[400]!, width: 2),
+                            borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
                           ),
                           filled: true,
-                          fillColor: Colors.white,
+                          fillColor: Theme.of(context).colorScheme.surface,
                           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                         ),
                       ),
