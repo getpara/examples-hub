@@ -356,8 +356,7 @@ class WalletTestHelper {
           for (final button in allButtons) {
             try {
               final label = await button.attributes['label'];
-              if (label != null && 
-                  !['shift', 'done', 'Emoji', 'Dictate', 'null', ''].contains(label) &&
+              if (!['shift', 'done', 'Emoji', 'Dictate', 'null', ''].contains(label) &&
                   !loginScreenIdentifiers.any((id) => label.contains(id))) {
                 nonKeyboardButtons.add(label);
               }
@@ -390,7 +389,7 @@ class WalletTestHelper {
   Future<void> _dumpPageSource(String context) async {
     try {
       print('\n📋 PAGE SOURCE DUMP ($context):');
-      final pageSource = await driver.pageSource;
+      // final pageSource = await driver.pageSource; // For future detailed analysis
       
       // Extract key information instead of dumping entire XML
       final staticTexts = await driver.findElements(AppiumBy.className('XCUIElementTypeStaticText')).toList();
@@ -410,7 +409,7 @@ class WalletTestHelper {
       for (int i = 0; i < buttons.length && i < 10; i++) {
         try {
           final label = await buttons[i].attributes['label'];
-          if (label != null && label != 'null') print('    [$i] "$label"');
+          if (label != 'null') print('    [$i] "$label"');
         } catch (e) {
           // Skip
         }
@@ -500,7 +499,7 @@ class WalletTestHelper {
       for (final button in buttons) {
         try {
           final label = await button.attributes['label'];
-          if (label == null || label == 'null') continue;
+          if (label == 'null') continue;
           
           // Check for wallet screen buttons
           if (walletIdentifiers.any((id) => label.contains(id))) {

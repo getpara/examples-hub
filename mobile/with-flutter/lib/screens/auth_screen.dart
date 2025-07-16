@@ -5,6 +5,7 @@ import '../client/para.dart';
 import '../features/auth/widgets/social_auth_button.dart';
 import '../features/auth/widgets/email_phone_input.dart';
 import '../features/auth/widgets/otp_verification_sheet.dart';
+import 'wallet_creation_loading_screen.dart';
 
 class AuthScreen extends StatefulWidget {
   final VoidCallback onSuccess;
@@ -72,13 +73,28 @@ class _AuthScreenState extends State<AuthScreen> {
       final authState = await para.initiateAuthFlow(auth: auth);
 
       if (authState.stage == AuthStage.verify && mounted) {
-        // Show OTP verification
-        showOTPVerificationSheet(
+        // Show OTP verification and await result
+        final result = await showOTPVerificationSheet(
           context: context,
           identifier: value,
           onVerify: (otp) => _handleOTPVerification(authState, otp),
           onResend: () => _resendOTP(auth),
         );
+        
+        // Handle navigation based on result
+        if (result is AuthState && result.stage == AuthStage.signup && mounted) {
+          // Navigate to wallet creation loading screen
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => WalletCreationLoadingScreen(
+                onComplete: widget.onSuccess,
+              ),
+            ),
+          );
+          
+          // Start wallet creation
+          _handleWalletCreation(result);
+        }
       } else if (authState.stage == AuthStage.login) {
         // Existing user - try to login
         await _handleLogin(authState);
@@ -96,27 +112,50 @@ class _AuthScreenState extends State<AuthScreen> {
     }
   }
 
-  Future<void> _handleOTPVerification(AuthState authState, String otp) async {
+  Future<AuthState?> _handleOTPVerification(AuthState authState, String otp) async {
     try {
       final verifiedState = await para.verifyOtp(
         otp: otp,
       );
       
       if (verifiedState.stage == AuthStage.signup && mounted) {
-        // Need to choose signup method
-        Navigator.of(context).pop(); // Close bottom sheet
-        // For now, automatically choose passkey
-        await para.handleSignup(
-          authState: verifiedState,
-          signupMethod: SignupMethod.passkey,
-          webAuthenticationSession: _webAuthSession,
-        );
-        widget.onSuccess();
+        // Return the verified state so AuthScreen can handle navigation
+        return verifiedState;
+      } else if (verifiedState.stage == AuthStage.login && mounted) {
+        // For existing users, handle login and complete authentication
+        await _handleLogin(verifiedState);
+        return null; // Login handled, no further action needed
       }
+      return null;
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Invalid code: ${e.toString()}')),
+        );
+      }
+      return null;
+    }
+  }
+
+  Future<void> _handleWalletCreation(AuthState verifiedState) async {
+    try {
+      // Create wallets using passkey signup method
+      await para.handleSignup(
+        authState: verifiedState,
+        signupMethod: SignupMethod.passkey,
+        webAuthenticationSession: _webAuthSession,
+      );
+      
+      // Success - the loading screen will handle navigation via onComplete
+      if (mounted) {
+        Navigator.of(context).pop(); // Close loading screen
+        widget.onSuccess();
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.of(context).pop(); // Close loading screen
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Wallet creation failed: ${e.toString()}')),
         );
       }
     }

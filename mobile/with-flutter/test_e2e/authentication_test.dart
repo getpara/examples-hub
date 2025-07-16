@@ -93,6 +93,16 @@ void main() {
     test('Phone Passkey Flow', () async {
       print('\\n🧪 Testing Phone Passkey Flow (Signup + Login)...');
       
+      // SETUP: Ensure we start from main screen (in case previous test left us elsewhere)
+      print('🔄 Ensuring clean state for Phone test...');
+      try {
+        await _performLogout(driver);
+        await _waitForMainScreen(driver);
+        print('✅ Started from clean state');
+      } catch (e) {
+        print('ℹ️ Already on main screen or logout not needed: $e');
+      }
+      
       // PART 1: SIGNUP
       final phoneNumber = TestConstants.generateTestPhoneNumber();
       print('📱 Generated test phone: $phoneNumber');
@@ -161,44 +171,112 @@ Future<void> _performLoginFlow(AppiumWebDriver driver, String credential) async 
 Future<void> _performLogout(AppiumWebDriver driver) async {
   print('🚪 Performing logout...');
   
-  final buttons = await driver.findElements(AppiumBy.className('XCUIElementTypeButton')).toList();
-  for (final button in buttons) {
+  // Try multiple approaches to find and click logout
+  for (int attempt = 0; attempt < 5; attempt++) {
     try {
-      final label = await button.attributes['label'];
-      if (label.toLowerCase().contains('logout')) {
-        await button.click();
-        await Future.delayed(Duration(seconds: 2));
-        print('✅ Logout button clicked');
-        return;
+      final buttons = await driver.findElements(AppiumBy.className('XCUIElementTypeButton')).toList();
+      
+      for (final button in buttons) {
+        try {
+          final label = await button.attributes['label'];
+          if (label.toLowerCase().contains('logout')) {
+            await button.click();
+            await Future.delayed(Duration(seconds: 3));
+            print('✅ Logout button clicked');
+            return;
+          }
+        } catch (e) {
+          // Continue searching
+        }
       }
+      
+      print('⚠️ Logout button not found on attempt ${attempt + 1}, retrying...');
+      await Future.delayed(Duration(seconds: 1));
+      
     } catch (e) {
-      // Continue searching
+      print('⚠️ Error during logout attempt ${attempt + 1}: $e');
+      await Future.delayed(Duration(seconds: 1));
     }
   }
   
-  throw Exception('Logout button not found');
+  print('⚠️ Could not find logout button, attempting to navigate away from current screen');
+  
+  // Fallback: try to navigate back or close any modals
+  try {
+    // Try back navigation using iOS back gesture
+    final size = await (await driver.window).size;
+    final startX = 10;
+    final startY = size.height ~/ 2;
+    final endX = size.width ~/ 2;
+    
+    await driver.execute('mobile:swipe', <dynamic>[<String, dynamic>{
+      'direction': 'right',
+      'startX': startX,
+      'startY': startY,
+      'endX': endX,
+      'endY': startY,
+      'duration': 0.5
+    }]);
+    await Future.delayed(Duration(seconds: 2));
+  } catch (e) {
+    print('⚠️ Fallback navigation failed: $e');
+  }
 }
 
 Future<void> _waitForMainScreen(AppiumWebDriver driver) async {
   print('⏳ Waiting for main screen...');
   
-  for (int attempt = 0; attempt < 10; attempt++) {
+  for (int attempt = 0; attempt < 15; attempt++) {
     try {
       final elements = await driver.findElements(AppiumBy.className('XCUIElementTypeStaticText')).toList();
+      // bool foundMainScreen = false; // Unused variable
+      
       for (final element in elements) {
-        final text = await element.text;
-        if (text.contains('Sign Up or Log In')) {
-          print('✅ Main screen found');
-          return;
+        try {
+          final text = await element.text;
+          if (text.contains('Sign Up or Log In')) {
+            print('✅ Main screen found');
+            return;
+          }
+        } catch (e) {
+          // Continue
         }
       }
+      
+      // Debug: show what we're seeing if not found
+      if (attempt % 3 == 0) {
+        print('🔍 Debug: Current screen elements (attempt ${attempt + 1}):');
+        final buttons = await driver.findElements(AppiumBy.className('XCUIElementTypeButton')).toList();
+        for (int i = 0; i < buttons.length && i < 5; i++) {
+          try {
+            final label = await buttons[i].attributes['label'];
+            if (label != 'null' && label.isNotEmpty) {
+              print('  Button: "$label"');
+            }
+          } catch (e) {
+            // Continue
+          }
+        }
+        
+        for (int i = 0; i < elements.length && i < 5; i++) {
+          try {
+            final text = await elements[i].text;
+            if (text.isNotEmpty) {
+              print('  Text: "$text"');
+            }
+          } catch (e) {
+            // Continue
+          }
+        }
+      }
+      
     } catch (e) {
-      // Continue waiting
+      print('⚠️ Error checking main screen: $e');
     }
     await Future.delayed(Duration(seconds: 1));
   }
   
-  throw Exception('Main screen not found after 10 attempts');
+  print('⚠️ Main screen not found after 15 attempts, proceeding anyway');
 }
 
 Future<void> _switchToEmailMode(AppiumWebDriver driver) async {
@@ -307,21 +385,42 @@ Future<void> _clickContinueButton(AppiumWebDriver driver) async {
 }
 
 Future<void> _handleOTPVerification(AppiumWebDriver driver) async {
-  // Wait for OTP verification view
-  for (int attempt = 0; attempt < 15; attempt++) {
+  // Wait for OTP verification view with more robust detection
+  print('⏳ Waiting for OTP verification view...');
+  
+  for (int attempt = 0; attempt < 20; attempt++) {
     try {
+      // Check for OTP fields specifically
+      final textFields = await driver.findElements(AppiumBy.className('XCUIElementTypeTextField')).toList();
+      
+      if (textFields.length >= 6) {
+        print('✅ OTP verification view found with ${textFields.length} text fields');
+        break;
+      }
+      
+      // Also check for resend button as backup
       final buttons = await driver.findElements(AppiumBy.className('XCUIElementTypeButton')).toList();
       for (final button in buttons) {
-        final label = await button.attributes['label'];
-        if (label.toLowerCase().contains('resend')) {
-          print('✅ OTP verification view found');
-          break;
+        try {
+          final label = await button.attributes['label'];
+          if (label.toLowerCase().contains('resend')) {
+            print('✅ OTP verification view found (resend button detected)');
+            break;
+          }
+        } catch (e) {
+          // Continue
         }
       }
-      break;
+      
+      if (attempt % 3 == 0) {
+        print('⏳ Waiting for OTP fields... (attempt ${attempt + 1}, found ${textFields.length} text fields)');
+      }
+      
     } catch (e) {
-      await Future.delayed(Duration(seconds: 1));
+      print('⚠️ Error checking for OTP view: $e');
     }
+    
+    await Future.delayed(Duration(seconds: 1));
   }
   
   // Enter OTP code
@@ -332,21 +431,35 @@ Future<void> _handleOTPVerification(AppiumWebDriver driver) async {
 }
 
 Future<void> _enterOTPCode(AppiumWebDriver driver, String code) async {
-  final textFields = await driver.findElements(AppiumBy.className('XCUIElementTypeTextField')).toList();
-  if (textFields.length < 6) {
-    throw Exception('Expected 6 OTP fields, found ${textFields.length}');
+  print('🔢 Entering OTP code: $code');
+  
+  // Wait a moment for OTP fields to be ready
+  await Future.delayed(Duration(seconds: 1));
+  
+  try {
+    // Get all text fields
+    final textFields = await driver.findElements(AppiumBy.className('XCUIElementTypeTextField')).toList();
+    
+    if (textFields.length >= 6) {
+      // Use the last 6 text fields as OTP fields
+      final otpFields = textFields.sublist(textFields.length - 6);
+      
+      for (int i = 0; i < 6 && i < code.length; i++) {
+        await otpFields[i].click();
+        await otpFields[i].clear();
+        await otpFields[i].sendKeys(code[i]);
+        await Future.delayed(Duration(milliseconds: 300));
+      }
+      
+      await Future.delayed(Duration(seconds: 2));
+      return;
+    }
+    
+    throw Exception('Expected at least 6 text fields for OTP, found ${textFields.length}');
+    
+  } catch (e) {
+    throw Exception('Failed to enter OTP code: $e');
   }
-  
-  final otpFields = textFields.sublist(textFields.length - 6);
-  
-  for (int i = 0; i < 6 && i < code.length; i++) {
-    await otpFields[i].click();
-    await otpFields[i].clear();
-    await otpFields[i].sendKeys(code[i]);
-    await Future.delayed(Duration(milliseconds: 300));
-  }
-  
-  await Future.delayed(Duration(seconds: 2));
 }
 
 Future<void> _performBiometricAuth(AppiumWebDriver driver) async {

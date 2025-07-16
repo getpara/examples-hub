@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:para/para.dart';
 
 class OTPVerificationSheet extends StatefulWidget {
   final String identifier; // email or phone
-  final Function(String otp) onVerify;
+  final Future<AuthState?> Function(String otp) onVerify;
   final VoidCallback onResend;
 
   const OTPVerificationSheet({
@@ -62,10 +63,16 @@ class _OTPVerificationSheetState extends State<OTPVerificationSheet> {
     setState(() => _isLoading = true);
     
     try {
-      await widget.onVerify(_otpCode);
-    } finally {
+      final result = await widget.onVerify(_otpCode);
+      if (mounted) {
+        Navigator.of(context).pop(result);
+      }
+    } catch (e) {
       if (mounted) {
         setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Verification failed: ${e.toString()}')),
+        );
       }
     }
   }
@@ -117,6 +124,7 @@ class _OTPVerificationSheetState extends State<OTPVerificationSheet> {
                   width: 45,
                   height: 55,
                   child: TextField(
+                    key: Key('otp_field_$index'),
                     controller: _controllers[index],
                     focusNode: _focusNodes[index],
                     textAlign: TextAlign.center,
@@ -156,13 +164,13 @@ class _OTPVerificationSheetState extends State<OTPVerificationSheet> {
   }
 }
 
-void showOTPVerificationSheet({
+Future<AuthState?> showOTPVerificationSheet({
   required BuildContext context,
   required String identifier,
-  required Function(String) onVerify,
+  required Future<AuthState?> Function(String) onVerify,
   required VoidCallback onResend,
 }) {
-  showModalBottomSheet(
+  return showModalBottomSheet<AuthState?>(
     context: context,
     isScrollControlled: true,
     isDismissible: false,

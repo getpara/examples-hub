@@ -29,8 +29,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## E2E Testing
 - E2E tests located in `test_e2e/` directory
-- Tests use Appium with iOS Simulator for authentication flows
+- Tests use Appium with iOS Simulator for authentication and wallet flows
 - Setup: `cd test_e2e && dart run tool/setup.dart`
 - Run all: `cd test_e2e && dart run tool/run_tests.dart`
-- Run email tests: `cd test_e2e && dart run tool/run_tests.dart email`
-- Run phone tests: `cd test_e2e && dart run tool/run_tests.dart phone`
+- Run specific tests: `cd test_e2e && dart run tool/run_single_test.dart <test-type>`
+  - `authentication` - Email/phone passkey authentication
+  - `evm` - EVM wallet operations and signing
+  - `solana` - Solana wallet operations and signing  
+  - `cosmos` - Cosmos wallet operations, signing, and chain management
+  - `wallets` - All wallet tests (EVM + Solana + Cosmos)

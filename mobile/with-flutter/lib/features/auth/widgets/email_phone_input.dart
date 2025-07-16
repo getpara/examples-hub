@@ -212,6 +212,7 @@ class _EmailPhoneInputState extends State<EmailPhoneInput> {
           width: double.infinity,
           height: 48,
           child: ElevatedButton(
+            key: const Key('continue_button'),
             onPressed: _isValidInput() ? _handleSubmit : null,
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.black,
