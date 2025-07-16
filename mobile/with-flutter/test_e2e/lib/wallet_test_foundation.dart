@@ -531,24 +531,39 @@ class WalletTestHelper {
     try {
       // First check if EVM wallet already exists by looking for EVM wallet cells
       final cells = await driver.findElements(AppiumBy.className('XCUIElementTypeCell')).toList();
-      for (final cell in cells) {
+      print('🔍 Found ${cells.length} wallet cells');
+      
+      for (int i = 0; i < cells.length; i++) {
         try {
-          final staticTexts = await cell.findElements(AppiumBy.className('XCUIElementTypeStaticText')).toList();
+          final staticTexts = await cells[i].findElements(AppiumBy.className('XCUIElementTypeStaticText')).toList();
           for (final text in staticTexts) {
             final content = await text.text;
+            print('  Cell [$i] text: "$content"');
             if (content.contains('EVM') || content.contains('Ethereum')) {
               print('✅ EVM wallet already exists');
               return;
             }
           }
         } catch (e) {
-          // Continue checking
+          print('  Cell [$i] error reading text: $e');
         }
       }
       
       // Look for "Add Wallet" button
       print('📱 Looking for Add Wallet button...');
       final buttons = await driver.findElements(AppiumBy.className('XCUIElementTypeButton')).toList();
+      
+      // Debug: Print all available buttons
+      print('🔍 Available buttons:');
+      for (int i = 0; i < buttons.length && i < 10; i++) {
+        try {
+          final label = await buttons[i].attributes['label'];
+          print('  [$i] "$label"');
+        } catch (e) {
+          print('  [$i] (error reading label)');
+        }
+      }
+      
       for (final button in buttons) {
         try {
           final label = await button.attributes['label'];
@@ -561,8 +576,9 @@ class WalletTestHelper {
             print('📱 Looking for EVM option in bottom sheet...');
             await _selectEVMInBottomSheet();
             
-            // Wait for wallet creation to complete
-            await Future.delayed(Duration(seconds: 5));
+            // Wait for wallet creation to complete (can take up to 10 seconds)
+            print('⏳ Waiting for EVM wallet creation to complete...');
+            await Future.delayed(Duration(seconds: 12));
             print('✅ EVM wallet created successfully');
             return;
           }
@@ -571,20 +587,37 @@ class WalletTestHelper {
         }
       }
       
-      // Check if "Create First Wallet" button exists (for empty wallet case)
-      for (final button in buttons) {
+      // Look for "Add Wallet" or "Create Your First Wallet" text
+      // Both are GestureDetector with Text, not Buttons
+      print('📱 Looking for Add Wallet or Create Your First Wallet text...');
+      final staticTexts = await driver.findElements(AppiumBy.className('XCUIElementTypeStaticText')).toList();
+      
+      // Debug: Print all available text elements
+      print('🔍 Available text elements:');
+      for (int i = 0; i < staticTexts.length && i < 10; i++) {
         try {
-          final label = await button.attributes['label'];
-          if (label.contains('Create Your First Wallet') || label.contains('Create First Wallet')) {
-            print('📱 Tapping Create First Wallet button...');
-            await button.click();
+          final content = await staticTexts[i].text;
+          print('  [$i] "$content"');
+        } catch (e) {
+          print('  [$i] (error reading text)');
+        }
+      }
+      
+      for (final text in staticTexts) {
+        try {
+          final content = await text.text;
+          if (content.contains('Add Wallet') || 
+              content.contains('Create Your First Wallet') || 
+              content.contains('Create First Wallet')) {
+            print('📱 Tapping wallet creation area: "$content"');
+            await text.click();
             await Future.delayed(Duration(seconds: 2));
             
             // Look for EVM in the bottom sheet
             await _selectEVMInBottomSheet();
             
             await Future.delayed(Duration(seconds: 5));
-            print('✅ First EVM wallet created');
+            print('✅ EVM wallet created successfully');
             return;
           }
         } catch (e) {
