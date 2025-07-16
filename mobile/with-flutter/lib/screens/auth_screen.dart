@@ -175,7 +175,7 @@ class _AuthScreenState extends State<AuthScreen> {
               const SizedBox(height: 60),
               // Logo
               Image.asset(
-                'lib/assets/app_icon.png',
+                'lib/assets/para.png',
                 width: 85,
                 height: 85,
               ),

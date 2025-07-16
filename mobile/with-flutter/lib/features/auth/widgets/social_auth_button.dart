@@ -48,6 +48,7 @@ class SocialAuthButton extends StatelessWidget {
                 _iconAsset,
                 width: 32,
                 height: 32,
+                color: provider == SocialProvider.discord ? const Color(0xFF5865F2) : null,
               ),
       ),
     );
