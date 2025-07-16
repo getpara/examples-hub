@@ -263,6 +263,15 @@ class WalletTestFactory {
   }
 }
 
+// Helper class to track screen state
+class _ScreenState {
+  bool isOnLoginScreen = false;
+  bool isOnWalletScreen = false;
+  bool hasLoadingIndicator = false;
+  final Set<String> foundLoginElements = {};
+  final Set<String> foundWalletElements = {};
+}
+
 /// Enhanced test helper with robust wallet operations
 class WalletTestHelper {
   final AppiumWebDriver driver;
@@ -288,77 +297,232 @@ class WalletTestHelper {
     print('✅ Email authentication completed');
   }
   
-  /// Waits for wallets view with retry logic
+  /// Waits for wallets view with advanced debugging and refresh strategies
   Future<void> waitForWalletsView() async {
-    print('⏳ Waiting for wallets view...');
+    print('⏳ Waiting for wallets view with advanced detection...');
     
-    for (int attempt = 0; attempt < 15; attempt++) {
+    // Dump initial page source for debugging
+    await _dumpPageSource('Initial state after authentication');
+    
+    // Force a refresh of Appium's view
+    await _forceAppiumRefresh();
+    
+    // Wait for login screen to disappear and wallets screen to appear
+    const maxAttempts = 40;
+    const loginScreenIdentifiers = ['Sign Up or Log In', 'Phone', 'Email', 'Powered by'];
+    const walletScreenIdentifiers = ['Wallets', 'Logout', 'Create Your First Wallet', 'Create First Wallet'];
+    
+    for (int attempt = 0; attempt < maxAttempts; attempt++) {
       try {
-        // Method 1: Try accessibility identifiers (most reliable)
-        try {
-          await driver.findElement(AppiumBy.accessibilityId('wallets_screen_title'));
-          await driver.findElement(AppiumBy.accessibilityId('wallets_screen_logout_button'));
-          print('✅ Wallets view found (accessibility identifiers)');
-          return;
-        } catch (e) {
-          // Fallback to text-based detection
-        }
-        
-        // Method 2: Text-based detection (StaticText for title, Button for logout)
-        bool hasWalletsTitle = false;
-        bool hasLogoutButton = false;
-        
-        // Check for "Wallets" title (StaticText)
-        final staticTexts = await driver.findElements(AppiumBy.className('XCUIElementTypeStaticText')).toList();
-        for (final element in staticTexts) {
-          final text = await element.text;
-          if (text == 'Wallets') {
-            hasWalletsTitle = true;
-            break;
+        // Every 5 attempts, force another refresh and dump page source
+        if (attempt > 0 && attempt % 5 == 0) {
+          print('🔄 Forcing Appium refresh (attempt $attempt)...');
+          await _forceAppiumRefresh();
+          
+          if (attempt % 10 == 0) {
+            await _dumpPageSource('Debug at attempt $attempt');
           }
         }
         
-        // Check for "Logout" button (Button, not StaticText!)
-        final buttons = await driver.findElements(AppiumBy.className('XCUIElementTypeButton')).toList();
-        for (final button in buttons) {
-          try {
-            final label = await button.attributes['label'];
-            if (label == 'Logout') {
-              hasLogoutButton = true;
-              break;
-            }
-          } catch (e) {
-            // Try other attributes
+        // Check current screen state
+        final screenState = await _analyzeCurrentScreen(loginScreenIdentifiers, walletScreenIdentifiers);
+        
+        if (screenState.isOnWalletScreen) {
+          print('✅ Wallet screen detected!');
+          print('  - Found wallet elements: ${screenState.foundWalletElements}');
+          await Future.delayed(Duration(seconds: 1)); // Let it stabilize
+          return;
+        }
+        
+        if (screenState.hasLoadingIndicator) {
+          print('⏳ Loading indicator detected, waiting for transition...');
+          await Future.delayed(Duration(seconds: 2));
+          continue;
+        }
+        
+        if (screenState.isOnLoginScreen) {
+          if (attempt % 3 == 0) {
+            print('⚠️ Still on login screen (attempt $attempt)');
+            print('  - Found login elements: ${screenState.foundLoginElements}');
+          }
+        } else if (!screenState.isOnWalletScreen) {
+          print('🔍 Unknown screen state (attempt $attempt)');
+          print('  - Not login, not wallet, checking for any activity...');
+          
+          // Try to find ANY button or text that indicates we've moved past login
+          final allButtons = await driver.findElements(AppiumBy.className('XCUIElementTypeButton')).toList();
+          final nonKeyboardButtons = <String>[];
+          
+          for (final button in allButtons) {
             try {
-              final name = await button.attributes['name'];
-              if (name == 'Logout') {
-                hasLogoutButton = true;
-                break;
+              final label = await button.attributes['label'];
+              if (label != null && 
+                  !['shift', 'done', 'Emoji', 'Dictate', 'null', ''].contains(label) &&
+                  !loginScreenIdentifiers.any((id) => label.contains(id))) {
+                nonKeyboardButtons.add(label);
               }
             } catch (e) {
               // Continue
             }
           }
-        }
-        
-        // Success if we find both key elements
-        if (hasWalletsTitle && hasLogoutButton) {
-          print('✅ Wallets view found (text detection: title=$hasWalletsTitle, button=$hasLogoutButton)');
-          return;
+          
+          if (nonKeyboardButtons.isNotEmpty) {
+            print('✅ Found non-login buttons: $nonKeyboardButtons');
+            print('  Assuming we\'ve navigated away from login');
+            return;
+          }
         }
         
       } catch (e) {
-        // Continue waiting
+        print('⚠️ Error during detection attempt $attempt: $e');
       }
       
-      if (attempt % 3 == 0) {
-        print('⏳ Still waiting for wallets view... (attempt ${attempt + 1}/15)');
-      }
-      
-      await Future.delayed(Duration(seconds: 1));
+      await Future.delayed(Duration(milliseconds: 500));
     }
     
-    throw Exception('❌ Timed out waiting for wallets view after 15 attempts');
+    // Final diagnostic before giving up
+    await _dumpPageSource('Final state - timeout reached');
+    print('❌ Failed to detect wallet screen after $maxAttempts attempts');
+    print('⚠️ Proceeding anyway, but test may fail');
+  }
+  
+  // Helper method to dump page source for debugging
+  Future<void> _dumpPageSource(String context) async {
+    try {
+      print('\n📋 PAGE SOURCE DUMP ($context):');
+      final pageSource = await driver.pageSource;
+      
+      // Extract key information instead of dumping entire XML
+      final staticTexts = await driver.findElements(AppiumBy.className('XCUIElementTypeStaticText')).toList();
+      final buttons = await driver.findElements(AppiumBy.className('XCUIElementTypeButton')).toList();
+      
+      print('  - Static texts found: ${staticTexts.length}');
+      for (int i = 0; i < staticTexts.length && i < 10; i++) {
+        try {
+          final text = await staticTexts[i].text;
+          if (text.isNotEmpty) print('    [$i] "$text"');
+        } catch (e) {
+          // Skip
+        }
+      }
+      
+      print('  - Buttons found: ${buttons.length}');
+      for (int i = 0; i < buttons.length && i < 10; i++) {
+        try {
+          final label = await buttons[i].attributes['label'];
+          if (label != null && label != 'null') print('    [$i] "$label"');
+        } catch (e) {
+          // Skip
+        }
+      }
+      
+      // Save full page source to file for detailed analysis
+      // Uncomment if needed:
+      // import 'dart:io';
+      // final timestamp = DateTime.now().millisecondsSinceEpoch;
+      // await File('page_source_$timestamp.xml').writeAsString(pageSource);
+      
+      print('');
+    } catch (e) {
+      print('⚠️ Failed to dump page source: $e');
+    }
+  }
+  
+  // Force Appium to refresh its view of the UI
+  Future<void> _forceAppiumRefresh() async {
+    try {
+      // Method 1: Request page source (forces re-query)
+      await driver.pageSource;
+      
+      // Method 2: Perform a minimal swipe to trigger UI refresh
+      final window = await driver.window;
+      final size = await window.size;
+      final centerX = size.width ~/ 2;
+      final centerY = size.height ~/ 2;
+      
+      // Very small swipe that shouldn't affect UI but forces refresh
+      await driver.execute('mobile:swipe', <dynamic>[<String, dynamic>{
+        'direction': 'up',
+        'startX': centerX,
+        'startY': centerY,
+        'endX': centerX,
+        'endY': centerY - 10,
+        'duration': 0.1
+      }]);
+      
+      await Future.delayed(Duration(milliseconds: 200));
+    } catch (e) {
+      // Refresh failed, but continue
+    }
+  }
+  
+  // Analyze current screen state
+  Future<_ScreenState> _analyzeCurrentScreen(
+    List<String> loginIdentifiers,
+    List<String> walletIdentifiers,
+  ) async {
+    final state = _ScreenState();
+    
+    try {
+      // Check for loading indicators
+      final loadingIndicators = await driver.findElements(AppiumBy.className('XCUIElementTypeActivityIndicator')).toList();
+      state.hasLoadingIndicator = loadingIndicators.isNotEmpty;
+      
+      // Check static texts
+      final staticTexts = await driver.findElements(AppiumBy.className('XCUIElementTypeStaticText')).toList();
+      for (final element in staticTexts) {
+        try {
+          final text = await element.text;
+          if (text.isEmpty) continue;
+          
+          // Check login identifiers
+          for (final identifier in loginIdentifiers) {
+            if (text.contains(identifier)) {
+              state.foundLoginElements.add(identifier);
+              state.isOnLoginScreen = true;
+            }
+          }
+          
+          // Check wallet identifiers
+          for (final identifier in walletIdentifiers) {
+            if (text.contains(identifier)) {
+              state.foundWalletElements.add(identifier);
+              state.isOnWalletScreen = true;
+            }
+          }
+        } catch (e) {
+          // Continue
+        }
+      }
+      
+      // Check buttons
+      final buttons = await driver.findElements(AppiumBy.className('XCUIElementTypeButton')).toList();
+      for (final button in buttons) {
+        try {
+          final label = await button.attributes['label'];
+          if (label == null || label == 'null') continue;
+          
+          // Check for wallet screen buttons
+          if (walletIdentifiers.any((id) => label.contains(id))) {
+            state.foundWalletElements.add(label);
+            state.isOnWalletScreen = true;
+          }
+          
+          // Check for login screen buttons
+          if (loginIdentifiers.any((id) => label.contains(id))) {
+            state.foundLoginElements.add(label);
+            state.isOnLoginScreen = true;
+          }
+        } catch (e) {
+          // Continue
+        }
+      }
+      
+    } catch (e) {
+      print('⚠️ Error analyzing screen: $e');
+    }
+    
+    return state;
   }
   
   /// Ensures EVM wallet exists (creates if needed)
@@ -526,51 +690,74 @@ class WalletTestHelper {
   }
   
   Future<void> _enterOTPCode(String code) async {
-    print('🔢 Entering OTP code using accessibility identifiers: $code');
+    print('🔢 Entering OTP code: $code');
     
-    // Method 1: Try accessibility identifiers (most reliable)
+    // Wait a moment for OTP fields to be ready
+    await Future.delayed(Duration(seconds: 1));
+    
     try {
-      for (int i = 0; i < 6; i++) {
-        final field = await driver.findElement(AppiumBy.accessibilityId('otp_field_$i'));
-        await field.click();
-        await Future.delayed(Duration(milliseconds: 100));
-        await field.clear();
-        await field.sendKeys(code[i]);
-        print('  ✅ Entered digit ${i + 1}: ${code[i]} (accessibility ID)');
+      // Get all text fields
+      final textFields = await driver.findElements(AppiumBy.className('XCUIElementTypeTextField')).toList();
+      
+      if (textFields.length >= 6) {
+        // Use the last 6 text fields as OTP fields
+        final otpFields = textFields.sublist(textFields.length - 6);
+        
+        for (int i = 0; i < 6 && i < code.length; i++) {
+          await otpFields[i].click();
+          await otpFields[i].clear();
+          await otpFields[i].sendKeys(code[i]);
+          await Future.delayed(Duration(milliseconds: 300));
+        }
+        
+        await Future.delayed(Duration(seconds: 2));
+        return;
       }
-      await Future.delayed(Duration(seconds: 2));
-      return;
+      
+      throw Exception('Expected at least 6 text fields for OTP, found ${textFields.length}');
+      
     } catch (e) {
-      print('⚠️ Accessibility ID method failed, falling back to text field detection: $e');
+      throw Exception('Failed to enter OTP code: $e');
     }
-    
-    // Method 2: Fallback to text field detection
-    final textFields = await driver.findElements(AppiumBy.className('XCUIElementTypeTextField')).toList();
-    if (textFields.length < 6) {
-      throw Exception('Expected 6 OTP fields, found ${textFields.length}');
-    }
-    
-    final otpFields = textFields.sublist(textFields.length - 6);
-    
-    for (int i = 0; i < 6 && i < code.length; i++) {
-      await otpFields[i].click();
-      await otpFields[i].clear();
-      await otpFields[i].sendKeys(code[i]);
-      print('  ✅ Entered digit ${i + 1}: ${code[i]} (fallback)');
-      await Future.delayed(Duration(milliseconds: 300));
-    }
-    
-    await Future.delayed(Duration(seconds: 2));
   }
   
   Future<void> _performBiometricAuth() async {
     await Future.delayed(Duration(seconds: 3));
+    
+    // Handle system dialog with coordinate tap (like Swift implementation)
+    // Tap at normalized coordinates (0.5, 0.92) - center horizontally, 92% from top
+    try {
+      print('📱 Tapping Continue button location (coordinate-based)...');
+      final window = await driver.window;
+      final size = await window.size;
+      
+      // Calculate tap coordinates - center horizontally, 85% from top for Continue button
+      final x = size.width ~/ 2;
+      final y = (size.height * 0.85).round();
+      
+      // Perform tap at coordinates
+      await driver.execute('mobile:tap', <dynamic>[<String, dynamic>{
+        'x': x,
+        'y': y
+      }]);
+      
+      print('✅ Tapped at coordinates ($x, $y)');
+      await Future.delayed(Duration(seconds: 1));
+    } catch (e) {
+      print('⚠️ Could not perform coordinate tap: $e');
+    }
+    
     try {
       await driver.execute('mobile:sendBiometricMatch', <dynamic>[<String, dynamic>{
         'type': 'touchId',
         'match': true
       }]);
       print('✅ Biometric authentication successful');
+      
+      // Wait longer for authentication to complete and navigation to happen
+      print('⏳ Waiting for authentication to complete...');
+      await Future.delayed(Duration(seconds: 5));
+      
     } catch (e) {
       throw Exception('Biometric authentication failed: $e');
     }

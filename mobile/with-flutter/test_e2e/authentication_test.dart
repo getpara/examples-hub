@@ -326,6 +326,9 @@ Future<void> _handleOTPVerification(AppiumWebDriver driver) async {
   
   // Enter OTP code
   await _enterOTPCode(driver, TestConstants.verificationCode);
+  
+  // After OTP entry, handle biometric authentication
+  await _performBiometricAuth(driver);
 }
 
 Future<void> _enterOTPCode(AppiumWebDriver driver, String code) async {
@@ -348,12 +351,41 @@ Future<void> _enterOTPCode(AppiumWebDriver driver, String code) async {
 
 Future<void> _performBiometricAuth(AppiumWebDriver driver) async {
   await Future.delayed(Duration(seconds: 3));
+  
+  // Handle system dialog with coordinate tap (like Swift implementation)
+  // Tap at normalized coordinates (0.5, 0.92) - center horizontally, 92% from top
+  try {
+    print('📱 Tapping Continue button location (coordinate-based)...');
+    final window = await driver.window;
+    final size = await window.size;
+    
+    // Calculate tap coordinates - center horizontally, 85% from top for Continue button
+    final x = size.width ~/ 2;
+    final y = (size.height * 0.85).round();
+    
+    // Perform tap at coordinates
+    await driver.execute('mobile:tap', <dynamic>[<String, dynamic>{
+      'x': x,
+      'y': y
+    }]);
+    
+    print('✅ Tapped at coordinates ($x, $y)');
+    await Future.delayed(Duration(seconds: 1));
+  } catch (e) {
+    print('⚠️ Could not perform coordinate tap: $e');
+  }
+  
   try {
     await driver.execute('mobile:sendBiometricMatch', <dynamic>[<String, dynamic>{
       'type': 'touchId',
       'match': true
     }]);
     print('✅ Biometric authentication successful (signup)');
+    
+    // Wait longer for authentication to complete and navigation to happen
+    print('⏳ Waiting for authentication to complete...');
+    await Future.delayed(Duration(seconds: 5));
+    
   } catch (e) {
     throw Exception('Biometric authentication failed: $e');
   }
@@ -361,13 +393,44 @@ Future<void> _performBiometricAuth(AppiumWebDriver driver) async {
 
 Future<void> _performBiometricAuthForLogin(AppiumWebDriver driver) async {
   await Future.delayed(Duration(seconds: 2));
+  
+  // For login, we need to handle the "Sign in" dialog first
+  // This dialog appears with "Continue" button at a different position
   try {
+    print('📱 Looking for Sign in dialog...');
+    
+    // Wait for the Sign in dialog to appear
+    await Future.delayed(Duration(seconds: 2));
+    
+    // Tap the Continue button on the Sign in dialog
+    // This button is lower on the screen (around 85% from top)
+    final window = await driver.window;
+    final size = await window.size;
+    
+    final x = size.width ~/ 2;
+    final y = (size.height * 0.85).round();
+    
+    print('📱 Tapping Continue button on Sign in dialog at ($x, $y)...');
+    await driver.execute('mobile:tap', <dynamic>[<String, dynamic>{
+      'x': x,
+      'y': y
+    }]);
+    
+    print('✅ Tapped Continue on Sign in dialog');
+    await Future.delayed(Duration(seconds: 2));
+    
+    // Now handle the biometric authentication
     await driver.execute('mobile:sendBiometricMatch', <dynamic>[<String, dynamic>{
       'type': 'touchId',
       'match': true
     }]);
     print('✅ Biometric authentication successful (login)');
+    
+    // Wait for authentication to complete and navigation to happen
+    print('⏳ Waiting for authentication to complete...');
+    await Future.delayed(Duration(seconds: 5));
+    
   } catch (e) {
-    throw Exception('Biometric authentication for login failed: $e');
+    throw Exception('Login authentication failed: $e');
   }
 }
