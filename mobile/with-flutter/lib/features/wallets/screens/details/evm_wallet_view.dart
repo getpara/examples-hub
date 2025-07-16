@@ -5,6 +5,7 @@ import 'package:http/http.dart';
 import 'package:para/para.dart' as para_sdk;
 import 'package:web3dart/web3dart.dart';
 import '../../../../client/para.dart';
+import '../../widgets/wallet_management_card.dart';
 
 class EVMWalletView extends StatefulWidget {
   final para_sdk.Wallet wallet;
@@ -40,6 +41,9 @@ class _EVMWalletViewState extends State<EVMWalletView> {
   @override
   void initState() {
     super.initState();
+    // Debug: wallet initialization
+    // print('EVMWalletView initState - wallet id: ${widget.wallet.id}');
+    // print('EVMWalletView initState - address: ${widget.wallet.address}');
     _initializeWeb3();
   }
   
@@ -51,9 +55,26 @@ class _EVMWalletViewState extends State<EVMWalletView> {
         para: para,
         walletId: widget.wallet.id,
       );
-      await _fetchBalance();
+      
+      if (widget.wallet.address != null) {
+        setState(() {
+          _balance = '0.0000 ETH'; // Set default balance
+        });
+        await _fetchBalance();
+      } else {
+        // Debug: no address found
+        // print('EVMWalletView - No address found, wallet might need initialization');
+        setState(() {
+          _isLoading = false;
+        });
+      }
     } catch (e) {
+      // Debug: initialization error
+      // print('EVMWalletView - Error initializing: $e');
       _showResult('Error', 'Failed to initialize EVM signer: $e');
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
   
@@ -91,18 +112,26 @@ class _EVMWalletViewState extends State<EVMWalletView> {
   
   Future<void> _fetchBalance() async {
     if (widget.wallet.address == null) {
-      _showResult('Error', 'No wallet address found');
+      // Debug: no address for balance fetch
+      // print('EVMWalletView - Cannot fetch balance: no address');
+      setState(() => _balance = 'No address available');
       return;
     }
     
     setState(() => _isLoading = true);
     try {
+      // Debug: fetching balance
+      // print('EVMWalletView - Fetching balance for address: ${widget.wallet.address}');
       final address = EthereumAddress.fromHex(widget.wallet.address!);
       final balance = await _web3Client.getBalance(address);
       final ethBalance = balance.getValueInUnit(EtherUnit.ether);
       setState(() => _balance = '${ethBalance.toStringAsFixed(4)} ETH');
+      // Debug: balance fetched
+      // print('EVMWalletView - Balance fetched: $_balance');
     } catch (e) {
-      _showResult('Error', 'Failed to fetch balance: $e');
+      // Debug: balance fetch error
+      // print('EVMWalletView - Error fetching balance: $e');
+      setState(() => _balance = '0.0000 ETH');
     } finally {
       setState(() => _isLoading = false);
     }
@@ -303,7 +332,7 @@ class _EVMWalletViewState extends State<EVMWalletView> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withAlpha((255 * 0.05).round()),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 5,
             offset: const Offset(0, 2),
           ),
@@ -316,9 +345,9 @@ class _EVMWalletViewState extends State<EVMWalletView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFBF9F7),
+      backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFBF9F7),
+        backgroundColor: Colors.grey[50],
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.black),
         title: const Text(
@@ -353,9 +382,10 @@ class _EVMWalletViewState extends State<EVMWalletView> {
                             Expanded(
                               child: Text(
                                 widget.wallet.address ?? 'No address',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontFamily: 'SF Mono',
                                   fontSize: 12,
+                                  color: widget.wallet.address != null ? Colors.black : Colors.grey[600],
                                 ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -370,27 +400,27 @@ class _EVMWalletViewState extends State<EVMWalletView> {
                           ],
                         ),
                       ),
+                      const SizedBox(height: 16),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Balance:',
+                            style: TextStyle(color: Colors.grey[600]),
+                          ),
+                          Text(
+                            _balance ?? (_isLoading ? 'Loading...' : 'Tap refresh →'),
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.refresh, size: 18),
+                            onPressed: _isLoading ? null : _fetchBalance,
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                          ),
+                        ],
+                      ),
                       if (_balance != null) ...[
-                        const SizedBox(height: 16),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'Balance:',
-                              style: TextStyle(color: Colors.grey[600]),
-                            ),
-                            Text(
-                              _balance!,
-                              style: const TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.refresh, size: 18),
-                              onPressed: _isLoading ? null : _fetchBalance,
-                              padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints(),
-                            ),
-                          ],
-                        ),
                         if (_shouldShowFundButton()) ...[
                           const SizedBox(height: 8),
                           SizedBox(
@@ -435,13 +465,31 @@ class _EVMWalletViewState extends State<EVMWalletView> {
                       const SizedBox(height: 16),
                       TextField(
                         onChanged: (value) => setState(() => _messageToSign = value),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: Colors.black87,
+                        ),
                         decoration: InputDecoration(
                           hintText: 'Enter a message to sign',
+                          hintStyle: TextStyle(
+                            color: Colors.grey[500],
+                            fontSize: 16,
+                          ),
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.grey[300]!),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.grey[300]!),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.blue[400]!, width: 2),
                           ),
                           filled: true,
-                          fillColor: Colors.grey[100],
+                          fillColor: Colors.white,
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                         ),
                       ),
                       const SizedBox(height: 12),
@@ -452,12 +500,25 @@ class _EVMWalletViewState extends State<EVMWalletView> {
                               ? null
                               : _signMessage,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.black,
+                            backgroundColor: _isLoading || _messageToSign.isEmpty
+                                ? Colors.grey[400]
+                                : Colors.black,
+                            foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            elevation: 2,
                           ),
-                          child: const Text(
+                          child: Text(
                             'Sign Message',
-                            style: TextStyle(color: Colors.white),
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: _isLoading || _messageToSign.isEmpty
+                                  ? Colors.grey[600]
+                                  : Colors.white,
+                            ),
                           ),
                         ),
                       ),
@@ -508,6 +569,12 @@ class _EVMWalletViewState extends State<EVMWalletView> {
                     ],
                   ),
                 ),
+                const SizedBox(height: 16),
+                // Wallet Management Card
+                WalletManagementCard(
+                  onRefresh: _fetchBalance,
+                ),
+                const SizedBox(height: 32), // Add bottom padding
               ],
             ),
           ),

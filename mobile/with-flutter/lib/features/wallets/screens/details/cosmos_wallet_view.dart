@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:para/para.dart' as para_sdk;
 import '../../../../client/para.dart';
+import '../../widgets/wallet_management_card.dart';
 
 class CosmosWalletView extends StatefulWidget {
   final para_sdk.Wallet wallet;
@@ -19,9 +20,6 @@ class CosmosWalletView extends StatefulWidget {
 class _CosmosWalletViewState extends State<CosmosWalletView> {
   para_sdk.ParaCosmosSigner? _signer; // ignore: unused_field
   String _selectedChain = 'provider'; // Default to testnet
-  bool _useCustomConfig = false;
-  String _customChainId = '';
-  String _customPrefix = '';
   
   String? _balance;
   String _messageToSign = '';
@@ -53,6 +51,22 @@ class _CosmosWalletViewState extends State<CosmosWalletView> {
       denom: 'uosmo',
       testAddress: 'osmo1v9yrqx8aaddlna29zxngr4ye3jnxtpprrej532',
     ),
+    'juno-1': ChainConfig(
+      name: 'Juno',
+      chainId: 'juno-1',
+      prefix: 'juno',
+      rpcUrl: 'https://juno-rpc.publicnode.com',
+      denom: 'ujuno',
+      testAddress: 'juno1v9yrqx8aaddlna29zxngr4ye3jnxtpprhxtcwg',
+    ),
+    'stargaze-1': ChainConfig(
+      name: 'Stargaze',
+      chainId: 'stargaze-1',
+      prefix: 'stars',
+      rpcUrl: 'https://stargaze-rpc.publicnode.com',
+      denom: 'ustars',
+      testAddress: 'stars1v9yrqx8aaddlna29zxngr4ye3jnxtpprfu7n3c',
+    ),
     'osmo-test-5': ChainConfig(
       name: 'Osmosis Testnet',
       chainId: 'osmo-test-5',
@@ -72,6 +86,10 @@ class _CosmosWalletViewState extends State<CosmosWalletView> {
   @override
   void initState() {
     super.initState();
+    // Debug: wallet initialization
+    // print('CosmosWalletView initState - wallet id: ${widget.wallet.id}');
+    // print('CosmosWalletView initState - address: ${widget.wallet.address}');
+    // print('CosmosWalletView initState - addressSecondary: ${widget.wallet.addressSecondary}');
     _initializeCosmos();
   }
   
@@ -79,50 +97,105 @@ class _CosmosWalletViewState extends State<CosmosWalletView> {
     try {
       _signer = para_sdk.ParaCosmosSigner(
         para: para,
-        walletId: widget.wallet.id!,
         chainId: _currentConfig.chainId,
         prefix: _currentConfig.prefix,
+        rpcUrl: _currentConfig.rpcUrl,
       );
+      
+      // Initialize the signer with the wallet
+      await _signer!.selectWallet(widget.wallet.id!);
+      // Debug: signer initialization
+      // print('CosmosWalletView - Signer initialized with wallet: ${widget.wallet.id}');
       
       // Cosmos addresses might be in addressSecondary
       final cosmosAddress = widget.wallet.addressSecondary ?? widget.wallet.address;
-      if (cosmosAddress != null) {
-        // Update the UI with the Cosmos address
-        setState(() {});
-      }
+      // Debug: address selection
+      // print('CosmosWalletView - Using address: $cosmosAddress');
       
-      await _fetchBalance();
+      if (cosmosAddress != null) {
+        // Update the UI with the Cosmos address and set initial balance
+        setState(() {
+          _balance = '0.0000 ATOM'; // Set default balance
+        });
+        await _fetchBalance();
+      } else {
+        // Debug: no address found
+        // print('CosmosWalletView - No address found, wallet might need initialization');
+        setState(() {
+          _isLoading = false;
+        });
+      }
     } catch (e) {
+      // Debug: initialization error
+      // print('CosmosWalletView - Error initializing: $e');
       _showResult('Error', 'Failed to initialize Cosmos signer: $e');
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
   
   Future<void> _reinitializeSigner() async {
-    setState(() => _isLoading = true);
+    setState(() {
+      _isLoading = true;
+      _balance = null; // Reset balance when switching chains
+    });
     try {
-      final chainId = _useCustomConfig ? _customChainId : _currentConfig.chainId;
-      final prefix = _useCustomConfig ? _customPrefix : _currentConfig.prefix;
-      
       _signer = para_sdk.ParaCosmosSigner(
         para: para,
-        walletId: widget.wallet.id!,
-        chainId: chainId,
-        prefix: prefix,
+        chainId: _currentConfig.chainId,
+        prefix: _currentConfig.prefix,
+        rpcUrl: _currentConfig.rpcUrl,
       );
       
+      // Initialize the signer with the wallet
+      await _signer!.selectWallet(widget.wallet.id!);
+      
       await _fetchBalance();
-      _showResult('Success', 'Chain configuration updated');
+      _showResult('Success', 'Switched to ${_currentConfig.name}');
     } catch (e) {
-      _showResult('Error', 'Failed to update configuration: $e');
+      _showResult('Error', 'Failed to switch chain: $e');
     } finally {
       setState(() => _isLoading = false);
     }
   }
   
   Future<void> _fetchBalance() async {
-    // For demo purposes, we'll just show a mock balance
-    // In production, you would query the chain's RPC endpoint
-    setState(() => _balance = '0.0000 ${_currentConfig.denom.toUpperCase()}');
+    if (_signer == null) {
+      // Debug: signer not initialized
+      // print('CosmosWalletView - Cannot fetch balance: signer not initialized');
+      return;
+    }
+    
+    final address = widget.wallet.addressSecondary ?? widget.wallet.address;
+    if (address == null) {
+      // Debug: no address for balance fetch
+      // print('CosmosWalletView - Cannot fetch balance: no address');
+      setState(() => _balance = 'No address available');
+      return;
+    }
+    
+    setState(() => _isLoading = true);
+    try {
+      // Debug: fetching balance
+      // print('CosmosWalletView - Fetching balance for address: $address, denom: ${_currentConfig.denom}');
+      final balanceString = await _signer!.getBalance(denom: _currentConfig.denom);
+      // Debug: balance received
+      // print('CosmosWalletView - Received balance: $balanceString');
+      final balanceAmount = BigInt.tryParse(balanceString) ?? BigInt.zero;
+      
+      // Convert from smallest unit to display unit (divide by 10^6 for most Cosmos denoms)
+      final displayBalance = balanceAmount.toDouble() / 1000000;
+      
+      setState(() => _balance = '${displayBalance.toStringAsFixed(4)} ${_currentConfig.denom.substring(1).toUpperCase()}');
+    } catch (e) {
+      // Debug: balance fetch error
+      // print('CosmosWalletView - Error fetching balance: $e');
+      // If balance fetch fails, show 0 balance
+      setState(() => _balance = '0.0000 ${_currentConfig.denom.substring(1).toUpperCase()}');
+    } finally {
+      setState(() => _isLoading = false);
+    }
   }
   
   Future<void> _signMessage() async {
@@ -170,13 +243,114 @@ class _CosmosWalletViewState extends State<CosmosWalletView> {
   }
   
   Future<void> _signTransaction() async {
-    // For demo purposes, we'll create a simple transfer transaction
-    _showResult('Info', 'Cosmos transaction signing coming soon');
+    if (_signer == null) {
+      _showResult('Error', 'Signer not initialized');
+      return;
+    }
+    
+    setState(() => _isLoading = true);
+    final startTime = DateTime.now();
+    
+    try {
+      // Show dialog to choose signing method
+      final signingMethod = await _showSigningMethodDialog();
+      if (signingMethod == null) {
+        setState(() => _isLoading = false);
+        return;
+      }
+      
+      if (signingMethod == 'proto') {
+        // Create a minimal but valid protobuf SignDoc
+        final signDocBase64 = _createProtoSignDoc();
+        await _signer!.signDirect(signDocBase64: signDocBase64);
+        
+      } else {
+        // Create an amino SignDoc for demo
+        final signDocBase64 = _createAminoSignDoc();
+        await _signer!.signAmino(signDocBase64: signDocBase64);
+      }
+      
+      final duration = DateTime.now().difference(startTime).inMilliseconds / 1000;
+      _showResult(
+        'Success',
+        'Transaction signed successfully using ${signingMethod.toUpperCase()}\nDuration: ${duration.toStringAsFixed(2)}s',
+      );
+    } catch (e) {
+      final duration = DateTime.now().difference(startTime).inMilliseconds / 1000;
+      _showResult(
+        'Error',
+        'Failed to sign transaction: $e\nDuration: ${duration.toStringAsFixed(2)}s',
+      );
+    } finally {
+      setState(() => _isLoading = false);
+    }
   }
   
   Future<void> _sendTransaction() async {
-    // For demo purposes, we'll show the flow
-    _showResult('Info', 'Cosmos transaction sending coming soon');
+    if (_signer == null) {
+      _showResult('Error', 'Signer not initialized');
+      return;
+    }
+    
+    setState(() => _isLoading = true);
+    final startTime = DateTime.now();
+    
+    try {
+      // For demo purposes, we'll sign with amino and show the result
+      final signDocBase64 = _createAminoSignDoc();
+      await _signer!.signAmino(signDocBase64: signDocBase64);
+      
+      final duration = DateTime.now().difference(startTime).inMilliseconds / 1000;
+      
+      // In a real app, you would broadcast the signed transaction to the chain
+      _showResult(
+        'Success',
+        'Transaction signed and ready to broadcast\n'
+        'Chain: ${_currentConfig.name}\n'
+        'To: ${_currentConfig.testAddress}\n'
+        'Amount: 1.0 ${_currentConfig.denom.substring(1).toUpperCase()}\n'
+        'Duration: ${duration.toStringAsFixed(2)}s\n\n'
+        'Note: Broadcasting not implemented in demo',
+      );
+    } catch (e) {
+      final duration = DateTime.now().difference(startTime).inMilliseconds / 1000;
+      _showResult(
+        'Error',
+        'Failed to send transaction: $e\nDuration: ${duration.toStringAsFixed(2)}s',
+      );
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+  
+  Future<String?> _showSigningMethodDialog() async {
+    return showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Select Signing Method'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              title: const Text('Proto (Direct)'),
+              subtitle: const Text('Modern protobuf-based signing'),
+              onTap: () => Navigator.pop(context, 'proto'),
+            ),
+            ListTile(
+              title: const Text('Amino'),
+              subtitle: const Text('Legacy JSON-based signing'),
+              onTap: () => Navigator.pop(context, 'amino'),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+        ],
+      ),
+    );
   }
   
   void _showResult(String title, String message) {
@@ -206,6 +380,63 @@ class _CosmosWalletViewState extends State<CosmosWalletView> {
   }
   
   
+  String _createProtoSignDoc() {
+    // Create a minimal but valid protobuf SignDoc
+    // This must match the binary protobuf format, not JSON
+    final chainId = _currentConfig.chainId;
+    final chainIdBytes = utf8.encode(chainId);
+    
+    final protobufBytes = <int>[];
+    
+    // body_bytes (field 1, wire type 2) - empty
+    protobufBytes.add(0x0A); // tag (field 1, wire type 2)
+    protobufBytes.add(0x00); // length 0
+    
+    // auth_info_bytes (field 2, wire type 2) - empty  
+    protobufBytes.add(0x12); // tag (field 2, wire type 2)
+    protobufBytes.add(0x00); // length 0
+    
+    // chain_id (field 3, wire type 2)
+    protobufBytes.add(0x1A); // tag (field 3, wire type 2)
+    protobufBytes.add(chainIdBytes.length); // length
+    protobufBytes.addAll(chainIdBytes); // chain ID string
+    
+    // account_number (field 4, wire type 0) - value 0
+    protobufBytes.add(0x20); // tag (field 4, wire type 0)
+    protobufBytes.add(0x00); // value 0
+    
+    return base64Encode(protobufBytes);
+  }
+
+  String _createAminoSignDoc() {
+    final signDocJson = {
+      'chain_id': _currentConfig.chainId,
+      'account_number': '0',
+      'sequence': '0',
+      'fee': {
+        'amount': [
+          {'denom': _currentConfig.denom, 'amount': '5000'}
+        ],
+        'gas': '200000',
+      },
+      'msgs': [
+        {
+          'type': 'cosmos-sdk/MsgSend',
+          'value': {
+            'from_address': widget.wallet.addressSecondary ?? widget.wallet.address ?? '',
+            'to_address': _currentConfig.testAddress,
+            'amount': [
+              {'denom': _currentConfig.denom, 'amount': '1000000'}
+            ],
+          },
+        },
+      ],
+      'memo': 'Test transaction from Para Flutter',
+    };
+    
+    return base64Encode(utf8.encode(jsonEncode(signDocJson)));
+  }
+
   void _showFundingInstructions() {
     final address = widget.wallet.addressSecondary ?? widget.wallet.address;
     if (address != null) {
@@ -236,7 +467,7 @@ class _CosmosWalletViewState extends State<CosmosWalletView> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withAlpha((255 * 0.05).round()),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 5,
             offset: const Offset(0, 2),
           ),
@@ -252,9 +483,13 @@ class _CosmosWalletViewState extends State<CosmosWalletView> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Wallet Address',
-            style: TextStyle(fontSize: 14, color: Colors.grey),
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey[600],
+              fontWeight: FontWeight.w500,
+            ),
           ),
           const SizedBox(height: 8),
           Container(
@@ -268,9 +503,10 @@ class _CosmosWalletViewState extends State<CosmosWalletView> {
                 Expanded(
                   child: Text(
                     address ?? 'No address',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: 'SF Mono',
                       fontSize: 12,
+                      color: address != null ? Colors.black : Colors.grey[600],
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -285,27 +521,30 @@ class _CosmosWalletViewState extends State<CosmosWalletView> {
               ],
             ),
           ),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Balance:',
+                style: TextStyle(color: Colors.grey[600]),
+              ),
+              Text(
+                _balance ?? (_isLoading ? 'Loading...' : 'Tap refresh →'),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: _balance != null ? Colors.black : Colors.grey[600],
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.refresh, size: 18),
+                onPressed: _isLoading ? null : _fetchBalance,
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+              ),
+            ],
+          ),
           if (_balance != null) ...[
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Balance:',
-                  style: TextStyle(color: Colors.grey[600]),
-                ),
-                Text(
-                  _balance!,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.refresh, size: 18),
-                  onPressed: _isLoading ? null : _fetchBalance,
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                ),
-              ],
-            ),
             if (_shouldShowFundButton()) ...[
               const SizedBox(height: 8),
               SizedBox(
@@ -341,81 +580,54 @@ class _CosmosWalletViewState extends State<CosmosWalletView> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Chain Configuration',
+          Text(
+            'Select Chain',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
+              color: Colors.black87,
             ),
           ),
           const SizedBox(height: 16),
-          SwitchListTile(
-            title: const Text('Use Custom Configuration'),
-            value: _useCustomConfig,
-            onChanged: (value) {
-              setState(() => _useCustomConfig = value);
-              if (!value) {
-                _reinitializeSigner();
-              }
-            },
-            contentPadding: EdgeInsets.zero,
-          ),
-          if (_useCustomConfig) ...[
-            const SizedBox(height: 12),
-            TextField(
-              onChanged: (value) => _customChainId = value,
-              decoration: InputDecoration(
-                labelText: 'Chain ID',
-                hintText: 'e.g., cosmoshub-4',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                filled: true,
-                fillColor: Colors.grey[100],
-              ),
+          Theme(
+            data: Theme.of(context).copyWith(
+              canvasColor: Colors.white,
+              cardColor: Colors.white,
             ),
-            const SizedBox(height: 12),
-            TextField(
-              onChanged: (value) => _customPrefix = value,
-              decoration: InputDecoration(
-                labelText: 'Address Prefix',
-                hintText: 'e.g., cosmos',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                filled: true,
-                fillColor: Colors.grey[100],
-              ),
-            ),
-            const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _customChainId.isNotEmpty && _customPrefix.isNotEmpty
-                    ? _reinitializeSigner
-                    : null,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.grey[300],
-                  foregroundColor: Colors.black,
-                ),
-                child: const Text('Apply Configuration'),
-              ),
-            ),
-          ] else ...[
-            DropdownButtonFormField<String>(
+            child: DropdownButtonFormField<String>(
               value: _selectedChain,
+              style: const TextStyle(
+                fontSize: 16,
+                color: Colors.black87,
+              ),
               decoration: InputDecoration(
-                labelText: 'Select Chain',
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Colors.grey[300]!),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Colors.grey[300]!),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Colors.blue[400]!, width: 2),
                 ),
                 filled: true,
-                fillColor: Colors.grey[100],
+                fillColor: Colors.white,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               ),
+              dropdownColor: Colors.white,
               items: _chainConfigs.entries.map((entry) {
                 return DropdownMenuItem(
                   value: entry.key,
-                  child: Text(entry.value.name),
+                  child: Text(
+                    entry.value.name,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: Colors.black87,
+                    ),
+                  ),
                 );
               }).toList(),
               onChanged: (value) {
@@ -425,7 +637,7 @@ class _CosmosWalletViewState extends State<CosmosWalletView> {
                 }
               },
             ),
-          ],
+          ),
         ],
       ),
     );
@@ -436,23 +648,42 @@ class _CosmosWalletViewState extends State<CosmosWalletView> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Message Signing',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
+              color: Colors.black87,
             ),
           ),
           const SizedBox(height: 16),
           TextField(
             onChanged: (value) => setState(() => _messageToSign = value),
+            style: const TextStyle(
+              fontSize: 16,
+              color: Colors.black87,
+            ),
             decoration: InputDecoration(
               hintText: 'Enter a message to sign',
+              hintStyle: TextStyle(
+                color: Colors.grey[500],
+                fontSize: 16,
+              ),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: Colors.grey[300]!),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: Colors.grey[300]!),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: Colors.blue[400]!, width: 2),
               ),
               filled: true,
-              fillColor: Colors.grey[100],
+              fillColor: Colors.white,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             ),
           ),
           const SizedBox(height: 12),
@@ -463,12 +694,25 @@ class _CosmosWalletViewState extends State<CosmosWalletView> {
                   ? null
                   : _signMessage,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.black,
+                backgroundColor: _isLoading || _messageToSign.isEmpty
+                    ? Colors.grey[400]
+                    : Colors.black,
+                foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 2,
               ),
-              child: const Text(
+              child: Text(
                 'Sign Message',
-                style: TextStyle(color: Colors.white),
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: _isLoading || _messageToSign.isEmpty
+                      ? Colors.grey[600]
+                      : Colors.white,
+                ),
               ),
             ),
           ),
@@ -482,11 +726,12 @@ class _CosmosWalletViewState extends State<CosmosWalletView> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Transaction Operations',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
+              color: Colors.black87,
             ),
           ),
           const SizedBox(height: 16),
@@ -526,9 +771,9 @@ class _CosmosWalletViewState extends State<CosmosWalletView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFBF9F7),
+      backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFBF9F7),
+        backgroundColor: Colors.grey[50],
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.black),
         title: const Text(
@@ -549,6 +794,12 @@ class _CosmosWalletViewState extends State<CosmosWalletView> {
                 _buildMessageSigningCard(),
                 const SizedBox(height: 16),
                 _buildTransactionOperationsCard(),
+                const SizedBox(height: 16),
+                // Wallet Management Card
+                WalletManagementCard(
+                  onRefresh: _fetchBalance,
+                ),
+                const SizedBox(height: 32), // Add bottom padding
               ],
             ),
           ),

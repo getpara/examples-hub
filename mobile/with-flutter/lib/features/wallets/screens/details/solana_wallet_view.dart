@@ -5,6 +5,7 @@ import 'package:para/para.dart' as para_sdk;
 import 'package:solana/solana.dart' as solana;
 import 'package:solana/encoder.dart';
 import '../../../../client/para.dart';
+import '../../widgets/wallet_management_card.dart';
 
 class SolanaWalletView extends StatefulWidget {
   final para_sdk.Wallet wallet;
@@ -37,6 +38,9 @@ class _SolanaWalletViewState extends State<SolanaWalletView> {
   @override
   void initState() {
     super.initState();
+    // Debug: wallet initialization
+    // print('SolanaWalletView initState - wallet id: ${widget.wallet.id}');
+    // print('SolanaWalletView initState - address: ${widget.wallet.address}');
     _initializeSolana();
   }
   
@@ -52,9 +56,26 @@ class _SolanaWalletViewState extends State<SolanaWalletView> {
         solanaClient: _solanaClient,
         walletId: widget.wallet.id,
       );
-      await _fetchBalance();
+      
+      if (widget.wallet.address != null) {
+        setState(() {
+          _balance = '0.0000 SOL'; // Set default balance
+        });
+        await _fetchBalance();
+      } else {
+        // Debug: no address found
+        // print('SolanaWalletView - No address found, wallet might need initialization');
+        setState(() {
+          _isLoading = false;
+        });
+      }
     } catch (e) {
+      // Debug: initialization error
+      // print('SolanaWalletView - Error initializing: $e');
       _showResult('Error', 'Failed to initialize Solana signer: $e');
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
   
@@ -92,18 +113,26 @@ class _SolanaWalletViewState extends State<SolanaWalletView> {
   
   Future<void> _fetchBalance() async {
     if (widget.wallet.address == null) {
-      _showResult('Error', 'No wallet address found');
+      // Debug: no address for balance fetch
+      // print('SolanaWalletView - Cannot fetch balance: no address');
+      setState(() => _balance = 'No address available');
       return;
     }
     
     setState(() => _isLoading = true);
     try {
+      // Debug: fetching balance
+      // print('SolanaWalletView - Fetching balance for address: ${widget.wallet.address}');
       final pubKey = solana.Ed25519HDPublicKey.fromBase58(widget.wallet.address!);
       final lamports = await _solanaClient.rpcClient.getBalance(pubKey.toBase58());
       final solBalance = lamports.value / solana.lamportsPerSol;
       setState(() => _balance = '${solBalance.toStringAsFixed(4)} SOL');
+      // Debug: balance fetched
+      // print('SolanaWalletView - Balance fetched: $_balance');
     } catch (e) {
-      _showResult('Error', 'Failed to fetch balance: $e');
+      // Debug: balance fetch error
+      // print('SolanaWalletView - Error fetching balance: $e');
+      setState(() => _balance = '0.0000 SOL');
     } finally {
       setState(() => _isLoading = false);
     }
@@ -314,7 +343,7 @@ class _SolanaWalletViewState extends State<SolanaWalletView> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withAlpha((255 * 0.05).round()),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 5,
             offset: const Offset(0, 2),
           ),
@@ -327,9 +356,9 @@ class _SolanaWalletViewState extends State<SolanaWalletView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFBF9F7),
+      backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFBF9F7),
+        backgroundColor: Colors.grey[50],
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.black),
         title: const Text(
@@ -364,9 +393,10 @@ class _SolanaWalletViewState extends State<SolanaWalletView> {
                             Expanded(
                               child: Text(
                                 widget.wallet.address ?? 'No address',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontFamily: 'SF Mono',
                                   fontSize: 12,
+                                  color: widget.wallet.address != null ? Colors.black : Colors.grey[600],
                                 ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -381,43 +411,45 @@ class _SolanaWalletViewState extends State<SolanaWalletView> {
                           ],
                         ),
                       ),
-                      if (_balance != null) ...[
-                        const SizedBox(height: 16),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'Balance:',
-                              style: TextStyle(color: Colors.grey[600]),
-                            ),
-                            Text(
-                              _balance!,
-                              style: const TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.refresh, size: 18),
-                              onPressed: _isLoading ? null : _fetchBalance,
-                              padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints(),
-                            ),
-                          ],
-                        ),
-                        if (_shouldShowFundButton()) ...[
-                          const SizedBox(height: 8),
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton.icon(
-                              onPressed: _showFundingInstructions,
-                              icon: const Icon(Icons.add_circle_outline),
-                              label: const Text('Fund Wallet (Devnet)'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.purple,
-                                foregroundColor: Colors.white,
-                              ),
+                      const SizedBox(height: 16),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Balance:',
+                            style: TextStyle(color: Colors.grey[600]),
+                          ),
+                          Text(
+                            _balance ?? (_isLoading ? 'Loading...' : 'Tap refresh →'),
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: _balance != null ? Colors.black : Colors.grey[600],
                             ),
                           ),
+                          IconButton(
+                            icon: const Icon(Icons.refresh, size: 18),
+                            onPressed: _isLoading ? null : _fetchBalance,
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                          ),
                         ],
-                      ] else ...[
+                      ),
+                      if (_shouldShowFundButton()) ...[
+                        const SizedBox(height: 8),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton.icon(
+                            onPressed: _showFundingInstructions,
+                            icon: const Icon(Icons.add_circle_outline),
+                            label: const Text('Fund Wallet (Devnet)'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.purple,
+                              foregroundColor: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
+                      if (_balance == null) ...[
                         const SizedBox(height: 16),
                         Align(
                           alignment: Alignment.centerRight,
@@ -446,13 +478,31 @@ class _SolanaWalletViewState extends State<SolanaWalletView> {
                       const SizedBox(height: 16),
                       TextField(
                         onChanged: (value) => setState(() => _messageToSign = value),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: Colors.black87,
+                        ),
                         decoration: InputDecoration(
                           hintText: 'Enter a message to sign',
+                          hintStyle: TextStyle(
+                            color: Colors.grey[500],
+                            fontSize: 16,
+                          ),
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.grey[300]!),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.grey[300]!),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.blue[400]!, width: 2),
                           ),
                           filled: true,
-                          fillColor: Colors.grey[100],
+                          fillColor: Colors.white,
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                         ),
                       ),
                       const SizedBox(height: 12),
@@ -463,12 +513,25 @@ class _SolanaWalletViewState extends State<SolanaWalletView> {
                               ? null
                               : _signMessage,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.black,
+                            backgroundColor: _isLoading || _messageToSign.isEmpty
+                                ? Colors.grey[400]
+                                : Colors.black,
+                            foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            elevation: 2,
                           ),
-                          child: const Text(
+                          child: Text(
                             'Sign Message',
-                            style: TextStyle(color: Colors.white),
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: _isLoading || _messageToSign.isEmpty
+                                  ? Colors.grey[600]
+                                  : Colors.white,
+                            ),
                           ),
                         ),
                       ),
@@ -519,6 +582,12 @@ class _SolanaWalletViewState extends State<SolanaWalletView> {
                     ],
                   ),
                 ),
+                const SizedBox(height: 16),
+                // Wallet Management Card
+                WalletManagementCard(
+                  onRefresh: _fetchBalance,
+                ),
+                const SizedBox(height: 32), // Add bottom padding
               ],
             ),
           ),

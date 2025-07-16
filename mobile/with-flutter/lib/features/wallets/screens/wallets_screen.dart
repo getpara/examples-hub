@@ -105,11 +105,12 @@ class _WalletsScreenState extends State<WalletsScreen> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (context) => Container(
-        height: 240,
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
+      builder: (context) => SafeArea(
+        child: Container(
+          height: 240,
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
             const Text(
               'Select Wallet Type',
               style: TextStyle(
@@ -153,7 +154,8 @@ class _WalletsScreenState extends State<WalletsScreen> {
                 ),
               ),
             )),
-          ],
+            ],
+          ),
         ),
       ),
     );

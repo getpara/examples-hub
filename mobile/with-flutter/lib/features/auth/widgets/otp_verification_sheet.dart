@@ -72,18 +72,19 @@ class _OTPVerificationSheetState extends State<OTPVerificationSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom,
-      ),
-      decoration: const BoxDecoration(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
+    return SafeArea(
+      child: Container(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
+        decoration: const BoxDecoration(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
             Container(
               width: 40,
               height: 4,
@@ -131,7 +132,7 @@ class _OTPVerificationSheetState extends State<OTPVerificationSheet> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       filled: true,
-                      fillColor: Theme.of(context).colorScheme.surface.withValues(alpha: 0.1),
+                      fillColor: const Color(0xFF261E35),
                     ),
                     onChanged: (value) => _onDigitChanged(index, value),
                   ),
@@ -147,7 +148,8 @@ class _OTPVerificationSheetState extends State<OTPVerificationSheet> {
                 child: const Text('Resend code'),
               ),
             const SizedBox(height: 16),
-          ],
+            ],
+          ),
         ),
       ),
     );
