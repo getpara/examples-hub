@@ -294,28 +294,56 @@ class WalletTestHelper {
     
     for (int attempt = 0; attempt < 15; attempt++) {
       try {
-        // Look for "Wallets" title and "Logout" text (both are StaticText elements)
-        bool hasWalletsTitle = false;
-        bool hasLogoutText = false;
+        // Method 1: Try accessibility identifiers (most reliable)
+        try {
+          await driver.findElement(AppiumBy.accessibilityId('wallets_screen_title'));
+          await driver.findElement(AppiumBy.accessibilityId('wallets_screen_logout_button'));
+          print('✅ Wallets view found (accessibility identifiers)');
+          return;
+        } catch (e) {
+          // Fallback to text-based detection
+        }
         
+        // Method 2: Text-based detection (StaticText for title, Button for logout)
+        bool hasWalletsTitle = false;
+        bool hasLogoutButton = false;
+        
+        // Check for "Wallets" title (StaticText)
         final staticTexts = await driver.findElements(AppiumBy.className('XCUIElementTypeStaticText')).toList();
         for (final element in staticTexts) {
           final text = await element.text;
           if (text == 'Wallets') {
             hasWalletsTitle = true;
-          }
-          if (text == 'Logout') {
-            hasLogoutText = true;
-          }
-          // Early exit if we found both
-          if (hasWalletsTitle && hasLogoutText) {
             break;
           }
         }
         
-        // Success if we find both key elements from the AppBar
-        if (hasWalletsTitle && hasLogoutText) {
-          print('✅ Wallets view found (title + logout detected)');
+        // Check for "Logout" button (Button, not StaticText!)
+        final buttons = await driver.findElements(AppiumBy.className('XCUIElementTypeButton')).toList();
+        for (final button in buttons) {
+          try {
+            final label = await button.attributes['label'];
+            if (label == 'Logout') {
+              hasLogoutButton = true;
+              break;
+            }
+          } catch (e) {
+            // Try other attributes
+            try {
+              final name = await button.attributes['name'];
+              if (name == 'Logout') {
+                hasLogoutButton = true;
+                break;
+              }
+            } catch (e) {
+              // Continue
+            }
+          }
+        }
+        
+        // Success if we find both key elements
+        if (hasWalletsTitle && hasLogoutButton) {
+          print('✅ Wallets view found (text detection: title=$hasWalletsTitle, button=$hasLogoutButton)');
           return;
         }
         

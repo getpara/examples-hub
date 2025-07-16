@@ -201,6 +201,7 @@ class _WalletsScreenState extends State<WalletsScreen> {
         ),
         title: const Text(
           'Wallets',
+          key: ValueKey('wallets_screen_title'),
           style: TextStyle(
             color: Colors.black,
             fontWeight: FontWeight.w600,
@@ -208,6 +209,7 @@ class _WalletsScreenState extends State<WalletsScreen> {
         ),
         actions: [
           TextButton(
+            key: const ValueKey('wallets_screen_logout_button'),
             onPressed: widget.onLogout,
             child: const Text(
               'Logout',
