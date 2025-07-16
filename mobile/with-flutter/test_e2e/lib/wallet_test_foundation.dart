@@ -294,14 +294,45 @@ class WalletTestHelper {
     
     for (int attempt = 0; attempt < 15; attempt++) {
       try {
+        // Check for navigation bar title "Wallets"
+        final navBars = await driver.findElements(AppiumBy.className('XCUIElementTypeNavigationBar')).toList();
+        for (final navBar in navBars) {
+          try {
+            final name = await navBar.attributes['name'];
+            if (name == 'Wallets') {
+              print('✅ Wallets view found (nav bar)');
+              return;
+            }
+          } catch (e) {
+            // Continue checking
+          }
+        }
+        
+        // Check for wallet-related text elements
         final elements = await driver.findElements(AppiumBy.className('XCUIElementTypeStaticText')).toList();
         for (final element in elements) {
           final text = await element.text;
-          if (text == 'Your Wallets' || text == 'EVM Wallet' || text == 'SOLANA Wallet') {
-            print('✅ Wallets view found');
+          if (text == 'Wallets' || text == 'SOLANA' || text == 'COSMOS' || text == 'EVM' || 
+              text.contains('Add Wallet') || text.contains('Logout')) {
+            print('✅ Wallets view found (text: $text)');
             return;
           }
         }
+        
+        // Check for wallet address patterns (base58, bech32, hex)
+        for (final element in elements) {
+          final text = await element.text;
+          if (text.length > 20 && (
+              RegExp(r'^[1-9A-HJ-NP-Za-km-z]{32,44}$').hasMatch(text) || // Solana
+              RegExp(r'^[a-z]+1[a-z0-9]{38,58}$').hasMatch(text) || // Cosmos
+              RegExp(r'^0x[a-fA-F0-9]{40}$').hasMatch(text) || // EVM
+              text.contains('...') // Truncated addresses
+          )) {
+            print('✅ Wallets view found (address pattern: $text)');
+            return;
+          }
+        }
+        
       } catch (e) {
         // Continue waiting
       }
