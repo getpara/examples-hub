@@ -529,14 +529,61 @@ class WalletTestHelper {
     print('🏦 Ensuring EVM wallet exists...');
     
     try {
-      // Check if "Create First Wallet" button exists
+      // First check if EVM wallet already exists by looking for EVM wallet cells
+      final cells = await driver.findElements(AppiumBy.className('XCUIElementTypeCell')).toList();
+      for (final cell in cells) {
+        try {
+          final staticTexts = await cell.findElements(AppiumBy.className('XCUIElementTypeStaticText')).toList();
+          for (final text in staticTexts) {
+            final content = await text.text;
+            if (content.contains('EVM') || content.contains('Ethereum')) {
+              print('✅ EVM wallet already exists');
+              return;
+            }
+          }
+        } catch (e) {
+          // Continue checking
+        }
+      }
+      
+      // Look for "Add Wallet" button
+      print('📱 Looking for Add Wallet button...');
       final buttons = await driver.findElements(AppiumBy.className('XCUIElementTypeButton')).toList();
       for (final button in buttons) {
         try {
           final label = await button.attributes['label'];
-          if (label.contains('Create First Wallet') || label.contains('createFirstWalletButton')) {
+          if (label.contains('Add Wallet')) {
+            print('📱 Tapping Add Wallet button...');
             await button.click();
-            await Future.delayed(Duration(seconds: 3));
+            await Future.delayed(Duration(seconds: 2));
+            
+            // Now look for EVM in the bottom sheet
+            print('📱 Looking for EVM option in bottom sheet...');
+            await _selectEVMInBottomSheet();
+            
+            // Wait for wallet creation to complete
+            await Future.delayed(Duration(seconds: 5));
+            print('✅ EVM wallet created successfully');
+            return;
+          }
+        } catch (e) {
+          // Continue searching
+        }
+      }
+      
+      // Check if "Create First Wallet" button exists (for empty wallet case)
+      for (final button in buttons) {
+        try {
+          final label = await button.attributes['label'];
+          if (label.contains('Create Your First Wallet') || label.contains('Create First Wallet')) {
+            print('📱 Tapping Create First Wallet button...');
+            await button.click();
+            await Future.delayed(Duration(seconds: 2));
+            
+            // Look for EVM in the bottom sheet
+            await _selectEVMInBottomSheet();
+            
+            await Future.delayed(Duration(seconds: 5));
             print('✅ First EVM wallet created');
             return;
           }
@@ -545,18 +592,36 @@ class WalletTestHelper {
         }
       }
       
-      // Check if EVM wallet already exists
-      final cells = await driver.findElements(AppiumBy.className('XCUIElementTypeCell')).toList();
-      if (cells.isNotEmpty) {
-        print('✅ EVM wallet already exists');
-        return;
-      }
-      
-      throw Exception('Could not create or find EVM wallet');
+      throw Exception('Could not find Add Wallet or Create First Wallet button');
       
     } catch (e) {
       throw Exception('EVM wallet setup failed: $e');
     }
+  }
+
+  /// Helper method to select EVM in the wallet type bottom sheet
+  Future<void> _selectEVMInBottomSheet() async {
+    print('📱 Selecting EVM in bottom sheet...');
+    
+    // Wait for bottom sheet to appear
+    await Future.delayed(Duration(seconds: 1));
+    
+    // Look for EVM button in the bottom sheet
+    final buttons = await driver.findElements(AppiumBy.className('XCUIElementTypeButton')).toList();
+    for (final button in buttons) {
+      try {
+        final label = await button.attributes['label'];
+        if (label.contains('EVM') || label.contains('evm')) {
+          print('📱 Tapping EVM button...');
+          await button.click();
+          return;
+        }
+      } catch (e) {
+        // Continue searching
+      }
+    }
+    
+    throw Exception('Could not find EVM button in bottom sheet');
   }
   
   /// Ensures Solana wallet exists (creates if needed)

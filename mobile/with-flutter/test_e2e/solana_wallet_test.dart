@@ -6,11 +6,11 @@ import 'package:test/test.dart';
 import 'package:appium_driver/async_io.dart';
 import 'package:dotenv/dotenv.dart';
 import 'lib/wallet_test_foundation.dart';
+import 'lib/test_constants.dart';
 
 void main() {
   group('Solana Wallet E2E Tests', () {
     late AppiumWebDriver driver;
-    late WalletTestContext context;
     
     setUpAll(() async {
       // Load environment variables
@@ -49,23 +49,32 @@ void main() {
         desired: capabilities,
       );
       
-      // Create isolated context for Solana wallet tests
-      context = await WalletTestFactory.createIsolatedContext(
-        driver: driver,
-        walletType: WalletType.solana,
-      );
+      // Enroll biometrics for all tests
+      try {
+        await driver.execute('mobile:enrollBiometric', <dynamic>[<String, dynamic>{'isEnabled': true}]);
+        print('✅ Biometrics enrolled successfully');
+      } catch (e) {
+        print('Warning: Could not enroll biometrics: $e');
+      }
       
-      print('✅ Solana wallet test context initialized');
+      // Perform one-time authentication setup (Solana wallet created by default)
+      print('🔐 Setting up authentication for Solana wallet tests...');
+      final helper = WalletTestHelper(driver);
+      final uniqueEmail = TestConstants.generateUniqueEmail();
+      await helper.performEmailAuthWithPasskey(uniqueEmail);
+      await helper.waitForWalletsView();
+      print('✅ Authentication completed - Solana wallet should be available');
     });
 
     tearDownAll(() async {
-      await WalletTestFactory.destroyContext(driver, context);
       await driver.quit();
     });
 
     setUp(() async {
+      print('\\n🚀 Setting up Solana wallet test...');
       // Ensure we start each test in the Solana wallet view
       await _navigateToSolanaWallet(driver);
+      print('✅ Solana wallet test ready');
     });
 
     test('Basic Wallet Operations', () async {

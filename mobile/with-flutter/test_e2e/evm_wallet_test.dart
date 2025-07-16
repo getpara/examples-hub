@@ -11,7 +11,6 @@ import 'lib/test_constants.dart';
 void main() {
   group('EVM Wallet Tests', () {
     late AppiumWebDriver driver;
-    late WalletTestContext context;
     
     setUpAll(() async {
       // Load environment and validate prerequisites
@@ -56,36 +55,40 @@ void main() {
       } catch (e) {
         print('Warning: Could not enroll biometrics: $e');
       }
+      
+      // Perform one-time authentication setup to create wallets
+      print('🔐 Setting up authentication and creating wallets...');
+      final helper = WalletTestHelper(driver);
+      final uniqueEmail = TestConstants.generateUniqueEmail();
+      await helper.performEmailAuthWithPasskey(uniqueEmail);
+      await helper.waitForWalletsView();
+      
+      // Create EVM wallet (not created by default)
+      print('🏦 Creating EVM wallet...');
+      await helper.ensureEVMWalletExists();
+      print('✅ Authentication and wallet setup completed');
     });
 
     tearDownAll(() async {
-      // Emergency cleanup of any remaining contexts
-      await WalletTestFactory.destroyAllContexts(driver);
       await driver.quit();
     });
 
     setUp(() async {
-      print('\\n🚀 Setting up fresh EVM wallet test context...');
+      print('\\n🚀 Setting up EVM wallet test...');
       
-      // Create isolated test context for this specific test
-      context = await WalletTestFactory.createIsolatedContext(
-        driver: driver,
-        walletType: WalletType.evm,
-      );
-      
-      // Navigate to EVM wallet view
+      // Navigate to EVM wallet view (should already exist from setup)
       await _navigateToEVMWallet(driver);
       
-      print('✅ EVM wallet test context ready');
+      print('✅ EVM wallet test ready');
     });
 
     tearDown(() async {
-      print('\\n🧹 Cleaning up EVM wallet test context...');
+      print('\\n🧹 Cleaning up EVM wallet test...');
       
-      // Destroy the isolated context
-      await WalletTestFactory.destroyContext(driver, context);
+      // Navigate back to wallets view for next test
+      await _navigateToWalletsView(driver);
       
-      print('✅ EVM wallet test context cleaned up');
+      print('✅ EVM wallet test cleaned up');
     });
 
     test('Basic Wallet Operations', () async {

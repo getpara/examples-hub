@@ -6,11 +6,11 @@ import 'package:test/test.dart';
 import 'package:appium_driver/async_io.dart';
 import 'package:dotenv/dotenv.dart';
 import 'lib/wallet_test_foundation.dart';
+import 'lib/test_constants.dart';
 
 void main() {
   group('Cosmos Wallet E2E Tests', () {
     late AppiumWebDriver driver;
-    late WalletTestContext context;
     
     setUpAll(() async {
       // Load environment variables
@@ -49,23 +49,32 @@ void main() {
         desired: capabilities,
       );
       
-      // Create isolated context for Cosmos wallet tests
-      context = await WalletTestFactory.createIsolatedContext(
-        driver: driver,
-        walletType: WalletType.cosmos,
-      );
+      // Enroll biometrics for all tests
+      try {
+        await driver.execute('mobile:enrollBiometric', <dynamic>[<String, dynamic>{'isEnabled': true}]);
+        print('✅ Biometrics enrolled successfully');
+      } catch (e) {
+        print('Warning: Could not enroll biometrics: $e');
+      }
       
-      print('✅ Cosmos wallet test context initialized');
+      // Perform one-time authentication setup (Cosmos wallet created by default)
+      print('🔐 Setting up authentication for Cosmos wallet tests...');
+      final helper = WalletTestHelper(driver);
+      final uniqueEmail = TestConstants.generateUniqueEmail();
+      await helper.performEmailAuthWithPasskey(uniqueEmail);
+      await helper.waitForWalletsView();
+      print('✅ Authentication completed - Cosmos wallet should be available');
     });
 
     tearDownAll(() async {
-      await WalletTestFactory.destroyContext(driver, context);
       await driver.quit();
     });
 
     setUp(() async {
+      print('\\n🚀 Setting up Cosmos wallet test...');
       // Ensure we start each test in the Cosmos wallet view
       await _navigateToCosmosWallet(driver);
+      print('✅ Cosmos wallet test ready');
     });
 
     test('Wallet Operations', () async {
