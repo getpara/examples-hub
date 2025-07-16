@@ -262,21 +262,48 @@ Future<void> _enterPhoneAndContinue(AppiumWebDriver driver, String phone) async 
 }
 
 Future<void> _clickContinueButton(AppiumWebDriver driver) async {
-  final buttons = await driver.findElements(AppiumBy.className('XCUIElementTypeButton')).toList();
-  for (final button in buttons) {
+  // Wait for Continue button to be enabled (with explicit wait)
+  for (int attempt = 0; attempt < 10; attempt++) {
     try {
-      final label = await button.attributes['label'];
-      final enabled = await button.enabled;
-      if (label == 'Continue' && enabled) {
-        await button.click();
-        return;
+      // Method 1: Try accessibility identifier (most reliable)
+      try {
+        final continueButton = await driver.findElement(AppiumBy.accessibilityId('continue_button'));
+        final enabled = await continueButton.enabled;
+        if (enabled) {
+          await continueButton.click();
+          print('✅ Continue button clicked (accessibility ID)');
+          return;
+        } else {
+          print('⏳ Continue button found but disabled, waiting... (attempt ${attempt + 1}/10)');
+        }
+      } catch (e) {
+        // Fallback to text-based detection
+      }
+      
+      // Method 2: Fallback to button label detection
+      final buttons = await driver.findElements(AppiumBy.className('XCUIElementTypeButton')).toList();
+      for (final button in buttons) {
+        try {
+          final label = await button.attributes['label'];
+          final enabled = await button.enabled;
+          if (label == 'Continue' && enabled) {
+            await button.click();
+            print('✅ Continue button clicked (fallback)');
+            return;
+          }
+        } catch (e) {
+          // Continue searching
+        }
       }
     } catch (e) {
-      // Continue searching
+      // Continue waiting
     }
+    
+    // Wait before next attempt
+    await Future.delayed(Duration(seconds: 1));
   }
   
-  throw Exception('Continue button not found or not enabled');
+  throw Exception('Continue button not found or not enabled after 10 attempts');
 }
 
 Future<void> _handleOTPVerification(AppiumWebDriver driver) async {

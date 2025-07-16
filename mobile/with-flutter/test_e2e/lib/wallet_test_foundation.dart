@@ -526,6 +526,25 @@ class WalletTestHelper {
   }
   
   Future<void> _enterOTPCode(String code) async {
+    print('🔢 Entering OTP code using accessibility identifiers: $code');
+    
+    // Method 1: Try accessibility identifiers (most reliable)
+    try {
+      for (int i = 0; i < 6; i++) {
+        final field = await driver.findElement(AppiumBy.accessibilityId('otp_field_$i'));
+        await field.click();
+        await Future.delayed(Duration(milliseconds: 100));
+        await field.clear();
+        await field.sendKeys(code[i]);
+        print('  ✅ Entered digit ${i + 1}: ${code[i]} (accessibility ID)');
+      }
+      await Future.delayed(Duration(seconds: 2));
+      return;
+    } catch (e) {
+      print('⚠️ Accessibility ID method failed, falling back to text field detection: $e');
+    }
+    
+    // Method 2: Fallback to text field detection
     final textFields = await driver.findElements(AppiumBy.className('XCUIElementTypeTextField')).toList();
     if (textFields.length < 6) {
       throw Exception('Expected 6 OTP fields, found ${textFields.length}');
@@ -537,6 +556,7 @@ class WalletTestHelper {
       await otpFields[i].click();
       await otpFields[i].clear();
       await otpFields[i].sendKeys(code[i]);
+      print('  ✅ Entered digit ${i + 1}: ${code[i]} (fallback)');
       await Future.delayed(Duration(milliseconds: 300));
     }
     
