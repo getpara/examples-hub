@@ -1,4 +1,4 @@
-import { ParaModalProps } from '@getpara/react-sdk';
+import { ParaModalProps } from '@getpara/react-sdk-lite';
 import { ParaConnectorOpts as ParaConnectorOptsBase, createParaConnector } from '@getpara/wagmi-v2-connector';
 import { renderModal } from './connectorModal.js';
 import { QueryClient } from '@tanstack/react-query';

@@ -1,4 +1,4 @@
-import ParaWeb, { setIsOpen } from '@getpara/react-sdk';
+import ParaWeb, { setIsOpen } from '@getpara/react-sdk-lite';
 import { type ParaModalPropsForInit } from './paraConnector.js';
 import { type QueryClient } from '@tanstack/react-query';
 
@@ -21,7 +21,7 @@ export function renderModal(
   };
 
   const render = async () => {
-    const { ParaProvider } = await import('@getpara/react-sdk');
+    const { ParaProvider } = await import('@getpara/react-sdk-lite');
     const { QueryClientProvider } = await import('@tanstack/react-query');
 
     const existingContainer = document.getElementById('para-modal');

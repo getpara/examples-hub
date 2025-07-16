@@ -2,7 +2,7 @@
   "name": "@getpara/wagmi-v2-integration",
   "version": "2.0.0-alpha.32",
   "dependencies": {
-    "@getpara/react-sdk": "2.0.0-alpha.32",
+    "@getpara/react-sdk-lite": "2.0.0-alpha.32",
     "@getpara/wagmi-v2-connector": "2.0.0-alpha.32"
   },
   "devDependencies": {

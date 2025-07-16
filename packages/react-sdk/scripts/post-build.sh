@@ -1,3 +1,2 @@
-cp -R ./src/modal/css dist/css
-cp -R ./src/modal/public dist/public
-cp -R ./src/cli dist/cli
+cp -R ../react-sdk-lite/src/modal/css dist/css
+cp -R ../react-sdk-lite/src/modal/public dist/public
