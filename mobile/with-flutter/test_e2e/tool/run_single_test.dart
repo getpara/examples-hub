@@ -2,16 +2,41 @@
 
 import 'dart:io';
 
-/// Run a single test by number
+/// Run a single test file
 void main(List<String> args) async {
   if (args.isEmpty) {
-    print('Usage: dart run tool/run_single_test.dart <test-number>');
-    print('Example: dart run tool/run_single_test.dart 01');
+    print('Usage: dart run tool/run_single_test.dart <test-file>');
+    print('Available tests:');
+    print('  authentication - Run authentication tests');
+    print('  evm - Run EVM wallet tests');
+    print('  solana - Run Solana wallet tests');
+    print('  cosmos - Run Cosmos wallet tests');
     exit(1);
   }
   
-  final testNumber = args[0].padLeft(2, '0');
-  print('🧪 Running test $testNumber...\n');
+  final testType = args[0];
+  String testFile;
+  
+  switch (testType) {
+    case 'authentication':
+    case 'auth':
+      testFile = 'authentication_test.dart';
+      break;
+    case 'evm':
+      testFile = 'evm_wallet_test.dart';
+      break;
+    case 'solana':
+      testFile = 'solana_wallet_test.dart';
+      break;
+    case 'cosmos':
+      testFile = 'cosmos_wallet_test.dart';
+      break;
+    default:
+      print('❌ Unknown test type: $testType');
+      exit(1);
+  }
+  
+  print('🧪 Running $testType tests ($testFile)...\n');
   
   // Start Appium server
   print('🚀 Starting Appium server...');
@@ -24,10 +49,10 @@ void main(List<String> args) async {
   await Future.delayed(Duration(seconds: 5));
   
   try {
-    // Run the specific test by name pattern
+    // Run the specific test file
     final testResult = await Process.run(
       'dart',
-      ['test', '--timeout', '300s', '-N', '$testNumber ', 'para_flutter_e2e_test.dart'],
+      ['test', '--timeout', '300s', testFile],
     );
     
     print(testResult.stdout);
@@ -36,9 +61,9 @@ void main(List<String> args) async {
     }
     
     if (testResult.exitCode == 0) {
-      print('\n✅ Test $testNumber PASSED');
+      print('\n✅ $testType tests PASSED');
     } else {
-      print('\n❌ Test $testNumber FAILED');
+      print('\n❌ $testType tests FAILED');
     }
     
   } finally {
