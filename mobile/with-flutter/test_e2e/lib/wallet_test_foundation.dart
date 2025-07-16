@@ -294,33 +294,28 @@ class WalletTestHelper {
     
     for (int attempt = 0; attempt < 15; attempt++) {
       try {
-        // Simple check: Look for "Wallets" title and "Logout" button
+        // Look for "Wallets" title and "Logout" text (both are StaticText elements)
         bool hasWalletsTitle = false;
-        bool hasLogoutButton = false;
+        bool hasLogoutText = false;
         
-        // Check for "Wallets" title
         final staticTexts = await driver.findElements(AppiumBy.className('XCUIElementTypeStaticText')).toList();
         for (final element in staticTexts) {
           final text = await element.text;
           if (text == 'Wallets') {
             hasWalletsTitle = true;
+          }
+          if (text == 'Logout') {
+            hasLogoutText = true;
+          }
+          // Early exit if we found both
+          if (hasWalletsTitle && hasLogoutText) {
             break;
           }
         }
         
-        // Check for "Logout" button
-        final buttons = await driver.findElements(AppiumBy.className('XCUIElementTypeButton')).toList();
-        for (final button in buttons) {
-          final label = await button.attributes['label'];
-          if (label == 'Logout') {
-            hasLogoutButton = true;
-            break;
-          }
-        }
-        
-        // Success if we find both key elements
-        if (hasWalletsTitle && hasLogoutButton) {
-          print('✅ Wallets view found (title: $hasWalletsTitle, logout: $hasLogoutButton)');
+        // Success if we find both key elements from the AppBar
+        if (hasWalletsTitle && hasLogoutText) {
+          print('✅ Wallets view found (title + logout detected)');
           return;
         }
         
@@ -335,7 +330,7 @@ class WalletTestHelper {
       await Future.delayed(Duration(seconds: 1));
     }
     
-    throw Exception('Wallets view not found after 15 attempts');
+    throw Exception('❌ Timed out waiting for wallets view after 15 attempts');
   }
   
   /// Ensures EVM wallet exists (creates if needed)
