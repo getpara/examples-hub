@@ -5,7 +5,11 @@ import '../client/para.dart';
 import '../features/auth/widgets/social_auth_button.dart';
 import '../features/auth/widgets/email_phone_input.dart';
 import '../features/auth/widgets/otp_verification_sheet.dart';
+import '../features/auth/widgets/connect_wallet_button.dart';
+import '../features/auth/widgets/external_wallet_selection_sheet.dart';
+import '../features/auth/models/external_wallet_provider.dart';
 import 'wallet_creation_loading_screen.dart';
+import 'external_wallet_demo_screen.dart';
 
 class AuthScreen extends StatefulWidget {
   final VoidCallback onSuccess;
@@ -21,6 +25,7 @@ class AuthScreen extends StatefulWidget {
 
 class _AuthScreenState extends State<AuthScreen> {
   SocialProvider? _loadingProvider;
+  ExternalWalletProvider? _loadingExternalWallet;
   bool _isProcessing = false;
   late final FlutterWebAuthSession _webAuthSession;
 
@@ -195,11 +200,64 @@ class _AuthScreenState extends State<AuthScreen> {
     }
   }
 
-  void _showWalletSelection() {
-    // Will be implemented in a future phase
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Wallet connection coming soon')),
-    );
+  void _showExternalWalletSelection() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      useSafeArea: true,
+      builder: (context) => ExternalWalletSelectionSheet(
+        onWalletSelected: _handleExternalWalletAuth,
+        loadingProvider: _loadingExternalWallet,
+      ),
+    ).whenComplete(() {
+      // Reset loading state if sheet is dismissed without selection
+      if (mounted && _loadingExternalWallet != null) {
+        setState(() => _loadingExternalWallet = null);
+      }
+    });
+  }
+
+  Future<void> _handleExternalWalletAuth(ExternalWalletProvider provider) async {
+    // Prevent double-tap issues
+    if (_loadingExternalWallet != null) return;
+    
+    setState(() => _loadingExternalWallet = provider);
+
+    try {
+      String? address;
+      if (provider == ExternalWalletProvider.phantom) {
+        address = await phantomConnector.connect();
+      } else if (provider == ExternalWalletProvider.metamask) {
+        await metamaskConnector.connect();
+        address = metamaskConnector.accounts.isNotEmpty ? metamaskConnector.accounts.first : null;
+      }
+      
+      // Success - close sheet and navigate to demo view
+      if (mounted && address != null) {
+        Navigator.pop(context); // Close the sheet
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ExternalWalletDemoScreen(
+              provider: provider,
+              address: address!,
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.pop(context); // Close the sheet
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('External wallet connection failed: ${e.toString()}')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _loadingExternalWallet = null);
+      }
+    }
   }
 
   @override
@@ -286,28 +344,10 @@ class _AuthScreenState extends State<AuthScreen> {
                 ],
               ),
               const SizedBox(height: 20),
-              // Connect Wallet button
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: OutlinedButton(
-                  onPressed: _showWalletSelection,
-                  style: OutlinedButton.styleFrom(
-                    backgroundColor: Colors.grey[100],
-                    foregroundColor: Colors.black,
-                    side: BorderSide.none,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: const Text(
-                    'Connect Wallet',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
-                    ),
-                  ),
-                ),
+              // External Wallet button
+              ConnectWalletButton(
+                onPressed: _showExternalWalletSelection,
+                isLoading: _loadingExternalWallet != null,
               ),
               const SizedBox(height: 48),
               // Footer
