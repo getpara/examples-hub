@@ -217,70 +217,6 @@ Future<void> _navigateToSolanaWallet(AppiumWebDriver driver) async {
   throw Exception('Could not find Solana wallet after comprehensive analysis');
 }
 
-Future<void> _switchToSolanaTab(AppiumWebDriver driver) async {
-  print('🔄 Switching to Solana tab...');
-  
-  // Look for Solana tab button
-  final buttons = await driver.findElements(AppiumBy.className('XCUIElementTypeButton')).toList();
-  for (final button in buttons) {
-    try {
-      final label = await button.attributes['label'];
-      if (label.toLowerCase().contains('solana')) {
-        await button.click();
-        print('✅ Switched to Solana tab');
-        await Future.delayed(Duration(seconds: 2));
-        return;
-      }
-    } catch (e) {
-      // Continue searching
-    }
-  }
-  
-  // Alternative: try clicking by accessibility id
-  try {
-    final solanaButton = await driver.findElement(AppiumBy.accessibilityId('Solana'));
-    await solanaButton.click();
-    print('✅ Switched to Solana tab (by accessibility id)');
-    await Future.delayed(Duration(seconds: 2));
-  } catch (e) {
-    print('⚠️ Could not switch to Solana tab, continuing...');
-  }
-}
-
-Future<void> _verifyInSolanaWalletView(AppiumWebDriver driver) async {
-  print('🔍 Verifying in Solana wallet view...');
-  
-  // Look for "Solana Wallet" title
-  final staticTexts = await driver.findElements(AppiumBy.className('XCUIElementTypeStaticText')).toList();
-  for (final element in staticTexts) {
-    try {
-      final text = await element.text;
-      if (text.contains('Solana Wallet')) {
-        print('✅ Confirmed in Solana wallet view');
-        return;
-      }
-    } catch (e) {
-      // Continue searching
-    }
-  }
-  
-  // Also check navigation bars
-  final navBars = await driver.findElements(AppiumBy.className('XCUIElementTypeNavigationBar')).toList();
-  for (final navBar in navBars) {
-    try {
-      final name = await navBar.attributes['name'];
-      if (name.contains('Solana')) {
-        print('✅ Confirmed in Solana wallet view (nav bar)');
-        return;
-      }
-    } catch (e) {
-      // Continue searching
-    }
-  }
-  
-  print('⚠️ Could not verify Solana wallet view, continuing...');
-}
-
 // Test Functions
 Future<void> _testCopyWalletAddress(AppiumWebDriver driver) async {
   print('📋 Testing wallet address display...');
@@ -377,24 +313,4 @@ Future<void> _testSignTransaction(AppiumWebDriver driver) async {
   }
   
   throw Exception('Sign transaction button not found');
-}
-
-Future<void> _handleBiometricAuthentication(AppiumWebDriver driver) async {
-  print('🔐 Handling biometric authentication...');
-  
-  try {
-    // Wait for biometric prompt
-    await Future.delayed(Duration(seconds: 2));
-    
-    // Send biometric match
-    await driver.execute('mobile:sendBiometricMatch', <dynamic>[<String, dynamic>{
-      'type': 'touchId',
-      'match': true
-    }]);
-    
-    print('✅ Biometric authentication successful');
-    await Future.delayed(Duration(seconds: 2));
-  } catch (e) {
-    print('⚠️ Biometric authentication failed or not required: $e');
-  }
 }
