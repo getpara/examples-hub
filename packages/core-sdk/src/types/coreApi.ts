@@ -101,6 +101,7 @@ export const PARA_INTERNAL_METHODS = [
   'verifyTelegramLink',
   'verifyExternalWalletLink',
   'accountLinkInProgress',
+  'prepareLogin',
 ] as const;
 
 export type CoreMethodName = (typeof PARA_CORE_METHODS)[number];
@@ -658,6 +659,10 @@ export type InternalMethods = {
   verifyExternalWalletLink: {
     params: Omit<VerifyExternalWalletParams, 'externalWallet'>;
     response: LinkedAccounts;
+  };
+  prepareLogin: {
+    params: void;
+    response: string;
   };
 };
 

@@ -54,7 +54,7 @@
   "scripts": {
     "build": "rm -rf build && tsc && vite build",
     "deploy-s3": "yarn && yarn build && aws s3 sync dist/ s3://$VITE_BUCKET_NAME --acl public-read --delete",
-    "deploy-sandbox": "VITE_ENVIRONMENT=SANDBOX VITE_BUCKET_NAME=capsule-rainbowkit-playground VITE_PARA_API_KEY=8ee2d015fbc6062a6e30bdc472f2946c yarn deploy-s3",
+    "deploy-sandbox": "VITE_ENVIRONMENT=SANDBOX VITE_BUCKET_NAME=capsule-rainbowkit-playground VITE_PARA_API_KEY=2f938ac0c48ef356050a79bd66042a23 yarn deploy-s3",
     "dev": "vite --host",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "postinstall": "yarn graz -g",

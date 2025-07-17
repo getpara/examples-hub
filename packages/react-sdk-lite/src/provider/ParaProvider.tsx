@@ -1,4 +1,4 @@
-import { forwardRef, useEffect } from 'react';
+import { forwardRef, useEffect, useState } from 'react';
 import { useStore } from './stores/useStore.js';
 import { useAutoSessionKeepAlive } from './hooks/utils/useAutoSessionKeepAlive.js';
 import { useEventListeners } from './hooks/utils/useEventListeners.js';
@@ -39,6 +39,8 @@ export const ParaProvider = forwardRef<
   const rpcUrl = useStore(state => state.rpcUrl);
   const setRpcUrl = useStore(state => state.setRpcUrl);
   const setProviderProps = useStore(state => state.setProviderProps);
+
+  const [isClientReady, setIsClientReady] = useState(client?.isReady);
 
   useEffect(() => {
     setProviderProps({
@@ -125,18 +127,30 @@ export const ParaProvider = forwardRef<
       ? new ParaWeb(paraClientConfig.env, paraClientConfig.apiKey, paraClientConfig.opts)
       : paraClientConfig;
 
+    if (newClient.isReady) {
+      setIsClientReady(true);
+    } else {
+      setIsClientReady(false);
+    }
+
     setClient(newClient);
   }, [paraClientConfig]);
 
   useEffect(() => {
     if (client && !client.isReady) {
-      client.ready().catch(err => {
-        console.error('Error initializing Para client:', err);
-      });
+      client
+        .ready()
+        .then(() => {
+          setIsClientReady(true);
+        })
+        .catch(err => {
+          setIsClientReady(false);
+          console.error('Error initializing Para client:', err);
+        });
     }
   }, [client]);
 
-  if (!client) {
+  if (!client || !isClientReady) {
     return null;
   }
 

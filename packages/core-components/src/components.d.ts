@@ -942,6 +942,10 @@ export namespace Components {
     }
     interface CpslTileButton {
         /**
+          * If the button is disabled. Default is: false.
+         */
+        "disabled"?: boolean;
+        /**
           * The name of the icon. If both `icon` and `src` are provided, `icon` will be used.
          */
         "icon"?: IconType;
@@ -2602,6 +2606,10 @@ declare namespace LocalJSX {
         "weight"?: 'regular' | 'medium' | 'semiBold' | 'bold';
     }
     interface CpslTileButton {
+        /**
+          * If the button is disabled. Default is: false.
+         */
+        "disabled"?: boolean;
         /**
           * The name of the icon. If both `icon` and `src` are provided, `icon` will be used.
          */

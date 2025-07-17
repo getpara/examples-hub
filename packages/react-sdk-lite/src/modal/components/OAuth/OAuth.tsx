@@ -19,7 +19,7 @@ export const OAuth = ({ methods }: OAuthProps) => {
   const isDark = useStore(state => state.isDarkTheme);
   const setStep = useModalStore(state => state.setStep);
   const showAll = useModalStore(state => state.step === ModalStep.AUTH_MORE || state.step === ModalStep.AUTH_GUEST_SIGNUP);
-  const { verifyFarcaster, verifyOAuth } = useAuthActions();
+  const { verifyFarcaster, verifyOAuth, isOAuthReady } = useAuthActions();
 
   const hasMore = methods.length > HAS_MORE_LENGTH;
 
@@ -57,6 +57,7 @@ export const OAuth = ({ methods }: OAuthProps) => {
           onClick={handleMethodClick(method)}
           $index={index}
           $totalItems={showMoreButton ? HAS_MORE_LENGTH : methodsToShow.length}
+          disabled={!isOAuthReady}
         />
       ))}
       {showMoreButton && (
@@ -66,6 +67,7 @@ export const OAuth = ({ methods }: OAuthProps) => {
           onClick={handleShowAll}
           $index={HAS_MORE_LENGTH - 1}
           $totalItems={HAS_MORE_LENGTH}
+          disabled={!isOAuthReady}
         />
       )}
     </OAuthContainer>

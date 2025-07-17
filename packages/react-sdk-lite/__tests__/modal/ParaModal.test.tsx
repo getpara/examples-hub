@@ -61,6 +61,9 @@ describe('ParaModal', () => {
   it('renders first screen', async () => {
     const para = new Para(Environment.DEV, 'apikey123');
     await (para as unknown as any).ready();
+
+    (para as unknown as any).prepareLogin = vi.fn().mockResolvedValue('testId');
+
     render(
       <QueryClientProvider client={queryClient}>
         <ParaProvider

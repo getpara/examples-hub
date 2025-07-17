@@ -8,6 +8,12 @@ import { IconType } from '../../interface.js';
 })
 export class CpslTileButton {
   /**
+   * If the button is disabled.
+   * Default is: false.
+   */
+  @Prop({ reflect: true }) disabled?: boolean = false;
+
+  /**
    * The external source of the icon. If both `icon` and `src` are provided, `icon` will be used.
    */
   @Prop() src?: string;
@@ -19,8 +25,12 @@ export class CpslTileButton {
 
   render() {
     return (
-      <Host>
-        <button class="button-native">
+      <Host
+        class={{
+          disabled: this.disabled,
+        }}
+      >
+        <button class="button-native" disabled={this.disabled}>
           <cpsl-icon exportparts="icon" src={this.src} icon={this.icon} />
           <slot></slot>
         </button>

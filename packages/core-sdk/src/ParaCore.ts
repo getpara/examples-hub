@@ -2402,16 +2402,14 @@ export abstract class ParaCore implements CoreInterface {
    * @param {string} [opts.appScheme] the app scheme to redirect to after the OAuth flow. This is for mobile only.
    * @returns {string} the URL for the user to log in with OAuth.
    */
-  async #getOAuthUrl({
+  #getOAuthUrl({
     method,
     appScheme,
     accountLinkInProgress,
-    ...params
+    sessionLookupId,
   }: CoreMethodParams<'getOAuthUrl'> & {
     accountLinkInProgress?: AccountLinkInProgress;
-  }): CoreMethodResponse<'getOAuthUrl'> {
-    const sessionLookupId = params.sessionLookupId ?? (await this.#prepareLogin());
-
+  }): Awaited<CoreMethodResponse<'getOAuthUrl'>> {
     return constructUrl({
       base: getBaseOAuthUrl(this.ctx.env),
       path: `/auth/${method}`,
@@ -2429,6 +2427,14 @@ export abstract class ParaCore implements CoreInterface {
   }
 
   async getOAuthUrl(opts: CoreMethodParams<'getOAuthUrl'>): CoreMethodResponse<'getOAuthUrl'> {
+    const sessionLookupId = opts.sessionLookupId ?? (await this.prepareLogin());
+
+    return this.#getOAuthUrl({ ...opts, sessionLookupId });
+  }
+
+  getOAuthUrlSync(
+    opts: Omit<CoreMethodParams<'getOAuthUrl'>, 'sessionLookupId'> & { sessionLookupId: string },
+  ): Awaited<CoreMethodResponse<'getOAuthUrl'>> {
     return this.#getOAuthUrl(opts);
   }
 
@@ -2466,7 +2472,7 @@ export abstract class ParaCore implements CoreInterface {
         accountLinkInProgress = await this.#assertIsLinkingAccountOrStart(method);
         sessionLookupId = (await this.touchSession()).sessionLookupId;
       } else {
-        sessionLookupId = await this.#prepareLogin();
+        sessionLookupId = await this.prepareLogin();
       }
 
       const oAuthUrl = await this.#getOAuthUrl({ method, appScheme, sessionLookupId, accountLinkInProgress });
@@ -3849,7 +3855,7 @@ export abstract class ParaCore implements CoreInterface {
     | (T extends ServerAuthStateSignup ? AuthStateSignup : never)
   > {
     if (!opts.sessionLookupId && serverAuthState.stage === 'login') {
-      opts.sessionLookupId = await this.#prepareLogin();
+      opts.sessionLookupId = await this.prepareLogin();
     }
 
     const { auth, externalWallet, userId, displayName, pfpUrl, username } = serverAuthState;
@@ -3904,7 +3910,7 @@ export abstract class ParaCore implements CoreInterface {
     return authState;
   }
 
-  async #prepareLogin(): Promise<string> {
+  protected async prepareLogin(): InternalMethodResponse<'prepareLogin'> {
     await this.logout();
     const { sessionLookupId } = await this.touchSession(true);
 
