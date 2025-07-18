@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:web3dart/web3dart.dart';
 import 'package:solana/solana.dart' as solana;
+import 'package:solana/encoder.dart';
 import '../features/auth/models/external_wallet_provider.dart';
 import '../client/para.dart';
 
@@ -113,7 +114,7 @@ class _ExternalWalletDemoScreenState extends State<ExternalWalletDemoScreen> {
             lamports: lamports,
           );
           
-          // Create message
+          // Create message with recent blockhash
           final message = solana.Message(
             instructions: [transferInstruction],
           );
@@ -124,8 +125,28 @@ class _ExternalWalletDemoScreenState extends State<ExternalWalletDemoScreen> {
             feePayer: fromPubkey,
           );
           
-          // Serialize the compiled message
-          final serializedMessage = Uint8List.fromList(compiledMessage.toByteArray().toList());
+          // Create unsigned transaction
+          // Phantom expects a transaction with empty signatures
+          final dummySignature = solana.Signature(
+            List.filled(64, 0), // 64 zero bytes for empty signature
+            publicKey: fromPubkey,
+          );
+          
+          final unsignedTx = solana.SignedTx(
+            compiledMessage: compiledMessage,
+            signatures: [dummySignature], // Empty signature for Phantom to fill
+          );
+          
+          // Serialize the transaction
+          final serializedMessage = unsignedTx.encode();
+          
+          // Debug: Log transaction details
+          print('Transaction details:');
+          print('  From: ${widget.address}');
+          print('  To: $testAddress');
+          print('  Amount: $lamports lamports (0.001 SOL)');
+          print('  Blockhash: ${recentBlockhash.value.blockhash}');
+          print('  Serialized size: ${serializedMessage.length} bytes');
           
           // Send via Phantom connector using the new method
           final signature = await phantomConnector.signAndSendTransactionBytes(serializedMessage);
