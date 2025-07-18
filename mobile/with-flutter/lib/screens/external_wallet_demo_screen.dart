@@ -1,8 +1,10 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:web3dart/web3dart.dart';
 import 'package:solana/solana.dart' as solana;
 import 'package:solana/encoder.dart';
+import 'package:para/para.dart' as para_sdk;
 import '../features/auth/models/external_wallet_provider.dart';
 import '../client/para.dart';
 
@@ -127,43 +129,81 @@ class _ExternalWalletDemoScreenState extends State<ExternalWalletDemoScreen> {
           
           // Create unsigned transaction
           // Phantom expects a transaction with empty signatures
-          final dummySignature = solana.Signature(
+          final dummySignature = Signature(
             List.filled(64, 0), // 64 zero bytes for empty signature
             publicKey: fromPubkey,
           );
           
-          final unsignedTx = solana.SignedTx(
+          final unsignedTx = SignedTx(
             compiledMessage: compiledMessage,
             signatures: [dummySignature], // Empty signature for Phantom to fill
           );
           
-          // Serialize the transaction
-          final serializedMessage = unsignedTx.encode();
+          // Serialize the transaction - encode() returns base64 string
+          final serializedBase64 = unsignedTx.encode();
+          
+          // Convert base64 to bytes
+          final serializedMessage = base64Decode(serializedBase64);
           
           // Debug: Log transaction details
-          print('Transaction details:');
-          print('  From: ${widget.address}');
-          print('  To: $testAddress');
-          print('  Amount: $lamports lamports (0.001 SOL)');
-          print('  Blockhash: ${recentBlockhash.value.blockhash}');
-          print('  Serialized size: ${serializedMessage.length} bytes');
+          debugPrint('Transaction details:');
+          debugPrint('  From: ${widget.address}');
+          debugPrint('  To: $testAddress');
+          debugPrint('  Amount: $lamports lamports (0.001 SOL)');
+          debugPrint('  Blockhash: ${recentBlockhash.value.blockhash}');
+          debugPrint('  Serialized size: ${serializedMessage.length} bytes');
           
-          // Send via Phantom connector using the new method
-          final signature = await phantomConnector.signAndSendTransactionBytes(serializedMessage);
+          // Get signed transaction from Phantom (returns base58 encoded signed tx)
+          final signedTxBase58 = await phantomConnector.signTransactionBytes(serializedMessage);
           
-          setState(() {
-            _transactionHash = signature;
-          });
+          // Debug log
+          debugPrint('Received signed transaction from Phantom');
+          
+          // Send the signed transaction to the network
+          try {
+            // Convert signed transaction to base64 for RPC using helper
+            final signedTxBase64 = para_sdk.ParaPhantomTransactionHelper.signedTransactionToBase64(signedTxBase58);
+            
+            // Send to Solana network
+            final signature = await solanaClient.rpcClient.sendTransaction(
+              signedTxBase64,
+              preflightCommitment: solana.Commitment.confirmed,
+            );
+            
+            setState(() {
+              _transactionHash = signature;
+            });
 
-          _showSuccessDialog(
-            'Transaction Sent!', 
-            'Real Solana transaction sent successfully!\n\n'
-            'To: $testAddress\n'
-            'Amount: 0.001 SOL\n'
-            'Network: Solana Devnet\n\n'
-            'Transaction Signature:\n$signature\n\n'
-            '⚠️ This is a real transaction on Solana Devnet.'
-          );
+            _showSuccessDialog(
+              'Transaction Sent!', 
+              'Real Solana transaction sent successfully!\n\n'
+              'To: $testAddress\n'
+              'Amount: 0.001 SOL\n'
+              'Network: Solana Devnet\n\n'
+              'Transaction Signature:\n$signature\n\n'
+              '⚠️ This is a real transaction on Solana Devnet.'
+            );
+          } catch (sendError) {
+            // Handle specific Solana errors
+            final errorString = sendError.toString();
+            
+            if (errorString.contains('no record of a prior credit') || 
+                errorString.contains('insufficient') ||
+                errorString.contains('0x1')) {
+              _showErrorDialog('Insufficient Balance', 
+                'Your wallet needs SOL to pay for transaction fees.\n\n'
+                'Current network: Solana Devnet\n'
+                'Wallet: ${widget.address}\n\n'
+                'To get free devnet SOL:\n'
+                '1. Copy your wallet address (tap the copy button)\n'
+                '2. Visit https://faucet.solana.com\n'
+                '3. Paste your address and request SOL\n\n'
+                'Note: Make sure Phantom is set to Devnet network!');
+            } else {
+              _showErrorDialog('Transaction Send Failed', 
+                'Transaction was signed by Phantom but failed to send:\n\n$errorString');
+            }
+          }
         } catch (e) {
           // Handle errors
           String errorMessage = e.toString();
@@ -174,16 +214,6 @@ class _ExternalWalletDemoScreenState extends State<ExternalWalletDemoScreen> {
             _showErrorDialog('Insufficient Balance', 
               'You need SOL in your wallet to pay for transaction fees.\n\n'
               'Visit https://faucet.solana.com to get free devnet SOL.');
-          } else if (errorMessage.contains('RangeError')) {
-            // This is expected with the current solana_web3 package limitations
-            _showErrorDialog('Phantom Transaction', 
-              'The Phantom connector is working, but the solana_web3 package '
-              'has limitations with transaction deserialization.\n\n'
-              'In a production app, you would:\n'
-              '1. Build the transaction (✓ working)\n'
-              '2. Pass it to Phantom differently\n'
-              '3. Or use Para SDK\'s native wallet instead\n\n'
-              'Error: $errorMessage');
           } else {
             _showErrorDialog('Transaction Failed', errorMessage);
           }
