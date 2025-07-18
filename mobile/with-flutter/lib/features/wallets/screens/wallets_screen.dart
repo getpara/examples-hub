@@ -22,7 +22,7 @@ class _WalletsScreenState extends State<WalletsScreen> {
   List<Wallet> _wallets = [];
   bool _isLoading = true;
   bool _isRefreshing = false;
-  bool _isCreatingWallet = false;
+  WalletType? _creatingWalletType;
   String? _error;
 
   @override
@@ -78,18 +78,20 @@ class _WalletsScreenState extends State<WalletsScreen> {
     }
   }
 
-  Future<void> _createWallet(WalletType type) async {
-    setState(() => _isCreatingWallet = true);
+  Future<void> _createWallet(WalletType type, StateSetter setModalState) async {
+    setState(() => _creatingWalletType = type);
+    setModalState(() => _creatingWalletType = type);
     
     try {
       await para.createWallet(type: type, skipDistribute: false);
       await _loadWallets();
       if (mounted) {
+        setState(() => _creatingWalletType = null);
         Navigator.of(context).pop();
       }
     } catch (e) {
       if (mounted) {
-        setState(() => _isCreatingWallet = false);
+        setState(() => _creatingWalletType = null);
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Create wallet failed: ${e.toString()}')),
@@ -102,59 +104,62 @@ class _WalletsScreenState extends State<WalletsScreen> {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.white,
+      isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (context) => SafeArea(
-        child: Container(
-          height: 240,
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-            const Text(
-              'Select Wallet Type',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: Colors.black,
-              ),
-            ),
-            const SizedBox(height: 24),
-            ...WalletType.values.map((type) => Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: _isCreatingWallet 
-                    ? null 
-                    : () => _createWallet(type),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.black,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  child: _isCreatingWallet
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                        ),
-                      )
-                    : Text(
-                        type.value,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w500,
-                          color: Colors.white,
-                        ),
-                      ),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setModalState) => SafeArea(
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+              const Text(
+                'Select Wallet Type',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black,
                 ),
               ),
-            )),
-            ],
+              const SizedBox(height: 24),
+              ...WalletType.values.map((type) => Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: ElevatedButton(
+                    onPressed: _creatingWalletType != null 
+                      ? null 
+                      : () => _createWallet(type, setModalState),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.black,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    child: _creatingWalletType == type
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        )
+                      : Text(
+                          type.value,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w500,
+                            color: Colors.white,
+                          ),
+                        ),
+                  ),
+                ),
+              )),
+              ],
+            ),
           ),
         ),
       ),
