@@ -9,7 +9,7 @@ import { coinbaseWallet, injected, metaMask, walletConnect } from "wagmi/connect
 import { sepolia } from "wagmi/chains";
 
 const connector = paraConnector({
-  appName: "Para RainbowKit Example",
+  appName: "Para Wagmi Example",
   authLayout: ["AUTH:FULL", "EXTERNAL:FULL"],
   chains: [sepolia],
   disableEmailLogin: false,

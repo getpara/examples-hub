@@ -5,7 +5,7 @@
   "scripts": {
     "build": "next build",
     "dev": "next dev",
-    "lint": "next lint",
+    "lint": "eslint .",
     "start": "next start",
     "anchor:build": "anchor build",
     "anchor:deploy": "anchor deploy --program-name transfer_tokens --program-keypair target/deploy/transfer_tokens-keypair.json",
@@ -29,14 +29,15 @@
     "tweetnacl-util": "0.15.1"
   },
   "devDependencies": {
+    "@eslint/js": "^9.29.0",
     "@types/node": "22.10.10",
     "@types/react": "19",
     "@types/react-dom": "19",
     "eslint": "^9.29.0",
-    "eslint-config-next": "^15.3.4",
     "postcss": "8",
     "tailwindcss": "4.1.10",
     "ts-node": "10.9.2",
-    "typescript": "5.7.3"
+    "typescript": "5.7.3",
+    "typescript-eslint": "^8.29.0"
   }
 }

@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -69,15 +69,16 @@
   },
   "devDependencies": {
     "@0xsquid/squid-types": "^0.1.160",
+    "@eslint/js": "^9.29.0",
     "@tailwindcss/postcss": "^4.1.7",
     "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "cosmjs-types": "^0.9.0",
-    "eslint": "latest",
-    "eslint-config-next": "latest",
+    "eslint": "^9.29.0",
     "postcss": "^8",
     "tailwindcss": "^4.1.7",
-    "typescript": "^5"
+    "typescript": "^5",
+    "typescript-eslint": "^8.22.0"
   }
 }

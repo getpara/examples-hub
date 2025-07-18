@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useAccount } from "@getpara/react-sdk";
+import { useAccount, getCosmosAddress } from "@getpara/react-sdk";
 import { useParaSigner } from "@/hooks/useParaSigner";
 import { useAccountAddress } from "@/hooks/useAccountAddress";
 import { fromBase64 } from "@cosmjs/encoding";
