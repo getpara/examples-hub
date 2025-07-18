@@ -957,7 +957,7 @@ packages:
     source: hosted
     version: "0.0.1"
   solana_web3:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: solana_web3
       sha256: "706b76a475e74dae5ffb523b66c0c51cc73f8e2a137bf418debaba096b42510c"
