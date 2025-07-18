@@ -4,7 +4,6 @@
   "dependencies": {
     "@getpara/core-sdk": "2.0.0-alpha.33",
     "@getpara/user-management-client": "2.0.0-alpha.33",
-    "@sentry/browser": "^9.1.0",
     "base64url": "^3.0.1",
     "buffer": "6.0.3",
     "cbor-web": "^9.0.2",

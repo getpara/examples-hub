@@ -5,22 +5,11 @@ import ParaCore, {
   CoreMethodParams,
   CoreMethodResponse,
 } from '@getpara/core-sdk';
-import * as Sentry from '@sentry/node';
 import { ServerUtils } from './ServerUtils.js';
 
 export class Para extends ParaCore {
   constructor(env: Environment, apiKey?: string, opts?: ConstructorOpts) {
     super(env, apiKey, opts);
-
-    // Starting with non-prod environments to monitor error reporting;
-    // production will be enabled after further testing.
-    /* v8 ignore next 6 */
-    if (env !== Environment.PROD && env !== Environment.DEV) {
-      Sentry.init({
-        environment: env.toLowerCase(),
-        dsn: 'https://2a26842d951255c2721fde5c1dd2b252@o4504568036720640.ingest.us.sentry.io/4508850906791936',
-      });
-    }
   }
 
   async ready() {
