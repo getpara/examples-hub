@@ -1,14 +1,14 @@
 {
   "name": "@getpara/react-sdk",
-  "version": "2.0.0-alpha.32",
+  "version": "2.0.0-alpha.33",
   "bin": {
     "setup-para": "dist/cli/cli.mjs"
   },
   "dependencies": {
-    "@getpara/cosmos-wallet-connectors": "2.0.0-alpha.32",
-    "@getpara/evm-wallet-connectors": "2.0.0-alpha.32",
-    "@getpara/solana-wallet-connectors": "2.0.0-alpha.32",
-    "@getpara/react-sdk-lite": "2.0.0-alpha.32"
+    "@getpara/cosmos-wallet-connectors": "2.0.0-alpha.33",
+    "@getpara/evm-wallet-connectors": "2.0.0-alpha.33",
+    "@getpara/react-sdk-lite": "2.0.0-alpha.33",
+    "@getpara/solana-wallet-connectors": "2.0.0-alpha.33"
   },
   "devDependencies": {
     "@types/react": "^18.0.31",

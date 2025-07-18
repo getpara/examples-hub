@@ -1,3 +1,42 @@
+# Release (Thu Jul 17 2025)
+
+## Package Versions
+- @getpara/web-sdk@2.0.0-alpha.33
+- @getpara/wagmi-v2-integration@2.0.0-alpha.33
+- @getpara/wagmi-v2-connector@2.0.0-alpha.33
+- @getpara/viem-v2-integration@2.0.0-alpha.33
+- @getpara/viem-v1-integration@2.0.0-alpha.33
+- @getpara/user-management-client@2.0.0-alpha.33
+- @getpara/solana-web3.js-v1-integration@2.0.0-alpha.33
+- @getpara/solana-wallet-connectors@2.0.0-alpha.33
+- @getpara/solana-signers-v2-integration@2.0.0-alpha.33
+- @getpara/server-sdk@2.0.0-alpha.33
+- @getpara/react-sdk-lite@2.0.0-alpha.33
+- @getpara/react-sdk@2.0.0-alpha.33
+- @getpara/react-native-wallet@2.0.0-alpha.33
+- @getpara/react-components@2.0.0-alpha.33
+- @getpara/react-component-library@1.0.0-alpha.28
+- @getpara/react-common@2.0.0-alpha.33
+- @getpara/evm-wallet-connectors@2.0.0-alpha.33
+- @getpara/ethers-v6-integration@2.0.0-alpha.33
+- @getpara/ethers-v5-integration@2.0.0-alpha.33
+- @getpara/cosmos-wallet-connectors@2.0.0-alpha.33
+- @getpara/cosmjs-v0-integration@2.0.0-alpha.33
+- @getpara/core-sdk@2.0.0-alpha.33
+- @getpara/core-components@2.0.0-alpha.33
+
+### Features
+- Add react-sdk-lite (#1071) - 8b77ec12a
+- Support Farcaster mini-app Solana wallets (#1096) - f06c6cd79
+- Improved Farcaster mini-app configuration (#1091) - e88228fe7
+
+### Fixes
+- OAuth popup not opening on some browsers (#1101) - 7bf3886a7
+- Dev Portal - Initial Loader (#1097) - dcf2fcfe5
+
+### Chores
+- require docs link in title instead of PR body (#1100) - 93a6253ab
+
 # Release (Thu Jul 10 2025)
 
 ## Package Versions
