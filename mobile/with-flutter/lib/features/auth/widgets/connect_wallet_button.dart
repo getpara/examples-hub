@@ -22,7 +22,7 @@ class ConnectWalletButton extends StatelessWidget {
         child: ElevatedButton(
           onPressed: isLoading ? null : onPressed,
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFFF5F5F5), // Light grey background like iOS
+            backgroundColor: const Color(0xFFE5E5E5), // Slightly darker grey background
             foregroundColor: Colors.black,
             elevation: 0,
             shape: RoundedRectangleBorder(

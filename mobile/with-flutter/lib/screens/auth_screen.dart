@@ -290,23 +290,29 @@ class _AuthScreenState extends State<AuthScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  SocialAuthButton(
-                    provider: SocialProvider.google,
-                    isLoading: _loadingProvider == SocialProvider.google,
-                    onPressed: () => _handleSocialAuth(SocialProvider.google),
-                  ),
-                  const SizedBox(width: 12),
-                  if (Platform.isIOS)
-                    SocialAuthButton(
-                      provider: SocialProvider.apple,
-                      isLoading: _loadingProvider == SocialProvider.apple,
-                      onPressed: () => _handleSocialAuth(SocialProvider.apple),
+                  Flexible(
+                    child: SocialAuthButton(
+                      provider: SocialProvider.google,
+                      isLoading: _loadingProvider == SocialProvider.google,
+                      onPressed: () => _handleSocialAuth(SocialProvider.google),
                     ),
-                  if (Platform.isIOS) const SizedBox(width: 12),
-                  SocialAuthButton(
-                    provider: SocialProvider.discord,
-                    isLoading: _loadingProvider == SocialProvider.discord,
-                    onPressed: () => _handleSocialAuth(SocialProvider.discord),
+                  ),
+                  const SizedBox(width: 8),
+                  if (Platform.isIOS)
+                    Flexible(
+                      child: SocialAuthButton(
+                        provider: SocialProvider.apple,
+                        isLoading: _loadingProvider == SocialProvider.apple,
+                        onPressed: () => _handleSocialAuth(SocialProvider.apple),
+                      ),
+                    ),
+                  if (Platform.isIOS) const SizedBox(width: 8),
+                  Flexible(
+                    child: SocialAuthButton(
+                      provider: SocialProvider.discord,
+                      isLoading: _loadingProvider == SocialProvider.discord,
+                      onPressed: () => _handleSocialAuth(SocialProvider.discord),
+                    ),
                   ),
                 ],
               ),
@@ -370,12 +376,6 @@ class _AuthScreenState extends State<AuthScreen> {
                           fontSize: 12,
                           color: Colors.grey[600],
                         ),
-                      ),
-                      const SizedBox(width: 4),
-                      Image.asset(
-                        'lib/assets/app_icon.png',
-                        width: 12,
-                        height: 12,
                       ),
                       const SizedBox(width: 4),
                       const Text(

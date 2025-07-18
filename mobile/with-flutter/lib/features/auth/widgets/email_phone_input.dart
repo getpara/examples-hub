@@ -92,61 +92,188 @@ class _EmailPhoneInputState extends State<EmailPhoneInput> {
 
   Widget _buildInputWidget() {
     if (_isPhoneMode) {
-      return TextField(
-        controller: _controller,
-        focusNode: _focusNode,
-        keyboardType: TextInputType.phone,
-        autocorrect: false,
-        style: const TextStyle(color: Colors.black),
-        inputFormatters: [
-          FilteringTextInputFormatter.allow(RegExp(r'[\d]')),
-        ],
-        maxLines: 1,
-        decoration: InputDecoration(
-          prefix: CountryCodePicker(
-            onChanged: (countryCode) =>
-                setState(() => _selectedCountryCode = countryCode),
-            initialSelection: 'US',
-            favorite: const ['+1', 'US'],
-            showCountryOnly: false,
-            showOnlyCountryWhenClosed: false,
-            alignLeft: false,
-            dialogTextStyle: const TextStyle(color: Colors.black),
-            searchStyle: const TextStyle(color: Colors.black),
-            searchDecoration: InputDecoration(
-              hintText: 'Search',
-              hintStyle: TextStyle(color: Colors.grey[600]),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Country code picker as a separate widget
+          SizedBox(
+            height: 48, // Fixed height to match text field
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border.all(
+                    color: _focusNode.hasFocus
+                        ? Theme.of(context).primaryColor
+                        : Colors.grey[400]!,
+                    width: 0.5, // Make border thinner
+                ),
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(8),
+                  bottomLeft: Radius.circular(8),
+                ),
+                color: Colors.grey[100],
+              ),
+              child: Theme(
+                data: Theme.of(context).copyWith(
+                  appBarTheme: const AppBarTheme(
+                    backgroundColor: Colors.white,
+                    foregroundColor: Colors.black,
+                    titleTextStyle: TextStyle(
+                      color: Colors.black,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  dialogTheme: const DialogTheme(
+                    backgroundColor: Colors.white,
+                    titleTextStyle: TextStyle(
+                      color: Colors.black,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  textTheme: Theme.of(context).textTheme.copyWith(
+                    titleLarge: const TextStyle(
+                      color: Colors.black,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    bodyLarge: const TextStyle(
+                      color: Colors.black,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+                child: CountryCodePicker(
+                  onChanged: (countryCode) =>
+                      setState(() => _selectedCountryCode = countryCode),
+                  initialSelection: 'US',
+                  favorite: const ['+1', 'US'],
+                  showCountryOnly: false,
+                  showOnlyCountryWhenClosed: false,
+                  alignLeft: false,
+                  hideHeaderText: true, // Hide the "select country" header
+                  hideSearch: true, // Hide the search bar
+                  dialogTextStyle: const TextStyle(
+                    color: Colors.black,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  searchStyle: const TextStyle(
+                    color: Colors.black,
+                    fontSize: 16,
+                  ),
+                  searchDecoration: InputDecoration(
+                    hintText: 'Search',
+                    hintStyle: TextStyle(color: Colors.grey[600]),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: Colors.grey[300]!),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: Colors.grey[300]!),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: Theme.of(context).primaryColor),
+                    ),
+                    filled: true,
+                    fillColor: Colors.grey[50],
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  ),
+                  textStyle: const TextStyle(color: Colors.black, fontSize: 14),
+                  padding: EdgeInsets.zero,
+                  dialogSize: const Size(400, 600), // Much larger dialog
+                  dialogBackgroundColor: Colors.white,
+                  barrierColor: Colors.black.withOpacity(0.5),
+                ),
               ),
             ),
           ),
-          hintText: 'Phone number',
-          hintStyle: TextStyle(color: Colors.grey[600]),
-          border: InputBorder.none,
-          filled: true,
-          fillColor: Colors.transparent,
-          isDense: true,
-          contentPadding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-        ),
+          // Phone number input
+          Expanded(
+            child: SizedBox(
+              height: 48, // Fixed height to match country picker
+              child: TextField(
+                controller: _controller,
+                focusNode: _focusNode,
+                keyboardType: TextInputType.phone,
+                autocorrect: false,
+                style: const TextStyle(color: Colors.black),
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'[\d\s\-\(\)]')),
+                ],
+                maxLines: 1,
+                decoration: InputDecoration(
+                  hintText: 'Phone number',
+                  hintStyle: TextStyle(color: Colors.grey[600]),
+                  border: OutlineInputBorder(
+                    borderRadius: const BorderRadius.only(
+                      topRight: Radius.circular(8),
+                      bottomRight: Radius.circular(8),
+                    ),
+                    borderSide: BorderSide(
+                      color: _focusNode.hasFocus
+                          ? Theme.of(context).primaryColor
+                          : Colors.grey[400]!,
+                      width: 0.5, // Make border thinner
+                    ),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: const BorderRadius.only(
+                      topRight: Radius.circular(8),
+                      bottomRight: Radius.circular(8),
+                    ),
+                    borderSide: BorderSide(color: Colors.grey[400]!, width: 0.5),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: const BorderRadius.only(
+                      topRight: Radius.circular(8),
+                      bottomRight: Radius.circular(8),
+                    ),
+                    borderSide: BorderSide(color: Theme.of(context).primaryColor, width: 0.5),
+                  ),
+                  filled: true,
+                  fillColor: Colors.grey[100],
+                  isDense: true,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
+                ),
+              ),
+            ),
+          ),
+        ],
       );
     } else {
-      return TextField(
-        controller: _controller,
-        focusNode: _focusNode,
-        keyboardType: TextInputType.emailAddress,
-        autocorrect: false,
-        style: const TextStyle(color: Colors.black),
-        maxLines: 1,
-        decoration: InputDecoration(
-          prefixIcon: Icon(Icons.email_outlined, color: Colors.grey[600]),
-          hintText: 'Email address',
-          hintStyle: TextStyle(color: Colors.grey[600]),
-          border: InputBorder.none,
-          filled: true,
-          fillColor: Colors.transparent,
-          isDense: true,
-          contentPadding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+      return SizedBox(
+        height: 48, // Same height as phone input
+        child: TextField(
+          controller: _controller,
+          focusNode: _focusNode,
+          keyboardType: TextInputType.emailAddress,
+          autocorrect: false,
+          style: const TextStyle(color: Colors.black),
+          maxLines: 1,
+          decoration: InputDecoration(
+            prefixIcon: Icon(Icons.email_outlined, color: Colors.grey[600]),
+            hintText: 'Email address',
+            hintStyle: TextStyle(color: Colors.grey[600]),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: Colors.grey[400]!, width: 0.5),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: Colors.grey[400]!, width: 0.5),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: Theme.of(context).primaryColor, width: 0.5),
+            ),
+            filled: true,
+            fillColor: Colors.grey[100],
+            isDense: true,
+            contentPadding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
+          ),
         ),
       );
     }
@@ -188,17 +315,7 @@ class _EmailPhoneInputState extends State<EmailPhoneInput> {
           ),
         ),
         const SizedBox(height: 12),
-        Container(
-          decoration: BoxDecoration(
-            border: Border.all(
-                color: _focusNode.hasFocus
-                    ? Theme.of(context).primaryColor
-                    : Colors.grey[400]!),
-            borderRadius: BorderRadius.circular(8),
-            color: Colors.grey[100],
-          ),
-          child: _buildInputWidget(),
-        ),
+        _buildInputWidget(),
         if (_errorText != null)
           Padding(
             padding: const EdgeInsets.only(top: 8.0),
