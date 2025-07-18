@@ -68,7 +68,7 @@ struct CosmosWalletView: View {
                 transactionOperationsCard
                 walletManagementCard
             }
-            .padding()
+            .padding(.horizontal)
         }
         .navigationTitle("Cosmos Wallet")
         .alert(item: Binding(

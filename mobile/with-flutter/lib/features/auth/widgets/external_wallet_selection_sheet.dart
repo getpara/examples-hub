@@ -4,12 +4,10 @@ import '../models/external_wallet_provider.dart';
 
 class ExternalWalletSelectionSheet extends StatefulWidget {
   final Function(ExternalWalletProvider) onWalletSelected;
-  final ExternalWalletProvider? loadingProvider;
 
   const ExternalWalletSelectionSheet({
     super.key,
     required this.onWalletSelected,
-    this.loadingProvider,
   });
 
   @override
@@ -17,6 +15,7 @@ class ExternalWalletSelectionSheet extends StatefulWidget {
 }
 
 class _ExternalWalletSelectionSheetState extends State<ExternalWalletSelectionSheet> {
+  ExternalWalletProvider? _loadingProvider;
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -102,10 +101,15 @@ class _ExternalWalletSelectionSheetState extends State<ExternalWalletSelectionSh
     required String subtitle,
     required String iconPath,
   }) {
-    final isLoading = widget.loadingProvider == provider;
+    final isLoading = _loadingProvider == provider;
     
     return GestureDetector(
-      onTap: isLoading ? null : () => widget.onWalletSelected(provider),
+      onTap: isLoading ? null : () {
+        setState(() {
+          _loadingProvider = provider;
+        });
+        widget.onWalletSelected(provider);
+      },
       child: Semantics(
         button: true,
         label: 'Connect with $title wallet',
@@ -132,6 +136,9 @@ class _ExternalWalletSelectionSheetState extends State<ExternalWalletSelectionSh
                   iconPath,
                   width: 32,
                   height: 32,
+                  colorFilter: provider == ExternalWalletProvider.phantom 
+                    ? const ColorFilter.mode(Color(0xFFAB9FF2), BlendMode.srcIn)
+                    : null,
                 ),
               ),
             ),

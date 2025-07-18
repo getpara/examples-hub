@@ -127,6 +127,7 @@ class _OTPVerificationSheetState extends State<OTPVerificationSheet> {
                     key: Key('otp_field_$index'),
                     controller: _controllers[index],
                     focusNode: _focusNodes[index],
+                    autofocus: index == 0,
                     textAlign: TextAlign.center,
                     keyboardType: TextInputType.number,
                     maxLength: 1,

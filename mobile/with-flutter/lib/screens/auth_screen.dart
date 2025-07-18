@@ -25,7 +25,6 @@ class AuthScreen extends StatefulWidget {
 
 class _AuthScreenState extends State<AuthScreen> {
   SocialProvider? _loadingProvider;
-  ExternalWalletProvider? _loadingExternalWallet;
   bool _isProcessing = false;
   late final FlutterWebAuthSession _webAuthSession;
 
@@ -208,22 +207,11 @@ class _AuthScreenState extends State<AuthScreen> {
       useSafeArea: true,
       builder: (context) => ExternalWalletSelectionSheet(
         onWalletSelected: _handleExternalWalletAuth,
-        loadingProvider: _loadingExternalWallet,
       ),
-    ).whenComplete(() {
-      // Reset loading state if sheet is dismissed without selection
-      if (mounted && _loadingExternalWallet != null) {
-        setState(() => _loadingExternalWallet = null);
-      }
-    });
+    );
   }
 
   Future<void> _handleExternalWalletAuth(ExternalWalletProvider provider) async {
-    // Prevent double-tap issues
-    if (_loadingExternalWallet != null) return;
-    
-    setState(() => _loadingExternalWallet = provider);
-
     try {
       String? address;
       if (provider == ExternalWalletProvider.phantom) {
@@ -245,6 +233,12 @@ class _AuthScreenState extends State<AuthScreen> {
             ),
           ),
         );
+      } else if (mounted && address == null) {
+        // No address returned - close sheet and show error
+        Navigator.pop(context); // Close the sheet
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No wallet address found')),
+        );
       }
     } catch (e) {
       if (mounted) {
@@ -252,10 +246,6 @@ class _AuthScreenState extends State<AuthScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('External wallet connection failed: ${e.toString()}')),
         );
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _loadingExternalWallet = null);
       }
     }
   }
@@ -353,7 +343,6 @@ class _AuthScreenState extends State<AuthScreen> {
               // External Wallet button
               ConnectWalletButton(
                 onPressed: _showExternalWalletSelection,
-                isLoading: _loadingExternalWallet != null,
               ),
               const SizedBox(height: 48),
               // Footer
