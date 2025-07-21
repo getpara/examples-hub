@@ -26,8 +26,8 @@ const ConnectMockWallet = () => {
 
   const mockWallet = wallets[0];
 
-  expect(mockWallet.id).toBe('mock');
-  expect(wallets[1].id).toBe('para');
+  expect(mockWallet.id).toBe('Mock');
+  expect(wallets[1].id).toBe('Para');
 
   useEffect(() => {
     const connect = async () => {

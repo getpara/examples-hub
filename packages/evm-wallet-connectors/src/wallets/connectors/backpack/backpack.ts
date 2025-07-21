@@ -17,7 +17,7 @@ export const backpackWallet = ({ projectId, walletConnectParameters }: BackpackW
     id: 'backpack',
     internalId: 'BACKPACK',
     name: 'Backpack',
-    rdns: 'app.backpack.mobile',
+    rdns: 'app.backpack',
     iconUrl: icon,
     installed: isBackpackInjected,
     isExtension: true,

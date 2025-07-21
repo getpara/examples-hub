@@ -31,7 +31,7 @@ export function AccountProfileLink() {
     externalWalletProvider =
       accountLinkInProgress?.pendingWalletProvider ?? accountLinkInProgress?.externalWallet?.providerId,
     externalWalletType = accountLinkInProgress?.pendingWalletType ?? accountLinkInProgress?.externalWallet?.type,
-    accountLinkIcon = externalWalletProvider ?? accountLinkType,
+    externalWallet = wallets.find(w => w.id === externalWalletProvider),
     isTelegram = accountLinkType === 'TELEGRAM',
     {
       url,
@@ -78,15 +78,23 @@ export function AccountProfileLink() {
     const heroSpinner = (
       <HeroSpinner
         status={status}
-        icon={status === 'success' ? <HeroSuccessIcon /> : <HeroAccountTypeIcon accountType={accountLinkIcon!} />}
+        icon={
+          status === 'success' ? (
+            <HeroSuccessIcon />
+          ) : (
+            <HeroAccountTypeIcon
+              accountType={externalWallet ? undefined : accountLinkType}
+              src={externalWallet ? externalWallet.iconUrl : undefined}
+            />
+          )
+        }
         text={message}
       />
     );
-    ``;
 
     const onTryAgain =
       externalWalletProvider && externalWalletType
-        ? () => linkAccount({ externalWallet: { internalId: externalWalletProvider, type: externalWalletType } })
+        ? () => linkAccount({ externalWallet: { provider: externalWalletProvider, type: externalWalletType } })
         : accountLinkType && accountLinkType !== 'EXTERNAL_WALLET'
           ? () => linkAccount({ type: accountLinkType })
           : undefined;
@@ -181,7 +189,7 @@ export function AccountProfileLink() {
                       wallet={commonWallet}
                       isSelfFetching
                       onConnectWc={async w => {
-                        await linkAccount({ externalWallet: { internalId: w.internalId, type: w.type } });
+                        await linkAccount({ externalWallet: { provider: w.id, type: w.type } });
                       }}
                     />
                   );

@@ -5,15 +5,11 @@ import { getAccountTypeName } from '../../constants/oAuthLogos.js';
 import { useExternalWallets } from '../../../provider/providers/ExternalWalletProvider.js';
 import { useAccountLinking } from '../../../provider/providers/AccountLinkProvider.js';
 import { useEffect, useMemo } from 'react';
-import { EXTERNAL_WALLET_TYPES, TExternalWallet, TLinkedAccountType } from '@getpara/web-sdk';
+import { TLinkedAccountType } from '@getpara/web-sdk';
 import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
 import { safeStyled } from '@getpara/react-common';
 
-function isExternalWallet(str: TLinkedAccountType | TExternalWallet): str is TExternalWallet {
-  return (EXTERNAL_WALLET_TYPES as unknown as string[]).includes(str as string);
-}
-
-type Option = Exclude<TLinkedAccountType, 'EXTERNAL_WALLET'> | TExternalWallet;
+type Option = Exclude<TLinkedAccountType, 'EXTERNAL_WALLET'> | string;
 
 export function AccountProfileLinkOptions() {
   const para = useInternalClient();
@@ -33,7 +29,7 @@ export function AccountProfileLinkOptions() {
       externalWalletIndex >= 0
         ? [
             ...(accountLinkOptions.slice(0, externalWalletIndex) as Option[]),
-            ...EXTERNAL_WALLET_TYPES,
+            ...wallets.map(wallet => wallet.id as Option),
             ...(accountLinkOptions.slice(externalWalletIndex + 1) as Option[]),
           ]
         : (accountLinkOptions as Option[]);
@@ -42,14 +38,10 @@ export function AccountProfileLinkOptions() {
       new Set(
         baseOptions.filter(option => {
           if (
-            !isExternalWallet(option) ||
-            (connectedWallet?.internalId !== option &&
-              wallets.some(({ type, internalId, installed, isMobile }) => {
-                return (
-                  (installed || isMobile) &&
-                  para?.supportedWalletTypes.some(obj => obj.type === type) &&
-                  internalId === option
-                );
+            !wallets.some(wallet => wallet.id === option) ||
+            (connectedWallet?.id !== option &&
+              wallets.some(({ type, id, installed, isMobile }) => {
+                return (installed || isMobile) && para?.supportedWalletTypes.some(obj => obj.type === type) && id === option;
               }))
           ) {
             return true;
@@ -67,8 +59,8 @@ export function AccountProfileLinkOptions() {
   }, []);
 
   // Intentionally returning undefined if there is more than one option to indicate that the type selection screen is needed.
-  const getExternalWalletType = (internalId: string) => {
-    const allWallets = wallets.filter(wallet => wallet.internalId === internalId);
+  const getExternalWalletType = (id: string) => {
+    const allWallets = wallets.filter(wallet => wallet.id === id);
     if (allWallets.length === 1) {
       return allWallets[0].type;
     }
@@ -106,7 +98,7 @@ export function AccountProfileLinkOptions() {
             {options
               .filter(option => option !== 'EMAIL' && option !== 'PHONE')
               .map(option => {
-                const isWallet = isExternalWallet(option);
+                const externalWallet = wallets.find(wallet => wallet.id === option);
                 return (
                   <Option
                     fullWidth
@@ -114,15 +106,24 @@ export function AccountProfileLinkOptions() {
                     key={option}
                     onClick={() =>
                       linkAccount(
-                        isWallet
-                          ? { externalWallet: { internalId: option, type: getExternalWalletType(option) } }
-                          : { type: option },
+                        !!externalWallet
+                          ? {
+                              externalWallet: {
+                                provider: externalWallet.id,
+                                type: getExternalWalletType(externalWallet.id),
+                              },
+                            }
+                          : { type: option as any },
                       )
                     }
                   >
-                    <AccountTypeIcon accountType={option} size="24px" />
+                    <AccountTypeIcon
+                      accountType={externalWallet ? undefined : option}
+                      src={externalWallet ? externalWallet.iconUrl : undefined}
+                      size="24px"
+                    />
                     <CpslText color="contrast" variant="bodyM">
-                      {getAccountTypeName(option)}
+                      {externalWallet ? externalWallet.name : getAccountTypeName(option)}
                     </CpslText>
                   </Option>
                 );

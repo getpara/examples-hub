@@ -63,7 +63,7 @@ export const getActions = (set: StoreApi<ModalStore>['setState'], get: StoreApi<
     }
 
     if (currentStep === ModalStep.EX_WALLET_SELECTED) {
-      set({ selectedExternalWalletId: undefined, isExternalWalletConnecting: false, externalWalletError: undefined });
+      set({ selectedExternalWallet: undefined, isExternalWalletConnecting: false, externalWalletError: undefined });
     }
 
     if (prevStep) {
@@ -131,7 +131,7 @@ export const getActions = (set: StoreApi<ModalStore>['setState'], get: StoreApi<
   setIsFullyLoggedIn: isFullyLoggedIn => set({ isFullyLoggedIn }),
   setAccountAddFundTab: accountAddFundTab => set({ accountAddFundTab }),
   setGuestAddFundsTab: guestAddFundsTab => set({ guestAddFundsTab }),
-  setSelectedExternalWalletId: selectedExternalWalletId => set({ selectedExternalWalletId }),
+  setSelectedExternalWallet: selectedExternalWallet => set({ selectedExternalWallet }),
   setIsExternalWalletConnecting: isExternalWalletConnecting => set({ isExternalWalletConnecting }),
   setExternalWalletError: externalWalletError => set({ externalWalletError }),
   setIsUsingMobileConnector: isUsingMobileConnector => set({ isUsingMobileConnector }),

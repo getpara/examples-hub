@@ -7,11 +7,13 @@ import { safeStyled } from '@getpara/react-common';
 
 export function AccountProfileUnlink() {
   const { unlinkingAccount, unlinkAccountConfirm, isUnlinkAccountPending } = useAccountLinking(),
-    [accountType, setAccountType] = useState(unlinkingAccount?.externalWallet?.providerId ?? unlinkingAccount?.type);
+    [accountType, setAccountType] = useState(unlinkingAccount?.externalWallet?.providerId ?? unlinkingAccount?.type),
+    [isUnlinkingExternalWallet, setIsUnlinkingExternalWallet] = useState(false);
 
   useEffect(() => {
     if (unlinkingAccount) {
-      setAccountType(unlinkingAccount?.externalWallet?.providerId ?? unlinkingAccount?.type);
+      setAccountType(unlinkingAccount?.externalWallet?.provider ?? unlinkingAccount?.type);
+      setIsUnlinkingExternalWallet(!!unlinkingAccount?.externalWallet);
     }
   }, [unlinkingAccount]);
 
@@ -20,7 +22,8 @@ export function AccountProfileUnlink() {
       <Upper>
         <AccountTypeIcon accountType={accountType} size="80px" inset="5px" />
         <Message variant="bodyM" weight="semiBold" color="contrast">
-          Are you sure you want to unlink your {getAccountTypeName(accountType, { inline: true })}?
+          Are you sure you want to unlink your{' '}
+          {isUnlinkingExternalWallet ? accountType : getAccountTypeName(accountType, { inline: true })}?
         </Message>
       </Upper>
       <CpslButton variant="destructive" fullWidth onClick={unlinkAccountConfirm} disabled={isUnlinkAccountPending}>

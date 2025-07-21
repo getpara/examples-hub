@@ -8,30 +8,30 @@ import { useAccountLinking } from '../../../provider/providers/AccountLinkProvid
 
 export const ExternalWalletNetworkSelectStep = () => {
   const setStep = useModalStore(state => state.setStep);
-  const selectedExternalWalletId = useModalStore(state => state.selectedExternalWalletId);
-  const setSelectedExternalWalletId = useModalStore(state => state.setSelectedExternalWalletId);
+  const selectedExternalWallet = useModalStore(state => state.selectedExternalWallet);
+  const setSelectedExternalWallet = useModalStore(state => state.setSelectedExternalWallet);
   const { wallets, connectExternalWallet } = useExternalWallets();
   const { accountLinkInProgress, linkAccount } = useAccountLinking();
 
   const externalWalletProvider =
     accountLinkInProgress?.pendingWalletProvider ?? accountLinkInProgress?.externalWallet?.providerId;
 
-  if (!accountLinkInProgress && !selectedExternalWalletId) {
+  if (!accountLinkInProgress && !selectedExternalWallet) {
     setStep(ModalStep.ACCOUNT_MAIN);
     return null;
   }
 
-  const availableWallets = wallets.filter(w => w.internalId === (externalWalletProvider ?? selectedExternalWalletId));
+  const availableWallets = wallets.filter(w => w.id === (externalWalletProvider ?? selectedExternalWallet?.id));
 
   const firstWallet = availableWallets[0];
 
   const handleWalletClick = (wallet: CommonWallet) => () => {
     if (accountLinkInProgress) {
-      linkAccount({ externalWallet: wallet });
+      linkAccount({ externalWallet: { provider: wallet.id } });
       return;
     }
 
-    setSelectedExternalWalletId(wallet.internalId);
+    setSelectedExternalWallet({ id: wallet.id, type: wallet.type });
     setStep(ModalStep.EX_WALLET_SELECTED);
 
     if (wallet.installed || wallet.internalId === 'FARCASTER') {

@@ -1,9 +1,8 @@
-import { TExternalWallet } from '@getpara/web-sdk';
 import { IconType } from '@getpara/react-components';
 import { TLinkedAccountType } from '@getpara/web-sdk';
 
 export const ACCOUNT_TYPES: {
-  [key in TLinkedAccountType | TExternalWallet]: {
+  [key in TLinkedAccountType | string]: {
     logo: IconType;
     logoBranded?: IconType;
     name: string;
@@ -12,143 +11,143 @@ export const ACCOUNT_TYPES: {
     isExternalWallet?: boolean;
   };
 } = {
-  EMAIL: {
+  'EMAIL': {
     logo: 'mail',
     name: 'Email',
     inline: 'email address',
     isDark: true,
   },
-  PHONE: {
+  'PHONE': {
     logo: 'phone',
     name: 'Phone',
     inline: 'phone number',
     isDark: true,
   },
-  EXTERNAL_WALLET: {
+  'EXTERNAL_WALLET': {
     logo: 'wallet',
     name: 'External Wallet',
     inline: 'external wallet',
     isDark: true,
   },
-  GOOGLE: {
+  'GOOGLE': {
     logo: 'google',
     logoBranded: 'googleBrand',
     name: 'Google',
   },
-  TWITTER: {
+  'TWITTER': {
     logo: 'twitter',
     logoBranded: 'twitterBrand',
     name: 'X / Twitter',
     inline: 'X account',
     isDark: true,
   },
-  APPLE: {
+  'APPLE': {
     logo: 'apple',
     logoBranded: 'appleBrand',
     name: 'Apple',
     isDark: true,
   },
-  DISCORD: {
+  'DISCORD': {
     logo: 'discord',
     logoBranded: 'discordBrand',
     name: 'Discord',
   },
-  FACEBOOK: {
+  'FACEBOOK': {
     logo: 'facebook',
     logoBranded: 'facebookBrand',
     name: 'Facebook',
   },
-  FARCASTER: {
+  'FARCASTER': {
     logo: 'farcaster',
     logoBranded: 'farcasterBrand',
     name: 'Farcaster',
   },
-  TELEGRAM: {
+  'TELEGRAM': {
     logo: 'telegram',
     logoBranded: 'telegramBrand',
     name: 'Telegram',
   },
-  METAMASK: {
+  'MetaMask': {
     logo: 'metamask',
     name: 'MetaMask',
     isExternalWallet: true,
   },
-  RAINBOW: {
+  'Rainbow': {
     logo: 'rainbow',
     name: 'Rainbow',
     isExternalWallet: true,
   },
-  COINBASE: {
+  'Coinbase Wallet': {
     logo: 'coinbase',
     name: 'Coinbase Wallet',
     isExternalWallet: true,
   },
-  WALLETCONNECT: {
+  'WalletConnect': {
     logo: 'walletConnect',
     name: 'WalletConnect',
     isExternalWallet: true,
   },
-  ZERION: {
+  'Zerion': {
     logo: 'zerion',
     name: 'Zerion',
     isExternalWallet: true,
   },
-  SAFE: {
+  'Safe': {
     logo: 'safe',
     name: 'Safe',
     isExternalWallet: true,
   },
-  RABBY: {
+  'Rabby': {
     logo: 'rabby',
     name: 'Rabby',
     isExternalWallet: true,
   },
-  OKX: {
+  'OKX Wallet': {
     logo: 'okx',
-    name: 'OKX',
+    name: 'OKX Wallet',
     isExternalWallet: true,
   },
-  PHANTOM: {
+  'Phantom': {
     logo: 'phantom',
     name: 'Phantom',
     isExternalWallet: true,
   },
-  GLOW: {
+  'Glow': {
     logo: 'glow',
     name: 'Glow',
     isExternalWallet: true,
   },
-  BACKPACK: {
+  'Backpack': {
     logo: 'backpack',
     name: 'Backpack',
     isExternalWallet: true,
   },
-  KEPLR: {
+  'Keplr': {
     logo: 'keplr',
     name: 'Keplr',
     isExternalWallet: true,
   },
-  LEAP: {
+  'Leap': {
     logo: 'leap',
     name: 'Leap',
     isExternalWallet: true,
   },
-  HAHA: {
+  'HaHa': {
     logo: 'haha',
     name: 'HaHa',
     isExternalWallet: true,
   },
-  COSMOSTATION: {
+  'Cosmostation': {
     logo: 'cosmostation',
     name: 'Cosmostation',
     isExternalWallet: true,
   },
-  SOLFLARE: {
+  'Solflare': {
     logo: 'solflare',
     name: 'Solflare',
     isExternalWallet: true,
   },
-  VALORA: {
+  'Valora': {
     logo: 'valora',
     name: 'Valora',
     isExternalWallet: true,
@@ -156,7 +155,7 @@ export const ACCOUNT_TYPES: {
 };
 
 export function getAccountTypeName(
-  type: TLinkedAccountType | TExternalWallet | undefined,
+  type: TLinkedAccountType | string | undefined,
   { inline = false }: { inline?: boolean } = {},
 ): string | undefined {
   const data = type ? ACCOUNT_TYPES[type] : undefined;
