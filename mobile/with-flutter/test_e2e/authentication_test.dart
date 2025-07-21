@@ -140,11 +140,14 @@ Future<void> _performPhoneAuthWithPasskey(AppiumWebDriver driver, String phoneNu
   // Enter phone and continue
   await _enterPhoneAndContinue(driver, phoneNumber);
   
-  // Handle OTP verification
-  await _handleOTPVerification(driver);
+  // Handle OTP verification (but don't do biometric auth yet for phone)
+  await _handleOTPVerificationForPhone(driver);
   
-  // Complete biometric authentication
-  await _performBiometricAuth(driver);
+  // For phone signup, there's an additional Continue button after OTP
+  await _tapContinueAfterOTP(driver);
+  
+  // Now complete biometric authentication
+  await _performBiometricAuth(driver, isSignup: true);
   
   print('✅ Phone authentication completed');
 }
@@ -462,7 +465,7 @@ Future<void> _enterOTPCode(AppiumWebDriver driver, String code) async {
   }
 }
 
-Future<void> _performBiometricAuth(AppiumWebDriver driver) async {
+Future<void> _performBiometricAuth(AppiumWebDriver driver, {bool isSignup = false}) async {
   await Future.delayed(Duration(seconds: 3));
   
   // Handle system dialog with coordinate tap (like Swift implementation)
@@ -493,7 +496,7 @@ Future<void> _performBiometricAuth(AppiumWebDriver driver) async {
       'type': 'touchId',
       'match': true
     }]);
-    print('✅ Biometric authentication successful (signup)');
+    print('✅ Biometric authentication successful${isSignup ? ' (signup)' : ''}');
     
     // Wait longer for authentication to complete and navigation to happen
     print('⏳ Waiting for authentication to complete...');
@@ -545,5 +548,78 @@ Future<void> _performBiometricAuthForLogin(AppiumWebDriver driver) async {
     
   } catch (e) {
     throw Exception('Login authentication failed: $e');
+  }
+}
+
+Future<void> _handleOTPVerificationForPhone(AppiumWebDriver driver) async {
+  // Wait for OTP verification view with more robust detection
+  print('⏳ Waiting for OTP verification view...');
+  
+  for (int attempt = 0; attempt < 20; attempt++) {
+    try {
+      // Check for OTP fields specifically
+      final textFields = await driver.findElements(AppiumBy.className('XCUIElementTypeTextField')).toList();
+      
+      if (textFields.length >= 6) {
+        print('✅ OTP verification view found with ${textFields.length} text fields');
+        break;
+      }
+      
+      // Also check for resend button as backup
+      final buttons = await driver.findElements(AppiumBy.className('XCUIElementTypeButton')).toList();
+      for (final button in buttons) {
+        try {
+          final label = await button.attributes['label'];
+          if (label.toLowerCase().contains('resend')) {
+            print('✅ OTP verification view found (resend button detected)');
+            break;
+          }
+        } catch (e) {
+          // Continue
+        }
+      }
+      
+      if (attempt % 3 == 0) {
+        print('⏳ Waiting for OTP fields... (attempt ${attempt + 1}, found ${textFields.length} text fields)');
+      }
+      
+    } catch (e) {
+      print('⚠️ Error checking for OTP view: $e');
+    }
+    
+    await Future.delayed(Duration(seconds: 1));
+  }
+  
+  // Enter OTP code
+  await _enterOTPCode(driver, TestConstants.verificationCode);
+  
+  // Don't perform biometric auth here for phone - it's done after the additional Continue button
+}
+
+Future<void> _tapContinueAfterOTP(AppiumWebDriver driver) async {
+  print('📱 Looking for Continue button after OTP entry...');
+  
+  // Wait a bit for the button to appear
+  await Future.delayed(Duration(seconds: 2));
+  
+  // Try coordinate-based tap first (most reliable for system dialogs)
+  try {
+    final window = await driver.window;
+    final size = await window.size;
+    
+    // Calculate tap coordinates - center horizontally, 85% from top for Continue button
+    final x = size.width ~/ 2;
+    final y = (size.height * 0.85).round();
+    
+    print('📱 Tapping Continue button location (coordinate-based) after OTP...');
+    await driver.execute('mobile:tap', <dynamic>[<String, dynamic>{
+      'x': x,
+      'y': y
+    }]);
+    
+    print('✅ Tapped at coordinates ($x, $y)');
+    await Future.delayed(Duration(seconds: 1));
+  } catch (e) {
+    print('⚠️ Could not perform coordinate tap: $e');
   }
 }
