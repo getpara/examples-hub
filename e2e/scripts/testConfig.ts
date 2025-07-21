@@ -16,6 +16,7 @@ export interface CLIArgs {
   isSequential: boolean;
   isHeaded: boolean;
   isDiffOnly: boolean;
+  isWebOnly: boolean;  // Filter only web frameworks
   remainingArgs: string[];
 }
 
@@ -208,10 +209,11 @@ export function parseCliArgs(args: string[]): CLIArgs {
   return {
     framework,
     testType,
-    isSequential: args.includes("--sequential") || process.env.E2E_SEQUENTIAL === "true",
+    isSequential: true, // Always run tests sequentially to avoid conflicts
     isHeaded: args.includes("--headed") || process.env.E2E_HEADED === "true",
     isDiffOnly: args.includes("--diff-only"),
-    remainingArgs: args.filter(arg => !["--sequential", "--headed", "--diff-only"].includes(arg))
+    isWebOnly: args.includes("--web"),
+    remainingArgs: args.filter(arg => !["--sequential", "--headed", "--diff-only", "--web"].includes(arg))
   };
 }
 

@@ -6,10 +6,10 @@ import { defineConfig, devices } from "@playwright/test";
 export default defineConfig({
   timeout: 60000, // Reduced from 120s for faster feedback
   testDir: `../e2e/tests/${process.env.E2E_APP_DIR}`,
-  fullyParallel: true,
+  fullyParallel: false, // Run tests sequentially to avoid conflicts
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: 4,
+  workers: 1, // Single worker ensures one test at a time
   reporter: [["html"]],
   use: {
     baseURL: `http://localhost:${process.env.APP_PORT}`,

@@ -51,6 +51,10 @@ test.describe('Svelte custom auth example', () => {
     console.log('🔄 Closing creation context and clearing all state...');
     await createContext.close();
     
+    // Add a pause between user creation and login to ensure complete state cleanup
+    console.log('⏳ Waiting 3 seconds between user creation and login phases...');
+    await new Promise(resolve => setTimeout(resolve, 3000));
+    
     // ===== PHASE 2: Login with Completely Fresh Context =====
     console.log('🔄 Creating fresh context for login test...');
     const loginContext = await browser.newContext({

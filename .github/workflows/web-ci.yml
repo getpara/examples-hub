@@ -2,65 +2,65 @@ name: Web CI
 
 on:
   pull_request:
-    branches: [main]
+    branches: [2.0.0-alpha]
     paths:
-      - 'web/**/src/**'           # Source code changes
-      - 'web/**/package.json'     # Dependencies
-      - 'web/**/tsconfig*.json'   # TypeScript configuration
-      - 'web/**/vite.config.*'    # Vite configuration
-      - 'web/**/next.config.*'    # Next.js configuration
-      - 'web/**/tailwind.config.*' # Tailwind configuration
-      - 'web/**/postcss.config.*' # PostCSS configuration
-      - 'web/**/*.ts'             # TypeScript files
-      - 'web/**/*.tsx'            # React TypeScript files
-      - 'web/**/*.js'             # JavaScript files
-      - 'web/**/*.jsx'            # React JavaScript files
-      - 'web/**/*.vue'            # Vue files
-      - 'web/**/*.svelte'         # Svelte files
-      - 'web/**/*.css'            # CSS files
-      - 'web/**/*.scss'           # SCSS files
-      - 'web/**/*.html'           # HTML files
-      - '.github/workflows/web-ci.yml'
-      - '.env.ci.example'
-      - 'package.json'
-      - 'yarn.lock'
-      - '.yarnrc.yml'
-      - '.yarn/**'
-  
+      - "web/**/src/**" # Source code changes
+      - "web/**/package.json" # Dependencies
+      - "web/**/tsconfig*.json" # TypeScript configuration
+      - "web/**/vite.config.*" # Vite configuration
+      - "web/**/next.config.*" # Next.js configuration
+      - "web/**/tailwind.config.*" # Tailwind configuration
+      - "web/**/postcss.config.*" # PostCSS configuration
+      - "web/**/*.ts" # TypeScript files
+      - "web/**/*.tsx" # React TypeScript files
+      - "web/**/*.js" # JavaScript files
+      - "web/**/*.jsx" # React JavaScript files
+      - "web/**/*.vue" # Vue files
+      - "web/**/*.svelte" # Svelte files
+      - "web/**/*.css" # CSS files
+      - "web/**/*.scss" # SCSS files
+      - "web/**/*.html" # HTML files
+      - ".github/workflows/web-ci.yml"
+      - ".env.ci.example"
+      - "package.json"
+      - "yarn.lock"
+      - ".yarnrc.yml"
+      - ".yarn/**"
+
   push:
     branches: [main]
     paths:
-      - 'web/**/src/**'           # Source code changes
-      - 'web/**/package.json'     # Dependencies
-      - 'web/**/tsconfig*.json'   # TypeScript configuration
-      - 'web/**/vite.config.*'    # Vite configuration
-      - 'web/**/next.config.*'    # Next.js configuration
-      - 'web/**/tailwind.config.*' # Tailwind configuration
-      - 'web/**/postcss.config.*' # PostCSS configuration
-      - 'web/**/*.ts'             # TypeScript files
-      - 'web/**/*.tsx'            # React TypeScript files
-      - 'web/**/*.js'             # JavaScript files
-      - 'web/**/*.jsx'            # React JavaScript files
-      - 'web/**/*.vue'            # Vue files
-      - 'web/**/*.svelte'         # Svelte files
-      - 'web/**/*.css'            # CSS files
-      - 'web/**/*.scss'           # SCSS files
-      - 'web/**/*.html'           # HTML files
-      - '.github/workflows/web-ci.yml'
-      - '.env.ci.example'
-      - 'package.json'
-      - 'yarn.lock'
-      - '.yarnrc.yml'
-      - '.yarn/**'
-  
+      - "web/**/src/**" # Source code changes
+      - "web/**/package.json" # Dependencies
+      - "web/**/tsconfig*.json" # TypeScript configuration
+      - "web/**/vite.config.*" # Vite configuration
+      - "web/**/next.config.*" # Next.js configuration
+      - "web/**/tailwind.config.*" # Tailwind configuration
+      - "web/**/postcss.config.*" # PostCSS configuration
+      - "web/**/*.ts" # TypeScript files
+      - "web/**/*.tsx" # React TypeScript files
+      - "web/**/*.js" # JavaScript files
+      - "web/**/*.jsx" # React JavaScript files
+      - "web/**/*.vue" # Vue files
+      - "web/**/*.svelte" # Svelte files
+      - "web/**/*.css" # CSS files
+      - "web/**/*.scss" # SCSS files
+      - "web/**/*.html" # HTML files
+      - ".github/workflows/web-ci.yml"
+      - ".env.ci.example"
+      - "package.json"
+      - "yarn.lock"
+      - ".yarnrc.yml"
+      - ".yarn/**"
+
   workflow_dispatch:
     inputs:
       skip_build:
-        description: 'Skip build step (faster iteration)'
+        description: "Skip build step (faster iteration)"
         type: boolean
         default: false
       skip_e2e:
-        description: 'Skip E2E tests'
+        description: "Skip E2E tests"
         type: boolean
         default: false
 
@@ -80,17 +80,16 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       projects: ${{ steps.collect.outputs.projects }}
-      e2e-matrix: ${{ steps.collect.outputs.e2e-matrix }}
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Collect projects
         id: collect
         run: |
           # Find all projects with package.json in web folder
           projects="["
           first=true
-          
+
           for framework_dir in web/*; do
             if [ -d "$framework_dir" ]; then
               framework_name=$(basename "$framework_dir")
@@ -113,14 +112,10 @@ jobs:
               fi
             fi
           done
-          
+
           projects+="]"
           echo "projects=$projects" >> $GITHUB_OUTPUT
-          
-          # E2E matrix (framework level only)
-          e2e_matrix='[{"framework":"react-vite","name":"React Vite"},{"framework":"react-nextjs","name":"React Next.js","test_target":"react-nextjs"},{"framework":"vue","name":"Vue"},{"framework":"svelte","name":"Svelte"}]'
-          echo "e2e-matrix=$e2e_matrix" >> $GITHUB_OUTPUT
-          
+
           # Debug output
           echo "Found projects:"
           echo "$projects" | jq .
@@ -129,24 +124,24 @@ jobs:
   test-project:
     needs: collect-projects
     runs-on: ubuntu-latest
-    timeout-minutes: 15  # Per-job timeout to prevent hangs
+    timeout-minutes: 15 # Per-job timeout to prevent hangs
     strategy:
       fail-fast: false
-      max-parallel: 4  # Limit concurrent jobs for resource management
+      max-parallel: 4 # Limit concurrent jobs for resource management
       matrix:
         project: ${{ fromJson(needs.collect-projects.outputs.projects) }}
-    
+
     name: Test ${{ matrix.project.name }}
-    
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'yarn'
-          cache-dependency-path: '**/yarn.lock'
+          cache: "yarn"
+          cache-dependency-path: "**/yarn.lock"
 
       - name: Cache build artifacts
         uses: actions/cache@v4
@@ -157,7 +152,12 @@ jobs:
             **/build
             **/.vite
             **/.nuxt
-          key: build-artifacts-${{ runner.os }}-${{ matrix.project.name }}-${{ hashFiles(format('{0}/package.json', matrix.project.path), format('{0}/src/**', matrix.project.path), format('{0}/**/*.ts', matrix.project.path), format('{0}/**/*.tsx', matrix.project.path), format('{0}/**/*.js', matrix.project.path), format('{0}/**/*.jsx', matrix.project.path), format('{0}/**/*.vue', matrix.project.path), format('{0}/**/*.svelte', matrix.project.path)) }}
+          key:
+            build-artifacts-${{ runner.os }}-${{ matrix.project.name }}-${{ hashFiles(format('{0}/package.json',
+            matrix.project.path), format('{0}/src/**', matrix.project.path), format('{0}/**/*.ts', matrix.project.path),
+            format('{0}/**/*.tsx', matrix.project.path), format('{0}/**/*.js', matrix.project.path),
+            format('{0}/**/*.jsx', matrix.project.path), format('{0}/**/*.vue', matrix.project.path),
+            format('{0}/**/*.svelte', matrix.project.path)) }}
           restore-keys: |
             build-artifacts-${{ runner.os }}-${{ matrix.project.name }}-
 
@@ -171,7 +171,7 @@ jobs:
         id: test
         run: |
           cd ${{ matrix.project.path }}
-          
+
           # Initialize result tracking
           PROJECT_NAME="${{ matrix.project.name }}"
           LINT_STATUS="⏭️ skipped"
@@ -179,11 +179,11 @@ jobs:
           BUILD_STATUS="⏭️ skipped"
           FAILED=false
           START_TIME=$(date +%s)
-          
+
           # Create summary header for this project
           echo "### Testing: $PROJECT_NAME" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           # Install dependencies with optimizations
           echo "📦 Installing dependencies..."
           if yarn install --immutable --network-timeout 60000 --cache-folder $YARN_CACHE_FOLDER; then
@@ -193,7 +193,7 @@ jobs:
             FAILED=true
             exit 1
           fi
-          
+
           # Lint
           if grep -q '"lint"' package.json; then
             echo ""
@@ -209,7 +209,7 @@ jobs:
           else
             echo "- Lint: ⏭️ no script" >> $GITHUB_STEP_SUMMARY
           fi
-          
+
           # Typecheck
           if grep -q '"typecheck"' package.json; then
             echo ""
@@ -229,7 +229,7 @@ jobs:
           else
             echo "- Typecheck: ⏭️ no script" >> $GITHUB_STEP_SUMMARY
           fi
-          
+
           # Build (only if typecheck passed or doesn't exist)
           if [[ "$TYPECHECK_STATUS" != "❌ failed" ]] && [[ "${{ github.event.inputs.skip_build }}" != "true" ]]; then
             if grep -q '"build"' package.json; then
@@ -247,25 +247,25 @@ jobs:
               echo "- Build: ⏭️ no script" >> $GITHUB_STEP_SUMMARY
             fi
           fi
-          
+
           # Calculate execution time
           END_TIME=$(date +%s)
           DURATION=$((END_TIME - START_TIME))
           echo "- Duration: ${DURATION}s" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           # Cleanup
           echo ""
           echo "🧹 Cleaning up node_modules..."
           rm -rf node_modules
-          
+
           # Set outputs for summary
           echo "project_name=$PROJECT_NAME" >> $GITHUB_OUTPUT
           echo "lint_status=$LINT_STATUS" >> $GITHUB_OUTPUT
           echo "typecheck_status=$TYPECHECK_STATUS" >> $GITHUB_OUTPUT
           echo "build_status=$BUILD_STATUS" >> $GITHUB_OUTPUT
           echo "duration=$DURATION" >> $GITHUB_OUTPUT
-          
+
           if [ "$FAILED" = true ]; then
             echo "failed=true" >> $GITHUB_OUTPUT
             exit 1
@@ -281,20 +281,25 @@ jobs:
       needs.collect-projects.result == 'success' &&
       github.event.inputs.skip_e2e != 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 20  # E2E tests need more time
-    strategy:
-      fail-fast: false
-      max-parallel: 2  # Limit E2E parallelism for stability
-      matrix:
-        framework: ${{ fromJson(needs.collect-projects.outputs.e2e-matrix) }}
-    
-    name: E2E ${{ matrix.framework.name }}
-    
+    timeout-minutes: 30 # E2E tests need more time
+
+    name: E2E Web Tests
+
     env:
+      # Base environment variables
       PARA_API_KEY_BETA: ${{ secrets.PARA_API_KEY_BETA }}
       PARA_API_KEY_SANDBOX: ${{ secrets.PARA_API_KEY_SANDBOX }}
       PARA_ENVIRONMENT: BETA
-    
+      # Vite-specific environment variables
+      VITE_PARA_API_KEY: ${{ secrets.PARA_API_KEY_BETA }}
+      VITE_PARA_ENVIRONMENT: BETA
+      # Next.js-specific environment variables
+      NEXT_PUBLIC_PARA_API_KEY: ${{ secrets.PARA_API_KEY_BETA }}
+      NEXT_PUBLIC_PARA_ENVIRONMENT: BETA
+      # WalletConnect project IDs (if needed)
+      VITE_WALLET_CONNECT_PROJECT_ID: ${{ secrets.WALLET_CONNECT_PROJECT_ID }}
+      NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID: ${{ secrets.WALLET_CONNECT_PROJECT_ID }}
+
     steps:
       - uses: actions/checkout@v4
 
@@ -302,9 +307,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'yarn'
-          cache-dependency-path: '**/yarn.lock'
-
+          cache: "yarn"
+          cache-dependency-path: "**/yarn.lock"
 
       - name: Install dependencies
         run: yarn install --immutable --network-timeout 60000 --cache-folder $YARN_CACHE_FOLDER
@@ -315,16 +319,16 @@ jobs:
 
       - name: Run E2E Tests
         id: e2e-test
-        timeout-minutes: 15
+        timeout-minutes: 25
         run: |
-          echo "### E2E Test: ${{ matrix.framework.name }}" >> $GITHUB_STEP_SUMMARY
-          
-          # Use test_target if specified, otherwise use framework name
-          TEST_TARGET="${{ matrix.framework.test_target || matrix.framework.framework }}"
-          xvfb-run yarn test:$TEST_TARGET
-          
+          echo "### E2E Web Tests" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Run all web E2E tests
+          xvfb-run yarn test:web
+
           if [ $? -eq 0 ]; then
-            echo "✅ E2E tests passed" >> $GITHUB_STEP_SUMMARY
+            echo "✅ All web E2E tests passed" >> $GITHUB_STEP_SUMMARY
           else
             echo "❌ E2E tests failed" >> $GITHUB_STEP_SUMMARY
             exit 1
@@ -334,7 +338,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: playwright-report-${{ matrix.framework.framework }}
+          name: playwright-report-web
           path: playwright-report/
           retention-days: 7
 
@@ -348,18 +352,18 @@ jobs:
         run: |
           echo "# 📊 Web CI Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           # Overall status
           PROJECT_STATUS="${{ needs.test-project.result }}"
           E2E_STATUS="${{ needs.e2e.result }}"
-          
+
           echo "## Overall Status" >> $GITHUB_STEP_SUMMARY
           echo "| Component | Status |" >> $GITHUB_STEP_SUMMARY
           echo "|-----------|--------|" >> $GITHUB_STEP_SUMMARY
           echo "| Project Tests | ${{ needs.test-project.result == 'success' && '✅ Passed' || needs.test-project.result == 'failure' && '❌ Failed' || '⏭️ Skipped' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| E2E Tests | ${{ needs.e2e.result == 'success' && '✅ Passed' || needs.e2e.result == 'failure' && '❌ Failed' || '⏭️ Skipped' }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           # Final result
           if [ "$PROJECT_STATUS" = "success" ] && [ "$E2E_STATUS" = "success" ]; then
             echo "## ✅ All checks passed!" >> $GITHUB_STEP_SUMMARY

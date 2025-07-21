@@ -42,6 +42,7 @@
     "test:vue": "tsx e2e/scripts/runAllTests.ts vue",
     "test:svelte": "tsx e2e/scripts/runAllTests.ts svelte",
     "test:node": "tsx e2e/scripts/runAllTests.ts node",
+    "test:web": "tsx e2e/scripts/runAllTests.ts --web",
     "act:web-ci": "act -W .github/workflows/web-ci.yml",
     "act:web-ci:pr": "act pull_request -W .github/workflows/web-ci.yml",
     "act:deps": "act workflow_dispatch -W .github/workflows/update-para-dependencies.yml",

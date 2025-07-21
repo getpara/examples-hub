@@ -1,5 +1,5 @@
 import * as crypto from 'node:crypto';
-import { BrowserContext, Page, FrameLocator } from '@playwright/test';
+import { BrowserContext, Page, FrameLocator, expect } from '@playwright/test';
 import { Protocol } from 'playwright-core/types/protocol';
 
 import { AuthPortalPage } from './authPortal';
@@ -81,6 +81,30 @@ export class ParaModalExamplePage {
 
   async visit() {
     await this.page.goto('/');
+    // Wait for page to be fully loaded and interactive
+    await this.page.waitForLoadState('networkidle');
+    await this.page.waitForTimeout(1000); // Additional wait for any JS initialization
+  }
+
+  /**
+   * Ensures the UI is stable and ready before opening the Para modal
+   * This helps prevent issues where the modal backdrop appears but the modal itself fails to open
+   */
+  async waitForUIStability(openModalText: string = 'Open Modal') {
+    console.log('🔄 Waiting for UI stability before modal interaction...');
+    
+    // Wait for the modal button to be visible and stable
+    const modalButton = this.page.getByRole('button', { name: openModalText });
+    await modalButton.waitFor({ state: 'visible', timeout: 10000 });
+    
+    // Additional wait to ensure any animations or async operations complete
+    await this.page.waitForTimeout(1500);
+    
+    // Verify button is still visible and clickable
+    await expect(modalButton).toBeVisible();
+    await expect(modalButton).toBeEnabled();
+    
+    console.log('✅ UI is stable and ready for modal interaction');
   }
 
   async createUser({
@@ -98,7 +122,9 @@ export class ParaModalExamplePage {
     password?: string;
     usePhoneNumber?: boolean;
   }) {
-    await this.page.waitForTimeout(700);
+    // Ensure UI is stable before opening modal
+    await this.waitForUIStability(openModalText);
+    
     await this.page.getByRole('button', { name: openModalText }).click();
     await this.page.waitForTimeout(1000);
 
@@ -206,7 +232,11 @@ export class ParaModalExamplePage {
   }) {
     console.log('Starting login flow...');
     await this.page.reload();
-    await this.page.waitForTimeout(500);
+    await this.page.waitForLoadState('networkidle'); // Wait for reload to complete
+    
+    // Ensure UI is stable before opening modal
+    await this.waitForUIStability(openModalText);
+    
     console.log(`Looking for button with text: ${openModalText}`);
     await this.page.getByRole('button', { name: openModalText }).click();
     console.log('Modal opened');

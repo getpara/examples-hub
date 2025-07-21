@@ -16,38 +16,7 @@ import {
   TEST_PATTERNS
 } from "./testConfig";
 
-// Simple concurrency limiter for parallel execution
-class ConcurrencyLimiter {
-  constructor(private limit: number) {}
-  private running = 0;
-  private queue: Array<{ task: () => Promise<any>; resolve: (value: any) => void; reject: (error: any) => void }> = [];
-
-  async run<T>(task: () => Promise<T>): Promise<T> {
-    return new Promise((resolve, reject) => {
-      this.queue.push({ task, resolve, reject });
-      this.process();
-    });
-  }
-
-  private async process() {
-    if (this.running >= this.limit || this.queue.length === 0) {
-      return;
-    }
-
-    this.running++;
-    const { task, resolve, reject } = this.queue.shift()!;
-
-    try {
-      const result = await task();
-      resolve(result);
-    } catch (error) {
-      reject(error);
-    } finally {
-      this.running--;
-      this.process();
-    }
-  }
-}
+// Removed ConcurrencyLimiter class - tests now always run sequentially
 
 // Load environment variables
 dotenv.config();
@@ -94,12 +63,8 @@ async function runSingleTest(framework: string, testType?: string): Promise<void
       testPath,
       "--config=e2e/example-hub-playwright.config.ts",
       "--reporter=list",
+      "--workers=1", // Always run with single worker for test stability
     ];
-
-    // Always run sequentially by default for single tests
-    if (process.env.E2E_WORKERS !== "auto") {
-      playwrightArgs.push("--workers=1");
-    }
 
     // Check for headed mode
     if (cliArgs.isHeaded) {
@@ -143,11 +108,8 @@ const runTestsForApp = async (appName: string): Promise<TestResult> => {
       `e2e/tests/${config.path}`,
       "--config=e2e/example-hub-playwright.config.ts",
       "--reporter=list",
+      "--workers=1", // Always run with single worker for test stability
     ];
-
-    if (cliArgs.isSequential) {
-      playwrightArgs.push("--workers=1");
-    }
 
     if (cliArgs.isHeaded) {
       playwrightArgs.push("--headed");
@@ -169,10 +131,18 @@ const runTestsForApp = async (appName: string): Promise<TestResult> => {
 // Get frameworks to test (either based on git diff or all)
 let candidateFrameworks = detectChangedFrameworks(cliArgs.isDiffOnly);
 
-// Apply additional filtering if framework filter is provided
+// Apply additional filtering based on CLI args
 const appsToTest = candidateFrameworks.filter(appName => {
-  if (!cliArgs.framework) return true;
-  return appName.includes(cliArgs.framework);
+  // If --web flag, only include web frameworks
+  if (cliArgs.isWebOnly) {
+    return ["react-vite", "react-nextjs", "vue", "svelte"].some(webFw => appName.includes(webFw));
+  }
+  // If single framework specified, check if it matches
+  if (cliArgs.framework) {
+    return appName.includes(cliArgs.framework);
+  }
+  // Otherwise include all
+  return true;
 });
 
 // Main execution logic
@@ -197,7 +167,7 @@ async function main(): Promise<void> {
 
   console.log("🧪 Running E2E tests for:");
   appsToTest.forEach(app => console.log(`  - ${app}`));
-  console.log(`\nMode: ${cliArgs.isSequential ? "Sequential" : "Parallel (max 4 concurrent)"}`);
+  console.log(`\nMode: Sequential (one test at a time)`);
   console.log(`Display: ${cliArgs.isHeaded ? "Headed" : "Headless"}`);
   if (cliArgs.isDiffOnly) {
     console.log(`Filter: Only changed frameworks (--diff-only)`);
@@ -207,45 +177,14 @@ async function main(): Promise<void> {
   await runAllTests();
 }
 
-// Run tests - either sequentially or in parallel
+// Run tests sequentially
 async function runAllTests() {
-  if (cliArgs.isSequential) {
-    // Sequential execution (original behavior)
-    for (const appName of appsToTest) {
-      const result = await runTestsForApp(appName);
-      if (!result.success) {
-        setTestFailed(true);
-      }
-    }
-  } else {
-    // Parallel execution with concurrency limit
-    const concurrencyLimit = 4;
-    const limiter = new ConcurrencyLimiter(concurrencyLimit);
-    
-    console.log(`🚀 Starting parallel test execution (max ${concurrencyLimit} concurrent)...\n`);
-    
-    const testTasks = appsToTest.map(appName => 
-      limiter.run(() => runTestsForApp(appName))
-    );
-    
-    const results = await Promise.all(testTasks);
-    
-    // Process results
-    const successful = results.filter(r => r.success);
-    const failed = results.filter(r => !r.success);
-    
-    console.log(`\n${"=".repeat(80)}`);
-    console.log("📊 E2E Test Summary:");
-    console.log(`${"=".repeat(80)}`);
-    console.log(`✅ Successful: ${successful.length}`);
-    successful.forEach(r => console.log(`   - ${r.appName}`));
-    
-    if (failed.length > 0) {
-      console.log(`❌ Failed: ${failed.length}`);
-      failed.forEach(r => console.log(`   - ${r.appName}: ${r.error}`));
+  // Sequential execution - run one test at a time
+  for (const appName of appsToTest) {
+    const result = await runTestsForApp(appName);
+    if (!result.success) {
       setTestFailed(true);
     }
-    console.log(`${"=".repeat(80)}`);
   }
 }
 
