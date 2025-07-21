@@ -2,7 +2,7 @@ import type { Ctx, SignatureRes, PlatformUtils, TPregenIdentifierType, TWalletTy
 import { BackupKitEmailProps, SDKType } from '@getpara/user-management-client';
 import { ServerLocalStorage } from './ServerLocalStorage.js';
 import { ServerSessionStorage } from './ServerSessionStorage.js';
-import { keygen, preKeygen, ed25519Keygen, ed25519PreKeygen } from './wallet/keygen.js';
+import { keygen, preKeygen, ed25519Keygen, ed25519PreKeygen, initializeWorker } from './wallet/keygen.js';
 import { signMessage, sendTransaction, signTransaction, ed25519Sign } from './wallet/signing.js';
 import { getPrivateKey } from './wallet/privateKey.js';
 
@@ -151,5 +151,9 @@ export class ServerUtils implements PlatformUtils {
 
   openPopup(_popupUrl: string): Window {
     throw new Error('OpenPopup is not implemented in the ServerUtils class.');
+  }
+
+  async initializeWorker(ctx: Ctx): Promise<void> {
+    return initializeWorker(ctx);
   }
 }

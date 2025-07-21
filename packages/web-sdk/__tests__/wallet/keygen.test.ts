@@ -1,6 +1,6 @@
 import { vi, describe, it, expect, afterEach, beforeEach } from 'vitest';
 
-import { ed25519Keygen, ed25519PreKeygen, keygen, preKeygen, refresh } from '../../src/wallet/keygen.js';
+import { ed25519Keygen, ed25519PreKeygen, keygen, preKeygen, refresh, initializeWorker } from '../../src/wallet/keygen.js';
 import { Environment } from '@getpara/core-sdk';
 import {
   COSMOS_PREFIX,
@@ -273,6 +273,28 @@ describe('keygen', () => {
         return Promise.resolve({ postMessage: vi.fn(), terminate: vi.fn() }) as any;
       });
       await expect(ed25519PreKeygen(TEST_CTX, USER.email, 'EMAIL', USER.sessionCookie)).rejects.toThrow(mockWorkerError);
+    });
+  });
+  describe('initializeWorker', () => {
+    it('success', async () => {
+      await initializeWorker(TEST_CTX);
+
+      expect(workerMessagePostSpy).toBeCalledTimes(1);
+      expect(workerMessagePostSpy).toBeCalledWith({
+        env: Environment.DEV,
+        apiKey: PARTNER.apiKey,
+        functionType: 'INIT',
+        workId: expect.any(String),
+      });
+    });
+
+    it('handles worker errors', async () => {
+      const mockWorkerError = new Error('Mock worker error');
+      vi.spyOn(workerWrapper, 'setupWorker').mockImplementationOnce((_ctx, _onSuccess, onError) => {
+        setTimeout(() => onError(mockWorkerError), 0);
+        return Promise.resolve({ postMessage: vi.fn(), terminate: vi.fn() }) as any;
+      });
+      await expect(initializeWorker(TEST_CTX)).rejects.toThrow(mockWorkerError);
     });
   });
 });

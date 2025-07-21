@@ -1,5 +1,13 @@
 import axios from 'axios';
-import { Ctx, Environment, getPortalBaseURL, initClient, mpcComputationClient, paraVersion } from '@getpara/core-sdk';
+import {
+  Ctx,
+  Environment,
+  getBaseMPCNetworkUrl,
+  getPortalBaseURL,
+  initClient,
+  mpcComputationClient,
+  paraVersion,
+} from '@getpara/core-sdk';
 import * as walletUtils from './walletUtils.js';
 
 let rawWasm: any;
@@ -51,6 +59,9 @@ async function executeMessage(ctx: Ctx, message: Message): Promise<any> {
   const { functionType, params } = message;
 
   switch (functionType) {
+    case 'INIT': {
+      return {};
+    }
     case 'KEYGEN': {
       const { userId, secretKey, type = 'EVM' } = params;
       return walletUtils.keygen(ctx, userId, type, secretKey);
@@ -178,13 +189,14 @@ export async function handleMessage(e: { data: Message }): Promise<any> {
   if (!wasmLoaded && (!ctx.offloadMPCComputationURL || ctx.useDKLS)) {
     await loadWasm(ctx);
     if (global.initWasm) {
+      const serverUrl = getBaseMPCNetworkUrl(ctx.env, !ctx.disableWebSockets);
       await new Promise((resolve, reject) =>
         global.initWasm((err, result) => {
           if (err) {
             reject(err);
           }
           resolve(result);
-        }),
+        }, serverUrl),
       );
     }
     wasmLoaded = true;

@@ -669,6 +669,31 @@ describe('worker', () => {
       expect(mockGoRun).not.toBeCalled();
       expect(mockWASMInit).not.toBeCalled();
     });
+    it('init', async () => {
+      const _TEST_CTX = {
+        ...TEST_CTX,
+        disableWorkers: undefined,
+        offloadMPCComputationURL: undefined,
+        mpcComputationClient: undefined,
+      };
+
+      const resp = await handleMessage(
+        {
+          data: {
+            functionType: 'INIT',
+            params: {},
+            ..._TEST_CTX,
+          },
+        },
+        mockPostMessage,
+        false,
+      );
+
+      expect(resp).toBeFalsy();
+      expect(mockPostMessage).toBeCalledTimes(1);
+      expect(mockGoRun).not.toBeCalled();
+      expect(mockWASMInit).not.toBeCalled();
+    });
     it('fail - invalid function type', async () => {
       const _TEST_CTX = {
         ...TEST_CTX,

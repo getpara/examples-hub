@@ -204,6 +204,7 @@ export abstract class ParaCore implements CoreInterface {
   private isAwaitingLogin = false;
   private isAwaitingFarcaster = false;
   private isAwaitingOAuth = false;
+  private isWorkerInitialized = false;
 
   get isEmail(): boolean {
     return isEmail(this.authInfo?.auth);
@@ -1158,7 +1159,24 @@ export abstract class ParaCore implements CoreInterface {
     this.setExternalWallets(_externalWallets);
   };
 
+  protected initializeWorker = async () => {
+    if (!this.isWorkerInitialized && !this.ctx.disableWebSockets && !this.ctx.disableWorkers) {
+      try {
+        // we only want to try to initialize the worker once, it will automatically be initialized when needed if this fails
+        this.isWorkerInitialized = true;
+        await this.platformUtils.initializeWorker(this.ctx);
+      } catch (e) {
+        this.devLog('error initializing worker:', e);
+      }
+    }
+  };
+
   async touchSession(regenerate = false): Promise<SessionInfo> {
+    if (!this.isWorkerInitialized) {
+      // no await here to avoid blocking this call
+      this.initializeWorker();
+    }
+
     if (!this.isReady) {
       await this.ready();
     }

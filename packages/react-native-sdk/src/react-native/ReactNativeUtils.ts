@@ -262,4 +262,8 @@ export class ReactNativeUtils implements PlatformUtils {
     const base64Sig = await ParaSignerModule.ed25519Sign(protocolId, share, base64Bytes);
     return { signature: base64Sig };
   }
+
+  async initializeWorker(_ctx: Ctx): Promise<void> {
+    return;
+  }
 }

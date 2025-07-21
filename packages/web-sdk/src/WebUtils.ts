@@ -2,7 +2,7 @@ import { Ctx, PlatformUtils, SignatureRes, PopupType } from '@getpara/core-sdk';
 
 import { LocalStorage } from './LocalStorage.js';
 import { SessionStorage } from './SessionStorage.js';
-import { keygen, preKeygen, ed25519Keygen, ed25519PreKeygen, refresh } from './wallet/keygen.js';
+import { keygen, preKeygen, ed25519Keygen, ed25519PreKeygen, refresh, initializeWorker } from './wallet/keygen.js';
 import { signMessage, sendTransaction, signTransaction, ed25519Sign } from './wallet/signing.js';
 import { BackupKitEmailProps, TWalletType, SDKType } from '@getpara/user-management-client';
 import { getPrivateKey } from './wallet/privateKey.js';
@@ -227,5 +227,9 @@ export class WebUtils implements PlatformUtils {
 
       return popupWindow;
     }
+  }
+
+  async initializeWorker(ctx: Ctx): Promise<void> {
+    return initializeWorker(ctx);
   }
 }

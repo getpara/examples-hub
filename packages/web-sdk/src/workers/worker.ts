@@ -3,7 +3,15 @@
 // run `yarn build` to rebuild the worker file
 
 import * as walletUtils from './walletUtils.js';
-import { Ctx, Environment, getPortalBaseURL, initClient, mpcComputationClient, paraVersion } from '@getpara/core-sdk';
+import {
+  Ctx,
+  Environment,
+  getBaseMPCNetworkUrl,
+  getPortalBaseURL,
+  initClient,
+  mpcComputationClient,
+  paraVersion,
+} from '@getpara/core-sdk';
 
 export interface Message {
   env: Environment;
@@ -49,6 +57,9 @@ async function executeMessage(ctx: Ctx, message: Message): Promise<any> {
   const { functionType, params, returnObject } = message;
 
   switch (functionType) {
+    case 'INIT': {
+      return {};
+    }
     case 'KEYGEN': {
       const { userId, secretKey, type = 'EVM' } = params;
       const keygenRes = await walletUtils.keygen(ctx, userId, type, secretKey);
@@ -199,6 +210,8 @@ export async function handleMessage(
 
   if (!wasmLoaded && (!ctx.offloadMPCComputationURL || ctx.useDKLS)) {
     await loadWasm(ctx, wasmOverride);
+    const serverUrl = getBaseMPCNetworkUrl(ctx.env, !ctx.disableWebSockets);
+
     if (global.initWasm) {
       await new Promise((resolve, reject) =>
         global.initWasm?.((err, result) => {
@@ -206,7 +219,7 @@ export async function handleMessage(
             reject(err);
           }
           resolve(result);
-        }),
+        }, serverUrl),
       );
     }
     wasmLoaded = true;

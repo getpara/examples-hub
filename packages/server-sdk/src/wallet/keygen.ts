@@ -283,3 +283,36 @@ export function ed25519PreKeygen(
     }
   });
 }
+
+export async function initializeWorker(ctx: Ctx): Promise<void> {
+  return new Promise(async (resolve, reject) => {
+    const workId = uuid.v4();
+
+    try {
+      const worker = await setupWorker(
+        ctx,
+        async () => {
+          resolve();
+        },
+        error => {
+          reject(error);
+        },
+        workId,
+        {
+          functionType: 'INIT',
+          disableWorkers: ctx.disableWorkers,
+          disableWebSockets: ctx.disableWebSockets,
+        },
+      );
+
+      worker.postMessage({
+        env: ctx.env,
+        apiKey: ctx.apiKey,
+        functionType: 'INIT',
+        workId,
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
+}

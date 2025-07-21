@@ -381,6 +381,12 @@ describe('ReactNativeUtils', () => {
     });
   });
 
+  describe('initializeWorker', () => {
+    it('should complete without error', async () => {
+      await expect(utils.initializeWorker(mockCtx)).resolves.toBeUndefined();
+    });
+  });
+
   describe('unimplemented methods', () => {
     it('should throw for generateBlumPrimes', async () => {
       await expect(utils.generateBlumPrimes(mockCtx)).rejects.toThrow('method not implemented');

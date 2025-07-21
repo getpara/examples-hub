@@ -94,6 +94,12 @@ export class Worker {
         });
         return;
       }
+      case 'INIT': {
+        this.onmessage({
+          workId,
+        });
+        return;
+      }
     }
   }
   terminate() {}

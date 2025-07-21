@@ -39,6 +39,7 @@ export const mockClaimPregenWallets = vi.fn();
 export const mockHasPregenWallet = vi.fn();
 export const mockUpdatePregenWalletIdentifier = vi.fn();
 export const mockCreateGuestWallets = vi.fn();
+export const mockInitializeWorker = vi.fn();
 export class MockPara extends ParaInternal {
   checkIfUserExists = mockCheckIfUserExists;
   checkIfUserExistsByPhone = mockCheckIfUserExistsByPhone;
@@ -77,6 +78,7 @@ export class MockPara extends ParaInternal {
   hasPregenWallet = mockHasPregenWallet;
   updatePregenWalletIdentifier = mockUpdatePregenWalletIdentifier;
   createGuestWallets = mockCreateGuestWallets;
+  initializeWorker = mockInitializeWorker;
 
   wallets = TEST_WALLETS;
   userId = TEST_USER_ID;

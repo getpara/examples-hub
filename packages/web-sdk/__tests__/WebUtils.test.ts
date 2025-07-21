@@ -62,6 +62,7 @@ const sendTransactionSpy = vi.spyOn(signing, 'sendTransaction').mockImplementati
 const ed25519SignSpy = vi.spyOn(signing, 'ed25519Sign').mockImplementation(async () => ({
   signature: SIGNATURE,
 }));
+const initializeWorkerSpy = vi.spyOn(keygen, 'initializeWorker').mockImplementation(async () => undefined);
 
 let popUpHeight = 0;
 let popUpWidth = 550;
@@ -579,5 +580,13 @@ describe('WebUtils', () => {
     height=${popUpHeight}, top=${(WINDOW_INNER_HEIGHT - popUpHeight) / 2}, left=${(WINDOW_INNER_WIDTH - popUpWidth) / 2}`,
       );
     });
+  });
+  it('initializeWorker', async () => {
+    const webUtils = new WebUtils();
+
+    await webUtils.initializeWorker(TEST_CTX);
+
+    expect(initializeWorkerSpy).toBeCalledTimes(1);
+    expect(initializeWorkerSpy).toBeCalledWith(TEST_CTX);
   });
 });

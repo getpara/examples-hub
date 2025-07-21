@@ -115,6 +115,14 @@ export class Worker {
         });
         return;
       }
+      case 'INIT': {
+        this.onmessage({
+          data: {
+            workId,
+          },
+        });
+        return;
+      }
     }
   }
   terminate() {}

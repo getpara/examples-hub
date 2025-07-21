@@ -127,4 +127,6 @@ export interface PlatformUtils {
   disableProviderModal?: boolean;
 
   openPopup(popupUrl: string, opts?: { type: PopupType }): Window;
+
+  initializeWorker(ctx: Ctx): Promise<void>;
 }

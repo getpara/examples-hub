@@ -5,6 +5,7 @@ import { workerMessagePostSpy } from '../mocks/mockWorker.js';
 import {
   ed25519Keygen,
   ed25519PreKeygen,
+  initializeWorker,
   isKeygenComplete,
   isPreKeygenComplete,
   keygen,
@@ -331,6 +332,37 @@ describe('keygen', () => {
       });
 
       await expect(ed25519PreKeygen(TEST_CTX, USER.email, 'EMAIL', USER.sessionCookie)).rejects.toThrow(waitUntilTrueError);
+    });
+  });
+
+  describe('initializeWorker', () => {
+    it('success', async () => {
+      await initializeWorker(TEST_CTX);
+
+      expect(workerMessagePostSpy).toBeCalledTimes(1);
+      expect(workerMessagePostSpy).toBeCalledWith({
+        env: Environment.DEV,
+        apiKey: PARTNER.apiKey,
+        functionType: 'INIT',
+        workId: expect.any(String),
+      });
+    });
+
+    it('handles worker errors', async () => {
+      const mockWorkerError = new Error('Mock worker error');
+      vi.spyOn(workerWrapper, 'setupWorker').mockImplementationOnce((_ctx, _onSuccess, onError, _workId) => {
+        setTimeout(() => onError(mockWorkerError), 0);
+        return Promise.resolve({ postMessage: vi.fn() }) as any;
+      });
+      await expect(initializeWorker(TEST_CTX)).rejects.toThrow(mockWorkerError);
+    });
+
+    it('handles setup errors', async () => {
+      const setupWorkerError = new Error('Setup worker failed');
+      vi.spyOn(workerWrapper, 'setupWorker').mockImplementationOnce((_ctx, _onSuccess, _onError, _workId) => {
+        throw setupWorkerError;
+      });
+      await expect(initializeWorker(TEST_CTX)).rejects.toThrow(setupWorkerError);
     });
   });
 });

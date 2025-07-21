@@ -62,6 +62,7 @@ export const mockEd25519Keygen = vi.fn();
 export const mockEd25519PreKeygen = vi.fn();
 export const mockEd25519Sign = vi.fn();
 export const mockRefreshShare = vi.fn();
+export const mockInitializeWorker = vi.fn();
 
 export const resetPlatformMocks = () => {
   mockRefresh.mockReturnValue({ signer: 'test-refresh-signer', protocolId: 'protocolId' });
@@ -76,6 +77,7 @@ export const resetPlatformMocks = () => {
   mockEd25519PreKeygen.mockResolvedValue(SOLANA_PREGEN_WALLET_KEYGEN_RES);
   mockEd25519Sign.mockReturnValue({ signature: 'signature' });
   mockRefreshShare.mockResolvedValue('recoverySecret');
+  mockInitializeWorker.mockResolvedValue(undefined);
 };
 
 resetPlatformMocks();
@@ -122,4 +124,6 @@ export class MockPlatformUtils implements PlatformUtils {
   disableProviderModal = false;
 
   openPopup = vi.fn();
+
+  initializeWorker = mockInitializeWorker;
 }

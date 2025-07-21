@@ -311,3 +311,27 @@ export function ed25519PreKeygen(
     });
   });
 }
+
+export async function initializeWorker(ctx: Ctx): Promise<void> {
+  return new Promise(async (resolve, reject) => {
+    const workId = uuid.v4();
+
+    const worker = await setupWorker(
+      ctx,
+      async () => {
+        resolve();
+      },
+      error => {
+        reject(error);
+      },
+      workId,
+    );
+
+    worker.postMessage({
+      env: ctx.env,
+      apiKey: ctx.apiKey,
+      functionType: 'INIT',
+      workId,
+    });
+  });
+}

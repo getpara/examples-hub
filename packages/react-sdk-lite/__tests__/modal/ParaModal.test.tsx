@@ -60,6 +60,7 @@ describe('ParaModal', () => {
 
   it('renders first screen', async () => {
     const para = new Para(Environment.DEV, 'apikey123');
+    (para as any).initializeWorker = vi.fn();
     await (para as unknown as any).ready();
 
     (para as unknown as any).prepareLogin = vi.fn().mockResolvedValue('testId');

@@ -30,6 +30,7 @@ const ed25519PreKeygenSpy = vi.spyOn(keygen, 'ed25519PreKeygen').mockImplementat
   walletId: WALLET.id,
   recoveryShare: null,
 }));
+const initializeWorkerSpy = vi.spyOn(keygen, 'initializeWorker').mockImplementation(async () => undefined);
 
 const signMessageSpy = vi.spyOn(signing, 'signMessage').mockImplementation(async () => ({
   signature: SIGNATURE,
@@ -262,5 +263,14 @@ describe('ServerUtils', () => {
     expect(() => serverUtils.openPopup('https://test.com')).toThrow(
       'OpenPopup is not implemented in the ServerUtils class.',
     );
+  });
+
+  it('initializeWorker', async () => {
+    const serverUtils = new ServerUtils();
+
+    await serverUtils.initializeWorker(TEST_CTX);
+
+    expect(initializeWorkerSpy).toBeCalledTimes(1);
+    expect(initializeWorkerSpy).toBeCalledWith(TEST_CTX);
   });
 });
