@@ -71,7 +71,8 @@ concurrency:
 env:
   NODE_VERSION: "20.19.0"
   # Improve caching and performance
-  YARN_CACHE_FOLDER: ~/.yarn-cache
+  YARN_ENABLE_GLOBAL_CACHE: 'false'
+  YARN_NM_MODE: 'hardlinks-local'
   NODE_OPTIONS: "--max-old-space-size=4096"
 
 jobs:
@@ -136,6 +137,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Pre-job cleanup
+        run: |
+          # Ensure we start with a clean workspace
+          echo "🧹 Pre-job cleanup..."
+          # Remove any artifacts that might exist from previous runs
+          find . -name "node_modules" -type d -prune -exec rm -rf '{}' + 2>/dev/null || true
+          find . -name ".next" -type d -prune -exec rm -rf '{}' + 2>/dev/null || true
+          find . -name ".vite" -type d -prune -exec rm -rf '{}' + 2>/dev/null || true
+          find . -name ".nuxt" -type d -prune -exec rm -rf '{}' + 2>/dev/null || true
+          find . -name "dist" -type d -prune -exec rm -rf '{}' + 2>/dev/null || true
+          find . -name "build" -type d -prune -exec rm -rf '{}' + 2>/dev/null || true
+          find . -name ".yarn-cache-local" -type d -prune -exec rm -rf '{}' + 2>/dev/null || true
+          echo "✅ Pre-cleanup complete"
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -161,12 +176,6 @@ jobs:
           restore-keys: |
             build-artifacts-${{ runner.os }}-${{ matrix.project.name }}-
 
-      - name: Load CI environment variables
-        run: |
-          if [ -f .env.ci.example ]; then
-            cat .env.ci.example >> $GITHUB_ENV
-          fi
-
       - name: Test Project
         id: test
         run: |
@@ -186,7 +195,9 @@ jobs:
 
           # Install dependencies with optimizations
           echo "📦 Installing dependencies..."
-          if yarn install --immutable --network-timeout 60000 --cache-folder $YARN_CACHE_FOLDER; then
+          # Use project-specific yarn cache to avoid conflicts
+          export YARN_CACHE_FOLDER="$(pwd)/.yarn-cache-local"
+          if yarn install --immutable --network-timeout 60000; then
             echo "✅ Dependencies installed" >> $GITHUB_STEP_SUMMARY
           else
             echo "❌ Failed to install dependencies" >> $GITHUB_STEP_SUMMARY
@@ -254,10 +265,42 @@ jobs:
           echo "- Duration: ${DURATION}s" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
-          # Cleanup
+          # Comprehensive cleanup to prevent disk space issues
           echo ""
-          echo "🧹 Cleaning up node_modules..."
+          echo "🧹 Performing comprehensive cleanup..."
+          
+          # Clean node_modules
+          echo "  - Removing node_modules..."
           rm -rf node_modules
+          
+          # Clean yarn caches and artifacts
+          echo "  - Removing yarn caches..."
+          rm -rf .yarn-cache-local
+          rm -rf .yarn/cache
+          rm -rf .yarn/unplugged
+          rm -rf .yarn/build-state.yml
+          rm -rf .yarn/install-state.gz
+          
+          # Clean build artifacts
+          echo "  - Removing build artifacts..."
+          rm -rf .next
+          rm -rf .nuxt
+          rm -rf .vite
+          rm -rf dist
+          rm -rf build
+          rm -rf out
+          rm -rf .turbo
+          rm -rf .parcel-cache
+          rm -rf .svelte-kit
+          
+          # Clean other common artifacts
+          echo "  - Removing other artifacts..."
+          rm -rf coverage
+          rm -rf .eslintcache
+          rm -rf .stylelintcache
+          rm -rf *.log
+          
+          echo "✅ Cleanup complete"
 
           # Set outputs for summary
           echo "project_name=$PROJECT_NAME" >> $GITHUB_OUTPUT
@@ -311,7 +354,10 @@ jobs:
           cache-dependency-path: "**/yarn.lock"
 
       - name: Install dependencies
-        run: yarn install --immutable --network-timeout 60000 --cache-folder $YARN_CACHE_FOLDER
+        run: |
+          # Use local yarn cache to avoid conflicts
+          export YARN_CACHE_FOLDER="$(pwd)/.yarn-cache-local"
+          yarn install --immutable --network-timeout 60000
 
       - name: Install Playwright
         timeout-minutes: 3
