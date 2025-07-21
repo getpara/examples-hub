@@ -1,3 +1,43 @@
+# Release (Mon Jul 21 2025)
+
+## Package Versions
+- @getpara/web-sdk@2.0.0-alpha.34
+- @getpara/wagmi-v2-integration@2.0.0-alpha.34
+- @getpara/wagmi-v2-connector@2.0.0-alpha.34
+- @getpara/viem-v2-integration@2.0.0-alpha.34
+- @getpara/viem-v1-integration@2.0.0-alpha.34
+- @getpara/user-management-client@2.0.0-alpha.34
+- @getpara/solana-web3.js-v1-integration@2.0.0-alpha.34
+- @getpara/solana-wallet-connectors@2.0.0-alpha.34
+- @getpara/solana-signers-v2-integration@2.0.0-alpha.34
+- @getpara/server-sdk@2.0.0-alpha.34
+- @getpara/react-sdk-lite@2.0.0-alpha.34
+- @getpara/react-sdk@2.0.0-alpha.34
+- @getpara/react-native-wallet@2.0.0-alpha.34
+- @getpara/react-components@2.0.0-alpha.34
+- @getpara/react-component-library@1.0.0-alpha.29
+- @getpara/react-common@2.0.0-alpha.34
+- @getpara/evm-wallet-connectors@2.0.0-alpha.34
+- @getpara/ethers-v6-integration@2.0.0-alpha.34
+- @getpara/ethers-v5-integration@2.0.0-alpha.34
+- @getpara/cosmos-wallet-connectors@2.0.0-alpha.34
+- @getpara/cosmjs-v0-integration@2.0.0-alpha.34
+- @getpara/core-sdk@2.0.0-alpha.34
+- @getpara/core-components@2.0.0-alpha.34
+
+### Features
+- Use portal onramps without reauthenticating (#1102) - b9b3fd645
+- add viem hooks (#1095) - 3e3438506
+- External Wallet - Extension Auto Detection (#1059) - d2e69aec5
+
+### Fixes
+- update CI to use Node.js 22.17.0 for all jobs to resolve @farcaster/mini-app-solana compatibility - b1e47b6fe
+
+### Chores
+- improvements to wallet creation speed (#1008) - 24da47530
+- Reduced size install indicator (#1073) - 8cf0ffaeb
+- remove sentry usage from sdk packages (#1105) - 0d9497807
+
 # Release (Thu Jul 17 2025)
 
 ## Package Versions

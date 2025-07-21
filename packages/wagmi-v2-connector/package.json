@@ -1,9 +1,9 @@
 {
   "name": "@getpara/wagmi-v2-connector",
-  "version": "2.0.0-alpha.33",
+  "version": "2.0.0-alpha.34",
   "dependencies": {
-    "@getpara/viem-v2-integration": "2.0.0-alpha.33",
-    "@getpara/web-sdk": "2.0.0-alpha.33"
+    "@getpara/viem-v2-integration": "2.0.0-alpha.34",
+    "@getpara/web-sdk": "2.0.0-alpha.34"
   },
   "devDependencies": {
     "typescript": "^5.8.3",
