@@ -12,7 +12,7 @@ const HAS_MORE_LENGTH = 3;
 
 export const ExternalWallets = () => {
   const { wallets: allWallets, connectExternalWallet } = useExternalWallets();
-  const setSelectedExternalWalletId = useModalStore(state => state.setSelectedExternalWalletId);
+  const setSelectedExternalWallet = useModalStore(state => state.setSelectedExternalWallet);
   const setStep = useModalStore(state => state.setStep);
   const showAll = useModalStore(state => state.step === ModalStep.EX_WALLET_MORE);
   const authLayout = useModalStore(state => state.authLayout);
@@ -47,12 +47,12 @@ export const ExternalWallets = () => {
     const shouldShowNetworkSelection = allWallets.filter(w => w.id === wallet.id).length > 1;
 
     if (shouldShowNetworkSelection) {
-      setSelectedExternalWalletId(wallet.internalId);
+      setSelectedExternalWallet({ id: wallet.id, type: wallet.type });
       setStep(ModalStep.EX_WALLET_NETWORK_SELECT);
       return;
     }
 
-    setSelectedExternalWalletId(wallet.internalId);
+    setSelectedExternalWallet({ id: wallet.id, type: wallet.type });
     setStep(ModalStep.EX_WALLET_SELECTED);
 
     if (wallet.installed) {

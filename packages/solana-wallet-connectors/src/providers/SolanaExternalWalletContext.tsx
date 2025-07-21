@@ -60,20 +60,13 @@ export function SolanaExternalWalletProvider({
     await para.logout();
   };
 
-  const _reset = async ({ logout = false }: { logout?: boolean } = {}) => {
-    await disconnect();
-    if (logout) {
-      await para.logout();
-    }
-  };
-
   const login = async ({
     address,
     providerId,
     providerName,
   }: {
     address: string;
-    providerId: TExternalWallet;
+    providerId: string;
     providerName?: string;
   }) => {
     try {
@@ -111,7 +104,7 @@ export function SolanaExternalWalletProvider({
         try {
           await login({
             address,
-            providerId: getWallet(wallet?.adapter?.name ?? '')?.internalId,
+            providerId: getWallet(wallet?.adapter?.name ?? '')?.id,
             providerName: wallet?.adapter?.name,
           });
         } catch (err) {
@@ -259,7 +252,7 @@ export function SolanaExternalWalletProvider({
 
       if (address) {
         try {
-          authState = await login({ address, providerId: getWallet(adapter.name)?.internalId, providerName: adapter.name });
+          authState = await login({ address, providerId: getWallet(adapter.name)?.id, providerName: adapter.name });
           verificationMessage.current = authState.stage === 'verify' ? authState.signatureVerificationMessage : undefined;
         } catch (err) {
           await disconnect();
@@ -285,8 +278,8 @@ export function SolanaExternalWalletProvider({
     return { address, error, authState };
   };
 
-  const requestInfo = async (providerId: TExternalWallet): Promise<ExternalWalletInfo> => {
-    const wallet = wallets.find(w => w.internalId === providerId);
+  const requestInfo = async (providerId: string): Promise<ExternalWalletInfo> => {
+    const wallet = wallets.find(w => w.id === providerId);
 
     const adapter = getAdapter(wallet.name ?? '');
 
@@ -298,7 +291,7 @@ export function SolanaExternalWalletProvider({
         partnerId: para.partnerId,
         address,
         type: 'SOLANA',
-        providerId: wallet.internalId,
+        providerId: wallet.id,
         provider: wallet.name,
       };
 
@@ -311,7 +304,7 @@ export function SolanaExternalWalletProvider({
   };
 
   const disconnectBase = async (providerId: TExternalWallet) => {
-    const wallet = wallets.find(w => w.internalId === providerId);
+    const wallet = wallets.find(w => w.id === providerId);
 
     const adapter = getAdapter(wallet.name ?? '');
 
@@ -345,6 +338,8 @@ export function SolanaExternalWalletProvider({
       installed:
         adapter && (adapter?.readyState === WalletReadyState.Installed || adapter?.readyState === WalletReadyState.Loadable),
       ...metaData,
+      // Using name here since that's the only common id across the networks
+      id: metaData.name,
     } as CommonWallet;
   };
 
@@ -407,11 +402,33 @@ export function SolanaExternalWalletProvider({
     setupFarcaster();
   }, [para.isFarcasterMiniApp, wallets, adapters]);
 
+  const injectedWallets = adapters
+    .filter(wallet => wallet.adapter.name !== 'Mobile Wallet Adapter' && !wallets.some(w => w.name === wallet.adapter.name))
+    .map(wallet => {
+      const adapter = wallet.adapter;
+
+      return {
+        connect: () => connect(adapter),
+        connectMobile: () => connect(adapter),
+        type: 'SOLANA',
+        installed:
+          adapter &&
+          (adapter?.readyState === WalletReadyState.Installed || adapter?.readyState === WalletReadyState.Loadable),
+        name: adapter.name,
+        iconUrl: adapter.icon,
+        // Using name here since that's the only common id across the networks
+        id: adapter.name,
+        internalId: adapter.name,
+      } as CommonWallet;
+    });
+
+  const walletsWithInjected = [...wallets, ...injectedWallets];
+
   return (
     <SolanaExternalWalletContext.Provider
       value={useMemo(
         () => ({
-          wallets,
+          wallets: walletsWithInjected,
           disconnect,
           signMessage,
           signVerificationMessage,
@@ -420,7 +437,15 @@ export function SolanaExternalWalletProvider({
           farcasterStatus,
           ...externalHooks,
         }),
-        [wallets, disconnect, signMessage, signVerificationMessage, requestInfo, farcasterStatus, disconnectBase],
+        [
+          walletsWithInjected,
+          disconnect,
+          signMessage,
+          signVerificationMessage,
+          requestInfo,
+          farcasterStatus,
+          disconnectBase,
+        ],
       )}
     >
       {children}

@@ -2,7 +2,6 @@ import {
   EmbeddedWalletType,
   ExternalWalletType,
   PartnerEntity,
-  TExternalWallet,
   TPregenIdentifierType,
   TWalletScheme,
 } from '@getpara/user-management-client';
@@ -28,7 +27,7 @@ export interface Wallet {
   lastUsedPartnerId?: string;
   isExternal?: boolean;
   isExternalWithParaAuth?: boolean;
-  externalProviderId?: TExternalWallet;
+  externalProviderId?: string;
   isExternalWithVerification?: boolean;
   isExternalConnectionOnly?: boolean;
   ensName?: string | null;

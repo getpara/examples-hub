@@ -1,7 +1,7 @@
 import { CpslIcon, CpslInput, CpslSelect, CpslSelectItem, CpslText, CpslTileButton } from '@getpara/react-components';
 import { safeStyled } from '@getpara/react-common';
 import { MOBILE_SIZE, NETWORKS, ON_RAMP_ASSETS } from '../constants/constants.js';
-import { Network, OnRampAsset, TExternalWallet, TLinkedAccountType } from '@getpara/web-sdk';
+import { Network, OnRampAsset, TLinkedAccountType } from '@getpara/web-sdk';
 import { useStore } from '../../provider/stores/useStore.js';
 import { ACCOUNT_TYPES } from '../constants/oAuthLogos.js';
 import { PropsWithChildren, useEffect, useRef, useState } from 'react';
@@ -176,25 +176,27 @@ export function AccountTypeIcon({
   accountType,
   size,
   inset,
+  src,
 }: {
-  accountType?: TLinkedAccountType | TExternalWallet;
+  accountType?: TLinkedAccountType | string;
   size?: string;
   inset?: string;
+  src?: string;
 }) {
   const isDark = useStore(state => state.modalConfig?.theme?.mode === 'dark');
   const data = accountType ? ACCOUNT_TYPES[accountType] : null;
 
-  return data ? (
-    <CpslIcon size={size} inset={inset} icon={data.logoBranded ?? data.logo} invert={isDark && data.isDark} />
+  return data || src ? (
+    <CpslIcon size={size} inset={inset} icon={data?.logoBranded ?? data?.logo} src={src} invert={isDark && data?.isDark} />
   ) : null;
 }
 
-export function HeroAccountTypeIcon({ accountType }: { accountType: TLinkedAccountType | TExternalWallet }) {
+export function HeroAccountTypeIcon({ accountType, src }: { accountType?: TLinkedAccountType | string; src?: string }) {
   if (accountType === 'EMAIL' || accountType === 'PHONE') {
     return <HeroGenericIcon accountType={accountType} />;
   }
 
-  return <AccountTypeIcon accountType={accountType} size="60px" />;
+  return <AccountTypeIcon accountType={accountType} size="60px" src={src} />;
 }
 
 export function HeroSuccessIcon() {

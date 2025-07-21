@@ -138,7 +138,7 @@ export const AuthMainStepContent = ({
       {isGuestModeEnabled && !isGuestMode && !isFarcasterMiniApp && (
         <GuestMode
           href="#"
-          isDark={isDark}
+          $isDark={isDark}
           onClick={e => {
             e.preventDefault();
             createGuestWallets();
@@ -175,13 +175,13 @@ const CondensedButton = safeStyled(CpslButton)`
   }
 `;
 
-const GuestMode = safeStyled.a<{ isDark?: boolean }>`
+const GuestMode = safeStyled.a<{ $isDark?: boolean }>`
   display: flex;
   justify-content: center;
   align-items: center;
   width: 100%;
   height: 50px;
-  color: ${({ isDark }) => (isDark ? 'white' : 'black')};
+  color: ${({ $isDark }) => ($isDark ? 'white' : 'black')};
   text-decoration: none;
   font-size: 16px;
   font-weight: 500;

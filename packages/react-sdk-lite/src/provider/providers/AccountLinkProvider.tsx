@@ -10,7 +10,6 @@ import {
   LINKED_ACCOUNT_TYPES,
   SupportedAccountLinks,
   TelegramAuthResponse,
-  TExternalWallet,
   TLinkedAccountType,
   Auth,
   AuthInfo,
@@ -23,11 +22,11 @@ import { useExternalWallets } from './ExternalWalletProvider.js';
 import { useInternalClient } from '../hooks/utils/useInternalClient.js';
 import { generateInternalMutation } from '../hooks/mutations/utils.js';
 import { validateAuth } from '../../modal/utils/authInputHelpers.js';
-import { extractAuthInfo, TWalletType } from '@getpara/user-management-client';
+import { EXTERNAL_WALLET_TYPES, extractAuthInfo, TExternalWallet, TWalletType } from '@getpara/user-management-client';
 import { useStore } from '../stores/useStore.js';
 
 type AccountLinkInProgress = Partial<
-  CoreAccountLinkInProgress & { pendingWalletProvider?: TExternalWallet; pendingWalletType?: TWalletType }
+  CoreAccountLinkInProgress & { pendingWalletProvider?: string; pendingWalletType?: TWalletType }
 >;
 
 export type ModalLinkAccountArgs =
@@ -37,7 +36,9 @@ export type ModalLinkAccountArgs =
       type: Exclude<TLinkedAccountType, 'EXTERNAL_WALLET'> | 'X';
     }
   | {
-      externalWallet: { internalId: TExternalWallet; type?: TWalletType };
+      // For internal modal usage we'll pass the external wallet id as a string regardless of whether it's a supported wallet type or not
+      // For the hook we want devs to pass in one of our supported external wallet types for better type safety and dev ex
+      externalWallet: { provider: TExternalWallet | string; type?: TWalletType };
     }
   | {
       options: SupportedAccountLinks;
@@ -186,10 +187,23 @@ export const AccountLinkProvider = ({ children }: PropsWithChildren) => {
         break;
       case args && 'externalWallet' in args:
         {
-          const providerId = args.externalWallet.internalId;
+          const isSupportedWalletType = EXTERNAL_WALLET_TYPES.includes(args.externalWallet.provider as TExternalWallet);
+
+          let supportedWalletId: string | undefined;
+
+          if (isSupportedWalletType) {
+            supportedWalletId = wallets.find(w => w.internalId === args.externalWallet.provider)?.id;
+
+            if (!supportedWalletId) {
+              throw new Error(`wallet not installed: ${args.externalWallet.provider}`);
+            }
+          }
+
+          // If the passed in wallet is officially supported, we use its id, else assume it's an automatically detected wallet
+          const providerId = supportedWalletId ?? args.externalWallet.provider;
           const type = args.externalWallet.type;
 
-          if (providerId === connectedWallet?.internalId) {
+          if (providerId === connectedWallet?.id) {
             throw new Error(`Cannot link the currently connected external wallet: ${providerId}`);
           }
 
@@ -199,7 +213,7 @@ export const AccountLinkProvider = ({ children }: PropsWithChildren) => {
             pendingWalletType: type,
           });
 
-          const linkWallet = wallets.find(w => w.internalId === providerId);
+          const linkWallet = wallets.find(w => w.id === providerId);
 
           if (!linkWallet) {
             throw new Error(`wallet not installed: ${providerId}`);
@@ -243,7 +257,7 @@ export const AccountLinkProvider = ({ children }: PropsWithChildren) => {
             setLinkAccountError(`Error authenticating external wallet: ${e.message}`);
           } finally {
             if (linkWallet.type === 'EVM' || linkWallet.type === 'SOLANA') {
-              await disconnectBase(providerId);
+              await disconnectBase(providerId, linkWallet.type);
             }
           }
         }

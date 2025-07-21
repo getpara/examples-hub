@@ -27,7 +27,6 @@ import {
   type ExternalWalletContextType,
   type ExternalWalletProviderConfigBase,
   type SignArgs,
-  type TExternalWallet,
 } from '@getpara/react-common';
 import { AuthState, ExternalWalletInfo, isMobile } from '@getpara/web-sdk';
 import { etherUnits, formatUnits } from 'viem';
@@ -122,9 +121,7 @@ export function EvmExternalWalletProvider({
     switch (true) {
       case !!externalWallet.providerId:
         {
-          connector = connectionsRef.current.find(
-            c => (c.connector.paraDetails as ParaDetails | undefined)?.internalId === externalWallet.providerId,
-          )?.connector;
+          connector = connectionsRef.current.find(c => c.connector?.name === externalWallet.providerId)?.connector;
         }
         break;
     }
@@ -415,8 +412,8 @@ export function EvmExternalWalletProvider({
   //   return getWalletConnectUri(connector, connector.paraDetails?.getUri);
   // };
 
-  const requestInfo = async (providerId: TExternalWallet): Promise<ExternalWalletInfo> => {
-    const connector = connectors.find(c => c.paraDetails?.internalId === providerId);
+  const requestInfo = async (providerId: string): Promise<ExternalWalletInfo> => {
+    const connector = connectors.find(c => c.name === providerId);
 
     if (connector.isAuthorized) isLinkingAccount.current = true;
     try {
@@ -426,7 +423,7 @@ export function EvmExternalWalletProvider({
         partnerId: para.partnerId,
         address,
         type: 'EVM',
-        providerId: connector.paraDetails?.internalId,
+        providerId: connector.name,
         provider: connector.name,
         ensName,
         ensAvatar,
@@ -436,12 +433,12 @@ export function EvmExternalWalletProvider({
     }
   };
 
-  const disconnectBase = async (providerId?: TExternalWallet): Promise<void> => {
+  const disconnectBase = async (providerId?: string): Promise<void> => {
     if (!providerId) {
       throw new Error('Provider ID is required to disconnect');
     }
 
-    const connector = connectors.find(c => c.paraDetails?.internalId === providerId);
+    const connector = connectors.find(c => c.id === providerId);
 
     isLinkingAccount.current = true;
     try {
@@ -465,7 +462,7 @@ export function EvmExternalWalletProvider({
         }
       }
     });
-  const eip6963ids = connectors.filter(c => isEIP6963Connector(c)).map(c => c.id);
+  const eip6963Names = connectors.filter(c => isEIP6963Connector(c)).map(c => c.name);
   const dedupedConnectors = connectors
     .map(c => {
       // Filter out the duplicated walletConnect connector with the modal
@@ -474,7 +471,7 @@ export function EvmExternalWalletProvider({
         return;
       }
       // Remove any non EIP6963 connectors if they have a matching EIP6963 connectors
-      if (!isEIP6963Connector(c) && eip6963ids.includes(c.paraDetails?.rdns)) {
+      if (!isEIP6963Connector(c) && eip6963Names.includes(c.name)) {
         return;
       }
       // Return the EIP6963 connectors
@@ -507,8 +504,21 @@ export function EvmExternalWalletProvider({
         connector.paraDetails?.internalId === 'WALLETCONNECT' ||
         connector.paraDetails?.showQrModal;
 
+      const isInjected = !c.paraDetails && eip6963Names.includes(c.name);
+
+      // If there is a para connector, use that not to injected
+      if (isInjected && connectors.some(c => c.paraDetails?.rdns === c.id)) {
+        return undefined;
+      }
+
       return {
         ...connector,
+        // Using name here since that's the only common id across the networks
+        id: connector.name,
+        internalId: connector.internalId ?? connector.name,
+        isExtension: connector.isExtension ?? isInjected,
+        installed: connector.installed ?? isInjected,
+        iconUrl: connector.iconUrl ?? connector.icon,
         connect: () => connect(connector),
         connectMobile: (manual?: boolean) => connectMobile(connector, manual),
         type: 'EVM',
@@ -519,12 +529,11 @@ export function EvmExternalWalletProvider({
 
   const getConnectorInfo = (connector: WagmiConnectorInstance): Partial<ExternalWalletInfo> => {
     const paraDetails = connector.paraDetails as ParaDetails | undefined;
-    const providerId = paraDetails?.internalId;
-    const withFullParaAuth = walletsWithFullAuth?.includes(providerId);
+    const withFullParaAuth = walletsWithFullAuth?.includes(paraDetails?.internalId);
     return {
       type: 'EVM',
-      providerId,
-      provider: paraDetails?.name,
+      providerId: connector.name,
+      provider: connector.name,
       withFullParaAuth,
     };
   };
@@ -554,7 +563,7 @@ export function EvmExternalWalletProvider({
   }, [connections]);
 
   const connectParaEmbedded = useCallback(async (): Promise<{ result?: unknown; error?: string }> => {
-    const paraConnectorInstance = connectors.find(c => c.id === 'para');
+    const paraConnectorInstance = connectors.find(c => c.id === 'Para');
     if (!paraConnectorInstance) {
       return { error: 'No para connector instance' };
     }

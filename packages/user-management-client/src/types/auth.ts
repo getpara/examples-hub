@@ -238,7 +238,7 @@ export type ExternalWalletInfo = {
   address: string;
   type: ExternalWalletType;
   provider?: string;
-  providerId?: TExternalWallet;
+  providerId?: string;
   addressBech32?: string;
   withFullParaAuth?: boolean;
   ensName?: string | null;

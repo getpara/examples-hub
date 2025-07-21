@@ -10,6 +10,7 @@ import {
   useSuggestChainAndConnect,
   getChainInfo,
   getWallet as grazGetWallet,
+  WALLET_TYPES,
 } from '@getpara/graz';
 import { useExternalWalletStore } from '../stores/useStore.js';
 import { WalletWithType } from '../types/Wallet.js';
@@ -224,7 +225,7 @@ export function CosmosExternalWalletProvider({
   const signMessage = async ({ message, externalWallet }: SignArgs) => {
     let wallet, signAddress, signEthAddress;
     if (externalWallet) {
-      const commonWallet = wallets.find(w => w.internalId === externalWallet.providerId);
+      const commonWallet = wallets.find(w => w.id === externalWallet.providerId);
 
       wallet = grazGetWallet((commonWallet as unknown as WalletWithType)?.grazType as GrazWalletType);
       signAddress = externalWallet.addressBech32;
@@ -368,21 +369,41 @@ export function CosmosExternalWalletProvider({
     }
   };
 
-  // The logic in the modal should prevent this from happening, logging for edge cases.
+  const injectedWallets = WALLET_TYPES.filter(w => !incompleteWallets.some(iw => iw.grazType === w) && checkWallet(w))
+    .map(w => {
+      const wallet = grazGetWallet(w) as any;
+
+      if (!wallet.eip6963ProviderInfo) {
+        return undefined;
+      }
+
+      const eipInfo = wallet.eip6963ProviderInfo;
+      return {
+        grazType: w,
+        // Using name here for the injected connector since that's the only common id across the networks
+        id: eipInfo.name,
+        internalId: eipInfo.name,
+        iconUrl: eipInfo.icon,
+        ...eipInfo,
+      };
+    })
+    .filter(w => !!w);
+
+  const allWallets: WalletWithType[] = [...incompleteWallets, ...injectedWallets];
 
   const getWallet = (walletType: GrazWalletType) =>
-    incompleteWallets.find(w => w.grazType === walletType || w.grazMobileType === walletType);
+    allWallets.find(w => w.grazType === walletType || w.grazMobileType === walletType);
 
   const getProvider = (walletType: GrazWalletType) => {
     const wallet = getWallet(walletType);
 
     return {
       provider: wallet?.name,
-      providerId: wallet?.internalId,
+      providerId: wallet?.id,
     };
   };
 
-  const wallets = incompleteWallets
+  const wallets = allWallets
     .map(wallet => {
       return {
         connect: () => connect(wallet.grazType),
@@ -390,6 +411,8 @@ export function CosmosExternalWalletProvider({
         getQrUri: () => '',
         type: 'COSMOS',
         ...wallet,
+        // Using name here since that's the only common id across the networks
+        id: wallet.name,
         installed: checkWallet(wallet.grazType),
       } as CommonWallet;
     })
@@ -417,8 +440,8 @@ export function CosmosExternalWalletProvider({
     }
   }, [para, multiChain, chains, selectedChainId]);
 
-  const requestInfo = async (providerId: TExternalWallet): Promise<ExternalWalletInfo> => {
-    const wallet = wallets.find(w => w.internalId === providerId);
+  const requestInfo = async (providerId: string): Promise<ExternalWalletInfo> => {
+    const wallet = wallets.find(w => w.id === providerId);
 
     if (!wallet) {
       throw new Error(`Wallet for provider ${providerId} not found`);

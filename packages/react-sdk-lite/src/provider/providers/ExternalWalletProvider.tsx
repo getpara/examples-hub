@@ -13,13 +13,7 @@ import {
   ExternalWalletContextType,
   TExternalWallet,
 } from '@getpara/react-common';
-import {
-  COSMOS_WALLETS,
-  EVM_WALLETS,
-  ExternalWalletInfo,
-  SOLANA_WALLETS,
-  VerifyExternalWalletParams,
-} from '@getpara/web-sdk';
+import { ExternalWalletInfo, VerifyExternalWalletParams } from '@getpara/web-sdk';
 import { useAuthActions } from './AuthProvider.js';
 import { CosmosSignResult } from '@getpara/cosmos-wallet-connectors';
 
@@ -57,12 +51,15 @@ export const defaultExternalWallet = {
   signMessage: () => Promise.resolve({} as unknown as any),
   isSigningMessage: false,
   getWalletBalance: () => Promise.resolve(undefined),
-  requestInfo: (_: TExternalWallet) => Promise.resolve({} as ExternalWalletInfo),
-  disconnectBase: (_: TExternalWallet) => Promise.resolve(),
+  requestInfo: (_: string) => Promise.resolve({} as ExternalWalletInfo),
+  disconnectBase: (_: string, __: TWalletType) => Promise.resolve(),
   connectFarcasterMiniApp: () => Promise.resolve(),
 };
 
-type Value = Omit<ExternalWalletContextType<CosmosSignResult>, 'disconnect' | 'signVerificationMessage' | 'requestInfo'> &
+type Value = Omit<
+  ExternalWalletContextType<CosmosSignResult>,
+  'disconnect' | 'signVerificationMessage' | 'requestInfo' | 'disconnectBase'
+> &
   ChainManagement<string, void> &
   BalanceManagement & {
     wallet?: CommonWallet;
@@ -81,7 +78,8 @@ type Value = Omit<ExternalWalletContextType<CosmosSignResult>, 'disconnect' | 's
     connectEmbeddedToExternalConnectors: () => Promise<void>;
     isSigningMessage: boolean;
     verifyWalletSignature: () => Promise<VerifyExternalWalletParams | undefined>;
-    requestInfo: (_: TExternalWallet, __: TWalletType) => Promise<ExternalWalletInfo>;
+    requestInfo: (_: string, __: TWalletType) => Promise<ExternalWalletInfo>;
+    disconnectBase: (_: string, __: TWalletType) => Promise<void>;
     connectFarcasterMiniApp: () => Promise<void>;
   };
 
@@ -142,8 +140,8 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
   const setStepDirection = useModalStore(state => state.setStepDirection);
   const setIsExternalWalletConnecting = useModalStore(state => state.setIsExternalWalletConnecting);
   const isExternalWalletConnecting = useModalStore(state => state.isExternalWalletConnecting);
-  const setSelectedExternalWalletId = useModalStore(state => state.setSelectedExternalWalletId);
-  const selectedExternalWalletId = useModalStore(state => state.selectedExternalWalletId);
+  const selectedExternalWallet = useModalStore(state => state.selectedExternalWallet);
+  const setSelectedExternalWallet = useModalStore(state => state.setSelectedExternalWallet);
   const setExternalWalletError = useModalStore(state => state.setExternalWalletError);
   const setIsUsingMobileConnector = useModalStore(state => state.setIsUsingMobileConnector);
   const refs = useModalStore(state => state.refs);
@@ -157,7 +155,9 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
   const [isSigningMessage, setIsSigningMessage] = useState(false);
 
   // Filter any wallets that aren't included in the sort array, sort by the array then sort by installed extensions
-  const wallets = [...evmWallets, ...solanaWallets, ...cosmosWallets]
+  const allWallets = [...evmWallets, ...solanaWallets, ...cosmosWallets];
+
+  let wallets = allWallets
     .filter(
       w =>
         (w.internalId !== 'FARCASTER' || para?.isFarcasterMiniApp) &&
@@ -170,9 +170,15 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
     )
     .sort((a, b) => (a.installed === b.installed ? 0 : a.installed ? -1 : 1));
 
+  const injectedWallets = allWallets.filter(
+    w => w?.id !== 'Para' && !wallets.some(wallet => wallet.id === w.id) && w.installed,
+  );
+
+  wallets = [...wallets, ...injectedWallets];
+
   const wallet = useMemo(
-    () => wallets.find(w => w.internalId === selectedExternalWalletId),
-    [wallets, selectedExternalWalletId],
+    () => wallets.find(w => w.id === selectedExternalWallet?.id && w.type === selectedExternalWallet?.type),
+    [wallets, selectedExternalWallet],
   );
 
   const updateQrUri = async () => {
@@ -202,7 +208,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
         return undefined;
       }
     }
-  }, [evmGetWalletBalance, selectedExternalWalletId]);
+  }, [evmGetWalletBalance, selectedExternalWallet]);
 
   const chains: CommonChain[] = useMemo(() => {
     const walletType = Object.values(para.externalWallets || {})[0]?.type;
@@ -218,7 +224,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
         return [];
       }
     }
-  }, [cosmosChains, evmChains, selectedExternalWalletId]);
+  }, [cosmosChains, evmChains, selectedExternalWallet]);
 
   const chainId: string | undefined = useMemo(() => {
     const walletType = Object.values(para.externalWallets || {})[0]?.type;
@@ -234,7 +240,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
         return undefined;
       }
     }
-  }, [cosmosChains, evmChains, selectedExternalWalletId]);
+  }, [cosmosChains, evmChains, selectedExternalWallet]);
 
   const switchChain = useCallback(
     async (chainId: string) => {
@@ -576,19 +582,13 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
     }
   };
 
-  const disconnectBase = async (providerId: TExternalWallet) => {
-    const [isEvm, isSolana, _isCosmos] = [
-      EVM_WALLETS.includes(providerId as any),
-      SOLANA_WALLETS.includes(providerId as any),
-      COSMOS_WALLETS.includes(providerId as any),
-    ];
-
-    switch (true) {
-      case isEvm:
+  const disconnectBase = async (providerId: TExternalWallet, type: TWalletType) => {
+    switch (type) {
+      case 'EVM':
         await evmDisconnectBase(providerId);
         break;
 
-      case isSolana:
+      case 'SOLANA':
         await solanaDisconnectBase(providerId);
         break;
 
@@ -603,7 +603,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
     await para.logout();
     await evmDisconnect();
     await cosmosDisconnect();
-    setSelectedExternalWalletId();
+    setSelectedExternalWallet();
     // Do Solana disconnect last so window refresh happens last
     await solanaDisconnect();
   };

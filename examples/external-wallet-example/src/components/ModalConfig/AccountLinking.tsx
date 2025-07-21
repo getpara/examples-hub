@@ -10,6 +10,7 @@ import {
 } from '@getpara/react-components';
 import {
   EXTERNAL_WALLET_TYPES,
+  LinkAccountArgs,
   LINKED_ACCOUNT_TYPES,
   TExternalWallet,
   TLinkedAccountType,
@@ -34,7 +35,7 @@ const OPTIONS = [...LINKED_ACCOUNT_TYPES, ...EXTERNAL_WALLET_TYPES];
 export const AccountLinking = () => {
   const { linkAccount } = useLinkAccount();
 
-  const [args, setArgs] = useState<Parameters<typeof linkAccount>[0]>(undefined);
+  const [args, setArgs] = useState<LinkAccountArgs>(undefined);
   const [tab, setTab] = useState<ArgType>('none');
   const [authIdentifier, setAuthIdentifier] = useState('');
   const [externalWalletType, setExternalWalletType] = useState<TExternalWallet>([...EXTERNAL_WALLET_TYPES][0]);
@@ -163,7 +164,7 @@ export const AccountLinking = () => {
 
   useEffect(() => {
     if (tab === 'externalWallet') {
-      setArgs({ externalWallet: externalWalletType as TExternalWallet });
+      setArgs({ externalWallet: { internalId: externalWalletType as TExternalWallet } });
     }
   }, [tab, externalWalletType]);
 

@@ -3,11 +3,12 @@ import { CpslButton, CpslIcon, CpslIdenticon, CpslText } from '@getpara/react-co
 import { useClient } from '../../../provider/index.js';
 import { useLinkedAccounts } from '../../../provider/hooks/index.js';
 import { getWalletDisplayName } from '../../utils/getWalletDisplayName.js';
-import { LinkedAccount as TLinkedAccount, truncateAddress } from '@getpara/web-sdk';
+import { LinkedAccount as TLinkedAccount, TLinkedAccountType, truncateAddress } from '@getpara/web-sdk';
 import { useAccountLinking } from '../../../provider/providers/AccountLinkProvider.js';
 import { ReactNode } from 'react';
 import { safeStyled, useCopyToClipboard } from '@getpara/react-common';
-import { getAccountTypeName } from '../../constants/oAuthLogos.js';
+import { useExternalWallets } from '../../../provider/providers/ExternalWalletProvider.js';
+import { ACCOUNT_TYPES } from '../../constants/oAuthLogos.js';
 
 const Entry = ({
   identifier,
@@ -64,6 +65,7 @@ const Entry = ({
 export const AccountProfile = () => {
   const para = useClient();
   const { data: linkedAccounts } = useLinkedAccounts();
+  const { wallets } = useExternalWallets();
   const { isEnabled, linkAccount, unlinkAccount } = useAccountLinking();
 
   if (!para) {
@@ -83,7 +85,7 @@ export const AccountProfile = () => {
             <Entry
               key={externalWallet.address}
               icon={<AccountTypeIcon accountType={externalWallet.providerId} size="24px" />}
-              name={externalWallet.ensName ?? getAccountTypeName(externalWallet.providerId) ?? ''}
+              name={externalWallet.ensName ?? externalWallet.provider ?? ''}
               address={externalWallet.addressBech32 ?? externalWallet.address}
               addressShort={truncateAddress(externalWallet.addressBech32 ?? externalWallet.address, externalWallet.type, {
                 prefix: para.cosmosPrefix,
@@ -122,13 +124,30 @@ export const AccountProfile = () => {
               ].map((linkedAccount: TLinkedAccount & { isPrimary?: boolean }) => {
                 const { identifier, displayName, type, isPrimary = false, externalWallet } = linkedAccount;
 
+                const externalWalletConnector = wallets.find(wallet => wallet.id === externalWallet?.providerId);
+                let accountType: TLinkedAccountType | string | undefined = type;
+                let src: string | undefined = undefined;
+
+                if (externalWallet) {
+                  if (externalWalletConnector) {
+                    accountType = undefined;
+                    src = externalWalletConnector.iconUrl;
+                  } else if (externalWallet.providerId && ACCOUNT_TYPES[externalWallet.providerId]) {
+                    accountType = externalWallet.providerId;
+                    src = undefined;
+                  } else {
+                    accountType = 'EXTERNAL_WALLET';
+                    src = undefined;
+                  }
+                }
+
                 return (
                   <Entry
                     key={identifier}
-                    icon={<AccountTypeIcon accountType={externalWallet?.providerId ?? type} size="24px" />}
+                    icon={<AccountTypeIcon accountType={accountType} src={src} size="24px" />}
                     name={
                       externalWallet
-                        ? (externalWallet.ensName ?? getAccountTypeName(externalWallet.providerId) ?? '')
+                        ? (externalWallet.ensName ?? externalWalletConnector?.name ?? externalWallet.provider ?? '')
                         : (displayName ?? identifier)
                     }
                     address={externalWallet?.addressBech32 ?? externalWallet?.address}
@@ -176,6 +195,7 @@ const Content = safeStyled(Section)``;
 const Title = safeStyled(CpslText)``;
 
 const EntryContainer = safeStyled.div`
+  overflow: hidden;
   position: relative;
   width: 100%;
   display: flex;

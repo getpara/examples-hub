@@ -47,7 +47,7 @@ interface ModalState {
   isFullyLoggedIn: boolean;
   accountAddFundTab?: AddFundsTabType;
   guestAddFundsTab?: AddFundsTabType;
-  selectedExternalWalletId?: string;
+  selectedExternalWallet?: { id: string; type: TWalletType };
   isUsingMobileConnector?: boolean;
   isExternalWalletConnecting?: boolean;
   externalWalletError?: string[];
@@ -90,7 +90,7 @@ export interface ModalActions {
   setOnRampStep: (_: OnRampStep) => void;
   setIsFullyLoggedIn: (isFullyLoggedIn: boolean) => void;
   setAccountAddFundTab: (accountAddFundTab?: AddFundsTabType) => void;
-  setSelectedExternalWalletId: (id?: string) => void;
+  setSelectedExternalWallet: (_?: { id: string; type: TWalletType }) => void;
   setIsUsingMobileConnector: (isUsingMobileConnector?: boolean) => void;
   setIsExternalWalletConnecting: (isExternalWalletConnecting: boolean) => void;
   setExternalWalletError: (externalWalletError?: string[]) => void;
@@ -156,7 +156,7 @@ export const useModalStore = create<ModalStore>()(
         step: state.step,
         authState: state.authState,
         onRampPurchase: state.onRampPurchase,
-        selectedExternalWalletId: state.selectedExternalWalletId,
+        selectedExternalWallet: state.selectedExternalWallet,
         isUsingMobileConnector: state.isUsingMobileConnector,
         isPasskeySupported: state.isPasskeySupported,
       }),
