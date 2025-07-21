@@ -133,6 +133,21 @@ jobs:
         project: ${{ fromJson(needs.collect-projects.outputs.projects) }}
 
     name: Test ${{ matrix.project.name }}
+    
+    env:
+      # Base environment variables
+      PARA_API_KEY_BETA: ${{ secrets.PARA_API_KEY_BETA }}
+      PARA_API_KEY_SANDBOX: ${{ secrets.PARA_API_KEY_SANDBOX }}
+      PARA_ENVIRONMENT: ${{ secrets.PARA_ENVIRONMENT }}
+      # Vite-specific environment variables
+      VITE_PARA_API_KEY: ${{ secrets.VITE_PARA_API_KEY }}
+      VITE_PARA_ENVIRONMENT: ${{ secrets.VITE_PARA_ENVIRONMENT }}
+      # Next.js-specific environment variables
+      NEXT_PUBLIC_PARA_API_KEY: ${{ secrets.NEXT_PUBLIC_PARA_API_KEY }}
+      NEXT_PUBLIC_PARA_ENVIRONMENT: ${{ secrets.NEXT_PUBLIC_PARA_ENVIRONMENT }}
+      # WalletConnect project IDs (if needed)
+      VITE_WALLET_CONNECT_PROJECT_ID: ${{ secrets.VITE_WALLET_CONNECT_PROJECT_ID }}
+      NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID }}
 
     steps:
       - uses: actions/checkout@v4
@@ -332,16 +347,16 @@ jobs:
       # Base environment variables
       PARA_API_KEY_BETA: ${{ secrets.PARA_API_KEY_BETA }}
       PARA_API_KEY_SANDBOX: ${{ secrets.PARA_API_KEY_SANDBOX }}
-      PARA_ENVIRONMENT: BETA
+      PARA_ENVIRONMENT: ${{ secrets.PARA_ENVIRONMENT }}
       # Vite-specific environment variables
-      VITE_PARA_API_KEY: ${{ secrets.PARA_API_KEY_BETA }}
-      VITE_PARA_ENVIRONMENT: BETA
+      VITE_PARA_API_KEY: ${{ secrets.VITE_PARA_API_KEY }}
+      VITE_PARA_ENVIRONMENT: ${{ secrets.VITE_PARA_ENVIRONMENT }}
       # Next.js-specific environment variables
-      NEXT_PUBLIC_PARA_API_KEY: ${{ secrets.PARA_API_KEY_BETA }}
-      NEXT_PUBLIC_PARA_ENVIRONMENT: BETA
+      NEXT_PUBLIC_PARA_API_KEY: ${{ secrets.NEXT_PUBLIC_PARA_API_KEY }}
+      NEXT_PUBLIC_PARA_ENVIRONMENT: ${{ secrets.NEXT_PUBLIC_PARA_ENVIRONMENT }}
       # WalletConnect project IDs (if needed)
-      VITE_WALLET_CONNECT_PROJECT_ID: ${{ secrets.WALLET_CONNECT_PROJECT_ID }}
-      NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID: ${{ secrets.WALLET_CONNECT_PROJECT_ID }}
+      VITE_WALLET_CONNECT_PROJECT_ID: ${{ secrets.VITE_WALLET_CONNECT_PROJECT_ID }}
+      NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID }}
 
     steps:
       - uses: actions/checkout@v4
