@@ -2,7 +2,6 @@ import {
   createWalletClient,
   WalletClient,
   WalletClientConfig,
-  LocalAccount,
   Address,
   hashMessage,
   serializeTransaction,
@@ -12,6 +11,10 @@ import {
   Hex,
   SerializeTransactionFn,
   hashTypedData,
+  Account,
+  Transport,
+  Chain,
+  LocalAccount,
 } from 'viem';
 import * as viemChains from 'viem/chains';
 
@@ -95,7 +98,11 @@ export function getViemChain(chainId: string): viemChains.Chain {
   throw new Error(`chain with id ${chainId} not found`);
 }
 
-export function createParaViemClient(para: ParaCore, params: WalletClientConfig, opts?: ViemClientOpts): WalletClient {
+export function createParaViemClient(
+  para: ParaCore,
+  params: WalletClientConfig,
+  opts?: ViemClientOpts,
+): WalletClient<Transport, Chain, Account> {
   return createWalletClient({
     account: opts?.noAccount ? undefined : createParaAccount(para),
     ...params,

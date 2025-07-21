@@ -2,13 +2,17 @@ import { CpslButton, CpslInput, CpslText } from '@getpara/react-components';
 import { useEffect, useState } from 'react';
 import { useAccount, useSignMessage, useVerifyMessage } from 'wagmi';
 import { Card, OverflowText, ProfileInnerContainer } from './common';
+import { useWallet } from '@getpara/react-sdk';
 
 export const EvmProfile = () => {
   const { address } = useAccount();
   const { signMessageAsync } = useSignMessage();
+  const { data: wallet } = useWallet();
 
   const [message, setMessage] = useState<string>('');
   const [messageSignature, setMessageSignature] = useState<`0x${string}`>();
+
+  const selectedAddress = wallet && wallet.type === 'EVM' ? (wallet.address as `0x${string}`) : address;
 
   useEffect(() => {
     if (!address && (message || messageSignature)) {
@@ -26,7 +30,10 @@ export const EvmProfile = () => {
   const handleSign = async () => {
     setMessageSignature(undefined);
 
-    const res = await signMessageAsync({ message });
+    const res = await signMessageAsync({
+      message,
+      account: selectedAddress,
+    });
 
     setMessageSignature(res);
     setMessage('');
@@ -38,8 +45,8 @@ export const EvmProfile = () => {
         <CpslText variant="headingXS" weight="semiBold">
           EVM
         </CpslText>
-        <CpslText>Connected EVM Wallet: {address ?? 'Not Connected'}</CpslText>
-        {address && (
+        <CpslText>Connected EVM Wallet: {selectedAddress ?? 'Not Connected'}</CpslText>
+        {selectedAddress && (
           <>
             <CpslInput
               placeholder="Message to sign"

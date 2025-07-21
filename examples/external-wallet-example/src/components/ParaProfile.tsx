@@ -1,32 +1,33 @@
 import { CpslButton, CpslInput, CpslText } from '@getpara/react-components';
 import { Card, OverflowText, ProfileInnerContainer } from './common';
-import { useAccount, useClient, useSignMessage, useWallet } from '@getpara/react-sdk';
+import { useAccount, useClient, useWallet } from '@getpara/react-sdk';
 import { useState } from 'react';
+import { useViemClient } from '@getpara/react-sdk/evm';
+import { sepolia } from 'viem/chains';
+import { http } from 'viem';
 
 export const ParaProfile = () => {
   const { embedded, external, connectionType, isConnected } = useAccount({ cosmos: { multiChain: true } });
   const { data: wallet } = useWallet();
-  const { signMessageAsync, error } = useSignMessage();
+  const { viemClient } = useViemClient({
+    walletClientConfig: {
+      chain: sepolia,
+      transport: http('https://ethereum-sepolia-rpc.publicnode.com'),
+    },
+  });
   const paraClient = useClient();
 
   const [message, setMessage] = useState<string>('');
   const [messageSignature, setMessageSignature] = useState<string>();
 
   const handleSign = async () => {
-    if (!wallet || !message) {
+    if (!wallet || !message || !viemClient) {
       return;
     }
 
-    const signatureRes = await signMessageAsync({
-      messageBase64: Buffer.from(message).toString('base64'),
-    });
+    const signatureRes = await viemClient.signMessage({ message });
 
-    if ('pendingTransactionId' in signatureRes) {
-    } else {
-      if (signatureRes.signature) {
-        setMessageSignature(signatureRes.signature);
-      }
-    }
+    setMessageSignature(signatureRes);
   };
 
   const embeddedConnected = isConnected && embedded?.isConnected && embedded?.wallets?.some(w => !w.isExternal);
@@ -72,7 +73,6 @@ export const ParaProfile = () => {
               }}
             />
             {messageSignature && <OverflowText>Message Signature: {messageSignature}</OverflowText>}
-            {error && <OverflowText color="error">{error.message}</OverflowText>}
             <CpslButton disabled={!message} onClick={handleSign}>
               Sign Message
             </CpslButton>
