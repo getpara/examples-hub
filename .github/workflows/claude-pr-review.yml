@@ -1,7 +1,7 @@
 name: Claude PR Review
 
 on:
-  pull_request_target:
+  pull_request:
     types: [opened, synchronize]
 
 jobs:
@@ -15,25 +15,23 @@ jobs:
     concurrency:
       group: pr-review-${{ github.event.pull_request.number }}
       cancel-in-progress: true
-
     steps:
+
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          repository: ${{ github.event.pull_request.head.repo.full_name }}
-          ref:        ${{ github.event.pull_request.head.ref }}
-          token:      ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ github.event.pull_request.head.ref }}
           fetch-depth: 0
 
       - name: Run Claude PR Review
         uses: anthropics/claude-code-action@beta
         with:
-          model:               "claude-opus-4-20250514"
-          use_sticky_comment:  true
-          anthropic_api_key:   ${{ secrets.ANTHROPIC_API_KEY }}
-          github_token:        ${{ secrets.GITHUB_TOKEN }}
-          max_turns:           "30"
-          timeout_minutes:     15
+          model: "claude-opus-4-20250514"         # use Opus 4 model
+          use_sticky_comment: true                # update the same summary comment each run
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token:     ${{ secrets.GITHUB_TOKEN }}
+          max_turns:        "30"
+          timeout_minutes:  15
           custom_instructions: |
             You are reviewing a Para Web SDK PR. Follow the comprehensive review guidelines in .github/prompts/comprehensive-pr-review.md.
 
