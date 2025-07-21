@@ -13,8 +13,7 @@ import {
 } from "@solana/spl-token";
 import { TransferTokens } from "@/idl/transfer_tokens";
 import idl from "@/idl/transfer_tokens.json" assert { type: "json" };
-import { PROGRAM_ID } from "@/config/constants";
-import { useAccount, useWallet } from "@getpara/react-sdk";
+import { useWallet } from "@getpara/react-sdk";
 
 export default function ProgramMintTokenPage() {
   const [amount, setAmount] = useState("");
@@ -24,7 +23,6 @@ export default function ProgramMintTokenPage() {
   const [isBalanceLoading, setIsBalanceLoading] = useState(false);
   const [solBalance, setSolBalance] = useState<string | null>(null);
   const [tokenBalance, setTokenBalance] = useState<string | null>(null);
-  const [tokenAccount, setTokenAccount] = useState<string | null>(null);
   const [txSignature, setTxSignature] = useState("");
   const [status, setStatus] = useState<{
     show: boolean;
@@ -42,18 +40,20 @@ export default function ProgramMintTokenPage() {
     setIsBalanceLoading(true);
     try {
       // Fetch SOL balance
-      const balance = await connection.getBalance(signer.sender!);
+      if (!signer.sender) {
+        throw new Error("Signer sender not available");
+      }
+      const balance = await connection.getBalance(signer.sender);
       setSolBalance((balance / LAMPORTS_PER_SOL).toFixed(4));
 
       // Fetch token balance if mint address is available
       if (mintAccount && mintAccount.length > 0) {
         try {
           const mint = new anchor.web3.PublicKey(mintAccount);
-          const userPubkey = signer.sender!;
+          const userPubkey = signer.sender;
 
           // Get associated token address
           const ata = await getAssociatedTokenAddress(mint, userPubkey, false, TOKEN_2022_PROGRAM_ID);
-          setTokenAccount(ata.toString());
 
           // Try to get token account info
           try {
@@ -83,7 +83,7 @@ export default function ProgramMintTokenPage() {
               const displayBalance = fractionalPart ? `${wholePart}.${fractionalPart}` : wholePart;
               setTokenBalance(displayBalance);
             }
-          } catch (e) {
+          } catch {
             // Token account doesn't exist
             setTokenBalance("0");
           }
@@ -104,7 +104,6 @@ export default function ProgramMintTokenPage() {
     if (address && connection && signer) {
       fetchBalances();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [address, connection, signer, mintAccount]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -143,7 +142,10 @@ export default function ProgramMintTokenPage() {
       const program = new anchor.Program(idl as TransferTokens, anchorProvider);
 
       // Get mint info to get decimals
-      const mintInfo = await getMint(connection!, mintPubkey, "confirmed", TOKEN_2022_PROGRAM_ID);
+      if (!connection) {
+        throw new Error("Connection not available");
+      }
+      const mintInfo = await getMint(connection, mintPubkey, "confirmed", TOKEN_2022_PROGRAM_ID);
       const decimals = mintInfo.decimals;
 
       // Convert display amount to raw amount
@@ -160,7 +162,7 @@ export default function ProgramMintTokenPage() {
       const tx = await program.methods
         .mintToken(rawAmount)
         .accounts({
-          payer: signer.sender!,
+          payer: signer.sender,
           mintAccount: mintPubkey,
           associatedTokenAccount: recipientAta,
           recipient: recipientPubkey,

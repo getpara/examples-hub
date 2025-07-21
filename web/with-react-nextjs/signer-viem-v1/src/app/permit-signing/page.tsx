@@ -40,7 +40,7 @@ export default function PermitSigningPage() {
       const contract = getContract({
         address: PARA_TEST_TOKEN_CONTRACT_ADDRESS as `0x${string}`,
         abi: ParaTestToken.abi,
-        publicClient: publicClient!,
+        publicClient,
       });
 
       const balance = await contract.read.balanceOf([address]);
@@ -73,10 +73,14 @@ export default function PermitSigningPage() {
         throw new Error("Please connect your wallet to sign the permit.");
       }
 
+      if (!publicClient) {
+        throw new Error("Public client not initialized. Please reconnect your wallet.");
+      }
+
       const contract = getContract({
         address: PARA_TEST_TOKEN_CONTRACT_ADDRESS,
         abi: ParaTestToken.abi,
-        publicClient: publicClient!,
+        publicClient,
       });
 
       // Get nonce for the permit
@@ -117,7 +121,11 @@ export default function PermitSigningPage() {
         message: "Please sign the permit in your wallet...",
       });
 
-      const signature = await walletClient!.signTypedData({
+      if (!walletClient) {
+        throw new Error("Wallet client not initialized. Please reconnect your wallet.");
+      }
+
+      const signature = await walletClient.signTypedData({
         account: address,
         domain,
         types,

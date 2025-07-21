@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useAccount, useModal, useWallet, useSignMessage, useWalletState, } from "@getpara/react-sdk";
+import { useAccount, useModal, useWallet, useSignMessage } from "@getpara/react-sdk";
 import { StatusAlert } from "@/components/ui/StatusAlert";
 import { ConnectWalletCard } from "@/components/ui/ConnectWalletCard";
 import { SignMessageForm } from "@/components/ui/SignMessageForm";
@@ -13,7 +13,6 @@ export default function Home() {
   const { isConnected } = useAccount();
   const { data: wallet } = useWallet();
   const signMessageHook = useSignMessage();
-  const walletState = useWalletState();
 
   const address = wallet?.address;
 

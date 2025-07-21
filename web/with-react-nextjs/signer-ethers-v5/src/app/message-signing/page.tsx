@@ -18,7 +18,6 @@ export default function MessageSigningPage() {
   }>({ show: false, type: "success", message: "" });
 
   const account = useAccount();
-  const { data: wallet } = useWallet();
   const { signer } = useParaSigner();
 
   const handleSubmit = async (e: React.FormEvent) => {

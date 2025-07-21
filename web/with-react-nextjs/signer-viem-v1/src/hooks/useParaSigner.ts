@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useAccount, useWallet, ParaWeb, Environment } from "@getpara/react-sdk";
+import { useAccount, useWallet, ParaWeb } from "@getpara/react-sdk";
 import { createParaAccount, createParaViemClient } from "@getpara/viem-v1-integration";
 import { LocalAccount, WalletClient } from "viem";
 import { holesky } from "viem/chains";

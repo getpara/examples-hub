@@ -1,6 +1,6 @@
 "use client";
 
-import { ParaProvider as ParaSDKProvider, Environment } from "@getpara/react-sdk";
+import { ParaProvider as ParaSDKProvider } from "@getpara/react-sdk";
 import { createParaAccount, createParaViemClient } from "@getpara/viem-v2-integration";
 import { createPublicClient, http, type WalletClient, type PublicClient, type LocalAccount } from "viem";
 import { holesky } from "viem/chains";
@@ -9,7 +9,7 @@ import "@getpara/react-sdk/styles.css";
 
 // Create a custom hook for viem-specific functionality
 import { createContext, useContext, useEffect, useState } from "react";
-import { useAccount, useClient, useWallet } from "@getpara/react-sdk";
+import { useAccount, useClient } from "@getpara/react-sdk";
 
 interface ViemContextType {
   publicClient: PublicClient | null;
@@ -21,9 +21,7 @@ const ViemContext = createContext<ViemContextType | undefined>(undefined);
 
 export function ViemProvider({ children }: { children: React.ReactNode }) {
   const { isConnected } = useAccount();
-  const { data: wallet } = useWallet();
   const para = useClient();
-  const address = wallet?.address as `0x${string}` | undefined;
   const [publicClient, setPublicClient] = useState<PublicClient | null>(null);
   const [walletClient, setWalletClient] = useState<WalletClient | null>(null);
   const [localAccount, setLocalAccount] = useState<LocalAccount | null>(null);
@@ -74,7 +72,7 @@ export function ParaProvider({ children }: { children: React.ReactNode }) {
   return (
     <ParaSDKProvider
       paraClientConfig={{
-        apiKey: API_KEY!,
+        apiKey: API_KEY,
         env: ENVIRONMENT,
       }}
       config={{ appName: "Para Viem v2 Demo" }}

@@ -36,7 +36,7 @@ export default function ContractInteractionPage() {
       const contract = getContract({
         address: PARA_TEST_TOKEN_CONTRACT_ADDRESS,
         abi: ParaTestToken.abi,
-        publicClient: publicClient!,
+        publicClient,
       });
 
       const balance = await contract.read.balanceOf([address]);
@@ -91,11 +91,15 @@ export default function ContractInteractionPage() {
         );
       }
 
+      if (!publicClient || !walletClient) {
+        throw new Error("Wallet client or public client not initialized. Please reconnect your wallet.");
+      }
+
       const contract = getContract({
         address: PARA_TEST_TOKEN_CONTRACT_ADDRESS,
         abi: ParaTestToken.abi,
-        publicClient: publicClient!,
-        walletClient: walletClient!,
+        publicClient,
+        walletClient,
       });
 
       setStatus({
@@ -115,7 +119,7 @@ export default function ContractInteractionPage() {
         message: "Transaction submitted. Waiting for confirmation...",
       });
 
-      const receipt = await publicClient!.waitForTransactionReceipt({ hash });
+      const receipt = await publicClient.waitForTransactionReceipt({ hash });
 
       console.log("Transaction confirmed:", receipt);
 

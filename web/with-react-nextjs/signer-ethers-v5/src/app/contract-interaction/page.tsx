@@ -107,7 +107,7 @@ export default function ContractInteractionPage() {
       });
 
       // Wait for transaction to be mined
-      const receipt = await tx.wait();
+      await tx.wait();
 
       setStatus({
         show: true,

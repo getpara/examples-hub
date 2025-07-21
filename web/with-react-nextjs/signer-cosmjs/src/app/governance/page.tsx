@@ -5,7 +5,7 @@ import { useAccount } from "@getpara/react-sdk";
 import { useParaSigner } from "@/hooks/useParaSigner";
 import { useCosmosQueryClient } from "@/hooks/useCosmosQueryClient";
 import { useAccountAddress } from "@/hooks/useAccountAddress";
-import { MsgVoteEncodeObject } from "@cosmjs/stargate";
+import { MsgVoteEncodeObject, StargateClient } from "@cosmjs/stargate";
 import { MsgVote } from "cosmjs-types/cosmos/gov/v1beta1/tx";
 import { VoteOption } from "cosmjs-types/cosmos/gov/v1beta1/gov";
 
@@ -44,7 +44,13 @@ export default function GovernancePage() {
     try {
       // Note: This is a simplified example. In reality, you'd need to handle pagination
       // and filter for active proposals
-      const response = await (queryClient as any).gov.proposals(
+      // Using a type assertion for the extended query client
+      const extendedClient = queryClient as StargateClient & {
+        gov: {
+          proposals: (status: number, depositor: string, voter: string) => Promise<{ proposals: Proposal[] }>;
+        };
+      };
+      const response = await extendedClient.gov.proposals(
         2, // ProposalStatus.PROPOSAL_STATUS_VOTING_PERIOD
         "",
         ""
@@ -71,7 +77,7 @@ export default function GovernancePage() {
 
   useEffect(() => {
     fetchProposals();
-  }, [queryClient]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [queryClient]);
 
   const vote = async () => {
     setIsLoading(true);

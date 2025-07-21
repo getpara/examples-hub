@@ -1,6 +1,6 @@
 "use client";
 
-import { useModal, useAccount } from "@getpara/react-sdk";
+import { useModal } from "@getpara/react-sdk";
 import { useParaSigner } from "@/hooks/useParaSigner";
 import { useState, useEffect } from "react";
 import { PARA_TEST_TOKEN_CONTRACT_ADDRESS } from "@/config/contracts";
@@ -47,10 +47,9 @@ export default function TokenTransferPage() {
       const tokenContract = getContract({
         address: contractAddress as `0x${string}`,
         abi: ERC20_ABI,
-        client: publicClient!,
+        client: publicClient,
       });
 
-      const decimals = await tokenContract.read.decimals();
       const balance = await tokenContract.read.balanceOf([address]);
       const symbol = await tokenContract.read.symbol();
 
@@ -102,8 +101,8 @@ export default function TokenTransferPage() {
         address: contractAddress as `0x${string}`,
         abi: ERC20_ABI,
         client: {
-          public: publicClient!,
-          wallet: walletClient!,
+          public: publicClient,
+          wallet: walletClient,
         },
       });
 
@@ -126,11 +125,10 @@ export default function TokenTransferPage() {
         message: "Transaction submitted. Waiting for confirmation...",
       });
 
-      const receipt = await publicClient!.waitForTransactionReceipt({
+      await publicClient.waitForTransactionReceipt({
         hash,
       });
 
-      console.log("Transaction confirmed:", receipt);
 
       setStatus({
         show: true,

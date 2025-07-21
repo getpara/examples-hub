@@ -2,14 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useAccount, useModal, useWallet, useLogout } from "@getpara/react-sdk";
+import { useAccount, useModal, useWallet } from "@getpara/react-sdk";
 
 export default function Header() {
   const pathname = usePathname();
   const { openModal } = useModal();
   const { isConnected } = useAccount();
   const { data: wallet } = useWallet();
-  const { logout } = useLogout();
 
   return (
     <header className="border-b border-gray-200">

@@ -13,7 +13,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <QueryClientProvider client={queryClient}>
       <ParaProvider
         paraClientConfig={{
-          apiKey: API_KEY!,
+          apiKey: API_KEY || "",
           env: ENVIRONMENT,
         }}
         config={{

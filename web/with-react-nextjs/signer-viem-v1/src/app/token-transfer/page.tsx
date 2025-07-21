@@ -11,7 +11,6 @@ import { PARA_TEST_TOKEN_CONTRACT_ADDRESS } from "@/config/contracts";
 const ERC20_ABI = [
   "function transfer(address to, uint256 amount) returns (bool)",
   "function balanceOf(address account) view returns (uint256)",
-  "function decimals() view returns (uint8)",
   "function symbol() view returns (string)",
 ];
 
@@ -51,10 +50,9 @@ export default function TokenTransferPage() {
       const tokenContract = getContract({
         address: contractAddress as `0x${string}`,
         abi: ERC20_ABI,
-        publicClient: publicClient!,
+        publicClient,
       });
 
-      const decimals = await tokenContract.read.decimals();
       const balance = await tokenContract.read.balanceOf([address]);
       const symbol = await tokenContract.read.symbol();
 
@@ -98,11 +96,15 @@ export default function TokenTransferPage() {
       }
 
       // Create contract instance with both clients
+      if (!publicClient || !walletClient) {
+        throw new Error("Wallet client or public client not initialized. Please reconnect your wallet.");
+      }
+
       const tokenContract = getContract({
         address: contractAddress as `0x${string}`,
         abi: ERC20_ABI,
-        publicClient: publicClient!,
-        walletClient: walletClient!,
+        publicClient,
+        walletClient,
       });
 
       setStatus({
@@ -124,7 +126,7 @@ export default function TokenTransferPage() {
         message: "Transaction submitted. Waiting for confirmation...",
       });
 
-      const receipt = await publicClient!.waitForTransactionReceipt({
+      const receipt = await publicClient.waitForTransactionReceipt({
         hash,
       });
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { useAccount, useWallet, useModal } from "@getpara/react-sdk";
+import { useAccount, useModal } from "@getpara/react-sdk";
 import { SupportedNetwork, NETWORK_CONFIG, ASSET_DETAILS } from "@/config/constants";
 import { useSquidBridge } from "@/hooks/useSquidBridge";
 import { useTokenBalance } from "@/hooks/useTokenBalance";
@@ -15,6 +15,7 @@ import { TransactionDetails } from "@/components/TransactionDetails";
 import { useSigners } from "@/hooks/useSigners";
 import { Info } from "lucide-react";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import type { ProgressData } from "@/types/squid";
 
 type TransactionState = "idle" | "sending" | "checking" | "complete" | "failed";
 type StepType =
@@ -32,7 +33,6 @@ type StepType =
 export default function Home() {
   const { openModal } = useModal();
   const { isConnected } = useAccount();
-  const { data: wallet } = useWallet();
   const { useQuote, executeBridge, isExecuting } = useSquidBridge();
   const { ethereumEthers, baseEthers, solanaSvm } = useSigners();
 
@@ -153,8 +153,8 @@ export default function Home() {
       quote,
       originNetwork,
       destNetwork,
-      onProgress: (progressData: any) => {
-        const { steps, currentStep: progressStep, txHashes, error, axelarScanUrl: scanUrl } = progressData;
+      onProgress: (progressData: ProgressData) => {
+        const { currentStep: progressStep, txHashes, error, axelarScanUrl: scanUrl } = progressData;
 
         if (txHashes && txHashes.length > 0) {
           setTransactionHash(txHashes[0].txHash);

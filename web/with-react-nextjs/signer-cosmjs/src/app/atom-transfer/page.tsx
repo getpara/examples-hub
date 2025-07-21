@@ -44,7 +44,7 @@ export default function AtomTransferPage() {
 
   useEffect(() => {
     fetchBalance();
-  }, [address, queryClient]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [address, queryClient]);
 
   const sendTransaction = async () => {
     setIsLoading(true);

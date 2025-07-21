@@ -3,7 +3,7 @@
 import { useMemo, useEffect, useState } from "react";
 import { useAccount, useClient } from "@getpara/react-sdk";
 import { createParaAccount, createParaViemClient } from "@getpara/viem-v2-integration";
-import { createPublicClient, http, PublicClient, WalletClient } from "viem";
+import { createPublicClient, http, PublicClient } from "viem";
 import { sepolia, baseSepolia } from "viem/chains";
 import { ParaSolanaWeb3Signer } from "@getpara/solana-web3.js-v1-integration";
 import { Connection } from "@solana/web3.js";

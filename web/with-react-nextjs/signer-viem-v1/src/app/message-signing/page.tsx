@@ -19,7 +19,7 @@ export default function MessageSigningPage() {
 
   const account = useAccount();
   const { walletClient, viemAccount } = useParaSigner();
-  const address = useAccountAddress();
+  useAccountAddress();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

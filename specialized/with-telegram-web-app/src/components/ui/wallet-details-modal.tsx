@@ -1,11 +1,12 @@
 import React from "react";
 import { X } from "lucide-react";
 import { Button } from "./button";
+import type { Wallet } from "@getpara/core-sdk";
 
 interface WalletDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  walletDetails: any;
+  walletDetails: Record<string, Wallet> | null;
 }
 
 const WalletDetailsModal: React.FC<WalletDetailsModalProps> = ({ isOpen, onClose, walletDetails }) => {

@@ -4,7 +4,7 @@
     "": {
       "name": "blockchain-auth-ui",
       "dependencies": {
-        "@getpara/web-sdk": "2.0.0-alpha.32",
+        "@getpara/web-sdk": "2.0.0-alpha.33",
         "lucide-react": "^0.487.0",
         "postcss": "^8.5.3",
         "react": "^19.0.0",
@@ -190,11 +190,11 @@
 
     "@ethersproject/web": ["@ethersproject/web@5.8.0", "", { "dependencies": { "@ethersproject/base64": "^5.8.0", "@ethersproject/bytes": "^5.8.0", "@ethersproject/logger": "^5.8.0", "@ethersproject/properties": "^5.8.0", "@ethersproject/strings": "^5.8.0" } }, "sha512-j7+Ksi/9KfGviws6Qtf9Q7KCqRhpwrYKQPs+JBA/rKVFF/yaWLHJEH3zfVP2plVu+eys0d2DlFmhoQJayFewcw=="],
 
-    "@getpara/core-sdk": ["@getpara/core-sdk@2.0.0-alpha.32", "", { "dependencies": { "@celo/utils": "^8.0.2", "@cosmjs/encoding": "^0.32.4", "@ethereumjs/util": "^9.1.0", "@getpara/user-management-client": "2.0.0-alpha.32", "@noble/hashes": "^1.5.0", "base64url": "^3.0.1", "libphonenumber-js": "^1.11.7", "node-forge": "^1.3.1", "uuid": "^11.1.0" } }, "sha512-YZyBc9VCnqrBwzvybDXzsI63FVELKbG4Sbb7ez/IQAcrThn14RPWOdL8RZrJYZ0cUkrbmQ1EMljyplXyUfpStQ=="],
+    "@getpara/core-sdk": ["@getpara/core-sdk@2.0.0-alpha.33", "", { "dependencies": { "@celo/utils": "^8.0.2", "@cosmjs/encoding": "^0.32.4", "@ethereumjs/util": "^9.1.0", "@getpara/user-management-client": "2.0.0-alpha.33", "@noble/hashes": "^1.5.0", "base64url": "^3.0.1", "libphonenumber-js": "^1.11.7", "node-forge": "^1.3.1", "uuid": "^11.1.0" } }, "sha512-VzD3xKjQbj8FiNHXSzjnwF6PLkqdPNaHMNT+1zvw+RIWXynYu1dkOQCzcDehNTzjVN3vCshz2iRwCgHyYgBLMg=="],
 
-    "@getpara/user-management-client": ["@getpara/user-management-client@2.0.0-alpha.32", "", { "dependencies": { "axios": "^1.8.4", "libphonenumber-js": "^1.11.7" } }, "sha512-B5gl3ZmaJ+WspZOsWxb5SlDuI1FmxoTAPxDkN2kBaNtYrRTSNDeARhJgRIZ9T2mJ/SAPff38/5mOtjpsePH1+w=="],
+    "@getpara/user-management-client": ["@getpara/user-management-client@2.0.0-alpha.33", "", { "dependencies": { "axios": "^1.8.4", "libphonenumber-js": "^1.11.7" } }, "sha512-09QL/oJySenSYPgoI4obH9orPk+4596/1LcGkzuZ5gvl3XO9TUis3wfu1TRfZjKUt0z0VlOPNp/Mg3wV9ai+wA=="],
 
-    "@getpara/web-sdk": ["@getpara/web-sdk@2.0.0-alpha.32", "", { "dependencies": { "@getpara/core-sdk": "2.0.0-alpha.32", "@getpara/user-management-client": "2.0.0-alpha.32", "@sentry/browser": "^9.1.0", "base64url": "^3.0.1", "buffer": "6.0.3", "cbor-web": "^9.0.2", "node-forge": "1.3.1", "ua-parser-js": "^2.0.2" }, "peerDependencies": { "@farcaster/miniapp-sdk": "^0.1.2" }, "optionalPeers": ["@farcaster/miniapp-sdk"] }, "sha512-x8SeSVrPz2ncuUVUOaZom2/QQY90760SMucrMsek4IlDrRPel3BQuMAz6EwmxmtguWOBzHAoJdcJ5dEhJVWUdA=="],
+    "@getpara/web-sdk": ["@getpara/web-sdk@2.0.0-alpha.33", "", { "dependencies": { "@getpara/core-sdk": "2.0.0-alpha.33", "@getpara/user-management-client": "2.0.0-alpha.33", "@sentry/browser": "^9.1.0", "base64url": "^3.0.1", "buffer": "6.0.3", "cbor-web": "^9.0.2", "node-forge": "1.3.1", "ua-parser-js": "^2.0.2" }, "peerDependencies": { "@farcaster/miniapp-sdk": "^0.1.2" }, "optionalPeers": ["@farcaster/miniapp-sdk"] }, "sha512-VeLB7mp9FLswOhFquIopgh9MWDz4hDHHoFJ5i5Ch3gjDpGgeupQzjisrVxCAkLcB2jHhAIOFnlf+bppUE6dtIQ=="],
 
     "@humanfs/core": ["@humanfs/core@0.19.1", "", {}, "sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA=="],
 

@@ -2,25 +2,11 @@
 
 import { useState } from "react";
 import { useAccount } from "@getpara/react-sdk";
-import { useParaSigner } from "@/hooks/useParaSigner";
+import { useParaCosmWasmSigner } from "@/hooks/useParaCosmWasmSigner";
 import { useAccountAddress } from "@/hooks/useAccountAddress";
 import { CosmWasmClient } from "@cosmjs/cosmwasm-stargate";
 import { DEFAULT_CHAIN } from "@/config/chains";
 
-// Example CW20 token contract interface
-interface CW20ExecuteMsg {
-  transfer?: {
-    recipient: string;
-    amount: string;
-  };
-  burn?: {
-    amount: string;
-  };
-  increase_allowance?: {
-    spender: string;
-    amount: string;
-  };
-}
 
 export default function CosmWasmInteractionPage() {
   const [contractAddress, setContractAddress] = useState("");
@@ -36,7 +22,7 @@ export default function CosmWasmInteractionPage() {
   }>({ show: false, type: "success", message: "" });
 
   const account = useAccount();
-  const { signingClient } = useParaSigner();
+  const { signingClient } = useParaCosmWasmSigner();
   const address = useAccountAddress();
 
   const queryContract = async () => {
@@ -108,7 +94,7 @@ export default function CosmWasmInteractionPage() {
         message: "Please confirm the transaction in your wallet...",
       });
 
-      const result = await (signingClient as any).execute(
+      const result = await signingClient.execute(
         address,
         contractAddress,
         parsedMsg,

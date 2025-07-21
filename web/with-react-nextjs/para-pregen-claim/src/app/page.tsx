@@ -35,8 +35,8 @@ export default function Home() {
       } else {
         setPregenError(response.error || "Failed to generate wallet");
       }
-    } catch (e: any) {
-      setPregenError(e.message || "Error generating wallet");
+    } catch (e: unknown) {
+      setPregenError(e instanceof Error ? e.message : "Error generating wallet");
     }
     setIsGenerating(false);
   };

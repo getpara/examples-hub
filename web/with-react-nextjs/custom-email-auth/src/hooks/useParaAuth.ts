@@ -1,7 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { para } from "@/lib/para/client";
 import { queryClient } from "@/context/QueryProvider";
-import type { AuthState } from "@getpara/web-sdk";
 
 interface SignUpOrLoginParams {
   email: string;

@@ -8,6 +8,7 @@ import { DepositAddressResponse, RouteResponse, SolanaTxResponse, TransactionRes
 import { TxRaw } from "cosmjs-types/cosmos/tx/v1beta1/tx";
 import { Transaction, VersionedTransaction, Connection } from "@solana/web3.js";
 import { Wallet } from "@project-serum/anchor";
+import type { ProgressData } from "@/types/squid";
 
 interface QuoteParams {
   originNetwork: SupportedNetwork | null;
@@ -95,7 +96,7 @@ export function useSquidBridge() {
     route: RouteResponse["route"],
     provider: ethers.JsonRpcProvider,
     from: string
-  ): Promise<{ success: boolean; error?: any }> => {
+  ): Promise<{ success: boolean; error?: unknown }> => {
     try {
       if (!route.transactionRequest) {
         console.warn("No transactionRequest in route, skipping simulation");
@@ -109,7 +110,7 @@ export function useSquidBridge() {
         return { success: true };
       }
 
-      const result = await provider.send("eth_call", [
+      await provider.send("eth_call", [
         {
           to: tx.targetAddress,
           data: tx.data,
@@ -130,7 +131,7 @@ export function useSquidBridge() {
   const simulateSolanaTransaction = async (
     route: RouteResponse["route"],
     connection: Connection
-  ): Promise<{ success: boolean; error?: any }> => {
+  ): Promise<{ success: boolean; error?: unknown }> => {
     try {
       if (!route.transactionRequest) {
         console.warn("No transaction request for Solana simulation");
@@ -192,13 +193,13 @@ export function useSquidBridge() {
     mutationFn: async ({
       quote,
       originNetwork,
-      destNetwork,
+      destNetwork: _destNetwork,
       onProgress,
     }: {
       quote: RouteResponse;
       originNetwork: SupportedNetwork;
       destNetwork: SupportedNetwork;
-      onProgress?: (status: any) => void;
+      onProgress?: (status: ProgressData) => void;
     }) => {
       if (!squid) throw new Error("Squid client not initialized");
       if (!quote?.route) throw new Error("Invalid quote");
@@ -219,13 +220,20 @@ export function useSquidBridge() {
               console.warn("Chainflip transaction detected. Status tracking may be limited.");
             }
 
-            const statusParams: any = {
+            interface StatusParams {
+              transactionId: string;
+              requestId: string;
+              integratorId?: string;
+              quoteId?: string;
+            }
+            
+            const statusParams: StatusParams = {
               transactionId: txHashResult.hash,
               requestId: quote.requestId,
               integratorId: quote.integratorId,
             };
 
-            const quoteId = (quote.route as any).quoteId || (quote as any).quoteId;
+            const quoteId = (quote.route as { quoteId?: string }).quoteId || (quote as { quoteId?: string }).quoteId;
             if (quoteId) {
               statusParams.quoteId = quoteId;
             }

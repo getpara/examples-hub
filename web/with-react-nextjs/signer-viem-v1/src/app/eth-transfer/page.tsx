@@ -71,7 +71,10 @@ export default function EthTransferPage() {
 
       return true;
     } catch (error) {
-      throw error;
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error("Failed to validate transaction");
     }
   };
 
@@ -132,7 +135,11 @@ export default function EthTransferPage() {
         message: "Transaction submitted. Waiting for confirmation...",
       });
 
-      const receipt = await publicClient!.waitForTransactionReceipt({ hash: txHash });
+      if (!publicClient) {
+        throw new Error("Public client not initialized. Please reconnect your wallet.");
+      }
+
+      const receipt = await publicClient.waitForTransactionReceipt({ hash: txHash });
 
       console.log("Transaction confirmed:", receipt);
 

@@ -14,7 +14,7 @@ export default function Header() {
 
   useEffect(() => {
     if (account?.isConnected && wallet?.type !== "SOLANA") {
-      const solanaWallet = account.embedded.wallets?.find((w: any) => w.type === "SOLANA");
+      const solanaWallet = account.embedded.wallets?.find((w) => w.type === "SOLANA");
       if (solanaWallet) {
         setSelectedWallet({ id: solanaWallet.id, type: "SOLANA" });
       }

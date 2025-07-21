@@ -71,13 +71,17 @@ export default function ContractDeploymentPage() {
         message: "Deploying contract. Please confirm the transaction in your wallet...",
       });
 
+      if (!publicClient) {
+        throw new Error("Public client not initialized. Please reconnect your wallet.");
+      }
+
       const hash = await walletClient.deployContract({
         abi: ParaTestToken.abi,
         bytecode: (ParaTestToken.bytecode.startsWith("0x")
           ? ParaTestToken.bytecode
           : `0x${ParaTestToken.bytecode}`) as `0x${string}`,
         account: viemAccount,
-        chain: publicClient!.chain,
+        chain: publicClient.chain,
       });
 
       setStatus({
@@ -87,7 +91,7 @@ export default function ContractDeploymentPage() {
       });
 
       // Wait for transaction receipt
-      const receipt = await publicClient!.waitForTransactionReceipt({
+      const receipt = await publicClient.waitForTransactionReceipt({
         hash,
       });
 

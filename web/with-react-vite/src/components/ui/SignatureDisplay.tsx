@@ -3,7 +3,9 @@ interface SignatureDisplayProps {
 }
 
 export function SignatureDisplay({ signature }: SignatureDisplayProps) {
-  if (!signature) return null;
+  if (!signature) {
+    return null;
+  }
 
   return (
     <div className="bg-white rounded-none border border-gray-200 p-6">

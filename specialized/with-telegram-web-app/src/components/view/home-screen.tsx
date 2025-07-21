@@ -10,6 +10,7 @@ import para from "../../lib/para";
 import { ErrorState } from "../ui/error-state";
 import { LoadingState } from "../ui/loading-state";
 import WalletDetailsModal from "../ui/wallet-details-modal";
+import type { Wallet } from "@getpara/core-sdk";
 
 interface HomeScreenProps {
   setScreen: (screen: ScreenName) => void;
@@ -29,7 +30,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ setScreen }) => {
   const [error, setError] = useState<string>("");
 
   const [showWalletDetails, setShowWalletDetails] = useState<boolean>(false);
-  const [walletDetails, setWalletDetails] = useState<any>(null);
+  const [walletDetails, setWalletDetails] = useState<Record<string, Wallet> | null>(null);
 
   useEffect(() => {
     fetchBalance();

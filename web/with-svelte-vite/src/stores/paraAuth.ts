@@ -56,11 +56,12 @@ export async function signUpOrLoginWithEmail(email: string): Promise<AuthState> 
     }
     
     return authState;
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Authentication failed';
     authModal.update(state => ({
       ...state,
       isLoading: false,
-      error: error.message || 'Authentication failed',
+      error: errorMessage,
     }));
     throw error;
   }
@@ -84,11 +85,12 @@ export async function signUpOrLoginWithPhone(phoneNumber: string, countryCode: s
     }
     
     return authState;
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Authentication failed';
     authModal.update(state => ({
       ...state,
       isLoading: false,
-      error: error.message || 'Authentication failed',
+      error: errorMessage,
     }));
     throw error;
   }
@@ -102,13 +104,14 @@ export async function verifyAccount(verificationCode: string): Promise<AuthState
     const authState = await para.verifyNewAccount({ verificationCode });
     authModal.update(state => ({ ...state, isLoading: false }));
     return authState;
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error && error.message === 'Invalid verification code'
+      ? 'Verification code incorrect or expired'
+      : error instanceof Error ? error.message : 'Verification failed';
     authModal.update(state => ({
       ...state,
       isLoading: false,
-      error: error.message === 'Invalid verification code'
-        ? 'Verification code incorrect or expired'
-        : error.message || 'Verification failed',
+      error: errorMessage,
     }));
     throw error;
   }
@@ -145,11 +148,12 @@ export async function verifyOAuth(
     
     authModal.update(state => ({ ...state, isLoading: false }));
     return authState;
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'OAuth authentication failed';
     authModal.update(state => ({
       ...state,
       isLoading: false,
-      error: error.message || 'OAuth authentication failed',
+      error: errorMessage,
       selectedOAuthMethod: null,
     }));
     throw error;
@@ -187,11 +191,12 @@ export async function logout() {
     await para.logout();
     await checkAuthentication();
     closeModal();
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Failed to logout';
     authModal.update(state => ({
       ...state,
       isLoading: false,
-      error: error.message || 'Failed to logout',
+      error: errorMessage,
     }));
     throw error;
   }

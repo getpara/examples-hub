@@ -1,6 +1,6 @@
 "use client";
 
-import { useModal, useAccount } from "@getpara/react-sdk";
+import { useModal } from "@getpara/react-sdk";
 import { useParaSigner } from "@/hooks/useParaSigner";
 import { useState, useEffect } from "react";
 import { PARA_TEST_TOKEN_CONTRACT_ADDRESS } from "@/config/contracts";
@@ -36,7 +36,7 @@ export default function BatchTransactionsPage() {
       const contract = getContract({
         address: PARA_TEST_TOKEN_CONTRACT_ADDRESS,
         abi: ParaTestToken.abi,
-        client: publicClient!,
+        client: publicClient,
       });
 
       const balance = await contract.read.balanceOf([address]);
@@ -96,8 +96,8 @@ export default function BatchTransactionsPage() {
         address: PARA_TEST_TOKEN_CONTRACT_ADDRESS,
         abi: ParaTestToken.abi,
         client: {
-          public: publicClient!,
-          wallet: walletClient!,
+          public: publicClient,
+          wallet: walletClient,
         },
       });
 
@@ -138,7 +138,7 @@ export default function BatchTransactionsPage() {
       });
 
       // Wait for transaction to be mined
-      const receipt = await publicClient!.waitForTransactionReceipt({
+      await publicClient.waitForTransactionReceipt({
         hash,
       });
 

@@ -50,7 +50,7 @@ export default function TypedDataSigningPage() {
       const contract = getContract({
         address: PARA_TEST_TOKEN_CONTRACT_ADDRESS,
         abi: ParaTestToken.abi,
-        publicClient: publicClient!,
+        publicClient,
       });
 
       const balance = await contract.read.balanceOf([address]);
@@ -118,7 +118,11 @@ export default function TypedDataSigningPage() {
         message: "Please sign the typed data in your wallet...",
       });
 
-      const signature = await walletClient!.signTypedData({
+      if (!walletClient) {
+        throw new Error("Wallet client not initialized. Please reconnect your wallet.");
+      }
+
+      const signature = await walletClient.signTypedData({
         account: address,
         domain,
         types,

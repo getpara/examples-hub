@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useAccount, useWallet, useClient } from "@getpara/react-sdk";
+import { useAccount, useClient } from "@getpara/react-sdk";
 import { ParaEthersSigner } from "@getpara/ethers-v6-integration";
 import { ethers } from "ethers";
 import { ParaSolanaWeb3Signer } from "@getpara/solana-web3.js-v1-integration";
@@ -29,7 +29,7 @@ interface SignerData {
 
 const SIGNERS_QUERY_KEY = ["globalSigners"];
 
-async function initializeSigners(para: any): Promise<SignerData> {
+async function initializeSigners(para: unknown): Promise<SignerData> {
   const signerData: SignerData = {
     ethereumEthers: { provider: null, signer: null, address: null, isInitialized: false },
     baseEthers: { provider: null, signer: null, address: null, isInitialized: false },
@@ -96,7 +96,6 @@ async function initializeSigners(para: any): Promise<SignerData> {
 export function useSigners() {
   const para = useClient();
   const { isConnected } = useAccount();
-  const { data: wallet } = useWallet();
   const queryClient = useQueryClient();
 
   const {

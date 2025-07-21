@@ -11,7 +11,7 @@ export function ParaProvider({
   return (
     <ParaSDKProvider
       paraClientConfig={{
-        apiKey: API_KEY!,
+        apiKey: API_KEY || "",
         env: ENVIRONMENT,
       }}
       config={{ appName: "Para Modal Example" }}

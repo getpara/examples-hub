@@ -72,26 +72,22 @@ export default function EthTransferPage() {
   const validateTransaction = async (toAddress: string, ethAmount: string): Promise<boolean> => {
     if (!wallet?.address || !provider) throw new Error("No sender address or provider available");
 
-    try {
-      const balanceWei = await provider.getBalance(wallet.address);
-      const feeData = await provider.getFeeData();
-      const gasLimit = ethers.BigNumber.from(21000);
-      const maxGasFee = gasLimit.mul(feeData.maxFeePerGas ?? ethers.BigNumber.from(0));
-      const amountWei = ethers.utils.parseEther(ethAmount);
-      const totalCost = amountWei.add(maxGasFee);
+    const balanceWei = await provider.getBalance(wallet.address);
+    const feeData = await provider.getFeeData();
+    const gasLimit = ethers.BigNumber.from(21000);
+    const maxGasFee = gasLimit.mul(feeData.maxFeePerGas ?? ethers.BigNumber.from(0));
+    const amountWei = ethers.utils.parseEther(ethAmount);
+    const totalCost = amountWei.add(maxGasFee);
 
-      if (totalCost.gt(balanceWei)) {
-        const requiredEth = ethers.utils.formatEther(totalCost);
-        const availableEth = ethers.utils.formatEther(balanceWei);
-        throw new Error(
-          `Insufficient balance. Transaction requires approximately ${requiredEth} ETH (including max gas fees), but only ${availableEth} ETH is available.`
-        );
-      }
-
-      return true;
-    } catch (error) {
-      throw error;
+    if (totalCost.gt(balanceWei)) {
+      const requiredEth = ethers.utils.formatEther(totalCost);
+      const availableEth = ethers.utils.formatEther(balanceWei);
+      throw new Error(
+        `Insufficient balance. Transaction requires approximately ${requiredEth} ETH (including max gas fees), but only ${availableEth} ETH is available.`
+      );
     }
+
+    return true;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

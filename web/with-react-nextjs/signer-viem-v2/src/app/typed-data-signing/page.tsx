@@ -1,6 +1,6 @@
 "use client";
 
-import { useModal, useAccount } from "@getpara/react-sdk";
+import { useModal } from "@getpara/react-sdk";
 import { useParaSigner } from "@/hooks/useParaSigner";
 import { useState, useEffect } from "react";
 import { PARA_TEST_TOKEN_CONTRACT_ADDRESS } from "@/config/contracts";
@@ -46,7 +46,7 @@ export default function TypedDataSigningPage() {
       const contract = getContract({
         address: PARA_TEST_TOKEN_CONTRACT_ADDRESS,
         abi: ParaTestToken.abi,
-        client: publicClient!,
+        client: publicClient,
       });
 
       const balance = await contract.read.balanceOf([address]);
@@ -83,14 +83,14 @@ export default function TypedDataSigningPage() {
       const contract = getContract({
         address: PARA_TEST_TOKEN_CONTRACT_ADDRESS,
         abi: ParaTestToken.abi,
-        client: publicClient!,
+        client: publicClient,
       });
 
       const name = await contract.read.name();
       const nonce = await contract.read.nonces([address]);
 
       const newAttestation: TokenAttestation = {
-        holder: address!,
+        holder: address,
         balance: tokenBalance,
         purpose,
         timestamp: Math.floor(Date.now() / 1000),
@@ -100,7 +100,7 @@ export default function TypedDataSigningPage() {
       const domain = {
         name: name as string,
         version: "1",
-        chainId: publicClient!.chain!.id,
+        chainId: publicClient.chain?.id || 17000,
         verifyingContract: PARA_TEST_TOKEN_CONTRACT_ADDRESS,
       } as const;
 
@@ -128,7 +128,7 @@ export default function TypedDataSigningPage() {
         nonce: nonce as bigint,
       };
 
-      const sig = await walletClient!.signTypedData({
+      const sig = await walletClient.signTypedData({
         account: address,
         domain,
         types,

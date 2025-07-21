@@ -47,19 +47,20 @@ export async function checkAuthentication() {
         isLoading: false,
       }));
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Failed to check authentication';
     accountState.update(state => ({
       ...state,
       isConnected: false,
       address: '',
       isLoading: false,
-      error: error.message || 'Failed to check authentication',
+      error: errorMessage,
     }));
   }
 }
 
 // Sign message
-export async function signMessage(message: string): Promise<any> {
+export async function signMessage(message: string): Promise<unknown> {
   const currentState = get(accountState);
   
   if (!currentState.isConnected) {

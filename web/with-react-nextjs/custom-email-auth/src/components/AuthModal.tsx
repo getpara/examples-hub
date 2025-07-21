@@ -92,8 +92,8 @@ export function AuthModal() {
         
         // The connection state change will close the modal
       }
-    } catch (err: any) {
-      setError(err.message || "Authentication failed");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Authentication failed");
     }
   };
 
@@ -112,11 +112,12 @@ export function AuthModal() {
       await queryClient.invalidateQueries({ queryKey: ["paraAccount"] });
       
       // The connection state change will close the modal
-    } catch (err: any) {
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Verification failed";
       setError(
-        err.message === "Invalid verification code"
+        errorMessage === "Invalid verification code"
           ? "Verification code incorrect or expired"
-          : err.message || "Verification failed"
+          : errorMessage
       );
     }
   };
@@ -127,8 +128,8 @@ export function AuthModal() {
     try {
       await logoutAsync();
       closeModal();
-    } catch (err: any) {
-      setError(err.message || "Failed to logout");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to logout");
     }
   };
 

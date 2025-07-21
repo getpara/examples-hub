@@ -5,10 +5,9 @@ import { useAccount } from "@getpara/react-sdk";
 import { useParaSigner } from "@/hooks/useParaSigner";
 import { useCosmosQueryClient } from "@/hooks/useCosmosQueryClient";
 import { useAccountAddress } from "@/hooks/useAccountAddress";
-import { DEFAULT_CHAIN, COSMOS_TESTNET } from "@/config/chains";
-import { MsgDelegateEncodeObject } from "@cosmjs/stargate";
+import { DEFAULT_CHAIN } from "@/config/chains";
+import { MsgDelegateEncodeObject, StargateClient, coins } from "@cosmjs/stargate";
 import { MsgDelegate } from "cosmjs-types/cosmos/staking/v1beta1/tx";
-import { coins } from "@cosmjs/stargate";
 
 interface Validator {
   operatorAddress: string;
@@ -29,7 +28,14 @@ export default function StakingPage() {
   const [amount, setAmount] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isValidatorsLoading, setIsValidatorsLoading] = useState(false);
-  const [delegations, setDelegations] = useState<any[]>([]);
+  const [delegations, setDelegations] = useState<Array<{
+    delegation: {
+      validatorAddress: string;
+    };
+    balance: {
+      amount: string;
+    };
+  }>>([]);
   const [txHash, setTxHash] = useState<string | null>(null);
   const [status, setStatus] = useState<{
     show: boolean;
@@ -47,7 +53,13 @@ export default function StakingPage() {
 
     setIsValidatorsLoading(true);
     try {
-      const response = await (queryClient as any).staking.validators("BOND_STATUS_BONDED");
+      // Using a type assertion for the extended query client
+      const extendedClient = queryClient as StargateClient & {
+        staking: {
+          validators: (status: string) => Promise<{ validators: Validator[] }>;
+        };
+      };
+      const response = await extendedClient.staking.validators("BOND_STATUS_BONDED");
       setValidators(response.validators.slice(0, 10)); // Show top 10 validators
     } catch (error) {
       console.error("Error fetching validators:", error);
@@ -60,7 +72,20 @@ export default function StakingPage() {
     if (!queryClient || !address) return;
 
     try {
-      const response = await (queryClient as any).staking.delegatorDelegations(address);
+      // Using a type assertion for the extended query client
+      const extendedClient = queryClient as StargateClient & {
+        staking: {
+          delegatorDelegations: (address: string) => Promise<{ delegationResponses: Array<{
+            delegation: {
+              validatorAddress: string;
+            };
+            balance: {
+              amount: string;
+            };
+          }> }>;
+        };
+      };
+      const response = await extendedClient.staking.delegatorDelegations(address);
       setDelegations(response.delegationResponses);
     } catch (error) {
       console.error("Error fetching delegations:", error);
@@ -69,11 +94,11 @@ export default function StakingPage() {
 
   useEffect(() => {
     fetchValidators();
-  }, [queryClient]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [queryClient]);
 
   useEffect(() => {
     fetchDelegations();
-  }, [queryClient, address]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [queryClient, address]);
 
   const delegate = async () => {
     setIsLoading(true);

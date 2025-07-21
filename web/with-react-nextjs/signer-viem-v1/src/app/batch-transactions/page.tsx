@@ -40,7 +40,7 @@ export default function BatchTransactionsPage() {
       const contract = getContract({
         address: PARA_TEST_TOKEN_CONTRACT_ADDRESS,
         abi: ParaTestToken.abi,
-        publicClient: publicClient!,
+        publicClient,
       });
 
       const balance = await contract.read.balanceOf([address]);
@@ -125,11 +125,15 @@ export default function BatchTransactionsPage() {
         }
       });
 
+      if (!publicClient || !walletClient) {
+        throw new Error("Wallet client or public client not initialized. Please reconnect your wallet.");
+      }
+
       const contract = getContract({
         address: PARA_TEST_TOKEN_CONTRACT_ADDRESS,
         abi: ParaTestToken.abi,
-        publicClient: publicClient!,
-        walletClient: walletClient!,
+        publicClient,
+        walletClient,
       });
 
       setStatus({
@@ -149,7 +153,7 @@ export default function BatchTransactionsPage() {
         message: "Batch transaction submitted. Waiting for confirmation...",
       });
 
-      const receipt = await publicClient!.waitForTransactionReceipt({ hash });
+      const receipt = await publicClient.waitForTransactionReceipt({ hash });
 
       console.log("Batch transaction confirmed:", receipt);
 
