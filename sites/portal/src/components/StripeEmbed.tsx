@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { OnrampSession, OnrampSessionResult, StripeOnramp, loadStripeOnramp } from '@stripe/crypto';
-import { Network, OnRampAsset, OnRampProvider, OnRampPurchaseStatus } from '@getpara/web-sdk';
+import { Network, OnRampAsset, OnRampProvider } from '@getpara/web-sdk';
 import { CpslSpinner } from '@getpara/react-components';
 import { OnRampProps, SpinnerContainer } from '@getpara/react-common';
 import styled from 'styled-components';
@@ -39,7 +39,7 @@ const useOnrampSessionListener = (type, session, callback) => {
   }, [session, callback, type]);
 };
 
-export const StripeEmbed = ({ para, isDark, isEmbedded, onRampPurchase, setOnRampPurchase }: OnRampProps) => {
+export const StripeEmbed = ({ isDark, onRampPurchase, onSuccess }: OnRampProps) => {
   const [isReady, setIsReady] = useState(false);
 
   const isStripeEmbed = useMemo(() => onRampPurchase.provider === OnRampProvider.STRIPE, [onRampPurchase]);
@@ -90,30 +90,14 @@ export const StripeEmbed = ({ para, isDark, isEmbedded, onRampPurchase, setOnRam
       switch (session.status) {
         case 'fulfillment_processing':
         case 'fulfillment_complete':
-          const updatedPurchase = await para.ctx.client.updateOnRampPurchase({
-            userId: para.getUserId(),
-            walletId: onRampPurchase.walletId,
-            externalWalletAddress: onRampPurchase.externalWalletAddress,
-            purchaseId: onRampPurchase.id,
-            updates: {
-              status: OnRampPurchaseStatus.FINISHED,
-              fiatQuantity: session.quote.source_amount,
-              fiat: session.quote.source_currency.asset_code,
-              network: NetworkCodes[session.quote.destination_currency.currency_network],
-              asset: AssetCodes[session.quote.destination_currency.asset_code],
-              assetQuantity: session.quote.destination_amount,
-              providerKey: null,
-            },
+          onSuccess({
+            fiatQuantity: session.quote.source_amount,
+            fiat: session.quote.source_currency.asset_code,
+            network: NetworkCodes[session.quote.destination_currency.currency_network],
+            asset: AssetCodes[session.quote.destination_currency.asset_code],
+            assetQuantity: session.quote.destination_amount,
+            providerKey: null,
           });
-
-          setOnRampPurchase(updatedPurchase);
-          if (!isEmbedded) {
-            setTimeout(() => {
-              if (typeof window !== 'undefined') {
-                window.close();
-              }
-            }, 5000);
-          }
           break;
 
         default:

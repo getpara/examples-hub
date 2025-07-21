@@ -7,8 +7,7 @@ import { useStore } from '../../../provider/stores/useStore.js';
 import { motion, AnimatePresence } from 'framer-motion';
 import { OnRampProviderButton } from '../OnRampComponents/OnRampProviderButton.js';
 import { useWallet } from '../../../provider/index.js';
-import { EnabledFlow, OnRampProvider, OnRampPurchaseType } from '@getpara/web-sdk';
-import { ModalStep } from '../../utils/steps.js';
+import { EnabledFlow, OnRampPurchaseType } from '@getpara/web-sdk';
 import { contentMotionProps } from './common.js';
 import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
 
@@ -17,7 +16,6 @@ export function AddFundsProvider() {
   const hideWallets = useStore(state => state.modalConfig?.hideWallets);
   const onRampConfig = useModalStore(state => state.onRampConfig);
   const setOnRampPurchase = useModalStore(state => state.setOnRampPurchase);
-  const setModalStep = useModalStore(state => state.setStep);
   const { asset, network, fiatQuantity, isProviderAllowed, tab } = useAddFunds();
   const { data: activeWallet } = useWallet();
 
@@ -50,12 +48,10 @@ export function AddFundsProvider() {
                       onClick={async () => {
                         if (!activeWallet?.type) return;
 
-                        const isPopup = id !== OnRampProvider.RAMP;
-
                         const { onRampPurchase: newOnRampPurchase } = await para.initiateOnRampTransaction({
                           walletId: activeWallet.isExternal ? undefined : activeWallet.id,
                           externalWalletAddress: activeWallet.isExternal ? activeWallet.id : undefined,
-                          shouldOpenPopup: isPopup,
+                          shouldOpenPopup: true,
                           params: {
                             type: tab === EnabledFlow.BUY ? OnRampPurchaseType.BUY : OnRampPurchaseType.SELL,
                             walletType: activeWallet.type,
@@ -68,8 +64,6 @@ export function AddFundsProvider() {
                         });
 
                         setOnRampPurchase({ ...newOnRampPurchase, fiat: 'USD' });
-
-                        !isPopup && setModalStep(ModalStep.ADD_FUNDS_AWAITING);
                       }}
                     />
                   </motion.div>

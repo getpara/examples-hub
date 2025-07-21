@@ -149,7 +149,7 @@ export class ServerUtils implements PlatformUtils {
 
   disableProviderModal = true;
 
-  openPopup(_popupUrl: string): Window {
+  async openPopup(_popupUrl: string): Promise<Window> {
     throw new Error('OpenPopup is not implemented in the ServerUtils class.');
   }
 

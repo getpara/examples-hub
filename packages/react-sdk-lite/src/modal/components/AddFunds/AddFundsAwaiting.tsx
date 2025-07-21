@@ -1,13 +1,6 @@
-import { StepContainer } from '../common.js';
-import { OnRampProvider, OnRampPurchase } from '@getpara/web-sdk';
 import { useModalStore } from '../../stores/index.js';
-import { lazy, useEffect, useMemo, useState } from 'react';
+import { useEffect } from 'react';
 import { ModalStep } from '../../utils/steps.js';
-import { MoonPayEmbed as CommonMoonPayEmbed, RampEmbed } from '@getpara/react-common';
-import { safeStyled } from '@getpara/react-common';
-import { useGoBack } from '../../hooks/useGoBack.js';
-import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
-import { useStore } from '../../../provider/stores/useStore.js';
 
 const STEPS = {
   CANCELLED: ModalStep.ADD_FUNDS_FAILURE,
@@ -16,50 +9,7 @@ const STEPS = {
 
 export const AddFundsAwaiting = () => {
   const setStep = useModalStore(state => state.setStep);
-  const goBack = useGoBack();
-  const onRampConfig = useModalStore(state => state.onRampConfig);
   const onRampPurchase = useModalStore(state => state.onRampPurchase);
-  const setOnRampPurchase = useModalStore(state => state.setOnRampPurchase);
-  const para = useInternalClient();
-  const appName = useStore(state => state.appName);
-  const isDark = useStore(state => state.isDarkTheme);
-
-  const [MoonPayEmbed, setMoonPayEmbed] = useState<typeof CommonMoonPayEmbed>();
-
-  const props = {
-    para,
-    appName,
-    onRampConfig,
-    onRampPurchase: onRampPurchase as OnRampPurchase,
-    isDark,
-    isEmbedded: true,
-    setOnRampPurchase,
-    onClose: goBack,
-  };
-
-  useEffect(() => {
-    const _MoonPayEmbed = lazy(() => import(`./MoonPayEmbed.js`));
-
-    if (_MoonPayEmbed) {
-      setMoonPayEmbed(_MoonPayEmbed as any);
-    }
-  }, []);
-
-  const onRampEmbed = useMemo(() => {
-    if (!onRampPurchase?.id || !props.onRampConfig) {
-      return null;
-    }
-    switch (onRampPurchase?.provider) {
-      case OnRampProvider.MOONPAY:
-        return !MoonPayEmbed || typeof window === 'undefined' ? null : (
-          <MoonPayEmbed {...props} onRampConfig={props.onRampConfig} />
-        );
-      case OnRampProvider.RAMP:
-        return <RampEmbed {...props} apiKey={props.onRampConfig?.rampApiKey ?? ''} onRampConfig={props.onRampConfig} />;
-      default:
-        return null;
-    }
-  }, [onRampPurchase?.provider, MoonPayEmbed]);
 
   useEffect(() => {
     let timeoutId;
@@ -73,9 +23,5 @@ export const AddFundsAwaiting = () => {
     return () => clearTimeout(timeoutId);
   }, [onRampPurchase?.status]);
 
-  return <Container $wide>{onRampEmbed}</Container>;
+  return null;
 };
-
-const Container = safeStyled(StepContainer)`
-  flex: 1;
-`;

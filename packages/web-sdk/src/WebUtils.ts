@@ -154,10 +154,12 @@ export class WebUtils implements PlatformUtils {
 
   disableProviderModal = false;
 
-  openPopup(popupUrl: string, opts?: { type: PopupType }): Window {
+  async openPopup(popupUrl: string, opts?: { type: PopupType }): Promise<Window> {
     if (typeof window === 'undefined') {
       return;
     }
+
+    let popupWindow: Window | null = null;
 
     if (opts) {
       const { type } = opts;
@@ -209,24 +211,26 @@ export class WebUtils implements PlatformUtils {
       const windowFeatures = `toolbar=no, menubar=no, width=${popUpWidth}, 
     height=${popUpHeight}, top=${top}, left=${left}`;
 
-      let popupWindow = window.open(popupUrl, type.toString(), windowFeatures);
+      popupWindow = window.open(popupUrl, type.toString(), windowFeatures);
       if (!popupWindow) {
         setTimeout(() => {
           popupWindow = window.open(popupUrl, '_blank');
         }, 0);
       }
-
-      return popupWindow;
     } else {
-      const popupWindow = window.open(popupUrl, 'popup', 'popup=true,width=400,height=500');
+      popupWindow = window.open(popupUrl, 'popup', 'popup=true,width=400,height=500');
       if (!popupWindow) {
         setTimeout(() => {
-          window.open(popupUrl, '_blank');
+          popupWindow = window.open(popupUrl, '_blank');
         }, 0);
       }
-
-      return popupWindow;
     }
+
+    while (!popupWindow) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+
+    return popupWindow;
   }
 
   async initializeWorker(ctx: Ctx): Promise<void> {

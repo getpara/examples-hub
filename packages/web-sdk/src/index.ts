@@ -9,9 +9,9 @@ export {
   type OnRampAllowedAssets,
 } from '@getpara/core-sdk';
 export { createCredential, generateSignature, parseCredentialCreationRes } from './cryptography/webAuth.js';
-export { truncateEthAddress } from './utils/truncateEthAddress.js';
-export { isPasskeySupported } from './utils/isPasskeySupported.js';
+export { truncateEthAddress, isPasskeySupported, offRampSend } from './utils/index.js';
 export * from './utils/isMobile.js';
+export * from './types/index.js';
 
 export { ParaWeb, ParaCore };
 export default ParaWeb;

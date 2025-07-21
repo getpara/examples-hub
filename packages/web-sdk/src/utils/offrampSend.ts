@@ -1,23 +1,14 @@
-import { OnRampPurchaseUpdateParams } from '@getpara/user-management-client';
-import Para, { hexStringToBase64, OnRampPurchase, SuccessfulSignatureRes } from '@getpara/web-sdk';
+import Para, { hexStringToBase64, OnRampPurchase, SuccessfulSignatureRes } from '@getpara/core-sdk';
+import { OfframpDepositRequest } from '../types/index.js';
 
 export async function offRampSend(
   para: Para,
   { id: purchaseId, provider, walletId, walletType, address, testMode = false }: Partial<OnRampPurchase>,
-  setOnRampPurchase: (_: OnRampPurchase) => void,
-  {
-    assetQuantity,
-    fiat,
-    fiatQuantity,
-    chainId,
-    destinationAddress,
-    contractAddress,
-  }: OnRampPurchaseUpdateParams & {
-    chainId?: string;
-    destinationAddress: string;
-    contractAddress?: string | null;
-  },
-): Promise<string | undefined> {
+  { assetQuantity, fiat, fiatQuantity, chainId, destinationAddress, contractAddress }: OfframpDepositRequest,
+): Promise<{
+  txHash: string;
+  updatedOnRampPurchase: OnRampPurchase;
+}> {
   if (!purchaseId || !walletId || !walletType || !provider) {
     throw new Error('Missing required fields');
   }
@@ -64,7 +55,7 @@ export async function offRampSend(
       walletType,
     });
 
-    const updated = await para.ctx.client.updateOnRampPurchase({
+    const updatedOnRampPurchase = await para.ctx.client.updateOnRampPurchase({
       userId: para.getUserId(),
       walletId,
       purchaseId,
@@ -77,9 +68,7 @@ export async function offRampSend(
       },
     });
 
-    setOnRampPurchase(updated);
-
-    return txHash;
+    return { txHash, updatedOnRampPurchase };
   } catch (e) {
     throw new Error(e.response?.data || e.message);
   }

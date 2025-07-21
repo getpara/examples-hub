@@ -257,10 +257,10 @@ describe('ServerUtils', () => {
     expect(ed25519SignSpy).toBeCalledWith(TEST_CTX, USER.id, WALLET.id, WALLET.share, BASE64_BYTES, USER.sessionCookie);
   });
 
-  it('openPopup throws error', () => {
+  it('openPopup throws error', async () => {
     const serverUtils = new ServerUtils();
 
-    expect(() => serverUtils.openPopup('https://test.com')).toThrow(
+    await expect(serverUtils.openPopup('https://test.com')).rejects.toThrow(
       'OpenPopup is not implemented in the ServerUtils class.',
     );
   });

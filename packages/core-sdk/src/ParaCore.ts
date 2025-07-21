@@ -23,7 +23,6 @@ import {
   TWalletType,
   WalletParams,
   PregenIds,
-  extractWalletRef,
   PasswordStatus,
   BiometricLocationHint,
   Auth,
@@ -58,6 +57,7 @@ import {
   SupportedAccountLinks,
   isPregenAuth,
   VerifiedAuthInfo,
+  OnRampPurchase,
 } from '@getpara/user-management-client';
 import type { pki as pkiType, jsbn as jsbnType } from 'node-forge';
 import forge from 'node-forge';
@@ -450,7 +450,14 @@ export abstract class ParaCore implements CoreInterface {
     }, {});
   }
 
-  private platformUtils: PlatformUtils;
+  protected onRampPopup:
+    | {
+        window: Window;
+        onRampPurchase: OnRampPurchase;
+      }
+    | undefined = undefined;
+
+  protected platformUtils: PlatformUtils;
 
   private localStorageGetItem = (key: string): Promise<string | null> | string | null => {
     return this.platformUtils.localStorage.get(key);
@@ -515,7 +522,7 @@ export abstract class ParaCore implements CoreInterface {
     };
   }
 
-  private isPortal(envOverride?: Environment): boolean {
+  protected isPortal(envOverride?: Environment): boolean {
     if (typeof window === 'undefined') return false;
     return (
       !!window.location?.host &&
@@ -751,7 +758,7 @@ export abstract class ParaCore implements CoreInterface {
         break;
       }
       case 'onRamp': {
-        path = `/web/users/${this.userId}/on-ramp-transaction/${opts.pathId}`;
+        path = `/web/users/${this.userId}/on-ramp-transaction/v2/${opts.pathId}`;
         break;
       }
       case 'telegramLogin': {
@@ -805,7 +812,7 @@ export abstract class ParaCore implements CoreInterface {
             displayName: this.authInfo.displayName,
           }
         : {}),
-      ...(isOnRamp ? { sessionId } : {}),
+      ...(isOnRamp ? { origin: typeof window !== 'undefined' ? window.location.origin : undefined, email: this.email } : {}),
       ...(isLogin
         ? {
             sessionId: thisDevice.sessionId,
@@ -2652,7 +2659,7 @@ export abstract class ParaCore implements CoreInterface {
     });
 
     if (shouldOpenPopup) {
-      this.platformUtils.openPopup(link);
+      await this.platformUtils.openPopup(link);
     }
 
     return link;
@@ -3321,20 +3328,9 @@ export abstract class ParaCore implements CoreInterface {
 
   private async getOnRampTransactionUrl({
     purchaseId,
-    providerKey,
-    ...walletParams
   }: { purchaseId: string; providerKey?: string } & WalletParams): Promise<string> {
-    const { sessionId } = await this.touchSession();
-    const [key, identifier] = extractWalletRef(walletParams);
-
     return this.constructPortalUrl('onRamp', {
       pathId: purchaseId,
-      sessionId,
-      params: {
-        [key]: identifier,
-        providerKey,
-        currentWalletIds: JSON.stringify(this.currentWalletIds),
-      },
     });
   }
 
@@ -3376,7 +3372,7 @@ export abstract class ParaCore implements CoreInterface {
     let signRes = await this.signMessageInner({ wallet, signerId, messageBase64, cosmosSignDocBase64 });
     let timeStart = Date.now();
     if ((signRes as DeniedSignatureRes).pendingTransactionId) {
-      this.platformUtils.openPopup(
+      await this.platformUtils.openPopup(
         await this.getTransactionReviewUrl((signRes as DeniedSignatureRes).pendingTransactionId, timeoutMs),
         { type: cosmosSignDocBase64 ? PopupType.SIGN_TRANSACTION_REVIEW : PopupType.SIGN_MESSAGE_REVIEW },
       );
@@ -3502,7 +3498,7 @@ export abstract class ParaCore implements CoreInterface {
 
     let timeStart = Date.now();
     if ((signRes as DeniedSignatureRes).pendingTransactionId) {
-      this.platformUtils.openPopup(
+      await this.platformUtils.openPopup(
         await this.getTransactionReviewUrl((signRes as DeniedSignatureRes).pendingTransactionId, timeoutMs),
         { type: PopupType.SIGN_TRANSACTION_REVIEW },
       );
@@ -3594,7 +3590,9 @@ export abstract class ParaCore implements CoreInterface {
     });
 
     if (shouldOpenPopup) {
-      this.platformUtils.openPopup(portalUrl, { type: PopupType.ON_RAMP_TRANSACTION });
+      const onRampWindow = await this.platformUtils.openPopup(portalUrl, { type: PopupType.ON_RAMP_TRANSACTION });
+
+      this.onRampPopup = { window: onRampWindow, onRampPurchase };
     }
 
     return { onRampPurchase, portalUrl };

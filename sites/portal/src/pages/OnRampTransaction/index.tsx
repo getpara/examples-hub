@@ -1,14 +1,21 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { MoonPayEmbed } from '@getpara/react-common';
+import { MoonPayEmbed, RampEmbed } from '@getpara/react-common';
 import { usePara } from '../../components/ParaContext';
 import { StripeEmbed } from '../../components/StripeEmbed';
 import { authLogin, authLoginWithPassword, authUpdateKeyShares } from '../../utils/authLogin';
 import { useModalOutletContext } from '../../hooks/useModalOutletContext';
-import { CurrentWalletIds, OnRampConfig, OnRampProvider, OnRampPurchase } from '@getpara/user-management-client';
+import {
+  CurrentWalletIds,
+  OnRampConfig,
+  OnRampProvider,
+  OnRampPurchase,
+  OnRampPurchaseStatus,
+  OnRampPurchaseUpdateParams,
+} from '@getpara/user-management-client';
 import { CpslSpinner } from '@getpara/react-components';
 import styled from 'styled-components';
-import { AuthMethod, getPublicKeyHex } from '@getpara/web-sdk';
+import { AuthMethod, getNetworkPrefix, getPublicKeyHex, offRampSend, OfframpDepositRequest } from '@getpara/web-sdk';
 import { useExtractedParams } from '../../hooks/useExtractedParams';
 import { EnterPasswordStep } from '../AuthLogin/components/EnterPasswordStep';
 
@@ -152,6 +159,56 @@ export function OnRampTransaction() {
     }
   }
 
+  const onUpdate = async (updates: OnRampPurchaseUpdateParams) => {
+    const updated = await para.ctx.client.updateOnRampPurchase({
+      userId,
+      walletId: onRampPurchase.walletId,
+      externalWalletAddress: onRampPurchase.externalWalletAddress,
+      purchaseId: onRampPurchase.id,
+      updates,
+    });
+
+    setOnRampPurchase(updated);
+  };
+
+  const onSuccess = async (updates: OnRampPurchaseUpdateParams) => {
+    await onUpdate({
+      ...updates,
+      status: OnRampPurchaseStatus.FINISHED,
+    });
+
+    setTimeout(() => {
+      if (typeof window !== 'undefined') {
+        window.close();
+      }
+    }, 5000);
+  };
+
+  const onDepositRequest = async (depositRequest: OfframpDepositRequest) => {
+    const { txHash, updatedOnRampPurchase } = await offRampSend(para, onRampPurchase, depositRequest);
+
+    setOnRampPurchase(updatedOnRampPurchase);
+
+    return txHash;
+  };
+
+  const onSignMoonPayUrl = async (url: string) => {
+    if (userId || !onRampPurchase.walletType) {
+      throw new Error('missing required fields');
+    }
+
+    const res = await para.ctx.client.signMoonPayUrl(para.getUserId()!, {
+      url,
+      type: onRampPurchase.walletType,
+      cosmosPrefix: getNetworkPrefix(onRampPurchase.network),
+      testMode: onRampPurchase.testMode,
+      walletId: onRampPurchase.walletId || undefined,
+      externalWalletAddress: onRampPurchase.externalWalletAddress || undefined,
+    });
+
+    return res.data.signature;
+  };
+
   const onRampEmbed = useMemo(() => {
     if (isAwaitingPassword) {
       return <EnterPasswordStep error={passwordError} onLoginClick={loginWithPassword} />;
@@ -161,22 +218,25 @@ export function OnRampTransaction() {
     }
 
     const props = {
-      para,
       onRampConfig,
       onRampPurchase: onRampPurchase as OnRampPurchase,
       isDark,
-      setOnRampPurchase,
+      onUpdate,
+      onSuccess,
+      onDepositRequest,
     };
 
     switch (onRampPurchase?.provider) {
       case OnRampProvider.MOONPAY:
-        return <MoonPayEmbed {...props} />;
+        return <MoonPayEmbed {...props} email={para.email} onUrlSignatureRequest={onSignMoonPayUrl} />;
       case OnRampProvider.STRIPE:
         return <StripeEmbed {...props} />;
+      case OnRampProvider.RAMP:
+        return <RampEmbed apiKey={onRampConfig.rampApiKey} email={para.email} {...props} />;
       default:
         return null;
     }
-  }, [para, onRampConfig, onRampPurchase, isAwaitingPassword, isDark]);
+  }, [para.email, onRampConfig, onRampPurchase, isAwaitingPassword, isDark]);
 
   useEffect(() => {
     performSetup();

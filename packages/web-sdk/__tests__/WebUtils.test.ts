@@ -309,7 +309,7 @@ describe('WebUtils', () => {
     expect(webUtils.disableProviderModal).toBeFalsy();
   });
   describe('openPopup', () => {
-    it('no window', () => {
+    it('no window', async () => {
       Object.defineProperty(globalThis, 'window', {
         value: undefined,
         configurable: true,
@@ -317,7 +317,7 @@ describe('WebUtils', () => {
 
       const webUtils = new WebUtils();
 
-      const resp = webUtils.openPopup(TEST_POPUP_URL);
+      const resp = await webUtils.openPopup(TEST_POPUP_URL);
 
       expect(resp).toBeUndefined();
       Object.defineProperty(globalThis, 'window', {
@@ -326,34 +326,33 @@ describe('WebUtils', () => {
       });
     });
     describe('no type', () => {
-      it('no delay', () => {
+      it('no delay', async () => {
         const webUtils = new WebUtils();
 
-        const resp = webUtils.openPopup(TEST_POPUP_URL);
+        const resp = await webUtils.openPopup(TEST_POPUP_URL);
 
         expect(resp.location.href).toBe(TEST_POPUP_URL);
         expect(mockWindowOpen).toBeCalledTimes(1);
         expect(mockWindowOpen).toBeCalledWith(TEST_POPUP_URL, 'popup', 'popup=true,width=400,height=500');
       });
-      it('delay', () => {
+      it('delay', async () => {
         mockWindowOpen.mockReturnValueOnce(undefined as any);
         const webUtils = new WebUtils();
 
-        const resp = webUtils.openPopup(TEST_POPUP_URL);
+        await webUtils.openPopup(TEST_POPUP_URL);
 
         vi.advanceTimersByTime(1000);
 
-        expect(resp).toBeUndefined();
         expect(mockWindowOpen).toBeCalledTimes(2);
         expect(mockWindowOpen).toBeCalledWith(TEST_POPUP_URL, 'popup', 'popup=true,width=400,height=500');
         expect(mockWindowOpen).toBeCalledWith(TEST_POPUP_URL, '_blank');
       });
     });
     describe('LOGIN_PASSKEY', () => {
-      it('no delay', () => {
+      it('no delay', async () => {
         const webUtils = new WebUtils();
 
-        const resp = webUtils.openPopup(TEST_POPUP_URL, {
+        const resp = await webUtils.openPopup(TEST_POPUP_URL, {
           type: PopupType.LOGIN_PASSKEY,
         });
         popUpHeight = 798;
@@ -367,18 +366,17 @@ describe('WebUtils', () => {
     height=${popUpHeight}, top=${(WINDOW_INNER_HEIGHT - popUpHeight) / 2}, left=${(WINDOW_INNER_WIDTH - popUpWidth) / 2}`,
         );
       });
-      it('delay', () => {
+      it('delay', async () => {
         mockWindowOpen.mockReturnValueOnce(undefined as any);
         const webUtils = new WebUtils();
 
-        const resp = webUtils.openPopup(TEST_POPUP_URL, {
+        await webUtils.openPopup(TEST_POPUP_URL, {
           type: PopupType.LOGIN_PASSKEY,
         });
         popUpHeight = 798;
 
         vi.advanceTimersByTime(1000);
 
-        expect(resp).toBeUndefined();
         expect(mockWindowOpen).toBeCalledTimes(2);
         expect(mockWindowOpen).toBeCalledWith(
           TEST_POPUP_URL,
@@ -388,7 +386,7 @@ describe('WebUtils', () => {
         );
         expect(mockWindowOpen).toBeCalledWith(TEST_POPUP_URL, '_blank');
       });
-      it('dual monitor', () => {
+      it('dual monitor', async () => {
         Object.defineProperty(globalThis, 'window', {
           value: {
             ...windowMockValue,
@@ -400,7 +398,7 @@ describe('WebUtils', () => {
 
         const webUtils = new WebUtils();
 
-        const resp = webUtils.openPopup(TEST_POPUP_URL, {
+        const resp = await webUtils.openPopup(TEST_POPUP_URL, {
           type: PopupType.LOGIN_PASSKEY,
         });
         popUpHeight = 798;
@@ -419,7 +417,7 @@ describe('WebUtils', () => {
           configurable: true,
         });
       });
-      it('use document', () => {
+      it('use document', async () => {
         Object.defineProperty(globalThis, 'window', {
           value: {
             ...windowMockValue,
@@ -431,7 +429,7 @@ describe('WebUtils', () => {
 
         const webUtils = new WebUtils();
 
-        const resp = webUtils.openPopup(TEST_POPUP_URL, {
+        const resp = await webUtils.openPopup(TEST_POPUP_URL, {
           type: PopupType.LOGIN_PASSKEY,
         });
         popUpHeight = 798;
@@ -450,7 +448,7 @@ describe('WebUtils', () => {
           configurable: true,
         });
       });
-      it('use screen', () => {
+      it('use screen', async () => {
         Object.defineProperty(globalThis, 'window', {
           value: {
             ...windowMockValue,
@@ -471,7 +469,7 @@ describe('WebUtils', () => {
 
         const webUtils = new WebUtils();
 
-        const resp = webUtils.openPopup(TEST_POPUP_URL, {
+        const resp = await webUtils.openPopup(TEST_POPUP_URL, {
           type: PopupType.LOGIN_PASSKEY,
         });
         popUpHeight = 798;
@@ -495,10 +493,10 @@ describe('WebUtils', () => {
         });
       });
     });
-    it('LOGIN_PASSKEY', () => {
+    it('LOGIN_PASSKEY', async () => {
       const webUtils = new WebUtils();
 
-      const resp = webUtils.openPopup(TEST_POPUP_URL, {
+      const resp = await webUtils.openPopup(TEST_POPUP_URL, {
         type: PopupType.LOGIN_PASSKEY,
       });
       popUpHeight = 798;
@@ -512,10 +510,10 @@ describe('WebUtils', () => {
     height=${popUpHeight}, top=${(WINDOW_INNER_HEIGHT - popUpHeight) / 2}, left=${(WINDOW_INNER_WIDTH - popUpWidth) / 2}`,
       );
     });
-    it('CREATE_PASSKEY', () => {
+    it('CREATE_PASSKEY', async () => {
       const webUtils = new WebUtils();
 
-      const resp = webUtils.openPopup(TEST_POPUP_URL, {
+      const resp = await webUtils.openPopup(TEST_POPUP_URL, {
         type: PopupType.CREATE_PASSKEY,
       });
       popUpHeight = 464;
@@ -529,10 +527,10 @@ describe('WebUtils', () => {
     height=${popUpHeight}, top=${(WINDOW_INNER_HEIGHT - popUpHeight) / 2}, left=${(WINDOW_INNER_WIDTH - popUpWidth) / 2}`,
       );
     });
-    it('SIGN_MESSAGE_REVIEW', () => {
+    it('SIGN_MESSAGE_REVIEW', async () => {
       const webUtils = new WebUtils();
 
-      const resp = webUtils.openPopup(TEST_POPUP_URL, {
+      const resp = await webUtils.openPopup(TEST_POPUP_URL, {
         type: PopupType.SIGN_MESSAGE_REVIEW,
       });
       popUpHeight = 585;
@@ -546,10 +544,10 @@ describe('WebUtils', () => {
     height=${popUpHeight}, top=${(WINDOW_INNER_HEIGHT - popUpHeight) / 2}, left=${(WINDOW_INNER_WIDTH - popUpWidth) / 2}`,
       );
     });
-    it('SIGN_TRANSACTION_REVIEW', () => {
+    it('SIGN_TRANSACTION_REVIEW', async () => {
       const webUtils = new WebUtils();
 
-      const resp = webUtils.openPopup(TEST_POPUP_URL, {
+      const resp = await webUtils.openPopup(TEST_POPUP_URL, {
         type: PopupType.SIGN_TRANSACTION_REVIEW,
       });
       popUpHeight = 750;
@@ -563,10 +561,10 @@ describe('WebUtils', () => {
     height=${popUpHeight}, top=${(WINDOW_INNER_HEIGHT - popUpHeight) / 2}, left=${(WINDOW_INNER_WIDTH - popUpWidth) / 2}`,
       );
     });
-    it('OAUTH', () => {
+    it('OAUTH', async () => {
       const webUtils = new WebUtils();
 
-      const resp = webUtils.openPopup(TEST_POPUP_URL, {
+      const resp = await webUtils.openPopup(TEST_POPUP_URL, {
         type: PopupType.OAUTH,
       });
       popUpHeight = 768;

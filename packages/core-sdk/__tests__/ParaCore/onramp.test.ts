@@ -1,13 +1,5 @@
-import {
-  Environment,
-  getPortalBaseURL,
-  Network,
-  OnRampAsset,
-  OnRampProvider,
-  OnRampPurchaseType,
-  PopupType,
-} from '../../src';
-import { API_KEY, COMMON_SEARCH_PARAMS, CURRENT_WALLET_IDS, PURCHASE_ID, SESSION_ID, USER_ID, WALLET } from '../constants';
+import { Environment, getPortalBaseURL, Network, OnRampAsset, OnRampProvider, OnRampPurchaseType } from '../../src';
+import { API_KEY, COMMON_SEARCH_PARAMS, CURRENT_WALLET_IDS, PURCHASE_ID, USER_ID, WALLET } from '../constants';
 import { MockPara } from '../mocks/mockParaCore';
 import { describe, expect, it, beforeAll, vi } from 'vitest';
 import { expectSearchParams, getWorkerContent } from '../utils';
@@ -39,13 +31,11 @@ describe('on-ramp transactions', () => {
 
       const url = new URL(transactionReviewRes);
       expect(url.origin).toEqual(getPortalBaseURL(para.ctx));
-      expect(url.pathname).toEqual(`/web/users/${USER_ID}/on-ramp-transaction/${PURCHASE_ID}`);
+      expect(url.pathname).toEqual(`/web/users/${USER_ID}/on-ramp-transaction/v2/${PURCHASE_ID}`);
       expectSearchParams(url, {
         ...COMMON_SEARCH_PARAMS,
         apiKey: API_KEY,
-        currentWalletIds: JSON.stringify(CURRENT_WALLET_IDS),
-        sessionId: SESSION_ID,
-        walletId: WALLET.id,
+        origin: 'http://localhost:3000',
       });
     });
 
@@ -67,7 +57,6 @@ describe('on-ramp transactions', () => {
 
       const { onRampPurchase, portalUrl } = await para.initiateOnRampTransaction({
         walletId: WALLET.id,
-        shouldOpenPopup: true,
         params,
       });
 
@@ -81,11 +70,7 @@ describe('on-ramp transactions', () => {
       });
 
       expect(new URL(portalUrl).origin).toEqual(getPortalBaseURL(para.ctx));
-      expect(new URL(portalUrl).pathname).toEqual(`/web/users/${USER_ID}/on-ramp-transaction/${onRampPurchase.id}`);
-
-      expect((para as unknown as any).platformUtils.openPopup).toHaveBeenCalledWith(portalUrl, {
-        type: PopupType.ON_RAMP_TRANSACTION,
-      });
+      expect(new URL(portalUrl).pathname).toEqual(`/web/users/${USER_ID}/on-ramp-transaction/v2/${onRampPurchase.id}`);
 
       expect(onRampPurchase).toEqual({ id: 'id', userId: USER_ID, address: WALLET.address, ...params });
     });

@@ -25,6 +25,9 @@ const TransactionReview = lazy(() => import('./pages/TransactionReview/Transacti
 const OnRampTransaction = lazy(() =>
   import('./pages/OnRampTransaction').then(module => ({ default: module.OnRampTransaction })),
 );
+const OnRampTransactionV2 = lazy(() =>
+  import('./pages/OnRampTransactionV2').then(module => ({ default: module.OnRampTransactionV2 })),
+);
 const TelegramLogin = lazy(() => import('./pages/TelegramLogin').then(module => ({ default: module.TelegramLogin })));
 const ShortUrl = lazy(() => import('./pages/ShortUrl/ShortUrl'));
 
@@ -51,6 +54,7 @@ export const App = () => {
           <Route element={<PasswordCreation />} path="users/:userId/passwords/:passwordId" />
           <Route element={<TransactionReview />} path="users/:userId/transaction-review/:pendingTransactionId" />
           <Route element={<OnRampTransaction />} path="users/:userId/on-ramp-transaction/:purchaseId" />
+          <Route element={<OnRampTransactionV2 />} path="users/:userId/on-ramp-transaction/v2/:purchaseId" />
         </Route>
         <Route element={<ModalLayout />} path="/auth">
           <Route element={<TelegramLogin />} path="telegram" />

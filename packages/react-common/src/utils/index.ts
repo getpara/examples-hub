@@ -135,7 +135,6 @@ export function getContractAddressFromAsset(network: Network, asset: OnRampAsset
   return NetworkAssetAddresses.find(row => row.network === network && row.asset === asset)?.address;
 }
 
-export * from './offRampSend.js';
 export * from './getDeviceLogo.js';
 export * from './getDeviceModelName.js';
 export * from './getBrowserName.js';

@@ -5089,9 +5089,9 @@
   integrity sha512-4aErSrCR/On/e5G2hDP0wjooqDdauzEbIq8hIkIe5pXV0rtWJZvdCEKL0ykZxex+IxIwBp0eGeV48hQN07dXtw==
 
 "@moonpay/moonpay-react@^1.8.3":
-  version "1.8.3"
-  resolved "https://registry.yarnpkg.com/@moonpay/moonpay-react/-/moonpay-react-1.8.3.tgz#0cb372fb387db3993985bf492b68fc3b491e4cf0"
-  integrity sha512-kz0W0nt+tg4NZWGSVIN5nF3AYQttQF07UH8klrdVtfIg+Jg8GbxazlQDCvg8FX21KaEld1buBLBh0EfAGO7/sw==
+  version "1.10.2"
+  resolved "https://registry.yarnpkg.com/@moonpay/moonpay-react/-/moonpay-react-1.10.2.tgz#b22d01b6f721de4e737a9ebdd71b90cede394206"
+  integrity sha512-pbDS7vixhrPbfh2MT8hZXF8zhuEEPeltwwUQ6cvhuXTB/ub+15PbDUSRY1CTeMUSM1TnqAYaFZRnmiCdHXsp4g==
 
 "@motionone/animation@^10.15.1", "@motionone/animation@^10.18.0":
   version "10.18.0"
