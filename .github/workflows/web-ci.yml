@@ -45,8 +45,8 @@ concurrency:
 env:
   NODE_VERSION: "20.19.0"
   # Improve caching and performance
-  YARN_ENABLE_GLOBAL_CACHE: 'false'
-  YARN_NM_MODE: 'hardlinks-local'
+  YARN_ENABLE_GLOBAL_CACHE: "false"
+  YARN_NM_MODE: "hardlinks-local"
   NODE_OPTIONS: "--max-old-space-size=4096"
 
 jobs:
@@ -107,7 +107,7 @@ jobs:
         project: ${{ fromJson(needs.collect-projects.outputs.projects) }}
 
     name: Test ${{ matrix.project.name }}
-    
+
     env:
       # Base environment variables
       PARA_API_KEY_BETA: ${{ secrets.PARA_API_KEY_BETA }}
@@ -125,6 +125,14 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            ${{ matrix.project.path }}
+            .github
+            package.json
+            yarn.lock
+            .yarnrc.yml
+            .yarn
 
       - name: Clean Workspace
         run: |
@@ -144,8 +152,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: "yarn"
-          cache-dependency-path: "**/yarn.lock"
 
       - name: Run Tests
         id: test
@@ -256,11 +262,11 @@ jobs:
           # Comprehensive cleanup to prevent disk space issues
           echo ""
           echo "🧹 Performing comprehensive cleanup..."
-          
+
           # Clean node_modules
           echo "  - Removing node_modules..."
           rm -rf node_modules
-          
+
           # Clean yarn caches and artifacts
           echo "  - Removing yarn caches..."
           rm -rf .yarn-cache-local
@@ -268,22 +274,22 @@ jobs:
           rm -rf .yarn/unplugged
           rm -rf .yarn/build-state.yml
           rm -rf .yarn/install-state.gz
-          
+
           # Clean build artifacts (in case any were missed)
           echo "  - Removing remaining build artifacts..."
           rm -rf .next .nuxt .vite dist build out .turbo
           rm -rf .parcel-cache .svelte-kit coverage
-          
+
           # Clean other common artifacts
           echo "  - Removing other artifacts..."
           rm -rf .eslintcache .stylelintcache tsconfig.tsbuildinfo
           rm -rf *.log
-          
+
           # Show final disk usage for this project
           echo "💾 Final disk usage after cleanup:" >> $GITHUB_STEP_SUMMARY
           df -h | grep -E "Filesystem|/$" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           echo "✅ Cleanup complete"
 
           # Set outputs for summary
@@ -334,8 +340,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: "yarn"
-          cache-dependency-path: "**/yarn.lock"
 
       - name: Install Dependencies
         run: |
