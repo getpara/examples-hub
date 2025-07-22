@@ -47,7 +47,7 @@ export default function MessageSigningPage() {
 
       const messageToSign = message.trim();
 
-      const signature = await walletClient.signMessage({ account: address, message: messageToSign });
+      const signature = await walletClient.signMessage({ account: address as `0x${string}`, message: messageToSign });
 
       setSignature(`${signature}`);
 
@@ -72,7 +72,7 @@ export default function MessageSigningPage() {
     try {
       if (!message || !signature) return;
 
-      const recovered = await verifyMessage({ address: address, message, signature: signature as `0x${string}` });
+      const recovered = await verifyMessage({ address: address as `0x${string}`, message, signature: signature as `0x${string}` });
       setRecovered(recovered);
       setStatus({
         show: true,

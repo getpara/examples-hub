@@ -96,15 +96,9 @@ export default function TokenTransferPage() {
         throw new Error("Please enter a valid amount greater than 0.");
       }
 
-      // Create contract instance with both clients
-      const tokenContract = getContract({
-        address: contractAddress as `0x${string}`,
-        abi: ERC20_ABI,
-        client: {
-          public: publicClient,
-          wallet: walletClient,
-        },
-      });
+      if (!walletClient || !publicClient) {
+        throw new Error("Wallet client not available.");
+      }
 
       setStatus({
         show: true,
@@ -112,8 +106,13 @@ export default function TokenTransferPage() {
         message: "Please confirm the transaction in your wallet...",
       });
 
-      const hash = await tokenContract.write.transfer([to, parseEther(amount)], {
-        account: address,
+      const hash = await walletClient.writeContract({
+        address: contractAddress as `0x${string}`,
+        abi: ERC20_ABI,
+        functionName: 'transfer',
+        args: [to as `0x${string}`, parseEther(amount)],
+        account: address as `0x${string}`,
+        chain: walletClient.chain,
       });
 
       console.log("Transaction submitted:", hash);

@@ -171,7 +171,7 @@ export function useSquidBridge() {
     const networkCategory = NETWORK_CONFIG[originNetwork].networkCategory;
 
     if (networkCategory === "evm") {
-      const ethTx = tx as TransactionResponse;
+      const ethTx = tx as unknown as TransactionResponse;
       return { hash: ethTx.hash };
     } else if (networkCategory === "svm") {
       const solanaTx = tx as SolanaTxResponse;
@@ -226,10 +226,10 @@ export function useSquidBridge() {
               integratorId?: string;
               quoteId?: string;
             }
-            
+
             const statusParams: StatusParams = {
               transactionId: txHashResult.hash,
-              requestId: quote.requestId,
+              requestId: quote.requestId!,
               integratorId: quote.integratorId,
             };
 
@@ -366,7 +366,7 @@ export function useSquidBridge() {
         }
 
         const tx = await squid.executeRoute({
-          signer,
+          signer: signer as ethers.Signer,
           route: quote.route,
         });
 

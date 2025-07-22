@@ -73,6 +73,10 @@ export default function PermitSigningPage() {
         throw new Error("No wallet ID found. Please reconnect your wallet.");
       }
 
+      if (!publicClient || !walletClient) {
+        throw new Error("Client not available.");
+      }
+
       const contract = getContract({
         address: PARA_TEST_TOKEN_CONTRACT_ADDRESS,
         abi: ParaTestToken.abi,
@@ -119,7 +123,7 @@ export default function PermitSigningPage() {
 
       // Sign the permit with viem's signTypedData
       const signature = await walletClient.signTypedData({
-        account: address,
+        account: address as `0x${string}`,
         domain,
         types,
         primaryType: "Permit",

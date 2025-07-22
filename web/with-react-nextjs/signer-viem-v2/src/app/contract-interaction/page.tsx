@@ -95,18 +95,18 @@ export default function ContractInteractionPage() {
         }
       }
 
-      const contract = getContract({
-        address: PARA_TEST_TOKEN_CONTRACT_ADDRESS,
-        abi: ParaTestToken.abi,
-        client: {
-          public: publicClient,
-          wallet: walletClient,
-        },
-      });
+      if (!walletClient || !publicClient) {
+        throw new Error("Wallet client not available.");
+      }
 
       // Execute the mint function
-      const hash = await contract.write.mint([parseEther(amount)], {
-        account: address,
+      const hash = await walletClient.writeContract({
+        address: PARA_TEST_TOKEN_CONTRACT_ADDRESS,
+        abi: ParaTestToken.abi,
+        functionName: 'mint',
+        args: [parseEther(amount)],
+        account: address as `0x${string}`,
+        chain: walletClient.chain,
       });
 
       setTxHash(hash);

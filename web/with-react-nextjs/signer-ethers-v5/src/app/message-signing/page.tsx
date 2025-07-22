@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { ethers } from "ethers";
-import { useAccount, useWallet } from "@getpara/react-sdk";
+import { useAccount } from "@getpara/react-sdk";
 import { Card } from "@/components/ui/Card";
 import { useParaSigner } from "@/hooks/useParaSigner";
 
@@ -102,9 +102,13 @@ export default function MessageSigningPage() {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-4">
           <div className="space-y-3">
-            <label htmlFor="message" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="message"
+              className="block text-sm font-medium text-gray-700">
               Message to Sign
             </label>
             <input

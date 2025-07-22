@@ -67,13 +67,17 @@ export default function ContractDeploymentPage() {
         message: "Deploying contract. Please confirm the transaction in your wallet...",
       });
 
+      if (!walletClient || !publicClient) {
+        throw new Error("Wallet client not available.");
+      }
+
       // Deploy the contract using viem
       const hash = await walletClient.deployContract({
         abi: ParaTestToken.abi,
         bytecode: (ParaTestToken.bytecode.startsWith("0x")
           ? ParaTestToken.bytecode
           : `0x${ParaTestToken.bytecode}`) as `0x${string}`,
-        account: address,
+        account: address as `0x${string}`,
         chain: publicClient.chain,
       });
 

@@ -22,8 +22,8 @@ export function useParaAccount() {
         isConnected.value = false;
         address.value = "";
       }
-    } catch (err: any) {
-      error.value = err.message || "Failed to check authentication";
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : "Failed to check authentication";
       isConnected.value = false;
       address.value = "";
     } finally {
@@ -31,7 +31,7 @@ export function useParaAccount() {
     }
   }
 
-  async function signMessage(message: string): Promise<any> {
+  async function signMessage(message: string) {
     if (!isConnected.value) {
       throw new Error("Not connected");
     }

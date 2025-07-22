@@ -30,7 +30,12 @@ export default function SolTransferPage() {
 
     setIsBalanceLoading(true);
     try {
-      const balanceLamports = await connection.getBalance(signer?.sender!);
+      if (!signer?.sender) {
+        console.error("No signer sender available");
+        setBalance(null);
+        return;
+      }
+      const balanceLamports = await connection.getBalance(signer.sender);
       setBalance((balanceLamports / LAMPORTS_PER_SOL).toFixed(4));
     } catch (error) {
       console.error("Error fetching balance:", error);
@@ -44,8 +49,7 @@ export default function SolTransferPage() {
     if (address && signer) {
       fetchBalance();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [address, signer]);
+  }, [address, signer, connection]);
 
   const constructTransaction = async (toAddress: string, solAmount: string): Promise<Transaction> => {
     if (!address || !connection) throw new Error("No sender address or connection available");
@@ -59,14 +63,14 @@ export default function SolTransferPage() {
 
       transaction.add(
         SystemProgram.transfer({
-          fromPubkey: fromPubKey!,
+          fromPubkey: fromPubKey as PublicKey,
           toPubkey: toPubKey,
           lamports: BigInt(amountLamports),
         })
       );
 
       transaction.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
-      transaction.feePayer = fromPubKey!;
+      transaction.feePayer = fromPubKey as PublicKey;
 
       return transaction;
     } catch (error) {
@@ -79,10 +83,16 @@ export default function SolTransferPage() {
     if (!address || !connection) throw new Error("No sender address or provider available");
 
     try {
-      const balanceLamports = await connection.getBalance(signer?.sender!);
+      if (!signer?.sender) {
+        throw new Error("No signer sender available");
+      }
+      const balanceLamports = await connection.getBalance(signer.sender);
       const transaction = await constructTransaction(toAddress, solAmount);
       const estimatedGas = await transaction.getEstimatedFee(connection);
-      const totalCost = parseFloat(solAmount) * LAMPORTS_PER_SOL + estimatedGas!;
+      if (estimatedGas === null) {
+        throw new Error("Failed to estimate transaction fee");
+      }
+      const totalCost = parseFloat(solAmount) * LAMPORTS_PER_SOL + estimatedGas;
 
       if (totalCost > balanceLamports) {
         const requiredSol = (totalCost / LAMPORTS_PER_SOL).toFixed(4);
@@ -94,6 +104,7 @@ export default function SolTransferPage() {
 
       return true;
     } catch (error) {
+      console.error("Error validating transaction:", error);
       throw error;
     }
   };

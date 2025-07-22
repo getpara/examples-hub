@@ -1,10 +1,11 @@
 "use client";
 
 import { ParaProvider as ParaProviderBase } from "@getpara/react-sdk";
+import { PregenAuth } from "@getpara/core-sdk";
 import { API_KEY, ENVIRONMENT } from "@/config/constants";
 
 export function ParaProvider({ children }: { children: React.ReactNode }) {
-  const fetchPregenWalletsOverride = async (_opts: { pregenId: string }) => {
+  const fetchPregenWalletsOverride = async (_opts: { pregenId: PregenAuth }) => {
     // Check if we have a stored pregen UUID from step 1
     const storedUuid = typeof window !== 'undefined' ? localStorage.getItem('pregenUuid') : null;
     

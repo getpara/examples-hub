@@ -93,7 +93,7 @@ export default function ProgramCreateTokenPage() {
 
       const tx = await program.methods
         .createToken(tokenName, tokenSymbol)
-        .accounts({
+        .accountsPartial({
           payer: signer.sender,
           mintAccount: mintKeypair.publicKey,
           tokenProgram: TOKEN_2022_PROGRAM_ID,

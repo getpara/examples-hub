@@ -91,15 +91,9 @@ export default function BatchTransactionsPage() {
         throw new Error("Please connect your wallet.");
       }
 
-      // Create contract instance with both clients
-      const contract = getContract({
-        address: PARA_TEST_TOKEN_CONTRACT_ADDRESS,
-        abi: ParaTestToken.abi,
-        client: {
-          public: publicClient,
-          wallet: walletClient,
-        },
-      });
+      if (!walletClient || !publicClient) {
+        throw new Error("Wallet client not available.");
+      }
 
       // Prepare calldata for each operation
       const calldata = operations.map((op) => {
@@ -124,8 +118,13 @@ export default function BatchTransactionsPage() {
         message: "Please confirm the batched transaction in your wallet...",
       });
 
-      const hash = await contract.write.multicall([calldata], {
+      const hash = await walletClient.writeContract({
+        address: PARA_TEST_TOKEN_CONTRACT_ADDRESS,
+        abi: ParaTestToken.abi,
+        functionName: 'multicall',
+        args: [calldata],
         account: address,
+        chain: walletClient.chain,
       });
 
       console.log("Transaction submitted:", hash);
@@ -142,7 +141,7 @@ export default function BatchTransactionsPage() {
         hash,
       });
 
-      console.log("Transaction confirmed:", receipt);
+      console.log("Transaction confirmed");
 
       setStatus({
         show: true,

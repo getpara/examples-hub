@@ -161,7 +161,7 @@ export default function ProgramMintTokenPage() {
 
       const tx = await program.methods
         .mintToken(rawAmount)
-        .accounts({
+        .accountsPartial({
           payer: signer.sender,
           mintAccount: mintPubkey,
           associatedTokenAccount: recipientAta,

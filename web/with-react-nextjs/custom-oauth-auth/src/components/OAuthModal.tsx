@@ -126,8 +126,8 @@ export function OAuthModal() {
       // Force immediate query refresh
       await queryClient.invalidateQueries({ queryKey: ["paraAccount"] });
       
-    } catch (err: any) {
-      setError(err.message || "Authentication failed");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Authentication failed");
     } finally {
       setAuthenticatingMethod(null);
     }
@@ -139,8 +139,8 @@ export function OAuthModal() {
     try {
       await logoutAsync();
       closeModal();
-    } catch (err: any) {
-      setError(err.message || "Failed to logout");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to logout");
     }
   };
 

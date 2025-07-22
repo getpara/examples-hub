@@ -1,7 +1,7 @@
 {
   "name": "para-telegram-miniapp",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -43,6 +43,7 @@
     "autoprefixer": "^10.4.20",
     "eslint": "^9.29.0",
     "gh-pages": "^6.1.1",
+    "pino-pretty": "13.0.0",
     "postcss": "^8.4.41",
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.22.0",

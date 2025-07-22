@@ -60,7 +60,7 @@ export async function checkAuthentication() {
 }
 
 // Sign message
-export async function signMessage(message: string): Promise<unknown> {
+export async function signMessage(message: string) {
   const currentState = get(accountState);
   
   if (!currentState.isConnected) {

@@ -80,6 +80,10 @@ export default function TypedDataSigningPage() {
         throw new Error("Unable to fetch token balance.");
       }
 
+      if (!publicClient || !walletClient) {
+        throw new Error("Client not available.");
+      }
+
       const contract = getContract({
         address: PARA_TEST_TOKEN_CONTRACT_ADDRESS,
         abi: ParaTestToken.abi,
@@ -100,7 +104,7 @@ export default function TypedDataSigningPage() {
       const domain = {
         name: name as string,
         version: "1",
-        chainId: publicClient.chain?.id || 17000,
+        chainId: publicClient?.chain?.id || 17000,
         verifyingContract: PARA_TEST_TOKEN_CONTRACT_ADDRESS,
       } as const;
 
@@ -129,7 +133,7 @@ export default function TypedDataSigningPage() {
       };
 
       const sig = await walletClient.signTypedData({
-        account: address,
+        account: address as `0x${string}`,
         domain,
         types,
         primaryType: "TokenAttestation",

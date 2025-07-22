@@ -1,7 +1,8 @@
 {
   "name": "connector-reown-appkit",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "build": "next build",
     "dev": "next dev",
@@ -20,8 +21,8 @@
     "@getpara/react-sdk": "2.0.0-alpha.33",
     "@getpara/wagmi-v2-integration": "2.0.0-alpha.33",
     "@leapwallet/cosmos-social-login-capsule-provider": "^0.0.44",
-    "@reown/appkit": "^1.7.11",
-    "@reown/appkit-adapter-wagmi": "^1.7.11",
+    "@reown/appkit": "^1.7.16",
+    "@reown/appkit-adapter-wagmi": "^1.7.16",
     "@solana-mobile/wallet-adapter-mobile": "^2.2.2",
     "@solana/wallet-adapter-base": "^0.9.27",
     "@solana/wallet-adapter-react": "^0.15.39",
@@ -44,6 +45,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
+    "pino-pretty": "13.0.0",
     "tailwindcss": "^4",
     "typescript": "^5",
     "typescript-eslint": "^8.29.0"
