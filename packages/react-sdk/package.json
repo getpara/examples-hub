@@ -6,8 +6,10 @@
   },
   "dependencies": {
     "@getpara/cosmos-wallet-connectors": "2.0.0-alpha.34",
+    "@getpara/cosmjs-v0-integration": "2.0.0-alpha.34",
     "@getpara/evm-wallet-connectors": "2.0.0-alpha.34",
     "@getpara/react-sdk-lite": "2.0.0-alpha.34",
+    "@getpara/solana-signers-v2-integration": "2.0.0-alpha.34",
     "@getpara/solana-wallet-connectors": "2.0.0-alpha.34",
     "@getpara/viem-v2-integration": "2.0.0-alpha.34"
   },
@@ -21,7 +23,13 @@
     "./styles.css": "./dist/css/modal.css",
     "./evm": "./dist/evm/index.js",
     "./evm/hooks": "./dist/evm/hooks/index.js",
-    "./evm/actions": "./dist/evm/actions/index.js"
+    "./evm/actions": "./dist/evm/actions/index.js",
+    "./cosmos": "./dist/cosmos/index.js",
+    "./cosmos/hooks": "./dist/cosmos/hooks/index.js",
+    "./cosmos/actions": "./dist/cosmos/actions/index.js",
+    "./solana": "./dist/solana/index.js",
+    "./solana/hooks": "./dist/solana/hooks/index.js",
+    "./solana/actions": "./dist/solana/actions/index.js"
   },
   "files": [
     "dist",

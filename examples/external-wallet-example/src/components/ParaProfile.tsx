@@ -1,10 +1,16 @@
 import { CpslButton, CpslInput, CpslText } from '@getpara/react-components';
 import { Card, OverflowText, ProfileInnerContainer } from './common';
 import { useAccount, useClient, useWallet } from '@getpara/react-sdk';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useViemClient } from '@getpara/react-sdk/evm';
+import { useCosmjsProtoSigner } from '@getpara/react-sdk/cosmos';
+import { useSolanaSigner } from '@getpara/react-sdk/solana';
 import { sepolia } from 'viem/chains';
 import { http } from 'viem';
+import { createSolanaRpc, getUtf8Encoder } from '@solana/kit';
+import bs58 from 'bs58';
+
+const paraRpc = createSolanaRpc('https://api.testnet.solana.com');
 
 export const ParaProfile = () => {
   const { embedded, external, connectionType, isConnected } = useAccount({ cosmos: { multiChain: true } });
@@ -15,19 +21,81 @@ export const ParaProfile = () => {
       transport: http('https://ethereum-sepolia-rpc.publicnode.com'),
     },
   });
+  const { protoSigner } = useCosmjsProtoSigner();
+  const { solanaSigner } = useSolanaSigner({ rpc: paraRpc });
   const paraClient = useClient();
 
   const [message, setMessage] = useState<string>('');
   const [messageSignature, setMessageSignature] = useState<string>();
 
+  useEffect(() => {
+    setMessageSignature(undefined);
+  }, [wallet]);
+
   const handleSign = async () => {
-    if (!wallet || !message || !viemClient) {
+    if (!wallet || !wallet.address || !message) {
       return;
     }
 
-    const signatureRes = await viemClient.signMessage({ message });
+    switch (wallet.type) {
+      case 'EVM':
+        if (!viemClient) {
+          console.error('Viem client is not available');
+          return;
+        }
 
-    setMessageSignature(signatureRes);
+        const signatureRes = await viemClient.signMessage({ message });
+        setMessageSignature(signatureRes);
+        return;
+
+      case 'COSMOS':
+        if (!protoSigner) {
+          console.error('Proto signer is not available');
+          return;
+        }
+
+        // Create a simple sign doc for the message
+        const signDoc = {
+          bodyBytes: new TextEncoder().encode(
+            JSON.stringify({
+              messages: [],
+              memo: message,
+            }),
+          ),
+          authInfoBytes: new Uint8Array(0),
+          chainId: '',
+          accountNumber: BigInt(0),
+        };
+
+        const result = await protoSigner.signDirect(protoSigner.address, signDoc);
+
+        setMessageSignature(result.signature.signature);
+        return;
+
+      case 'SOLANA':
+        if (!solanaSigner) {
+          console.error('Solana signer is not available');
+          return;
+        }
+
+        // Convert message to bytes
+        const messageBytes = new Uint8Array(getUtf8Encoder().encode(message));
+
+        // Sign the message
+        const signatureResult = await solanaSigner.signMessages([{ content: messageBytes, signatures: {} }]);
+
+        // Get the signature
+        const signatureBytes = signatureResult[0][solanaSigner.address];
+        const signatureBase58 = bs58.encode(signatureBytes);
+
+        setMessageSignature(signatureBase58);
+
+        return;
+
+      default:
+        console.error('Unsupported wallet type');
+        return;
+    }
   };
 
   const embeddedConnected = isConnected && embedded?.isConnected && embedded?.wallets?.some(w => !w.isExternal);
