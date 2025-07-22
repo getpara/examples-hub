@@ -13,10 +13,10 @@ export const APP_DESCRIPTION =
   "This example demonstrates how to integrate Para as a custom wagmi connector in Reown AppKit.";
 export const chains = [mainnet, arbitrum, optimism, polygon, base] as const;
 
-export const projectId = process.env.NEXT_PUBLIC_PROJECT_ID;
+export const projectId = process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID;
 
 if (!projectId) {
-  throw new Error("NEXT_PUBLIC_PROJECT_ID is not set");
+  throw new Error("NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID is not set");
 }
 
 const queryClient = new QueryClient({

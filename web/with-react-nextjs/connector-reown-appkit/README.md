@@ -1,6 +1,7 @@
 # Connector Reown AppKit
 
-This example demonstrates how to integrate Para SDK with Reown AppKit and Wagmi in a Next.js application. It showcases how Para can be used as a custom Wagmi connector alongside Reown AppKit's comprehensive wallet connection interface.
+This example demonstrates how to integrate Para SDK with Reown AppKit and Wagmi in a Next.js application. It showcases
+how Para can be used as a custom Wagmi connector alongside Reown AppKit's comprehensive wallet connection interface.
 
 ## Setup
 
@@ -10,7 +11,7 @@ Create a `.env.local` file in the root directory:
 
 ```env
 NEXT_PUBLIC_PARA_API_KEY=your_para_api_key
-NEXT_PUBLIC_PROJECT_ID=your_reown_project_id
+NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID=your_reown_project_id
 ```
 
 ### Installation
