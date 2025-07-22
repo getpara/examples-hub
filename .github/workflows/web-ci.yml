@@ -27,32 +27,6 @@ on:
       - ".yarnrc.yml"
       - ".yarn/**"
 
-  push:
-    branches: [main]
-    paths:
-      - "web/**/src/**" # Source code changes
-      - "web/**/package.json" # Dependencies
-      - "web/**/tsconfig*.json" # TypeScript configuration
-      - "web/**/vite.config.*" # Vite configuration
-      - "web/**/next.config.*" # Next.js configuration
-      - "web/**/tailwind.config.*" # Tailwind configuration
-      - "web/**/postcss.config.*" # PostCSS configuration
-      - "web/**/*.ts" # TypeScript files
-      - "web/**/*.tsx" # React TypeScript files
-      - "web/**/*.js" # JavaScript files
-      - "web/**/*.jsx" # React JavaScript files
-      - "web/**/*.vue" # Vue files
-      - "web/**/*.svelte" # Svelte files
-      - "web/**/*.css" # CSS files
-      - "web/**/*.scss" # SCSS files
-      - "web/**/*.html" # HTML files
-      - ".github/workflows/web-ci.yml"
-      - ".env.ci.example"
-      - "package.json"
-      - "yarn.lock"
-      - ".yarnrc.yml"
-      - ".yarn/**"
-
   workflow_dispatch:
     inputs:
       skip_build:
@@ -172,24 +146,6 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: "yarn"
           cache-dependency-path: "**/yarn.lock"
-
-      - name: Cache Build Artifacts
-        uses: actions/cache@v4
-        with:
-          path: |
-            **/.next
-            **/dist
-            **/build
-            **/.vite
-            **/.nuxt
-          key:
-            build-artifacts-${{ runner.os }}-${{ matrix.project.name }}-${{ hashFiles(format('{0}/package.json',
-            matrix.project.path), format('{0}/src/**', matrix.project.path), format('{0}/**/*.ts', matrix.project.path),
-            format('{0}/**/*.tsx', matrix.project.path), format('{0}/**/*.js', matrix.project.path),
-            format('{0}/**/*.jsx', matrix.project.path), format('{0}/**/*.vue', matrix.project.path),
-            format('{0}/**/*.svelte', matrix.project.path)) }}
-          restore-keys: |
-            build-artifacts-${{ runner.os }}-${{ matrix.project.name }}-
 
       - name: Run Tests
         id: test
