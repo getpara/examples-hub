@@ -1,6 +1,32 @@
 import { generateStateHook } from './utils.js';
 
-export * from './core.js';
-export * from './useLinkAccount.js';
+export { useLinkAccount } from './useLinkAccount.js';
+export { useSignUpOrLogIn } from './useSignUpOrLogIn.js';
+export { useVerifyNewAccount } from './useVerifyNewAccount.js';
+export { useWaitForLogin } from './useWaitForLogin.js';
+export { useWaitForSignup } from './useWaitForSignup.js';
+export { useWaitForWalletCreation } from './useWaitForWalletCreation.js';
+export { useVerifyOAuth } from './useVerifyOAuth.js';
+export { useVerifyFarcaster } from './useVerifyFarcaster.js';
+export { useVerifyTelegram } from './useVerifyTelegram.js';
+export { useLoginExternalWallet } from './useLoginExternalWallet.js';
+export { useVerifyExternalWallet } from './useVerifyExternalWallet.js';
+export { useSetup2fa } from './useSetup2fa.js';
+export { useEnable2fa } from './useEnable2fa.js';
+export { useVerify2fa } from './useVerify2fa.js';
+export { useKeepSessionAlive } from './useKeepSessionAlive.js';
+export { useLogout } from './useLogout.js';
+export { useResendVerificationCode } from './useResendVerificationCode.js';
+export { useCreateWallet } from './useCreateWallet.js';
+export { useCreateWalletPerType } from './useCreateWalletPerType.js';
+export { useCreatePregenWallet } from './useCreatePregenWallet.js';
+export { useCreatePregenWalletPerType } from './useCreatePregenWalletPerType.js';
+export { useClaimPregenWallets } from './useClaimPregenWallets.js';
+export { useHasPregenWallet } from './useHasPregenWallet.js';
+export { useUpdatePregenWalletIdentifier } from './useUpdatePregenWalletIdentifier.js';
+export { useCreateGuestWallets } from './useCreateGuestWallets.js';
+export { useSignMessage } from './useSignMessage.js';
+export { useSignTransaction } from './useSignTransaction.js';
+export { useIssueJwt } from './useIssueJwt.js';
 
 export const useCreateGuestWalletsState = generateStateHook('createGuestWallets');

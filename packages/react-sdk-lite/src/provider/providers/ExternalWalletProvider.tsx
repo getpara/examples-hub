@@ -148,7 +148,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
   const para = useInternalClient();
   const { setSelectedWallet } = useWalletState();
   const { onNewAuthState } = useAuthActions();
-  const { mutateAsync: verifyExternalWallet } = useVerifyExternalWallet();
+  const { verifyExternalWalletAsync } = useVerifyExternalWallet();
 
   const [qrUri, setQrUri] = useState<string>();
   const [chainIdSwitchingTo, setChainIdSwitchingTo] = useState<string>();
@@ -377,7 +377,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
     }
 
     try {
-      const d = await verifyExternalWallet(verifyExternalWalletParams);
+      const d = await verifyExternalWalletAsync(verifyExternalWalletParams);
       if (wallet && externalWalletsWithFullAuth?.includes(wallet.name?.toUpperCase() as TExternalWallet)) {
         await onNewAuthState(d);
       } else {

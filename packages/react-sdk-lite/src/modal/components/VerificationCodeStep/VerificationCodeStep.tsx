@@ -144,7 +144,7 @@ export const VerificationCode = ({ authInfo, onResend, onSubmit, status, error }
 
 export const VerificationCodeStep = () => {
   const { verifyNewAccount, verifyNewAccountStatus, verifyNewAccountError } = useAuthActions();
-  const { mutateAsync: resendVerificationCode } = useResendVerificationCode();
+  const { resendVerificationCodeAsync } = useResendVerificationCode();
 
   const para = useInternalClient();
 
@@ -158,7 +158,7 @@ export const VerificationCodeStep = () => {
         authInfo={para.authInfo as AuthInfo<'email' | 'phone'>}
         onSubmit={verifyNewAccount}
         onResend={() => {
-          resendVerificationCode({ type: 'SIGNUP' });
+          resendVerificationCodeAsync({ type: 'SIGNUP' });
         }}
         status={verifyNewAccountStatus}
         error={verifyNewAccountError}

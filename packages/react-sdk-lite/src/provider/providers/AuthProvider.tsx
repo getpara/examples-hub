@@ -118,21 +118,21 @@ export function AuthProvider({
   const goBack = useGoBack();
   const { isConnected } = useAccount();
 
-  const { mutate: mutateSignUpOrLogIn, isPending: isSignUpOrLogInPending } = useSignUpOrLogIn();
+  const { signUpOrLogIn: mutateSignUpOrLogIn, isPending: isSignUpOrLogInPending } = useSignUpOrLogIn();
   const {
-    mutate: mutateVerifyNewAccount,
+    verifyNewAccount: mutateVerifyNewAccount,
     status: verifyNewAccountStatus,
     error: verifyNewAccountError,
   } = useVerifyNewAccount();
-  const { mutate: mutateVerifyOAuth } = useVerifyOAuth();
-  const { mutate: mutateVerifyFarcaster } = useVerifyFarcaster();
-  const { mutate: mutateVerifyTelegram, status: verifyTelegramStatus } = useVerifyTelegram();
-  const { mutate: mutateWaitForLogin } = useWaitForLogin();
-  const { mutate: mutateWaitForSignup } = useWaitForSignup();
-  const { mutateAsync: mutateAsyncWaitForWalletCreation } = useWaitForWalletCreation();
-  const { mutate: mutateSetup2fa, isPending: isSetup2faPending } = useSetup2fa();
-  const { mutate: mutateCreateGuestWallets, isPending: isCreateGuestWalletsPending } = useCreateGuestWallets();
-  const { mutate: mutateLogout } = useLogout();
+  const { verifyOAuth: mutateVerifyOAuth } = useVerifyOAuth();
+  const { verifyFarcaster: mutateVerifyFarcaster } = useVerifyFarcaster();
+  const { verifyTelegram: mutateVerifyTelegram, status: verifyTelegramStatus } = useVerifyTelegram();
+  const { waitForLogin: mutateWaitForLogin } = useWaitForLogin();
+  const { waitForSignup: mutateWaitForSignup } = useWaitForSignup();
+  const { waitForWalletCreationAsync: mutateAsyncWaitForWalletCreation } = useWaitForWalletCreation();
+  const { setup2fa: mutateSetup2fa, isPending: isSetup2faPending } = useSetup2fa();
+  const { createGuestWallets: mutateCreateGuestWallets, isPending: isCreateGuestWalletsPending } = useCreateGuestWallets();
+  const { logout: mutateLogout } = useLogout();
   const { data: biometricHints } = useFormattedBiometricHints();
 
   const [sessionLookupId, setSessionLookupId] = useState<string | undefined>(undefined);

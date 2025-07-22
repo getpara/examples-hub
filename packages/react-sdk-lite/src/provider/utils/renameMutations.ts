@@ -1,28 +1,35 @@
-import { CoreMethodName, CoreMethodParams, CoreMethodResponse, CoreMethods } from '@getpara/web-sdk';
-import { DefaultError, UseMutationResult } from '@tanstack/react-query';
-import { CoreMethodMutationHook } from '../types/utils.js';
+import { DefaultError, UseMutateAsyncFunction, UseMutateFunction, UseMutationResult } from '@tanstack/react-query';
+import { Compute } from '../types/utils.js';
+
+// Utility type to omit mutate and mutateAsync, and add custom keys
+type RenamedMutationResult<TData, TError, TVariables, TContext, TName extends string> = Omit<
+  UseMutationResult<TData, TError, TVariables, TContext>,
+  'mutate' | 'mutateAsync'
+> & {
+  [K in TName]: UseMutateFunction<TData, TError, TVariables, TContext>;
+} & {
+  [K in `${TName}Async`]: UseMutateAsyncFunction<TData, TError, TVariables, TContext>;
+};
 
 export function renameMutations<
-  TResp = unknown,
   TData = unknown,
   TError = DefaultError,
   TVariables = void,
   TContext = unknown,
->(mutationObj: UseMutationResult<TData, TError, TVariables, TContext>, name: string): TResp {
+  TName extends string = string,
+>(
+  mutationObj: UseMutationResult<TData, TError, TVariables, TContext>,
+  name: TName,
+): Compute<RenamedMutationResult<TData, TError, TVariables, TContext, TName>> {
   const newMutations = {
     [name]: mutationObj.mutate,
     [`${name}Async`]: mutationObj.mutateAsync,
-  };
+  } as Record<string, unknown>;
+
+  const { mutate: _, mutateAsync: __, ...rest } = mutationObj;
 
   return {
     ...newMutations,
-    ...mutationObj,
-  } as TResp;
-}
-
-export function renameCoreMutations<method extends CoreMethodName & keyof CoreMethods>(
-  mutationObj: UseMutationResult<CoreMethodResponse<method>, Error, CoreMethodParams<method> | undefined, unknown>,
-  name: method,
-): CoreMethodMutationHook<method> {
-  return renameMutations(mutationObj, name);
+    ...rest,
+  } as RenamedMutationResult<TData, TError, TVariables, TContext, TName>;
 }

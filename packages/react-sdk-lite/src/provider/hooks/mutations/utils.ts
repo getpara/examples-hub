@@ -1,6 +1,5 @@
 import {
   CoreMethodName,
-  CoreMethodParams,
   CoreMethods,
   InternalAction,
   InternalMethodName,
@@ -8,50 +7,13 @@ import {
   InternalMethods,
 } from '@getpara/web-sdk';
 import {
-  CoreMethodMutationHook,
   CoreMethodMutation,
   CoreMethodMutationState,
   CoreMethodMutationStateHook,
   InternalMethodMutationHook,
 } from '../../types/utils.js';
-import { renameCoreMutations } from '../../utils/renameMutations.js';
-import { useClient } from '../utils/index.js';
 import { useMutation, useMutationState } from '@tanstack/react-query';
-import { CoreAction } from '../../actions/utils.js';
 import { useInternalClient } from '../utils/useInternalClient.js';
-
-export function generateCoreMutation<const method extends CoreMethodName & keyof CoreMethods>(
-  method: method,
-  action: CoreAction<method>,
-  {
-    delay,
-    defaultParams,
-  }: {
-    delay?: number;
-    defaultParams?: CoreMethodParams<method>;
-  } = {},
-): () => CoreMethodMutationHook<method> {
-  return () => {
-    const para = useClient();
-
-    const mutation = useMutation({
-      mutationKey: [method],
-      mutationFn: async (args?: CoreMethodParams<method>) => {
-        if (typeof delay === 'number') await new Promise(resolve => setTimeout(resolve, delay));
-
-        try {
-          const result = await action(para, (args ?? defaultParams)!);
-
-          return result;
-        } catch (error) {
-          throw error;
-        }
-      },
-    });
-
-    return renameCoreMutations<method>(mutation, method);
-  };
-}
 
 export function generateInternalMutation<const method extends InternalMethodName & keyof InternalMethods>(
   method: method,

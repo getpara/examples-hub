@@ -26,7 +26,7 @@ export function AccountProfileLink() {
       resetMutations,
     } = useAccountLinking(),
     { wallets } = useExternalWallets(),
-    { mutate: resendVerificationCode } = useResendVerificationCode(),
+    { resendVerificationCode } = useResendVerificationCode(),
     accountLinkType = accountLinkInProgress?.type,
     externalWalletProvider =
       accountLinkInProgress?.pendingWalletProvider ?? accountLinkInProgress?.externalWallet?.providerId,
