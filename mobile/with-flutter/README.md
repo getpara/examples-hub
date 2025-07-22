@@ -22,7 +22,6 @@ building your Flutter application with Para.
 
 ## Installation
 
-<<<<<<< HEAD
 > **Note**: Full passkey functionality on iOS requires a valid Apple Developer Account and a registered bundle ID
 > matching the Team ID provided to Para. For Android, passkey functionality requires a device with secure lock screen
 > and biometric authentication enabled, plus Google Play Services with an active Google account.
@@ -120,7 +119,7 @@ var authState = await para.signUpOrLogIn(auth: {'email': email});
 if (authState.stage == AuthStage.verify) {
 
   // Verify email with OTP
-  authState = await para.verifyNewAccount(verificationCode: code);
+  authState = await para.verifyOtp(otp: code);
 
   // Set up passkey
   await para.generatePasskey(identifier: email, biometricsId: signupState.passkeyId);
@@ -143,7 +142,7 @@ var authState = await para.signUpOrLogIn(auth: {'phone': phone});
 if (authState.stage == AuthStage.verify) {
 
   // Verify email with OTP
-  authState = await para.verifyNewAccount(verificationCode: code);
+  authState = await para.verifyOtp(otp: code);
 
   // Set up passkey
   await para.generatePasskey(identifier: phone, biometricsId: signupState.passkeyId);
@@ -237,53 +236,49 @@ The example demonstrates comprehensive wallet management capabilities:
 
 The application includes network-specific transaction signing examples:
 
-- **Solana Transactions**: Implementation using the `solana_web3` package:
+- **Solana Transactions**: Implementation using the `solana` package:
 
 ```dart
-// Create connection and get public key
-final connection = web3.Connection(web3.Cluster.devnet);
-final publicKey = web3.Pubkey.fromBase58(wallet.address!);
+// Create Solana client and get public keys
+final solanaClient = solana.SolanaClient(
+  rpcUrl: Uri.parse('https://api.devnet.solana.com'),
+  websocketUrl: Uri.parse('wss://api.devnet.solana.com'),
+);
+final fromPubkey = solana.Ed25519HDPublicKey.fromBase58(wallet.address!);
+final toPubkey = solana.Ed25519HDPublicKey.fromBase58(recipientAddress);
 
-// Construct transaction
-final transaction = web3.Transaction.v0(
-  payer: publicKey,
-  recentBlockhash: blockhash.blockhash,
-  instructions: [
-    programs.SystemProgram.transfer(
-      fromPubkey: publicKey,
-      toPubkey: web3.Pubkey.fromBase58(recipientAddress),
-      lamports: lamports,
-    ),
-  ],
+// Get recent blockhash
+final recentBlockhash = await solanaClient.rpcClient.getLatestBlockhash();
+
+// Create transfer instruction
+final transferInstruction = solana.SystemInstruction.transfer(
+  fundingAccount: fromPubkey,
+  recipientAccount: toPubkey,
+  lamports: lamports,
 );
 
-// Prepare for signing
-final message = transaction.serializeMessage().toList();
-final messageBase64 = base64Encode(message);
-
-// Sign with Para
-final result = await para.signMessage(
-  walletId: wallet.id!,
-  messageBase64: messageBase64,
+// Create and compile message
+final message = solana.Message(instructions: [transferInstruction]);
+final compiledMessage = message.compile(
+  recentBlockhash: recentBlockhash.value.blockhash,
+  feePayer: fromPubkey,
 );
 
-// Process signature
-if (result is SuccessfulSignatureResult) {
-  final signature = base64.decode(result.signature);
-  transaction.addSignature(publicKey, signature);
-}
+// Sign with Para SDK's Solana signer
+final signer = ParaSolanaWeb3Signer(
+  para: para,
+  solanaClient: solanaClient,
+  walletId: wallet.id,
+);
+
+final signedTx = await signer.signTransaction(compiledMessage);
+final txHash = await signer.sendTransaction(signedTx);
 ```
 
-> **Note**: While this example uses the `solana_web3` package, the signing process can be adapted for other Solana
-> packages. The core integration point remains Para's `signMessage` method.
+> **Note**: The Para SDK provides `ParaSolanaWeb3Signer` for seamless integration with the `solana` package,
+> handling transaction signing through Para's secure infrastructure.
 
 ---
-=======
-1.  Install Flutter dependencies:
-    ```bash
-    flutter pub get
-    ```
->>>>>>> main
 
 ## Running the Example
 

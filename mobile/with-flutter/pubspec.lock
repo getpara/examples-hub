@@ -18,7 +18,7 @@ packages:
     source: hosted
     version: "7.4.5"
   app_links:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: app_links
       sha256: "85ed8fc1d25a76475914fff28cc994653bd900bc2c26e4b57a49e097febb54ba"
@@ -113,14 +113,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.4.0"
-  circle_flags:
-    dependency: transitive
-    description:
-      name: circle_flags
-      sha256: "875cd64e607b46838ce429e2f7cc88c615f8514181d2d0f9e73de37ba3fb2f52"
-      url: "https://pub.dev"
-    source: hosted
-    version: "5.0.0"
   cli_config:
     dependency: transitive
     description:
@@ -153,6 +145,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.2"
+  country_code_picker:
+    dependency: "direct main"
+    description:
+      name: country_code_picker
+      sha256: ee216486da1db8e3c5688f9650c99472ab6a4025ed1ea0c5a54ae6063143d90d
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.3.0"
   coverage:
     dependency: transitive
     description:
@@ -286,14 +286,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  flutter_country_selector:
-    dependency: transitive
-    description:
-      name: flutter_country_selector
-      sha256: "814bddd55153cfbce221e94c67005412ae72364e04e4685f260e6335abc76fc9"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.11"
   flutter_dotenv:
     dependency: "direct main"
     description:
@@ -374,11 +366,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "5.0.0"
-  flutter_localizations:
-    dependency: transitive
-    description: flutter
-    source: sdk
-    version: "0.0.0"
   flutter_svg:
     dependency: "direct main"
     description:
@@ -485,14 +472,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.1.2"
-  intl:
-    dependency: transitive
-    description:
-      name: intl
-      sha256: d6f56758b7d3014a48af9701c085700aac781a92a87a62b1333b46d8879661cf
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.19.0"
   io:
     dependency: transitive
     description:
@@ -748,14 +727,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.1.0"
-  phone_form_field:
-    dependency: "direct main"
-    description:
-      name: phone_form_field
-      sha256: "14f3c6f0c6c2a49087d4f6c002157f359c3a37ede06fe4bb78ce89c162a305c7"
-      url: "https://pub.dev"
-    source: hosted
-    version: "9.2.5"
   phone_numbers_parser:
     dependency: transitive
     description:
@@ -844,6 +815,62 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.0"
+  shared_preferences:
+    dependency: "direct main"
+    description:
+      name: shared_preferences
+      sha256: "6e8bf70b7fef813df4e9a36f658ac46d107db4b4cfe1048b477d4e453a8159f5"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.5.3"
+  shared_preferences_android:
+    dependency: transitive
+    description:
+      name: shared_preferences_android
+      sha256: "20cbd561f743a342c76c151d6ddb93a9ce6005751e7aa458baad3858bfbfb6ac"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.4.10"
+  shared_preferences_foundation:
+    dependency: transitive
+    description:
+      name: shared_preferences_foundation
+      sha256: "6a52cfcdaeac77cad8c97b539ff688ccfc458c007b4db12be584fbe5c0e49e03"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.5.4"
+  shared_preferences_linux:
+    dependency: transitive
+    description:
+      name: shared_preferences_linux
+      sha256: "580abfd40f415611503cae30adf626e6656dfb2f0cee8f465ece7b6defb40f2f"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.4.1"
+  shared_preferences_platform_interface:
+    dependency: transitive
+    description:
+      name: shared_preferences_platform_interface
+      sha256: "57cbf196c486bc2cf1f02b85784932c6094376284b3ad5779d1b1c6c6a816b80"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.4.1"
+  shared_preferences_web:
+    dependency: transitive
+    description:
+      name: shared_preferences_web
+      sha256: c49bd060261c9a3f0ff445892695d6212ff603ef3115edbb448509d407600019
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.4.3"
+  shared_preferences_windows:
+    dependency: transitive
+    description:
+      name: shared_preferences_windows
+      sha256: "94ef0f72b2d71bc3e700e025db3710911bd51a71cefb65cc609dd0d9a982e3c1"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.4.1"
   shelf:
     dependency: transitive
     description:
@@ -922,7 +949,7 @@ packages:
     source: hosted
     version: "0.0.1"
   solana_web3:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: solana_web3
       sha256: "706b76a475e74dae5ffb523b66c0c51cc73f8e2a137bf418debaba096b42510c"

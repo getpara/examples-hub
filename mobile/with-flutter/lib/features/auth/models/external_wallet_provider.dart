@@ -1,0 +1,1 @@
+enum ExternalWalletProvider { phantom, metamask, other }
