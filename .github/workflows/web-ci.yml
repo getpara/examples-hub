@@ -76,7 +76,7 @@ env:
   NODE_OPTIONS: "--max-old-space-size=4096"
 
 jobs:
-  # Collect all projects in web folder
+  # Discover projects
   collect-projects:
     runs-on: ubuntu-latest
     outputs:
@@ -84,7 +84,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Collect projects
+      - name: Discover Projects
         id: collect
         run: |
           # Find all projects with package.json in web folder
@@ -121,14 +121,14 @@ jobs:
           echo "Found projects:"
           echo "$projects" | jq .
 
-  # Test all projects - combined job for efficiency
+  # Test projects
   test-project:
     needs: collect-projects
     runs-on: ubuntu-latest
     timeout-minutes: 15 # Per-job timeout to prevent hangs
     strategy:
       fail-fast: false
-      max-parallel: 4 # Limit concurrent jobs for resource management
+      max-parallel: 2 # Reduced to minimize storage usage
       matrix:
         project: ${{ fromJson(needs.collect-projects.outputs.projects) }}
 
@@ -152,7 +152,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Pre-job cleanup
+      - name: Clean Workspace
         run: |
           # Ensure we start with a clean workspace
           echo "🧹 Pre-job cleanup..."
@@ -173,7 +173,7 @@ jobs:
           cache: "yarn"
           cache-dependency-path: "**/yarn.lock"
 
-      - name: Cache build artifacts
+      - name: Cache Build Artifacts
         uses: actions/cache@v4
         with:
           path: |
@@ -191,7 +191,7 @@ jobs:
           restore-keys: |
             build-artifacts-${{ runner.os }}-${{ matrix.project.name }}-
 
-      - name: Test Project
+      - name: Run Tests
         id: test
         run: |
           cd ${{ matrix.project.path }}
@@ -206,6 +206,11 @@ jobs:
 
           # Create summary header for this project
           echo "### Testing: $PROJECT_NAME" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Show initial disk usage
+          echo "💾 Initial disk usage:" >> $GITHUB_STEP_SUMMARY
+          df -h | grep -E "Filesystem|/$" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
           # Install dependencies with optimizations
@@ -232,6 +237,10 @@ jobs:
               FAILED=true
               echo "- Lint: ❌ failed" >> $GITHUB_STEP_SUMMARY
             fi
+            
+            # Clean lint artifacts immediately
+            echo "🧹 Cleaning lint artifacts..."
+            rm -rf .eslintcache .stylelintcache
           else
             echo "- Lint: ⏭️ no script" >> $GITHUB_STEP_SUMMARY
           fi
@@ -252,6 +261,10 @@ jobs:
               BUILD_STATUS="⏭️ skipped (typecheck failed)"
               echo "- Build: ⏭️ skipped (typecheck failed)" >> $GITHUB_STEP_SUMMARY
             fi
+            
+            # Clean TypeScript artifacts immediately
+            echo "🧹 Cleaning TypeScript artifacts..."
+            rm -rf tsconfig.tsbuildinfo
           else
             echo "- Typecheck: ⏭️ no script" >> $GITHUB_STEP_SUMMARY
           fi
@@ -269,6 +282,11 @@ jobs:
                 FAILED=true
                 echo "- Build: ❌ failed" >> $GITHUB_STEP_SUMMARY
               fi
+              
+              # Clean build artifacts immediately after verification
+              echo "🧹 Cleaning build artifacts..."
+              rm -rf .next .nuxt .vite dist build out .turbo
+              rm -rf .parcel-cache .svelte-kit coverage
             else
               echo "- Build: ⏭️ no script" >> $GITHUB_STEP_SUMMARY
             fi
@@ -278,7 +296,6 @@ jobs:
           END_TIME=$(date +%s)
           DURATION=$((END_TIME - START_TIME))
           echo "- Duration: ${DURATION}s" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
 
           # Comprehensive cleanup to prevent disk space issues
           echo ""
@@ -296,24 +313,20 @@ jobs:
           rm -rf .yarn/build-state.yml
           rm -rf .yarn/install-state.gz
           
-          # Clean build artifacts
-          echo "  - Removing build artifacts..."
-          rm -rf .next
-          rm -rf .nuxt
-          rm -rf .vite
-          rm -rf dist
-          rm -rf build
-          rm -rf out
-          rm -rf .turbo
-          rm -rf .parcel-cache
-          rm -rf .svelte-kit
+          # Clean build artifacts (in case any were missed)
+          echo "  - Removing remaining build artifacts..."
+          rm -rf .next .nuxt .vite dist build out .turbo
+          rm -rf .parcel-cache .svelte-kit coverage
           
           # Clean other common artifacts
           echo "  - Removing other artifacts..."
-          rm -rf coverage
-          rm -rf .eslintcache
-          rm -rf .stylelintcache
+          rm -rf .eslintcache .stylelintcache tsconfig.tsbuildinfo
           rm -rf *.log
+          
+          # Show final disk usage for this project
+          echo "💾 Final disk usage after cleanup:" >> $GITHUB_STEP_SUMMARY
+          df -h | grep -E "Filesystem|/$" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
           
           echo "✅ Cleanup complete"
 
@@ -331,7 +344,7 @@ jobs:
             echo "failed=false" >> $GITHUB_OUTPUT
           fi
 
-  # E2E tests
+  # End-to-end tests
   e2e:
     needs: [collect-projects, test-project]
     if: |
@@ -368,7 +381,7 @@ jobs:
           cache: "yarn"
           cache-dependency-path: "**/yarn.lock"
 
-      - name: Install dependencies
+      - name: Install Dependencies
         run: |
           # Use local yarn cache to avoid conflicts
           export YARN_CACHE_FOLDER="$(pwd)/.yarn-cache-local"
@@ -409,7 +422,7 @@ jobs:
     needs: [test-project, e2e]
     runs-on: ubuntu-latest
     steps:
-      - name: Generate Summary
+      - name: Generate Report
         run: |
           echo "# 📊 Web CI Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
