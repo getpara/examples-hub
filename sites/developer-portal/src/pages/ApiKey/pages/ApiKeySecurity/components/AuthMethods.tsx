@@ -4,7 +4,7 @@ import { ConfigCard } from '../../../components/ConfigCard';
 import { SecurityForm } from '../hooks/useSecurityForm';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
-import { AUTH_METHODS, DOCS_LINK } from '../../../../../utils/constants';
+import { AUTH_METHODS, AUTH_METHODS_DOCS_LINK } from '../../../../../utils/constants';
 import { SwitchCard } from '../../../components/SwitchCard';
 
 export const AuthMethods = () => {
@@ -15,7 +15,7 @@ export const AuthMethods = () => {
       title="Passkeys and Passwords"
       subtitle="You can prompt users to create accounts using a passkey, a password, or let them choose. Enabling both the passkeys and passwords will allow the user to choose their method and Passkeys will be preferenced."
       ActionComponent={
-        <Link to={DOCS_LINK} className="para:flex para:gap-2 para:items-center">
+        <Link to={AUTH_METHODS_DOCS_LINK} className="para:flex para:gap-2 para:items-center">
           <Button variant="outline">
             Learn More
             <ArrowRight />

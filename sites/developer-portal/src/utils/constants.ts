@@ -29,6 +29,10 @@ export const ADVANCED_MODAL_THEME_DOCS_LINK =
   'https://docs.getpara.com/alpha/web/guides/customization/modal#advanced-theme-customization';
 export const TX_POPUPS_DOCS_LINK = 'https://docs.getpara.com/alpha/web/guides/permissions';
 export const MODAL_CUSTOMIZATION_DOCS_LINK = 'https://docs.getpara.com/alpha/web/guides/customization/modal';
+export const DOMAIN_SECURITY_DOCS_LINK =
+  'https://docs.getpara.com/v2/react/guides/customization/developer-portal-setup#domain-security';
+export const AUTH_METHODS_DOCS_LINK =
+  'https://docs.getpara.com/v2/react/guides/customization/developer-portal-security#authentication-methods';
 
 export const NEXT_EXTRA_DOCS_LINK = 'https://docs.getpara.com/alpha/web/troubleshooting/nextjs';
 export const VITE_EXTRA_DOCS_LINK = 'https://docs.getpara.com/alpha/web/troubleshooting/react-vite';

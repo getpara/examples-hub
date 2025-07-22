@@ -36,8 +36,8 @@ const formSchema = z.object({
     .nullable(),
   sessionMaxAge: z
     .number()
-    .min(300000, 'Sessions must be longer than or equal to 5 minutes')
-    .max(2_592_000_000, 'Sessions must be shorter than or equal to 30 days')
+    .min(5, 'Sessions must be longer than or equal to 5 minutes')
+    .max(43_200, 'Sessions must be shorter than or equal to 30 days')
     .optional()
     .nullable(),
   forceTransactionPopups: z.boolean().optional().nullable(),
@@ -62,7 +62,9 @@ export const useSecurityForm = () => {
       data: {
         ...updateData,
         ...(updateData.origins ? { origins: updateData.origins.split(',').map(v => v.trim()) } : { origins: null }),
-        ...(updateData.sessionMaxAge ? { sessionMaxAge: updateData.sessionMaxAge.toString(10) } : { sessionMaxAge: null }),
+        ...(updateData.sessionMaxAge
+          ? { sessionMaxAge: (updateData.sessionMaxAge * 60 * 1000).toString(10) } // convert minutes to ms
+          : { sessionMaxAge: null }),
       },
     });
   };

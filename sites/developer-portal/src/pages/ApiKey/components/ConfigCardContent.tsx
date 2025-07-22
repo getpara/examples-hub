@@ -12,18 +12,14 @@ export const ConfigCardContent = ({ title, subtitle, ActionComponent, children, 
   return (
     <div className="para:flex para:flex-col para:gap-4">
       {(title || subtitle || ActionComponent) && (
-        <div className="para:flex para:flex-col">
-          {(title || ActionComponent) && (
-            <div className="para:flex para:items-center para:justify-between para:gap-2">
-              <Typography className="para:text-xl para:font-medium">{title}</Typography>
-              {ActionComponent}
-            </div>
-          )}
-          {subtitle && (
+        <div className="para:flex para:justify-between para:gap-2 para:items-start">
+          <div className="para:flex para:flex-col">
+            <Typography className="para:text-xl para:font-medium">{title}</Typography>
             <Typography color="secondary" className="para:text-sm para:font-medium">
               {subtitle}
             </Typography>
-          )}
+          </div>
+          {ActionComponent}
         </div>
       )}
       <div className={cn('para:flex para:flex-col para:md:flex-row para:gap-4', className)}>{children}</div>
