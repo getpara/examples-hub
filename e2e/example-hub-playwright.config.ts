@@ -1,24 +1,19 @@
 import { defineConfig, devices } from "@playwright/test";
 
-/**
- * See https://playwright.dev/docs/test-configuration.
- */
 export default defineConfig({
-  timeout: 60000, // Reduced from 120s for faster feedback
+  timeout: 60000,
   testDir: `../e2e/tests/${process.env.E2E_APP_DIR}`,
-  fullyParallel: false, // Run tests sequentially to avoid conflicts
+  fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: 1, // Single worker ensures one test at a time
+  workers: 1,
   reporter: [["html"]],
   use: {
     baseURL: `http://localhost:${process.env.APP_PORT}`,
     headless: true,
     trace: "retain-on-failure",
     video: "retain-on-failure",
-    // Ensure complete test isolation
     storageState: { cookies: [], origins: [] },
-    // Clear browser cache and other state
     launchOptions: {
       args: [
         "--disable-background-timer-throttling",
@@ -42,12 +37,17 @@ export default defineConfig({
     },
   ],
 
-  webServer: [
-    {
-      command: `cd ../${process.env.E2E_APP_DIR} && ${process.env.APP_START_COMMAND}`,
-      url: `http://localhost:${process.env.APP_PORT}`,
-      reuseExistingServer: !process.env.CI,
-      timeout: 240 * 1000,
-    },
-  ],
+  webServer: process.env.APP_START_COMMAND
+    ? [
+        {
+          command: process.env.APP_START_COMMAND,
+          url: `http://localhost:${process.env.APP_PORT}`,
+          reuseExistingServer: !process.env.CI,
+          timeout: 240 * 1000,
+          stdout: "pipe",
+          stderr: "pipe",
+          cwd: process.env.E2E_APP_FULL_PATH,
+        },
+      ]
+    : undefined,
 });

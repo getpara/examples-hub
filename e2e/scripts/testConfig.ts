@@ -16,7 +16,7 @@ export interface CLIArgs {
   isSequential: boolean;
   isHeaded: boolean;
   isDiffOnly: boolean;
-  isWebOnly: boolean;  // Filter only web frameworks
+  isWebOnly: boolean;
   remainingArgs: string[];
 }
 
@@ -31,7 +31,6 @@ export interface TestEnvironment {
   environment: "BETA" | "SANDBOX";
 }
 
-// Get environment variables with fallback
 function getEnvVar(key: string, fallback?: string): string {
   const value = process.env[key];
   if (!value && !fallback) {
@@ -40,18 +39,16 @@ function getEnvVar(key: string, fallback?: string): string {
   return value || fallback || "";
 }
 
-// Get the test environment configuration
 export function getTestEnvironment(): TestEnvironment {
-  const environment = (getEnvVar("PARA_ENVIRONMENT", "BETA") as "BETA" | "SANDBOX");
+  const environment = getEnvVar("PARA_ENVIRONMENT", "BETA") as "BETA" | "SANDBOX";
   const apiKeyVar = environment === "BETA" ? "PARA_API_KEY_BETA" : "PARA_API_KEY_SANDBOX";
-  
+
   return {
     apiKey: getEnvVar(apiKeyVar),
     environment,
   };
 }
 
-// Get framework-specific environment variables
 export function getFrameworkEnvVars(framework: string, testEnv: TestEnvironment): Record<string, string> {
   const baseEnvVars: Record<string, string> = {
     PARA_ENVIRONMENT: testEnv.environment,
@@ -66,14 +63,14 @@ export function getFrameworkEnvVars(framework: string, testEnv: TestEnvironment)
         VITE_PARA_API_KEY: getEnvVar("VITE_PARA_API_KEY", testEnv.apiKey),
         VITE_PARA_ENVIRONMENT: testEnv.environment,
       };
-    
+
     case "react-nextjs":
       return {
         ...baseEnvVars,
         NEXT_PUBLIC_PARA_API_KEY: getEnvVar("NEXT_PUBLIC_PARA_API_KEY", testEnv.apiKey),
         NEXT_PUBLIC_PARA_ENVIRONMENT: testEnv.environment,
       };
-    
+
     case "node":
     case "deno":
     case "bun":
@@ -83,13 +80,12 @@ export function getFrameworkEnvVars(framework: string, testEnv: TestEnvironment)
         VITE_PARA_API_KEY: testEnv.apiKey,
         ENCRYPTION_KEY: getEnvVar("ENCRYPTION_KEY", crypto.randomBytes(24).toString("base64url").slice(0, 32)),
       };
-    
+
     default:
       return baseEnvVars;
   }
 }
 
-// Application configurations
 export const APP_CONFIGS: Record<string, TestAppConfig> = {
   "react-vite": {
     path: "web/with-react-vite",
@@ -122,14 +118,15 @@ export const APP_CONFIGS: Record<string, TestAppConfig> = {
   "node": {
     path: "server/with-node",
     framework: "node",
-    port: parseInt(getEnvVar("NODE_PORT", "3000")),
+    port: parseInt(getEnvVar("NODE_PORT", "8080")),
     startCommand: "yarn dev",
-    installCommand: "yarn install:all",
-    envVars: {},
+    installCommand: "yarn install",
+    envVars: {
+      PORT: getEnvVar("NODE_PORT", "8080"),
+    },
   },
 };
 
-// Test file patterns
 export const TEST_PATTERNS = {
   "email-password": "happyPath.email-password.spec.ts",
   "email-passkey": "happyPath.email-passkey.spec.ts",
@@ -138,7 +135,6 @@ export const TEST_PATTERNS = {
   "all": "*.spec.ts",
 };
 
-// Get test configuration
 export function getTestConfig(appName: string): TestAppConfig {
   const config = APP_CONFIGS[appName];
   if (!config) {
@@ -159,7 +155,6 @@ export function getTestConfig(appName: string): TestAppConfig {
   };
 }
 
-// Shared utilities for test execution
 let testFailed = false;
 
 export function setTestFailed(failed: boolean): void {
@@ -170,14 +165,13 @@ export function getTestFailed(): boolean {
   return testFailed;
 }
 
-// Utility function to execute shell commands
 export function runCommand(cmd: string, cwd?: string, env?: Record<string, string>): void {
   console.log(`Running: ${cmd} ${cwd ? `in ${cwd}` : ""}`);
   try {
-    execSync(cmd, { 
-      stdio: "inherit", 
-      cwd, 
-      env: { ...process.env, ...env } 
+    execSync(cmd, {
+      stdio: "inherit",
+      cwd,
+      env: { ...process.env, ...env },
     });
   } catch (error) {
     console.error(`Error executing: ${cmd}`, (error as Error).message);
@@ -186,7 +180,6 @@ export function runCommand(cmd: string, cwd?: string, env?: Record<string, strin
   }
 }
 
-// Async wrapper for runCommand to work with Promise.all
 export async function runCommandAsync(cmd: string, cwd?: string, env?: Record<string, string>): Promise<void> {
   return new Promise((resolve, reject) => {
     try {
@@ -198,47 +191,43 @@ export async function runCommandAsync(cmd: string, cwd?: string, env?: Record<st
   });
 }
 
-// Parse command line arguments
 export function parseCliArgs(args: string[]): CLIArgs {
-  const framework = args.find(arg => !arg.startsWith("--"));
+  const framework = args.find((arg) => !arg.startsWith("--"));
   const testType = args.find((arg, index) => {
     const prevArg = args[index - 1];
     return prevArg && !prevArg.startsWith("--") && !arg.startsWith("--");
   });
-  
+
   return {
     framework,
     testType,
-    isSequential: true, // Always run tests sequentially to avoid conflicts
+    isSequential: true,
     isHeaded: args.includes("--headed") || process.env.E2E_HEADED === "true",
     isDiffOnly: args.includes("--diff-only"),
     isWebOnly: args.includes("--web"),
-    remainingArgs: args.filter(arg => !["--sequential", "--headed", "--diff-only", "--web"].includes(arg))
+    remainingArgs: args.filter((arg) => !["--sequential", "--headed", "--diff-only", "--web"].includes(arg)),
   };
 }
 
-// Framework path mapping for change detection
 export const FRAMEWORK_PATHS: Record<string, string[]> = {
   "react-vite": ["web/with-react-vite/", "web/", "e2e/tests/web/with-react-vite/"],
   "react-nextjs": ["web/with-react-nextjs/", "web/", "e2e/tests/web/with-react-nextjs/"],
   "vue": ["web/with-vue-vite/", "web/", "e2e/tests/web/with-vue-vite/"],
   "svelte": ["web/with-svelte-vite/", "web/", "e2e/tests/web/with-svelte-vite/"],
-  "node": ["server/with-node/", "server/", "e2e/tests/server/with-node/"]
+  "node": ["server/with-node/", "server/", "e2e/tests/server/with-node/"],
 };
 
-// Function to detect changed frameworks using git diff
 export function detectChangedFrameworks(isDiffOnly: boolean): string[] {
   if (!isDiffOnly) {
-    return Object.keys(APP_CONFIGS); // Return all frameworks if not using diff mode
+    return Object.keys(APP_CONFIGS);
   }
 
   try {
-    // Get changed files since last commit
-    const gitDiff = execSync("git diff --name-only HEAD~1 HEAD", { 
+    const gitDiff = execSync("git diff --name-only HEAD~1 HEAD", {
       encoding: "utf8",
-      stdio: "pipe"
+      stdio: "pipe",
     }).trim();
-    
+
     if (!gitDiff) {
       console.log("🔍 No changes detected, running all frameworks");
       return Object.keys(APP_CONFIGS);
@@ -247,21 +236,17 @@ export function detectChangedFrameworks(isDiffOnly: boolean): string[] {
     const changedFiles = gitDiff.split("\n");
     const changedFrameworks = new Set<string>();
 
-    // Check which frameworks have changed files
     for (const [framework, paths] of Object.entries(FRAMEWORK_PATHS)) {
-      const hasChanges = changedFiles.some(file => 
-        paths.some(frameworkPath => file.startsWith(frameworkPath))
-      );
-      
+      const hasChanges = changedFiles.some((file) => paths.some((frameworkPath) => file.startsWith(frameworkPath)));
+
       if (hasChanges) {
         changedFrameworks.add(framework);
       }
     }
 
-    // Always include frameworks that match the filter
     const availableFrameworks = Object.keys(APP_CONFIGS);
-    const matchingFrameworks = Array.from(changedFrameworks).filter(framework =>
-      availableFrameworks.some(available => available.includes(framework))
+    const matchingFrameworks = Array.from(changedFrameworks).filter((framework) =>
+      availableFrameworks.some((available) => available.includes(framework))
     );
 
     if (matchingFrameworks.length === 0) {
@@ -277,20 +262,15 @@ export function detectChangedFrameworks(isDiffOnly: boolean): string[] {
   }
 }
 
-// Validate environment setup
 export function validateEnvironment(): void {
   try {
-    // Check for at least one API key
     const hasBetaKey = !!process.env.PARA_API_KEY_BETA;
     const hasSandboxKey = !!process.env.PARA_API_KEY_SANDBOX;
-    
+
     if (!hasBetaKey && !hasSandboxKey) {
-      throw new Error(
-        "No API keys found. Please set PARA_API_KEY_BETA or PARA_API_KEY_SANDBOX in your .env file."
-      );
+      throw new Error("No API keys found. Please set PARA_API_KEY_BETA or PARA_API_KEY_SANDBOX in your .env file.");
     }
 
-    // Validate current environment has corresponding key
     const testEnv = getTestEnvironment();
     console.log(`✓ Test environment validated: ${testEnv.environment}`);
   } catch (error) {

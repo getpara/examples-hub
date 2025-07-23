@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import * as crypto from 'node:crypto';
 
 test.describe('with-node server API', () => {
-  const baseURL = process.env.BASE_URL || 'http://localhost:3000';
+  const baseURL = process.env.BASE_URL || 'http://localhost:8080';
 
   test('happy path - create wallet and sign with viem', async ({ request }) => {
     const randomHexString = crypto.randomBytes(5).toString('hex');
