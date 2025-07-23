@@ -1372,8 +1372,8 @@ export abstract class ParaCore implements CoreInterface {
     return this.#authInfo;
   }
 
-  protected assertUserId(): string {
-    if (!this.userId || this.isGuestMode) {
+  protected assertUserId({ allowGuestMode = false }: { allowGuestMode?: boolean } = {}): string {
+    if (!this.userId || (!allowGuestMode && this.isGuestMode)) {
       throw new Error('no userId is set');
     }
 
@@ -2113,7 +2113,7 @@ export abstract class ParaCore implements CoreInterface {
         }
         break;
     }
-    const userId = this.assertUserId();
+    const userId = this.assertUserId({ allowGuestMode: true });
 
     if (type !== 'EMAIL' && type !== 'PHONE') {
       throw new Error('invalid auth type for verification code');
@@ -4066,7 +4066,7 @@ export abstract class ParaCore implements CoreInterface {
     ...urlOptions
   }: CoreMethodParams<'verifyNewAccount'>): CoreMethodResponse<'verifyNewAccount'> {
     this.assertIsAuthSet(['email', 'phone']);
-    const userId = this.assertUserId();
+    const userId = this.assertUserId({ allowGuestMode: true });
 
     const serverAuthState = await this.ctx.client.verifyNewAccount(userId, {
       verificationCode,
