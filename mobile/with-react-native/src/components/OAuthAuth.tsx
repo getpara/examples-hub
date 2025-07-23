@@ -66,9 +66,9 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess, onShowSecurityC
           } else {
             throw new Error("Unexpected authentication state");
           }
-        } catch (err) {
-          console.error(err);
-          setError(err instanceof Error ? err.message : "OAuth verification failed");
+        } catch (_err) {
+          console.error(_err);
+          setError(_err instanceof Error ? _err.message : "OAuth verification failed");
         } finally {
           setPendingOAuthProvider(null);
           setLoading(false);
@@ -113,7 +113,7 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess, onShowSecurityC
     // Get OAuth URL with app redirect scheme
     const oauthUrl = await para.getOAuthUrl({
       method: provider,
-      appScheme: APP_SCHEME, // Redirects to: {APP_SCHEME}://para?method=login
+      deeplinkUrl: `${APP_SCHEME}://para?method=login`, // Redirects to: {APP_SCHEME}://para?method=login
     });
 
     // Open in-app browser for OAuth
@@ -138,7 +138,7 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess, onShowSecurityC
         // Fallback to external browser
         await Linking.openURL(oauthUrl);
       }
-    } catch (err) {
+    } catch (_err) {
       setPendingOAuthProvider(null);
       setLoading(false);
       setError("Failed to open authentication window");

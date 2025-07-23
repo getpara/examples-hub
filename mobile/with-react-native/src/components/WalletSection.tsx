@@ -50,7 +50,7 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
           setStatus("");
         }
       }
-    } catch (err) {
+    } catch (_err) {
       // Handle error by creating new wallet
       try {
         setStatus("Creating new EVM wallet...");
