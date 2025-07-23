@@ -245,7 +245,8 @@ export const AuthenticationConfigurator: React.FC = () => {
       const hasCosmosNetwork = networksConfig.networks?.includes('COSMOS');
 
       const shouldInclude =
-        (isEvmWallet && hasEthereumNetwork) || (isSolWallet && hasSolanaNetwork) || (isCosmosWallet && hasCosmosNetwork);
+        wallet !== 'FARCASTER' &&
+        ((isEvmWallet && hasEthereumNetwork) || (isSolWallet && hasSolanaNetwork) || (isCosmosWallet && hasCosmosNetwork));
 
       return shouldInclude;
     });
