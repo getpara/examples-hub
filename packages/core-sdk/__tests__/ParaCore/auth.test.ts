@@ -72,6 +72,7 @@ import '../mocks/mockCryptographyUtils.js';
 import _ from 'lodash';
 import { faker } from '@faker-js/faker';
 import { EXTERNAL_WALLET_CONNECTION_ONLY_USER_ID } from '../../src/constants.js';
+import { OAuthResponse } from '../../dist/types/index.js';
 
 const emailAuthInfo: AuthInfo<'email'> = {
   auth: { email: USER_EMAIL },
@@ -754,41 +755,60 @@ describe('ParaCore - authentication', () => {
 
     describe('oauth', () => {
       describe('verify', () => {
-        [false, true].forEach(withCallback => {
-          describe(withCallback ? 'with onOAuthUrl' : 'without onOAuthUrl', () => {
-            const prepare = async (method: Parameters<typeof para.verifyOAuth>[0]['method']) => {
+        [0, 1, 2].forEach(strategy => {
+          describe(['with onOAuthUrl', 'with onOAuthPopup', 'neither'][strategy], () => {
+            const prepare = async (method: Parameters<typeof para.verifyOAuth>[0]['method']): Promise<OAuthResponse> => {
               let url: URL, authState: AuthState;
-              if (withCallback) {
-                const onOAuthUrl = vi.fn();
+              switch (strategy) {
+                case 0:
+                  {
+                    const onOAuthUrl = vi.fn();
 
-                authState = await para.verifyOAuth({
-                  method,
-                  onOAuthUrl,
-                });
+                    authState = await para.verifyOAuth({
+                      method,
+                      onOAuthUrl,
+                    });
 
-                expect(onOAuthUrl).toHaveBeenCalledOnce();
-                expect(onOAuthUrl).toHaveBeenCalledWith(expect.stringContaining(''));
+                    expect(onOAuthUrl).toHaveBeenCalledOnce();
+                    expect(onOAuthUrl).toHaveBeenCalledWith(expect.stringContaining(''));
 
-                const oAuthUrl = onOAuthUrl.mock.calls[0][0];
-                url = new URL(oAuthUrl);
-              } else {
-                const oAuthUrl = await para.getOAuthUrl({ method });
+                    const oAuthUrl = onOAuthUrl.mock.calls[0][0];
+                    url = new URL(oAuthUrl);
+                  }
+                  break;
+                case 1:
+                  {
+                    const onOAuthPopup = vi.fn();
 
-                authState = await para.verifyOAuth({ method });
+                    authState = await para.verifyOAuth({
+                      method,
+                      onOAuthPopup,
+                    });
+                  }
+                  break;
+                case 2:
+                  {
+                    const oAuthUrl = await para.getOAuthUrl({ method });
 
-                url = new URL(oAuthUrl);
+                    authState = await para.verifyOAuth({ method });
+
+                    url = new URL(oAuthUrl);
+                  }
+                  break;
               }
 
-              expect(url.origin).toEqual('http://localhost:8080');
-              expect(url.pathname).toEqual(`/auth/${method}`);
-              expectSearchParams(url, {
-                apiKey: PARTNER.apiKey,
-                sessionLookupId: SESSION_LOOKUP_ID,
-              });
+              if (url) {
+                expect(url.origin).toEqual('http://localhost:8080');
+                expect(url.pathname).toEqual(`/auth/${method}`);
+                expectSearchParams(url, {
+                  apiKey: PARTNER.apiKey,
+                  sessionLookupId: SESSION_LOOKUP_ID,
+                });
+              }
 
               testAuthInfo(para, emailAuthInfo);
 
-              return authState;
+              return authState as OAuthResponse;
             };
 
             ['GOOGLE', 'APPLE', 'FACEBOOK', 'DISCORD', 'TWITTER'].forEach(method => {
@@ -1003,7 +1023,7 @@ describe('ParaCore - authentication', () => {
     it('logout', async () => {
       const { address, type, provider } = EXTERNAL_WALLET;
 
-      await para.loginExternalWallet({ externalWallet: { address, type, provider } });
+      await para.loginExternalWallet({ externalWallet: { partnerId: PARTNER.id, address, type, provider } });
 
       await para.logout();
 

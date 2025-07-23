@@ -144,11 +144,21 @@ export type OAuthParams = OAuthUrlParams &
      * A function returning a boolean, indicating whether the OAuth process should be cancelled.
      */
     isCanceled?: () => boolean;
+
     /**
      * A callback function that will be invoked with the OAuth URL when it is available.
      * For example, you can use this to open the URL in a new window or tab.
+     *
+     * You should pass one of `onOAuthUrl` or `onOAuthPopup`, not both.
      */
     onOAuthUrl?: (url: string) => void;
+    /**
+     * A callback function that will be invoked with the OAuth popup window when it is available.
+     * If supplied, a window will automatically be opened for you if running on an applicable platform.
+     *
+     * You should pass one of `onOAuthUrl` or `onOAuthPopup`, not both.
+     */
+    onOAuthPopup?: (popup: Window) => void;
   };
 
 export type AuthStateBaseParams = WithCustomTheme & WithUseShortUrls;

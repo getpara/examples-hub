@@ -120,79 +120,86 @@ describe('account linking', () => {
             return;
           }
 
-          it(isConflict ? 'throws error when conflict' : 'succeeds', async () => {
-            const accountLinkInProgress = await para.linkAccount(args!);
-
-            mockVerifyLink.mockResolvedValueOnce(isConflict ? { isConflict: true } : { accounts: [] });
-
-            let verify,
-              expectParams = {};
-            switch (type) {
-              case 'EMAIL':
-              case 'PHONE':
-                {
-                  verify = para.verifyEmailOrPhoneLink({
-                    verificationCode: VERIFICATION_CODE,
-                  });
-                  expectParams = {
-                    verificationCode: VERIFICATION_CODE,
-                  };
-                }
-                break;
-              case 'TELEGRAM':
-                {
-                  verify = para.verifyTelegramLink({
-                    telegramAuthResponse: USER_TELEGRAM_AUTH_OBJECT,
-                  });
-                  expectParams = {
-                    telegramAuthResponse: USER_TELEGRAM_AUTH_OBJECT,
-                  };
-                }
-                break;
-              case 'FARCASTER':
-                {
-                  verify = para.verifyFarcasterLink({
-                    onConnectUri: vi.fn(),
-                  });
-                }
-                break;
-              case 'EXTERNAL_WALLET':
-                {
-                  verify = para.verifyExternalWalletLink({
-                    signedMessage: 'asdf',
-                  });
-                  expectParams = {
-                    externalWallet: accountLinkInProgress.externalWallet!,
-                    signedMessage: 'asdf',
-                  };
-                }
-                break;
-              default:
-                verify = para.verifyOAuthLink({
-                  method: type === 'X' ? 'TWITTER' : type,
-                  onOAuthUrl: vi.fn(),
-                });
-
-                break;
+          [false, true].forEach(isPopup => {
+            if (isPopup && !OAUTH_METHODS.includes(type as unknown as any)) {
+              return;
             }
+            describe(isPopup ? 'with popup' : 'without popup', () => {
+              it(isConflict ? 'throws error when conflict' : 'succeeds', async () => {
+                const accountLinkInProgress = await para.linkAccount(args!);
 
-            switch (isConflict) {
-              case true:
-                await expect(verify).rejects.toThrow(AccountLinkError.Conflict);
+                mockVerifyLink.mockResolvedValueOnce(isConflict ? { isConflict: true } : { accounts: [] });
 
-                break;
-              case false:
-                await verify;
+                let verify,
+                  expectParams = {};
+                switch (type) {
+                  case 'EMAIL':
+                  case 'PHONE':
+                    {
+                      verify = para.verifyEmailOrPhoneLink({
+                        verificationCode: VERIFICATION_CODE,
+                      });
+                      expectParams = {
+                        verificationCode: VERIFICATION_CODE,
+                      };
+                    }
+                    break;
+                  case 'TELEGRAM':
+                    {
+                      verify = para.verifyTelegramLink({
+                        telegramAuthResponse: USER_TELEGRAM_AUTH_OBJECT,
+                      });
+                      expectParams = {
+                        telegramAuthResponse: USER_TELEGRAM_AUTH_OBJECT,
+                      };
+                    }
+                    break;
+                  case 'FARCASTER':
+                    {
+                      verify = para.verifyFarcasterLink({
+                        onConnectUri: vi.fn(),
+                      });
+                    }
+                    break;
+                  case 'EXTERNAL_WALLET':
+                    {
+                      verify = para.verifyExternalWalletLink({
+                        signedMessage: 'asdf',
+                      });
+                      expectParams = {
+                        externalWallet: accountLinkInProgress.externalWallet!,
+                        signedMessage: 'asdf',
+                      };
+                    }
+                    break;
+                  default:
+                    verify = para.verifyOAuthLink({
+                      method: type === 'X' ? 'TWITTER' : type,
+                      ...(isPopup ? { onOAuthPopup: vi.fn() } : { onOAuthUrl: vi.fn() }),
+                    });
 
-                expect(mockVerifyLink).toHaveBeenCalledWith({
-                  linkedAccountId: accountLinkInProgress.id,
-                  userId: para.userId,
-                  ...expectParams,
-                });
+                    break;
+                }
 
-                expect(para.accountLinkInProgress).toBeUndefined();
-                break;
-            }
+                switch (isConflict) {
+                  case true:
+                    await expect(verify).rejects.toThrow(AccountLinkError.Conflict);
+
+                    break;
+                  case false:
+                    await verify;
+
+                    expect(mockVerifyLink).toHaveBeenCalledWith({
+                      linkedAccountId: accountLinkInProgress.id,
+                      userId: para.userId,
+                      ...expectParams,
+                    });
+
+                    expect(para.accountLinkInProgress).toBeUndefined();
+                    break;
+                }
+              });
+            });
           });
         });
       });

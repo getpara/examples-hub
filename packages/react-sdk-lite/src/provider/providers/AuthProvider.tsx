@@ -1,5 +1,5 @@
 import { BiometricHints, useUserAgent } from '@getpara/react-common';
-import { createContext, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, PropsWithChildren, useCallback, useContext, useEffect, useMemo } from 'react';
 import { useModalStore } from '../../modal/stores/index.js';
 import { ModalStep } from '../../modal/utils/steps.js';
 import {
@@ -14,7 +14,6 @@ import {
   useSetup2fa,
   useLogout,
   useCreateGuestWallets,
-  useAccount,
 } from '../index.js';
 import { DEFAULTS } from '../../modal/constants/defaults.js';
 import { openPopup } from '../../modal/utils/openPopup.js';
@@ -56,7 +55,6 @@ type Value = {
   isCreateGuestWalletsPending: boolean;
   logout: () => void;
   biometricHints?: BiometricHints;
-  isOAuthReady?: boolean;
 };
 
 type Props = PropsWithChildren<{
@@ -116,7 +114,6 @@ export function AuthProvider({
   const authStepRoute = useModalStore(state => state.authStepRoute);
   const isIFrameReady = useModalStore(state => state.isIFrameReady);
   const goBack = useGoBack();
-  const { isConnected } = useAccount();
 
   const { signUpOrLogIn: mutateSignUpOrLogIn, isPending: isSignUpOrLogInPending } = useSignUpOrLogIn();
   const {
@@ -134,28 +131,6 @@ export function AuthProvider({
   const { createGuestWallets: mutateCreateGuestWallets, isPending: isCreateGuestWalletsPending } = useCreateGuestWallets();
   const { logout: mutateLogout } = useLogout();
   const { data: biometricHints } = useFormattedBiometricHints();
-
-  const [sessionLookupId, setSessionLookupId] = useState<string | undefined>(undefined);
-
-  // Setup OAuth session lookup ID if needed
-  useEffect(() => {
-    const setupOAuthSessionLookupId = async () => {
-      if (!para || isConnected) {
-        return;
-      }
-
-      const authStepsWithOAuth = [ModalStep.AUTH_MAIN, ModalStep.AUTH_MORE];
-
-      if (authStepsWithOAuth.includes(currentStep) && !sessionLookupId) {
-        setSessionLookupId(await para.prepareLogin());
-        return;
-      } else if (!authStepsWithOAuth.includes(currentStep) && sessionLookupId) {
-        setSessionLookupId(undefined);
-      }
-    };
-
-    setupOAuthSessionLookupId();
-  }, [isConnected, currentStep]);
 
   const goBackIfPopupClosedOnSteps = (steps: ModalStep[]) => {
     if (refs.popupWindow.current?.closed && (!refs.currentStep.current || steps.includes(refs.currentStep.current))) {
@@ -414,23 +389,14 @@ export function AuthProvider({
   };
 
   const verifyOAuth = async (method: CoreMethodParams<'verifyOAuth'>['method']) => {
-    if (!sessionLookupId) {
-      return;
-    }
-
     setStep(ModalStep.AWAITING_OAUTH);
-
-    const oAuthUrl = para.getOAuthUrlSync({ method, sessionLookupId });
-    refs.popupWindow.current = openPopup({
-      url: oAuthUrl,
-      target: `${method}AuthPopup`,
-      type: 'OAUTH',
-      current: refs.popupWindow.current,
-    });
 
     mutateVerifyOAuth(
       {
         method,
+        onOAuthPopup: oAuthPopup => {
+          refs.popupWindow.current = oAuthPopup;
+        },
         isCanceled: () => refs.popupWindow.current?.closed || cancelIfExitedSteps([ModalStep.AWAITING_OAUTH]),
         onPoll: () => {
           goBackIfPopupClosedOnSteps([ModalStep.AWAITING_OAUTH]);
@@ -595,7 +561,6 @@ export function AuthProvider({
       isCreateGuestWalletsPending,
       logout,
       biometricHints: biometricHints || undefined,
-      isOAuthReady: !!sessionLookupId,
     }),
     [
       presentSignupUi,
@@ -616,7 +581,6 @@ export function AuthProvider({
       isCreateGuestWalletsPending,
       logout,
       biometricHints,
-      sessionLookupId,
     ],
   );
 

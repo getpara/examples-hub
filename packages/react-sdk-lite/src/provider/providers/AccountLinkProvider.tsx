@@ -16,7 +16,7 @@ import {
   InternalMethodParams,
 } from '@getpara/web-sdk';
 import { useModalStore } from '../../modal/stores/index.js';
-import { ModalStep, openPopup } from '../../modal/index.js';
+import { ModalStep } from '../../modal/index.js';
 import { useGoBack } from '../../modal/hooks/useGoBack.js';
 import { useExternalWallets } from './ExternalWalletProvider.js';
 import { useInternalClient } from '../hooks/utils/useInternalClient.js';
@@ -333,13 +333,8 @@ export const AccountLinkProvider = ({ children }: PropsWithChildren) => {
       {
         method,
         isCanceled: () => !!refs.popupWindow.current?.closed,
-        onOAuthUrl: oAuthUrl => {
-          refs.popupWindow.current = openPopup({
-            url: oAuthUrl,
-            target: `${method}AuthPopup`,
-            type: 'OAUTH',
-            current: refs.popupWindow.current,
-          });
+        onOAuthPopup: oAuthPopup => {
+          refs.popupWindow.current = oAuthPopup;
         },
       },
       {

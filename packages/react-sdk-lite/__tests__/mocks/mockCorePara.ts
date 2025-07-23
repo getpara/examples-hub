@@ -87,6 +87,5 @@ export class MockPara extends ParaInternal {
   isReady = true;
 
   getOAuthURL = vi.fn().mockResolvedValue('https://example.com');
-  getOAuthUrlSync = vi.fn().mockResolvedValue('https://example.com');
   prepareLogin = vi.fn().mockResolvedValue('testId');
 }

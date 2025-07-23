@@ -2457,12 +2457,6 @@ export abstract class ParaCore implements CoreInterface {
     return this.#getOAuthUrl({ ...opts, sessionLookupId });
   }
 
-  getOAuthUrlSync(
-    opts: Omit<CoreMethodParams<'getOAuthUrl'>, 'sessionLookupId'> & { sessionLookupId: string },
-  ): Awaited<CoreMethodResponse<'getOAuthUrl'>> {
-    return this.#getOAuthUrl(opts);
-  }
-
   protected verifyOAuthProcess(
     _: InternalMethodParams<'verifyOAuthLink'> & { isLinkAccount: true },
   ): InternalMethodResponse<'verifyOAuthLink'>;
@@ -2485,14 +2479,24 @@ export abstract class ParaCore implements CoreInterface {
     onCancel,
     onPoll,
     onOAuthUrl,
+    onOAuthPopup,
     isLinkAccount,
     ...urlOptions
   }: { isLinkAccount: boolean } & (CoreMethodParams<'verifyOAuth'> | InternalMethodParams<'verifyOAuthLink'>)): Promise<
     AuthStateSignupOrLogin | LinkedAccounts
   > {
+    let popupWindow;
+    if (onOAuthPopup) {
+      try {
+        popupWindow = await this.platformUtils.openPopup('about:blank', { type: PopupType.OAUTH });
+      } catch (error) {
+        throw new Error(`Failed to open OAuth popup: ${error}`);
+      }
+    }
+
     let sessionLookupId, accountLinkInProgress;
 
-    if (onOAuthUrl) {
+    if (onOAuthUrl || onOAuthPopup) {
       if (isLinkAccount) {
         accountLinkInProgress = await this.#assertIsLinkingAccountOrStart(method);
         sessionLookupId = (await this.touchSession()).sessionLookupId;
@@ -2502,7 +2506,17 @@ export abstract class ParaCore implements CoreInterface {
 
       const oAuthUrl = await this.#getOAuthUrl({ method, appScheme, sessionLookupId, accountLinkInProgress });
 
-      onOAuthUrl(oAuthUrl);
+      switch (true) {
+        case !!onOAuthUrl: {
+          onOAuthUrl(oAuthUrl);
+          break;
+        }
+        case !!onOAuthPopup && !!popupWindow: {
+          popupWindow.location.href = oAuthUrl;
+          onOAuthPopup(popupWindow);
+          break;
+        }
+      }
     } else {
       ({ sessionLookupId } = await this.touchSession());
     }

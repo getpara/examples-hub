@@ -123,7 +123,7 @@ export class MockPlatformUtils implements PlatformUtils {
 
   disableProviderModal = false;
 
-  openPopup = vi.fn();
+  openPopup = vi.fn().mockResolvedValue({ location: {} });
 
   initializeWorker = mockInitializeWorker;
 }
