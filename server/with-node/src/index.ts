@@ -1,0 +1,45 @@
+import express, { Request, Response, NextFunction } from "express";
+import { configDotenv } from "dotenv";
+import { router } from "./routes";
+
+configDotenv();
+
+const app = express();
+
+const port: number = parseInt(process.env.PORT || "8080", 10);
+
+process.on("uncaughtException", (error: Error) => {
+  console.error("Uncaught Exception:", error);
+  process.exit(1);
+});
+
+process.on("unhandledRejection", (reason: unknown, promise: Promise<unknown>) => {
+  console.error("Unhandled Rejection at:", promise, "reason:", reason);
+  process.exit(1);
+});
+
+app.use(express.json());
+
+app.use(router);
+
+app.use((_req: Request, res: Response): void => {
+  if (!res.headersSent) {
+    res.status(404).json({ error: "Not Found" });
+  }
+});
+
+app.use((err: Error, _req: Request, res: Response, _next: NextFunction): void => {
+  console.error(err);
+  if (!res.headersSent) {
+    res.status(500).json({ error: err.message || "Internal Server Error" });
+  }
+});
+
+const server = app.listen(port, (): void => {
+  console.log(`Server is running on http://localhost:${port}`);
+});
+
+server.on("error", (error: Error) => {
+  console.error("Server error:", error);
+  process.exit(1);
+});

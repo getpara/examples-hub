@@ -10,7 +10,7 @@ on:
       create_pr:
         description: "Create pull request if updates found"
         type: boolean
-        default: false
+        default: true
 
   schedule:
     - cron: "0 2 * * *"
@@ -50,7 +50,7 @@ jobs:
           echo "🔍 Checking for available @getpara/* dependency updates..."
 
           # Always run check-only mode first to detect available updates
-          node scripts/update-para-dependencies.js --check-only > update_check.log 2>&1
+          npx tsx scripts/update-para-dependencies.ts --check-only > update_check.log 2>&1
 
           # Check if any updates are available by looking for the update summary
           if grep -q "📦 Package Updates:" update_check.log; then
@@ -128,7 +128,7 @@ jobs:
           echo "✅ Changes pushed to branch"
 
       - name: Create Pull Request
-        if: steps.commit_changes.outputs.committed == 'true' && inputs.create_pr && !inputs.dry_run
+        if: steps.commit_changes.outputs.committed == 'true' && (inputs.create_pr == true || (github.event_name == 'schedule' && inputs.create_pr != false)) && !inputs.dry_run
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -156,9 +156,12 @@ jobs:
 
             ---
             *This PR was created automatically by the GitHub Action workflow.*
+            
+            cc @jlm0
           branch: "automated-para-deps-update-${{ github.run_number }}"
           base: "2.0.0-alpha"
           delete-branch: true
+          reviewers: jlm0
 
       - name: Summary
         if: always()
