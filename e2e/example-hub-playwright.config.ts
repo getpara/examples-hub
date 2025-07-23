@@ -47,6 +47,7 @@ export default defineConfig({
           stdout: "pipe",
           stderr: "pipe",
           cwd: process.env.E2E_APP_FULL_PATH,
+          env: { ...process.env },
         },
       ]
     : undefined,
