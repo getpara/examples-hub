@@ -5,11 +5,9 @@ import { decrypt } from "../utils/encryption-utils.js";
 import { ParaSolanaWeb3Signer } from "@getpara/solana-web3.js-v1-integration";
 import { Connection, clusterApiUrl, Transaction, SystemProgram, LAMPORTS_PER_SOL } from "@solana/web3.js";
 
-// Environment variables
-const PARA_API_KEY = process.env.PARA_API_KEY;
-const PARA_ENVIRONMENT = (process.env.PARA_ENVIRONMENT as Environment) || Environment.BETA;
-
 export async function solanaPregenSignHandler(req: Request, res: Response): Promise<void> {
+  const PARA_API_KEY = process.env.PARA_API_KEY;
+  const PARA_ENVIRONMENT = (process.env.PARA_ENVIRONMENT as Environment) || Environment.BETA;
   try {
     const email = req.body.email as string | undefined;
 
@@ -61,13 +59,13 @@ export async function solanaPregenSignHandler(req: Request, res: Response): Prom
 
     res.status(200).json({
       success: true,
-      message: "Transaction signed using Solana-Web3 + Para (pre-generated wallet)"
+      message: "Transaction signed using Solana-Web3 + Para (pre-generated wallet)",
     });
   } catch (error) {
     console.error("Error in solanaPregenSignHandler:", error);
-    res.status(500).json({ 
-      success: false, 
-      message: error instanceof Error ? error.message : "Failed to sign transaction" 
+    res.status(500).json({
+      success: false,
+      message: error instanceof Error ? error.message : "Failed to sign transaction",
     });
   }
 }

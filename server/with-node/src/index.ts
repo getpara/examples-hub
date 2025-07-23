@@ -43,3 +43,29 @@ server.on("error", (error: Error) => {
   console.error("Server error:", error);
   process.exit(1);
 });
+
+// Graceful shutdown handlers
+const gracefulShutdown = (signal: string) => {
+  console.log(`\n${signal} received. Starting graceful shutdown...`);
+
+  server.close(() => {
+    console.log("HTTP server closed.");
+    process.exit(0);
+  });
+
+  // Force shutdown after 10 seconds
+  setTimeout(() => {
+    console.error("Could not close connections in time, forcefully shutting down");
+    process.exit(1);
+  }, 10000);
+};
+
+// Handle process termination signals
+process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
+process.on("SIGINT", () => gracefulShutdown("SIGINT"));
+
+// Handle nodemon restarts
+process.once("SIGUSR2", () => {
+  gracefulShutdown("SIGUSR2");
+  process.kill(process.pid, "SIGUSR2");
+});

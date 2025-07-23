@@ -6,10 +6,10 @@ import { ParaProtoSigner } from "@getpara/cosmjs-v0-integration";
 import { getKeyShareInDB } from "../db/keySharesDB.js";
 import { decrypt } from "../utils/encryption-utils.js";
 
-const PARA_API_KEY = process.env.PARA_API_KEY;
-const PARA_ENVIRONMENT = (process.env.PARA_ENVIRONMENT as Environment) || Environment.BETA;
-
 export async function cosmjsPregenSignHandler(req: Request, res: Response): Promise<void> {
+  const PARA_API_KEY = process.env.PARA_API_KEY;
+  const PARA_ENVIRONMENT = (process.env.PARA_ENVIRONMENT as Environment) || Environment.BETA;
+
   try {
     if (!PARA_API_KEY) {
       res.status(500).json({

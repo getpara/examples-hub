@@ -11,17 +11,15 @@ import { getKeyShareInDB } from "../db/keySharesDB.js";
 import { decrypt } from "../utils/encryption-utils.js";
 import { customSignMessage } from "../utils/signature-utils.js";
 
-const PARA_API_KEY = process.env.PARA_API_KEY;
-const PARA_ENVIRONMENT = (process.env.PARA_ENVIRONMENT as Environment) || Environment.BETA;
-const ZERODEV_PROJECT_ID = process.env.ZERODEV_PROJECT_ID;
-const ZERODEV_BUNDLER_RPC = process.env.ZERODEV_BUNDLER_RPC;
-const ZERODEV_PAYMASTER_RPC = process.env.ZERODEV_PAYMASTER_RPC;
-const ZERODEV_RPC_URL = process.env.ZERODEV_ARBITRUM_SEPOLIA_RPC;
-
-const EXAMPLE_CONTRACT_ADDRESS = "0x7920b6d8b07f0b9a3b96f238c64e022278db1419";
-const EXAMPLE_ABI = Example["contracts"]["contracts/Example.sol:Example"]["abi"];
-
 export async function zerodevPregenSignHandler(req: Request, res: Response): Promise<void> {
+  const PARA_API_KEY = process.env.PARA_API_KEY;
+  const PARA_ENVIRONMENT = (process.env.PARA_ENVIRONMENT as Environment) || Environment.BETA;
+  const ZERODEV_PROJECT_ID = process.env.ZERODEV_PROJECT_ID;
+  const ZERODEV_BUNDLER_RPC = process.env.ZERODEV_BUNDLER_RPC;
+  const ZERODEV_PAYMASTER_RPC = process.env.ZERODEV_PAYMASTER_RPC;
+  const ZERODEV_RPC_URL = process.env.ZERODEV_ARBITRUM_SEPOLIA_RPC;
+  const EXAMPLE_CONTRACT_ADDRESS = "0x7920b6d8b07f0b9a3b96f238c64e022278db1419";
+  const EXAMPLE_ABI = Example["contracts"]["contracts/Example.sol:Example"]["abi"];
   try {
     const email = req.body.email as string | undefined;
 

@@ -5,10 +5,9 @@ import { ethers } from "ethers";
 import { getKeyShareInDB } from "../db/keySharesDB.js";
 import { decrypt } from "../utils/encryption-utils.js";
 
-const PARA_API_KEY = process.env.PARA_API_KEY;
-const PARA_ENVIRONMENT = (process.env.PARA_ENVIRONMENT as Environment) || Environment.BETA;
-
 export async function ethersPregenSignHandler(req: Request, res: Response): Promise<void> {
+  const PARA_API_KEY = process.env.PARA_API_KEY;
+  const PARA_ENVIRONMENT = (process.env.PARA_ENVIRONMENT as Environment) || Environment.BETA;
   try {
     const email = req.body.email as string | undefined;
 

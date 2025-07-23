@@ -3,10 +3,9 @@ import { Para as ParaServer, Environment } from "@getpara/server-sdk";
 import { encrypt } from "../utils/encryption-utils.js";
 import { setKeyShareInDB } from "../db/keySharesDB.js";
 
-const PARA_API_KEY = process.env.PARA_API_KEY;
-const PARA_ENVIRONMENT = (process.env.PARA_ENVIRONMENT as Environment) || Environment.BETA;
-
 export async function createPregenWalletHandler(req: Request, res: Response): Promise<void> {
+  const PARA_API_KEY = process.env.PARA_API_KEY;
+  const PARA_ENVIRONMENT = (process.env.PARA_ENVIRONMENT as Environment) || Environment.BETA;
   try {
     const email = req.body.email as string | undefined;
 

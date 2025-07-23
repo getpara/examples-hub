@@ -3,7 +3,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc --project tsconfig.json",
-    "dev": "tsx watch src/index.ts",
+    "dev": "tsx watch --clear-screen=false src/index.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc --noEmit"

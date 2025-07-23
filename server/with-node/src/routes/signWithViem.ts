@@ -6,11 +6,9 @@ import { createParaAccount, createParaViemClient } from "@getpara/viem-v2-integr
 import { http, parseEther, parseGwei } from "viem";
 import { sepolia } from "viem/chains";
 
-// Environment variables
-const PARA_API_KEY = process.env.PARA_API_KEY;
-const PARA_ENVIRONMENT = (process.env.PARA_ENVIRONMENT as Environment) || Environment.BETA;
-
 export async function viemPregenSignHandler(req: Request, res: Response): Promise<void> {
+  const PARA_API_KEY = process.env.PARA_API_KEY;
+  const PARA_ENVIRONMENT = (process.env.PARA_ENVIRONMENT as Environment) || Environment.BETA;
   try {
     const email = req.body.email as string | undefined;
 
@@ -63,13 +61,13 @@ export async function viemPregenSignHandler(req: Request, res: Response): Promis
 
     res.status(200).json({
       success: true,
-      message: "Transaction signed using Viem + Para (pre-generated wallet)"
+      message: "Transaction signed using Viem + Para (pre-generated wallet)",
     });
   } catch (error) {
     console.error("Error in viemPregenSignHandler:", error);
-    res.status(500).json({ 
-      success: false, 
-      message: error instanceof Error ? error.message : "Failed to sign transaction" 
+    res.status(500).json({
+      success: false,
+      message: error instanceof Error ? error.message : "Failed to sign transaction",
     });
   }
 }

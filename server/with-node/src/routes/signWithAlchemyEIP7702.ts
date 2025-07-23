@@ -10,15 +10,14 @@ import { getKeyShareInDB } from "../db/keySharesDB";
 import { decrypt } from "../utils/encryption-utils";
 import { customSignAuthorization, customSignMessage } from "../utils/signature-utils.js";
 
-const EXAMPLE_CONTRACT_ADDRESS = "0x7920b6d8b07f0b9a3b96f238c64e022278db1419";
-const EXAMPLE_ABI = Example["contracts"]["contracts/Example.sol:Example"]["abi"];
-const PARA_API_KEY = process.env.PARA_API_KEY;
-const PARA_ENVIRONMENT = (process.env.PARA_ENVIRONMENT as Environment) || Environment.BETA;
-const ALCHEMY_API_KEY = process.env.ALCHEMY_API_KEY;
-const ALCHEMY_GAS_POLICY_ID = process.env.ALCHEMY_GAS_POLICY_ID;
-const ALCHEMY_RPC_URL = process.env.ALCHEMY_RPC_URL;
-
 export async function alchemyEip7702SignHandler(req: Request, res: Response): Promise<void> {
+  const EXAMPLE_CONTRACT_ADDRESS = "0x7920b6d8b07f0b9a3b96f238c64e022278db1419";
+  const EXAMPLE_ABI = Example["contracts"]["contracts/Example.sol:Example"]["abi"];
+  const PARA_API_KEY = process.env.PARA_API_KEY;
+  const PARA_ENVIRONMENT = (process.env.PARA_ENVIRONMENT as Environment) || Environment.BETA;
+  const ALCHEMY_API_KEY = process.env.ALCHEMY_API_KEY;
+  const ALCHEMY_GAS_POLICY_ID = process.env.ALCHEMY_GAS_POLICY_ID;
+  const ALCHEMY_RPC_URL = process.env.ALCHEMY_RPC_URL;
   try {
     if (!PARA_API_KEY || !ALCHEMY_API_KEY || !ALCHEMY_GAS_POLICY_ID || !ALCHEMY_RPC_URL) {
       res.status(500).json({
