@@ -8,8 +8,9 @@ import { arbitrumSepolia } from "viem/chains";
 import { createPublicClient, encodeFunctionData, http, parseGwei, LocalAccount } from "viem";
 import Example from "../contracts/Example.json";
 import { customSignAuthorization, customSignMessage } from "../utils/signature-utils.js";
+import { getKeyShareInDB } from "../db/keySharesDB.js";
+import { decrypt } from "../utils/encryption-utils.js";
 
-// Environment variables
 const PARA_API_KEY = process.env.PARA_API_KEY;
 const PARA_ENVIRONMENT = (process.env.PARA_ENVIRONMENT as Environment) || Environment.BETA;
 const ZERODEV_PROJECT_ID = process.env.ZERODEV_PROJECT_ID;
@@ -22,10 +23,10 @@ const EXAMPLE_ABI = Example["contracts"]["contracts/Example.sol:Example"]["abi"]
 
 export async function zerodevEip7702SignHandler(req: Request, res: Response): Promise<void> {
   try {
-    const session = req.body.session as string | undefined;
+    const email = req.body.email as string | undefined;
 
-    if (!session) {
-      res.status(400).json({ success: false, message: "Provide session in the request body" });
+    if (!email) {
+      res.status(400).json({ success: false, message: "Provide email in the request body" });
       return;
     }
 
@@ -39,7 +40,21 @@ export async function zerodevEip7702SignHandler(req: Request, res: Response): Pr
     }
 
     const para = new ParaServer(PARA_ENVIRONMENT, PARA_API_KEY);
-    await para.importSession(session);
+
+    const hasPregenWallet = await para.hasPregenWallet({ pregenId: { email } });
+    if (!hasPregenWallet) {
+      res.status(400).json({ success: false, message: "No pre-generated wallet found for this email" });
+      return;
+    }
+
+    const keyShare = await getKeyShareInDB(email);
+    if (!keyShare) {
+      res.status(400).json({ success: false, message: "Key share not found" });
+      return;
+    }
+
+    const decryptedKeyShare = await decrypt(keyShare);
+    await para.setUserShare(decryptedKeyShare);
 
     const viemParaAccount: LocalAccount = createParaAccount(para);
     viemParaAccount.signMessage = async ({ message }) => customSignMessage(para, message);
@@ -101,7 +116,7 @@ export async function zerodevEip7702SignHandler(req: Request, res: Response): Pr
 
     res.status(200).json({
       success: true,
-      message: "User operation batch sent using ZeroDev EIP-7702 + Para (session-based) with viem signer",
+      message: "User operation batch sent using ZeroDev EIP-7702 + Para (pre-generated wallet) with viem signer",
     });
   } catch (error) {
     console.error("Error in zerodevEip7702SignHandler:", error);

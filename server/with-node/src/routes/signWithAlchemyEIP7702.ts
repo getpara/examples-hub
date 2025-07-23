@@ -6,6 +6,8 @@ import { createParaAccount, createParaViemClient } from "@getpara/viem-v2-integr
 import { Request, Response } from "express";
 import Example from "../contracts/Example.json";
 import { encodeFunctionData, http, LocalAccount, WalletClient } from "viem";
+import { getKeyShareInDB } from "../db/keySharesDB";
+import { decrypt } from "../utils/encryption-utils";
 import { customSignAuthorization, customSignMessage } from "../utils/signature-utils.js";
 
 const EXAMPLE_CONTRACT_ADDRESS = "0x7920b6d8b07f0b9a3b96f238c64e022278db1419";
@@ -26,26 +28,43 @@ export async function alchemyEip7702SignHandler(req: Request, res: Response): Pr
       return;
     }
 
-    const session = req.body.session as string | undefined;
+    const email = req.body.email as string | undefined;
 
-    if (!session) {
+    if (!email) {
       res.status(400).json({
         success: false,
-        message: "Missing session in request body",
+        message: "Missing email in request body",
       });
       return;
     }
 
     const para = new ParaServer(PARA_ENVIRONMENT, PARA_API_KEY);
 
-    await para.importSession(session);
+    const hasPregenWallet = await para.hasPregenWallet({ pregenId: { email } });
+
+    if (!hasPregenWallet) {
+      res.status(400).json({
+        success: false,
+        message: "No pre-generated wallet found for this email",
+      });
+      return;
+    }
+
+    const keyShare = await getKeyShareInDB(email);
+    if (!keyShare) {
+      res.status(400).json({
+        success: false,
+        message: "Key share not found for this email",
+      });
+      return;
+    }
+
+    const decryptedKeyShare = await decrypt(keyShare);
+    await para.setUserShare(decryptedKeyShare);
 
     const viemParaAccount: LocalAccount = createParaAccount(para);
-
     viemParaAccount.signMessage = async ({ message }) => customSignMessage(para, message);
-    viemParaAccount.signAuthorization = async (authorization) => {
-      return customSignAuthorization(para, authorization);
-    };
+    viemParaAccount.signAuthorization = async (authorization) => customSignAuthorization(para, authorization);
 
     const viemClient: WalletClient = createParaViemClient(para, {
       account: viemParaAccount,
@@ -84,7 +103,7 @@ export async function alchemyEip7702SignHandler(req: Request, res: Response): Pr
 
     res.status(200).json({
       success: true,
-      message: "User operation batch sent successfully using Alchemy + Para with EIP-7702",
+      message: "User operation batch sent successfully using Alchemy + Para with EIP-7702 (pre-generated wallet)",
     });
   } catch (error) {
     console.error("EIP-7702 transaction error:", error);

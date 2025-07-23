@@ -35,12 +35,24 @@ test.describe("with-node server API", () => {
       path: "/zerodev/pregen",
       expectedMessage: "User operation batch sent using ZeroDev + Para (pregen-based) with viem signer",
     },
+    {
+      path: "/alchemy/eip7702",
+      expectedMessage:
+        "User operation batch sent successfully using Alchemy + Para with EIP-7702 (pre-generated wallet)",
+    },
+    {
+      path: "/zerodev/eip7702",
+      expectedMessage:
+        "User operation batch sent using ZeroDev EIP-7702 + Para (pre-generated wallet) with viem signer",
+    },
   ];
 
   for (const route of signingRoutes) {
     test(`happy path - create wallet and sign with ${route.path.slice(1)}`, async ({ request }) => {
       const randomHexString = crypto.randomBytes(5).toString("hex");
       const email = `teste2e+${randomHexString}@test.usecapsule.com`;
+
+      // Step 1: Create wallet
       const createResponse = await request.post(`${baseURL}/wallets/pregen/create`, {
         data: { email },
       });
@@ -54,6 +66,7 @@ test.describe("with-node server API", () => {
         message: "Pre-generated wallets created successfully",
       });
 
+      // Step 2: Sign with the specific route
       const signResponse = await request.post(`${baseURL}${route.path}`, {
         data: { email },
       });
@@ -72,11 +85,13 @@ test.describe("with-node server API", () => {
   test("error case - wallet already exists", async ({ request }) => {
     const email = "teste2e+duplicate@test.usecapsule.com";
 
+    // First creation should succeed
     const firstResponse = await request.post(`${baseURL}/wallets/pregen/create`, {
       data: { email },
     });
     expect(firstResponse.status()).toBe(201);
 
+    // Second creation should fail with 409
     const secondResponse = await request.post(`${baseURL}/wallets/pregen/create`, {
       data: { email },
     });
