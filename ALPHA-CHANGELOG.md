@@ -1,3 +1,41 @@
+# Release (Wed Jul 23 2025)
+
+## Package Versions
+- @getpara/web-sdk@2.0.0-alpha.35
+- @getpara/wagmi-v2-integration@2.0.0-alpha.35
+- @getpara/wagmi-v2-connector@2.0.0-alpha.35
+- @getpara/viem-v2-integration@2.0.0-alpha.35
+- @getpara/viem-v1-integration@2.0.0-alpha.35
+- @getpara/user-management-client@2.0.0-alpha.35
+- @getpara/solana-web3.js-v1-integration@2.0.0-alpha.35
+- @getpara/solana-wallet-connectors@2.0.0-alpha.35
+- @getpara/solana-signers-v2-integration@2.0.0-alpha.35
+- @getpara/server-sdk@2.0.0-alpha.35
+- @getpara/react-sdk-lite@2.0.0-alpha.35
+- @getpara/react-sdk@2.0.0-alpha.35
+- @getpara/react-native-wallet@2.0.0-alpha.35
+- @getpara/react-components@2.0.0-alpha.35
+- @getpara/react-component-library@1.0.0-alpha.30
+- @getpara/react-common@2.0.0-alpha.35
+- @getpara/evm-wallet-connectors@2.0.0-alpha.35
+- @getpara/ethers-v6-integration@2.0.0-alpha.35
+- @getpara/ethers-v5-integration@2.0.0-alpha.35
+- @getpara/cosmos-wallet-connectors@2.0.0-alpha.35
+- @getpara/cosmjs-v0-integration@2.0.0-alpha.35
+- @getpara/core-sdk@2.0.0-alpha.35
+- @getpara/core-components@2.0.0-alpha.35
+
+### Features
+- Cosmos & Solana signer hooks (#1108) - 71f53f483
+
+### Fixes
+- Remove farcaster from modal builder (#1103) - 3466f2b4c
+- Issue with oauth process reversing https
+- Dev Portal - Security tab fixes (#1113) - a44aecb02
+
+### Chores
+- improve hooks typing (#1112) - b5ec88a06
+
 # Release (Mon Jul 21 2025)
 
 ## Package Versions
