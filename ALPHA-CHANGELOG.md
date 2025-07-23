@@ -1,6 +1,37 @@
 # Release (Wed Jul 23 2025)
 
 ## Package Versions
+- @getpara/web-sdk@2.0.0-alpha.36
+- @getpara/wagmi-v2-integration@2.0.0-alpha.36
+- @getpara/wagmi-v2-connector@2.0.0-alpha.36
+- @getpara/viem-v2-integration@2.0.0-alpha.36
+- @getpara/viem-v1-integration@2.0.0-alpha.36
+- @getpara/user-management-client@2.0.0-alpha.36
+- @getpara/solana-web3.js-v1-integration@2.0.0-alpha.36
+- @getpara/solana-wallet-connectors@2.0.0-alpha.36
+- @getpara/solana-signers-v2-integration@2.0.0-alpha.36
+- @getpara/server-sdk@2.0.0-alpha.36
+- @getpara/react-sdk-lite@2.0.0-alpha.36
+- @getpara/react-sdk@2.0.0-alpha.36
+- @getpara/react-native-wallet@2.0.0-alpha.36
+- @getpara/react-components@2.0.0-alpha.36
+- @getpara/react-component-library@1.0.0-alpha.31
+- @getpara/react-common@2.0.0-alpha.36
+- @getpara/evm-wallet-connectors@2.0.0-alpha.36
+- @getpara/ethers-v6-integration@2.0.0-alpha.36
+- @getpara/ethers-v5-integration@2.0.0-alpha.36
+- @getpara/cosmos-wallet-connectors@2.0.0-alpha.36
+- @getpara/cosmjs-v0-integration@2.0.0-alpha.36
+- @getpara/core-sdk@2.0.0-alpha.36
+- @getpara/core-components@2.0.0-alpha.36
+
+
+### Fixes
+- Issue with complete guest account setup (#1116) - 37affce27
+
+# Release (Wed Jul 23 2025)
+
+## Package Versions
 - @getpara/web-sdk@2.0.0-alpha.35
 - @getpara/wagmi-v2-integration@2.0.0-alpha.35
 - @getpara/wagmi-v2-connector@2.0.0-alpha.35
