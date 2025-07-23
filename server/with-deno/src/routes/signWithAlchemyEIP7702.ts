@@ -62,13 +62,14 @@ export const signWithAlchemyEIP7702: Handler = async (req: Request): Promise<Res
     // @ts-ignore - Deno npm module duplication issue with viem types
     const walletClientSigner = new WalletClientSigner(viemClient, "para");
 
-    // @ts-ignore - Deno npm module duplication issue with viem types
     const alchemyClient = await createModularAccountV2Client({
       mode: "7702",
       transport: alchemy({
         rpcUrl: ALCHEMY_RPC_URL,
       }),
+      // @ts-ignore - Deno npm module duplication issue with viem types
       chain: arbitrumSepolia,
+      // @ts-ignore - Deno npm module duplication issue with viem types
       signer: walletClientSigner,
       policyId: ALCHEMY_GAS_POLICY_ID,
     });

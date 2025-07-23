@@ -70,10 +70,11 @@ export const signWithAlchemy: Handler = async (req: Request): Promise<Response> 
     // @ts-ignore - Deno npm module duplication issue with viem types
     const walletClientSigner = new WalletClientSigner(viemClient, "para");
 
-    // @ts-ignore - Deno npm module duplication issue with viem types
     const alchemyClient = await createModularAccountAlchemyClient({
       apiKey: ALCHEMY_API_KEY,
+      // @ts-ignore - Deno npm module duplication issue with viem types
       chain: arbitrumSepolia,
+      // @ts-ignore - Deno npm module duplication issue with viem types
       signer: walletClientSigner,
       gasManagerConfig: {
         policyId: ALCHEMY_GAS_POLICY_ID,

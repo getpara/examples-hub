@@ -48,6 +48,7 @@ export const signWithEthers: Handler = async (req: Request): Promise<Response> =
     await para.setUserShare(decryptedKeyShare);
 
     const ethersProvider = new ethers.JsonRpcProvider("https://ethereum-sepolia-rpc.publicnode.com");
+    // @ts-ignore - Deno npm module duplication issue with ethers types
     const paraEthersSigner = new ParaEthersSigner(para, ethersProvider as ethers.Provider);
 
     const address = await paraEthersSigner.getAddress();

@@ -60,6 +60,7 @@ export const signWithViem: Handler = async (req: Request): Promise<Response> => 
       transport: http("https://ethereum-sepolia-rpc.publicnode.com"),
     });
 
+    // @ts-ignore - Deno npm module duplication issue with viem types
     const request = await viemClient.prepareTransactionRequest({
       account: viemParaAccount,
       to: viemParaAccount.address,
