@@ -63,6 +63,66 @@ function shouldUpdateVersion(currentVersion: string, latestVersion: string): boo
   return parseInt(latestAlpha) > parseInt(currentAlpha);
 }
 
+/**
+ * Discover all unique @getpara packages used across the repository
+ * @param dir - Directory to start traversing from
+ * @param currentDepth - Current depth of traversal
+ * @returns Set of unique @getpara package names
+ */
+function discoverGetParaPackages(dir: string, currentDepth = 0): Set<string> {
+  const packages = new Set<string>();
+  
+  // Stop if we've reached the maximum depth
+  if (currentDepth > MAX_DEPTH) {
+    return packages;
+  }
+
+  try {
+    // Read all items in the current directory
+    const items = fs.readdirSync(dir);
+
+    // Check if there's a package.json in this directory
+    if (items.includes("package.json")) {
+      const filePath = path.join(dir, "package.json");
+      try {
+        const packageData = JSON.parse(fs.readFileSync(filePath, "utf8"));
+        const sectionsToCheck = ["dependencies", "devDependencies", "peerDependencies", "optionalDependencies"];
+        
+        sectionsToCheck.forEach((section) => {
+          if (packageData[section]) {
+            Object.keys(packageData[section]).forEach((dep) => {
+              if (dep.startsWith("@getpara/")) {
+                packages.add(dep);
+              }
+            });
+          }
+        });
+      } catch (error) {
+        console.error(`Error reading ${filePath}:`, error.message);
+      }
+    }
+
+    // Continue traversing subdirectories
+    for (const item of items) {
+      const itemPath = path.join(dir, item);
+      // Skip node_modules and hidden directories
+      if (item === "node_modules" || item.startsWith(".")) {
+        continue;
+      }
+
+      // Check if it's a directory
+      if (fs.statSync(itemPath).isDirectory()) {
+        const subPackages = discoverGetParaPackages(itemPath, currentDepth + 1);
+        subPackages.forEach(pkg => packages.add(pkg));
+      }
+    }
+  } catch (error) {
+    console.error(`Error processing directory ${dir}:`, error.message);
+  }
+  
+  return packages;
+}
+
 // Traverse directories recursively up to MAX_DEPTH
 function traverseDirectories(dir: string, versionMap: Record<string, string>, currentDepth = 0, diffOnly = false): void {
   // Stop if we've reached the maximum depth
@@ -353,15 +413,28 @@ Examples:
   }
 
   try {
-    console.log("🔍 Fetching latest alpha versions for @getpara/* packages...");
-    const versionMap = await fetchAllLatestAlphaVersions();
+    console.log("🔍 Discovering @getpara/* packages in the repository...");
+    const discoveredPackages = discoverGetParaPackages(rootDir);
     
-    if (Object.keys(versionMap).length === 0) {
-      console.error("❌ No alpha versions found. Cannot proceed with updates.");
-      process.exit(1);
+    if (discoveredPackages.size === 0) {
+      console.log("ℹ️  No @getpara/* packages found in the repository.");
+      process.exit(0);
     }
     
-    console.log(`\n📦 Found ${Object.keys(versionMap).length} packages with alpha versions`);
+    console.log(`\n📦 Discovered ${discoveredPackages.size} unique @getpara/* packages:`);
+    const packageList = Array.from(discoveredPackages).sort();
+    packageList.forEach(pkg => console.log(`  - ${pkg}`));
+    
+    console.log("\n🔍 Fetching latest alpha versions for discovered packages...");
+    const versionMap = await fetchAllLatestAlphaVersions(packageList);
+    
+    if (Object.keys(versionMap).length === 0) {
+      console.error("❌ No alpha versions found for any of the discovered packages.");
+      console.log("ℹ️  This might mean the packages don't have alpha versions yet.");
+      process.exit(0);
+    }
+    
+    console.log(`\n📦 Found alpha versions for ${Object.keys(versionMap).length} packages`);
     
     if (mode === "--diff-only") {
       console.log("🚀 INCREMENTAL MODE - Only processing files with version differences");
@@ -417,7 +490,8 @@ export {
   shouldUpdateVersion,
   traverseDirectories,
   updatePackageJson,
-  generateCommitMessage
+  generateCommitMessage,
+  discoverGetParaPackages
 };
 
 // Run main if this script is executed directly

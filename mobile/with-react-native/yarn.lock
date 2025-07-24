@@ -1841,30 +1841,30 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@getpara/core-sdk@npm:2.0.0-alpha.27":
-  version: 2.0.0-alpha.27
-  resolution: "@getpara/core-sdk@npm:2.0.0-alpha.27"
+"@getpara/core-sdk@npm:2.0.0-alpha.36":
+  version: 2.0.0-alpha.36
+  resolution: "@getpara/core-sdk@npm:2.0.0-alpha.36"
   dependencies:
     "@celo/utils": "npm:^8.0.2"
     "@cosmjs/encoding": "npm:^0.32.4"
     "@ethereumjs/util": "npm:^9.1.0"
-    "@getpara/user-management-client": "npm:2.0.0-alpha.27"
+    "@getpara/user-management-client": "npm:2.0.0-alpha.36"
     "@noble/hashes": "npm:^1.5.0"
     base64url: "npm:^3.0.1"
     libphonenumber-js: "npm:^1.11.7"
     node-forge: "npm:^1.3.1"
     uuid: "npm:^11.1.0"
-  checksum: 10c0/97261cdbfa76f87cd7c86b3fc98ed362b8c528232fa36cb7ef49e51681198c3ce8b8fdf8239901c43a59f6cbe95a9bdd7a66b5378b16926befc0b1f0db5ec730
+  checksum: 10c0/27ebf6c6a802a8d41892339e0b62e03c81bea9a467e34d2d7fc9a9c8a1e8d08b7713ab070fcf14807d86211a5214324f04609e88c3a7cde67e023d86d58e92da
   languageName: node
   linkType: hard
 
-"@getpara/react-native-wallet@npm:2.0.0-alpha.27":
-  version: 2.0.0-alpha.27
-  resolution: "@getpara/react-native-wallet@npm:2.0.0-alpha.27"
+"@getpara/react-native-wallet@npm:2.0.0-alpha.36":
+  version: 2.0.0-alpha.36
+  resolution: "@getpara/react-native-wallet@npm:2.0.0-alpha.36"
   dependencies:
-    "@getpara/core-sdk": "npm:2.0.0-alpha.27"
-    "@getpara/user-management-client": "npm:2.0.0-alpha.27"
-    "@getpara/web-sdk": "npm:2.0.0-alpha.27"
+    "@getpara/core-sdk": "npm:2.0.0-alpha.36"
+    "@getpara/user-management-client": "npm:2.0.0-alpha.36"
+    "@getpara/web-sdk": "npm:2.0.0-alpha.36"
     "@peculiar/webcrypto": "npm:^1.5.0"
     "@ungap/structured-clone": "npm:1.3.0"
     node-forge: "npm:1.3.1"
@@ -1881,33 +1881,37 @@ __metadata:
     react-native-quick-base64: "*"
     react-native-quick-crypto: "*"
     readable-stream: "*"
-  checksum: 10c0/3e573d8f66b269595493f938490435c01344737cf3bb5f427d5a5c272daf1e3014723c195f5276b671f766627068cd060dcc5db088e5c456d4fa4e27d48a2999
+  checksum: 10c0/2ca1b6d9be893e02781991dd22f9868dc59f2c5dc74b74330565aa527828089a2fabf36a0cec463a9f06a88d3edf0bc7f1a9603710825b348b0be28db9b7765b
   languageName: node
   linkType: hard
 
-"@getpara/user-management-client@npm:2.0.0-alpha.27":
-  version: 2.0.0-alpha.27
-  resolution: "@getpara/user-management-client@npm:2.0.0-alpha.27"
+"@getpara/user-management-client@npm:2.0.0-alpha.36":
+  version: 2.0.0-alpha.36
+  resolution: "@getpara/user-management-client@npm:2.0.0-alpha.36"
   dependencies:
     axios: "npm:^1.8.4"
     libphonenumber-js: "npm:^1.11.7"
-  checksum: 10c0/daceb2fa8740f77e3299d44a31c979325c63b3da3562ff19f0c432029dbc2442de8e4602857da11eea20460dce88632003f0806806367ae7289db58bcc5d74b5
+  checksum: 10c0/86a48515a6b82ef1a1402e9fa836250448a7e8c3391df0a8ce449c71d2fba859a097a14d4e9cb7519a9e4c3996511033232dd88f7060654b6a7f65fdae69e053
   languageName: node
   linkType: hard
 
-"@getpara/web-sdk@npm:2.0.0-alpha.27":
-  version: 2.0.0-alpha.27
-  resolution: "@getpara/web-sdk@npm:2.0.0-alpha.27"
+"@getpara/web-sdk@npm:2.0.0-alpha.36":
+  version: 2.0.0-alpha.36
+  resolution: "@getpara/web-sdk@npm:2.0.0-alpha.36"
   dependencies:
-    "@getpara/core-sdk": "npm:2.0.0-alpha.27"
-    "@getpara/user-management-client": "npm:2.0.0-alpha.27"
-    "@sentry/browser": "npm:^9.1.0"
+    "@getpara/core-sdk": "npm:2.0.0-alpha.36"
+    "@getpara/user-management-client": "npm:2.0.0-alpha.36"
     base64url: "npm:^3.0.1"
     buffer: "npm:6.0.3"
     cbor-web: "npm:^9.0.2"
     node-forge: "npm:1.3.1"
     ua-parser-js: "npm:^2.0.2"
-  checksum: 10c0/070b58e4ded611c2614e15e29f5d47f38fc8332c7ab216b1dbc3141f0195f8409f340761d6170b8c3f101f43f75d6ef48c9109764afad6b3d71e681316eb57cb
+  peerDependencies:
+    "@farcaster/miniapp-sdk": ^0.1.2
+  peerDependenciesMeta:
+    "@farcaster/miniapp-sdk":
+      optional: true
+  checksum: 10c0/7ec2ccbffcdad244be0ea42b6fa24ab5665693eb06a9a57637accaafbf59cf8dd7b3402666a0adfba0f2c340c56204cf5875ce98661d1dd13b9b6f93b6c298e9
   languageName: node
   linkType: hard
 
@@ -2929,64 +2933,6 @@ __metadata:
     "@noble/hashes": "npm:~1.4.0"
     "@scure/base": "npm:~1.1.6"
   checksum: 10c0/1ae1545a7384a4d9e33e12d9e9f8824f29b0279eb175b0f0657c0a782c217920054f9a1d28eb316a417dfc6c4e0b700d6fbdc6da160670107426d52fcbe017a8
-  languageName: node
-  linkType: hard
-
-"@sentry-internal/browser-utils@npm:9.30.0":
-  version: 9.30.0
-  resolution: "@sentry-internal/browser-utils@npm:9.30.0"
-  dependencies:
-    "@sentry/core": "npm:9.30.0"
-  checksum: 10c0/d6d1cb63e0cf4956484fa511a154e4918179ab27cb9ef08297c5e5386417a1b6ca6e6521ac328311db736238f64aa12ccb347b0c2a335e61868f065dbc78ea5d
-  languageName: node
-  linkType: hard
-
-"@sentry-internal/feedback@npm:9.30.0":
-  version: 9.30.0
-  resolution: "@sentry-internal/feedback@npm:9.30.0"
-  dependencies:
-    "@sentry/core": "npm:9.30.0"
-  checksum: 10c0/956b6492164339e076204eb9fa1249a0b794655c78212c9dcbd61c2b19196919490428a3244d9b838724a85f5c853726e7e0bfca1cf332f300cbfe6ad21627d1
-  languageName: node
-  linkType: hard
-
-"@sentry-internal/replay-canvas@npm:9.30.0":
-  version: 9.30.0
-  resolution: "@sentry-internal/replay-canvas@npm:9.30.0"
-  dependencies:
-    "@sentry-internal/replay": "npm:9.30.0"
-    "@sentry/core": "npm:9.30.0"
-  checksum: 10c0/fc7071c283b929401d48ff730396fad7d6cd62937524d0dd6a39fe8b8490d113bebe260be24fa5f669ad008c107d0c822c982ea6c224943620e4888680c041ef
-  languageName: node
-  linkType: hard
-
-"@sentry-internal/replay@npm:9.30.0":
-  version: 9.30.0
-  resolution: "@sentry-internal/replay@npm:9.30.0"
-  dependencies:
-    "@sentry-internal/browser-utils": "npm:9.30.0"
-    "@sentry/core": "npm:9.30.0"
-  checksum: 10c0/bbcc278900897eb14af857eae8a91f691273483dfea7bf56c68b63f77e12712dd69bdc695ab02c57edd7498816bebe2f229a6e4b56dfea02f8cf9ae05c6554a0
-  languageName: node
-  linkType: hard
-
-"@sentry/browser@npm:^9.1.0":
-  version: 9.30.0
-  resolution: "@sentry/browser@npm:9.30.0"
-  dependencies:
-    "@sentry-internal/browser-utils": "npm:9.30.0"
-    "@sentry-internal/feedback": "npm:9.30.0"
-    "@sentry-internal/replay": "npm:9.30.0"
-    "@sentry-internal/replay-canvas": "npm:9.30.0"
-    "@sentry/core": "npm:9.30.0"
-  checksum: 10c0/cff5fc37e94860e24c896f88cbb8b9c50c5c9c6520cadc8f17fc3bd8a1601c1d57c456e0081c0d749555b1617079f02a75747221a3d39e997a812ac5553684ea
-  languageName: node
-  linkType: hard
-
-"@sentry/core@npm:9.30.0":
-  version: 9.30.0
-  resolution: "@sentry/core@npm:9.30.0"
-  checksum: 10c0/db9eb6fb93881be8c14d7f72c5144cefe36f12a94470f5c289cea0792c7746ecc5d33fd12169ddbfe6835e67d9a68e0c870ff1e040cba6d13eaef4db55186997
   languageName: node
   linkType: hard
 
@@ -4221,7 +4167,7 @@ __metadata:
     "@babel/runtime": "npm:^7.25.0"
     "@craftzdog/react-native-buffer": "npm:^6.1.0"
     "@eslint/js": "npm:^9.29.0"
-    "@getpara/react-native-wallet": "npm:2.0.0-alpha.27"
+    "@getpara/react-native-wallet": "npm:2.0.0-alpha.36"
     "@react-native-async-storage/async-storage": "npm:^2.2.0"
     "@react-native-community/cli": "npm:19.0.0"
     "@react-native-community/cli-platform-android": "npm:19.0.0"

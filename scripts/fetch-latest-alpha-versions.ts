@@ -74,29 +74,25 @@ async function fetchLatestAlphaVersion(packageName: string): Promise<string | nu
 }
 
 /**
- * Fetch latest alpha versions for all known @getpara packages
+ * Fetch latest alpha versions for specified @getpara packages
+ * @param packages - Array of package names to fetch versions for
  */
-async function fetchAllLatestAlphaVersions(): Promise<Record<string, string>> {
-  // Known @getpara packages (discovered from package.json analysis)
-  const getparaPackages = [
-    "@getpara/core-sdk",
-    "@getpara/react-sdk", 
-    "@getpara/web-sdk",
-    "@getpara/server-sdk",
-    "@getpara/user-management-client",
-    "@getpara/cosmos-wallet-connectors",
-    "@getpara/evm-wallet-connectors", 
-    "@getpara/solana-wallet-connectors",
-    "@getpara/graz",
-    "@getpara/cosmjs-v0-integration",
-    "@getpara/ethers-v5-integration",
-    "@getpara/ethers-v6-integration",
-    "@getpara/solana-web3.js-v1-integration",
-    "@getpara/viem-v1-integration",
-    "@getpara/viem-v2-integration"
-  ];
+async function fetchAllLatestAlphaVersions(packages?: string[]): Promise<Record<string, string>> {
+  // If no packages provided, return empty map (will be filled by dynamic discovery)
+  if (!packages || packages.length === 0) {
+    console.log("No packages specified for version fetching.");
+    return {};
+  }
   
-  console.log("Fetching latest alpha versions for @getpara packages...");
+  // Filter to only @getpara packages
+  const getparaPackages = packages.filter(pkg => pkg.startsWith('@getpara/'));
+  
+  if (getparaPackages.length === 0) {
+    console.log("No @getpara packages found in the provided list.");
+    return {};
+  }
+  
+  console.log(`Fetching latest alpha versions for ${getparaPackages.length} @getpara packages...`);
   console.log("=".repeat(60));
   
   const versionMap = {};
@@ -121,20 +117,24 @@ async function fetchAllLatestAlphaVersions(): Promise<Record<string, string>> {
 // Main execution
 async function main() {
   try {
-    const versionMap = await fetchAllLatestAlphaVersions();
+    // When run standalone, inform that package discovery is needed
+    console.warn("⚠️  This script now requires packages to be discovered dynamically.");
+    console.warn("   Run 'yarn deps:update' to automatically discover and update all @getpara packages.");
+    console.warn("   This standalone mode is deprecated.");
     
-    // Output as JSON for consumption by other scripts
-    if (process.argv.includes("--json")) {
-      console.log(JSON.stringify(versionMap, null, 2));
+    // For backward compatibility, we could accept packages via command line
+    const packages = process.argv.slice(2).filter(arg => !arg.startsWith('--'));
+    
+    if (packages.length > 0) {
+      const versionMap = await fetchAllLatestAlphaVersions(packages);
+      
+      // Output as JSON for consumption by other scripts
+      if (process.argv.includes("--json")) {
+        console.log(JSON.stringify(versionMap, null, 2));
+      }
+      
+      console.log(`\nFound alpha versions for ${Object.keys(versionMap).length} packages`);
     }
-    
-    // Exit with error if no versions found
-    if (Object.keys(versionMap).length === 0) {
-      console.error("No alpha versions found for any @getpara packages");
-      process.exit(1);
-    }
-    
-    console.log(`\nFound alpha versions for ${Object.keys(versionMap).length} packages`);
     
   } catch (error) {
     console.error("Error fetching alpha versions:", error.message);
