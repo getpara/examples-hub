@@ -1,3 +1,34 @@
+# Release (Thu Jul 24 2025)
+
+## Package Versions
+- @getpara/web-sdk@2.0.0-alpha.37
+- @getpara/wagmi-v2-integration@2.0.0-alpha.37
+- @getpara/wagmi-v2-connector@2.0.0-alpha.37
+- @getpara/viem-v2-integration@2.0.0-alpha.37
+- @getpara/viem-v1-integration@2.0.0-alpha.37
+- @getpara/user-management-client@2.0.0-alpha.37
+- @getpara/solana-web3.js-v1-integration@2.0.0-alpha.37
+- @getpara/solana-wallet-connectors@2.0.0-alpha.37
+- @getpara/solana-signers-v2-integration@2.0.0-alpha.37
+- @getpara/server-sdk@2.0.0-alpha.37
+- @getpara/react-sdk-lite@2.0.0-alpha.37
+- @getpara/react-sdk@2.0.0-alpha.37
+- @getpara/react-native-wallet@2.0.0-alpha.37
+- @getpara/react-components@2.0.0-alpha.37
+- @getpara/react-component-library@1.0.0-alpha.32
+- @getpara/react-common@2.0.0-alpha.37
+- @getpara/evm-wallet-connectors@2.0.0-alpha.37
+- @getpara/ethers-v6-integration@2.0.0-alpha.37
+- @getpara/ethers-v5-integration@2.0.0-alpha.37
+- @getpara/cosmos-wallet-connectors@2.0.0-alpha.37
+- @getpara/cosmjs-v0-integration@2.0.0-alpha.37
+- @getpara/core-sdk@2.0.0-alpha.37
+- @getpara/core-components@2.0.0-alpha.37
+
+
+### Fixes
+- External wallet filtering (#1118) - 957fe4111
+
 # Release (Wed Jul 23 2025)
 
 ## Package Versions
