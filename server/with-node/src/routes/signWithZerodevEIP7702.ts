@@ -105,12 +105,10 @@ export async function zerodevEip7702SignHandler(req: Request, res: Response): Pr
       calls,
     });
 
-    const receipt = await kernelAccountClient.waitForUserOperationReceipt({
+    await kernelAccountClient.waitForUserOperationReceipt({
       hash: userOpHash,
       timeout: 30000,
     });
-
-    console.log("User operation receipt:", receipt);
 
     res.status(200).json({
       success: true,

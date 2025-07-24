@@ -20,6 +20,17 @@ process.on("unhandledRejection", (reason: unknown, promise: Promise<unknown>) =>
 
 app.use(express.json());
 
+// Log all incoming requests
+app.use((req: Request, res: Response, next: NextFunction) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  next();
+});
+
+// Health check endpoint
+app.get("/", (req: Request, res: Response) => {
+  res.json({ status: "ok", timestamp: new Date().toISOString() });
+});
+
 app.use(router);
 
 app.use((_req: Request, res: Response): void => {

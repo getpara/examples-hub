@@ -79,6 +79,13 @@ export function getFrameworkEnvVars(framework: string, testEnv: TestEnvironment)
         PARA_API_KEY: testEnv.apiKey,
         VITE_PARA_API_KEY: testEnv.apiKey,
         ENCRYPTION_KEY: getEnvVar("ENCRYPTION_KEY", crypto.randomBytes(24).toString("base64url").slice(0, 32)),
+        ALCHEMY_API_KEY: getEnvVar("ALCHEMY_API_KEY", ""),
+        ALCHEMY_GAS_POLICY_ID: getEnvVar("ALCHEMY_GAS_POLICY_ID", ""),
+        ALCHEMY_RPC_URL: getEnvVar("ALCHEMY_RPC_URL", ""),
+        ZERODEV_PROJECT_ID: getEnvVar("ZERODEV_PROJECT_ID", ""),
+        ZERODEV_BUNDLER_RPC: getEnvVar("ZERODEV_BUNDLER_RPC", ""),
+        ZERODEV_PAYMASTER_RPC: getEnvVar("ZERODEV_PAYMASTER_RPC", ""),
+        ZERODEV_SECRET_KEY: getEnvVar("ZERODEV_SECRET_KEY", ""),
       };
 
     default:

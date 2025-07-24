@@ -52,9 +52,7 @@ export async function ethersPregenSignHandler(req: Request, res: Response): Prom
       gasPrice: feeData.gasPrice,
     };
 
-    const signedTx = await paraEthersSigner.signTransaction(tx);
-
-    console.log("Ethers Pregen - Signed transaction:", signedTx);
+    await paraEthersSigner.signTransaction(tx);
 
     res.status(200).json({
       success: true,

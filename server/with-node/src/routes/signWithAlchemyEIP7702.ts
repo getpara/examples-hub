@@ -1,11 +1,11 @@
 import { alchemy, arbitrumSepolia } from "@account-kit/infra";
 import { createModularAccountV2Client } from "@account-kit/smart-contracts";
-import { BatchUserOperationCallData, WalletClientSigner } from "@aa-sdk/core";
-import ParaServer, { Environment } from "@getpara/server-sdk";
-import { createParaAccount, createParaViemClient } from "@getpara/viem-v2-integration";
+import { BatchUserOperationCallData, SmartAccountSigner } from "@aa-sdk/core";
+import { Para as ParaServer, Environment } from "@getpara/server-sdk";
+import { createParaAccount } from "@getpara/viem-v2-integration";
 import { Request, Response } from "express";
 import Example from "../contracts/Example.json";
-import { encodeFunctionData, http, LocalAccount, WalletClient } from "viem";
+import { encodeFunctionData, LocalAccount, SignableMessage } from "viem";
 import { getKeyShareInDB } from "../db/keySharesDB";
 import { decrypt } from "../utils/encryption-utils";
 import { customSignAuthorization, customSignMessage } from "../utils/signature-utils.js";
@@ -18,6 +18,7 @@ export async function alchemyEip7702SignHandler(req: Request, res: Response): Pr
   const ALCHEMY_API_KEY = process.env.ALCHEMY_API_KEY;
   const ALCHEMY_GAS_POLICY_ID = process.env.ALCHEMY_GAS_POLICY_ID;
   const ALCHEMY_RPC_URL = process.env.ALCHEMY_RPC_URL;
+
   try {
     if (!PARA_API_KEY || !ALCHEMY_API_KEY || !ALCHEMY_GAS_POLICY_ID || !ALCHEMY_RPC_URL) {
       res.status(500).json({
@@ -38,7 +39,6 @@ export async function alchemyEip7702SignHandler(req: Request, res: Response): Pr
     }
 
     const para = new ParaServer(PARA_ENVIRONMENT, PARA_API_KEY);
-
     const hasPregenWallet = await para.hasPregenWallet({ pregenId: { email } });
 
     if (!hasPregenWallet) {
@@ -50,6 +50,7 @@ export async function alchemyEip7702SignHandler(req: Request, res: Response): Pr
     }
 
     const keyShare = await getKeyShareInDB(email);
+
     if (!keyShare) {
       res.status(400).json({
         success: false,
@@ -65,13 +66,23 @@ export async function alchemyEip7702SignHandler(req: Request, res: Response): Pr
     viemParaAccount.signMessage = async ({ message }) => customSignMessage(para, message);
     viemParaAccount.signAuthorization = async (authorization) => customSignAuthorization(para, authorization);
 
-    const viemClient: WalletClient = createParaViemClient(para, {
-      account: viemParaAccount,
-      chain: arbitrumSepolia,
-      transport: http(ALCHEMY_RPC_URL),
-    });
-
-    const walletClientSigner = new WalletClientSigner(viemClient, "para");
+    const paraSigner: SmartAccountSigner<LocalAccount> = {
+      signerType: "para",
+      inner: viemParaAccount,
+      getAddress: async () => viemParaAccount.address,
+      signMessage: async (message: SignableMessage) => {
+        return await viemParaAccount.signMessage({ message });
+      },
+      signTypedData: async (typedData) => {
+        return await viemParaAccount.signTypedData(typedData as any);
+      },
+      signAuthorization: async (authorization) => {
+        if (typeof viemParaAccount.signAuthorization === "function") {
+          return await viemParaAccount.signAuthorization(authorization);
+        }
+        throw new Error("signAuthorization is not defined on viemParaAccount");
+      },
+    };
 
     const alchemyClient = await createModularAccountV2Client({
       mode: "7702",
@@ -79,10 +90,9 @@ export async function alchemyEip7702SignHandler(req: Request, res: Response): Pr
         rpcUrl: ALCHEMY_RPC_URL,
       }),
       chain: arbitrumSepolia,
-      signer: walletClientSigner,
+      signer: paraSigner,
       policyId: ALCHEMY_GAS_POLICY_ID,
     });
-
     const demoUserOperations: BatchUserOperationCallData = Array.from({ length: 5 }, (_, i) => i + 1).map((x) => ({
       target: EXAMPLE_CONTRACT_ADDRESS,
       data: encodeFunctionData({
@@ -91,13 +101,9 @@ export async function alchemyEip7702SignHandler(req: Request, res: Response): Pr
         args: [x],
       }),
     }));
-
     const userOperationResult = await alchemyClient.sendUserOperation({
       uo: demoUserOperations,
     });
-
-    console.log("Alchemy EIP-7702 - User operation result:", userOperationResult);
-
     await alchemyClient.waitForUserOperationTransaction(userOperationResult);
 
     res.status(200).json({
@@ -106,6 +112,9 @@ export async function alchemyEip7702SignHandler(req: Request, res: Response): Pr
     });
   } catch (error) {
     console.error("EIP-7702 transaction error:", error);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    const errorDetails = error instanceof Error && "cause" in error ? error.cause : undefined;
+    console.error("Error details:", { message: errorMessage, cause: errorDetails });
     res.status(500).json({
       success: false,
       message: "EIP-7702 transaction failed",

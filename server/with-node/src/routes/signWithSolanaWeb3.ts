@@ -45,7 +45,14 @@ export async function solanaPregenSignHandler(req: Request, res: Response): Prom
       return;
     }
 
-    const demoTx = new Transaction().add(
+    // Get recent blockhash for the transaction
+    const { blockhash } = await connection.getLatestBlockhash();
+
+    const demoTx = new Transaction();
+    demoTx.recentBlockhash = blockhash;
+    demoTx.feePayer = solanaSigner.sender;
+
+    demoTx.add(
       SystemProgram.transfer({
         fromPubkey: solanaSigner.sender,
         toPubkey: solanaSigner.sender,
@@ -53,9 +60,7 @@ export async function solanaPregenSignHandler(req: Request, res: Response): Prom
       })
     );
 
-    const signedTransaction = await solanaSigner.signTransaction(demoTx);
-
-    console.log("Solana Pregen - Signed transaction:", signedTransaction);
+    await solanaSigner.signTransaction(demoTx);
 
     res.status(200).json({
       success: true,
