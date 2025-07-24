@@ -17,9 +17,15 @@ A sample iOS wallet app demonstrating the [Para Swift SDK](https://github.com/ge
    open example.xcodeproj
    ```
 
-2. **Set environment variables** in Xcode scheme (Product → Scheme → Edit Scheme → Arguments):
-   - `PARA_API_KEY`: Your API key from [Para Developer Portal](https://developer.getpara.com/)
-   - `PARA_ENVIRONMENT`: beta
+2. **Configure Para SDK:**
+   
+   **For local development:**
+   - Copy `example/Config.xcconfig` to `example/Secrets.xcconfig`
+   - Add your API key from [Para Developer Portal](https://developer.getpara.com/)
+   - Set `PARA_ENVIRONMENT` to sandbox, beta, or prod
+   - In Xcode: Select your project → Info tab → Configurations → Set both Debug and Release to use "Secrets"
+   
+   **Note**: `Secrets.xcconfig` is gitignored. Use `Config.xcconfig` as the template.
 
 3. **Configure Xcode project:**
    - Go to **Signing & Capabilities** → Select your development team
@@ -41,7 +47,7 @@ A sample iOS wallet app demonstrating the [Para Swift SDK](https://github.com/ge
 To explore the SDK integration, check out these key files:
 - **Authentication**: `example/Auth/AuthView.swift`
 - **Wallet Operations**: `example/Wallet/EVMWalletView.swift`, `SolanaWalletView.swift`
-- **SDK Configuration**: `example/App/ExampleApp.swift`
+- **SDK Configuration**: `example/App/ParaConfig.swift`, `example/App/ExampleApp.swift`
 - **MetaMask Integration**: `example/Auth/MetaMaskDemoView.swift`
 
 ## Beta Testing
@@ -50,6 +56,18 @@ Use these test credentials in `beta` environment:
 - **Email**: Any address ending in `@test.getpara.com`
 - **Phone**: US numbers like `(425)-555-1234`
 - **OTP**: Any 6-digit code
+
+## Xcode Cloud Configuration
+
+For TestFlight and App Store builds:
+
+1. **Set Environment Variables in Xcode Cloud workflow:**
+   - `PARA_API_KEY`: Your Para API key
+   - `PARA_ENVIRONMENT`: sandbox, beta, or prod
+
+2. **How it works**: Xcode Cloud automatically exposes environment variables as build settings, which are then injected into Info.plist during the build. No custom scripts needed!
+
+3. **Security**: The `Secrets.xcconfig` file is gitignored to prevent accidental API key commits.
 
 ## Documentation
 

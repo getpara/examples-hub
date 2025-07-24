@@ -49,7 +49,10 @@ export function useParaOAuth() {
       };
 
       if (authState.stage === "signup") {
-        openPopup(authState.passkeyUrl!, "signUpPopup", "popup=true");
+        if (!authState.passkeyUrl) {
+          throw new Error("Passkey URL is required for signup");
+        }
+        openPopup(authState.passkeyUrl, "signUpPopup", "popup=true");
         const result = await para.waitForWalletCreation(popupConfig);
         
         if (!result.walletIds) {
@@ -60,7 +63,10 @@ export function useParaOAuth() {
       }
 
       if (authState.stage === "login") {
-        openPopup(authState.passkeyUrl!, "loginPopup", "popup=true");
+        if (!authState.passkeyUrl) {
+          throw new Error("Passkey URL is required for login");
+        }
+        openPopup(authState.passkeyUrl, "loginPopup", "popup=true");
         return await para.waitForLogin(popupConfig);
       }
 

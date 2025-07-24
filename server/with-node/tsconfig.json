@@ -2,33 +2,18 @@
   "compilerOptions": {
     "lib": ["ES2022"],
     "target": "ES2022",
-    "module": "Node16",
+    "module": "ESNext",
     "moduleDetection": "force",
-    "allowJs": true,
-    "moduleResolution": "Node16",
-    "allowImportingTsExtensions": false,
-    "noEmit": false,
+    "moduleResolution": "bundler",
     "outDir": "./dist",
     "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "strict": true,
-    "noFallthroughCasesInSwitch": true,
     "forceConsistentCasingInFileNames": true,
     "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
-    "removeComments": false,
-    "isolatedModules": true,
-    "verbatimModuleSyntax": false
+    "isolatedModules": true
   },
-  "ts-node": {
-    "esm": true,
-    "transpileOnly": true,
-    "skipIgnore": true,
-    "experimentalSpecifierResolution": "node"
-  },
-  "include": ["*.ts", "db/**/*.ts", "examples/**/*.ts", "utils/**/*.ts"],
+  "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "dist"]
 }

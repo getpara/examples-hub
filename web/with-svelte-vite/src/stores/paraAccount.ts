@@ -1,4 +1,4 @@
-import { writable, derived } from 'svelte/store';
+import { writable, derived, get } from 'svelte/store';
 import { para } from '@/lib/para/client';
 
 interface AccountState {
@@ -47,21 +47,21 @@ export async function checkAuthentication() {
         isLoading: false,
       }));
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Failed to check authentication';
     accountState.update(state => ({
       ...state,
       isConnected: false,
       address: '',
       isLoading: false,
-      error: error.message || 'Failed to check authentication',
+      error: errorMessage,
     }));
   }
 }
 
 // Sign message
-export async function signMessage(message: string): Promise<any> {
-  const state = accountState;
-  const currentState = (state as any).value || initialState;
+export async function signMessage(message: string) {
+  const currentState = get(accountState);
   
   if (!currentState.isConnected) {
     throw new Error('Not connected');

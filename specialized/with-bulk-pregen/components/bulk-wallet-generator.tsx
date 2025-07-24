@@ -70,7 +70,7 @@ export function BulkWalletGenerator() {
 
     // Process retries
     const failedEntries = failedResults.map(r => ({ handle: r.handle, type: r.type }));
-    await processBatches(failedEntries, (batchResults, batchIndex) => {
+    await processBatches(failedEntries, (batchResults, _batchIndex) => {
       // Update results for retried entries
       batchResults.forEach((result) => {
         const index = results.findIndex(

@@ -5,17 +5,23 @@
   "scripts": {
     "build": "next build",
     "dev": "next dev",
-    "lint": "next lint",
+    "lint": "eslint .",
     "start": "next start",
     "typecheck": "tsc --noEmit",
-    "postinstall": "yarn setup-para"
+    "postinstall": "npx setup-para"
   },
   "dependencies": {
-    "@getpara/cosmos-wallet-connectors": "2.0.0-alpha.27",
-    "@getpara/evm-wallet-connectors": "2.0.0-alpha.27",
-    "@getpara/react-sdk": "2.0.0-alpha.27",
-    "@getpara/server-sdk": "2.0.0-alpha.27",
-    "@getpara/solana-wallet-connectors": "2.0.0-alpha.27",
+    "@cosmjs/amino": "0.34.0",
+    "@cosmjs/cosmwasm-stargate": "0.34.0",
+    "@cosmjs/proto-signing": "0.34.0",
+    "@cosmjs/stargate": "0.34.0",
+    "@cosmjs/tendermint-rpc": "0.34.0",
+    "@getpara/cosmos-wallet-connectors": "2.0.0-alpha.36",
+    "@getpara/evm-wallet-connectors": "2.0.0-alpha.36",
+    "@getpara/graz": "2.0.0-alpha.3",
+    "@getpara/react-sdk": "2.0.0-alpha.36",
+    "@getpara/server-sdk": "2.0.0-alpha.36",
+    "@getpara/solana-wallet-connectors": "2.0.0-alpha.36",
     "@hookform/resolvers": "3.9.1",
     "@radix-ui/react-accordion": "1.2.2",
     "@radix-ui/react-alert-dialog": "1.1.4",
@@ -44,6 +50,11 @@
     "@radix-ui/react-toggle": "1.1.1",
     "@radix-ui/react-toggle-group": "1.1.1",
     "@radix-ui/react-tooltip": "1.1.6",
+    "@solana-mobile/wallet-adapter-mobile": "2.2.2",
+    "@solana/wallet-adapter-base": "0.9.27",
+    "@solana/wallet-adapter-react": "0.15.39",
+    "@solana/wallet-adapter-walletconnect": "0.1.21",
+    "@solana/web3.js": "1.98.2",
     "@tanstack/react-query": "5.81.5",
     "autoprefixer": "^10.4.20",
     "class-variance-authority": "^0.7.1",
@@ -66,16 +77,20 @@
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^0.9.6",
+    "viem": "2.31.7",
+    "wagmi": "2.15.6",
     "zod": "^3.24.1"
   },
   "devDependencies": {
+    "@eslint/js": "^9.29.0",
     "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "eslint": "latest",
-    "eslint-config-next": "latest",
+    "eslint": "^9.29.0",
+    "pino-pretty": "13.0.0",
     "postcss": "^8",
     "tailwindcss": "^3.4.17",
-    "typescript": "^5"
+    "typescript": "^5",
+    "typescript-eslint": "^8.22.0"
   }
 }

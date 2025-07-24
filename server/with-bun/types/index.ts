@@ -1,3 +1,0 @@
-interface RequestBody {
-  email: string;
-}

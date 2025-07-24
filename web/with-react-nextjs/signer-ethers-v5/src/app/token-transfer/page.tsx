@@ -32,7 +32,7 @@ export default function TokenTransferPage() {
     message: string;
   }>({ show: false, type: "success", message: "" });
 
-  const { data: account } = useAccount();
+  const account = useAccount();
   const { data: wallet } = useWallet();
   const { signer, provider } = useParaSigner();
 
@@ -47,7 +47,6 @@ export default function TokenTransferPage() {
 
       // Fetch token balance
       const tokenContract = new ethers.Contract(contractAddress, ERC20_ABI, provider);
-      const decimals = await tokenContract.decimals();
       const balance = await tokenContract.balanceOf(wallet.address);
       const symbol = await tokenContract.symbol();
 

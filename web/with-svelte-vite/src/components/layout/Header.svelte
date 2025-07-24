@@ -1,10 +1,14 @@
 <script lang="ts">
+  import { logout } from '@/stores/paraAuth';
+  
   export let isConnected: boolean = false;
   export let openModal: () => void;
 
-  function handleDisconnect() {
-    if (typeof window !== "undefined") {
-      window.location.reload();
+  async function handleDisconnect() {
+    try {
+      await logout();
+    } catch (error) {
+      console.error('Failed to logout:', error);
     }
   }
 </script>
@@ -21,13 +25,15 @@
         {#if isConnected}
           <button
             on:click={handleDisconnect}
-            class="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors">
+            class="px-4 py-2 bg-gray-900 text-white rounded-none hover:bg-gray-950 transition-colors text-sm font-medium"
+            data-testid="header-disconnect-button">
             Disconnect
           </button>
         {:else}
           <button
             on:click={openModal}
-            class="px-4 py-2 bg-gray-900 text-white rounded-none hover:bg-gray-950 transition-colors text-sm font-medium">
+            class="px-4 py-2 bg-gray-900 text-white rounded-none hover:bg-gray-950 transition-colors text-sm font-medium"
+            data-testid="header-connect-button">
             Connect Wallet
           </button>
         {/if}

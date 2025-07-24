@@ -15,7 +15,7 @@ export function useParaSigner() {
     if (account?.isConnected && rpc && client) {
       try {
         const newSigner = createParaSolanaSigner({
-          para: client as any,
+          para: client as unknown as Parameters<typeof createParaSolanaSigner>[0]['para'],
           rpc: paraRpc, // Pass the Para-compatible RPC client instance
         });
         

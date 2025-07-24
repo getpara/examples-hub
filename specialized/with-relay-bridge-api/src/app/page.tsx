@@ -1,9 +1,8 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { AuthLayout, OAuthMethod, ParaModal, useAccount, useModal } from "@getpara/react-sdk";
-import "@getpara/react-sdk/styles.css";
-import { SupportedNetwork, NETWORK_CONFIG, ASSET_DETAILS } from "@/constants";
+import { useAccount, useModal } from "@getpara/react-sdk";
+import { SupportedNetwork, NETWORK_CONFIG, ASSET_DETAILS } from "@/config/constants";
 import { useRelayBridge } from "@/hooks/useRelayBridge";
 import { useTokenBalance } from "@/hooks/useTokenBalance";
 import { TransactionProcessing } from "@/components/TransactionProcessing";
@@ -23,7 +22,7 @@ type StepType = "approve" | "deposit" | "fill" | "complete" | "failed";
 
 export default function Home() {
   const { openModal } = useModal();
-  const { data: account } = useAccount();
+  const { isConnected } = useAccount();
   const { useQuote, executeBridge, isExecuting } = useRelayBridge();
   const { ethereumViem, baseViem, solanaSvm } = useSigners();
 
@@ -86,7 +85,7 @@ export default function Home() {
 
   const isBridgeStateValid = useCallback((): boolean => {
     return !!(
-      account?.isConnected &&
+      isConnected &&
       originNetwork &&
       destNetwork &&
       parsedAmount > 0 &&
@@ -100,7 +99,7 @@ export default function Home() {
       !quoteError
     );
   }, [
-    account?.isConnected,
+    isConnected,
     originNetwork,
     destNetwork,
     parsedAmount,
@@ -245,7 +244,7 @@ export default function Home() {
               <div>
                 <AlertTitle>Testnet USDC & Gas Required</AlertTitle>
                 <AlertDescription>
-                  For this demo you'll need testnet USDC (grab it via{" "}
+                  For this demo you&apos;ll need testnet USDC (grab it via{" "}
                   <a
                     href="https://faucet.circle.com/"
                     target="_blank"
@@ -261,7 +260,7 @@ export default function Home() {
 
           <div className="flex-1">
             <BridgeForm
-              isConnected={account?.isConnected || false}
+              isConnected={isConnected || false}
               isValid={isBridgeStateValid()}
               onConnect={openModal}
               onBridge={handleBridge}>
@@ -274,7 +273,7 @@ export default function Home() {
                 destAddress={destAddress}
                 originBalance={originBalance}
                 destBalance={destBalance}
-                isConnected={account?.isConnected || false}
+                isConnected={isConnected || false}
                 onOriginChange={setOriginNetwork}
                 onDestChange={setDestNetwork}
               />
@@ -282,7 +281,7 @@ export default function Home() {
               <AmountInput
                 amount={amount}
                 usdValue={usdValue}
-                isConnected={account?.isConnected || false}
+                isConnected={isConnected || false}
                 onAmountChange={setAmount}
                 onMaxClick={handleMaxClick}
               />
@@ -309,36 +308,6 @@ export default function Home() {
           </div>
         </div>
       </div>
-
-      <ParaModal
-        disableEmailLogin={false}
-        disablePhoneLogin={false}
-        authLayout={[AuthLayout.AUTH_FULL]}
-        oAuthMethods={[
-          OAuthMethod.APPLE,
-          OAuthMethod.DISCORD,
-          OAuthMethod.FACEBOOK,
-          OAuthMethod.FARCASTER,
-          OAuthMethod.GOOGLE,
-          OAuthMethod.TWITTER,
-        ]}
-        onRampTestMode={true}
-        theme={{
-          foregroundColor: "#2D3648",
-          backgroundColor: "#FFFFFF",
-          accentColor: "#0066CC",
-          darkForegroundColor: "#E8EBF2",
-          darkBackgroundColor: "#1A1F2B",
-          darkAccentColor: "#4D9FFF",
-          mode: "light",
-          borderRadius: "lg",
-          font: "Inter",
-        }}
-        appName="Para Modal Example"
-        logo="/para.svg"
-        recoverySecretStepEnabled={true}
-        twoFactorAuthEnabled={false}
-      />
     </div>
   );
 }

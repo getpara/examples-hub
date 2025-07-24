@@ -101,7 +101,7 @@ export default function SmartWalletAccountPage() {
   const params = useParams();
   const router = useRouter();
   const { toast } = useToast();
-  const { data: account } = useAccount();
+  const { isConnected } = useAccount();
   const [wallet, setWallet] = useState<SmartWallet | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isReceiveDialogOpen, setIsReceiveDialogOpen] = useState(false);
@@ -122,7 +122,7 @@ export default function SmartWalletAccountPage() {
       return;
     }
 
-    if (!account?.isConnected) {
+    if (!isConnected) {
       // Redirect if EOA is not connected, as smart wallets are tied to it
       toast({
         title: "Wallet Not Connected",
@@ -147,7 +147,7 @@ export default function SmartWalletAccountPage() {
       setWallet(mockWallet);
       setIsLoading(false);
     }
-  }, [walletAddress, account, router, toast]);
+  }, [walletAddress, isConnected, router, toast]);
 
   // Calculate USD value
   const usdValue = useMemo(() => {

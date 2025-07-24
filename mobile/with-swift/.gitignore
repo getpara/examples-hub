@@ -95,3 +95,7 @@ iOSInjectionProject/
 
 # macOS
 .DS_Store 
+
+# Para SDK Configuration
+# Never commit API keys or secrets
+example/Secrets.xcconfig

@@ -1,30 +1,41 @@
 {
   "tasks": {
-    "install:all": "echo 'Deno does not require explicit installation, dependencies are downloaded on first use'",
-    "build:ui": "cd test-ui && yarn build",
-    "copy:ui": "mkdir -p public && cp -r test-ui/dist/* public/",
-    "build:dev": "deno task build:ui && deno task copy:ui",
-    "dev:server": "deno serve --watch --allow-env --env-file=.env --allow-ffi --allow-sys --allow-write --allow-net --allow-run --allow-read --unstable-net --unstable-worker-options --unstable-node-globals --unstable-detect-cjs --no-check server.ts",
-    "dev": "deno task build:dev && deno task dev:server",
+    "dev": "deno serve --watch --allow-env --env-file=.env --allow-ffi --allow-sys --allow-write --allow-net --allow-run --allow-read --unstable-net --unstable-worker-options --unstable-node-globals --unstable-detect-cjs --no-check src/index.ts",
     "test": "deno test",
-    "build": "deno compile --allow-env --env-file=.env --allow-ffi --allow-sys --allow-write --allow-net --allow-run --allow-read --unstable-net --unstable-worker-options --unstable-node-globals --unstable-detect-cjs --no-check --output ./dist/server server.ts"
+    "build": "deno compile --allow-env --env-file=.env --allow-ffi --allow-sys --allow-write --allow-net --allow-run --allow-read --unstable-net --unstable-worker-options --unstable-node-globals --unstable-detect-cjs --no-check --output ./dist/server src/index.ts",
+    "lint": "deno lint",
+    "lint:fix": "deno lint --fix",
+    "typecheck": "deno check src/index.ts"
   },
   "imports": {
-    "@alchemy/aa-alchemy": "npm:@alchemy/aa-alchemy@3.19.0",
-    "@alchemy/aa-core": "npm:@alchemy/aa-core@3.19.0",
-    "@cosmjs/stargate": "npm:@cosmjs/stargate@0.33.1",
-    "@solana/web3.js": "npm:@solana/web3.js@1.98.0",
+    "@aa-sdk/core": "npm:@aa-sdk/core@4.52.2",
+    "@account-kit/infra": "npm:@account-kit/infra@4.52.2",
+    "@account-kit/smart-contracts": "npm:@account-kit/smart-contracts@4.52.2",
+    "@cosmjs/stargate": "npm:@cosmjs/stargate@0.34.0",
+    "@ethereumjs/rlp": "npm:@ethereumjs/rlp@5.0.2",
+    "@getpara/cosmjs-v0-integration": "npm:@getpara/cosmjs-v0-integration@2.0.0-alpha.33",
+    "@getpara/ethers-v6-integration": "npm:@getpara/ethers-v6-integration@2.0.0-alpha.33",
+    "@getpara/server-sdk": "npm:@getpara/server-sdk@2.0.0-alpha.33",
+    "@getpara/solana-web3.js-v1-integration": "npm:@getpara/solana-web3.js-v1-integration@2.0.0-alpha.33",
+    "@getpara/viem-v2-integration": "npm:@getpara/viem-v2-integration@2.0.0-alpha.33",
+    "@solana/web3.js": "npm:@solana/web3.js@1.98.2",
+    "@zerodev/ecdsa-validator": "npm:@zerodev/ecdsa-validator@5.4.9",
+    "@zerodev/sdk": "npm:@zerodev/sdk@5.4.41",
     "@std/encoding": "jsr:@std/encoding@1.0.5",
     "@std/http": "jsr:@std/http@1.0.7",
-    "@getpara/cosmjs-v0-integration": "npm:@getpara/cosmjs-v0-integration@1.11.0",
-    "@getpara/ethers-v6-integration": "npm:@getpara/ethers-v6-integration@1.11.0",
-    "@getpara/server-sdk": "npm:@getpara/server-sdk@1.11.0",
-    "@getpara/solana-web3.js-v1-integration": "npm:@getpara/solana-web3.js-v1-integration@1.11.0",
-    "@getpara/viem-v2-integration": "npm:@getpara/viem-v2-integration@1.11.0",
     "cosmjs-types": "npm:cosmjs-types@0.9.0",
-    "ethers": "npm:ethers@6.13.5",
-    "viem": "npm:viem@2.8.6",
+    "ethers": "npm:ethers@6.15.0",
+    "viem": "npm:viem@2.33.0",
     "@sentry/node": "npm:@sentry/node@9.21.0"
   },
-  "nodeModulesDir": "auto"
+  "nodeModulesDir": "auto",
+  "lint": {
+    "rules": {
+      "tags": ["recommended"]
+    },
+    "exclude": ["dist/"]
+  },
+  "fmt": {
+    "exclude": ["dist/"]
+  }
 }

@@ -6,7 +6,7 @@ import { useAccount, useModal, useWallet } from "@getpara/react-sdk";
 export default function Home() {
   const { openModal } = useModal();
   const { data: wallet } = useWallet();
-  const { data: account, isLoading, error } = useAccount();
+  const { isConnected, isLoading } = useAccount();
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen gap-6 p-8">
@@ -14,7 +14,7 @@ export default function Home() {
       <p className="max-w-md text-center">
         This example demonstrates how to integrate Para SDK in a Progressive Web App (PWA) built with Next.js.
       </p>
-      {account?.isConnected ? (
+      {isConnected ? (
         <WalletDisplay walletAddress={wallet?.address} />
       ) : (
         <p className="text-center">You are not logged in.</p>
@@ -26,7 +26,6 @@ export default function Home() {
         Open Para Modal
       </button>
 
-      {error && <p className="text-red-500 text-sm text-center">{error.message}</p>}
     </main>
   );
 }

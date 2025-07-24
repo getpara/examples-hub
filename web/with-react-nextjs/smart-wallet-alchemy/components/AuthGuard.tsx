@@ -10,13 +10,13 @@ interface AuthGuardProps {
 }
 
 export function AuthGuard({ children }: AuthGuardProps) {
-  const { data: account, isLoading } = useAccount();
+  const { isConnected, isLoading } = useAccount();
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
     console.log("[AuthGuard] isLoading:", isLoading);
-    console.log("[AuthGuard] account:", account);
+    console.log("[AuthGuard] isConnected:", isConnected);
     console.log("[AuthGuard] pathname:", pathname);
 
     if (isLoading) {
@@ -24,25 +24,25 @@ export function AuthGuard({ children }: AuthGuardProps) {
       return;
     }
 
-    if (!account?.isConnected) {
+    if (!isConnected) {
       console.log("[AuthGuard] Not connected, redirecting to /");
       router.replace("/");
       return;
     }
 
-    if (pathname === "/" && account?.isConnected) {
+    if (pathname === "/" && isConnected) {
       console.log("[AuthGuard] Connected user on /, redirecting to /accounts");
       router.replace("/accounts");
       return;
     }
-  }, [account, account?.isConnected, isLoading, pathname, router]);
+  }, [isConnected, isLoading, pathname, router]);
 
   if (isLoading) {
     console.log("[AuthGuard] Rendering FullScreenLoader (loading)");
     return <FullScreenLoader />;
   }
 
-  if (!account?.isConnected && pathname !== "/") {
+  if (!isConnected && pathname !== "/") {
     console.log("[AuthGuard] Not connected and not on /, rendering FullScreenLoader (redirecting)");
     return <FullScreenLoader />;
   }

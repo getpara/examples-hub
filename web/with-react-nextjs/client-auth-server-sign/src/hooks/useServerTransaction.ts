@@ -12,7 +12,10 @@ interface TransactionParams {
 
 interface TransactionResponse {
   transactionHash: string;
-  response: any;
+  response: {
+    transactionHash: string;
+    [key: string]: unknown;
+  };
 }
 
 export function useServerTransaction() {
@@ -21,7 +24,7 @@ export function useServerTransaction() {
   const queryClient = useQueryClient();
 
   const mutation = useMutation<TransactionResponse, Error, TransactionParams>({
-    mutationFn: async ({ from, to, amount, walletId }) => {
+    mutationFn: async ({ from, to, amount }) => {
       // Validate transaction
       const validation = await validateTransaction(provider, from, to, amount);
       if (!validation.isValid) {

@@ -6,6 +6,7 @@ import { Input } from "./common/Input";
 import { Button } from "./common/Button";
 import { StatusDisplay } from "./common/StatusDisplay";
 import { SecurityChoice } from "./SecurityChoice";
+import { AuthState, AuthStateSignup } from "@getpara/react-native-wallet";
 
 interface EmailAuthProps {
   onSuccess: () => void;
@@ -15,12 +16,18 @@ interface EmailAuthProps {
   onHideSecurityChoice?: () => void;
 }
 
-export const EmailAuth: React.FC<EmailAuthProps> = ({ onSuccess, onShowVerification, onHideVerification, onShowSecurityChoice, onHideSecurityChoice }) => {
+export const EmailAuth: React.FC<EmailAuthProps> = ({
+  onSuccess,
+  onShowVerification,
+  onHideVerification,
+  onShowSecurityChoice,
+  onHideSecurityChoice,
+}) => {
   const [email, setEmail] = useState("");
   const [verificationCode, setVerificationCode] = useState("");
   const [showVerification, setShowVerification] = useState(false);
   const [showSecurityChoice, setShowSecurityChoice] = useState(false);
-  const [authState, setAuthState] = useState<any>(null);
+  const [authState, setAuthState] = useState<AuthState | null>(null);
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
@@ -61,7 +68,7 @@ export const EmailAuth: React.FC<EmailAuthProps> = ({ onSuccess, onShowVerificat
           setStatus("Redirecting to password login...");
           const APP_SCHEME_EMAIL = "para-sdk-demo";
           const APP_SCHEME_REDIRECT_URL = `${APP_SCHEME_EMAIL}://para`;
-          
+
           await openAuthSessionAsync(authStateResult.passwordUrl, APP_SCHEME_REDIRECT_URL);
           await para.waitForLogin({});
           setStatus("");
@@ -125,32 +132,42 @@ export const EmailAuth: React.FC<EmailAuthProps> = ({ onSuccess, onShowVerificat
     }
   };
 
-  const handleSecurityChoice = async (choice: 'passkey' | 'password') => {
+  const handleSecurityChoice = async (choice: "passkey" | "password") => {
     setLoading(true);
-    setError('');
+    setError("");
 
     try {
-      if (choice === 'passkey') {
+      if (choice === "passkey") {
         // Register passkey for future logins
-        setStatus('Creating passkey...');
-        await para.registerPasskey(authState);
-        setStatus('');
+        setStatus("Creating passkey...");
+        if (!authState) {
+          setError("Missing authentication state for passkey registration");
+          setLoading(false);
+          return;
+        }
+        await para.registerPasskey(authState as AuthStateSignup);
+        setStatus("");
         onHideSecurityChoice?.();
         onSuccess();
       } else {
-        // Redirect to password creation
-        setStatus('Redirecting to password creation...');
-        const APP_SCHEME_EMAIL = 'para-sdk-demo';
+        setStatus("Redirecting to password creation...");
+        const APP_SCHEME_EMAIL = "para-sdk-demo";
         const APP_SCHEME_REDIRECT_URL = `${APP_SCHEME_EMAIL}://para`;
-        
-        await openAuthSessionAsync(authState.passwordUrl, APP_SCHEME_REDIRECT_URL);
+
+        const passwordUrl = (authState as AuthStateSignup)?.passwordUrl;
+        if (!passwordUrl) {
+          setError("Password URL is missing for password creation");
+          setLoading(false);
+          return;
+        }
+        await openAuthSessionAsync(passwordUrl, APP_SCHEME_REDIRECT_URL);
         await para.waitForWalletCreation({});
-        setStatus('');
+        setStatus("");
         onHideSecurityChoice?.();
         onSuccess();
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Security setup failed');
+      setError(err instanceof Error ? err.message : "Security setup failed");
     } finally {
       setLoading(false);
     }
@@ -185,15 +202,15 @@ export const EmailAuth: React.FC<EmailAuthProps> = ({ onSuccess, onShowVerificat
             keyboardType="number-pad"
             maxLength={6}
           />
-          
-          {(email.endsWith('@usecapsule.com') || email.endsWith('@getpara.com')) && (
+
+          {(email.endsWith("@usecapsule.com") || email.endsWith("@getpara.com")) && (
             <View style={styles.betaReminder}>
               <Text style={styles.betaReminderText}>
                 <Text style={styles.betaBold}>Beta Testing:</Text> Any random OTP will work
               </Text>
             </View>
           )}
-          
+
           <Button
             title="Verify"
             onPress={handleVerification}
@@ -208,7 +225,10 @@ export const EmailAuth: React.FC<EmailAuthProps> = ({ onSuccess, onShowVerificat
           />
         </>
       ) : (
-        <SecurityChoice onChoice={handleSecurityChoice} loading={loading} />
+        <SecurityChoice
+          onChoice={handleSecurityChoice}
+          loading={loading}
+        />
       )}
 
       <StatusDisplay

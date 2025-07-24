@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { StepIndicator } from "@/components/StepIndicator";
 import { AlertCircle } from "lucide-react";
-import { SupportedNetwork } from "@/constants";
+import { SupportedNetwork } from "@/config/constants";
 
 interface Network {
   name: string;

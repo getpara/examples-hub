@@ -54,6 +54,7 @@ export const OAuthButtons: React.FC<OAuthButtonsProps> = ({ onSelect, isLoading,
           key={method}
           onClick={() => onSelect(method)}
           disabled={isLoading || disabled}
+          data-testid={`auth-oauth-${method.toLowerCase()}`}
           className="flex items-center justify-center gap-3 px-4 py-2 border border-gray-300 rounded-none hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
           <img
             src={icon}

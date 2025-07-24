@@ -1,30 +1,28 @@
 import js from '@eslint/js'
-import globals from 'globals'
 import tseslint from 'typescript-eslint'
-import sveltePlugin from 'eslint-plugin-svelte'
 
 export default tseslint.config(
-  { ignores: ['dist', 'node_modules', '.svelte-kit'] },
-  js.configs.recommended,
-  ...tseslint.configs.recommended,
-  ...sveltePlugin.configs['flat/recommended'],
+  { ignores: ['dist', 'build', '.next', 'out', 'node_modules'] },
   {
-    languageOptions: {
-      globals: globals.browser,
-    },
-  },
-  {
-    files: ['**/*.svelte'],
-    languageOptions: {
-      parserOptions: {
-        parser: tseslint.parser,
-      },
-    },
-  },
-  {
+    extends: [js.configs.recommended, ...tseslint.configs.recommended],
+    files: ['**/*.{ts,tsx,js,jsx}'],
     rules: {
-      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
-      '@typescript-eslint/no-explicit-any': 'warn',
-    },
-  },
+      // TypeScript rules
+      '@typescript-eslint/no-unused-vars': ['error', { 
+        argsIgnorePattern: '^_',
+        varsIgnorePattern: '^_',
+        caughtErrorsIgnorePattern: '^_'
+      }],
+      '@typescript-eslint/no-explicit-any': 'error',
+      
+      // JavaScript rules
+      'no-console': ['warn', { allow: ['warn', 'error'] }],
+      'no-debugger': 'error',
+      'no-var': 'error',
+      'prefer-const': 'error',
+      'no-multiple-empty-lines': ['error', { max: 1 }],
+      'eqeqeq': ['error', 'always'],
+      'curly': ['error', 'all']
+    }
+  }
 )

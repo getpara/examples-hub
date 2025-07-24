@@ -1,7 +1,7 @@
 "use client";
 
 import { useParaSigner } from "@/hooks/useParaSigner";
-import { useAccount, useWallet } from "@getpara/react-sdk";
+import { useAccount } from "@getpara/react-sdk";
 import { LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
 import { useState, useEffect } from "react";
 
@@ -18,9 +18,8 @@ export default function SolTransferPage() {
     message: string;
   }>({ show: false, type: "success", message: "" });
 
-  const { signer, connection, anchorProvider, address } = useParaSigner();
-  const { data: account } = useAccount();
-  const { data: wallet } = useWallet();
+  const { connection, anchorProvider, address } = useParaSigner();
+  const account = useAccount();
 
   const isConnected = account?.isConnected;
 
@@ -43,7 +42,6 @@ export default function SolTransferPage() {
     if (address && anchorProvider) {
       fetchBalance();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [address, anchorProvider]);
 
   const constructTransaction = async (toAddress: string, solAmount: string): Promise<Transaction> => {
@@ -77,24 +75,23 @@ export default function SolTransferPage() {
   const validateTransaction = async (toAddress: string, solAmount: string): Promise<boolean> => {
     if (!address || !connection || !anchorProvider) throw new Error("No sender address or provider available");
 
-    try {
-      const balanceLamports = await connection.getBalance(anchorProvider.wallet.publicKey);
-      const transaction = await constructTransaction(toAddress, solAmount);
-      const estimatedGas = await transaction.getEstimatedFee(connection);
-      const totalCost = parseFloat(solAmount) * LAMPORTS_PER_SOL + estimatedGas!;
-
-      if (totalCost > balanceLamports) {
-        const requiredSol = (totalCost / LAMPORTS_PER_SOL).toFixed(4);
-        const availableSol = (balanceLamports / LAMPORTS_PER_SOL).toFixed(4);
-        throw new Error(
-          `Insufficient balance. Transaction requires approximately ${requiredSol} SOL, but you have only ${availableSol} SOL available.`
-        );
-      }
-
-      return true;
-    } catch (error) {
-      throw error;
+    const balanceLamports = await connection.getBalance(anchorProvider.wallet.publicKey);
+    const transaction = await constructTransaction(toAddress, solAmount);
+    const estimatedGas = await transaction.getEstimatedFee(connection);
+    if (estimatedGas === null) {
+      throw new Error("Failed to estimate transaction fee");
     }
+    const totalCost = parseFloat(solAmount) * LAMPORTS_PER_SOL + estimatedGas;
+
+    if (totalCost > balanceLamports) {
+      const requiredSol = (totalCost / LAMPORTS_PER_SOL).toFixed(4);
+      const availableSol = (balanceLamports / LAMPORTS_PER_SOL).toFixed(4);
+      throw new Error(
+        `Insufficient balance. Transaction requires approximately ${requiredSol} SOL, but you have only ${availableSol} SOL available.`
+      );
+    }
+
+    return true;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -147,7 +144,10 @@ export default function SolTransferPage() {
       console.log("Constructed transaction:", tx);
 
       // Send transaction using Anchor provider
-      const txResponse = await anchorProvider.sendAndConfirm!(tx);
+      if (!anchorProvider.sendAndConfirm) {
+        throw new Error("sendAndConfirm method not available on anchor provider");
+      }
+      const txResponse = await anchorProvider.sendAndConfirm(tx);
       console.log("Transaction submitted:", txResponse);
 
       setTxSignature(txResponse);

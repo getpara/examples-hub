@@ -6,13 +6,13 @@ import { ParaEthersV5Signer } from "@getpara/ethers-v5-integration";
 import { useEthersProvider } from "./useEthersProvider";
 
 export function useParaSigner() {
-  const { data: account } = useAccount();
+  const { isConnected } = useAccount();
   const client = useClient();
   const { provider } = useEthersProvider();
   const [signer, setSigner] = useState<ParaEthersV5Signer | null>(null);
 
   useEffect(() => {
-    if (account?.isConnected && provider && client) {
+    if (isConnected && provider && client) {
       try {
         const newSigner = new ParaEthersV5Signer(client, provider);
         setSigner(newSigner);
@@ -23,7 +23,7 @@ export function useParaSigner() {
     } else {
       setSigner(null);
     }
-  }, [account?.isConnected, provider, client]);
+  }, [isConnected, provider, client]);
 
   return {
     signer,

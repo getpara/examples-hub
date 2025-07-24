@@ -81,6 +81,7 @@ export const OTPInput: React.FC<OTPInputProps> = ({
             onKeyDown={(e) => handleKeyDown(index, e)}
             onPaste={handlePaste}
             disabled={disabled}
+            data-testid={`auth-otp-input-${index}`}
             className="w-12 h-12 text-center border border-gray-300 rounded-xs focus:ring-2 focus:ring-gray-500 focus:border-gray-500 text-lg disabled:bg-gray-100 disabled:cursor-not-allowed"
             autoComplete="off"
           />

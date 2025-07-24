@@ -1,6 +1,6 @@
 "use client";
 
-import { useModal, useAccount } from "@getpara/react-sdk";
+import { useModal } from "@getpara/react-sdk";
 import { useParaSigner } from "@/hooks/useParaSigner";
 import { useState, useEffect } from "react";
 import { PARA_TEST_TOKEN_CONTRACT_ADDRESS, PARA_TEST_TOKEN_CONTRACT_OWNER } from "@/config/contracts";
@@ -36,7 +36,7 @@ export default function PermitSigningPage() {
       const contract = getContract({
         address: PARA_TEST_TOKEN_CONTRACT_ADDRESS as `0x${string}`,
         abi: ParaTestToken.abi,
-        client: publicClient!,
+        client: publicClient,
       });
 
       const balance = await contract.read.balanceOf([address]);
@@ -73,17 +73,20 @@ export default function PermitSigningPage() {
         throw new Error("No wallet ID found. Please reconnect your wallet.");
       }
 
+      if (!publicClient || !walletClient) {
+        throw new Error("Client not available.");
+      }
+
       const contract = getContract({
         address: PARA_TEST_TOKEN_CONTRACT_ADDRESS,
         abi: ParaTestToken.abi,
-        client: publicClient!,
+        client: publicClient,
       });
 
       const nonce = await contract.read.nonces([address]);
 
       const deadline = Math.floor(Date.now() / 1000) + 3600;
 
-      const domainSeparator = await contract.read.DOMAIN_SEPARATOR();
 
       const name = await contract.read.name();
 
@@ -119,8 +122,8 @@ export default function PermitSigningPage() {
       });
 
       // Sign the permit with viem's signTypedData
-      const signature = await walletClient!.signTypedData({
-        account: address,
+      const signature = await walletClient.signTypedData({
+        account: address as `0x${string}`,
         domain,
         types,
         primaryType: "Permit",

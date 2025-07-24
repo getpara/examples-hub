@@ -1,34 +1,42 @@
 {
   "name": "with-bun",
   "type": "module",
-  "main": "server.ts",
-  "module": "server.ts",
+  "main": "src/index.ts",
+  "module": "src/index.ts",
   "scripts": {
-    "install:all": "bun install && cd test-ui && bun install",
-    "build:ui": "cd test-ui && bun run build",
-    "copy:ui": "rm -rf public/* && cp -r test-ui/dist/* public/",
-    "build:dev": "bun run build:ui && bun run copy:ui",
-    "dev:server": "bun run server.ts",
-    "dev": "bun run build:dev && bun run dev:server",
+    "dev": "bun run src/index.ts",
     "test": "bun test",
-    "build": "bun build ./server.ts --outdir ./dist --target node"
+    "build": "bun build ./src/index.ts --outdir ./dist --target node",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "typecheck": "bun --bun tsc --noEmit"
   },
   "dependencies": {
-    "@alchemy/aa-core": "3.19.0",
-    "@alchemy/aa-alchemy": "3.19.0",
-    "@cosmjs/stargate": "0.33.1",
-    "@solana/web3.js": "1.98.0",
-    "@getpara/cosmjs-v0-integration": "1.16.0",
-    "@getpara/ethers-v6-integration": "1.16.0",
-    "@getpara/server-sdk": "1.16.0",
-    "@getpara/solana-web3.js-v1-integration": "1.16.0",
-    "@getpara/viem-v2-integration": "1.16.0",
-    "ethers": "6.13.5",
-    "viem": "2.8.6"
+    "@aa-sdk/core": "4.52.2",
+    "@account-kit/infra": "4.52.2",
+    "@account-kit/smart-contracts": "4.52.2",
+    "@cosmjs/stargate": "0.34.0",
+    "@ethereumjs/rlp": "5.0.2",
+    "@getpara/cosmjs-v0-integration": "2.0.0-alpha.36",
+    "@getpara/ethers-v6-integration": "2.0.0-alpha.36",
+    "@getpara/server-sdk": "2.0.0-alpha.36",
+    "@getpara/solana-web3.js-v1-integration": "2.0.0-alpha.36",
+    "@getpara/viem-v2-integration": "2.0.0-alpha.36",
+    "@solana/web3.js": "1.98.2",
+    "@zerodev/ecdsa-validator": "5.4.9",
+    "@zerodev/sdk": "5.4.41",
+    "cosmjs-types": "0.9.0",
+    "ethers": "6.15.0",
+    "sqlite": "5.1.1",
+    "sqlite3": "5.1.7",
+    "viem": "2.33.0"
   },
   "devDependencies": {
+    "@eslint/js": "^9.29.0",
     "@types/bun": "1.1.11",
     "@types/node": "22.7.6",
-    "typescript": "5.6.3"
+    "eslint": "^9.29.0",
+    "typescript": "5.6.3",
+    "typescript-eslint": "^8.22.0"
   }
 }

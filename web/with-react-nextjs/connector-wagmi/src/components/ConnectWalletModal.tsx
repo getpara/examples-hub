@@ -30,7 +30,7 @@ export function ConnectWalletModal({ isOpen, onClose }: ConnectWalletModalProps)
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
+    <Modal isOpen={isOpen} onClose={onClose} data-testid="auth-modal">
       <div className="p-6">
         <h2 className="text-xl font-semibold mb-6">{isConnected ? "Wallet Settings" : "Connect Wallet"}</h2>
 
@@ -44,6 +44,7 @@ export function ConnectWalletModal({ isOpen, onClose }: ConnectWalletModalProps)
             </div>
             <button
               onClick={handleDisconnect}
+              data-testid="auth-logout-button"
               className="w-full px-4 py-2 bg-red-600 text-white rounded-none hover:bg-red-700 transition-colors cursor-pointer"
             >
               Disconnect
@@ -57,6 +58,7 @@ export function ConnectWalletModal({ isOpen, onClose }: ConnectWalletModalProps)
               {paraConnector && (
                 <button
                   onClick={() => connect({ connector: paraConnector })}
+                  data-testid="auth-oauth-para"
                   className="w-full px-4 py-2 bg-gray-900 text-white rounded-none hover:bg-gray-950 transition-colors cursor-pointer"
                 >
                   Connect with {paraConnector.name}
@@ -73,6 +75,7 @@ export function ConnectWalletModal({ isOpen, onClose }: ConnectWalletModalProps)
                     <button
                       key={connector.id}
                       onClick={() => connect({ connector })}
+                      data-testid={`wallet-option-${connector.id}`}
                       className="w-full px-4 py-2 bg-gray-100 text-gray-900 rounded-none hover:bg-gray-200 transition-colors cursor-pointer"
                     >
                       Connect with {connector.name}
