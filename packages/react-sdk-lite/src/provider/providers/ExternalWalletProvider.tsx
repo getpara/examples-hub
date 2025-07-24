@@ -157,16 +157,16 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
   // Filter any wallets that aren't included in the sort array, sort by the array then sort by installed extensions
   const allWallets = [...evmWallets, ...solanaWallets, ...cosmosWallets];
 
+  // Using internalId to filter and sort here since these are the values passed in to the externalWallets array
   let wallets = allWallets
     .filter(
       w =>
         (w.internalId !== 'FARCASTER' || para?.isFarcasterMiniApp) &&
-        externalWallets.includes(w.id.toUpperCase() as TExternalWallet),
+        externalWallets.includes(w.internalId as TExternalWallet),
     )
     .sort(
       (a, b) =>
-        externalWallets.indexOf(a.id.toUpperCase() as TExternalWallet) -
-        externalWallets.indexOf(b.id.toUpperCase() as TExternalWallet),
+        externalWallets.indexOf(a.internalId as TExternalWallet) - externalWallets.indexOf(b.internalId as TExternalWallet),
     )
     .sort((a, b) => (a.installed === b.installed ? 0 : a.installed ? -1 : 1));
 

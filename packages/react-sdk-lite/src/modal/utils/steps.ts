@@ -184,7 +184,7 @@ export const SignUpPreviousStep: {
   [SignUpModalStep.ADD_FUNDS_AWAITING]: ModalStep.ADD_FUNDS_BUY,
   [SignUpModalStep.ADD_FUNDS_SUCCESS]: undefined,
   [SignUpModalStep.ADD_FUNDS_FAILURE]: undefined,
-  [SignUpModalStep.AWAITING_IFRAME]: ModalStep.BIOMETRIC_CREATION,
+  [SignUpModalStep.AWAITING_IFRAME]: ModalStep.AUTH_MAIN,
 };
 
 export const GuestPreviousStep: {
@@ -256,7 +256,7 @@ export const LoginPreviousStep: {
   [LoginModalStep.ADD_FUNDS_AWAITING]: ModalStep.ADD_FUNDS_BUY,
   [LoginModalStep.ADD_FUNDS_SUCCESS]: undefined,
   [LoginModalStep.ADD_FUNDS_FAILURE]: undefined,
-  [SignUpModalStep.AWAITING_IFRAME]: ModalStep.BIOMETRIC_LOGIN,
+  [LoginModalStep.AWAITING_IFRAME]: ModalStep.AUTH_MAIN,
 };
 
 export const getStepHasFooter = (step: ModalStep): boolean => {

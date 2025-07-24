@@ -200,9 +200,11 @@ export function AuthProvider({
               onError: () => {
                 if (
                   refs.currentStep.current &&
-                  [ModalStep.AWAITING_BIOMETRIC_CREATION, ModalStep.PASSWORD_CREATION].includes(refs.currentStep.current)
+                  [ModalStep.AWAITING_BIOMETRIC_CREATION, ModalStep.PASSWORD_CREATION, ModalStep.AWAITING_IFRAME].includes(
+                    refs.currentStep.current,
+                  )
                 ) {
-                  setStep(ModalStep.BIOMETRIC_CREATION);
+                  goBack();
                 }
               },
               onSettled: () => {
