@@ -270,7 +270,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
 
           # Run server E2E tests
-          yarn test:server
+          yarn test:node
 
           if [ $? -eq 0 ]; then
             echo "✅ All server E2E tests passed" >> $GITHUB_STEP_SUMMARY

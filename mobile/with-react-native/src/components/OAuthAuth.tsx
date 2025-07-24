@@ -4,6 +4,7 @@ import { para } from "../para";
 import InAppBrowser from "react-native-inappbrowser-reborn";
 import { StatusDisplay } from "./common/StatusDisplay";
 import { SecurityChoice } from "./SecurityChoice";
+import { AuthState, AuthStateSignup } from "@getpara/react-native-wallet";
 
 // OAuth providers supported by Para SDK
 type SupportedOAuthMethod = "GOOGLE" | "DISCORD" | "TWITTER" | "APPLE" | "FACEBOOK";
@@ -23,7 +24,7 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess, onShowSecurityC
   const [error, setError] = useState("");
   const [pendingOAuthProvider, setPendingOAuthProvider] = useState<SupportedOAuthMethod | null>(null);
   const [showSecurityChoice, setShowSecurityChoice] = useState(false);
-  const [authState, setAuthState] = useState<any>(null);
+  const [authState, setAuthState] = useState<AuthState | null>(null);
 
   // Handle OAuth redirect deeplinks
   useEffect(() => {
@@ -113,7 +114,7 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess, onShowSecurityC
     // Get OAuth URL with app redirect scheme
     const oauthUrl = await para.getOAuthUrl({
       method: provider,
-      deeplinkUrl: `${APP_SCHEME}://para?method=login`, // Redirects to: {APP_SCHEME}://para?method=login
+      appScheme: `${APP_SCHEME}://para?method=login`, // Redirects to: {APP_SCHEME}://para?method=login
     });
 
     // Open in-app browser for OAuth
@@ -153,7 +154,7 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess, onShowSecurityC
       if (choice === 'passkey') {
         // Register passkey for future logins
         setStatus('Creating passkey...');
-        await para.registerPasskey(authState);
+        await para.registerPasskey(authState as AuthStateSignup);
         setStatus('');
         onHideSecurityChoice?.();
         onSuccess();
@@ -163,11 +164,19 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess, onShowSecurityC
         const APP_SCHEME_OAUTH = 'para-sdk-demo';
         const APP_SCHEME_REDIRECT_URL = `${APP_SCHEME_OAUTH}://para`;
         
-        await InAppBrowser.openAuth(authState.passwordUrl, APP_SCHEME_REDIRECT_URL);
-        await para.waitForWalletCreation({});
-        setStatus('');
-        onHideSecurityChoice?.();
-        onSuccess();
+        if (authState && (authState as AuthStateSignup).passwordUrl) {
+          const passwordUrl = (authState as AuthStateSignup).passwordUrl;
+          if (!passwordUrl) {
+            throw new Error('Password URL is undefined');
+          }
+          await InAppBrowser.openAuth(passwordUrl, APP_SCHEME_REDIRECT_URL);
+          await para.waitForWalletCreation({});
+          setStatus('');
+          onHideSecurityChoice?.();
+          onSuccess();
+        } else {
+          throw new Error('Missing authentication state for password creation');
+        }
       }
     } catch (err) {
       console.error(err);
