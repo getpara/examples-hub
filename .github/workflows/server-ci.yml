@@ -91,23 +91,27 @@ jobs:
         run: |
           cd server/with-node
           echo "Creating .env file for server..."
-          cat > .env << EOF
-          PARA_API_KEY_BETA=${{ secrets.PARA_API_KEY_BETA }}
-          PARA_API_KEY_SANDBOX=${{ secrets.PARA_API_KEY_SANDBOX }}
-          PARA_API_KEY=${{ secrets.PARA_API_KEY }}
-          PARA_ENVIRONMENT=${{ secrets.PARA_ENVIRONMENT }}
-          ENCRYPTION_KEY=${{ secrets.ENCRYPTION_KEY }}
-          ALCHEMY_API_KEY=${{ secrets.ALCHEMY_API_KEY }}
-          ALCHEMY_GAS_POLICY_ID=${{ secrets.ALCHEMY_GAS_POLICY_ID }}
-          ALCHEMY_ARBITRUM_SEPOLIA_RPC=${{ secrets.ALCHEMY_ARBITRUM_SEPOLIA_RPC }}
-          ALCHEMY_RPC_URL=${{ secrets.ALCHEMY_RPC_URL }}
-          ZERODEV_PROJECT_ID=${{ secrets.ZERODEV_PROJECT_ID }}
-          ZERODEV_BUNDLER_RPC=${{ secrets.ZERODEV_BUNDLER_RPC }}
-          ZERODEV_PAYMASTER_RPC=${{ secrets.ZERODEV_PAYMASTER_RPC }}
-          ZERODEV_SECRET_KEY=${{ secrets.ZERODEV_SECRET_KEY }}
-          ZERODEV_ARBITRUM_SEPOLIA_RPC=${{ secrets.ZERODEV_ARBITRUM_SEPOLIA_RPC }}
-          EOF
-          echo "✅ .env file created"
+
+          # Create .env file with proper variable expansion
+          {
+            echo "PARA_API_KEY_BETA=${PARA_API_KEY_BETA}"
+            echo "PARA_API_KEY_SANDBOX=${PARA_API_KEY_SANDBOX}"
+            echo "PARA_API_KEY=${PARA_API_KEY}"
+            echo "PARA_ENVIRONMENT=${PARA_ENVIRONMENT}"
+            echo "ENCRYPTION_KEY=${ENCRYPTION_KEY}"
+            echo "ALCHEMY_API_KEY=${ALCHEMY_API_KEY}"
+            echo "ALCHEMY_GAS_POLICY_ID=${ALCHEMY_GAS_POLICY_ID}"
+            echo "ALCHEMY_ARBITRUM_SEPOLIA_RPC=${ALCHEMY_ARBITRUM_SEPOLIA_RPC}"
+            echo "ALCHEMY_RPC_URL=${ALCHEMY_RPC_URL}"
+            echo "ZERODEV_PROJECT_ID=${ZERODEV_PROJECT_ID}"
+            echo "ZERODEV_BUNDLER_RPC=${ZERODEV_BUNDLER_RPC}"
+            echo "ZERODEV_PAYMASTER_RPC=${ZERODEV_PAYMASTER_RPC}"
+            echo "ZERODEV_SECRET_KEY=${ZERODEV_SECRET_KEY}"
+            echo "ZERODEV_ARBITRUM_SEPOLIA_RPC=${ZERODEV_ARBITRUM_SEPOLIA_RPC}"
+          } > .env
+
+          # Debug: Show file was created and has content
+          echo "✅ .env file created with $(wc -l < .env) lines"
 
       - name: Run Tests
         id: test
@@ -310,25 +314,31 @@ jobs:
 
       - name: Create .env file for E2E
         run: |
-          cd server/with-node
-          echo "Creating .env file for E2E tests..."
-          cat > .env << EOF
-          PARA_API_KEY_BETA=${{ secrets.PARA_API_KEY_BETA }}
-          PARA_API_KEY_SANDBOX=${{ secrets.PARA_API_KEY_SANDBOX }}
-          PARA_API_KEY=${{ secrets.PARA_API_KEY }}
-          PARA_ENVIRONMENT=${{ secrets.PARA_ENVIRONMENT }}
-          ENCRYPTION_KEY=${{ secrets.ENCRYPTION_KEY }}
-          ALCHEMY_API_KEY=${{ secrets.ALCHEMY_API_KEY }}
-          ALCHEMY_GAS_POLICY_ID=${{ secrets.ALCHEMY_GAS_POLICY_ID }}
-          ALCHEMY_ARBITRUM_SEPOLIA_RPC=${{ secrets.ALCHEMY_ARBITRUM_SEPOLIA_RPC }}
-          ALCHEMY_RPC_URL=${{ secrets.ALCHEMY_RPC_URL }}
-          ZERODEV_PROJECT_ID=${{ secrets.ZERODEV_PROJECT_ID }}
-          ZERODEV_BUNDLER_RPC=${{ secrets.ZERODEV_BUNDLER_RPC }}
-          ZERODEV_PAYMASTER_RPC=${{ secrets.ZERODEV_PAYMASTER_RPC }}
-          ZERODEV_SECRET_KEY=${{ secrets.ZERODEV_SECRET_KEY }}
-          ZERODEV_ARBITRUM_SEPOLIA_RPC=${{ secrets.ZERODEV_ARBITRUM_SEPOLIA_RPC }}
-          EOF
-          echo "✅ .env file created for E2E"
+          # Create .env file in root directory for E2E tests
+          echo "Creating .env file in root for E2E tests..."
+
+          # Create .env file with proper variable expansion
+          {
+            echo "PARA_API_KEY_BETA=${PARA_API_KEY_BETA}"
+            echo "PARA_API_KEY_SANDBOX=${PARA_API_KEY_SANDBOX}"
+            echo "PARA_API_KEY=${PARA_API_KEY}"
+            echo "PARA_ENVIRONMENT=${PARA_ENVIRONMENT}"
+            echo "ENCRYPTION_KEY=${ENCRYPTION_KEY}"
+            echo "ALCHEMY_API_KEY=${ALCHEMY_API_KEY}"
+            echo "ALCHEMY_GAS_POLICY_ID=${ALCHEMY_GAS_POLICY_ID}"
+            echo "ALCHEMY_ARBITRUM_SEPOLIA_RPC=${ALCHEMY_ARBITRUM_SEPOLIA_RPC}"
+            echo "ALCHEMY_RPC_URL=${ALCHEMY_RPC_URL}"
+            echo "ZERODEV_PROJECT_ID=${ZERODEV_PROJECT_ID}"
+            echo "ZERODEV_BUNDLER_RPC=${ZERODEV_BUNDLER_RPC}"
+            echo "ZERODEV_PAYMASTER_RPC=${ZERODEV_PAYMASTER_RPC}"
+            echo "ZERODEV_SECRET_KEY=${ZERODEV_SECRET_KEY}"
+            echo "ZERODEV_ARBITRUM_SEPOLIA_RPC=${ZERODEV_ARBITRUM_SEPOLIA_RPC}"
+          } > .env
+
+          # Debug: Show file was created and has content
+          echo "✅ .env file created with $(wc -l < .env) lines"
+          echo "Current directory: $(pwd)"
+          ls -la .env
 
       - name: Run E2E Tests
         id: e2e-test
@@ -337,7 +347,16 @@ jobs:
           echo "### E2E Server Tests" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
-          # Run server E2E tests
+          # Debug: Check if .env exists and has content
+          echo "Current directory: $(pwd)"
+          if [ -f .env ]; then
+            echo "✅ .env file exists in root"
+            echo "File size: $(wc -c < .env) bytes"
+          else
+            echo "❌ .env file not found in root!"
+          fi
+
+          # Run server E2E tests from root directory
           yarn test:node
 
           if [ $? -eq 0 ]; then
