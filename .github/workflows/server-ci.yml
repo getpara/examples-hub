@@ -312,33 +312,52 @@ jobs:
         timeout-minutes: 3
         run: npx playwright install chromium
 
-      - name: Create .env file for E2E
+      - name: Create .env file for E2E (root and server/with-node)
         run: |
           # Create .env file in root directory for E2E tests
           echo "Creating .env file in root for E2E tests..."
-
-          # Create .env file with proper variable expansion
           {
-            echo "PARA_API_KEY_BETA=${PARA_API_KEY_BETA}"
-            echo "PARA_API_KEY_SANDBOX=${PARA_API_KEY_SANDBOX}"
-            echo "PARA_API_KEY=${PARA_API_KEY}"
-            echo "PARA_ENVIRONMENT=${PARA_ENVIRONMENT}"
-            echo "ENCRYPTION_KEY=${ENCRYPTION_KEY}"
-            echo "ALCHEMY_API_KEY=${ALCHEMY_API_KEY}"
-            echo "ALCHEMY_GAS_POLICY_ID=${ALCHEMY_GAS_POLICY_ID}"
-            echo "ALCHEMY_ARBITRUM_SEPOLIA_RPC=${ALCHEMY_ARBITRUM_SEPOLIA_RPC}"
-            echo "ALCHEMY_RPC_URL=${ALCHEMY_RPC_URL}"
-            echo "ZERODEV_PROJECT_ID=${ZERODEV_PROJECT_ID}"
-            echo "ZERODEV_BUNDLER_RPC=${ZERODEV_BUNDLER_RPC}"
-            echo "ZERODEV_PAYMASTER_RPC=${ZERODEV_PAYMASTER_RPC}"
-            echo "ZERODEV_SECRET_KEY=${ZERODEV_SECRET_KEY}"
-            echo "ZERODEV_ARBITRUM_SEPOLIA_RPC=${ZERODEV_ARBITRUM_SEPOLIA_RPC}"
+          echo "PARA_API_KEY_BETA=${PARA_API_KEY_BETA}"
+          echo "PARA_API_KEY_SANDBOX=${PARA_API_KEY_SANDBOX}"
+          echo "PARA_API_KEY=${PARA_API_KEY}"
+          echo "PARA_ENVIRONMENT=${PARA_ENVIRONMENT}"
+          echo "ENCRYPTION_KEY=${ENCRYPTION_KEY}"
+          echo "ALCHEMY_API_KEY=${ALCHEMY_API_KEY}"
+          echo "ALCHEMY_GAS_POLICY_ID=${ALCHEMY_GAS_POLICY_ID}"
+          echo "ALCHEMY_ARBITRUM_SEPOLIA_RPC=${ALCHEMY_ARBITRUM_SEPOLIA_RPC}"
+          echo "ALCHEMY_RPC_URL=${ALCHEMY_RPC_URL}"
+          echo "ZERODEV_PROJECT_ID=${ZERODEV_PROJECT_ID}"
+          echo "ZERODEV_BUNDLER_RPC=${ZERODEV_BUNDLER_RPC}"
+          echo "ZERODEV_PAYMASTER_RPC=${ZERODEV_PAYMASTER_RPC}"
+          echo "ZERODEV_SECRET_KEY=${ZERODEV_SECRET_KEY}"
+          echo "ZERODEV_ARBITRUM_SEPOLIA_RPC=${ZERODEV_ARBITRUM_SEPOLIA_RPC}"
           } > .env
 
-          # Debug: Show file was created and has content
-          echo "✅ .env file created with $(wc -l < .env) lines"
-          echo "Current directory: $(pwd)"
-          ls -la .env
+            # Check that all required envs have values
+            MISSING_ENV=false
+            for VAR in PARA_API_KEY_BETA PARA_API_KEY_SANDBOX PARA_API_KEY PARA_ENVIRONMENT ENCRYPTION_KEY ALCHEMY_API_KEY ALCHEMY_GAS_POLICY_ID ALCHEMY_ARBITRUM_SEPOLIA_RPC ALCHEMY_RPC_URL ZERODEV_PROJECT_ID ZERODEV_BUNDLER_RPC ZERODEV_PAYMASTER_RPC ZERODEV_SECRET_KEY ZERODEV_ARBITRUM_SEPOLIA_RPC; do
+            VALUE=$(printenv $VAR)
+            if [ -z "$VALUE" ]; then
+              echo "❌ $VAR is missing or empty"
+              MISSING_ENV=true
+            fi
+            done
+            if [ "$MISSING_ENV" = true ]; then
+            echo "❌ One or more required environment variables are missing. Failing the job."
+            exit 1
+            else
+            echo "✅ All required environment variables are set."
+            fi
+
+            echo "✅ .env file created in root with $(wc -l < .env) lines"
+            echo "Current directory: $(pwd)"
+            ls -la .env
+
+          # Also create .env in server/with-node
+          mkdir -p server/with-node
+          cp .env server/with-node/.env
+          echo "✅ .env file copied to server/with-node/.env"
+          ls -la server/with-node/.env
 
       - name: Run E2E Tests
         id: e2e-test
