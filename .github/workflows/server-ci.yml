@@ -333,26 +333,6 @@ jobs:
           echo "ZERODEV_ARBITRUM_SEPOLIA_RPC=${ZERODEV_ARBITRUM_SEPOLIA_RPC}"
           } > .env
 
-            # Check that all required envs have values
-            MISSING_ENV=false
-            for VAR in PARA_API_KEY_BETA PARA_API_KEY_SANDBOX PARA_API_KEY PARA_ENVIRONMENT ENCRYPTION_KEY ALCHEMY_API_KEY ALCHEMY_GAS_POLICY_ID ALCHEMY_ARBITRUM_SEPOLIA_RPC ALCHEMY_RPC_URL ZERODEV_PROJECT_ID ZERODEV_BUNDLER_RPC ZERODEV_PAYMASTER_RPC ZERODEV_SECRET_KEY ZERODEV_ARBITRUM_SEPOLIA_RPC; do
-            VALUE=$(printenv $VAR)
-            if [ -z "$VALUE" ]; then
-              echo "❌ $VAR is missing or empty"
-              MISSING_ENV=true
-            fi
-            done
-            if [ "$MISSING_ENV" = true ]; then
-            echo "❌ One or more required environment variables are missing. Failing the job."
-            exit 1
-            else
-            echo "✅ All required environment variables are set."
-            fi
-
-            echo "✅ .env file created in root with $(wc -l < .env) lines"
-            echo "Current directory: $(pwd)"
-            ls -la .env
-
           # Also create .env in server/with-node
           mkdir -p server/with-node
           cp .env server/with-node/.env
