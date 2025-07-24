@@ -18,6 +18,10 @@ on:
         description: "Skip build step (faster iteration)"
         type: boolean
         default: false
+      skip_e2e:
+        description: "Skip E2E tests"
+        type: boolean
+        default: false
 
 concurrency:
   group: server-ci-${{ github.ref }}
@@ -222,10 +226,71 @@ jobs:
             echo "failed=false" >> $GITHUB_OUTPUT
           fi
 
+  # End-to-end tests
+  e2e:
+    needs: [test-server]
+    if: |
+      always() && 
+      needs.test-server.result == 'success' &&
+      github.event.inputs.skip_e2e != 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30 # E2E tests need more time
+
+    name: E2E Server Tests
+
+    env:
+      # Base environment variables
+      PARA_API_KEY_BETA: ${{ secrets.PARA_API_KEY_BETA }}
+      PARA_API_KEY_SANDBOX: ${{ secrets.PARA_API_KEY_SANDBOX }}
+      PARA_ENVIRONMENT: ${{ secrets.PARA_ENVIRONMENT }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install Dependencies
+        run: |
+          # Use local yarn cache to avoid conflicts
+          export YARN_CACHE_FOLDER="$(pwd)/.yarn-cache-local"
+          yarn install --immutable --network-timeout 60000
+
+      - name: Install Playwright
+        timeout-minutes: 3
+        run: npx playwright install chromium
+
+      - name: Run E2E Tests
+        id: e2e-test
+        timeout-minutes: 25
+        run: |
+          echo "### E2E Server Tests" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Run server E2E tests
+          yarn test:server
+
+          if [ $? -eq 0 ]; then
+            echo "✅ All server E2E tests passed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ E2E tests failed" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
+
+      - name: Upload Playwright Report
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report-server
+          path: playwright-report/
+          retention-days: 7
+
   # Summary job
   summary:
     if: always()
-    needs: [test-server]
+    needs: [test-server, e2e]
     runs-on: ubuntu-latest
     steps:
       - name: Generate Report
@@ -235,19 +300,21 @@ jobs:
 
           # Overall status
           SERVER_STATUS="${{ needs.test-server.result }}"
+          E2E_STATUS="${{ needs.e2e.result }}"
 
           echo "## Overall Status" >> $GITHUB_STEP_SUMMARY
           echo "| Component | Status |" >> $GITHUB_STEP_SUMMARY
           echo "|-----------|--------|" >> $GITHUB_STEP_SUMMARY
           echo "| Server Tests | ${{ needs.test-server.result == 'success' && '✅ Passed' || needs.test-server.result == 'failure' && '❌ Failed' || '⏭️ Skipped' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| E2E Tests | ${{ needs.e2e.result == 'success' && '✅ Passed' || needs.e2e.result == 'failure' && '❌ Failed' || '⏭️ Skipped' }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
           # Final result
-          if [ "$SERVER_STATUS" = "success" ]; then
+          if [ "$SERVER_STATUS" = "success" ] && [ "$E2E_STATUS" = "success" ]; then
             echo "## ✅ All checks passed!" >> $GITHUB_STEP_SUMMARY
           else
             echo "## ❌ Some checks failed" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
-            echo "Please check the job logs for details." >> $GITHUB_STEP_SUMMARY
+            echo "Please check the individual job logs for details." >> $GITHUB_STEP_SUMMARY
             exit 1
           fi
