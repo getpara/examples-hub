@@ -10,6 +10,7 @@
 import { execSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
+import { detectPackageManager } from './shared/utils';
 
 // Simple concurrency limiter
 class ConcurrencyLimiter {
@@ -120,7 +121,21 @@ async function runLint() {
       const task = async () => {
         console.log(`🔍 Running lint: ${dir as string}`);
         try {
-          execSync('yarn lint', {
+          const packageManager = detectPackageManager(dir as string);
+          let lintCommand: string;
+          
+          switch (packageManager) {
+            case 'bun':
+              lintCommand = 'bun lint';
+              break;
+            case 'deno':
+              lintCommand = 'deno task lint';
+              break;
+            default:
+              lintCommand = 'yarn lint';
+          }
+          
+          execSync(lintCommand, {
             cwd: dir as string,
             stdio: 'pipe',
             timeout: 60000

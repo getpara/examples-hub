@@ -74,7 +74,7 @@ export async function alchemyEip7702SignHandler(req: Request, res: Response): Pr
         return await viemParaAccount.signMessage({ message });
       },
       signTypedData: async (typedData) => {
-        return await viemParaAccount.signTypedData(typedData as any);
+        return await viemParaAccount.signTypedData(typedData);
       },
       signAuthorization: async (authorization) => {
         if (typeof viemParaAccount.signAuthorization === "function") {

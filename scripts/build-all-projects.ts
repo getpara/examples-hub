@@ -10,6 +10,7 @@
 import { execSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
+import { detectPackageManager } from './shared/utils';
 
 // Simple concurrency limiter
 class ConcurrencyLimiter {
@@ -120,7 +121,21 @@ async function runBuildAll() {
       const task = async () => {
         console.log(`🔨 Running build: ${dir}`);
         try {
-          execSync('yarn build', {
+          const packageManager = detectPackageManager(dir as string);
+          let buildCommand: string;
+          
+          switch (packageManager) {
+            case 'bun':
+              buildCommand = 'bun run build';
+              break;
+            case 'deno':
+              buildCommand = 'deno task build';
+              break;
+            default:
+              buildCommand = 'yarn build';
+          }
+          
+          execSync(buildCommand, {
             cwd: dir as string,
             stdio: 'pipe',
             timeout: 300000 // 5 minute timeout per build

@@ -6,14 +6,29 @@ import {
   findProjectDirectories,
   executeCommand,
   formatDuration,
-  hasScript
+  hasScript,
+  detectPackageManager
 } from './shared/utils';
 import { TaskResult } from './shared/types';
 import { CONCURRENCY_LIMITS, TIMEOUTS, BUILD_ARTIFACTS } from './shared/constants';
 
 async function buildProject(dir: string): Promise<TaskResult> {
   try {
-    executeCommand('yarn build', {
+    const packageManager = detectPackageManager(dir);
+    let buildCommand: string;
+    
+    switch (packageManager) {
+      case 'bun':
+        buildCommand = 'bun run build';
+        break;
+      case 'deno':
+        buildCommand = 'deno task build';
+        break;
+      default:
+        buildCommand = 'yarn build';
+    }
+    
+    executeCommand(buildCommand, {
       cwd: dir,
       timeout: TIMEOUTS.build,
       throwOnError: true

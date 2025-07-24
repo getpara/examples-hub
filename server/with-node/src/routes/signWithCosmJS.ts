@@ -92,8 +92,8 @@ export async function cosmjsPregenSignHandler(req: Request, res: Response): Prom
         success: true,
         message: "Transaction signed successfully using CosmJS + Para with pre-generated wallet",
       });
-    } catch (signError: any) {
-      if (signError.message?.includes("does not exist on chain")) {
+    } catch (signError: unknown) {
+      if (signError instanceof Error && signError.message?.includes("does not exist on chain")) {
         console.log("CosmJS Pregen - Account not funded, but signer is valid. Address:", fromAddress);
 
         res.status(200).json({

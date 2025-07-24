@@ -6,14 +6,29 @@ import {
   findProjectDirectories,
   executeCommand,
   formatDuration,
-  hasScript
+  hasScript,
+  detectPackageManager
 } from './shared/utils';
 import { TaskResult } from './shared/types';
 import { CONCURRENCY_LIMITS, TIMEOUTS } from './shared/constants';
 
 async function typecheckProject(dir: string): Promise<TaskResult> {
   try {
-    executeCommand('yarn typecheck', {
+    const packageManager = detectPackageManager(dir);
+    let typecheckCommand: string;
+    
+    switch (packageManager) {
+      case 'bun':
+        typecheckCommand = 'bun typecheck';
+        break;
+      case 'deno':
+        typecheckCommand = 'deno task typecheck';
+        break;
+      default:
+        typecheckCommand = 'yarn typecheck';
+    }
+    
+    executeCommand(typecheckCommand, {
       cwd: dir,
       timeout: TIMEOUTS.typecheck,
       throwOnError: true

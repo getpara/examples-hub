@@ -10,6 +10,7 @@
 import { execSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
+import { detectPackageManager } from './shared/utils';
 
 // Simple concurrency limiter
 class ConcurrencyLimiter {
@@ -120,7 +121,21 @@ async function runTypecheckAll() {
       const task = async () => {
         console.log(`📝 Running typecheck: ${dir as string}`);
         try {
-          execSync('yarn typecheck', {
+          const packageManager = detectPackageManager(dir as string);
+          let typecheckCommand: string;
+          
+          switch (packageManager) {
+            case 'bun':
+              typecheckCommand = 'bun typecheck';
+              break;
+            case 'deno':
+              typecheckCommand = 'deno task typecheck';
+              break;
+            default:
+              typecheckCommand = 'yarn typecheck';
+          }
+          
+          execSync(typecheckCommand, {
             cwd: dir as string,
             stdio: 'pipe',
             timeout: 300000 // 5 minute timeout per typecheck

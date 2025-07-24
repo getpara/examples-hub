@@ -6,14 +6,29 @@ import {
   findProjectDirectories,
   executeCommand,
   formatDuration,
-  hasScript
+  hasScript,
+  detectPackageManager
 } from './shared/utils';
 import { TaskResult } from './shared/types';
 import { CONCURRENCY_LIMITS, TIMEOUTS } from './shared/constants';
 
 async function lintProject(dir: string): Promise<TaskResult> {
   try {
-    executeCommand('yarn lint', {
+    const packageManager = detectPackageManager(dir);
+    let lintCommand: string;
+    
+    switch (packageManager) {
+      case 'bun':
+        lintCommand = 'bun lint';
+        break;
+      case 'deno':
+        lintCommand = 'deno task lint';
+        break;
+      default:
+        lintCommand = 'yarn lint';
+    }
+    
+    executeCommand(lintCommand, {
       cwd: dir,
       timeout: TIMEOUTS.lint,
       throwOnError: true

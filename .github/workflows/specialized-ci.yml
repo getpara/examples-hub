@@ -102,6 +102,8 @@ jobs:
       # WalletConnect project IDs (if needed)
       VITE_WALLET_CONNECT_PROJECT_ID: ${{ secrets.VITE_WALLET_CONNECT_PROJECT_ID }}
       NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID }}
+      # Squid Router API
+      NEXT_PUBLIC_SQUID_INTEGRATOR_ID: ${{ secrets.NEXT_PUBLIC_SQUID_INTEGRATOR_ID }}
 
     steps:
       - uses: actions/checkout@v4
