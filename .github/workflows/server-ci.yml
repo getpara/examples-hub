@@ -87,6 +87,28 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
+      - name: Create .env file
+        run: |
+          cd server/with-node
+          echo "Creating .env file for server..."
+          cat > .env << EOF
+          PARA_API_KEY_BETA=${{ secrets.PARA_API_KEY_BETA }}
+          PARA_API_KEY_SANDBOX=${{ secrets.PARA_API_KEY_SANDBOX }}
+          PARA_API_KEY=${{ secrets.PARA_API_KEY }}
+          PARA_ENVIRONMENT=${{ secrets.PARA_ENVIRONMENT }}
+          ENCRYPTION_KEY=${{ secrets.ENCRYPTION_KEY }}
+          ALCHEMY_API_KEY=${{ secrets.ALCHEMY_API_KEY }}
+          ALCHEMY_GAS_POLICY_ID=${{ secrets.ALCHEMY_GAS_POLICY_ID }}
+          ALCHEMY_ARBITRUM_SEPOLIA_RPC=${{ secrets.ALCHEMY_ARBITRUM_SEPOLIA_RPC }}
+          ALCHEMY_RPC_URL=${{ secrets.ALCHEMY_RPC_URL }}
+          ZERODEV_PROJECT_ID=${{ secrets.ZERODEV_PROJECT_ID }}
+          ZERODEV_BUNDLER_RPC=${{ secrets.ZERODEV_BUNDLER_RPC }}
+          ZERODEV_PAYMASTER_RPC=${{ secrets.ZERODEV_PAYMASTER_RPC }}
+          ZERODEV_SECRET_KEY=${{ secrets.ZERODEV_SECRET_KEY }}
+          ZERODEV_ARBITRUM_SEPOLIA_RPC=${{ secrets.ZERODEV_ARBITRUM_SEPOLIA_RPC }}
+          EOF
+          echo "✅ .env file created"
+
       - name: Run Tests
         id: test
         run: |
@@ -285,6 +307,28 @@ jobs:
       - name: Install Playwright
         timeout-minutes: 3
         run: npx playwright install chromium
+
+      - name: Create .env file for E2E
+        run: |
+          cd server/with-node
+          echo "Creating .env file for E2E tests..."
+          cat > .env << EOF
+          PARA_API_KEY_BETA=${{ secrets.PARA_API_KEY_BETA }}
+          PARA_API_KEY_SANDBOX=${{ secrets.PARA_API_KEY_SANDBOX }}
+          PARA_API_KEY=${{ secrets.PARA_API_KEY }}
+          PARA_ENVIRONMENT=${{ secrets.PARA_ENVIRONMENT }}
+          ENCRYPTION_KEY=${{ secrets.ENCRYPTION_KEY }}
+          ALCHEMY_API_KEY=${{ secrets.ALCHEMY_API_KEY }}
+          ALCHEMY_GAS_POLICY_ID=${{ secrets.ALCHEMY_GAS_POLICY_ID }}
+          ALCHEMY_ARBITRUM_SEPOLIA_RPC=${{ secrets.ALCHEMY_ARBITRUM_SEPOLIA_RPC }}
+          ALCHEMY_RPC_URL=${{ secrets.ALCHEMY_RPC_URL }}
+          ZERODEV_PROJECT_ID=${{ secrets.ZERODEV_PROJECT_ID }}
+          ZERODEV_BUNDLER_RPC=${{ secrets.ZERODEV_BUNDLER_RPC }}
+          ZERODEV_PAYMASTER_RPC=${{ secrets.ZERODEV_PAYMASTER_RPC }}
+          ZERODEV_SECRET_KEY=${{ secrets.ZERODEV_SECRET_KEY }}
+          ZERODEV_ARBITRUM_SEPOLIA_RPC=${{ secrets.ZERODEV_ARBITRUM_SEPOLIA_RPC }}
+          EOF
+          echo "✅ .env file created for E2E"
 
       - name: Run E2E Tests
         id: e2e-test

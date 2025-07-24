@@ -118,12 +118,10 @@ export async function zerodevPregenSignHandler(req: Request, res: Response): Pro
       callData: await kernelClient.account.encodeCalls(calls),
     });
 
-    const receipt = await kernelClient.waitForUserOperationReceipt({
+    await kernelClient.waitForUserOperationReceipt({
       hash: userOpHash,
       timeout: 30000,
     });
-
-    console.log("User operation receipt:", receipt);
 
     res.status(200).json({
       success: true,
