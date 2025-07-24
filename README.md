@@ -3,6 +3,8 @@
 Welcome! This repository is a central collection of example applications demonstrating various ways to integrate and use
 the `@getpara/*` suite of SDKs and packages across different platforms and frameworks.
 
+> **Important:** All examples in this repository use the **2.0.0-alpha** version of `@getpara/*` SDKs. This is the recommended approach for ALL projects - whether migrating existing projects or starting new ones. The 2.0.0-alpha release contains most major improvements and is the actively developed version.
+
 Whether you're building a web app, mobile app, backend service, or something more specialized, you can browse these
 examples to find patterns and integration guides.
 
@@ -25,6 +27,8 @@ The examples are organized into top-level directories based on the primary platf
 
 Each specific example (e.g., `/web/with-react-nextjs/para-modal`) lives within its own directory and aims to be
 self-contained with its own dependencies and configuration.
+
+> **Note:** The root-level `.env.ci.example` and `package.json` files are strictly for CI/CD purposes and are not related to individual example apps. Each example has its own `.env.example` and README with specific setup instructions.
 
 ## Getting Started with an Example
 
@@ -63,8 +67,15 @@ Most examples are designed to be run independently. Follow these general steps:
     nano .env
     ```
 
+    > **Need API Keys?** Visit [developer.getpara.com](https://developer.getpara.com) to configure and manage your API keys.
+
 5.  **Run the Example:** Each example directory should contain its own `README.md` with specific instructions on how to
     run it (e.g., `yarn dev`, `yarn start`, `expo start`, `flutter run`). Please refer to those instructions.
+
+## Resources
+
+- **Documentation:** Visit [docs.getpara.com](https://docs.getpara.com) to learn more about package usage and integration guides.
+- **Developer Portal:** Visit [developer.getpara.com](https://developer.getpara.com) to configure and manage your API keys.
 
 ## Support
 
