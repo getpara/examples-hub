@@ -41,8 +41,8 @@
     
     try {
       const result = await signMessage(message);
-      if (result && 'signature' in result) {
-        signature = result.signature;
+      if (result && typeof result === 'object' && 'signature' in result) {
+        signature = (result as { signature: string }).signature;
       }
     } catch (err: any) {
       error = err.message || "Failed to sign message. Please try again.";

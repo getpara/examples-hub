@@ -50,7 +50,7 @@ const transactionTypes = [
 ];
 
 export default function Home() {
-  const { data: account } = useAccount();
+  const account = useAccount();
   const { openModal } = useModal();
 
   return (

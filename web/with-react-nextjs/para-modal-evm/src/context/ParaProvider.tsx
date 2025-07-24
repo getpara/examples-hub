@@ -17,7 +17,7 @@ export function ParaProvider({
       }}
       externalWalletConfig={{
         wallets: ["METAMASK", "COINBASE", "WALLETCONNECT", "RAINBOW", "ZERION", "RABBY"],
-        createLinkedEmbeddedForExternalWallets: ["METAMASK"],
+        // createLinkedEmbeddedForExternalWallets: ["METAMASK"],
         evmConnector: {
           config: {
             chains: [mainnet, polygon, sepolia, celo],

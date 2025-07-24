@@ -8,7 +8,7 @@ import * as anchor from "@coral-xyz/anchor";
 import { useSolana } from "./useSolana";
 
 export function useParaSigner() {
-  const { data: account } = useAccount();
+  const { isConnected } = useAccount();
   const client = useClient();
   const { connection } = useSolana();
   
@@ -46,7 +46,7 @@ export function useParaSigner() {
   }, []);
 
   useEffect(() => {
-    if (account?.isConnected && connection && client) {
+    if (isConnected && connection && client) {
       try {
         const newSigner = new ParaSolanaWeb3Signer(client, connection);
         setSigner(newSigner);
@@ -68,13 +68,13 @@ export function useParaSigner() {
       setSigner(null);
       setAnchorProvider(null);
     }
-  }, [account?.isConnected, connection, client, createWalletAdapter]);
+  }, [isConnected, connection, client, createWalletAdapter]);
 
   return {
     signer,
     connection,
     anchorProvider,
-    isConnected: account?.isConnected || false,
+    isConnected: isConnected || false,
     address: signer?.sender?.toBase58() || null,
   };
 }

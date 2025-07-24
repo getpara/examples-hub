@@ -33,7 +33,7 @@ const transactionTypes = [
 
 export default function Home() {
   const { openModal } = useModal();
-  const { data: account } = useAccount();
+  const account = useAccount();
 
   return (
     <div className="container mx-auto px-4 py-12">

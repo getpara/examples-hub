@@ -1,4 +1,3 @@
-import { WalletType } from "@getpara/server-sdk";
 import { walletStore } from "@/lib/store";
 import { getParaServerClient } from "@/lib/para/server-client";
 import { NextResponse } from "next/server";

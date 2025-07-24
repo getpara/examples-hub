@@ -4,13 +4,14 @@ import { para } from "../para";
 import { Button } from "./common/Button";
 import { StatusDisplay } from "./common/StatusDisplay";
 import { Input } from "./common/Input";
+import { Wallet } from "@getpara/react-native-wallet";
 
 interface WalletSectionProps {
   onLogout: () => void;
 }
 
 export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
-  const [wallet, setWallet] = useState<any>(null);
+  const [wallet, setWallet] = useState<Wallet | null>(null);
   const [_loadingWallet, setLoadingWallet] = useState(false);
   const [signingMessage, setSigningMessage] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
@@ -32,7 +33,6 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
     try {
       // Para manages multiple wallet types - here we fetch EVM wallets
       const evmWallets = await para.getWalletsByType("EVM");
-      console.log("EVM Wallets:", evmWallets);
 
       if (evmWallets && evmWallets.length > 0) {
         // Use first wallet if exists
@@ -83,7 +83,7 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
 
     setSigningMessage(true);
     setError("");
-    setStatus("");  // Clear status since button shows loading
+    setStatus(""); // Clear status since button shows loading
     setSignature("");
 
     try {
@@ -154,7 +154,7 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
             onPress={signMessage}
             loading={signingMessage}
           />
-          
+
           {signature && (
             <View style={styles.signatureContainer}>
               <Text style={styles.resultLabel}>Signature Result</Text>

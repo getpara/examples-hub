@@ -23,7 +23,7 @@ export default function ContractInteractionPage() {
     message: string;
   }>({ show: false, type: "success", message: "" });
 
-  const { data: account } = useAccount();
+  const account = useAccount();
   const { data: wallet } = useWallet();
   const { signer, provider } = useParaSigner();
 
@@ -107,7 +107,7 @@ export default function ContractInteractionPage() {
       });
 
       // Wait for transaction to be mined
-      const receipt = await tx.wait();
+      await tx.wait();
 
       setStatus({
         show: true,

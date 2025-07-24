@@ -6,9 +6,10 @@ interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   children: React.ReactNode;
+  "data-testid"?: string;
 }
 
-export function Modal({ isOpen, onClose, children }: ModalProps) {
+export function Modal({ isOpen, onClose, children, "data-testid": dataTestId }: ModalProps) {
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
@@ -32,9 +33,10 @@ export function Modal({ isOpen, onClose, children }: ModalProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="fixed inset-0 bg-black opacity-50 transition-opacity" />
-      <div className="relative z-50 w-full max-w-md mx-4 bg-white border border-gray-200 rounded-none shadow-xl">
+      <div className="relative z-50 w-full max-w-md mx-4 bg-white border border-gray-200 rounded-none shadow-xl" data-testid={dataTestId}>
         <button
           onClick={onClose}
+          data-testid="modal-close-button"
           className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
           aria-label="Close modal">
           <svg

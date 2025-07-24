@@ -10,11 +10,10 @@ import { SignatureDisplay } from "@/components/ui/SignatureDisplay";
 export default function Home() {
   const [message, setMessage] = useState("Hello Para!");
   const { openModal } = useModal();
-  const { data: account } = useAccount();
+  const { isConnected } = useAccount();
   const { data: wallet } = useWallet();
   const signMessageHook = useSignMessage();
 
-  const isConnected = account?.isConnected;
   const address = wallet?.address;
 
   const handleSubmit = async (e: React.FormEvent) => {

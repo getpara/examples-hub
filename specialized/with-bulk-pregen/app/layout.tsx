@@ -1,6 +1,4 @@
 import type React from "react";
-import { GeistSans } from "geist/font/sans";
-import { GeistMono } from "geist/font/mono";
 import { ParaProvider } from "@/context/ParaProvider";
 import { QueryProvider } from "@/context/QueryProvider";
 import Header from "@/components/header";

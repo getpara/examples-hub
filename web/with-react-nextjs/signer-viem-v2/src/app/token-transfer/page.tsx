@@ -1,6 +1,6 @@
 "use client";
 
-import { useModal, useAccount } from "@getpara/react-sdk";
+import { useModal } from "@getpara/react-sdk";
 import { useParaSigner } from "@/hooks/useParaSigner";
 import { useState, useEffect } from "react";
 import { PARA_TEST_TOKEN_CONTRACT_ADDRESS } from "@/config/contracts";
@@ -47,10 +47,9 @@ export default function TokenTransferPage() {
       const tokenContract = getContract({
         address: contractAddress as `0x${string}`,
         abi: ERC20_ABI,
-        client: publicClient!,
+        client: publicClient,
       });
 
-      const decimals = await tokenContract.read.decimals();
       const balance = await tokenContract.read.balanceOf([address]);
       const symbol = await tokenContract.read.symbol();
 
@@ -97,15 +96,9 @@ export default function TokenTransferPage() {
         throw new Error("Please enter a valid amount greater than 0.");
       }
 
-      // Create contract instance with both clients
-      const tokenContract = getContract({
-        address: contractAddress as `0x${string}`,
-        abi: ERC20_ABI,
-        client: {
-          public: publicClient!,
-          wallet: walletClient!,
-        },
-      });
+      if (!walletClient || !publicClient) {
+        throw new Error("Wallet client not available.");
+      }
 
       setStatus({
         show: true,
@@ -113,8 +106,13 @@ export default function TokenTransferPage() {
         message: "Please confirm the transaction in your wallet...",
       });
 
-      const hash = await tokenContract.write.transfer([to, parseEther(amount)], {
-        account: address,
+      const hash = await walletClient.writeContract({
+        address: contractAddress as `0x${string}`,
+        abi: ERC20_ABI,
+        functionName: 'transfer',
+        args: [to as `0x${string}`, parseEther(amount)],
+        account: address as `0x${string}`,
+        chain: walletClient.chain,
       });
 
       console.log("Transaction submitted:", hash);
@@ -126,11 +124,10 @@ export default function TokenTransferPage() {
         message: "Transaction submitted. Waiting for confirmation...",
       });
 
-      const receipt = await publicClient!.waitForTransactionReceipt({
+      await publicClient.waitForTransactionReceipt({
         hash,
       });
 
-      console.log("Transaction confirmed:", receipt);
 
       setStatus({
         show: true,

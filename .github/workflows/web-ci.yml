@@ -1,0 +1,409 @@
+name: Web CI
+
+on:
+  pull_request:
+    branches: [2.0.0-alpha]
+    paths:
+      - "web/**/src/**" # Source code changes
+      - "web/**/package.json" # Dependencies
+      - "web/**/tsconfig*.json" # TypeScript configuration
+      - "web/**/vite.config.*" # Vite configuration
+      - "web/**/next.config.*" # Next.js configuration
+      - "web/**/tailwind.config.*" # Tailwind configuration
+      - "web/**/postcss.config.*" # PostCSS configuration
+      - "web/**/*.ts" # TypeScript files
+      - "web/**/*.tsx" # React TypeScript files
+      - "web/**/*.js" # JavaScript files
+      - "web/**/*.jsx" # React JavaScript files
+      - "web/**/*.vue" # Vue files
+      - "web/**/*.svelte" # Svelte files
+      - "web/**/*.css" # CSS files
+      - "web/**/*.scss" # SCSS files
+      - "web/**/*.html" # HTML files
+      - ".github/workflows/web-ci.yml"
+      - ".env.ci.example"
+      - "package.json"
+      - "yarn.lock"
+      - ".yarnrc.yml"
+      - ".yarn/**"
+
+  workflow_dispatch:
+    inputs:
+      skip_build:
+        description: "Skip build step (faster iteration)"
+        type: boolean
+        default: false
+      skip_e2e:
+        description: "Skip E2E tests"
+        type: boolean
+        default: false
+
+concurrency:
+  group: web-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "20.19.0"
+  # Improve caching and performance
+  YARN_ENABLE_GLOBAL_CACHE: "false"
+  YARN_NM_MODE: "hardlinks-local"
+  NODE_OPTIONS: "--max-old-space-size=4096"
+
+jobs:
+  # Discover projects
+  collect-projects:
+    runs-on: ubuntu-latest
+    outputs:
+      projects: ${{ steps.collect.outputs.projects }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Discover Projects
+        id: collect
+        run: |
+          # Find all projects with package.json in web folder
+          projects="["
+          first=true
+
+          for framework_dir in web/*; do
+            if [ -d "$framework_dir" ]; then
+              framework_name=$(basename "$framework_dir")
+              
+              # Check if framework dir itself has package.json (single project)
+              if [ -f "$framework_dir/package.json" ]; then
+                if [ "$first" != "true" ]; then projects+=","; fi
+                projects+="{\"path\":\"$framework_dir\",\"name\":\"$framework_name\"}"
+                first=false
+              else
+                # Check subdirectories for multiple projects
+                for project_dir in $framework_dir/*; do
+                  if [ -d "$project_dir" ] && [ -f "$project_dir/package.json" ]; then
+                    project_name=$(basename "$project_dir")
+                    if [ "$first" != "true" ]; then projects+=","; fi
+                    projects+="{\"path\":\"$project_dir\",\"name\":\"$framework_name/$project_name\"}"
+                    first=false
+                  fi
+                done
+              fi
+            fi
+          done
+
+          projects+="]"
+          echo "projects=$projects" >> $GITHUB_OUTPUT
+
+          # Debug output
+          echo "Found projects:"
+          echo "$projects" | jq .
+
+  # Test projects
+  test-project:
+    needs: collect-projects
+    runs-on: ubuntu-latest
+    timeout-minutes: 15 # Per-job timeout to prevent hangs
+    strategy:
+      fail-fast: false
+      max-parallel: 2 # Reduced to minimize storage usage
+      matrix:
+        project: ${{ fromJson(needs.collect-projects.outputs.projects) }}
+
+    name: Test ${{ matrix.project.name }}
+
+    env:
+      # Base environment variables
+      PARA_API_KEY_BETA: ${{ secrets.PARA_API_KEY_BETA }}
+      PARA_API_KEY_SANDBOX: ${{ secrets.PARA_API_KEY_SANDBOX }}
+      PARA_ENVIRONMENT: ${{ secrets.PARA_ENVIRONMENT }}
+      # Vite-specific environment variables
+      VITE_PARA_API_KEY: ${{ secrets.VITE_PARA_API_KEY }}
+      VITE_PARA_ENVIRONMENT: ${{ secrets.VITE_PARA_ENVIRONMENT }}
+      # Next.js-specific environment variables
+      NEXT_PUBLIC_PARA_API_KEY: ${{ secrets.NEXT_PUBLIC_PARA_API_KEY }}
+      NEXT_PUBLIC_PARA_ENVIRONMENT: ${{ secrets.NEXT_PUBLIC_PARA_ENVIRONMENT }}
+      # WalletConnect project IDs (if needed)
+      VITE_WALLET_CONNECT_PROJECT_ID: ${{ secrets.VITE_WALLET_CONNECT_PROJECT_ID }}
+      NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            ${{ matrix.project.path }}
+            .github
+            package.json
+            yarn.lock
+            .yarnrc.yml
+            .yarn
+
+      - name: Clean Workspace
+        run: |
+          # Ensure we start with a clean workspace
+          echo "🧹 Pre-job cleanup..."
+          # Remove any artifacts that might exist from previous runs
+          find . -name "node_modules" -type d -prune -exec rm -rf '{}' + 2>/dev/null || true
+          find . -name ".next" -type d -prune -exec rm -rf '{}' + 2>/dev/null || true
+          find . -name ".vite" -type d -prune -exec rm -rf '{}' + 2>/dev/null || true
+          find . -name ".nuxt" -type d -prune -exec rm -rf '{}' + 2>/dev/null || true
+          find . -name "dist" -type d -prune -exec rm -rf '{}' + 2>/dev/null || true
+          find . -name "build" -type d -prune -exec rm -rf '{}' + 2>/dev/null || true
+          find . -name ".yarn-cache-local" -type d -prune -exec rm -rf '{}' + 2>/dev/null || true
+          echo "✅ Pre-cleanup complete"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Run Tests
+        id: test
+        run: |
+          cd ${{ matrix.project.path }}
+
+          # Initialize result tracking
+          PROJECT_NAME="${{ matrix.project.name }}"
+          LINT_STATUS="⏭️ skipped"
+          TYPECHECK_STATUS="⏭️ skipped"
+          BUILD_STATUS="⏭️ skipped"
+          FAILED=false
+          START_TIME=$(date +%s)
+
+          # Create summary header for this project
+          echo "### Testing: $PROJECT_NAME" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Show initial disk usage
+          echo "💾 Initial disk usage:" >> $GITHUB_STEP_SUMMARY
+          df -h | grep -E "Filesystem|/$" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Install dependencies with optimizations
+          echo "📦 Installing dependencies..."
+          # Use project-specific yarn cache to avoid conflicts
+          export YARN_CACHE_FOLDER="$(pwd)/.yarn-cache-local"
+          if yarn install --immutable --network-timeout 60000; then
+            echo "✅ Dependencies installed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Failed to install dependencies" >> $GITHUB_STEP_SUMMARY
+            FAILED=true
+            exit 1
+          fi
+
+          # Lint
+          if grep -q '"lint"' package.json; then
+            echo ""
+            echo "🔍 Running lint..."
+            if timeout 300 yarn lint; then
+              LINT_STATUS="✅ passed"
+              echo "- Lint: ✅ passed" >> $GITHUB_STEP_SUMMARY
+            else
+              LINT_STATUS="❌ failed"
+              FAILED=true
+              echo "- Lint: ❌ failed" >> $GITHUB_STEP_SUMMARY
+            fi
+            
+            # Clean lint artifacts immediately
+            echo "🧹 Cleaning lint artifacts..."
+            rm -rf .eslintcache .stylelintcache
+          else
+            echo "- Lint: ⏭️ no script" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          # Typecheck
+          if grep -q '"typecheck"' package.json; then
+            echo ""
+            echo "📝 Running typecheck..."
+            if timeout 300 yarn typecheck; then
+              TYPECHECK_STATUS="✅ passed"
+              echo "- Typecheck: ✅ passed" >> $GITHUB_STEP_SUMMARY
+            else
+              TYPECHECK_STATUS="❌ failed"
+              FAILED=true
+              echo "- Typecheck: ❌ failed" >> $GITHUB_STEP_SUMMARY
+              # Skip build if typecheck fails
+              echo "⏭️ Skipping build due to typecheck failure"
+              BUILD_STATUS="⏭️ skipped (typecheck failed)"
+              echo "- Build: ⏭️ skipped (typecheck failed)" >> $GITHUB_STEP_SUMMARY
+            fi
+            
+            # Clean TypeScript artifacts immediately
+            echo "🧹 Cleaning TypeScript artifacts..."
+            rm -rf tsconfig.tsbuildinfo
+          else
+            echo "- Typecheck: ⏭️ no script" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          # Build (only if typecheck passed or doesn't exist)
+          if [[ "$TYPECHECK_STATUS" != "❌ failed" ]] && [[ "${{ github.event.inputs.skip_build }}" != "true" ]]; then
+            if grep -q '"build"' package.json; then
+              echo ""
+              echo "🔨 Running build..."
+              if timeout 300 yarn build; then
+                BUILD_STATUS="✅ passed"
+                echo "- Build: ✅ passed" >> $GITHUB_STEP_SUMMARY
+              else
+                BUILD_STATUS="❌ failed"
+                FAILED=true
+                echo "- Build: ❌ failed" >> $GITHUB_STEP_SUMMARY
+              fi
+              
+              # Clean build artifacts immediately after verification
+              echo "🧹 Cleaning build artifacts..."
+              rm -rf .next .nuxt .vite dist build out .turbo
+              rm -rf .parcel-cache .svelte-kit coverage
+            else
+              echo "- Build: ⏭️ no script" >> $GITHUB_STEP_SUMMARY
+            fi
+          fi
+
+          # Calculate execution time
+          END_TIME=$(date +%s)
+          DURATION=$((END_TIME - START_TIME))
+          echo "- Duration: ${DURATION}s" >> $GITHUB_STEP_SUMMARY
+
+          # Comprehensive cleanup to prevent disk space issues
+          echo ""
+          echo "🧹 Performing comprehensive cleanup..."
+
+          # Clean node_modules
+          echo "  - Removing node_modules..."
+          rm -rf node_modules
+
+          # Clean yarn caches and artifacts
+          echo "  - Removing yarn caches..."
+          rm -rf .yarn-cache-local
+          rm -rf .yarn/cache
+          rm -rf .yarn/unplugged
+          rm -rf .yarn/build-state.yml
+          rm -rf .yarn/install-state.gz
+
+          # Clean build artifacts (in case any were missed)
+          echo "  - Removing remaining build artifacts..."
+          rm -rf .next .nuxt .vite dist build out .turbo
+          rm -rf .parcel-cache .svelte-kit coverage
+
+          # Clean other common artifacts
+          echo "  - Removing other artifacts..."
+          rm -rf .eslintcache .stylelintcache tsconfig.tsbuildinfo
+          rm -rf *.log
+
+          # Show final disk usage for this project
+          echo "💾 Final disk usage after cleanup:" >> $GITHUB_STEP_SUMMARY
+          df -h | grep -E "Filesystem|/$" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "✅ Cleanup complete"
+
+          # Set outputs for summary
+          echo "project_name=$PROJECT_NAME" >> $GITHUB_OUTPUT
+          echo "lint_status=$LINT_STATUS" >> $GITHUB_OUTPUT
+          echo "typecheck_status=$TYPECHECK_STATUS" >> $GITHUB_OUTPUT
+          echo "build_status=$BUILD_STATUS" >> $GITHUB_OUTPUT
+          echo "duration=$DURATION" >> $GITHUB_OUTPUT
+
+          if [ "$FAILED" = true ]; then
+            echo "failed=true" >> $GITHUB_OUTPUT
+            exit 1
+          else
+            echo "failed=false" >> $GITHUB_OUTPUT
+          fi
+
+  # End-to-end tests
+  e2e:
+    needs: [collect-projects, test-project]
+    if: |
+      always() && 
+      needs.collect-projects.result == 'success' &&
+      github.event.inputs.skip_e2e != 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30 # E2E tests need more time
+
+    name: E2E Web Tests
+
+    env:
+      # Base environment variables
+      PARA_API_KEY_BETA: ${{ secrets.PARA_API_KEY_BETA }}
+      PARA_API_KEY_SANDBOX: ${{ secrets.PARA_API_KEY_SANDBOX }}
+      PARA_ENVIRONMENT: ${{ secrets.PARA_ENVIRONMENT }}
+      # Vite-specific environment variables
+      VITE_PARA_API_KEY: ${{ secrets.VITE_PARA_API_KEY }}
+      VITE_PARA_ENVIRONMENT: ${{ secrets.VITE_PARA_ENVIRONMENT }}
+      # Next.js-specific environment variables
+      NEXT_PUBLIC_PARA_API_KEY: ${{ secrets.NEXT_PUBLIC_PARA_API_KEY }}
+      NEXT_PUBLIC_PARA_ENVIRONMENT: ${{ secrets.NEXT_PUBLIC_PARA_ENVIRONMENT }}
+      # WalletConnect project IDs (if needed)
+      VITE_WALLET_CONNECT_PROJECT_ID: ${{ secrets.VITE_WALLET_CONNECT_PROJECT_ID }}
+      NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install Dependencies
+        run: |
+          # Use local yarn cache to avoid conflicts
+          export YARN_CACHE_FOLDER="$(pwd)/.yarn-cache-local"
+          yarn install --immutable --network-timeout 60000
+
+      - name: Install Playwright
+        timeout-minutes: 3
+        run: npx playwright install chromium
+
+      - name: Run E2E Tests
+        id: e2e-test
+        timeout-minutes: 25
+        run: |
+          echo "### E2E Web Tests" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Run all web E2E tests
+          xvfb-run yarn test:web
+
+          if [ $? -eq 0 ]; then
+            echo "✅ All web E2E tests passed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ E2E tests failed" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
+
+      - name: Upload Playwright Report
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report-web
+          path: playwright-report/
+          retention-days: 7
+
+  # Summary job
+  summary:
+    if: always()
+    needs: [test-project, e2e]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate Report
+        run: |
+          echo "# 📊 Web CI Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Overall status
+          PROJECT_STATUS="${{ needs.test-project.result }}"
+          E2E_STATUS="${{ needs.e2e.result }}"
+
+          echo "## Overall Status" >> $GITHUB_STEP_SUMMARY
+          echo "| Component | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Project Tests | ${{ needs.test-project.result == 'success' && '✅ Passed' || needs.test-project.result == 'failure' && '❌ Failed' || '⏭️ Skipped' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| E2E Tests | ${{ needs.e2e.result == 'success' && '✅ Passed' || needs.e2e.result == 'failure' && '❌ Failed' || '⏭️ Skipped' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Final result
+          if [ "$PROJECT_STATUS" = "success" ] && [ "$E2E_STATUS" = "success" ]; then
+            echo "## ✅ All checks passed!" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "## ❌ Some checks failed" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Please check the individual job logs for details." >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi

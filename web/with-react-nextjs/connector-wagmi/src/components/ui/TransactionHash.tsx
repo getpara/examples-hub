@@ -13,12 +13,13 @@ export function TransactionHash({ txHash }: TransactionHashProps) {
           href={`https://sepolia.etherscan.io/tx/${txHash}`}
           target="_blank"
           rel="noopener noreferrer"
+          data-testid="tx-etherscan-link"
           className="px-3 py-1 text-sm bg-gray-900 text-white hover:bg-gray-950 transition-colors rounded-none cursor-pointer">
           View on Etherscan
         </a>
       </div>
       <div className="p-6">
-        <p className="text-sm font-mono break-all text-gray-600 bg-white p-4 border border-gray-200">{txHash}</p>
+        <p className="text-sm font-mono break-all text-gray-600 bg-white p-4 border border-gray-200" data-testid="tx-hash-display">{txHash}</p>
       </div>
     </div>
   );

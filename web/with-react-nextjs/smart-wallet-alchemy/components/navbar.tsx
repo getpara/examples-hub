@@ -8,7 +8,7 @@ import Link from "next/link";
 export default function Navbar() {
   const { openModal } = useModal();
   const { data: wallet } = useWallet();
-  const { data: account, isLoading } = useAccount();
+  const { isConnected, isLoading } = useAccount();
 
   return (
     <header className="px-4 lg:px-6 h-14 flex items-center justify-between border-b bg-background sticky top-0 z-50">
@@ -22,7 +22,7 @@ export default function Navbar() {
         {/* Optionally, add other navigation links here if needed */}
         {/* Example: <Link href="/dashboard" className="text-sm font-medium hover:underline">Dashboard</Link> */}
 
-        {!isLoading && account?.isConnected && wallet?.address ? (
+        {!isLoading && isConnected && wallet?.address ? (
           <Button
             variant="outline"
             onClick={() => openModal()}

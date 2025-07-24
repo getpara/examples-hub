@@ -6,13 +6,13 @@ import { ParaSolanaWeb3Signer } from "@getpara/solana-web3.js-v1-integration";
 import { useSolana } from "./useSolana";
 
 export function useParaSigner() {
-  const { data: account } = useAccount();
+  const { isConnected } = useAccount();
   const client = useClient();
   const { connection } = useSolana();
   const [signer, setSigner] = useState<ParaSolanaWeb3Signer | null>(null);
 
   useEffect(() => {
-    if (account?.isConnected && connection && client) {
+    if (isConnected && connection && client) {
       try {
         const newSigner = new ParaSolanaWeb3Signer(client, connection);
         setSigner(newSigner);
@@ -23,7 +23,7 @@ export function useParaSigner() {
     } else {
       setSigner(null);
     }
-  }, [account?.isConnected, connection, client]);
+  }, [isConnected, connection, client]);
 
   return {
     signer,

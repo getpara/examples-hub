@@ -23,9 +23,9 @@ export function PhoneModal() {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [verificationCode, setVerificationCode] = useState("");
   const [error, setError] = useState("");
-  
+
   const popupWindow = useRef<Window | null>(null);
-  
+
   const {
     signUpOrLoginAsync,
     isSigningUpOrLoggingIn,
@@ -36,11 +36,8 @@ export function PhoneModal() {
     logoutAsync,
     isLoggingOut,
   } = useParaAuth();
-  
-  const {
-    createWalletAsync,
-    waitForWalletCreationAsync,
-  } = useParaWallet();
+
+  const { createWalletAsync, waitForWalletCreationAsync } = useParaWallet();
 
   // Reset state when modal closes
   useEffect(() => {
@@ -56,7 +53,7 @@ export function PhoneModal() {
 
   // Close modal after successful authentication (but not when already connected)
   const [wasConnected, setWasConnected] = useState(isConnected);
-  
+
   useEffect(() => {
     // If we transitioned from not connected to connected, close the modal
     if (!wasConnected && isConnected && isOpen) {
@@ -72,80 +69,80 @@ export function PhoneModal() {
 
   const handlePhoneSubmit = async () => {
     setError("");
-    
+
     try {
       const authState = await signUpOrLoginAsync({ phoneNumber, countryCode });
-      
+
       if (authState.stage === "verify") {
         setStep("verify");
       } else if (authState.stage === "login") {
         setStep("login");
         openPopup(authState.passkeyUrl, "loginPopup", "popup=true");
-        
+
         const { needsWallet } = await waitForLoginAsync({
           isCanceled: () => popupWindow.current?.closed ?? true,
         });
-        
+
         if (needsWallet) {
           await createWalletAsync({ skipDistribute: false });
         }
-        
+
         // Force immediate query refresh
         await queryClient.invalidateQueries({ queryKey: ["paraAccount"] });
-        
+
         // The connection state change will close the modal
       }
-    } catch (err: any) {
-      setError(err.message || "Authentication failed");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Authentication failed");
     }
   };
 
   const handleVerification = async () => {
     setError("");
-    
+
     try {
       const authState = await verifyAccountAsync({ verificationCode });
       openPopup(authState.passkeyUrl, "signUpPopup", "popup=true");
-      
+
       await waitForWalletCreationAsync({
         isCanceled: () => Boolean(popupWindow.current?.closed),
       });
-      
+
       // Force immediate query refresh
       await queryClient.invalidateQueries({ queryKey: ["paraAccount"] });
-      
+
       // The connection state change will close the modal
-    } catch (err: any) {
-      setError(
-        err.message === "Invalid verification code"
-          ? "Verification code incorrect or expired"
-          : err.message || "Verification failed"
-      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Verification failed");
     }
   };
 
   const handleLogout = async () => {
     setError("");
-    
+
     try {
       await logoutAsync();
       closeModal();
-    } catch (err: any) {
-      setError(err.message || "Failed to logout");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to logout");
     }
   };
 
   const isLoading = isSigningUpOrLoggingIn || isVerifying || isWaitingForLogin || isLoggingOut;
 
   return (
-    <Modal isOpen={isOpen} onClose={closeModal}>
+    <Modal
+      isOpen={isOpen}
+      onClose={closeModal}>
       <div className="space-y-4">
         <h2 className="text-xl font-bold">
-          {isConnected ? "Account Settings" : 
-            step === "phone" ? "Connect with Phone" :
-            step === "verify" ? "Verify Your Phone" :
-            "Logging In..."
-          }
+          {isConnected
+            ? "Account Settings"
+            : step === "phone"
+            ? "Connect with Phone"
+            : step === "verify"
+            ? "Verify Your Phone"
+            : "Logging In..."}
         </h2>
 
         {isConnected ? (

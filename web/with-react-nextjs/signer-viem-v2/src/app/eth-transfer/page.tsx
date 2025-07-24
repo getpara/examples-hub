@@ -1,6 +1,6 @@
 "use client";
 
-import { useModal, useAccount } from "@getpara/react-sdk";
+import { useModal } from "@getpara/react-sdk";
 import { useParaSigner } from "@/hooks/useParaSigner";
 import { useState, useEffect } from "react";
 import { formatEther, parseEther, parseGwei } from "viem";
@@ -19,7 +19,7 @@ export default function EthTransferPage() {
     message: string;
   }>({ show: false, type: "success", message: "" });
 
-  const { isConnected, address, walletClient, publicClient, walletId } = useParaSigner();
+  const { isConnected, address, walletClient, publicClient } = useParaSigner();
   const { openModal } = useModal();
 
   const fetchBalance = async () => {

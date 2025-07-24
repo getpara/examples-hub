@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  act-runner:
+    image: catthehacker/ubuntu:act-24.04
+    volumes:
+      - .:/workspace
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ~/.actrc:/root/.actrc:ro
+    environment:
+      - CI=true
+      - GITHUB_ACTIONS=true
+      - RUNNER_OS=Linux
+      - PARA_API_KEY_BETA=${PARA_API_KEY_BETA}
+      - PARA_API_KEY_SANDBOX=${PARA_API_KEY_SANDBOX}
+    working_dir: /workspace
+    command: act -W .github/workflows/tests.yml -j example-hub-e2e-tests

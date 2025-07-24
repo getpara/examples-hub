@@ -15,12 +15,11 @@ export default function Home() {
   const [amount, setAmount] = useState("");
 
   const { openModal } = useModal();
-  const { data: account } = useAccount();
+  const { isConnected } = useAccount();
   const { data: wallet } = useWallet();
 
   const address = wallet?.address;
   const walletId = wallet?.id;
-  const isConnected = account?.isConnected;
 
   // Use custom hooks
   const { data: balance, isLoading: isBalanceLoading, refetch: refetchBalance } = useBalance(address);

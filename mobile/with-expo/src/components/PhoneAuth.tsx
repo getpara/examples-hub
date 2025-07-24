@@ -6,6 +6,7 @@ import { Input } from "./common/Input";
 import { Button } from "./common/Button";
 import { StatusDisplay } from "./common/StatusDisplay";
 import { SecurityChoice } from "./SecurityChoice";
+import { AuthState, AuthStateSignup } from "@getpara/react-native-wallet";
 
 interface PhoneAuthProps {
   onSuccess: () => void;
@@ -15,12 +16,18 @@ interface PhoneAuthProps {
   onHideSecurityChoice?: () => void;
 }
 
-export const PhoneAuth: React.FC<PhoneAuthProps> = ({ onSuccess, onShowVerification, onHideVerification, onShowSecurityChoice, onHideSecurityChoice }) => {
+export const PhoneAuth: React.FC<PhoneAuthProps> = ({
+  onSuccess,
+  onShowVerification,
+  onHideVerification,
+  onShowSecurityChoice,
+  onHideSecurityChoice,
+}) => {
   const [phone, setPhone] = useState("");
   const [verificationCode, setVerificationCode] = useState("");
   const [showVerification, setShowVerification] = useState(false);
   const [showSecurityChoice, setShowSecurityChoice] = useState(false);
-  const [authState, setAuthState] = useState<any>(null);
+  const [authState, setAuthState] = useState<AuthState | null>(null);
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
@@ -61,7 +68,7 @@ export const PhoneAuth: React.FC<PhoneAuthProps> = ({ onSuccess, onShowVerificat
           setStatus("Redirecting to password login...");
           const APP_SCHEME_PHONE = "para-sdk-demo";
           const APP_SCHEME_REDIRECT_URL = `${APP_SCHEME_PHONE}://para`;
-          
+
           await openAuthSessionAsync(authStateResult.passwordUrl, APP_SCHEME_REDIRECT_URL);
           await para.waitForLogin({});
           setStatus("");
@@ -124,32 +131,37 @@ export const PhoneAuth: React.FC<PhoneAuthProps> = ({ onSuccess, onShowVerificat
     }
   };
 
-  const handleSecurityChoice = async (choice: 'passkey' | 'password') => {
+  const handleSecurityChoice = async (choice: "passkey" | "password") => {
     setLoading(true);
-    setError('');
+    setError("");
 
     try {
-      if (choice === 'passkey') {
+      if (choice === "passkey") {
         // Register passkey for future logins
-        setStatus('Creating passkey...');
-        await para.registerPasskey(authState);
-        setStatus('');
+        setStatus("Creating passkey...");
+        await para.registerPasskey(authState as AuthStateSignup);
+        setStatus("");
         onHideSecurityChoice?.();
         onSuccess();
       } else {
         // Redirect to password creation
-        setStatus('Redirecting to password creation...');
-        const APP_SCHEME_PHONE = 'para-sdk-demo';
+        setStatus("Redirecting to password creation...");
+        const APP_SCHEME_PHONE = "para-sdk-demo";
         const APP_SCHEME_REDIRECT_URL = `${APP_SCHEME_PHONE}://para`;
-        
-        await openAuthSessionAsync(authState.passwordUrl, APP_SCHEME_REDIRECT_URL);
-        await para.waitForWalletCreation({});
-        setStatus('');
-        onHideSecurityChoice?.();
-        onSuccess();
+
+        // Narrow type to AuthStateSignup to access passwordUrl
+        if (authState && "passwordUrl" in authState && typeof authState.passwordUrl === "string") {
+          await openAuthSessionAsync(authState.passwordUrl, APP_SCHEME_REDIRECT_URL);
+          await para.waitForWalletCreation({});
+          setStatus("");
+          onHideSecurityChoice?.();
+          onSuccess();
+        } else {
+          setError("Password URL is missing. Please try again.");
+        }
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Security setup failed');
+      setError(err instanceof Error ? err.message : "Security setup failed");
     } finally {
       setLoading(false);
     }
@@ -184,15 +196,15 @@ export const PhoneAuth: React.FC<PhoneAuthProps> = ({ onSuccess, onShowVerificat
             keyboardType="number-pad"
             maxLength={6}
           />
-          
-          {phone.includes('555') && (
+
+          {phone.includes("555") && (
             <View style={styles.betaReminder}>
               <Text style={styles.betaReminderText}>
                 <Text style={styles.betaBold}>Beta Testing:</Text> Any random OTP will work
               </Text>
             </View>
           )}
-          
+
           <Button
             title="Verify"
             onPress={handleVerification}
@@ -207,7 +219,10 @@ export const PhoneAuth: React.FC<PhoneAuthProps> = ({ onSuccess, onShowVerificat
           />
         </>
       ) : (
-        <SecurityChoice onChoice={handleSecurityChoice} loading={loading} />
+        <SecurityChoice
+          onChoice={handleSecurityChoice}
+          loading={loading}
+        />
       )}
 
       <StatusDisplay

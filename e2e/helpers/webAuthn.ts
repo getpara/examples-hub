@@ -46,3 +46,25 @@ export async function setIsUserVerifyingPlatformAuthenticatorAvailable(page: Pag
     };
   });
 }
+
+export async function removeVirtualAuthenticator(
+  authenticator: CDPSession,
+  authenticatorId: string,
+) {
+  await authenticator.send('WebAuthn.removeVirtualAuthenticator', {
+    authenticatorId,
+  });
+}
+
+export async function clearCredentials(
+  authenticator: CDPSession,
+  authenticatorId: string,
+) {
+  await authenticator.send('WebAuthn.clearCredentials', {
+    authenticatorId,
+  });
+}
+
+export async function disableWebAuthn(authenticator: CDPSession) {
+  await authenticator.send('WebAuthn.disable');
+}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useModal, useAccount } from "@getpara/react-sdk";
+import { useModal } from "@getpara/react-sdk";
 import { useParaSigner } from "@/hooks/useParaSigner";
 import { useState, useEffect } from "react";
 import ParaTestToken from "@/contracts/artifacts/contracts/ParaTestToken.sol/ParaTestToken.json";
@@ -67,14 +67,18 @@ export default function ContractDeploymentPage() {
         message: "Deploying contract. Please confirm the transaction in your wallet...",
       });
 
+      if (!walletClient || !publicClient) {
+        throw new Error("Wallet client not available.");
+      }
+
       // Deploy the contract using viem
-      const hash = await walletClient!.deployContract({
+      const hash = await walletClient.deployContract({
         abi: ParaTestToken.abi,
         bytecode: (ParaTestToken.bytecode.startsWith("0x")
           ? ParaTestToken.bytecode
           : `0x${ParaTestToken.bytecode}`) as `0x${string}`,
-        account: address!,
-        chain: publicClient!.chain,
+        account: address as `0x${string}`,
+        chain: publicClient.chain,
       });
 
       setStatus({
@@ -84,7 +88,7 @@ export default function ContractDeploymentPage() {
       });
 
       // Wait for transaction receipt
-      const receipt = await publicClient!.waitForTransactionReceipt({
+      const receipt = await publicClient.waitForTransactionReceipt({
         hash,
       });
 

@@ -73,8 +73,8 @@ export function useParaAuth() {
       }
       
       return authState;
-    } catch (error: any) {
-      state.error = error.message || 'Authentication failed';
+    } catch (error) {
+      state.error = error instanceof Error ? error.message : 'Authentication failed';
       throw error;
     } finally {
       state.isLoading = false;
@@ -98,8 +98,8 @@ export function useParaAuth() {
       }
       
       return authState;
-    } catch (error: any) {
-      state.error = error.message || 'Authentication failed';
+    } catch (error) {
+      state.error = error instanceof Error ? error.message : 'Authentication failed';
       throw error;
     } finally {
       state.isLoading = false;
@@ -113,10 +113,10 @@ export function useParaAuth() {
     try {
       const authState = await para.verifyNewAccount({ verificationCode });
       return authState;
-    } catch (error: any) {
-      state.error = error.message === 'Invalid verification code'
+    } catch (error) {
+      state.error = error instanceof Error && error.message === 'Invalid verification code'
         ? 'Verification code incorrect or expired'
-        : error.message || 'Verification failed';
+        : error instanceof Error ? error.message : 'Verification failed';
       throw error;
     } finally {
       state.isLoading = false;
@@ -149,8 +149,8 @@ export function useParaAuth() {
       }
       
       return authState;
-    } catch (error: any) {
-      state.error = error.message || 'OAuth authentication failed';
+    } catch (error) {
+      state.error = error instanceof Error ? error.message : 'OAuth authentication failed';
       throw error;
     } finally {
       state.isLoading = false;
@@ -187,8 +187,8 @@ export function useParaAuth() {
       await para.logout();
       await checkAuthentication();
       closeModal();
-    } catch (error: any) {
-      state.error = error.message || 'Failed to logout';
+    } catch (error) {
+      state.error = error instanceof Error ? error.message : 'Failed to logout';
       throw error;
     } finally {
       state.isLoading = false;

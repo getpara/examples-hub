@@ -1,4 +1,5 @@
 import { Check, Loader2, Circle, X, AlertCircle, RefreshCw, Clock } from "lucide-react";
+import type { StepStatus } from "@/types/squid";
 
 type StepType =
   | "approve"
@@ -47,7 +48,7 @@ export function StepIndicator({ currentStep, steps: customSteps }: StepIndicator
       const stepIndex = stepOrder.indexOf(stepId);
 
       if (stepIndex < errorIndex) return "completed";
-      if (stepIndex === errorIndex) return currentStep as any; // Return the actual error type
+      if (stepIndex === errorIndex) return currentStep as StepStatus; // Return the actual error type
       return "pending";
     }
 

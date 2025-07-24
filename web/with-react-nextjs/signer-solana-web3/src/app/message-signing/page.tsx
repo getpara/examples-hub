@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { verifySignature, getBase58Decoder, getBase58Encoder, getUtf8Encoder, SignatureBytes } from "@solana/kit";
+import { getBase58Decoder, getBase58Encoder, getUtf8Encoder } from "@solana/kit";
 import nacl from "tweetnacl";
 import { useAccount, useWallet } from "@getpara/react-sdk";
 import { useParaSigner } from "@/hooks/useParaSigner";
@@ -18,7 +18,7 @@ export default function MessageSigningPage() {
   }>({ show: false, type: "success", message: "" });
 
   const { signer } = useParaSigner();
-  const { data: account } = useAccount();
+  const account = useAccount();
   const { data: wallet } = useWallet();
 
   const walletId = wallet?.id;
@@ -109,7 +109,15 @@ export default function MessageSigningPage() {
 
       const messageBytes = new Uint8Array(getUtf8Encoder().encode(message));
       const signatureBytes = new Uint8Array(getBase58Encoder().encode(signature));
-      const publicKeyBuffer = signer?.sender!.toBytes()!;
+      if (!signer?.sender) {
+        setStatus({
+          show: true,
+          type: "error",
+          message: "No signer found. Please reconnect your wallet.",
+        });
+        return;
+      }
+      const publicKeyBuffer = signer.sender.toBytes();
       const isValid = nacl.sign.detached.verify(messageBytes, signatureBytes, publicKeyBuffer);
 
       setRecoveredAddress(isValid);

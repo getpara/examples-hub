@@ -28,7 +28,7 @@ export default function PermitSigningPage() {
     s: string;
   } | null>(null);
 
-  const { data: account } = useAccount();
+  const account = useAccount();
   const { data: wallet } = useWallet();
   const { signer, provider } = useParaSigner();
 
@@ -85,8 +85,7 @@ export default function PermitSigningPage() {
       // Calculate deadline (1 hour from now)
       const deadline = Math.floor(Date.now() / 1000) + 3600;
 
-      // Get domain separator
-      const domainSeparator = await contract.DOMAIN_SEPARATOR();
+      // Get contract name
       const name = await contract.name();
 
       // Prepare permit data

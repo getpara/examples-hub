@@ -8,8 +8,8 @@ import { createConfig, CreateConfigParameters, http, cookieStorage, createStorag
 import { coinbaseWallet, injected, metaMask, walletConnect } from "wagmi/connectors";
 import { sepolia } from "wagmi/chains";
 
-const connector = paraConnector({
-  appName: "Para RainbowKit Example",
+const connector = para ? paraConnector({
+  appName: "Para Wagmi Example",
   authLayout: ["AUTH:FULL", "EXTERNAL:FULL"],
   chains: [sepolia],
   disableEmailLogin: false,
@@ -33,12 +33,12 @@ const connector = paraConnector({
     mode: "light",
   },
   twoFactorAuthEnabled: false,
-});
+}) : null;
 
 const config = {
   chains: [sepolia],
   connectors: [
-    connector,
+    ...(connector ? [connector] : []),
     walletConnect({
       projectId: WALLET_CONNECT_PROJECT_ID,
     }),

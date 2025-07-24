@@ -9,7 +9,7 @@ export function useDeploySmartWallet() {
   const queryClient = useQueryClient();
   const para = useClient();
   const { data: wallet } = useWallet();
-  const { data: account } = useAccount();
+  const { isConnected } = useAccount();
   const { toast } = useToast();
   const [deployingAddress, setDeployingAddress] = useState<string | null>(null);
   const timeoutToastShownRef = useRef(false);
@@ -53,7 +53,7 @@ export function useDeploySmartWallet() {
 
   return useMutation({
     mutationFn: async ({ index, name }: { index: number; name: string }) => {
-      if (!para || !wallet?.id || !account?.isConnected) {
+      if (!para || !wallet?.id || !isConnected) {
         throw new Error('Not connected');
       }
 

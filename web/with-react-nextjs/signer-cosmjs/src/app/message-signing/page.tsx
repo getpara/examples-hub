@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useAccount } from "@getpara/react-sdk";
 import { useParaSigner } from "@/hooks/useParaSigner";
 import { useAccountAddress } from "@/hooks/useAccountAddress";
-import { fromBase64 } from "@cosmjs/encoding";
 
 export default function MessageSigningPage() {
   const [message, setMessage] = useState("Hello from Para + CosmJS!");
@@ -16,7 +15,7 @@ export default function MessageSigningPage() {
     message: string;
   }>({ show: false, type: "success", message: "" });
 
-  const { data: account } = useAccount();
+  const account = useAccount();
   const { signingClient } = useParaSigner();
   const address = useAccountAddress();
 
@@ -40,24 +39,22 @@ export default function MessageSigningPage() {
         message: "Please sign the message in your wallet...",
       });
 
-      // For arbitrary message signing, we can use the signer directly
-      const signer = (signingClient as any).signer;
-      if (!signer || !signer.signDirect) {
-        throw new Error("Signer does not support message signing");
-      }
-
-      // Create a simple sign doc for the message
-      const signDoc = {
-        bodyBytes: new TextEncoder().encode(JSON.stringify({
-          messages: [],
-          memo: message,
-        })),
-        authInfoBytes: new Uint8Array(0),
-        chainId: "",
-        accountNumber: BigInt(0),
+      // Create a transaction with just a memo to sign
+      const msgs: never[] = [];
+      const fee = {
+        amount: [{ denom: "uatom", amount: "0" }],
+        gas: "0",
       };
-
-      const result = await signer.signDirect(address, signDoc);
+      
+      // Sign and broadcast with simulation mode (won't actually send)
+      const txRaw = await signingClient.sign(address, msgs, fee, message);
+      
+      // Extract the signature from the transaction
+      const result = {
+        signature: {
+          signature: Buffer.from(txRaw.signatures[0]).toString('base64')
+        }
+      };
       
       setSignature(result.signature.signature);
       setStatus({

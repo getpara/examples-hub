@@ -8,7 +8,7 @@ interface HeaderProps {
 
 export function Header({ isPregenReady = false }: HeaderProps) {
   const { openModal } = useModal();
-  const { data: account } = useAccount();
+  const { isConnected } = useAccount();
 
   return (
     <header className="flex items-center justify-between p-6">
@@ -25,7 +25,7 @@ export function Header({ isPregenReady = false }: HeaderProps) {
           }
         `}
       >
-        {account?.isConnected ? "Connected" : "Connect Wallet"}
+        {isConnected ? "Connected" : "Connect Wallet"}
       </button>
     </header>
   );

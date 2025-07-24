@@ -14,7 +14,6 @@ import { useBalance, weiToUsd } from "@/hooks/useBalance";
 import { useEthPrice } from "@/hooks/useEthPrice";
 import { createParaAlchemyClient, generateSalt } from "@/lib/smart-wallet/core";
 import { parseEther, isAddress, formatEther } from "viem";
-import { getEOAAddress } from "@/lib/utils/account";
 
 export default function SendAssetsPage() {
   const params = useParams();
@@ -22,7 +21,7 @@ export default function SendAssetsPage() {
   const { toast } = useToast();
   const para = useClient();
   const { data: wallet } = useWallet();
-  const { data: account } = useAccount();
+  const { isConnected } = useAccount();
 
   const walletAddress = params.address as string;
   const { balance, isLoading: isBalanceLoading } = useBalance(walletAddress);
@@ -101,7 +100,7 @@ export default function SendAssetsPage() {
 
   const handleSend = async () => {
     if (!validateForm()) return;
-    if (!para || !wallet?.id || !account?.isConnected) {
+    if (!para || !wallet?.id || !isConnected) {
       toast({ title: "Error", description: "Wallet not connected", variant: "destructive" });
       return;
     }
@@ -174,7 +173,7 @@ export default function SendAssetsPage() {
               </div>
             </div>
             {(() => {
-              const eoaAddress = getEOAAddress(account, wallet);
+              const eoaAddress = wallet?.address;
               return eoaAddress ? (
                 <div className="space-y-1">
                   <Label className="text-xs text-muted-foreground">Owner EOA</Label>

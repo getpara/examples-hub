@@ -57,13 +57,10 @@ export default function SolTransferPage() {
     if (address && signer) {
       fetchBalance();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [address, signer]);
 
   const constructTransaction = async (toAddress: string, solAmount: string) => {
     if (!address || !rpc || !signer) throw new Error("No sender address or RPC client available");
-
-    try {
       const amountLamports = lamports(BigInt(parseFloat(solAmount) * Number(LAMPORTS_PER_SOL)));
 
       const response = await rpc.getLatestBlockhash().send();
@@ -83,34 +80,26 @@ export default function SolTransferPage() {
       );
 
       return compileTransaction(transactionMessage);
-    } catch (error) {
-      console.error("Error constructing transaction:", error);
-      throw error;
-    }
   };
 
   const validateTransaction = async (toAddress: string, solAmount: string): Promise<boolean> => {
     if (!address || !rpc || !signer) throw new Error("No sender address or RPC client available");
 
-    try {
-      const response = await rpc.getBalance(signer.address).send();
-      const balanceLamports = response.value;
-      const amountLamports = parseFloat(solAmount) * Number(LAMPORTS_PER_SOL);
-      const estimatedFee = 5000; // Rough estimate for transfer transaction
-      const totalCost = amountLamports + estimatedFee;
+    const response = await rpc.getBalance(signer.address).send();
+    const balanceLamports = response.value;
+    const amountLamports = parseFloat(solAmount) * Number(LAMPORTS_PER_SOL);
+    const estimatedFee = 5000; // Rough estimate for transfer transaction
+    const totalCost = amountLamports + estimatedFee;
 
-      if (totalCost > Number(balanceLamports)) {
-        const requiredSol = (totalCost / Number(LAMPORTS_PER_SOL)).toFixed(4);
-        const availableSol = (Number(balanceLamports) / Number(LAMPORTS_PER_SOL)).toFixed(4);
-        throw new Error(
-          `Insufficient balance. Transaction requires approximately ${requiredSol} SOL, but you have only ${availableSol} SOL available.`
-        );
-      }
-
-      return true;
-    } catch (error) {
-      throw error;
+    if (totalCost > Number(balanceLamports)) {
+      const requiredSol = (totalCost / Number(LAMPORTS_PER_SOL)).toFixed(4);
+      const availableSol = (Number(balanceLamports) / Number(LAMPORTS_PER_SOL)).toFixed(4);
+      throw new Error(
+        `Insufficient balance. Transaction requires approximately ${requiredSol} SOL, but you have only ${availableSol} SOL available.`
+      );
     }
+
+    return true;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -187,7 +176,8 @@ export default function SolTransferPage() {
 
       while (!receipt) {
         const signature = txResponse as unknown as Signature;
-        receipt = await rpc?.getSignatureStatuses([signature], {
+        if (!rpc) break;
+        receipt = await rpc.getSignatureStatuses([signature], {
           searchTransactionHistory: true,
         }).send();
         if (receipt?.value?.[0]?.confirmationStatus === "confirmed" || receipt?.value?.[0]?.confirmationStatus === "finalized") {

@@ -4,12 +4,18 @@ import { useState, useEffect } from "react";
 import { ArrowUpDownIcon } from "lucide-react";
 import SwapAmountInput from "@/components/ui/SwapAmountInput";
 import TransactionDetailsCollapsible from "@/components/ui/TransactionDetailsCollapsible";
-import { usePara } from "./ParaProvider";
+import { useAccount, useModal, useWallet } from "@getpara/react-sdk";
+import { useSolanaWeb3 } from "@/hooks/useSolanaWeb3";
 import { VersionedTransaction } from "@solana/web3.js";
-import { Token, TokenApiResponse } from "@/types";
+import { Token, TokenApiResponse, JupiterQuoteResponse } from "@/types";
 
 export default function TokenSwapCard() {
-  const { signer, connection, isConnected, openModal, address } = usePara();
+  const { openModal } = useModal();
+  const { isConnected } = useAccount();
+  const { data: wallet } = useWallet();
+  const { signer, connection } = useSolanaWeb3();
+  
+  const address = wallet?.address || null;
 
   const [tokens, setTokens] = useState<Token[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -17,10 +23,10 @@ export default function TokenSwapCard() {
   const [toToken, setToToken] = useState<Token | null>(null);
   const [fromAmount, setFromAmount] = useState("");
   const [toAmount, setToAmount] = useState("");
-  const [slippage, setSlippage] = useState(0.5);
+  const [slippage] = useState(0.5);
   const [swapStatus, setSwapStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState("");
-  const [quoteData, setQuoteData] = useState<any>(null);
+  const [quoteData, setQuoteData] = useState<JupiterQuoteResponse | null>(null);
 
   useEffect(() => {
     async function fetchTokens() {
@@ -196,10 +202,10 @@ export default function TokenSwapCard() {
         setToAmount("");
         setSwapStatus("idle");
       }, 2000);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Swap error:", error);
       setSwapStatus("error");
-      setErrorMessage(error.message || "Failed to execute swap");
+      setErrorMessage(error instanceof Error ? error.message : "Failed to execute swap");
     }
   };
 

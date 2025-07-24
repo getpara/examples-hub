@@ -7,7 +7,7 @@ import { LAMPORTS_PER_SOL, SystemProgram } from "@solana/web3.js";
 import { TOKEN_2022_PROGRAM_ID } from "@solana/spl-token";
 import { TransferTokens } from "@/idl/transfer_tokens";
 import idl from "@/idl/transfer_tokens.json" assert { type: "json" };
-import { useAccount, useWallet } from "@getpara/react-sdk";
+import { useWallet } from "@getpara/react-sdk";
 
 export default function ProgramCreateTokenPage() {
   const [isCreateTokenLoading, setIsCreateTokenLoading] = useState(false);
@@ -33,7 +33,10 @@ export default function ProgramCreateTokenPage() {
 
     setIsBalanceLoading(true);
     try {
-      const balanceInLamports = await connection.getBalance(signer.sender!);
+      if (!signer.sender) {
+        throw new Error("Signer sender not available");
+      }
+      const balanceInLamports = await connection.getBalance(signer.sender);
       setBalance((balanceInLamports / LAMPORTS_PER_SOL).toFixed(4));
     } catch (error) {
       console.error("Error fetching balance:", error);
@@ -47,7 +50,6 @@ export default function ProgramCreateTokenPage() {
     if (address && connection && signer) {
       fetchBalance();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [address, connection, signer]);
 
   const createToken = async (e: React.FormEvent) => {
@@ -91,8 +93,8 @@ export default function ProgramCreateTokenPage() {
 
       const tx = await program.methods
         .createToken(tokenName, tokenSymbol)
-        .accounts({
-          payer: signer.sender!,
+        .accountsPartial({
+          payer: signer.sender,
           mintAccount: mintKeypair.publicKey,
           tokenProgram: TOKEN_2022_PROGRAM_ID,
           systemProgram: SystemProgram.programId,

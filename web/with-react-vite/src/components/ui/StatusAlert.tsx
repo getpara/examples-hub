@@ -5,7 +5,9 @@ interface StatusAlertProps {
 }
 
 export function StatusAlert({ show, type, message }: StatusAlertProps) {
-  if (!show) return null;
+  if (!show) {
+    return null;
+  }
 
   const bgColor = {
     info: "bg-gray-100 border-gray-300",

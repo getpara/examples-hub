@@ -4,13 +4,14 @@ import { para } from "../para";
 import { Button } from "./common/Button";
 import { StatusDisplay } from "./common/StatusDisplay";
 import { Input } from "./common/Input";
+import { Wallet } from "@getpara/react-native-wallet";
 
 interface WalletSectionProps {
   onLogout: () => void;
 }
 
 export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
-  const [wallet, setWallet] = useState<any>(null);
+  const [wallet, setWallet] = useState<Wallet | null>(null);
   const [_loadingWallet, setLoadingWallet] = useState(false);
   const [signingMessage, setSigningMessage] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
@@ -32,7 +33,6 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
     try {
       // Get existing EVM wallets
       const evmWallets = await para.getWalletsByType("EVM");
-      console.log("EVM Wallets:", evmWallets);
 
       if (evmWallets && evmWallets.length > 0) {
         // Use first wallet
@@ -50,7 +50,7 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
           setStatus("");
         }
       }
-    } catch (err) {
+    } catch (_err) {
       // Handle error by creating new wallet
       try {
         setStatus("Creating new EVM wallet...");

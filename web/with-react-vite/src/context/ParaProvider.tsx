@@ -48,7 +48,7 @@ export function ParaProvider({
             selectedChainId: cosmoshub.chainId,
             multiChain: false,
             onSwitchChain: (chainId) => {
-              console.log("Switched chain to:", chainId);
+              console.warn("Switched chain to:", chainId);
             },
           },
         },
