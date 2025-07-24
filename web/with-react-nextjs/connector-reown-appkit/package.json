@@ -12,11 +12,11 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@cosmjs/amino": "^0.34.0",
     "@cosmjs/cosmwasm-stargate": "^0.34.0",
     "@cosmjs/launchpad": "^0.27.1",
     "@cosmjs/proto-signing": "^0.34.0",
     "@cosmjs/stargate": "^0.34.0",
-    "@cosmjs/amino": "^0.34.0",
     "@cosmjs/tendermint-rpc": "^0.34.0",
     "@getpara/graz": "2.0.0-alpha.3",
     "@getpara/react-sdk": "2.0.0-alpha.36",
