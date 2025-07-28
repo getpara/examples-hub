@@ -14,7 +14,7 @@
     "@floating-ui/react": "0.26.24",
     "@getpara/cosmos-wallet-connectors": "2.0.0-alpha.37",
     "@getpara/evm-wallet-connectors": "2.0.0-alpha.37",
-    "@getpara/graz": "2.0.0-alpha.3",
+    "@getpara/graz": "2.0.0-alpha.5",
     "@getpara/react-components": "2.0.0-alpha.37",
     "@getpara/react-sdk": "2.0.0-alpha.37",
     "@getpara/solana-wallet-connectors": "2.0.0-alpha.37",
