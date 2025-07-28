@@ -563,7 +563,7 @@ export function EvmExternalWalletProvider({
   }, [connections]);
 
   const connectParaEmbedded = useCallback(async (): Promise<{ result?: unknown; error?: string }> => {
-    const paraConnectorInstance = connectors.find(c => c.id === 'Para');
+    const paraConnectorInstance = connectors.find(c => c.id === 'para');
     if (!paraConnectorInstance) {
       return { error: 'No para connector instance' };
     }
