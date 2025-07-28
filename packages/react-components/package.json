@@ -1,9 +1,9 @@
 {
   "name": "@getpara/react-components",
   "description": "Capsule Core React Components",
-  "version": "2.0.0-alpha.37",
+  "version": "2.0.0-alpha.38",
   "dependencies": {
-    "@getpara/core-components": "2.0.0-alpha.37"
+    "@getpara/core-components": "2.0.0-alpha.38"
   },
   "devDependencies": {
     "@types/react": "^18.2.64",
