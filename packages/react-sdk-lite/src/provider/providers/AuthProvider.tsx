@@ -180,6 +180,7 @@ export function AuthProvider({
                   ModalStep.PASSWORD_CREATION,
                   ModalStep.AWAITING_IFRAME,
                   ModalStep.VERIFICATIONS,
+                  ModalStep.AWAITING_OAUTH,
                   ModalStep.EXTERNAL_WALLET_VERIFICATION,
                 ]),
               onPoll: () => {
