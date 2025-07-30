@@ -1,4 +1,4 @@
-name: Update Para Dependencies
+name: Update Para Dependencies Direct
 
 on:
   workflow_dispatch:
@@ -17,12 +17,11 @@ on:
 
 env:
   NODE_VERSION: "20.19.0"
-  YARN_CACHE_FOLDER: ~/.yarn-cache
 
 jobs:
   update-dependencies:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     permissions:
       contents: write
       pull-requests: write
@@ -43,92 +42,245 @@ jobs:
       - name: Install root dependencies
         run: yarn install --mode=update-lockfile --network-timeout 60000
 
-      - name: Check for available updates
-        id: check_updates
-        timeout-minutes: 5
+      - name: Discover @getpara packages
+        id: discover
         run: |
-          echo "🔍 Checking for available @getpara/* dependency updates..."
+          echo "🔍 Discovering @getpara/* packages in the repository..."
+          
+          # Find all package.json files and extract @getpara dependencies
+          packages=$(find . -name "package.json" -not -path "*/node_modules/*" -type f -exec grep -l "@getpara/" {} \; | \
+            while read -r file; do
+              cat "$file" | jq -r '.dependencies // {} | keys[], .devDependencies // {} | keys[], .peerDependencies // {} | keys[], .optionalDependencies // {} | keys[]' | grep "^@getpara/" || true
+            done | \
+            sort -u)
+          
+          if [ -z "$packages" ]; then
+            echo "No @getpara packages found"
+            echo "has_packages=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          echo "Found packages:"
+          echo "$packages"
+          
+          # Convert to JSON array for later use
+          packages_json=$(echo "$packages" | jq -R . | jq -s .)
+          echo "packages=$packages_json" >> $GITHUB_OUTPUT
+          echo "has_packages=true" >> $GITHUB_OUTPUT
 
-          # Always run check-only mode first to detect available updates
-          npx tsx scripts/update-para-dependencies.ts --check-only > update_check.log 2>&1
+      - name: Fetch latest versions
+        if: steps.discover.outputs.has_packages == 'true'
+        id: fetch_versions
+        run: |
+          echo "📦 Fetching latest alpha versions..."
+          
+          packages='${{ steps.discover.outputs.packages }}'
+          
+          # Create version map
+          version_map="{}"
+          
+          for package in $(echo "$packages" | jq -r '.[]'); do
+            echo "Checking $package..."
+            
+            # Fetch package info from npm
+            npm_data=$(npm view "$package" --json 2>/dev/null || echo "{}")
+            
+            if [ "$npm_data" != "{}" ]; then
+              # Get all versions and filter for alpha
+              alpha_version=$(echo "$npm_data" | jq -r '.versions[]' 2>/dev/null | grep -E "alpha" | sort -V | tail -1 || echo "")
+              
+              if [ -n "$alpha_version" ]; then
+                echo "  Latest alpha: $alpha_version"
+                version_map=$(echo "$version_map" | jq --arg pkg "$package" --arg ver "$alpha_version" '. + {($pkg): $ver}')
+              fi
+            fi
+          done
+          
+          echo "Version map:"
+          echo "$version_map" | jq .
+          
+          # Save to file for next steps
+          echo "$version_map" > version_map.json
+          
+          # Check if we found any versions
+          if [ "$(echo "$version_map" | jq 'length')" -eq 0 ]; then
+            echo "No alpha versions found"
+            echo "has_versions=false" >> $GITHUB_OUTPUT
+          else
+            echo "has_versions=true" >> $GITHUB_OUTPUT
+          fi
 
-          # Check if any updates are available by looking for the update summary
-          if grep -q "📦 Package Updates:" update_check.log; then
+      - name: Check for updates needed
+        if: steps.fetch_versions.outputs.has_versions == 'true'
+        id: check_updates
+        run: |
+          echo "🔍 Checking which files need updates..."
+          
+          version_map=$(cat version_map.json)
+          updates_needed=false
+          files_to_update=""
+          
+          # Find all package.json files
+          for file in $(find . -name "package.json" -not -path "*/node_modules/*" -type f); do
+            needs_update=false
+            
+            # Check each dependency section
+            for section in dependencies devDependencies peerDependencies optionalDependencies; do
+              deps=$(cat "$file" | jq -r ".$section // {} | to_entries[] | select(.key | startswith(\"@getpara/\")) | \"\(.key):\(.value)\"" 2>/dev/null || true)
+              
+              while IFS=: read -r pkg current_version; do
+                if [ -n "$pkg" ]; then
+                  latest_version=$(echo "$version_map" | jq -r --arg p "$pkg" '.[$p] // ""')
+                  
+                  if [ -n "$latest_version" ]; then
+                    # Compare versions (remove prefix characters)
+                    current_clean=$(echo "$current_version" | sed 's/^[^0-9]*//')
+                    latest_clean=$(echo "$latest_version" | sed 's/^[^0-9]*//')
+                    
+                    if [ "$current_clean" != "$latest_clean" ]; then
+                      echo "  $file: $pkg needs update ($current_version → $latest_version)"
+                      needs_update=true
+                      updates_needed=true
+                    fi
+                  fi
+                fi
+              done <<< "$deps"
+            done
+            
+            if [ "$needs_update" = true ]; then
+              files_to_update="$files_to_update$file\n"
+            fi
+          done
+          
+          if [ "$updates_needed" = true ]; then
             echo "updates_available=true" >> $GITHUB_OUTPUT
-            echo "✅ Updates are available"
+            echo -e "$files_to_update" > files_to_update.txt
+            echo "✅ Found updates needed"
           else
             echo "updates_available=false" >> $GITHUB_OUTPUT
             echo "✅ All dependencies are up to date"
           fi
 
-          # Show the check results
-          cat update_check.log
-
-      - name: Apply dependency updates
+      - name: Apply updates
         if: steps.check_updates.outputs.updates_available == 'true' && !inputs.dry_run
         id: apply_updates
-        timeout-minutes: 5
         run: |
           echo "🔄 Applying dependency updates..."
-
-          # Apply the updates
-          node scripts/update-para-dependencies.js > update_results.log 2>&1
-
-          # Extract commit message from the script output
-          if grep -A 20 "💬 Suggested commit message:" update_results.log > /dev/null; then
-            sed -n '/💬 Suggested commit message:/,/^-\+$/p' update_results.log | \
-              sed '1d;$d' > commit_message.txt
+          
+          version_map=$(cat version_map.json)
+          updated_files=0
+          updated_deps=0
+          commit_details=""
+          
+          # Process each file that needs updates
+          while IFS= read -r file; do
+            if [ -n "$file" ]; then
+              echo "Updating $file..."
+              
+              # Create a backup
+              cp "$file" "$file.bak"
+              
+              # Update each dependency section
+              for section in dependencies devDependencies peerDependencies optionalDependencies; do
+                # Get dependencies for this section
+                deps=$(cat "$file" | jq -r ".$section // {} | keys[]" 2>/dev/null | grep "^@getpara/" || true)
+                
+                for pkg in $deps; do
+                  latest_version=$(echo "$version_map" | jq -r --arg p "$pkg" '.[$p] // ""')
+                  
+                  if [ -n "$latest_version" ]; then
+                    current_version=$(cat "$file" | jq -r --arg s "$section" --arg p "$pkg" '.[$s][$p] // ""')
+                    
+                    if [ -n "$current_version" ]; then
+                      current_clean=$(echo "$current_version" | sed 's/^[^0-9]*//')
+                      latest_clean=$(echo "$latest_version" | sed 's/^[^0-9]*//')
+                      
+                      if [ "$current_clean" != "$latest_clean" ]; then
+                        # Update the version
+                        cat "$file" | jq --arg s "$section" --arg p "$pkg" --arg v "$latest_version" '.[$s][$p] = $v' > "$file.tmp"
+                        mv "$file.tmp" "$file"
+                        
+                        echo "  Updated $pkg: $current_version → $latest_version ($section)"
+                        ((updated_deps++))
+                        
+                        # Track for commit message
+                        if [[ ! "$commit_details" =~ "$pkg:" ]]; then
+                          commit_details="$commit_details- $pkg: $current_version → $latest_version\n"
+                        fi
+                      fi
+                    fi
+                  fi
+                done
+              done
+              
+              # Check if file was actually modified
+              if ! cmp -s "$file" "$file.bak"; then
+                ((updated_files++))
+                rm "$file.bak"
+                
+                # Update yarn.lock in this directory
+                dir=$(dirname "$file")
+                if [ -f "$dir/yarn.lock" ] || [ "$dir" = "." ]; then
+                  echo "  Updating yarn.lock in $dir..."
+                  (cd "$dir" && yarn install --mode=update-lockfile) || echo "  Warning: Failed to update yarn.lock in $dir"
+                fi
+              else
+                rm "$file.bak"
+              fi
+            fi
+          done < files_to_update.txt
+          
+          if [ $updated_files -gt 0 ]; then
+            echo "changes_made=true" >> $GITHUB_OUTPUT
             
-            # Set multiline output
+            # Generate commit message
+            commit_msg="update @getpara/* dependencies to latest alpha versions\n\n"
+            if [ $updated_deps -eq 1 ]; then
+              commit_msg="${commit_msg}Updated 1 @getpara package:\n"
+            else
+              commit_msg="${commit_msg}Updated $updated_deps @getpara packages:\n"
+            fi
+            commit_msg="${commit_msg}${commit_details}\n"
+            commit_msg="${commit_msg}Affected $updated_files package.json files across the monorepo."
+            
+            echo -e "$commit_msg" > commit_message.txt
+            
             echo "commit_message<<EOF" >> $GITHUB_OUTPUT
             cat commit_message.txt >> $GITHUB_OUTPUT
             echo "EOF" >> $GITHUB_OUTPUT
             
-            echo "changes_made=true" >> $GITHUB_OUTPUT
+            echo "✅ Updated $updated_files files with $updated_deps dependency updates"
           else
             echo "changes_made=false" >> $GITHUB_OUTPUT
+            echo "No actual changes made"
           fi
-
-          # Show the results
-          cat update_results.log
 
       - name: Commit changes
         if: steps.apply_updates.outputs.changes_made == 'true' && !inputs.dry_run
         id: commit_changes
         run: |
-          # Configure git
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-
-          # Add all changes
+          
           git add .
-
-          # Check if there are any changes to commit
+          
           if git diff --cached --quiet; then
             echo "No changes to commit"
             echo "committed=false" >> $GITHUB_OUTPUT
           else
-            # Commit with the generated message
             git commit -F commit_message.txt
             echo "committed=true" >> $GITHUB_OUTPUT
-            
-            # Get the commit hash
-            commit_hash=$(git rev-parse HEAD)
-            echo "commit_hash=$commit_hash" >> $GITHUB_OUTPUT
-            
             echo "✅ Changes committed successfully"
           fi
 
       - name: Push changes
         if: steps.commit_changes.outputs.committed == 'true' && !inputs.dry_run
-        timeout-minutes: 2
         run: |
-          # Push to current branch (improvements-and-automation)
           git push origin HEAD
-          echo "✅ Changes pushed to branch"
+          echo "✅ Changes pushed to current branch"
 
       - name: Create Pull Request
-        if: steps.commit_changes.outputs.committed == 'true' && (inputs.create_pr == true || (github.event_name == 'schedule' && inputs.create_pr != false)) && !inputs.dry_run
+        if: steps.commit_changes.outputs.committed == 'true' && inputs.create_pr && !inputs.dry_run
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -136,24 +288,17 @@ jobs:
           title: "chore: update @getpara/* dependencies to latest alpha versions"
           body: |
             ## 🔄 Automated Dependency Update
-
+            
             This PR updates @getpara/* packages to their latest alpha versions.
-
+            
             ### Changes Made
             ${{ steps.apply_updates.outputs.commit_message }}
-
+            
             ### Verification
             - [ ] All package.json files have been updated
             - [ ] Yarn.lock files have been refreshed
             - [ ] Dependencies are consistent across the monorepo
-
-            ### Testing
-            This change was generated by the automated dependency update workflow.
-            Please verify that:
-            1. All examples still build correctly
-            2. E2E tests pass
-            3. No breaking changes were introduced
-
+            
             ---
             *This PR was created automatically by the GitHub Action workflow.*
             
@@ -167,40 +312,19 @@ jobs:
         if: always()
         run: |
           echo "## 📊 Dependency Update Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-
-          if [ "${{ steps.check_updates.outputs.updates_available }}" == "true" ]; then
+          
+          if [ "${{ steps.discover.outputs.has_packages }}" != "true" ]; then
+            echo "❌ No @getpara/* packages found in repository" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ steps.fetch_versions.outputs.has_versions }}" != "true" ]; then
+            echo "❌ No alpha versions found for discovered packages" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ steps.check_updates.outputs.updates_available }}" == "true" ]; then
             echo "✅ Updates were available and processed" >> $GITHUB_STEP_SUMMARY
             
             if [ "${{ inputs.dry_run }}" == "true" ]; then
               echo "🔍 **Dry run mode** - No changes were made" >> $GITHUB_STEP_SUMMARY
             elif [ "${{ steps.commit_changes.outputs.committed }}" == "true" ]; then
               echo "✅ Changes committed successfully" >> $GITHUB_STEP_SUMMARY
-              if [ "${{ inputs.create_pr }}" == "true" ]; then
-                echo "📝 Pull request created" >> $GITHUB_STEP_SUMMARY
-              else
-                echo "📝 Changes pushed to current branch (no PR created)" >> $GITHUB_STEP_SUMMARY
-              fi
-            else
-              echo "❌ No changes were committed" >> $GITHUB_STEP_SUMMARY
             fi
           else
             echo "🎉 All @getpara/* dependencies are already up to date!" >> $GITHUB_STEP_SUMMARY
           fi
-
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Workflow Configuration" >> $GITHUB_STEP_SUMMARY
-          echo "- Dry run: ${{ inputs.dry_run || 'false' }}" >> $GITHUB_STEP_SUMMARY
-          echo "- Create PR: ${{ inputs.create_pr }}" >> $GITHUB_STEP_SUMMARY
-          echo "- Target branch: 2.0.0-alpha" >> $GITHUB_STEP_SUMMARY
-
-      - name: Upload logs
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: dependency-update-logs
-          path: |
-            update_check.log
-            update_results.log
-            commit_message.txt
-          retention-days: 7
