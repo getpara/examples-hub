@@ -1,3 +1,35 @@
+# Release (Wed Jul 30 2025)
+
+## Package Versions
+- @getpara/web-sdk@2.0.0-alpha.39
+- @getpara/wagmi-v2-integration@2.0.0-alpha.39
+- @getpara/wagmi-v2-connector@2.0.0-alpha.39
+- @getpara/viem-v2-integration@2.0.0-alpha.39
+- @getpara/viem-v1-integration@2.0.0-alpha.39
+- @getpara/user-management-client@2.0.0-alpha.39
+- @getpara/solana-web3.js-v1-integration@2.0.0-alpha.39
+- @getpara/solana-wallet-connectors@2.0.0-alpha.39
+- @getpara/solana-signers-v2-integration@2.0.0-alpha.39
+- @getpara/server-sdk@2.0.0-alpha.39
+- @getpara/react-sdk-lite@2.0.0-alpha.39
+- @getpara/react-sdk@2.0.0-alpha.39
+- @getpara/react-native-wallet@2.0.0-alpha.39
+- @getpara/react-components@2.0.0-alpha.39
+- @getpara/react-component-library@1.0.0-alpha.34
+- @getpara/react-common@2.0.0-alpha.39
+- @getpara/evm-wallet-connectors@2.0.0-alpha.39
+- @getpara/ethers-v6-integration@2.0.0-alpha.39
+- @getpara/ethers-v5-integration@2.0.0-alpha.39
+- @getpara/cosmos-wallet-connectors@2.0.0-alpha.39
+- @getpara/cosmjs-v0-integration@2.0.0-alpha.39
+- @getpara/core-sdk@2.0.0-alpha.39
+- @getpara/core-components@2.0.0-alpha.39
+
+
+### Fixes
+- fix to not exit signup logic after oauth for account creation when only passwords enabled (#1131) - 8ffe6b914
+- allow numeric segments in Apple bundle identifier validation (#1123) - b7d2e1c12
+
 # Release (Mon Jul 28 2025)
 
 ## Package Versions
