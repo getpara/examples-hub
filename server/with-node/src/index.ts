@@ -2,7 +2,7 @@ import express, { Request, Response, NextFunction } from "express";
 import { configDotenv } from "dotenv";
 import { router } from "./routes";
 
-configDotenv({ path: [".env", "../../.env"] });
+configDotenv();
 
 const app = express();
 

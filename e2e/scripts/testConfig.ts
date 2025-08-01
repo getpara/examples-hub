@@ -33,7 +33,7 @@ export interface TestEnvironment {
 
 function getEnvVar(key: string, fallback?: string): string {
   const value = process.env[key];
-  if (!value && !fallback) {
+  if (!value && fallback === undefined) {
     throw new Error(`Missing required environment variable: ${key}. Please check your .env file.`);
   }
   return value || fallback || "";
@@ -54,20 +54,24 @@ export function getFrameworkEnvVars(framework: string, testEnv: TestEnvironment)
     PARA_ENVIRONMENT: testEnv.environment,
   };
 
+  // Check for framework-specific API key overrides
+  const frameworkApiKeyOverride = getEnvVar(`PARA_API_KEY_${framework.toUpperCase()}_OVERRIDE`, "");
+  const apiKey = frameworkApiKeyOverride || testEnv.apiKey;
+
   switch (framework) {
     case "react-vite":
     case "vue":
     case "svelte":
       return {
         ...baseEnvVars,
-        VITE_PARA_API_KEY: getEnvVar("VITE_PARA_API_KEY", testEnv.apiKey),
+        VITE_PARA_API_KEY: getEnvVar("VITE_PARA_API_KEY", apiKey),
         VITE_PARA_ENVIRONMENT: testEnv.environment,
       };
 
     case "react-nextjs":
       return {
         ...baseEnvVars,
-        NEXT_PUBLIC_PARA_API_KEY: getEnvVar("NEXT_PUBLIC_PARA_API_KEY", testEnv.apiKey),
+        NEXT_PUBLIC_PARA_API_KEY: getEnvVar("NEXT_PUBLIC_PARA_API_KEY", apiKey),
         NEXT_PUBLIC_PARA_ENVIRONMENT: testEnv.environment,
       };
 
@@ -76,8 +80,9 @@ export function getFrameworkEnvVars(framework: string, testEnv: TestEnvironment)
     case "bun":
       return {
         ...baseEnvVars,
-        PARA_API_KEY: testEnv.apiKey,
-        VITE_PARA_API_KEY: testEnv.apiKey,
+        PARA_API_KEY: apiKey,
+        PARA_API_KEY_BETA: apiKey,
+        VITE_PARA_API_KEY: apiKey,
         ENCRYPTION_KEY: getEnvVar("ENCRYPTION_KEY", crypto.randomBytes(24).toString("base64url").slice(0, 32)),
         ALCHEMY_API_KEY: getEnvVar("ALCHEMY_API_KEY", ""),
         ALCHEMY_GAS_POLICY_ID: getEnvVar("ALCHEMY_GAS_POLICY_ID", ""),
