@@ -91,17 +91,13 @@ const runTestsForApp = async (appName: string): Promise<TestResult> => {
 
     console.log(`\n${"=".repeat(60)}`);
     console.log(`Running tests for ${appName}`);
-    console.log(`App path: ${config.path}`);
-    console.log(`Full path: ${appFullPath}`);
     console.log(`${"=".repeat(60)}`);
 
     console.log(`\n📦 Installing dependencies...`);
     if (config.installCommand) {
-      console.log(`Running: ${config.installCommand} in ${appFullPath}`);
-      await runCommandAsync(config.installCommand, appFullPath);
+      await runCommandAsync(config.installCommand, appFullPath, {}, true);
     } else {
-      console.log(`Running: yarn install in ${appFullPath}`);
-      await runCommandAsync("yarn install", appFullPath);
+      await runCommandAsync("yarn install", appFullPath, {}, true);
     }
 
     const playwrightArgs = [
@@ -127,14 +123,6 @@ const runTestsForApp = async (appName: string): Promise<TestResult> => {
     };
 
     console.log(`\n🧪 Running Playwright tests...`);
-    console.log(`Command: ${testCommand}`);
-    console.log(`Environment variables:`, {
-      E2E_APP_DIR: testEnv.E2E_APP_DIR,
-      E2E_APP_FULL_PATH: testEnv.E2E_APP_FULL_PATH,
-      APP_PORT: testEnv.APP_PORT,
-      BASE_URL: testEnv.BASE_URL,
-      APP_START_COMMAND: testEnv.APP_START_COMMAND,
-    });
 
     await runCommandAsync(testCommand, EXAMPLES_REPO_PATH, testEnv);
 
@@ -142,7 +130,6 @@ const runTestsForApp = async (appName: string): Promise<TestResult> => {
     return { appName, success: true };
   } catch (error) {
     console.error(`❌ Tests failed for ${appName}`);
-    console.error(`Error details:`, error);
     return { appName, success: false, error: (error as Error).message };
   }
 };

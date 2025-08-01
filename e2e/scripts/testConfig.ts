@@ -177,25 +177,37 @@ export function getTestFailed(): boolean {
   return testFailed;
 }
 
-export function runCommand(cmd: string, cwd?: string, env?: Record<string, string>): void {
-  console.log(`Running: ${cmd} ${cwd ? `in ${cwd}` : ""}`);
+export function runCommand(cmd: string, cwd?: string, env?: Record<string, string>, silent?: boolean): void {
+  if (silent) {
+    process.stdout.write(`⏳ Running: ${cmd.split(' ')[0]}...`);
+  } else {
+    console.log(`Running: ${cmd} ${cwd ? `in ${cwd}` : ""}`);
+  }
+  
   try {
     execSync(cmd, {
-      stdio: "inherit",
+      stdio: silent ? "pipe" : "inherit",
       cwd,
       env: { ...process.env, ...env },
     });
+    
+    if (silent) {
+      process.stdout.write(`\r✅ ${cmd.split(' ')[0]} completed                    \n`);
+    }
   } catch (error) {
+    if (silent) {
+      process.stdout.write(`\r❌ ${cmd.split(' ')[0]} failed                    \n`);
+    }
     console.error(`Error executing: ${cmd}`, (error as Error).message);
     setTestFailed(true);
     throw new Error(`Command failed: ${cmd}`);
   }
 }
 
-export async function runCommandAsync(cmd: string, cwd?: string, env?: Record<string, string>): Promise<void> {
+export async function runCommandAsync(cmd: string, cwd?: string, env?: Record<string, string>, silent?: boolean): Promise<void> {
   return new Promise((resolve, reject) => {
     try {
-      runCommand(cmd, cwd, env);
+      runCommand(cmd, cwd, env, silent);
       resolve();
     } catch (error) {
       reject(error);
