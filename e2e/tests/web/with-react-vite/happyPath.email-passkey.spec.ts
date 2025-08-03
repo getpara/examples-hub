@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 
 import { ParaModalExamplePage } from '../../../pages/paraModalExample';
 import * as webauthn from '../../../helpers/webAuthn';
+import { logger } from '../../../helpers/logger';
 
 const OPEN_MODAL_TEXT = 'Connect with Para';
 
@@ -40,7 +41,7 @@ test.describe('Para Modal - Email + Passkey Authentication', () => {
     const createAddressText = await addressElement.textContent();
 
     // Test message signing in creation context
-    console.log('🔄 Testing message signing...');
+    logger.logStep('Testing message signing...');
     const testMessage = 'Hello Para E2E Test with Email + Passkey!';
     const signature = await createParaModalPage.signMessage(testMessage);
     expect(signature).toBeTruthy();
@@ -51,15 +52,15 @@ test.describe('Para Modal - Email + Passkey Authentication', () => {
     await createParaModalPage.logout({ openModalText: OPEN_MODAL_TEXT });
 
     // Close the creation context completely
-    console.log('🔄 Closing creation context and clearing all state...');
+    logger.logStep('Closing creation context and clearing all state...');
     await createContext.close();
 
     // Add a pause between user creation and login to ensure complete state cleanup
-    console.log('⏳ Waiting 3 seconds between user creation and login phases...');
+    logger.logWait('Waiting 3 seconds between user creation and login phases...');
     await new Promise(resolve => setTimeout(resolve, 3000));
 
     // ===== PHASE 2: Login with Completely Fresh Context =====
-    console.log('🔄 Creating fresh context for login test...');
+    logger.logStep('Creating fresh context for login test...');
     const loginContext = await browser.newContext({
       permissions: ['clipboard-write', 'clipboard-read'],
       storageState: { cookies: [], origins: [] },
@@ -74,7 +75,7 @@ test.describe('Para Modal - Email + Passkey Authentication', () => {
     await loginParaModalPage.visit();
 
     // Test login with the same user credentials in fresh context
-    console.log('🔄 Testing login with existing account in fresh context...');
+    logger.logStep('Testing login with existing account in fresh context...');
     await loginParaModalPage.login({
       context: loginContext,
       credential,
@@ -89,7 +90,7 @@ test.describe('Para Modal - Email + Passkey Authentication', () => {
     const loginAddressText = await loginAddressElement.textContent();
     expect(loginAddressText).toBe(createAddressText);
 
-    console.log('✅ React Vite E2E test completed successfully');
+    logger.logStep('React Vite E2E test completed successfully', true);
 
     // Cleanup: ensure login context is properly closed
     await loginContext.close();

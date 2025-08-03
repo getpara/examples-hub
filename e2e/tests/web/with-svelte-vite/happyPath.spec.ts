@@ -2,10 +2,11 @@ import { test, expect } from '@playwright/test';
 
 import { CustomAuthExamplePage } from '../../../pages/customAuthExample';
 import * as webauthn from '../../../helpers/webAuthn';
+import { logger } from '../../../helpers/logger';
 
 test.describe('Svelte custom auth example', () => {
   test('happy path - email authentication flow', async ({ browser }) => {
-    console.log('🚀 Starting Svelte E2E test - Email authentication flow');
+    logger.logInfo('Starting Svelte E2E test - Email authentication flow');
     
     // ===== PHASE 1: User Creation with Fresh Context =====
     const createContext = await browser.newContext({
@@ -36,27 +37,27 @@ test.describe('Svelte custom auth example', () => {
     expect(createAddress).toMatch(/^0x[a-fA-F0-9]{40}$/);
     
     // Test message signing
-    console.log('🔄 Testing message signing...');
+    logger.logStep('Testing message signing...');
     const testMessage = 'Hello Para from Svelte!';
     const signature = await createAuthPage.signMessage(testMessage);
     expect(signature).toBeTruthy();
     expect(signature).toMatch(/^[a-fA-F0-9]+$/);
     
     // Test logout
-    console.log('🔄 Testing logout...');
+    logger.logStep('Testing logout...');
     await createAuthPage.logout();
     await expect(createPage.getByTestId('not-logged-in')).toBeVisible();
     
     // Close the creation context completely
-    console.log('🔄 Closing creation context and clearing all state...');
+    logger.logStep('Closing creation context and clearing all state...');
     await createContext.close();
     
     // Add a pause between user creation and login to ensure complete state cleanup
-    console.log('⏳ Waiting 3 seconds between user creation and login phases...');
+    logger.logWait('Waiting 3 seconds between user creation and login phases...');
     await new Promise(resolve => setTimeout(resolve, 3000));
     
     // ===== PHASE 2: Login with Completely Fresh Context =====
-    console.log('🔄 Creating fresh context for login test...');
+    logger.logStep('Creating fresh context for login test...');
     const loginContext = await browser.newContext({
       permissions: ['clipboard-write', 'clipboard-read'],
       storageState: { cookies: [], origins: [] },
@@ -75,7 +76,7 @@ test.describe('Svelte custom auth example', () => {
     await expect(loginPage.getByTestId('not-logged-in')).toBeVisible();
     
     // Test login with the same user credentials
-    console.log('🔄 Testing login with existing account in fresh context...');
+    logger.logStep('Testing login with existing account in fresh context...');
     await loginAuthPage.openAuthModal();
     await loginAuthPage.loginWithEmail({ context: loginContext, credential, email });
     
@@ -83,7 +84,7 @@ test.describe('Svelte custom auth example', () => {
     const loginAddress = await loginAuthPage.getWalletAddress();
     expect(loginAddress).toBe(createAddress);
     
-    console.log('✅ Svelte E2E test completed successfully');
+    logger.logStep('Svelte E2E test completed successfully', true);
     
     // Cleanup: ensure login context is properly closed
     await loginContext.close();

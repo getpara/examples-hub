@@ -15,6 +15,7 @@ import {
   CLIArgs,
   TEST_PATTERNS,
 } from "./testConfig";
+import { logger } from "../helpers/logger";
 
 dotenv.config();
 
@@ -30,9 +31,9 @@ const isAllTestsMode = !cliArgs.framework || (!cliArgs.testType && cliArgs.frame
 
 async function runSingleTest(framework: string, testType?: string): Promise<void> {
   if (!framework) {
-    console.error("Usage: tsx runAllTests.ts <framework> [test-type]");
-    console.error("Frameworks: react-vite, react-nextjs, vue, svelte, node");
-    console.error("Test types: email-password, email-passkey, phone-password, phone-passkey");
+    logger.logError("Usage: tsx runAllTests.ts <framework> [test-type]");
+    logger.logError("Frameworks: react-vite, react-nextjs, vue, svelte, node");
+    logger.logError("Test types: email-password, email-passkey, phone-password, phone-passkey");
     process.exit(1);
   }
 
@@ -63,8 +64,8 @@ async function runSingleTest(framework: string, testType?: string): Promise<void
 
     const command = `yarn playwright test ${playwrightArgs.join(" ")}`;
 
-    console.log(`Running tests for ${framework}${testType ? ` (${testType})` : ""}`);
-    console.log(`Command: ${command}\n`);
+    logger.logInfo(`Running tests for ${framework}${testType ? ` (${testType})` : ""}`);
+    logger.logInfo(`Command: ${command}\n`);
 
     const testEnv = {
       ...config.envVars,
@@ -77,9 +78,9 @@ async function runSingleTest(framework: string, testType?: string): Promise<void
 
     await runCommandAsync(command, EXAMPLES_REPO_PATH, testEnv);
 
-    console.log(`✅ Single test completed successfully for ${framework}`);
+    logger.logStep(`Single test completed successfully for ${framework}`, true);
   } catch (error) {
-    console.error("❌ Single test failed:", (error as Error).message);
+    logger.logError(`Single test failed: ${(error as Error).message}`);
     process.exit(1);
   }
 }
@@ -89,11 +90,11 @@ const runTestsForApp = async (appName: string): Promise<TestResult> => {
     const config = getTestConfig(appName);
     const appFullPath = path.resolve(EXAMPLES_REPO_PATH, config.path);
 
-    console.log(`\n${"=".repeat(60)}`);
-    console.log(`Running tests for ${appName}`);
-    console.log(`${"=".repeat(60)}`);
+    logger.log("", "=".repeat(60));
+    logger.logInfo(`Running tests for ${appName}`);
+    logger.log("", "=".repeat(60));
 
-    console.log(`\n📦 Installing dependencies...`);
+    logger.logInfo(`📦 Installing dependencies...`);
     if (config.installCommand) {
       await runCommandAsync(config.installCommand, appFullPath, {}, true);
     } else {
@@ -122,14 +123,14 @@ const runTestsForApp = async (appName: string): Promise<TestResult> => {
       BASE_URL: `http://localhost:${config.port}`,
     };
 
-    console.log(`\n🧪 Running Playwright tests...`);
+    logger.logInfo(`🧪 Running Playwright tests...`);
 
     await runCommandAsync(testCommand, EXAMPLES_REPO_PATH, testEnv);
 
-    console.log(`✅ Tests passed for ${appName}`);
+    logger.logStep(`Tests passed for ${appName}`, true);
     return { appName, success: true };
   } catch (error) {
-    console.error(`❌ Tests failed for ${appName}`);
+    logger.logError(`Tests failed for ${appName}`);
     return { appName, success: false, error: (error as Error).message };
   }
 };
@@ -154,23 +155,23 @@ async function main(): Promise<void> {
 
   if (appsToTest.length === 0) {
     if (cliArgs.isDiffOnly && candidateFrameworks.length === 0) {
-      console.log("✅ No frameworks need testing based on changes");
+      logger.logStep("No frameworks need testing based on changes", true);
       process.exit(0);
     } else {
-      console.error(`No apps found matching filter: ${cliArgs.framework}`);
-      console.error(`Available apps: ${Object.keys(APP_CONFIGS).join(", ")}`);
+      logger.logError(`No apps found matching filter: ${cliArgs.framework}`);
+      logger.logError(`Available apps: ${Object.keys(APP_CONFIGS).join(", ")}`);
       process.exit(1);
     }
   }
 
-  console.log("🧪 Running E2E tests for:");
-  appsToTest.forEach((app) => console.log(`  - ${app}`));
-  console.log(`\nMode: Sequential (one test at a time)`);
-  console.log(`Display: ${cliArgs.isHeaded ? "Headed" : "Headless"}`);
+  logger.logInfo("🧪 Running E2E tests for:");
+  appsToTest.forEach((app) => logger.logInfo(`  - ${app}`));
+  logger.logInfo(`\nMode: Sequential (one test at a time)`);
+  logger.logInfo(`Display: ${cliArgs.isHeaded ? "Headed" : "Headless"}`);
   if (cliArgs.isDiffOnly) {
-    console.log(`Filter: Only changed frameworks (--diff-only)`);
+    logger.logInfo(`Filter: Only changed frameworks (--diff-only)`);
   }
-  console.log("");
+  logger.logInfo("");
 
   await runAllTests();
 }
@@ -188,9 +189,9 @@ async function runAllTests() {
   await main();
 
   if (getTestFailed()) {
-    console.error("\n❌ Some tests failed");
+    logger.logError("Some tests failed");
     process.exit(1);
   }
 
-  console.log("\n✅ All tests completed successfully");
+  logger.logStep("All tests completed successfully", true);
 })();

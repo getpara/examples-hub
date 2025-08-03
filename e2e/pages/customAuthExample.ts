@@ -3,6 +3,7 @@ import { BrowserContext, Page, expect } from '@playwright/test';
 import { Protocol } from 'playwright-core/types/protocol';
 
 import { AuthPortalPage } from './authPortal';
+import { Logger } from '../helpers/logger';
 
 function getRandomEmail() {
   const randomHexString = crypto.randomBytes(5).toString('hex');
@@ -11,56 +12,60 @@ function getRandomEmail() {
 
 export class CustomAuthExamplePage {
   page: Page;
+  private logger: Logger;
 
   constructor(page: Page) {
     this.page = page;
+    this.logger = new Logger('CustomAuthExample');
   }
 
   async visit() {
-    console.log('🔄 Starting page visit...');
+    this.logger.logStep('Starting page visit...');
     await this.page.goto('/');
     await this.page.waitForLoadState('networkidle');
-    console.log('✅ Page loaded successfully');
+    this.logger.logStep('Page loaded successfully', true);
   }
 
   async openAuthModal() {
-    console.log('🔄 Opening auth modal...');
-    await this.page.waitForTimeout(500);
+    this.logger.logStep('Opening auth modal...');
     // Try both possible button test IDs (Vue uses open-modal-button, Svelte uses auth-connect-button)
     const openModalButton = await this.page.getByTestId('open-modal-button').or(this.page.getByTestId('auth-connect-button'));
+    await expect(openModalButton).toBeVisible({ timeout: 5000 });
     await openModalButton.click();
-    console.log('✅ Auth modal opened');
-    await this.page.waitForTimeout(1000);
+    this.logger.logStep('Auth modal opened', true);
+    // Wait for modal to be fully visible
+    await expect(this.page.getByTestId('email-tab')).toBeVisible({ timeout: 5000 });
   }
 
   async waitForParaAuthentication(timeout = 15000): Promise<void> {
-    console.log('🔄 Waiting for Para SDK authentication...');
+    this.logger.logStep('Waiting for Para SDK authentication...');
     
     // Use a more reliable approach: wait for the wallet-connected UI element with extended timeout
     // and add some polling to handle timing issues
     try {
       await expect(this.page.getByTestId('wallet-connected')).toBeVisible({ timeout });
-      console.log('✅ Para SDK authentication confirmed');
+      this.logger.logStep('Para SDK authentication confirmed', true);
     } catch (error) {
       // If direct wait fails, try polling approach
-      console.log('⚠️ Direct wait failed, trying polling approach...');
-      const startTime = Date.now();
+      this.logger.logWarning('Direct wait failed, trying polling approach...');
       
-      while (Date.now() - startTime < timeout) {
-        const isVisible = await this.page.getByTestId('wallet-connected').isVisible();
-        if (isVisible) {
-          console.log('✅ Para SDK authentication confirmed via polling');
-          return;
+      await expect.poll(
+        async () => {
+          const isVisible = await this.page.getByTestId('wallet-connected').isVisible();
+          if (!isVisible) {
+            // Check if we're still in loading state or if there's an error
+            const isLoading = await this.page.getByTestId('not-logged-in').isVisible();
+            this.logger.logDebug(`Still loading: ${isLoading}`);
+          }
+          return isVisible;
+        },
+        {
+          timeout,
+          message: 'Para SDK authentication not completed'
         }
-        
-        // Check if we're still in loading state or if there's an error
-        const isLoading = await this.page.getByTestId('not-logged-in').isVisible();
-        console.log(`🔍 Still loading: ${isLoading}`);
-        
-        await this.page.waitForTimeout(500);
-      }
+      ).toBe(true);
       
-      throw new Error(`Para SDK authentication not completed within ${timeout}ms`);
+      this.logger.logStep('Para SDK authentication confirmed via polling', true);
     }
   }
 
@@ -72,44 +77,44 @@ export class CustomAuthExamplePage {
     email?: string;
   }) {
     const userEmail = email || getRandomEmail();
-    console.log(`🔄 Starting user creation with email: ${userEmail}`);
+    this.logger.logStep(`Starting user creation with email: ${userEmail}`);
     
     // Switch to email tab if needed
-    console.log('🔄 Switching to email tab...');
+    this.logger.logStep('Switching to email tab...');
     await this.page.getByTestId('email-tab').click();
-    await this.page.waitForTimeout(300);
+    await expect(this.page.getByTestId('email-input')).toBeVisible({ timeout: 5000 });
 
     // Enter email
-    console.log(`📧 Entering email: ${userEmail}`);
+    this.logger.log('📧', `Entering email: ${userEmail}`);
     await this.page.getByTestId('email-input').fill(userEmail);
     await this.page.getByTestId('continue-email-button').click();
-    console.log('✅ Email submitted, waiting for OTP screen...');
+    this.logger.logStep('Email submitted, waiting for OTP screen...', true);
     
     // Wait for OTP screen
-    await this.page.waitForTimeout(3000);
-    console.log('🔄 Entering OTP code...');
+    await expect(this.page.getByTestId('otp-input-0')).toBeVisible({ timeout: 5000 });
+    this.logger.logStep('Entering OTP code...');
     
     // Enter OTP code (123456 for test environment)
     for (let i = 0; i < 6; i++) {
       await this.page.getByTestId(`otp-input-${i}`).fill((i + 1).toString());
     }
-    console.log('✅ OTP code entered');
+    this.logger.logStep('OTP code entered', true);
     
     // Handle passkey creation popup
-    console.log('🔄 Opening passkey creation popup...');
+    this.logger.logStep('Opening passkey creation popup...');
     const popupPromise = this.page.waitForEvent('popup');
     await this.page.getByTestId('verify-wallet-button').click();
     
     const popup = await popupPromise;
-    console.log('🔐 Setting up passkey credentials...');
+    this.logger.log('🔐', 'Setting up passkey credentials...');
     const authPortal = new AuthPortalPage(popup);
     const credentials = await authPortal.setup(context);
-    console.log('✅ Passkey credentials created');
+    this.logger.logStep('Passkey credentials created', true);
     
     // Wait for modal to close and verify Para SDK authentication
-    console.log('🔄 Waiting for wallet connection...');
+    this.logger.logStep('Waiting for wallet connection...');
     await this.waitForParaAuthentication();
-    console.log('✅ User creation completed - wallet connected');
+    this.logger.logStep('User creation completed - wallet connected', true);
     
     return {
       email: userEmail,
@@ -127,32 +132,32 @@ export class CustomAuthExamplePage {
     password?: string;
   }) {
     const userEmail = email || getRandomEmail();
-    console.log(`🔄 Starting user creation with email and password: ${userEmail}`);
+    this.logger.logStep(`Starting user creation with email and password: ${userEmail}`);
     
     try {
       // Switch to email tab if needed
-      console.log('🔄 Switching to email tab...');
+      this.logger.logStep('Switching to email tab...');
       await this.page.getByTestId('email-tab').click();
-      await this.page.waitForTimeout(300);
+      await expect(this.page.getByTestId('email-input')).toBeVisible({ timeout: 5000 });
 
       // Enter email
-      console.log(`📧 Entering email: ${userEmail}`);
+      this.logger.log('📧', `Entering email: ${userEmail}`);
       await this.page.getByTestId('email-input').fill(userEmail);
       await this.page.getByTestId('continue-email-button').click();
-      console.log('✅ Email submitted, waiting for OTP screen...');
+      this.logger.logStep('Email submitted, waiting for OTP screen...', true);
       
       // Wait for OTP screen
-      await this.page.waitForTimeout(3000);
-      console.log('🔄 Entering OTP code...');
+      await expect(this.page.getByTestId('otp-input-0')).toBeVisible({ timeout: 5000 });
+      this.logger.logStep('Entering OTP code...');
       
       // Enter OTP code (123456 for test environment)
       for (let i = 0; i < 6; i++) {
         await this.page.getByTestId(`otp-input-${i}`).fill((i + 1).toString());
       }
-      console.log('✅ OTP code entered');
+      this.logger.logStep('OTP code entered', true);
       
       // Handle password creation popup
-      console.log('🔄 Opening password creation popup...');
+      this.logger.logStep('Opening password creation popup...');
       const popupPromise = this.page.waitForEvent('popup');
       await this.page.getByTestId('verify-wallet-button').click();
       
@@ -160,32 +165,32 @@ export class CustomAuthExamplePage {
       const authPortal = new AuthPortalPage(popup);
       
       // Choose password option in popup
-      console.log('🔐 Choosing password option...');
+      this.logger.log('🔐', 'Choosing password option...');
+      await expect(popup.getByRole('button', { name: 'Choose Password' })).toBeVisible({ timeout: 5000 });
       await popup.getByRole('button', { name: 'Choose Password' }).click();
-      console.log('🔄 Entering password...');
+      this.logger.logStep('Entering password...');
       await popup.getByRole('textbox', { name: 'Enter password' }).click();
       await popup.getByRole('textbox', { name: 'Enter password' }).fill(password);
       await popup.getByRole('textbox', { name: 'Confirm password' }).click();
       await popup.getByRole('textbox', { name: 'Confirm password' }).fill(password);
       await popup.getByRole('button', { name: 'Save Password' }).click();
-      console.log('✅ Password saved');
+      this.logger.logStep('Password saved', true);
       
       // Wait for popup to close
-      console.log('🔄 Waiting for popup to close...');
+      this.logger.logStep('Waiting for popup to close...');
       await popup.waitForEvent('close');
       
       // Wait for modal to close and wallet to be connected
-      console.log('🔄 Waiting for wallet connection...');
-      await this.page.waitForTimeout(2000);
-      await expect(this.page.getByTestId('wallet-connected')).toBeVisible();
-      console.log('✅ User creation with password completed - wallet connected');
+      this.logger.logStep('Waiting for wallet connection...');
+      await expect(this.page.getByTestId('wallet-connected')).toBeVisible({ timeout: 10000 });
+      this.logger.logStep('User creation with password completed - wallet connected', true);
       
       return {
         email: userEmail,
         password,
       };
     } catch (error) {
-      console.error('❌ Error in createUserWithEmailAndPassword:', error);
+      this.logger.logError('Error in createUserWithEmailAndPassword:', error);
       throw error;
     }
   }
@@ -199,35 +204,35 @@ export class CustomAuthExamplePage {
     credential: Protocol.WebAuthn.Credential;
     email: string;
   }) {
-    console.log(`🔄 Starting login with email: ${email}`);
+    this.logger.logStep(`Starting login with email: ${email}`);
     
     // Enter email
-    console.log('🔄 Switching to email tab...');
+    this.logger.logStep('Switching to email tab...');
     await this.page.getByTestId('email-tab').click();
-    await this.page.waitForTimeout(300);
-    console.log(`📧 Entering email: ${email}`);
+    await expect(this.page.getByTestId('email-input')).toBeVisible({ timeout: 5000 });
+    this.logger.log('📧', `Entering email: ${email}`);
     await this.page.getByTestId('email-input').fill(email);
     await this.page.getByTestId('continue-email-button').click();
-    console.log('✅ Email submitted for login');
+    this.logger.logStep('Email submitted for login', true);
     
     // Handle passkey login popup
-    console.log('🔄 Opening passkey login popup...');
+    this.logger.logStep('Opening passkey login popup...');
     const popupPromise = this.page.waitForEvent('popup');
-    await this.page.waitForTimeout(1000);
+    // Wait for popup trigger to be ready
+    await expect(this.page.locator('body')).toBeVisible({ timeout: 5000 });
     
     const popup = await popupPromise;
-    console.log('🔐 Authenticating with passkey...');
+    this.logger.log('🔐', 'Authenticating with passkey...');
     const authPortal = new AuthPortalPage(popup);
     await authPortal.login(context, credential);
-    console.log('✅ Passkey authentication completed');
+    this.logger.logStep('Passkey authentication completed', true);
     
     // Wait for login to complete
-    console.log('🔄 Waiting for login completion...');
-    await this.page.waitForTimeout(2000);
+    this.logger.logStep('Waiting for login completion...');
     
     // Wait for Para SDK authentication to complete
     await this.waitForParaAuthentication();
-    console.log('✅ Login completed - wallet connected');
+    this.logger.logStep('Login completed - wallet connected', true);
   }
 
   async loginWithEmailAndPassword({
@@ -237,47 +242,47 @@ export class CustomAuthExamplePage {
     email: string;
     password: string;
   }) {
-    console.log(`🔄 Starting password login with email: ${email}`);
+    this.logger.logStep(`Starting password login with email: ${email}`);
     
     try {
       // Enter email
-      console.log('🔄 Switching to email tab...');
+      this.logger.logStep('Switching to email tab...');
       await this.page.getByTestId('email-tab').click();
       await this.page.waitForTimeout(300);
-      console.log(`📧 Entering email: ${email}`);
+      this.logger.log('📧', `Entering email: ${email}`);
       await this.page.getByTestId('email-input').fill(email);
       await this.page.getByTestId('continue-email-button').click();
-      console.log('✅ Email submitted for password login');
+      this.logger.logStep('Email submitted for password login', true);
       
       // Handle password login popup
-      console.log('🔄 Opening password login popup...');
+      this.logger.logStep('Opening password login popup...');
       const popupPromise = this.page.waitForEvent('popup');
       await this.page.waitForTimeout(1000);
       
       const popup = await popupPromise;
       
       // Click Login button
-      console.log('🔄 Clicking Login button...');
+      this.logger.logStep('Clicking Login button...');
       await popup.getByRole('button', { name: 'Login' }).click();
       
       // Enter password in the popup
-      console.log('🔐 Entering password...');
+      this.logger.log('🔐', 'Entering password...');
       await popup.getByRole('textbox', { name: 'Enter password' }).click();
       await popup.getByRole('textbox', { name: 'Enter password' }).fill(password);
       await popup.getByRole('button', { name: 'Continue' }).click();
-      console.log('✅ Password submitted');
+      this.logger.logStep('Password submitted', true);
       
       // Wait for popup to close
-      console.log('🔄 Waiting for popup to close...');
+      this.logger.logStep('Waiting for popup to close...');
       await popup.waitForEvent('close');
       
       // Wait for login to complete
-      console.log('🔄 Waiting for login completion...');
+      this.logger.logStep('Waiting for login completion...');
       await this.page.waitForTimeout(2000);
       await expect(this.page.getByTestId('wallet-connected')).toBeVisible();
-      console.log('✅ Password login completed - wallet connected');
+      this.logger.logStep('Password login completed - wallet connected', true);
     } catch (error) {
-      console.error('❌ Error in loginWithEmailAndPassword:', error);
+      this.logger.logError('Error in loginWithEmailAndPassword:', error);
       throw error;
     }
   }
@@ -342,22 +347,22 @@ export class CustomAuthExamplePage {
   }
 
   async signMessage(message: string): Promise<string | null> {
-    console.log(`🔄 Signing message: ${message}`);
+    this.logger.logStep(`Signing message: ${message}`);
     
     // Fill in the message
-    console.log('🔄 Filling message input...');
+    this.logger.logStep('Filling message input...');
     const messageInput = await this.page.getByTestId('sign-message-input');
     await messageInput.click();
     await messageInput.clear();
     await messageInput.fill(message);
-    console.log('✅ Message input filled');
+    this.logger.logStep('Message input filled', true);
     
     // Click sign button
-    console.log('🔄 Clicking sign button...');
+    this.logger.logStep('Clicking sign button...');
     await this.page.getByTestId('sign-message-button').click();
     
     // Wait for signature to appear
-    console.log('🔄 Waiting for signature...');
+    this.logger.logStep('Waiting for signature...');
     const signatureDisplay = await this.page.waitForSelector('[data-testid="sign-signature-display"]', {
       state: 'visible',
       timeout: 10000
@@ -365,20 +370,20 @@ export class CustomAuthExamplePage {
     
     // Get signature from the page
     const signature = await signatureDisplay.textContent();
-    console.log(`✅ Got signature: ${signature}`);
+    this.logger.logStep(`Got signature: ${signature}`, true);
     
     return signature;
   }
 
   async logout() {
-    console.log('🔄 Starting logout...');
-    console.log('🔄 Clicking header disconnect button...');
+    this.logger.logStep('Starting logout...');
+    this.logger.logStep('Clicking header disconnect button...');
     await this.page.getByTestId('header-disconnect-button').click();
     await this.page.waitForTimeout(2000); // Wait for logout and state update
     
     // Verify logout
-    console.log('🔄 Verifying logout...');
+    this.logger.logStep('Verifying logout...');
     await expect(this.page.getByTestId('not-logged-in')).toBeVisible();
-    console.log('✅ Logout completed');
+    this.logger.logStep('Logout completed', true);
   }
 }

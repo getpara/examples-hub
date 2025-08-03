@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 
 import { ParaModalExamplePage } from '../../../pages/paraModalExample';
 import * as webauthn from '../../../helpers/webAuthn';
+import { logger } from '../../../helpers/logger';
 
 const OPEN_MODAL_TEXT = 'Connect with Para';
 

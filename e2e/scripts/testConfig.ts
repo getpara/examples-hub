@@ -1,5 +1,6 @@
 import crypto from "crypto";
 import { execSync } from "child_process";
+import { logger } from "../helpers/logger";
 
 export interface TestAppConfig {
   path: string;
@@ -84,13 +85,14 @@ export function getFrameworkEnvVars(framework: string, testEnv: TestEnvironment)
         PARA_API_KEY_BETA: apiKey,
         VITE_PARA_API_KEY: apiKey,
         ENCRYPTION_KEY: getEnvVar("ENCRYPTION_KEY", crypto.randomBytes(24).toString("base64url").slice(0, 32)),
-        ALCHEMY_API_KEY: getEnvVar("ALCHEMY_API_KEY", ""),
-        ALCHEMY_GAS_POLICY_ID: getEnvVar("ALCHEMY_GAS_POLICY_ID", ""),
-        ALCHEMY_RPC_URL: getEnvVar("ALCHEMY_RPC_URL", ""),
-        ZERODEV_PROJECT_ID: getEnvVar("ZERODEV_PROJECT_ID", ""),
-        ZERODEV_BUNDLER_RPC: getEnvVar("ZERODEV_BUNDLER_RPC", ""),
-        ZERODEV_PAYMASTER_RPC: getEnvVar("ZERODEV_PAYMASTER_RPC", ""),
-        ZERODEV_SECRET_KEY: getEnvVar("ZERODEV_SECRET_KEY", ""),
+        // These are required for server frameworks and will be validated in getTestConfig
+        ALCHEMY_API_KEY: getEnvVar("ALCHEMY_API_KEY"),
+        ALCHEMY_GAS_POLICY_ID: getEnvVar("ALCHEMY_GAS_POLICY_ID"),
+        ALCHEMY_RPC_URL: getEnvVar("ALCHEMY_RPC_URL"),
+        ZERODEV_PROJECT_ID: getEnvVar("ZERODEV_PROJECT_ID"),
+        ZERODEV_BUNDLER_RPC: getEnvVar("ZERODEV_BUNDLER_RPC"),
+        ZERODEV_PAYMASTER_RPC: getEnvVar("ZERODEV_PAYMASTER_RPC"),
+        ZERODEV_SECRET_KEY: getEnvVar("ZERODEV_SECRET_KEY"),
       };
 
     default:
@@ -153,7 +155,47 @@ export function getTestConfig(appName: string): TestAppConfig {
     throw new Error(`Unknown app configuration: ${appName}`);
   }
 
+  // Validate all required environment variables early
+  const missingVars: string[] = [];
   const testEnv = getTestEnvironment();
+  
+  // Check framework-specific required variables
+  switch (config.framework) {
+    case "node":
+    case "deno":
+    case "bun":
+      // These frameworks require additional environment variables
+      const requiredServerVars = [
+        "ALCHEMY_API_KEY",
+        "ALCHEMY_GAS_POLICY_ID",
+        "ALCHEMY_RPC_URL",
+        "ZERODEV_PROJECT_ID",
+        "ZERODEV_BUNDLER_RPC",
+        "ZERODEV_PAYMASTER_RPC",
+        "ZERODEV_SECRET_KEY",
+      ];
+      
+      for (const varName of requiredServerVars) {
+        if (!process.env[varName]) {
+          missingVars.push(varName);
+        }
+      }
+      break;
+  }
+  
+  // Log missing variables informatively before failing
+  if (missingVars.length > 0) {
+    logger.logError(`\n❌ Missing required environment variables for ${config.framework} framework:`);
+    missingVars.forEach(varName => {
+      logger.logError(`   - ${varName}`);
+    });
+    logger.logError(`\nPlease check your .env file and ensure all required variables are set.`);
+    logger.logError(`Framework-specific requirements:`);
+    logger.logError(`- Server frameworks (node/deno/bun): Require Alchemy and ZeroDev configuration`);
+    logger.logError(`- Web frameworks: Only require Para API keys\n`);
+    throw new Error(`Missing required environment variables: ${missingVars.join(", ")}`);
+  }
+
   const frameworkEnvVars = getFrameworkEnvVars(config.framework, testEnv);
 
   return {
@@ -181,7 +223,7 @@ export function runCommand(cmd: string, cwd?: string, env?: Record<string, strin
   if (silent) {
     process.stdout.write(`⏳ Running: ${cmd.split(' ')[0]}...`);
   } else {
-    console.log(`Running: ${cmd} ${cwd ? `in ${cwd}` : ""}`);
+    logger.logInfo(`Running: ${cmd} ${cwd ? `in ${cwd}` : ""}`);
   }
   
   try {
@@ -198,7 +240,7 @@ export function runCommand(cmd: string, cwd?: string, env?: Record<string, strin
     if (silent) {
       process.stdout.write(`\r❌ ${cmd.split(' ')[0]} failed                    \n`);
     }
-    console.error(`Error executing: ${cmd}`, (error as Error).message);
+    logger.logError(`Error executing: ${cmd}`, (error as Error).message);
     setTestFailed(true);
     throw new Error(`Command failed: ${cmd}`);
   }
@@ -253,7 +295,7 @@ export function detectChangedFrameworks(isDiffOnly: boolean): string[] {
     }).trim();
 
     if (!gitDiff) {
-      console.log("🔍 No changes detected, running all frameworks");
+      logger.logDebug("🔍 No changes detected, running all frameworks");
       return Object.keys(APP_CONFIGS);
     }
 
@@ -274,14 +316,14 @@ export function detectChangedFrameworks(isDiffOnly: boolean): string[] {
     );
 
     if (matchingFrameworks.length === 0) {
-      console.log("🔍 No framework changes detected, skipping E2E tests");
+      logger.logDebug("🔍 No framework changes detected, skipping E2E tests");
       return [];
     }
 
-    console.log("🔍 Detected changes in frameworks:", matchingFrameworks.join(", "));
+    logger.logDebug("🔍 Detected changes in frameworks:", matchingFrameworks.join(", "));
     return matchingFrameworks;
   } catch (error) {
-    console.warn("⚠️ Failed to detect changes, running all frameworks:", (error as Error).message);
+    logger.logWarning("⚠️ Failed to detect changes, running all frameworks:", (error as Error).message);
     return Object.keys(APP_CONFIGS);
   }
 }
@@ -296,11 +338,11 @@ export function validateEnvironment(): void {
     }
 
     const testEnv = getTestEnvironment();
-    console.log(`✓ Test environment validated: ${testEnv.environment}`);
+    logger.logStep(`✓ Test environment validated: ${testEnv.environment}`, true);
   } catch (error) {
-    console.error("❌ Environment validation failed:");
-    console.error((error as Error).message);
-    console.error("\nPlease create a .env file based on .env.example and add your API keys.");
+    logger.logError("❌ Environment validation failed:");
+    logger.logError((error as Error).message);
+    logger.logError("\nPlease create a .env file based on .env.example and add your API keys.");
     process.exit(1);
   }
 }

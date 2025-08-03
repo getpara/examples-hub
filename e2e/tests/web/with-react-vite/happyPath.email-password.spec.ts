@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 
 import { ParaModalExamplePage } from '../../../pages/paraModalExample';
 import * as webauthn from '../../../helpers/webAuthn';
+import { logger } from '../../../helpers/logger';
 
 const OPEN_MODAL_TEXT = 'Connect with Para';
 const ADDRESS_IDENTIFIER = 'Address';
@@ -9,7 +10,7 @@ const PASSWORD = 'abc123@-$}"';
 
 test.describe('Para Modal - Email + Password Authentication', () => {
   test('happy path - create and login with email and password', async ({ browser }) => {
-    console.log('🚀 Starting React Vite Para Modal E2E test - Email + Password');
+    logger.logInfo('Starting React Vite Para Modal E2E test - Email + Password');
     const context = await browser.newContext({
       permissions: ['clipboard-write', 'clipboard-read'], // grant clipboard read/write permissions
     });
@@ -50,7 +51,7 @@ test.describe('Para Modal - Email + Password Authentication', () => {
     expect(loginAddressText).toBe(createAddressText);
 
     // Test message signing
-    console.log('🔄 Testing message signing...');
+    logger.logStep('Testing message signing...');
     const testMessage = 'Hello Para E2E Test with Email + Password!';
     const signature = await paraModalExamplePage.signMessage(testMessage);
     
@@ -59,6 +60,6 @@ test.describe('Para Modal - Email + Password Authentication', () => {
     expect(signature.length).toBeGreaterThan(0);
     expect(signature).toMatch(/^[a-fA-F0-9]+$/); // Should be a hex string (may or may not have 0x prefix)
     
-    console.log('✅ React Vite Para Modal E2E test completed successfully');
+    logger.logStep('React Vite Para Modal E2E test completed successfully', true);
   });
 });

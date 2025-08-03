@@ -52,8 +52,8 @@
     "typescript-eslint": "^8.29.0"
   },
   "resolutions": {
-    "@getpara/react-sdk": "2.0.0-alpha.36",
-    "@getpara/cosmjs-v0-integration": "2.0.0-alpha.36",
-    "@getpara/user-management-client": "2.0.0-alpha.36"
+    "@getpara/react-sdk": "2.0.0-alpha.39",
+    "@getpara/cosmjs-v0-integration": "2.0.0-alpha.39",
+    "@getpara/user-management-client": "2.0.0-alpha.39"
   }
 }

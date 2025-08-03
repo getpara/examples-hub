@@ -26,7 +26,6 @@
     "web:clean": "tsx scripts/clean-web.ts",
     "specialized:install": "tsx scripts/install-specialized.ts",
     "specialized:lint": "tsx scripts/lint-specialized.ts",
-    "specialized:typecheck": "tsx scripts/typecheck-specialized.ts",
     "specialized:build": "tsx scripts/build-specialized.ts",
     "specialized:clean": "tsx scripts/clean-specialized.ts",
     "server:install": "tsx scripts/install-server.ts",

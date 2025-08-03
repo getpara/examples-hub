@@ -86,7 +86,7 @@ function discoverGetParaPackages(dir: string, currentDepth = 0): Set<string> {
       const filePath = path.join(dir, "package.json");
       try {
         const packageData = JSON.parse(fs.readFileSync(filePath, "utf8"));
-        const sectionsToCheck = ["dependencies", "devDependencies", "peerDependencies", "optionalDependencies"];
+        const sectionsToCheck = ["dependencies", "devDependencies", "peerDependencies", "optionalDependencies", "resolutions"];
         
         sectionsToCheck.forEach((section) => {
           if (packageData[section]) {
@@ -166,7 +166,7 @@ function traverseDirectories(dir: string, versionMap: Record<string, string>, cu
 function hasUpdatesNeeded(filePath: string, versionMap: Record<string, string>): boolean {
   try {
     const packageData = JSON.parse(fs.readFileSync(filePath, "utf8"));
-    const sectionsToCheck = ["dependencies", "devDependencies", "peerDependencies", "optionalDependencies"];
+    const sectionsToCheck = ["dependencies", "devDependencies", "peerDependencies", "optionalDependencies", "resolutions"];
     
     for (const section of sectionsToCheck) {
       if (packageData[section]) {
@@ -206,7 +206,7 @@ function updatePackageJson(filePath: string, versionMap: Record<string, string>,
     const fileUpdates: Array<{ package: string; from: string; to: string; section: string }> = [];
 
     // Define sections to check for dependencies
-    const sectionsToCheck = ["dependencies", "devDependencies", "peerDependencies", "optionalDependencies"];
+    const sectionsToCheck = ["dependencies", "devDependencies", "peerDependencies", "optionalDependencies", "resolutions"];
 
     // Check and update each dependency section
     sectionsToCheck.forEach((section) => {

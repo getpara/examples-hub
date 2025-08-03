@@ -3,6 +3,7 @@ import * as crypto from "node:crypto";
 import fs from "fs/promises";
 import path from "path";
 import { fileURLToPath } from "url";
+import { logger } from "../../../helpers/logger";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -13,7 +14,7 @@ test.describe("with-node server API", () => {
     const dbPath = path.resolve(__dirname, "../../../../server/with-node/src/keyShares.db");
     try {
       await fs.unlink(dbPath);
-      console.log("Cleared keyShares database for clean test run");
+      logger.logInfo("Cleared keyShares database for clean test run");
     } catch (error) {
       // Ignore if file doesn't exist
     }
@@ -24,14 +25,14 @@ test.describe("with-node server API", () => {
     const randomHexString = crypto.randomBytes(5).toString("hex");
     const testEmail = `teste2e+${randomHexString}@test.usecapsule.com`;
     
-    console.log(`\n🔑 Creating test wallet with email: ${testEmail}`);
+    logger.logStep(`Creating test wallet with email: ${testEmail}`);
     const createResponse = await request.post(`${baseURL}/wallets/pregen/create`, {
       data: { email: testEmail },
     });
 
     expect(createResponse.ok()).toBeTruthy();
     expect(createResponse.status()).toBe(201);
-    console.log("✅ Test wallet created successfully\n");
+    logger.logStep("Test wallet created successfully", true);
 
     const signingRoutes = [
       { path: "/viem/pregen", expectedMessage: "Transaction signed using Viem + Para (pre-generated wallet)" },
@@ -66,8 +67,8 @@ test.describe("with-node server API", () => {
 
     // Test all signing routes with the same wallet
     for (const route of signingRoutes) {
-      console.log(`\n🧪 Testing ${route.path}`);
-      console.log(`  🔏 Signing with ${route.path} using email: ${testEmail}`);
+      logger.logStep(`Testing ${route.path}`);
+      logger.logStep(`Signing with ${route.path} using email: ${testEmail}`);
       
       const signResponse = await request.post(`${baseURL}${route.path}`, {
         data: { email: testEmail },
@@ -75,7 +76,7 @@ test.describe("with-node server API", () => {
 
       if (!signResponse.ok()) {
         const errorBody = await signResponse.text();
-        console.error(`  ❌ Sign request failed: ${signResponse.status()} - ${errorBody}`);
+        logger.logError(`Sign request failed: ${signResponse.status()} - ${errorBody}`);
       }
 
       expect(signResponse.ok()).toBeTruthy();
@@ -86,25 +87,25 @@ test.describe("with-node server API", () => {
         success: true,
         message: route.expectedMessage,
       });
-      console.log("  ✅ Sign operation completed successfully");
+      logger.logStep("Sign operation completed successfully", true);
     }
   });
 
   test("error case - wallet already exists", async ({ request }) => {
-    console.log("\n🧪 Testing error case: duplicate wallet creation");
+    logger.logStep("Testing error case: duplicate wallet creation");
     const randomHexString = crypto.randomBytes(5).toString("hex");
     const email = `teste2e+duplicate${randomHexString}@test.usecapsule.com`;
 
     // First creation should succeed
-    console.log("  📝 Creating first wallet...");
+    logger.logStep("Creating first wallet...");
     const firstResponse = await request.post(`${baseURL}/wallets/pregen/create`, {
       data: { email },
     });
     expect(firstResponse.status()).toBe(201);
-    console.log("  ✅ First wallet created successfully");
+    logger.logStep("First wallet created successfully", true);
 
     // Second creation should fail with 409
-    console.log("  📝 Attempting duplicate wallet creation...");
+    logger.logStep("Attempting duplicate wallet creation...");
     const secondResponse = await request.post(`${baseURL}/wallets/pregen/create`, {
       data: { email },
     });
@@ -115,11 +116,11 @@ test.describe("with-node server API", () => {
       success: false,
       message: "A pre-generated wallet already exists for this email",
     });
-    console.log("  ✅ Duplicate creation correctly rejected with 409");
+    logger.logStep("Duplicate creation correctly rejected with 409", true);
   });
 
   test("error case - missing email", async ({ request }) => {
-    console.log("\n🧪 Testing error case: missing email");
+    logger.logStep("Testing error case: missing email");
     const response = await request.post(`${baseURL}/wallets/pregen/create`, {
       data: {},
     });
@@ -131,14 +132,14 @@ test.describe("with-node server API", () => {
       success: false,
       message: "Provide email in the request body",
     });
-    console.log("  ✅ Missing email correctly rejected with 400");
+    logger.logStep("Missing email correctly rejected with 400", true);
   });
 
   test("error case - sign without wallet", async ({ request }) => {
-    console.log("\n🧪 Testing error case: sign without wallet");
+    logger.logStep("Testing error case: sign without wallet");
     const email = "teste2e+nonexistent@test.usecapsule.com";
 
-    console.log("  🔏 Attempting to sign without wallet...");
+    logger.logStep("Attempting to sign without wallet...");
     const response = await request.post(`${baseURL}/viem/pregen`, {
       data: { email },
     });
@@ -150,6 +151,6 @@ test.describe("with-node server API", () => {
       success: false,
       message: "No pre-generated wallet found for this email",
     });
-    console.log("  ✅ Sign without wallet correctly rejected with 400");
+    logger.logStep("Sign without wallet correctly rejected with 400", true);
   });
 });

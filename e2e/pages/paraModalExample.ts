@@ -3,6 +3,7 @@ import { BrowserContext, Page, FrameLocator, expect } from '@playwright/test';
 import { Protocol } from 'playwright-core/types/protocol';
 
 import { AuthPortalPage } from './authPortal';
+import { Logger } from '../helpers/logger';
 
 function getRandomPhoneNumber() {
   const last4 = `${Math.floor(Math.random() * 10000)}`.padStart(4, '0');
@@ -16,9 +17,11 @@ function getRandomEmail() {
 
 export class ParaModalExamplePage {
   page: Page;
+  private logger: Logger;
 
   constructor(page: Page) {
     this.page = page;
+    this.logger = new Logger('ParaModalExample');
   }
 
   /**
@@ -26,55 +29,18 @@ export class ParaModalExamplePage {
    * Tries multiple selectors and waits for content to be ready
    */
   private async getParaIframe(): Promise<FrameLocator> {
-    // Wait for any iframe to appear
-    await this.page.waitForSelector('iframe', { state: 'visible', timeout: 5000 });
+    // Wait for iframe to appear and be visible
+    await this.page.waitForSelector('iframe', { state: 'visible', timeout: 10000 });
     
     // Get the iframe locator
     const frameLocator = this.page.frameLocator('iframe').first();
     
-    // Try to find password input in the iframe
-    try {
-      // First attempt - wait a short time for content
-      await frameLocator.getByRole('textbox', { name: 'Enter password' }).waitFor({ 
-        state: 'visible', 
-        timeout: 3000 
-      });
-      console.log('Found password input in iframe on first attempt');
-      return frameLocator;
-    } catch (error) {
-      console.log('Password input not found in iframe, attempting to refresh iframe');
-      
-      // Get the iframe element to refresh it
-      const iframeElement = await this.page.locator('iframe').first().elementHandle();
-      if (iframeElement) {
-        const src = await iframeElement.getAttribute('src');
-        if (src) {
-          console.log('Refreshing iframe by resetting src attribute');
-          // Force refresh by setting src to empty then back to original
-          await iframeElement.evaluate((iframe) => {
-            const originalSrc = (iframe as HTMLIFrameElement).src;
-            (iframe as HTMLIFrameElement).src = 'about:blank';
-            setTimeout(() => {
-              (iframe as HTMLIFrameElement).src = originalSrc;
-            }, 100);
-          });
-          
-          // Wait for iframe to reload
-          await this.page.waitForTimeout(2000);
-          
-          // Try again to find the password input
-          try {
-            await frameLocator.getByRole('textbox', { name: 'Enter password' }).waitFor({ 
-              state: 'visible', 
-              timeout: 5000 
-            });
-            console.log('Found password input in iframe after refresh');
-          } catch {
-            console.log('Warning: Could not find password input even after refresh');
-          }
-        }
-      }
-    }
+    // Wait for the frame to be loaded and visible
+    await frameLocator.locator('body').waitFor({ state: 'visible', timeout: 10000 });
+    
+    // Ensure password input is visible in the iframe
+    await expect(frameLocator.getByRole('textbox', { name: 'Enter password' })).toBeVisible({ timeout: 10000 });
+    this.logger.logInfo('Found password input in iframe');
     
     return frameLocator;
   }
@@ -83,7 +49,8 @@ export class ParaModalExamplePage {
     await this.page.goto('/');
     // Wait for page to be fully loaded and interactive
     await this.page.waitForLoadState('networkidle');
-    await this.page.waitForTimeout(1000); // Additional wait for any JS initialization
+    // Wait for the main UI to be ready
+    await expect(this.page.getByRole('button', { name: 'Open Modal' })).toBeVisible({ timeout: 10000 });
   }
 
   /**
@@ -91,7 +58,7 @@ export class ParaModalExamplePage {
    * This helps prevent issues where the modal backdrop appears but the modal itself fails to open
    */
   async waitForUIStability(openModalText: string = 'Open Modal') {
-    console.log('🔄 Waiting for UI stability before modal interaction...');
+    this.logger.logStep('Waiting for UI stability before modal interaction...');
     
     // Wait for the modal button to be visible and stable
     const modalButton = this.page.getByRole('button', { name: openModalText });
@@ -104,7 +71,7 @@ export class ParaModalExamplePage {
     await expect(modalButton).toBeVisible();
     await expect(modalButton).toBeEnabled();
     
-    console.log('✅ UI is stable and ready for modal interaction');
+    this.logger.logStep('UI is stable and ready for modal interaction', true);
   }
 
   async createUser({
@@ -126,23 +93,17 @@ export class ParaModalExamplePage {
     await this.waitForUIStability(openModalText);
     
     await this.page.getByRole('button', { name: openModalText }).click();
-    await this.page.waitForTimeout(1000);
+    // Wait for modal to be visible
+    await expect(this.page.getByRole('textbox', { name: 'Enter email or phone' })).toBeVisible({ timeout: 5000 });
 
     const emailOrPhone = usePhoneNumber ? getRandomPhoneNumber() : getRandomEmail();
-    const enterEmailOrPhoneInput = await this.page.getByRole('textbox', { name: 'Enter email or phone' }).elementHandle();
-    if (!enterEmailOrPhoneInput) {
-      throw new Error('Could not find email/phone input');
-    }
+    const enterEmailOrPhoneInput = this.page.getByRole('textbox', { name: 'Enter email or phone' });
     await enterEmailOrPhoneInput.click();
-
-    await this.page.waitForTimeout(300);
-    for (let i = 0; i < emailOrPhone.length; i++) {
-      await enterEmailOrPhoneInput.press(emailOrPhone[i]);
-      await this.page.waitForTimeout(50);
-    }
-    await this.page.waitForTimeout(500);
+    await enterEmailOrPhoneInput.fill(emailOrPhone);
+    await expect(enterEmailOrPhoneInput).toHaveValue(emailOrPhone);
     await this.page.locator('.primary > .hydrated > div > svg').first().click();
-    await this.page.waitForTimeout(3000);
+    // Wait for OTP inputs to be visible
+    await expect(this.page.locator('#code-input-0')).toBeVisible({ timeout: 5000 });
 
     for (let i = 0; i < 6; i++) {
       await this.page.locator(`#code-input-${i}`).click();
@@ -152,9 +113,6 @@ export class ParaModalExamplePage {
     let credentials: Protocol.WebAuthn.Credential[] = [];
     if (password) {
       await this.page.getByRole('button', { name: 'Choose Password' }).click();
-      
-      // Wait for iframe to appear and load
-      await this.page.waitForTimeout(2000);
       
       // Use helper function to get iframe
       const iframeLocator = await this.getParaIframe();
@@ -167,12 +125,10 @@ export class ParaModalExamplePage {
       await iframeLocator.getByRole('button', { name: 'Save Password' }).click();
     } else {
       const page1Promise = this.page.waitForEvent('popup');
-      await this.page.waitForTimeout(500);
       await this.page.getByTestId('modal-content').getByRole('button', { name: 'Create' }).click();
 
       const page1 = await page1Promise;
       const authPortal = new AuthPortalPage(page1);
-      await this.page.waitForTimeout(500);
       credentials = await authPortal.setup(context);
     }
 
@@ -191,22 +147,11 @@ export class ParaModalExamplePage {
     }
 
     // Wait for modal to close and app state to update
-    console.log('🔄 Waiting for Para Modal to close and connection state to update...');
-    await this.page.waitForTimeout(3000);
+    this.logger.logStep('Waiting for Para Modal to close and connection state to update...');
     
-    // Verify that the modal has closed by checking that the page is back to main content
-    try {
-      // Wait for the account address display to appear (indicates successful connection)
-      await this.page.waitForSelector('[data-testid="account-address-display"]', { 
-        state: 'visible', 
-        timeout: 10000 
-      });
-      console.log('✅ Para Modal connection confirmed - account address display visible');
-    } catch (error) {
-      console.log('⚠️ Account address display not found after modal close, may need more time');
-      // Try waiting a bit more
-      await this.page.waitForTimeout(2000);
-    }
+    // Wait for the account address display to appear (indicates successful connection)
+    await expect(this.page.getByTestId('account-address-display')).toBeVisible({ timeout: 15000 });
+    this.logger.logStep('Para Modal connection confirmed - account address display visible', true);
     
     return {
       emailOrPhone,
@@ -230,68 +175,59 @@ export class ParaModalExamplePage {
     is2FAEnabled?: boolean;
     password?: string;
   }) {
-    console.log('Starting login flow...');
+    this.logger.logInfo('Starting login flow...');
     await this.page.reload();
     await this.page.waitForLoadState('networkidle'); // Wait for reload to complete
     
     // Ensure UI is stable before opening modal
     await this.waitForUIStability(openModalText);
     
-    console.log(`Looking for button with text: ${openModalText}`);
+    this.logger.logInfo(`Looking for button with text: ${openModalText}`);
     await this.page.getByRole('button', { name: openModalText }).click();
-    console.log('Modal opened');
-    await this.page.waitForTimeout(750);
+    this.logger.logInfo('Modal opened');
+    // Wait for modal to be visible
+    await expect(this.page.getByRole('textbox', { name: 'Enter email or phone' })).toBeVisible({ timeout: 5000 });
 
-    const enterEmailOrPhoneInput = await this.page.getByRole('textbox', { name: 'Enter email or phone' }).elementHandle();
-    if (!enterEmailOrPhoneInput) {
-      throw new Error('Could not find email/phone input');
-    }
-    console.log('Found email/phone input');
+    const enterEmailOrPhoneInput = this.page.getByRole('textbox', { name: 'Enter email or phone' });
+    this.logger.logInfo('Found email/phone input');
     await enterEmailOrPhoneInput.click();
-    await this.page.waitForTimeout(300);
-    for (let i = 0; i < emailOrPhone.length; i++) {
-      await enterEmailOrPhoneInput.press(emailOrPhone[i]);
-    }
-    console.log(`Entered email/phone: ${emailOrPhone}`);
-    await this.page.waitForTimeout(250);
+    await enterEmailOrPhoneInput.fill(emailOrPhone);
+    await expect(enterEmailOrPhoneInput).toHaveValue(emailOrPhone);
+    this.logger.logInfo(`Entered email/phone: ${emailOrPhone}`);
     await this.page.locator('.primary > .hydrated > div > svg').first().click();
-    console.log('Clicked arrow button to proceed');
-
-    await this.page.waitForTimeout(750);
+    this.logger.logInfo('Clicked arrow button to proceed');
     if (password) {
-      console.log('Password login flow - looking for password input in iframe...');
+      this.logger.logInfo('Password login flow - looking for password input in iframe...');
       try {
-        // Wait a bit for iframe to appear
-        await this.page.waitForTimeout(1000);
         
         // Use helper function to get iframe
         const iframeLocator = await this.getParaIframe();
         
         // Enter password in iframe
         const passwordInput = await iframeLocator.getByRole('textbox', { name: 'Enter password' });
-        console.log('Found password input in iframe');
+        this.logger.logInfo('Found password input in iframe');
         await passwordInput.click();
         await passwordInput.fill(password);
-        console.log('Entered password');
+        this.logger.logInfo('Entered password');
         
         // Now the Login button should be enabled
-        await this.page.waitForTimeout(500); // Wait for button to enable
-        const loginButton = await iframeLocator.getByRole('button', { name: 'Login' });
-        console.log('Found Login button in iframe, clicking...');
+        const loginButton = iframeLocator.getByRole('button', { name: 'Login' });
+        await expect(loginButton).toBeEnabled({ timeout: 5000 });
+        this.logger.logInfo('Found Login button in iframe, clicking...');
         
         // Click login button - no popup needed for password login with iframe
         await loginButton.click();
-        console.log('Clicked Login button, login should complete');
+        this.logger.logInfo('Clicked Login button, login should complete');
         
         // Wait for modal to close and user to be logged in
         await this.page.waitForTimeout(2000);
-        console.log('Login completed');
+        this.logger.logInfo('Login completed');
       } catch (error) {
-        console.error('Error in password login flow:', error);
+        this.logger.logError('Error in password login flow:', error);
         throw error;
       }
     } else {
-      console.log('Passkey login flow');
+      this.logger.logInfo('Passkey login flow');
       const page2Promise = this.page.waitForEvent('popup');
       await this.page.getByText('Login with passkey').click();
       const page2 = await page2Promise;
@@ -300,7 +236,7 @@ export class ParaModalExamplePage {
     }
 
     // Wait for login to complete and connection state to update
-    console.log('🔄 Waiting for login completion and connection state update...');
+    this.logger.logStep('Waiting for login completion and connection state update...');
     await this.page.waitForTimeout(2000);
     
     if (is2FAEnabled) {
@@ -314,9 +250,9 @@ export class ParaModalExamplePage {
         state: 'visible', 
         timeout: 10000 
       });
-      console.log('✅ Para Modal login confirmed - account address display visible');
+      this.logger.logStep('Para Modal login confirmed - account address display visible', true);
     } catch (error) {
-      console.log('⚠️ Account address display not found after login, may need more time');
+      this.logger.logWarning('Account address display not found after login, may need more time');
       await this.page.waitForTimeout(2000);
     }
   }
@@ -330,30 +266,30 @@ export class ParaModalExamplePage {
   }
 
   async signMessage(message: string): Promise<string> {
-    console.log(`Signing message: ${message}`);
+    this.logger.logInfo(`Signing message: ${message}`);
     
     // Find and fill the message input
     const messageInput = await this.page.getByTestId('sign-message-input');
     await messageInput.click();
     await messageInput.clear();
     await messageInput.fill(message);
-    console.log('Filled message input');
+    this.logger.logInfo('Filled message input');
     
     // Click the sign button
     const signButton = await this.page.getByTestId('sign-submit-button');
     await signButton.click();
-    console.log('Clicked sign button');
+    this.logger.logInfo('Clicked sign button');
     
     // Wait for signature to appear
     const signatureDisplay = await this.page.waitForSelector('[data-testid="sign-signature-display"]', {
       state: 'visible',
       timeout: 10000
     });
-    console.log('Signature appeared');
+    this.logger.logInfo('Signature appeared');
     
     // Get the signature text
     const signature = await signatureDisplay.textContent();
-    console.log(`Got signature: ${signature}`);
+    this.logger.logInfo(`Got signature: ${signature}`);
     
     return signature || '';
   }
