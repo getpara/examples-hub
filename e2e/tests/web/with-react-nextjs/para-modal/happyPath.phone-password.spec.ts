@@ -4,7 +4,6 @@ import { ParaModalExamplePage } from '../../../../pages/paraModalExample';
 import * as webauthn from '../../../../helpers/webAuthn';
 import { logger } from '../../../../helpers/logger';
 
-const OPEN_MODAL_TEXT = 'Connect with Para';
 const PASSWORD = 'abc123@-$}"';
 
 test.describe('Para Modal - Phone + Password Authentication', () => {
@@ -28,7 +27,6 @@ test.describe('Para Modal - Phone + Password Authentication', () => {
 
     const { emailOrPhone, credential, clipboardText } = await createParaModalPage.createUser({
       context: createContext,
-      openModalText: OPEN_MODAL_TEXT,
       isRecoverySecretEnabled: true,
       password: PASSWORD, // Password authentication
       usePhoneNumber: true, // Use phone number
@@ -52,7 +50,7 @@ test.describe('Para Modal - Phone + Password Authentication', () => {
     expect(signature).toMatch(/^[a-fA-F0-9]+$/);
 
     // Logout in creation context
-    await createParaModalPage.logout({ openModalText: OPEN_MODAL_TEXT });
+    await createParaModalPage.logout();
 
     // Close the creation context completely
     logger.logStep('Closing creation context and clearing all state...');
@@ -83,7 +81,6 @@ test.describe('Para Modal - Phone + Password Authentication', () => {
       context: loginContext, 
       credential, 
       emailOrPhone, 
-      openModalText: OPEN_MODAL_TEXT,
       password: PASSWORD // Password login
     });
 

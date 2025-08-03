@@ -16,6 +16,7 @@ import {
   TEST_PATTERNS,
 } from "./testConfig";
 import { logger } from "../helpers/logger";
+import { ensurePlaywrightBrowsers } from "./ensure-playwright-browsers";
 
 dotenv.config();
 
@@ -148,6 +149,9 @@ const appsToTest = candidateFrameworks.filter((appName) => {
 });
 
 async function main(): Promise<void> {
+  // Ensure Playwright browsers are installed before running any tests
+  ensurePlaywrightBrowsers();
+
   if (isSingleTestMode) {
     await runSingleTest(cliArgs.framework!, cliArgs.testType);
     return;

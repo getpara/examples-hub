@@ -4,7 +4,6 @@ import { ParaModalExamplePage } from '../../../pages/paraModalExample';
 import * as webauthn from '../../../helpers/webAuthn';
 import { logger } from '../../../helpers/logger';
 
-const OPEN_MODAL_TEXT = 'Connect with Para';
 const ADDRESS_IDENTIFIER = 'Address';
 const PASSWORD = 'abc123@-$}"';
 
@@ -20,7 +19,6 @@ test.describe('Para Modal - Phone + Password Authentication', () => {
 
     const { emailOrPhone, credential, clipboardText } = await paraModalExamplePage.createUser({
       context,
-      openModalText: OPEN_MODAL_TEXT,
       isRecoverySecretEnabled: true,
       password: PASSWORD,
       usePhoneNumber: true, // Use phone number
@@ -35,12 +33,11 @@ test.describe('Para Modal - Phone + Password Authentication', () => {
     const addressElement = await paraModalExamplePage.page.getByTestId('account-address-display');
     const createAddressText = await addressElement.textContent();
 
-    await paraModalExamplePage.logout({ openModalText: OPEN_MODAL_TEXT });
+    await paraModalExamplePage.logout();
     await paraModalExamplePage.login({
       context,
       credential,
       emailOrPhone,
-      openModalText: OPEN_MODAL_TEXT,
       password: PASSWORD,
     });
 

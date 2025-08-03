@@ -4,7 +4,6 @@ import { ParaModalExamplePage } from '../../../../pages/paraModalExample';
 import * as webauthn from '../../../../helpers/webAuthn';
 import { logger } from '../../../../helpers/logger';
 
-const OPEN_MODAL_TEXT = 'Connect with Para';
 const ADDRESS_IDENTIFIER = 'Address';
 
 test.describe('Para Modal - Phone + Passkey Authentication', () => {
@@ -28,7 +27,6 @@ test.describe('Para Modal - Phone + Passkey Authentication', () => {
 
     const { emailOrPhone, credential, clipboardText } = await createParaModalPage.createUser({
       context: createContext,
-      openModalText: OPEN_MODAL_TEXT,
       isRecoverySecretEnabled: true,
       usePhoneNumber: true, // Use phone number
     });
@@ -51,7 +49,7 @@ test.describe('Para Modal - Phone + Passkey Authentication', () => {
     expect(signature).toMatch(/^[a-fA-F0-9]+$/);
 
     // Logout in creation context
-    await createParaModalPage.logout({ openModalText: OPEN_MODAL_TEXT });
+    await createParaModalPage.logout();
 
     // Close the creation context completely
     logger.logStep('Closing creation context and clearing all state...');
@@ -81,8 +79,7 @@ test.describe('Para Modal - Phone + Passkey Authentication', () => {
     await loginParaModalPage.login({ 
       context: loginContext, 
       credential, 
-      emailOrPhone, 
-      openModalText: OPEN_MODAL_TEXT 
+      emailOrPhone 
     });
 
     // Verify same address after login in fresh context

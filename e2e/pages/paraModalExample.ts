@@ -50,18 +50,18 @@ export class ParaModalExamplePage {
     // Wait for page to be fully loaded and interactive
     await this.page.waitForLoadState('networkidle');
     // Wait for the main UI to be ready
-    await expect(this.page.getByRole('button', { name: 'Open Modal' })).toBeVisible({ timeout: 10000 });
+    await expect(this.page.getByTestId('header-connect-button')).toBeVisible({ timeout: 10000 });
   }
 
   /**
    * Ensures the UI is stable and ready before opening the Para modal
    * This helps prevent issues where the modal backdrop appears but the modal itself fails to open
    */
-  async waitForUIStability(openModalText: string = 'Open Modal') {
+  async waitForUIStability() {
     this.logger.logStep('Waiting for UI stability before modal interaction...');
     
     // Wait for the modal button to be visible and stable
-    const modalButton = this.page.getByRole('button', { name: openModalText });
+    const modalButton = this.page.getByTestId('header-connect-button');
     await modalButton.waitFor({ state: 'visible', timeout: 10000 });
     
     // Additional wait to ensure any animations or async operations complete
@@ -76,23 +76,21 @@ export class ParaModalExamplePage {
 
   async createUser({
     context,
-    openModalText = 'Open Modal',
     is2FAEnabled,
     isRecoverySecretEnabled,
     password,
     usePhoneNumber = false,
   }: {
     context: BrowserContext;
-    openModalText?: string;
     is2FAEnabled?: boolean;
     isRecoverySecretEnabled?: boolean;
     password?: string;
     usePhoneNumber?: boolean;
   }) {
     // Ensure UI is stable before opening modal
-    await this.waitForUIStability(openModalText);
+    await this.waitForUIStability();
     
-    await this.page.getByRole('button', { name: openModalText }).click();
+    await this.page.getByTestId('header-connect-button').click();
     // Wait for modal to be visible
     await expect(this.page.getByRole('textbox', { name: 'Enter email or phone' })).toBeVisible({ timeout: 5000 });
 
@@ -164,14 +162,12 @@ export class ParaModalExamplePage {
     context,
     credential,
     emailOrPhone,
-    openModalText = 'Open Modal',
     is2FAEnabled,
     password,
   }: {
     context: BrowserContext;
     credential: Protocol.WebAuthn.Credential;
     emailOrPhone: string;
-    openModalText?: string;
     is2FAEnabled?: boolean;
     password?: string;
   }) {
@@ -180,10 +176,10 @@ export class ParaModalExamplePage {
     await this.page.waitForLoadState('networkidle'); // Wait for reload to complete
     
     // Ensure UI is stable before opening modal
-    await this.waitForUIStability(openModalText);
+    await this.waitForUIStability();
     
-    this.logger.logInfo(`Looking for button with text: ${openModalText}`);
-    await this.page.getByRole('button', { name: openModalText }).click();
+    this.logger.logInfo('Looking for connect button');
+    await this.page.getByTestId('header-connect-button').click();
     this.logger.logInfo('Modal opened');
     // Wait for modal to be visible
     await expect(this.page.getByRole('textbox', { name: 'Enter email or phone' })).toBeVisible({ timeout: 5000 });
@@ -257,7 +253,7 @@ export class ParaModalExamplePage {
     }
   }
 
-  async logout({ openModalText = 'Open Modal' }: { openModalText?: string }) {
+  async logout() {
     // Click on the connected address button to open modal
     await this.page.getByTestId('account-address-display').click();
     await this.page.waitForTimeout(500);

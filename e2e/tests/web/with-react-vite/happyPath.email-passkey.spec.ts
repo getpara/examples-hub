@@ -4,7 +4,6 @@ import { ParaModalExamplePage } from '../../../pages/paraModalExample';
 import * as webauthn from '../../../helpers/webAuthn';
 import { logger } from '../../../helpers/logger';
 
-const OPEN_MODAL_TEXT = 'Connect with Para';
 
 test.describe('Para Modal - Email + Passkey Authentication', () => {
   test('happy path - create and login with email and passkey', async ({ browser }) => {
@@ -25,7 +24,6 @@ test.describe('Para Modal - Email + Passkey Authentication', () => {
 
     const { emailOrPhone, credential, clipboardText } = await createParaModalPage.createUser({
       context: createContext,
-      openModalText: OPEN_MODAL_TEXT,
       isRecoverySecretEnabled: true,
       usePhoneNumber: false, // Use email
       // No password parameter = passkey authentication
@@ -49,7 +47,7 @@ test.describe('Para Modal - Email + Passkey Authentication', () => {
     expect(signature).toMatch(/^[a-fA-F0-9]+$/);
 
     // Logout in creation context
-    await createParaModalPage.logout({ openModalText: OPEN_MODAL_TEXT });
+    await createParaModalPage.logout();
 
     // Close the creation context completely
     logger.logStep('Closing creation context and clearing all state...');
@@ -80,7 +78,6 @@ test.describe('Para Modal - Email + Passkey Authentication', () => {
       context: loginContext,
       credential,
       emailOrPhone,
-      openModalText: OPEN_MODAL_TEXT,
       // No password = passkey login
     });
 
