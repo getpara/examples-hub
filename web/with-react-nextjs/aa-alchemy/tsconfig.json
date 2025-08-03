@@ -19,9 +19,18 @@
       }
     ],
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./src/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
+  "include": [
+    "next-env.d.ts",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    ".next/types/**/*.ts",
+    "next.config.ts",
+    "tailwind.config.ts",
+    "postcss.config.mjs",
+    "eslint.config.mjs"
+  ],
+  "exclude": ["node_modules", "**/*.spec.ts", "**/*.test.ts"]
 }
