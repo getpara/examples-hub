@@ -8,6 +8,7 @@ import Apple from './apple.svg';
 import ArbitrumBrand from './arbitrum-brand.svg';
 import ArrowCircleBrokenDownLeft from './arrow-circle-broken-down-left.svg';
 import ArrowCircleDownFilled from './arrow-circle-down-filled.svg';
+import ArrowCircleDown from './arrow-circle-down.svg';
 import ArrowNarrow from './arrow-narrow.svg';
 import Arrow from './arrow.svg';
 import Asterisk from './asterisk.svg';
@@ -49,6 +50,7 @@ import Dell from './dell.svg';
 import DiscordBrand from './discord-brand.svg';
 import Discord from './discord.svg';
 import Dot from './dot.svg';
+import DotsSquare from './dots-square.svg';
 import Dots from './dots.svg';
 import DownloadCloud from './download-cloud.svg';
 import Download from './download.svg';
@@ -118,6 +120,7 @@ import Motorola from './motorola.svg';
 import NobleBrand from './noble-brand.svg';
 import Okx from './okx.svg';
 import OptimismBrand from './optimism-brand.svg';
+import ParaArrow from './para-arrow.svg';
 import ParaBlackBg from './para-black-bg.svg';
 import ParaBrand from './para-brand.svg';
 import ParaIconBrand from './para-icon-brand.svg';
@@ -180,10 +183,12 @@ import Tumblr from './tumblr.svg';
 import TwitterBrand from './twitter-brand.svg';
 import Twitter from './twitter.svg';
 import UsdcBrand from './usdc-brand.svg';
+import User01 from './user-01.svg';
 import UserCircle from './user-circle.svg';
 import UserPlus from './user-plus.svg';
 import User from './user.svg';
 import Valora from './valora.svg';
+import Wallet02 from './wallet-02.svg';
 import WalletConnect from './wallet-connect.svg';
 import Wallet from './wallet.svg';
 import X from './x.svg';
@@ -435,6 +440,7 @@ export const Icons = {
   arbitrumBrand: ArbitrumBrand,
   arrowCircleBrokenDownLeft: ArrowCircleBrokenDownLeft,
   arrowCircleDownFilled: ArrowCircleDownFilled,
+  arrowCircleDown: ArrowCircleDown,
   arrowNarrow: ArrowNarrow,
   arrow: Arrow,
   asterisk: Asterisk,
@@ -476,6 +482,7 @@ export const Icons = {
   discordBrand: DiscordBrand,
   discord: Discord,
   dot: Dot,
+  dotsSquare: DotsSquare,
   dots: Dots,
   downloadCloud: DownloadCloud,
   download: Download,
@@ -545,6 +552,7 @@ export const Icons = {
   nobleBrand: NobleBrand,
   okx: Okx,
   optimismBrand: OptimismBrand,
+  paraArrow: ParaArrow,
   paraBlackBg: ParaBlackBg,
   paraBrand: ParaBrand,
   paraIconBrand: ParaIconBrand,
@@ -607,10 +615,12 @@ export const Icons = {
   twitterBrand: TwitterBrand,
   twitter: Twitter,
   usdcBrand: UsdcBrand,
+  user01: User01,
   userCircle: UserCircle,
   userPlus: UserPlus,
   user: User,
   valora: Valora,
+  wallet02: Wallet02,
   walletConnect: WalletConnect,
   wallet: Wallet,
   x: X,

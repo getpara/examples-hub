@@ -9,6 +9,7 @@
 
 | Property                    | Attribute                     | Description                                                                                                                   | Type                            | Default     |
 | --------------------------- | ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | ------------------------------- | ----------- |
+| `alignCenter`               | `align-center`                | If `true`, the popover will be aligned to the center of the trigger element. Default is `false`.                              | `boolean`                       | `false`     |
 | `anchorEl`                  | --                            | ID for the element that the popover anchors to.                                                                               | `HTMLElement`                   | `undefined` |
 | `anchorOriginHorizontal`    | `anchor-origin-horizontal`    | Vertical anchor origin. Options are: `"left"`, `"center"`, `"right"`. Default is: `"left"`.                                   | `"center" \| "left" \| "right"` | `'left'`    |
 | `anchorOriginVertical`      | `anchor-origin-vertical`      | Vertical anchor origin. Options are: `"top"`, `"center"`, `"bottom"`. Default is: `"bottom"`.                                 | `"bottom" \| "center" \| "top"` | `'bottom'`  |

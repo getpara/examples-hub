@@ -2,22 +2,25 @@ import { CpslAvatar, CpslIcon, CpslText, IconType } from '@getpara/react-compone
 import { CoreAuthInfo, displayPhoneNumber } from '@getpara/web-sdk';
 import { getExternalWalletDisplayName, safeStyled } from '../utils/index.js';
 
-function defaultDisplay(authInfo: CoreAuthInfo): { defaultName: string | null; defaultIcon: IconType | null } {
-  const { authType, identifier, externalWallet } = authInfo;
+export function getAuthDisplay(authInfo: CoreAuthInfo): { name: string | null; icon?: IconType; src?: string } {
+  const { authType, displayName, identifier, pfpUrl, externalWallet } = authInfo;
 
   switch (authType) {
     case 'email':
-      return { defaultName: identifier.toLowerCase(), defaultIcon: 'mail' };
+      return { name: identifier.toLowerCase(), icon: 'mail' };
     case 'phone':
-      return { defaultName: displayPhoneNumber(identifier), defaultIcon: 'phone' };
+      return { name: displayPhoneNumber(identifier), icon: 'phone' };
     case 'farcaster':
-      return { defaultName: `@${identifier}`, defaultIcon: 'farcasterBrand' };
+      return { name: displayName ?? `@${identifier}`, ...(pfpUrl ? { src: pfpUrl } : { icon: 'farcasterBrand' }) };
     case 'telegram':
-      return { defaultName: `Telegram User @${identifier}`, defaultIcon: 'telegramBrand' };
+      return {
+        name: displayName ?? `Telegram User @${identifier}`,
+        ...(pfpUrl ? { src: pfpUrl } : { icon: 'telegramBrand' }),
+      };
     case 'externalWallet':
-      return { defaultName: getExternalWalletDisplayName(externalWallet), defaultIcon: 'wallet' };
+      return { name: getExternalWalletDisplayName(externalWallet), icon: 'wallet' };
     default:
-      return { defaultName: null, defaultIcon: null };
+      return { name: null, icon: null };
   }
 }
 
@@ -26,21 +29,21 @@ export const UserIdentifier = ({ authInfo }: { authInfo?: CoreAuthInfo }) => {
     return null;
   }
 
-  const { authType, displayName, pfpUrl } = authInfo;
+  const { authType } = authInfo;
 
-  const { defaultName, defaultIcon } = defaultDisplay(authInfo);
+  const { name, icon, src } = getAuthDisplay(authInfo);
 
   return (
     <Container>
       <IconContainer>
-        {pfpUrl ? (
-          <Avatar src={pfpUrl} size="20px" variant="round" />
+        {src ? (
+          <Avatar src={src} size="20px" variant="round" />
         ) : (
-          <Icon icon={defaultIcon} size={authType === 'telegram' ? '20px' : '13px'} />
+          <Icon icon={icon} size={authType === 'telegram' ? '20px' : '13px'} />
         )}
       </IconContainer>
       <IdentifierText variant="bodyS" weight="medium">
-        {displayName || defaultName}
+        {name}
       </IdentifierText>
     </Container>
   );

@@ -71,6 +71,12 @@ export class CpslPopover {
   @Prop() transformOriginVertical?: 'top' | 'center' | 'bottom' = 'top';
 
   /**
+   * If `true`, the popover will be aligned to the center of the trigger element.
+   * Default is `false`.
+   */
+  @Prop() alignCenter: boolean = false;
+
+  /**
    * Which trigger causes the popover to open.
    * Options are: `"click"`, `"hover"`.
    * Default is: `"click"`.
@@ -114,6 +120,7 @@ export class CpslPopover {
 
   @Watch('anchorOriginHorizontal')
   @Watch('anchorOriginVertical')
+  @Watch('alignCenter')
   onAnchorChange() {
     this.setPosition();
   }
@@ -229,18 +236,22 @@ export class CpslPopover {
       const elHeight = this.el.clientHeight;
       const { top, left, height, width } = anchorEl.getBoundingClientRect();
 
-      switch (this.anchorOriginHorizontal) {
-        case 'left': {
-          this.positionX = left;
-          break;
-        }
-        case 'center': {
-          this.positionX = left + width / 2;
-          break;
-        }
-        case 'right': {
-          this.positionX = left + width;
-          break;
+      if (this.alignCenter) {
+        this.positionX = left + (width / 2 - elWidth / 2);
+      } else {
+        switch (this.anchorOriginHorizontal) {
+          case 'left': {
+            this.positionX = left;
+            break;
+          }
+          case 'center': {
+            this.positionX = left + width / 2;
+            break;
+          }
+          case 'right': {
+            this.positionX = left + width;
+            break;
+          }
         }
       }
 

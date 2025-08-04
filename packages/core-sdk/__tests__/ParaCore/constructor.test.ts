@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { MockPara } from '../mocks/mockParaCore';
 import ParaCore, { Environment } from '../../src';
-import { API_KEY } from '../constants';
+import { API_KEY, PARTNER } from '../constants';
 
 describe('ParaCore - constructor', () => {
   describe('constructor', () => {
@@ -39,6 +39,24 @@ describe('ParaCore - constructor', () => {
       expect((para as unknown as any).sessionStorageGetItem).toEqual(opts.sessionStorageGetItemOverride);
       expect((para as unknown as any).sessionStorageSetItem).toEqual(opts.sessionStorageSetItemOverride);
       expect((para as unknown as any).clearStorage).toEqual(opts.clearStorageOverride);
+    });
+  });
+
+  describe('partner helpers', () => {
+    it('partnerLogo', async () => {
+      const para = new MockPara(Environment.DEV, API_KEY);
+      await para.touchSession();
+
+      expect((para as unknown as any).partnerLogo).toBeDefined();
+      expect((para as unknown as any).partnerLogo).toBe(PARTNER.logoUrl);
+    });
+
+    it('partnerName', async () => {
+      const para = new MockPara(Environment.DEV, API_KEY);
+      await para.touchSession();
+
+      expect((para as unknown as any).partnerName).toBeDefined();
+      expect((para as unknown as any).partnerName).toBe(PARTNER.displayName);
     });
   });
 });

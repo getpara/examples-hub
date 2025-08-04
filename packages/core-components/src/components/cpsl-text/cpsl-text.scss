@@ -363,6 +363,18 @@
   }
 }
 
+:host(.align-left) {
+  text-align: left;
+}
+
+:host(.align-center) {
+  text-align: center;
+}
+
+:host(.align-right) {
+  text-align: right;
+}
+
 :host p,
 h1,
 h2,

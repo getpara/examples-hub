@@ -197,6 +197,11 @@ input {
 
 .dropdown-inner {
   overflow: auto;
+  padding: var(--dropdown-inner-padding, 0px);
+  display: flex;
+  flex-direction: column;
+  gap: var(--dropdown-inner-gap, 0px);
+  background-color: var(--dropdown-background-color, var(--container-background-color));
   max-height: calc(100vh - 32px);
 
   scrollbar-width: thin;

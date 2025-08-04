@@ -29,6 +29,13 @@ export class CpslText {
    */
   @Prop() weight?: 'regular' | 'medium' | 'semiBold' | 'bold' = 'regular';
 
+  /**
+   * The text-align CSS property to apply.
+   * Options are: `"left"`, `"center", `"right".
+   * Default is: `"left"`.
+   */
+  @Prop() align?: 'left' | 'center' | 'right';
+
   private getContent = () => {
     switch (this.variant) {
       case 'headingXS': {
@@ -113,6 +120,9 @@ export class CpslText {
           'heading-l': this.variant === 'headingL',
           'heading-xl': this.variant === 'headingXL',
           'heading-2xl': this.variant === 'heading2XL',
+          'align-left': this.align === 'left',
+          'align-center': this.align === 'center',
+          'align-right': this.align === 'right',
         }}
       >
         {this.getContent()}

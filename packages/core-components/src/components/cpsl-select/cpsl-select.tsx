@@ -28,6 +28,12 @@ export class CpslSelect {
   @Prop() autoWidth?: boolean = false;
 
   /**
+   * If `true`, the popover will be aligned to the center of the trigger element.
+   * Default is `false`.
+   */
+  @Prop() alignCenter: boolean = false;
+
+  /**
    * If `true`, the user cannot interact with the input.
    */
   @Prop() disabled = false;
@@ -62,7 +68,7 @@ export class CpslSelect {
    * The name of the icon to use for the end icon.
    * Default: `chevronUp`
    */
-  @Prop() icon?: IconType = 'chevronUp';
+  @Prop() icon?: IconType | null = 'chevronUp';
 
   /**
    * The label for the input.
@@ -280,7 +286,9 @@ export class CpslSelect {
               </cpsl-text>
             )}
           </div>
-          <cpsl-icon part="icon" class={{ 'chevron': true, 'open': !this.noIconAnimation && this.popoverOpen, 'has-value': this.hasSelectedItem }} icon={this.icon} />
+          {this.icon && this.icon !== null && (
+            <cpsl-icon part="icon" class={{ 'chevron': true, 'open': !this.noIconAnimation && this.popoverOpen, 'has-value': this.hasSelectedItem }} icon={this.icon} />
+          )}
           <input
             id={this.inputId}
             disabled={this.disabled}
@@ -291,7 +299,15 @@ export class CpslSelect {
             onKeyPress={this.handleEnterPress}
             inputmode="none"
           />
-          <cpsl-popover part="popover" autoWidth={this.autoWidth} trigger={this.id} preventBlur={this.hasFocus} disabled={this.disabled} anchorEl={this.anchorEl}>
+          <cpsl-popover
+            part="popover"
+            autoWidth={this.autoWidth}
+            alignCenter={this.alignCenter}
+            trigger={this.id}
+            preventBlur={this.hasFocus}
+            disabled={this.disabled}
+            anchorEl={this.anchorEl}
+          >
             <div part="dropdown" class="dropdown">
               {this.showSearch && (
                 <div class="search-container">

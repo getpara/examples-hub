@@ -193,7 +193,7 @@ export abstract class ParaCore implements CoreInterface {
     return 'NONE';
   }
 
-  #partner?: PartnerEntity;
+  protected partner?: PartnerEntity;
 
   userId?: string;
   accountLinkInProgress: AccountLinkInProgress | undefined = undefined;
@@ -231,19 +231,27 @@ export abstract class ParaCore implements CoreInterface {
   }
 
   get partnerId(): string | undefined {
-    return this.#partner?.id;
+    return this.partner?.id;
+  }
+
+  protected get partnerName(): string | undefined {
+    return this.partner?.displayName;
+  }
+
+  protected get partnerLogo(): string | undefined {
+    return this.partner?.logoUrl;
   }
 
   async #assertPartner(): Promise<PartnerEntity> {
-    if (!this.#partner) {
+    if (!this.partner) {
       await this.touchSession();
     }
 
-    if (this.#partner?.cosmosPrefix && this.ctx.cosmosPrefix !== this.#partner.cosmosPrefix) {
-      this.ctx.cosmosPrefix = this.#partner?.cosmosPrefix;
+    if (this.partner?.cosmosPrefix && this.ctx.cosmosPrefix !== this.partner.cosmosPrefix) {
+      this.ctx.cosmosPrefix = this.partner?.cosmosPrefix;
     }
 
-    return this.#partner!;
+    return this.partner!;
   }
 
   /**
@@ -252,7 +260,7 @@ export abstract class ParaCore implements CoreInterface {
   currentWalletIds: CurrentWalletIds = {};
 
   get currentWalletIdsArray(): [string, TWalletType][] {
-    return (this.#partner?.supportedWalletTypes ?? Object.keys(this.currentWalletIds).map(type => ({ type }))).reduce(
+    return (this.partner?.supportedWalletTypes ?? Object.keys(this.currentWalletIds).map(type => ({ type }))).reduce(
       (acc, { type }) => {
         return [
           ...acc,
@@ -270,7 +278,7 @@ export abstract class ParaCore implements CoreInterface {
   }
 
   get #guestWalletIds(): CurrentWalletIds {
-    if (!this.#partner?.supportedWalletTypes) {
+    if (!this.partner?.supportedWalletTypes) {
       return {};
     }
 
@@ -286,7 +294,7 @@ export abstract class ParaCore implements CoreInterface {
             return {
               ...acc,
               ...getEquivalentTypes(wallet.type)
-                .filter(type => this.#partner.supportedWalletTypes.some(entry => entry.type === type))
+                .filter(type => this.partner.supportedWalletTypes.some(entry => entry.type === type))
                 .reduce((acc, eqType) => ({ ...acc, [eqType]: [...new Set([...(acc[eqType] ?? []), id])] }), {}),
             };
           }
@@ -429,23 +437,23 @@ export abstract class ParaCore implements CoreInterface {
   private fetchPregenWalletsOverride?: ConstructorOpts['fetchPregenWalletsOverride'];
 
   get isNoWalletConfig(): boolean {
-    return !!this.#partner?.supportedWalletTypes && this.#partner.supportedWalletTypes.length === 0;
+    return !!this.partner?.supportedWalletTypes && this.partner.supportedWalletTypes.length === 0;
   }
 
   get supportedWalletTypes(): SupportedWalletTypes {
-    return this.#partner?.supportedWalletTypes ?? [];
+    return this.partner?.supportedWalletTypes ?? [];
   }
 
   get cosmosPrefix(): string | undefined {
-    return this.#partner?.cosmosPrefix;
+    return this.partner?.cosmosPrefix;
   }
 
   get supportedAccountLinks(): SupportedAccountLinks {
-    return this.#partner?.supportedAccountLinks ?? [...LINKED_ACCOUNT_TYPES];
+    return this.partner?.supportedAccountLinks ?? [...LINKED_ACCOUNT_TYPES];
   }
 
   get isWalletTypeEnabled(): Partial<Record<TWalletType, boolean>> {
-    return (this.#partner?.supportedWalletTypes || []).reduce((acc, { type }) => {
+    return (this.partner?.supportedWalletTypes || []).reduce((acc, { type }) => {
       return { ...acc, [type]: true };
     }, {});
   }
@@ -546,8 +554,8 @@ export abstract class ParaCore implements CoreInterface {
 
   private isWalletSupported(wallet: Omit<Wallet, 'signer'>): boolean {
     return (
-      !this.#partner?.supportedWalletTypes ||
-      isWalletSupported(this.#partner.supportedWalletTypes.map(({ type }) => type) ?? [], wallet)
+      !this.partner?.supportedWalletTypes ||
+      isWalletSupported(this.partner.supportedWalletTypes.map(({ type }) => type) ?? [], wallet)
     );
   }
 
@@ -608,7 +616,7 @@ export abstract class ParaCore implements CoreInterface {
       } else if (!isOwned && !isUnclaimed) {
         error = `wallet with id ${wallet?.id} is not owned by the current user`;
       } else if (!this.isWalletSupported(wallet)) {
-        error = `wallet with id ${wallet.id} and type ${wallet.type} is not supported, supported types are: ${(this.#partner?.supportedWalletTypes || []).map(({ type }) => type).join(', ')}`;
+        error = `wallet with id ${wallet.id} and type ${wallet.type} is not supported, supported types are: ${(this.partner?.supportedWalletTypes || []).map(({ type }) => type).join(', ')}`;
       } else if (
         types &&
         (!getEquivalentTypes(types).includes(wallet?.type) ||
@@ -649,7 +657,7 @@ export abstract class ParaCore implements CoreInterface {
 
       return options.truncate
         ? truncateAddress(wallet.address, wallet.type, {
-            prefix: this.#partner?.cosmosPrefix,
+            prefix: this.partner?.cosmosPrefix,
             targetLength: options.targetLength,
           })
         : wallet.address;
@@ -666,7 +674,7 @@ export abstract class ParaCore implements CoreInterface {
 
     switch (wallet.type) {
       case 'COSMOS':
-        prefix = options.cosmosPrefix ?? this.#partner?.cosmosPrefix ?? 'cosmos';
+        prefix = options.cosmosPrefix ?? this.partner?.cosmosPrefix ?? 'cosmos';
         str = getCosmosAddress(wallet.publicKey!, prefix);
         break;
       default:
@@ -1191,10 +1199,10 @@ export abstract class ParaCore implements CoreInterface {
     const session = await this.ctx.client.touchSession(regenerate);
 
     if (
-      !this.#partner ||
-      this.#partner?.id !== session.partnerId ||
-      !supportedWalletTypesEq(this.#partner?.supportedWalletTypes || [], session.supportedWalletTypes) ||
-      (this.#partner?.cosmosPrefix || 'cosmos') !== session.cosmosPrefix
+      !this.partner ||
+      this.partner?.id !== session.partnerId ||
+      !supportedWalletTypesEq(this.partner?.supportedWalletTypes || [], session.supportedWalletTypes) ||
+      (this.partner?.cosmosPrefix || 'cosmos') !== session.cosmosPrefix
     ) {
       await this.#getPartner(session.partnerId);
     }
@@ -1822,9 +1830,9 @@ export abstract class ParaCore implements CoreInterface {
 
     const res = await this.ctx.client.getPartner(partnerId);
 
-    this.#partner = res.data.partner;
+    this.partner = res.data.partner;
 
-    return this.#partner;
+    return this.partner;
   }
 
   private async getPartnerURL(): Promise<string | undefined> {
@@ -2207,7 +2215,7 @@ export abstract class ParaCore implements CoreInterface {
     return (
       this.#guestWalletIdsArray.length > 0 &&
       Object.values(this.wallets).every(
-        ({ userId, partnerId }) => partnerId === this.#partner?.id && (!userId || userId !== this.userId),
+        ({ userId, partnerId }) => partnerId === this.partner?.id && (!userId || userId !== this.userId),
       )
     );
   }
@@ -3760,9 +3768,9 @@ export abstract class ParaCore implements CoreInterface {
       {},
     );
     const obj = {
-      partnerId: this.#partner?.id,
-      supportedWalletTypes: this.#partner?.supportedWalletTypes,
-      cosmosPrefix: this.#partner?.cosmosPrefix,
+      partnerId: this.partner?.id,
+      supportedWalletTypes: this.partner?.supportedWalletTypes,
+      cosmosPrefix: this.partner?.cosmosPrefix,
       authInfo: this.#authInfo,
       isGuestMode: this.isGuestMode,
       userId: this.userId,

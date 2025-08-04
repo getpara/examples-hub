@@ -20,4 +20,12 @@ export class ParaInternal extends ParaWeb implements InternalInterface {
   verifyTelegramLink = super.verifyTelegramLink;
   verifyFarcasterLink = super.verifyFarcasterLink;
   verifyExternalWalletLink = super.verifyExternalWalletLink;
+
+  get partnerLogo() {
+    return super.partnerLogo;
+  }
+
+  get partnerName() {
+    return super.partnerName;
+  }
 }

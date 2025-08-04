@@ -44,8 +44,6 @@
     var(--outer-container-padding-start)
   );
 
-  background-color: var(--container-background-color);
-
   &:hover {
     & > .inner-container {
       background-color: var(--container-hover-background-color);

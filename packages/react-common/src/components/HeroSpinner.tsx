@@ -8,7 +8,8 @@ export function HeroSpinner({
   icon,
   status = 'idle',
   text,
-}: PropsWithChildren<{ icon?: IconType | ReactNode; status?: Status; text?: ReactNode }>) {
+  secondaryText,
+}: PropsWithChildren<{ icon?: IconType | ReactNode; status?: Status; text?: ReactNode; secondaryText?: ReactNode }>) {
   return (
     <Root>
       <Hero>
@@ -21,11 +22,17 @@ export function HeroSpinner({
         <CpslText
           variant="bodyM"
           weight="semiBold"
+          align="center"
           color={status === 'error' ? 'error' : status === 'success' ? 'success' : 'primary'}
         >
           {text}
         </CpslText>
       </Text>
+      {secondaryText && (
+        <SecondaryText align="center" color="secondary" variant="semiBold">
+          {secondaryText}
+        </SecondaryText>
+      )}
     </Root>
   );
 }
@@ -57,6 +64,10 @@ const Text = safeStyled.div<{ status: Status }>`
       : status === 'success'
         ? 'var(--cpsl-color-utility-green)'
         : 'auto'};
+`;
+
+const SecondaryText = safeStyled(CpslText)`
+  margin-top: 8px;
 `;
 
 const Spinner = safeStyled(CpslSpinner)`

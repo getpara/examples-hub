@@ -33,6 +33,26 @@ export class CpslIcon {
    */
   @Prop() icon?: IconType;
 
+  /**
+   * Whether the icon should be rounded.
+   */
+  @Prop() radius?: 'none' | 'theme' | 'full' = 'none';
+
+  /**
+   * The background CSS property of the icon.
+   */
+  @Prop() background?: string;
+
+  /**
+   * The color of the icon.
+   */
+  @Prop() color?: string;
+
+  /**
+   * The border CSS property of the icon.
+   */
+  @Prop() border?: string;
+
   render() {
     return (
       <Host
@@ -42,9 +62,20 @@ export class CpslIcon {
           ...(this.inset ? { ['--inset']: this.inset } : {}),
           ...(this.size ? { ['--height']: this.size, ['--width']: this.size } : {}),
           ...(this.invert ? { ['--filter']: 'invert(100%)' } : {}),
+          ...(this.radius === 'full' ? { ['--border-radius']: '1000px' } : {}),
+          ...(this.radius === 'theme' ? { ['--border-radius']: 'var(--cpsl-border-radius-tile-button)' } : {}),
+          ...(this.background ? { ['--background']: this.background } : {}),
+          ...(this.border ? { ['--border']: this.border } : {}),
+          ...(this.color ? { ['--icon-color']: this.color } : {}),
         }}
       >
-        {!this.icon ? <img src={this.src} /> : <div innerHTML={Icons[this.icon]} />}
+        {this.icon ? (
+          <div innerHTML={Icons[this.icon]} />
+        ) : (
+          <div>
+            <img src={this.src} />
+          </div>
+        )}
       </Host>
     );
   }

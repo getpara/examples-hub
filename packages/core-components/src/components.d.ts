@@ -389,6 +389,18 @@ export namespace Components {
     }
     interface CpslIcon {
         /**
+          * The background CSS property of the icon.
+         */
+        "background"?: string;
+        /**
+          * The border CSS property of the icon.
+         */
+        "border"?: string;
+        /**
+          * The color of the icon.
+         */
+        "color"?: string;
+        /**
           * The name of the icon. If both `icon` and `src` are provided, `icon` will be used.
          */
         "icon"?: IconType;
@@ -400,6 +412,10 @@ export namespace Components {
           * Whether to invert the icon's colors.
          */
         "invert"?: boolean;
+        /**
+          * Whether the icon should be rounded.
+         */
+        "radius"?: 'none' | 'theme' | 'full';
         /**
           * The CSS size of the icon.
          */
@@ -670,6 +686,10 @@ export namespace Components {
     }
     interface CpslPopover {
         /**
+          * If `true`, the popover will be aligned to the center of the trigger element. Default is `false`.
+         */
+        "alignCenter": boolean;
+        /**
           * ID for the element that the popover anchors to.
          */
         "anchorEl"?: HTMLElement;
@@ -760,6 +780,10 @@ export namespace Components {
     }
     interface CpslSelect {
         /**
+          * If `true`, the popover will be aligned to the center of the trigger element. Default is `false`.
+         */
+        "alignCenter": boolean;
+        /**
           * ID of element to anchor popover to.
          */
         "anchorElId"?: string;
@@ -790,7 +814,7 @@ export namespace Components {
         /**
           * The name of the icon to use for the end icon. Default: `chevronUp`
          */
-        "icon"?: IconType;
+        "icon"?: IconType | null;
         /**
           * ID of the element, must be unique for the popover trigger.
          */
@@ -927,6 +951,10 @@ export namespace Components {
         "selectedTab"?: string;
     }
     interface CpslText {
+        /**
+          * The text-align CSS property to apply. Options are: `"left"`, `"center", `"right". Default is: `"left"`.
+         */
+        "align"?: 'left' | 'center' | 'right';
         /**
           * The color of text. Options are: `"primary"`, `"secondary", `"tertiary", `"subtle", `"inverted", `"error". Default is: `"primary"`.
          */
@@ -1954,6 +1982,18 @@ declare namespace LocalJSX {
     }
     interface CpslIcon {
         /**
+          * The background CSS property of the icon.
+         */
+        "background"?: string;
+        /**
+          * The border CSS property of the icon.
+         */
+        "border"?: string;
+        /**
+          * The color of the icon.
+         */
+        "color"?: string;
+        /**
           * The name of the icon. If both `icon` and `src` are provided, `icon` will be used.
          */
         "icon"?: IconType;
@@ -1965,6 +2005,10 @@ declare namespace LocalJSX {
           * Whether to invert the icon's colors.
          */
         "invert"?: boolean;
+        /**
+          * Whether the icon should be rounded.
+         */
+        "radius"?: 'none' | 'theme' | 'full';
         /**
           * The CSS size of the icon.
          */
@@ -2283,6 +2327,10 @@ declare namespace LocalJSX {
     }
     interface CpslPopover {
         /**
+          * If `true`, the popover will be aligned to the center of the trigger element. Default is `false`.
+         */
+        "alignCenter"?: boolean;
+        /**
           * ID for the element that the popover anchors to.
          */
         "anchorEl"?: HTMLElement;
@@ -2381,6 +2429,10 @@ declare namespace LocalJSX {
     }
     interface CpslSelect {
         /**
+          * If `true`, the popover will be aligned to the center of the trigger element. Default is `false`.
+         */
+        "alignCenter"?: boolean;
+        /**
           * ID of element to anchor popover to.
          */
         "anchorElId"?: string;
@@ -2411,7 +2463,7 @@ declare namespace LocalJSX {
         /**
           * The name of the icon to use for the end icon. Default: `chevronUp`
          */
-        "icon"?: IconType;
+        "icon"?: IconType | null;
         /**
           * ID of the element, must be unique for the popover trigger.
          */
@@ -2592,6 +2644,10 @@ declare namespace LocalJSX {
         "selectedTab"?: string;
     }
     interface CpslText {
+        /**
+          * The text-align CSS property to apply. Options are: `"left"`, `"center", `"right". Default is: `"left"`.
+         */
+        "align"?: 'left' | 'center' | 'right';
         /**
           * The color of text. Options are: `"primary"`, `"secondary", `"tertiary", `"subtle", `"inverted", `"error". Default is: `"primary"`.
          */

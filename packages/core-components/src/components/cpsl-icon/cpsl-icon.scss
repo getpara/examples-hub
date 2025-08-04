@@ -7,15 +7,18 @@
   --height: 24px;
   --width: 24px;
   --inset: 0px;
-  --svg-height: calc(var(--height) - (2 * var(--inset)));
-  --svg-width: calc(var(--width) - (2 * var(--inset)));
+  --computed-height: calc(var(--height) - (2 * var(--inset)));
+  --computed-width: calc(var(--width) - (2 * var(--inset)));
 
-  --icon-color: currentColor;
-  --icon-fill-color: currentColor;
-  --icon-stroke-color: currentColor;
+  --icon-color: var(--icon-color, currentColor);
+  --icon-fill-color: var(--icon-fill-color, var(--icon-color, currentColor));
+  --icon-stroke-color: var(--icon-stroke-color, var(--icon-color, currentColor));
 
   width: var(--width);
   height: var(--height);
+  border-radius: var(--border-radius, 0);
+  border: var(--border, auto);
+  background: var(--background, transparent);
 
   .foreground-0 {
     fill: var(--cpsl-color-foreground-0);
@@ -38,8 +41,8 @@
 }
 
 :host svg {
-  width: var(--svg-width, '100%');
-  height: var(--svg-height, '100%');
+  width: var(--computed-width, '100%');
+  height: var(--computed-height, '100%');
   filter: var(--filter);
 
   & .background-16 {
@@ -60,8 +63,8 @@
 }
 
 :host img {
-  width: 100%;
-  height: 100%;
+  width: var(--computed-width, 100%);
+  height: var(--computed-height, 100%);
 
   object-fit: contain;
 }

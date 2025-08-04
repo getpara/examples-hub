@@ -80,6 +80,7 @@ export const API_KEY = 'api-key-123';
 export const PARTNER = {
   id: 'ef3bf91c-fc1e-4d18-afe2-f2654c9531b4',
   portalUrl: 'https://test.com',
+  logoUrl: 'https://test.com/logo.png',
   apiKey: API_KEY,
   font: 'roboto',
   themeMode: 'light',
