@@ -21,7 +21,6 @@
     "@getpara/graz": "2.0.0-alpha.6",
     "@getpara/react-sdk": "2.0.0-alpha.39",
     "@getpara/solana-web3.js-v1-integration": "2.0.0-alpha.39",
-    "@getpara/viem-v1-integration": "2.0.0-alpha.39",
     "@getpara/viem-v2-integration": "2.0.0-alpha.39",
     "@hookform/resolvers": "^5.1.1",
     "@leapwallet/cosmos-social-login-capsule-provider": "^0.0.44",

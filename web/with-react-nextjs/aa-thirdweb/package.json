@@ -1,5 +1,5 @@
 {
-  "name": "aa-alchemy",
+  "name": "aa-thirdweb",
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -12,9 +12,6 @@
     "validate": "yarn typecheck && yarn lint && yarn build"
   },
   "dependencies": {
-    "@aa-sdk/core": "^4.43.1",
-    "@account-kit/infra": "^4.43.1",
-    "@account-kit/smart-contracts": "^4.43.1",
     "@cosmjs/cosmwasm-stargate": "^0.34.0",
     "@cosmjs/launchpad": "^0.27.1",
     "@cosmjs/proto-signing": "^0.34.0",
@@ -83,6 +80,7 @@
     "starknet": "^7.6.4",
     "tailwind-merge": "^3.3.1",
     "tailwindcss-animate": "^1.0.7",
+    "thirdweb": "5.89.0",
     "tweetnacl": "^1.0.3",
     "vaul": "^1.1.2",
     "viem": "^2.33.0",
@@ -105,6 +103,7 @@
     "typescript": "^5"
   },
   "resolutions": {
-    "@tanstack/react-query": "5.75.4"
+    "@tanstack/react-query": "5.75.4",
+    "viem": "2.33.0"
   }
 }
