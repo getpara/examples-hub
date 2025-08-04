@@ -1,6 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { useRef, useEffect } from "react";
-import { publicClient } from "@/lib/create-public-viem-client";
+import { getContract } from "thirdweb";
+import { isContractDeployed } from "thirdweb/utils";
+import { CHAIN } from "@/config/thirdweb";
+import { thirdwebClient } from "@/lib/thirdweb-client";
 
 export interface UseDeploymentStatusOptions {
   onDeployed?: () => void;
@@ -31,11 +34,13 @@ export function useDeploymentStatus(address: string | null, options?: UseDeploym
 
       attemptRef.current++;
 
-      const code = await publicClient.getCode({
-        address: address as `0x${string}`,
+      // Use Thirdweb's isContractDeployed
+      const contract = getContract({
+        client: thirdwebClient,
+        chain: CHAIN,
+        address,
       });
-
-      const isDeployed = !!(code && code !== "0x");
+      const isDeployed = await isContractDeployed(contract);
 
       return {
         isDeployed,

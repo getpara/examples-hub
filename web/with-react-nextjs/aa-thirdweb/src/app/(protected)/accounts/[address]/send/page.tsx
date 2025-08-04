@@ -117,16 +117,23 @@ export default function SendAssetsPage() {
       const walletIndex = 0;
       const { account } = await createParaThirdwebClient(para, BigInt(walletIndex));
 
-      // Import sendTransaction from thirdweb
-      const { sendTransaction } = await import("thirdweb");
+      // Import sendTransaction and prepareTransaction from thirdweb
+      const { sendTransaction, prepareTransaction } = await import("thirdweb");
+      const { CHAIN } = await import("@/config/thirdweb");
+      const { thirdwebClient } = await import("@/lib/thirdweb-client");
+      
+      // Prepare the transaction with chain and client
+      const transaction = prepareTransaction({
+        to: recipient as `0x${string}`,
+        data: "0x" as `0x${string}`,
+        value: parseEther(amount),
+        chain: CHAIN,
+        client: thirdwebClient,
+      });
       
       const result = await sendTransaction({
         account,
-        transaction: {
-          to: recipient as `0x${string}`,
-          data: "0x" as `0x${string}`,
-          value: parseEther(amount),
-        },
+        transaction,
       });
 
       toast({

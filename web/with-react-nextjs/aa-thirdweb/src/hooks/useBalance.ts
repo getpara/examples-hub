@@ -1,6 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { formatEther } from "viem";
-import { publicClient } from "@/lib/create-public-viem-client";
+import { getWalletBalance } from "thirdweb/wallets";
+import { CHAIN } from "@/config/thirdweb";
+import { thirdwebClient } from "@/lib/thirdweb-client";
 
 export interface Balance {
   wei: bigint;
@@ -34,13 +36,15 @@ export function useBalance(address?: string): UseBalanceReturn {
         throw new Error("No address provided");
       }
 
-      const balance = await publicClient.getBalance({
+      const balanceObj = await getWalletBalance({
+        client: thirdwebClient,
+        chain: CHAIN,
         address: address as `0x${string}`,
       });
 
       return {
-        wei: balance,
-        ether: formatEther(balance),
+        wei: balanceObj.value,
+        ether: formatEther(balanceObj.value),
       };
     },
     enabled: !!address,

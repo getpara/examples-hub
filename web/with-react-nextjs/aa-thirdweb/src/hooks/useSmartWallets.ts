@@ -20,7 +20,7 @@ export function useSmartWallets() {
         throw new Error("Not connected");
       }
 
-      return await checkExistingWallets(para, wallet.id);
+      return await checkExistingWallets(para);
     },
     enabled: !isLoading && !!para && !!wallet?.id && isConnected,
     retry: 1,

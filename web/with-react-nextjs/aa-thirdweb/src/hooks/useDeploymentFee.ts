@@ -1,11 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
-import { formatEther } from "viem";
-import { publicClient } from "@/lib/create-public-viem-client";
-import { createParaThirdwebClient } from "@/lib/create-thirdweb-client";
+import { getSmartWalletAddress } from "@/lib/get-smart-wallet-address";
 import { useClient } from "@getpara/react-sdk";
-import { useEthPrice } from "./useEthPrice";
-import { weiToUsd } from "./useBalance";
-import { THIRDWEB_CLIENT_ID, THIRDWEB_SECRET_KEY, thirdwebClient, CHAIN } from "@/config/thirdweb";
+import { THIRDWEB_CLIENT_ID, THIRDWEB_SECRET_KEY, CHAIN } from "@/config/thirdweb";
+import { thirdwebClient } from "@/lib/thirdweb-client";
 import { getContract } from "thirdweb";
 import { isContractDeployed } from "thirdweb/utils";
 
@@ -17,7 +14,6 @@ export interface DeploymentFee {
 
 export function useDeploymentFee(walletId: string | null, index: number) {
   const para = useClient();
-  const { priceUsd } = useEthPrice();
 
   const { data, isLoading, isError, error } = useQuery<DeploymentFee | undefined>({
     queryKey: ["deploymentFee", walletId, index],
@@ -36,13 +32,14 @@ export function useDeploymentFee(walletId: string | null, index: number) {
       }
 
       try {
-        const { account } = await createParaThirdwebClient(para, BigInt(index));
+        // Efficiently predict address without creating full connection
+        const address = await getSmartWalletAddress(para, walletId, index);
 
         // Create a contract instance for the smart wallet address
         const contract = getContract({
           client: thirdwebClient,
           chain: CHAIN,
-          address: account.address,
+          address: address as `0x${string}`,
         });
 
         // Check if account is already deployed
