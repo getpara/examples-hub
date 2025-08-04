@@ -14,7 +14,6 @@ import { customSignMessage } from "../utils/signature-utils.js";
 export async function zerodevPregenSignHandler(req: Request, res: Response): Promise<void> {
   const PARA_API_KEY = process.env.PARA_API_KEY;
   const PARA_ENVIRONMENT = (process.env.PARA_ENVIRONMENT as Environment) || Environment.BETA;
-  const ZERODEV_PROJECT_ID = process.env.ZERODEV_PROJECT_ID;
   const ZERODEV_BUNDLER_RPC = process.env.ZERODEV_BUNDLER_RPC;
   const ZERODEV_PAYMASTER_RPC = process.env.ZERODEV_PAYMASTER_RPC;
   const ZERODEV_RPC_URL = process.env.ZERODEV_ARBITRUM_SEPOLIA_RPC;
@@ -28,11 +27,11 @@ export async function zerodevPregenSignHandler(req: Request, res: Response): Pro
       return;
     }
 
-    if (!PARA_API_KEY || !ZERODEV_PROJECT_ID || !ZERODEV_BUNDLER_RPC || !ZERODEV_PAYMASTER_RPC || !ZERODEV_RPC_URL) {
+    if (!PARA_API_KEY || !ZERODEV_BUNDLER_RPC || !ZERODEV_PAYMASTER_RPC || !ZERODEV_RPC_URL) {
       res.status(500).json({
         success: false,
         message:
-          "Missing required environment variables (PARA_API_KEY, ZERODEV_PROJECT_ID, ZERODEV_BUNDLER_RPC, ZERODEV_PAYMASTER_RPC, ZERODEV_ARBITRUM_SEPOLIA_RPC)",
+          "Missing required environment variables (PARA_API_KEY, ZERODEV_BUNDLER_RPC, ZERODEV_PAYMASTER_RPC, ZERODEV_ARBITRUM_SEPOLIA_RPC)",
       });
       return;
     }
