@@ -7,19 +7,19 @@ import { Cog } from 'lucide-react';
 const BUTTONS = [
   {
     label: '2 Hours',
-    value: 7_200_000,
+    value: 120,
   },
   {
     label: '1 Day',
-    value: 86_400_000,
+    value: 1_440,
   },
   {
     label: '1 Week',
-    value: 604_800_000,
+    value: 10_080,
   },
   {
     label: '1 Month',
-    value: 2_592_000_000,
+    value: 43_200,
   },
   {
     label: 'Custom',
