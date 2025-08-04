@@ -10,7 +10,7 @@ export const SolanaWalletWrapper = ({
   solanaProviderConfig,
   onSwitchWallet,
 }: {
-  solanaProviderConfig: ParaSolanaProviderConfigNoWallets;
+  solanaProviderConfig: ParaSolanaProviderConfigNoWallets | undefined;
   onSwitchWallet: ({ address, error }: { address?: string; error?: string }) => void;
 } & PropsWithChildren) => {
   const externalWalletsWithFullAuth = useStore(state => state.externalWalletsWithFullAuth);

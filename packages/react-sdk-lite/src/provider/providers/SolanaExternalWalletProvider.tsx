@@ -10,7 +10,7 @@ export function SolanaExternalWalletProvider({
   isUsing,
   wallets: walletsFromProps,
   ...rest
-}: Omit<ParaSolanaProviderProps, 'config'> & { config: ParaSolanaProviderConfigNoWallets } & PropsWithChildren &
+}: Omit<ParaSolanaProviderProps, 'config'> & { config: ParaSolanaProviderConfigNoWallets | undefined } & PropsWithChildren &
   ExternalWalletProviderCommon) {
   const setSolanaContext = useStore(state => state.setSolanaContext);
   const setSolanaProvider = useStore(state => state.setSolanaProvider);
@@ -52,6 +52,10 @@ export function SolanaExternalWalletProvider({
 
   if (isLoadingLib) {
     return null;
+  }
+
+  if (!rest.config) {
+    return children;
   }
 
   if (SolanaProvider) {

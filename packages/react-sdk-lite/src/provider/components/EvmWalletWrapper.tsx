@@ -17,7 +17,7 @@ export const EvmWalletWrapper = <
   wagmiProviderProps,
   onSwitchWallet,
 }: {
-  evmProviderConfig: ParaEvmProviderConfigNoWallets<chains, transports>;
+  evmProviderConfig: ParaEvmProviderConfigNoWallets<chains, transports> | undefined;
   wagmiProviderProps: ParaWagmiProviderProps;
   onSwitchWallet: ({ address, error }: { address?: string; error?: string }) => void;
 } & PropsWithChildren) => {

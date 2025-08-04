@@ -1,4 +1,5 @@
 export { ParaProvider } from './ParaProvider.js';
+export { ParaProviderMin } from './ParaProviderMin.js';
 
 export * from './hooks/index.js';
 

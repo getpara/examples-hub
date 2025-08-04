@@ -10,7 +10,7 @@ export function CosmosExternalWalletProvider({
   isUsing,
   wallets: walletsFromProps,
   ...rest
-}: Omit<ParaCosmosProviderProps, 'config'> & { config: ParaCosmosProviderConfigNoWallets } & PropsWithChildren &
+}: Omit<ParaCosmosProviderProps, 'config'> & { config: ParaCosmosProviderConfigNoWallets | undefined } & PropsWithChildren &
   ExternalWalletProviderCommon) {
   const setCosmosContext = useStore(state => state.setCosmosContext);
   const setCosmosProvider = useStore(state => state.setCosmosProvider);
@@ -52,6 +52,10 @@ export function CosmosExternalWalletProvider({
 
   if (isLoadingLib) {
     return null;
+  }
+
+  if (!rest.config) {
+    return children;
   }
 
   if (CosmosProvider) {

@@ -13,7 +13,6 @@ import { CosmosWalletWrapper } from './CosmosWalletWrapper.js';
 import { SolanaWalletWrapper } from './SolanaWalletWrapper.js';
 import { useStore } from '../stores/useStore.js';
 import { ParaGrazProviderProps } from '@getpara/cosmos-wallet-connectors';
-import { getEVMExternalWalletConfigDefault } from '../utils/externalWalletDefaults.js';
 
 interface ExternalWalletWrapperProps<
   chains extends readonly [Chain, ...Chain[]],
@@ -43,65 +42,28 @@ export const ExternalWalletWrapper = <
     }
   }, [wallets, walletConnect]);
 
-  const evmProviderConfig: ParaEvmProviderConfigNoWallets<
-    readonly [Chain, ...Chain[]],
-    Record<[Chain, ...Chain[]][number]['id'], Transport>
-  > = useMemo(
+  const evmProviderConfig:
+    | ParaEvmProviderConfigNoWallets<readonly [Chain, ...Chain[]], Record<[Chain, ...Chain[]][number]['id'], Transport>>
+    | undefined = useMemo(
     () =>
-      !evmConnector
-        ? getEVMExternalWalletConfigDefault({ appName, projectId: walletConnect?.projectId })
-        : { appName, appDescription, appIcon, appUrl, projectId: walletConnect?.projectId ?? '', ...evmConnector?.config },
+      evmConnector
+        ? { appName, appDescription, appIcon, appUrl, projectId: walletConnect?.projectId ?? '', ...evmConnector?.config }
+        : undefined,
     [appName, appDescription, appIcon, appUrl, walletConnect?.projectId, evmConnector],
   );
 
-  const solanaProviderConfig: ParaSolanaProviderConfigNoWallets = useMemo(() => {
+  const solanaProviderConfig: ParaSolanaProviderConfigNoWallets | undefined = useMemo(() => {
     const appIdentity = {
       name: solanaConnector?.config.appIdentity?.name ?? appName,
       uri: solanaConnector?.config.appIdentity?.uri ?? appUrl,
       icon: solanaConnector?.config.appIdentity?.icon ?? appIcon,
     };
 
-    return !solanaConnector
-      ? { appIdentity, chain: 'devnet', endpoint: 'https://api.devnet.solana.com' }
-      : { appIdentity, ...solanaConnector?.config };
+    return solanaConnector ? { appIdentity, ...solanaConnector?.config } : undefined;
   }, [solanaConnector]);
 
-  const cosmosProviderConfig: ParaCosmosProviderConfigNoWallets = useMemo(
-    () =>
-      !cosmosConnector
-        ? {
-            chains: [
-              {
-                chainId: 'theta-testnet-001',
-                currencies: [{ coinDenom: 'atom', coinMinimalDenom: 'uatom', coinDecimals: 6 }],
-                rest: 'https://cosmoshubt.lava.build',
-                rpc: 'https://cosmoshubt.tendermintrpc.lava.build:443',
-                bech32Config: {
-                  bech32PrefixAccAddr: 'cosmos',
-                  bech32PrefixAccPub: 'cosmospub',
-                  bech32PrefixValAddr: 'cosmosvaloper',
-                  bech32PrefixValPub: 'cosmosvaloperpub',
-                  bech32PrefixConsAddr: 'cosmosvalcons',
-                  bech32PrefixConsPub: 'cosmosvalconspub',
-                },
-                chainName: 'cosmoshubtestnet',
-                feeCurrencies: [
-                  {
-                    coinDenom: 'atom',
-                    coinMinimalDenom: 'uatom',
-                    coinDecimals: 6,
-                    coinGeckoId: '',
-                    gasPriceStep: { low: 0.01, average: 0.025, high: 0.03 },
-                  },
-                ],
-                stakeCurrency: { coinDenom: 'atom', coinMinimalDenom: 'uatom', coinDecimals: 6 },
-                bip44: { coinType: 118 },
-              },
-            ],
-            onSwitchChain: () => {},
-            selectedChainId: 'theta-testnet-001',
-          }
-        : cosmosConnector.config,
+  const cosmosProviderConfig: ParaCosmosProviderConfigNoWallets | undefined = useMemo(
+    () => (cosmosConnector ? cosmosConnector.config : undefined),
     [cosmosConnector],
   );
 

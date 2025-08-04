@@ -1,4 +1,4 @@
-import { ParaModalHandle, ParaProviderProps, ParaProvider as ParaProviderMin } from '@getpara/react-sdk-lite';
+import { ParaModalHandle, ParaProviderProps, ParaProviderMin } from '@getpara/react-sdk-lite';
 import { forwardRef } from 'react';
 import { Chain, Transport } from 'viem';
 

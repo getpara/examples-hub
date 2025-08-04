@@ -15,7 +15,7 @@ export function EvmExternalWalletProvider<
   wallets: walletsFromProps,
   ...rest
 }: Omit<ParaEvmProviderProps<chains, transports>, 'config'> & {
-  config: ParaEvmProviderConfigNoWallets<chains, transports>;
+  config: ParaEvmProviderConfigNoWallets<chains, transports> | undefined;
 } & PropsWithChildren &
   ExternalWalletProviderCommon) {
   const setEvmContext = useStore(state => state.setEvmContext);
@@ -66,6 +66,10 @@ export function EvmExternalWalletProvider<
 
   if (isLoadingLib) {
     return null;
+  }
+
+  if (!rest.config) {
+    return children;
   }
 
   if (EvmProvider) {

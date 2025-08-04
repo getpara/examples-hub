@@ -13,7 +13,7 @@ export const CosmosWalletWrapper = ({
   grazProviderProps,
   onSwitchWallet,
 }: {
-  cosmosConnectorConfig: ParaCosmosProviderConfigNoWallets;
+  cosmosConnectorConfig: ParaCosmosProviderConfigNoWallets | undefined;
   grazProviderProps: ParaGrazProviderProps;
   onSwitchWallet: ({ address, error }: { address?: string; error?: string }) => void;
 } & PropsWithChildren) => {
