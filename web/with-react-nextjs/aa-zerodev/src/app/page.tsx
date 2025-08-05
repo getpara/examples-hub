@@ -37,7 +37,7 @@ export default function Home() {
           Smart Wallets with ZeroDev
         </h1>
         <p className="max-w-[600px] text-muted-foreground md:text-lg">
-          Experience the power of ERC-4337 Account Abstraction with ZeroDev's Kernel smart accounts. Create gasless, 
+          Experience the power of ERC-4337 Account Abstraction with ZeroDev&apos;s Kernel smart accounts. Create gasless, 
           programmable wallets on Sepolia testnet.
         </p>
         <div className="space-y-4 pt-4 w-full max-w-lg">
@@ -52,13 +52,13 @@ export default function Home() {
             <li className="flex items-start">
               <CheckCircle2 className="mr-2 mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
               <span>
-                <strong>Gas Sponsorship:</strong> Gasless transactions powered by ZeroDev's paymaster infrastructure.
+                <strong>Gas Sponsorship:</strong> Gasless transactions powered by ZeroDev&apos;s paymaster infrastructure.
               </span>
             </li>
             <li className="flex items-start">
               <CheckCircle2 className="mr-2 mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
               <span>
-                <strong>Bundler Infrastructure:</strong> Reliable UserOperation bundling with ZeroDev's production-grade bundler.
+                <strong>Bundler Infrastructure:</strong> Reliable UserOperation bundling with ZeroDev&apos;s production-grade bundler.
               </span>
             </li>
             <li className="flex items-start">

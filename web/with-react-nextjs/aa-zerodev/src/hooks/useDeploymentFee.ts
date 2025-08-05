@@ -1,10 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { formatEther } from "viem";
-import { publicClient } from "@/lib/create-public-viem-client";
 import { createParaZeroDevClient } from "@/lib/create-zerodev-client";
 import { useClient } from "@getpara/react-sdk";
 import { useEthPrice } from "./useEthPrice";
-import { weiToUsd } from "./useBalance";
 import { ZERODEV_PROJECT_ID } from "@/config/zerodev";
 
 export interface DeploymentFee {
@@ -15,7 +12,7 @@ export interface DeploymentFee {
 
 export function useDeploymentFee(walletId: string | null, index: number) {
   const para = useClient();
-  const { priceUsd } = useEthPrice();
+  useEthPrice();
 
   const { data, isLoading, isError, error } = useQuery<DeploymentFee | undefined>({
     queryKey: ["deploymentFee", walletId, index],
@@ -34,7 +31,7 @@ export function useDeploymentFee(walletId: string | null, index: number) {
       }
 
       try {
-        const { client, account } = await createParaZeroDevClient(para, BigInt(index));
+        const { account } = await createParaZeroDevClient(para, BigInt(index));
 
         // Check if account is already deployed
         const isDeployed = await account.isDeployed();

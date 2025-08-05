@@ -1635,17 +1635,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@getpara/viem-v1-integration@npm:2.0.0-alpha.39":
-  version: 2.0.0-alpha.39
-  resolution: "@getpara/viem-v1-integration@npm:2.0.0-alpha.39"
-  dependencies:
-    "@getpara/core-sdk": "npm:2.0.0-alpha.39"
-  peerDependencies:
-    viem: 1.x
-  checksum: 10c0/95af9c333845014962b430395bb90bb94c1109a1f5717eada01fa92c0d1f6db240e0d5f4b7174ac698eb4c77a83f8d5aa45e016a36bdc45a9b6d7c66a68f179b
-  languageName: node
-  linkType: hard
-
 "@getpara/viem-v2-integration@npm:2.0.0-alpha.37":
   version: 2.0.0-alpha.37
   resolution: "@getpara/viem-v2-integration@npm:2.0.0-alpha.37"
@@ -7423,7 +7412,6 @@ __metadata:
     "@getpara/graz": "npm:2.0.0-alpha.6"
     "@getpara/react-sdk": "npm:2.0.0-alpha.39"
     "@getpara/solana-web3.js-v1-integration": "npm:2.0.0-alpha.39"
-    "@getpara/viem-v1-integration": "npm:2.0.0-alpha.39"
     "@getpara/viem-v2-integration": "npm:2.0.0-alpha.39"
     "@hookform/resolvers": "npm:^5.1.1"
     "@leapwallet/cosmos-social-login-capsule-provider": "npm:^0.0.44"
