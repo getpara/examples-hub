@@ -26,7 +26,7 @@ export const useWaitForWalletCreation = () => {
 
   const mutation = useMutation({
     mutationKey: [WAIT_FOR_WALLET_CREATION_KEY],
-    mutationFn: async (args: CoreMethodParams<'waitForWalletCreation'>) => {
+    mutationFn: async (args: CoreMethodParams<'waitForWalletCreation'> = {}) => {
       try {
         const result = await waitForWalletCreation(para, args);
 
@@ -40,7 +40,7 @@ export const useWaitForWalletCreation = () => {
   return renameMutations<
     Compute<Awaited<CoreMethodResponse<'waitForWalletCreation'>>>,
     Error,
-    Compute<CoreMethodParams<'waitForWalletCreation'>>,
+    Compute<CoreMethodParams<'waitForWalletCreation'>> | void,
     unknown,
     'waitForWalletCreation'
   >(mutation, 'waitForWalletCreation');

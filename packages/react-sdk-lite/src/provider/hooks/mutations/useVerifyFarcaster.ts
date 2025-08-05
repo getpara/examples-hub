@@ -26,7 +26,7 @@ export const useVerifyFarcaster = () => {
 
   const mutation = useMutation({
     mutationKey: [VERIFY_FARCASTER_KEY],
-    mutationFn: async (args: CoreMethodParams<'verifyFarcaster'>) => {
+    mutationFn: async (args: CoreMethodParams<'verifyFarcaster'> = {}) => {
       try {
         const result = await verifyFarcaster(para, args);
         return result;
@@ -39,7 +39,7 @@ export const useVerifyFarcaster = () => {
   return renameMutations<
     Compute<Awaited<CoreMethodResponse<'verifyFarcaster'>>>,
     Error,
-    Compute<CoreMethodParams<'verifyFarcaster'>>,
+    Compute<CoreMethodParams<'verifyFarcaster'>> | void,
     unknown,
     'verifyFarcaster'
   >(mutation, 'verifyFarcaster');

@@ -38,7 +38,7 @@ describe('useWaitForWalletCreation', async () => {
     await hook.result.current.waitForWalletCreationAsync();
 
     expect(action).toHaveBeenCalledTimes(1);
-    expect(action).toHaveBeenCalledWith(para, undefined);
+    expect(action).toHaveBeenCalledWith(para, {});
   });
 });
 

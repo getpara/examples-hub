@@ -26,7 +26,7 @@ export const useWaitForLogin = () => {
 
   const mutation = useMutation({
     mutationKey: [WAIT_FOR_LOG_IN_KEY],
-    mutationFn: async (args: CoreMethodParams<'waitForLogin'>) => {
+    mutationFn: async (args: CoreMethodParams<'waitForLogin'> = {}) => {
       try {
         const result = await waitForLogin(para, args);
         return result;
@@ -39,7 +39,7 @@ export const useWaitForLogin = () => {
   return renameMutations<
     Compute<Awaited<CoreMethodResponse<'waitForLogin'>>>,
     Error,
-    Compute<CoreMethodParams<'waitForLogin'>>,
+    Compute<CoreMethodParams<'waitForLogin'>> | void,
     unknown,
     'waitForLogin'
   >(mutation, 'waitForLogin');

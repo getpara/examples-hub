@@ -26,7 +26,7 @@ export const useIssueJwt = () => {
 
   const mutation = useMutation({
     mutationKey: [ISSUE_JWT_KEY],
-    mutationFn: async (args: CoreMethodParams<'issueJwt'>) => {
+    mutationFn: async (args: CoreMethodParams<'issueJwt'> = {}) => {
       try {
         const result = await issueJwt(para, args);
         return result;
@@ -39,7 +39,7 @@ export const useIssueJwt = () => {
   return renameMutations<
     Compute<Awaited<CoreMethodResponse<'issueJwt'>>>,
     Error,
-    Compute<CoreMethodParams<'issueJwt'>>,
+    Compute<CoreMethodParams<'issueJwt'>> | void,
     unknown,
     'issueJwt'
   >(mutation, 'issueJwt');

@@ -26,7 +26,7 @@ export const useCreateWalletPerType = () => {
 
   const mutation = useMutation({
     mutationKey: [CREATE_WALLET_PER_TYPE_KEY],
-    mutationFn: async (args: CoreMethodParams<'createWalletPerType'>) => {
+    mutationFn: async (args: CoreMethodParams<'createWalletPerType'> = {}) => {
       try {
         const result = await createWalletPerType(para, args);
         return result;
@@ -39,7 +39,7 @@ export const useCreateWalletPerType = () => {
   return renameMutations<
     Compute<Awaited<CoreMethodResponse<'createWalletPerType'>>>,
     Error,
-    Compute<CoreMethodParams<'createWalletPerType'>>,
+    Compute<CoreMethodParams<'createWalletPerType'>> | void,
     unknown,
     'createWalletPerType'
   >(mutation, 'createWalletPerType');

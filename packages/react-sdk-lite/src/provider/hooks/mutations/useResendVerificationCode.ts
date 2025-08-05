@@ -26,7 +26,7 @@ export const useResendVerificationCode = () => {
 
   const mutation = useMutation({
     mutationKey: [RESEND_VERIFICATION_CODE_KEY],
-    mutationFn: async (args: CoreMethodParams<'resendVerificationCode'>) => {
+    mutationFn: async (args: CoreMethodParams<'resendVerificationCode'> = {}) => {
       try {
         const result = await resendVerificationCode(para, args);
         return result;
@@ -39,7 +39,7 @@ export const useResendVerificationCode = () => {
   return renameMutations<
     Compute<Awaited<CoreMethodResponse<'resendVerificationCode'>>>,
     Error,
-    Compute<CoreMethodParams<'resendVerificationCode'>>,
+    Compute<CoreMethodParams<'resendVerificationCode'>> | void,
     unknown,
     'resendVerificationCode'
   >(mutation, 'resendVerificationCode');

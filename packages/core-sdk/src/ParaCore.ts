@@ -3713,6 +3713,8 @@ export abstract class ParaCore implements CoreInterface {
    * @param {boolean} opts.clearPregenWallets if `true`, will remove all pregen wallets from storage
    **/
   async logout({ clearPregenWallets = false }: { clearPregenWallets?: boolean } = {}): Promise<void> {
+    const shouldDispatchLogoutEvent = await this.isSessionActive();
+
     await this.ctx.client.logout();
     await this.clearStorage();
 
@@ -3734,7 +3736,9 @@ export abstract class ParaCore implements CoreInterface {
     this.userId = undefined;
     this.sessionCookie = undefined;
 
-    dispatchEvent(ParaEvent.LOGOUT_EVENT, null);
+    if (shouldDispatchLogoutEvent) {
+      dispatchEvent(ParaEvent.LOGOUT_EVENT, null);
+    }
   }
 
   protected get toStringAdditions(): Record<string, unknown> {
