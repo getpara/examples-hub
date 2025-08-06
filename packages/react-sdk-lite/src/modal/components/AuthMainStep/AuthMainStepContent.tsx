@@ -12,6 +12,7 @@ import { useExternalWallets } from '../../../provider/providers/ExternalWalletPr
 import { useStore } from '../../../provider/stores/useStore.js';
 import { useAuthActions } from '../../../provider/providers/AuthProvider.js';
 import { useAccount, useParaStatus } from '../../../provider/index.js';
+import { connectWalletTitle, signUpOrLogInTitle } from '../Header/hooks/useStepTitle.js';
 
 interface AuthMainStepContentProps {
   oAuthMethods?: TOAuthMethod[];
@@ -79,12 +80,12 @@ export const AuthMainStepContent = ({
         case AuthLayout.AUTH_CONDENSED: {
           const icons: IconType[] = [];
 
-          oAuthMethods?.forEach(method => icons.push(ACCOUNT_TYPES[method][useBrandedLogos ? 'logoBranded' : 'logo']!));
+          oAuthMethods?.forEach(method => icons.push(ACCOUNT_TYPES[method][useBrandedLogos ? 'iconBranded' : 'icon']!));
 
           methods.push([
             <CondensedButton onClick={handleCondensedAuthClick} variant="tertiary" fullWidth key="authCondensed">
               <IconGroupSpacer slot="start" icons={[]} $isDark={useDarkLogos} />
-              Sign Up or Login
+              {signUpOrLogInTitle}
               <StyledIconGroup slot="end" icons={icons.splice(0, 3)} $isDark={useDarkLogos} />
             </CondensedButton>,
             layout,
@@ -106,7 +107,7 @@ export const AuthMainStepContent = ({
           methods.push([
             <CondensedButton onClick={handleCondensedExternalClick} variant="tertiary" fullWidth key="authCondensed">
               <IconGroupSpacer slot="start" icons={[]} $isDark={useDarkLogos} />
-              Connect Wallet
+              {connectWalletTitle}
               <StyledIconGroup slot="end" icons={icons.splice(0, 3)} $isDark={useDarkLogos} />
             </CondensedButton>,
             layout,

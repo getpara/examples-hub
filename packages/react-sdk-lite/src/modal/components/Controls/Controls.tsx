@@ -2,11 +2,10 @@ import { CpslIcon } from '@getpara/react-components';
 import { safeStyled } from '@getpara/react-common';
 import { useModalStore } from '../../stores/index.js';
 import { useGoBack } from '../../hooks/useGoBack.js';
-import { AccountSelect, ChainSelect } from './Selects.js';
-import { ModalStep } from '../../utils/steps.js';
+import { ChainSelect } from './ChainSelect.js';
 import { HeaderButton } from '@getpara/react-common';
 import { useStore } from '../../../provider/stores/useStore.js';
-import { useAccount } from '../../../provider/index.js';
+import { useStepTitle } from '../Header/hooks/useStepTitle.js';
 
 interface ControlsProps {
   onClose: () => void;
@@ -15,17 +14,8 @@ interface ControlsProps {
 export const Controls = ({ onClose }: ControlsProps) => {
   const bareModal = useStore(state => state.modalConfig?.bareModal);
   const hasPreviousStep = useModalStore(state => state.hasPreviousStep());
-  const step = useModalStore(state => state.step);
   const goBack = useGoBack();
-  const { isConnected } = useAccount();
-
-  const shouldShowSelects = [
-    ModalStep.ACCOUNT_MAIN,
-    ModalStep.CHAIN_SWITCH,
-    ModalStep.ADD_FUNDS_BUY,
-    ModalStep.ADD_FUNDS_RECEIVE,
-    ModalStep.ADD_FUNDS_WITHDRAW,
-  ].includes(step);
+  const { isControls } = useStepTitle();
 
   const handleBackClick = () => {
     goBack();
@@ -43,10 +33,9 @@ export const Controls = ({ onClose }: ControlsProps) => {
         <CpslIcon icon="arrow" />
       </BackButton>
       <MiddleContainer>
-        {shouldShowSelects && isConnected && (
+        {isControls && (
           <>
             <ChainSelect />
-            <AccountSelect />
           </>
         )}
       </MiddleContainer>
@@ -59,19 +48,21 @@ export const Controls = ({ onClose }: ControlsProps) => {
 
 const Container = safeStyled.div`
   position: absolute;
-  width: 100%;
-  top: 16px;
-
+  height: 24px;
+  top: 0;
+  left: -24px;
+  right: -24px;
+  margin: 0 16px;
   z-index: 3;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
 `;
 
 const MiddleContainer = safeStyled.div`
   flex: 1;
   display: flex;
+  width: 100%;
   align-items: center;
   justify-content: center;
   gap: 4px;

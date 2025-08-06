@@ -21,9 +21,7 @@ export function AddFundsProvider() {
 
   return (
     <Container {...contentMotionProps}>
-      <Heading variant="headingS" weight="bold">
-        Choose Provider
-      </Heading>
+      <Heading>Choose Provider</Heading>
       <$InnerStepContainer>
         <NoProviders isHidden={Object.values(isProviderAllowed).some(v => !!v)} variant="bodyM">
           No providers are available for this {hideWallets ? 'account' : 'wallet'}

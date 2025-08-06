@@ -20,9 +20,7 @@ export function FarcasterConnectQR() {
         </InnerStepContainer>
       ) : (
         <>
-          <Heading variant="headingS" weight="bold">
-            Sign in using Farcaster
-          </Heading>
+          <Heading>Sign in using Farcaster</Heading>
           <InnerStepContainer>
             <CenteredText variant="bodyS" color="secondary" weight="medium">
               Scan the QR code with your phone's camera to proceed.

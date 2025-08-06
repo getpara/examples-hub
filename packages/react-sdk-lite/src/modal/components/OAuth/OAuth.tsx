@@ -53,7 +53,7 @@ export const OAuth = ({ methods }: OAuthProps) => {
         <OAuthButton
           $isDark={useDarkLogos}
           key={method}
-          icon={ACCOUNT_TYPES[method][useBrandedLogos ? 'logoBranded' : 'logo']!}
+          icon={ACCOUNT_TYPES[method][useBrandedLogos ? 'iconBranded' : 'icon']!}
           onClick={handleMethodClick(method)}
           $index={index}
           $totalItems={showMoreButton ? HAS_MORE_LENGTH : methodsToShow.length}

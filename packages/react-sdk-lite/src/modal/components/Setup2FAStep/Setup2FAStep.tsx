@@ -95,12 +95,10 @@ export const Setup2FAStep = ({ onClose }: Setup2FAStepProps) => {
   return (
     <StepContainer>
       <InnerStepContainer>
-        <Heading variant="headingS" weight="bold">
-          Turn on Two-Factor authentication
-        </Heading>
+        <Heading>Turn on two-factor authentication</Heading>
         {isVerifying && (
           <CpslText variant="bodyS" color="secondary" weight="medium">
-            Please enter the code from your authenticator app.
+            Please enter the code from your authenticator app
           </CpslText>
         )}
       </InnerStepContainer>
@@ -130,7 +128,7 @@ export const Setup2FAStep = ({ onClose }: Setup2FAStepProps) => {
         ) : (
           <>
             <CpslText variant="bodyS" color="secondary" weight="medium">
-              Scan with your preferred authenticator app.
+              Scan with your preferred authenticator app
             </CpslText>
             <QRContainer>
               {!twoFactorStatus?.uri ? <CpslSpinner size={100} /> : <CpslQrCode url={twoFactorStatus.uri} />}

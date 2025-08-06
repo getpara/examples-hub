@@ -35,7 +35,7 @@ export const BiometricCreationStep = () => {
   return (
     <StepContainer $wide>
       <InnerStepContainer>
-        <Heading variant="headingS" weight="bold">
+        <Heading>
           {para.isExternalWalletAuth
             ? `Finish setup for your${appName ? ` ${appName}` : ''} wallet`
             : isBoth

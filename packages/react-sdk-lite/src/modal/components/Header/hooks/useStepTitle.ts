@@ -4,23 +4,48 @@ import { ModalStep } from '../../../utils/steps.js';
 import { useExternalWallets } from '../../../../provider/providers/ExternalWalletProvider.js';
 import { useStore } from '../../../../provider/stores/useStore.js';
 import { useAccountLinking } from '../../../../provider/providers/AccountLinkProvider.js';
+import { useAccount } from '../../../../provider/index.js';
+
+export const signUpOrLogInTitle = 'Sign Up or Login';
+
+export const connectWalletTitle = 'Connect Wallet';
 
 export const useStepTitle = () => {
+  const logo = useStore(state => state.modalConfig?.logo);
   const hideWallets = useStore(state => state.modalConfig?.hideWallets);
   const isLogin = useModalStore(state => state.isLogin());
   const currentStep = useModalStore(state => state.step);
+  const authLayout = useModalStore(state => state.authLayout) || [];
+  const { connectionType } = useAccount();
+
+  const [isAuthFirst, isAuthCondensed, isExternalFirst, isExternalCondensed, isBothCondensed] = [
+    authLayout[0]?.includes('AUTH'),
+    authLayout.includes('AUTH:CONDENSED'),
+    authLayout[0]?.includes('EXTERNAL'),
+    authLayout.includes('EXTERNAL:CONDENSED'),
+    authLayout.includes('AUTH:CONDENSED') && authLayout.includes('EXTERNAL:CONDENSED'),
+  ];
+
+  const authStepTitle = isBothCondensed
+    ? null
+    : isAuthFirst && !isAuthCondensed
+      ? signUpOrLogInTitle
+      : isExternalFirst && !isExternalCondensed
+        ? connectWalletTitle
+        : '';
+
   const { chainId } = useExternalWallets();
   const { isEnabled: isAccountLinkingEnabled } = useAccountLinking();
 
   const titles = useMemo(
     () => ({
-      [ModalStep.AUTH_MAIN]: '',
-      [ModalStep.AUTH_MORE]: 'Sign Up or Log In',
+      [ModalStep.AUTH_MAIN]: authStepTitle,
+      [ModalStep.AUTH_MORE]: signUpOrLogInTitle,
       [ModalStep.AUTH_GUEST_SIGNUP]: 'Complete Account Setup',
-      [ModalStep.EX_WALLET_MORE]: 'Connect Wallet',
+      [ModalStep.EX_WALLET_MORE]: connectWalletTitle,
       [ModalStep.VERIFICATIONS]: 'Sign Up',
-      [ModalStep.AWAITING_OAUTH]: isLogin ? 'Login' : 'Sign Up',
-      [ModalStep.FARCASTER_OAUTH]: isLogin ? 'Login' : 'Sign Up',
+      [ModalStep.AWAITING_OAUTH]: signUpOrLogInTitle,
+      [ModalStep.FARCASTER_OAUTH]: signUpOrLogInTitle,
       [ModalStep.BIOMETRIC_CREATION]: 'Sign Up',
       [ModalStep.PASSWORD_CREATION]: 'Sign Up',
       [ModalStep.AWAITING_BIOMETRIC_CREATION]: 'Sign Up',
@@ -36,12 +61,12 @@ export const useStepTitle = () => {
       [ModalStep.SETUP_2FA]: '2FA',
       [ModalStep.VERIFY_2FA]: '2FA',
       [ModalStep.TWO_FACTOR_DONE]: '2FA',
-      [ModalStep.ADD_FUNDS_BUY]: '',
-      [ModalStep.ADD_FUNDS_RECEIVE]: '',
-      [ModalStep.ADD_FUNDS_WITHDRAW]: '',
-      [ModalStep.ADD_FUNDS_AWAITING]: '',
-      [ModalStep.ADD_FUNDS_SUCCESS]: '',
-      [ModalStep.ADD_FUNDS_FAILURE]: '',
+      [ModalStep.ADD_FUNDS_BUY]: 'Add Funds',
+      [ModalStep.ADD_FUNDS_RECEIVE]: 'Add Funds',
+      [ModalStep.ADD_FUNDS_WITHDRAW]: 'Withdraw',
+      [ModalStep.ADD_FUNDS_AWAITING]: 'Add Funds',
+      [ModalStep.ADD_FUNDS_SUCCESS]: 'Add Funds',
+      [ModalStep.ADD_FUNDS_FAILURE]: 'Add Funds',
       [ModalStep.ACCOUNT_MAIN]: '',
       [ModalStep.CHAIN_SWITCH]: '',
       [ModalStep.ACCOUNT_PROFILE]: isAccountLinkingEnabled ? 'Profile' : 'Settings',
@@ -50,8 +75,24 @@ export const useStepTitle = () => {
       [ModalStep.ACCOUNT_PROFILE_REMOVE]: 'Unlink Account',
       [ModalStep.AWAITING_IFRAME]: isLogin ? 'Login' : 'Sign Up',
     }),
-    [isLogin, chainId, hideWallets],
+    [isLogin, chainId, hideWallets, authStepTitle],
   );
 
-  return { title: titles[currentStep] };
+  const title = useMemo(() => {
+    if (titles[currentStep]?.length > 0) {
+      return titles[currentStep];
+    }
+
+    return null;
+  }, [currentStep, titles]);
+
+  const isControls = useMemo(() => {
+    return connectionType === 'external' && [ModalStep.ACCOUNT_MAIN, ModalStep.CHAIN_SWITCH].includes(currentStep);
+  }, [connectionType, currentStep]);
+
+  const isTitleDisplayed = useMemo(() => {
+    return !isControls && (currentStep !== ModalStep.AUTH_MAIN || !logo);
+  }, [isControls, currentStep, logo]);
+
+  return { title, isTitleDisplayed, isControls };
 };

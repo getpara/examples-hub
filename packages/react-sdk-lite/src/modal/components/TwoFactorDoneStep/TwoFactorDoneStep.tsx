@@ -13,9 +13,7 @@ export const TwoFactorDoneStep = ({ onClose }: TwoFactorDoneStepStep) => {
     <StepContainer>
       <HeroIcon icon="checkCircleFilled" />
       <InnerStepContainer>
-        <Heading variant="headingXS" weight="semiBold">
-          Success
-        </Heading>
+        <Heading variant="headingXS">Success</Heading>
         <CpslText variant="bodyS" color="secondary" weight="medium">
           Your {hideWallets ? 'account' : 'wallet'} is now protected by 2FA
         </CpslText>

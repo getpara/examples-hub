@@ -1,18 +1,17 @@
-import { Network, OnRampAsset, OnRampMethod, OnRampProvider } from '@getpara/core-sdk';
+import { Network, OnRampAsset, OnRampMethod, OnRampProvider, TWalletType } from '@getpara/core-sdk';
 import { IconType } from '@getpara/react-components';
 import { Transition, Variants } from 'framer-motion';
+import { DisplayMetadata } from '../types/commonTypes.js';
 
 export const PARA_CONNECT = 'https://connect.getpara.com/';
 export const PARA_TERMS_AND_CONDITIONS = 'https://getpara.com/terms';
 
-export interface OnRampProviderConfig {
-  name: string;
+export type OnRampProviderConfig = DisplayMetadata & {
   feeLower: number;
   feeUpper?: number;
   methods: OnRampMethod[];
-  icon: IconType;
   backgroundColors: string[];
-}
+};
 
 export const ON_RAMP_PROVIDERS: Record<OnRampProvider, OnRampProviderConfig> = {
   [OnRampProvider.STRIPE]: {
@@ -52,7 +51,13 @@ const ICON_TYPES = {
   tetherBrand: { isCircular: true },
 };
 
-type Networks = Record<Network, { name: string; icon: IconType; isCircular?: boolean; isDark?: boolean }>;
+type Networks = Record<Network, DisplayMetadata>;
+
+export const WALLET_TYPES_METADATA: Record<TWalletType, DisplayMetadata> = {
+  EVM: { name: 'EVM', icon: 'ethereum', isDark: true },
+  SOLANA: { name: 'Solana', icon: 'solana' },
+  COSMOS: { name: 'Cosmos', icon: 'cosmos', isCircular: true, isDark: true },
+};
 
 export const NETWORKS: Networks = Object.entries({
   [Network.ETHEREUM]: { name: 'Ethereum', icon: 'ethereum' },
@@ -77,10 +82,7 @@ export const NETWORKS: Networks = Object.entries({
   };
 }, {} as Networks);
 
-type OnRampAssets = Record<
-  OnRampAsset,
-  { name: string; code: string; icon: IconType; isCircular?: boolean; isDark?: boolean }
->;
+type OnRampAssets = Record<OnRampAsset, DisplayMetadata & { code: string }>;
 
 export const ON_RAMP_ASSETS: Record<
   OnRampAsset,

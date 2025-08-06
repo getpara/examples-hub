@@ -1,5 +1,5 @@
-import { AccountTypeIcon, GradientScroll, StepContainer } from '../common.js';
-import { CpslButton, CpslIcon, CpslIdenticon, CpslText } from '@getpara/react-components';
+import { AccountTypeIcon, GradientScroll, StepContainer, WalletTypeIcon } from '../common.js';
+import { CpslButton, CpslIcon, CpslText } from '@getpara/react-components';
 import { useClient } from '../../../provider/index.js';
 import { useLinkedAccounts } from '../../../provider/hooks/index.js';
 import { getWalletDisplayName } from '../../utils/getWalletDisplayName.js';
@@ -9,6 +9,8 @@ import { ReactNode } from 'react';
 import { safeStyled, useCopyToClipboard } from '@getpara/react-common';
 import { useExternalWallets } from '../../../provider/providers/ExternalWalletProvider.js';
 import { ACCOUNT_TYPES } from '../../constants/oAuthLogos.js';
+import { useStore } from '../../../provider/stores/useStore.js';
+import { AccountHeader } from './AccountHeader.js';
 
 const Entry = ({
   identifier,
@@ -62,11 +64,18 @@ const Entry = ({
   );
 };
 
-export const AccountProfile = () => {
+export const AccountProfile = ({
+  isDisconnecting,
+  onDisconnect,
+}: {
+  isDisconnecting: boolean;
+  onDisconnect: () => void;
+}) => {
   const para = useClient();
   const { data: linkedAccounts } = useLinkedAccounts();
   const { wallets } = useExternalWallets();
   const { isEnabled, linkAccount, unlinkAccount } = useAccountLinking();
+  const hideWallets = useStore(state => state.modalConfig?.hideWallets);
 
   if (!para) {
     return null;
@@ -75,7 +84,22 @@ export const AccountProfile = () => {
   const externalWallet = para.authInfo?.externalWallet;
 
   return (
-    <StepContainer $wide>
+    <StepContainer>
+      <AccountHeader />
+      <ParaConnect target="_blank" href="https://connect.getpara.com" rel="noreferrer noopener">
+        <ParaIcon icon="paraIconBrand" size="40px" inset="8px" background="white" />
+        <div>
+          Do even more with your wallet
+          <br />
+          at <span style={{ fontWeight: '600' }}>Para Connect</span>
+        </div>
+        <Dots>
+          {new Array(6).fill(0).map((_, index) => (
+            <DotsIcon key={index} index={index} icon="dotsSquare" size="27.5px" />
+          ))}
+          <ParaArrow icon="paraArrow" size="31px" color="white" />
+        </Dots>
+      </ParaConnect>
       <Section>
         <Title variant="bodyS" color="secondary">
           Connected Wallets
@@ -84,7 +108,14 @@ export const AccountProfile = () => {
           {externalWallet ? (
             <Entry
               key={externalWallet.address}
-              icon={<AccountTypeIcon accountType={externalWallet.providerId} size="24px" />}
+              icon={
+                <WalletTypeIcon
+                  walletType={externalWallet.type!}
+                  externalWallet={externalWallet.providerId}
+                  size="24px"
+                  inset="0"
+                />
+              }
               name={externalWallet.ensName ?? externalWallet.provider ?? ''}
               address={externalWallet.addressBech32 ?? externalWallet.address}
               addressShort={truncateAddress(externalWallet.addressBech32 ?? externalWallet.address, externalWallet.type, {
@@ -95,13 +126,7 @@ export const AccountProfile = () => {
             para?.availableWallets?.map(wallet => (
               <Entry
                 key={wallet.address}
-                icon={
-                  wallet.isExternal ? (
-                    <AccountTypeIcon accountType={wallet.externalProviderId ?? 'EXTERNAL_WALLET'} size="24px" />
-                  ) : (
-                    <CpslIdenticon hash={para.getIdenticonHash(wallet.id, wallet.type)} size="24px" arcWidth="40%" />
-                  )
-                }
+                icon={<WalletTypeIcon walletType={wallet.type!} externalWallet={wallet.externalProviderId} size="24px" />}
                 name={getWalletDisplayName(para, wallet)}
                 address={wallet.address}
                 addressShort={truncateAddress(wallet.address!, wallet.type!)}
@@ -177,6 +202,10 @@ export const AccountProfile = () => {
           </Content>
         </Section>
       )}
+      <DisconnectButton variant="destructive" fullWidth onClick={onDisconnect} disabled={isDisconnecting}>
+        {hideWallets ? 'Logout' : 'Disconnect Wallet'}
+        <CpslIcon icon="logOut" slot="end" />
+      </DisconnectButton>
     </StepContainer>
   );
 };
@@ -186,13 +215,17 @@ const Section = safeStyled.div`
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
-  gap: 16px;
+  gap: 8px;
   width: 100%;
 `;
 
-const Content = safeStyled(Section)``;
+const Content = safeStyled(Section)`
+  gap: 12px;
+`;
 
-const Title = safeStyled(CpslText)``;
+const Title = safeStyled(CpslText)`
+  font-weight: 600;
+`;
 
 const EntryContainer = safeStyled.div`
   overflow: hidden;
@@ -237,4 +270,61 @@ const EntryUnlink = safeStyled.a<{ isDark?: boolean }>`
   &:hover {
     text-decoration: underline;
   }
+`;
+
+const DisconnectButton = safeStyled(CpslButton)`
+  --button-border-width: 0px;
+  --button-destructive-hover-background-color: rgba(255, 0, 0, 0.2);
+  --button-destructive-active-background-color: rgba(255, 0, 0, 0.1);
+
+`;
+
+const ParaConnect = safeStyled.a`
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  text-decoration: none;
+  color: white !important;
+  font-family: 'PP Mori', sans-serif;
+  font-weight: 500;
+  font-size: 15px;
+  padding: 16px;
+  height: 69px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  border-radius: 8px;
+  border: 1px solid #FF4E00;
+  background: #FF4E00;
+  box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.05), 0 0 20px 8px rgba(251, 188, 4, 0.20) inset;
+
+  &:hover, &:active {
+    background: #FF6A2B;
+    border: 1px solid #FF6A2B;
+  }
+
+`;
+
+const ParaIcon = safeStyled(CpslIcon)`
+  --border-radius: 4px;
+`;
+
+const Dots = safeStyled.div`
+  width: 75px;
+  position: absolute;
+  right: 14px;
+  top: 7px;
+`;
+
+const DotsIcon = safeStyled(CpslIcon)<{ index: number }>`
+  position: absolute;
+  left: ${({ index }) => `${(index % 3) * 27.5}px`};
+  top: ${({ index }) => `${Math.floor(index / 3) * 27.5}px`};
+`;
+
+const ParaArrow = safeStyled(CpslIcon)`
+  position: absolute;
+  top: 12px;
+  right: 4px;
 `;

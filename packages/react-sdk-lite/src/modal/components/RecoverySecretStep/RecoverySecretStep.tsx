@@ -44,9 +44,7 @@ export const SaveRecoverySecret = ({
   return (
     <>
       <InnerStepContainer>
-        <Heading variant="headingXS" weight="semiBold">
-          Save your Recovery Secret
-        </Heading>
+        <Heading>Save your Recovery Secret</Heading>
         <ButtonContainer>
           <ActionButton icon="download" onClick={onDownload}>
             <CpslText variant="bodyXS" color="secondary" weight="medium">
@@ -90,9 +88,7 @@ export const RecoverySecretStep = () => {
   return (
     <StepContainer>
       <InnerStepContainer>
-        <Heading variant="headingS" weight="bold">
-          {hideWallets ? "Don't lose access" : "Don't lose your wallet"}
-        </Heading>
+        <Heading>{hideWallets ? "Don't lose access" : "Don't lose your wallet"}</Heading>
         <InlineText variant="bodyS" color="secondary" weight="medium">
           Your{' '}
           <InlineText variant="bodyS" weight="medium">

@@ -34,9 +34,7 @@ export const AddFundsDone = ({ isSuccess, onClose }: AddFundsDoneProps) => {
     <StepContainer>
       <HeroIcon icon="checkCircleFilled" />
       <InnerStepContainer>
-        <Heading variant="headingS" weight="bold">
-          {heading}
-        </Heading>
+        <Heading>{heading}</Heading>
         <CpslText variant="bodyS" color="secondary">
           {text}
         </CpslText>

@@ -31,11 +31,7 @@ export const BiometricLoginStep = () => {
   return (
     <StepContainer $wide>
       <InnerStepContainer>
-        {displayWelcomeBack && (
-          <Heading variant="headingS" weight="bold">
-            Welcome back,
-          </Heading>
-        )}
+        {displayWelcomeBack && <Heading>Welcome back,</Heading>}
         <UserIdentifier authInfo={para.authInfo} />
       </InnerStepContainer>
       <MainContainer>

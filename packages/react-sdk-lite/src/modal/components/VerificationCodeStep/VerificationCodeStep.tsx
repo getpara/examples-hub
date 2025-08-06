@@ -94,9 +94,7 @@ export const VerificationCode = ({ authInfo, onResend, onSubmit, status, error }
   return (
     <>
       <InnerStepContainer>
-        <Heading variant="headingS" weight="bold">
-          Verify {isEmail ? 'Email' : 'Phone Number'}
-        </Heading>
+        <Heading>Verify {isEmail ? 'Email' : 'Phone Number'}</Heading>
         <InlineText variant="bodyS" color="secondary">
           Please enter the code we sent to{' '}
           <InlineText variant="bodyS">

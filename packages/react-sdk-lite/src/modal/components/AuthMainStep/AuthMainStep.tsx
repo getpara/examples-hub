@@ -3,7 +3,7 @@ import { TOAuthMethod } from '@getpara/web-sdk';
 import { AuthMainStepContent } from './AuthMainStepContent.js';
 import { CenteredText } from '../common.js';
 import { useStore } from '../../../provider/stores/useStore.js';
-import { useModalStore } from '../../stores/index.js';
+import { useStepTitle } from '../Header/hooks/useStepTitle.js';
 
 interface AuthMainStepProps {
   oAuthMethods?: TOAuthMethod[];
@@ -18,20 +18,17 @@ export const AuthMainStep = ({
   disablePhoneLogin,
   isGuestModeEnabled = false,
 }: AuthMainStepProps) => {
-  const authLayout = useModalStore(state => state.authLayout);
   const embeddedModal = useStore(state => state.modalConfig?.embeddedModal);
   const logo = useStore(state => state.modalConfig?.logo);
   const appName = useStore(state => state.appName);
-
-  const firstLayoutType = authLayout?.[0].split(':')[0];
-  const heading = firstLayoutType === 'AUTH' ? 'Sign Up or Login' : 'Connect Wallet';
+  const { title, isTitleDisplayed } = useStepTitle();
 
   return (
     <>
       {logo && <Logo src={logo} alt={`${appName ? `${appName} -` : ''}logo`} />}
-      {!embeddedModal && (
+      {!embeddedModal && !isTitleDisplayed && (
         <CenteredText variant={logo ? 'bodyM' : 'headingS'} weight="semiBold">
-          {heading}
+          {title}
         </CenteredText>
       )}
       <AuthMainStepContent

@@ -3,10 +3,10 @@ import { getOnRampNetworks, OnRampAsset } from '@getpara/web-sdk';
 import { safeStyled } from '@getpara/react-common';
 import { getAssetCode, getAssetName, ON_RAMP_ASSETS } from '../../constants/constants.js';
 import { useModalStore } from '../../stores/index.js';
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { useAddFunds } from './AddFundsContext.js';
 import { useWallet } from '../../../provider/hooks/queries/useWallet.js';
-import { AssetIcon } from '../common.js';
+import { AssetIcon, GradientScroll } from '../common.js';
 import { AnimatePresence, motion } from 'framer-motion';
 import { contentMotionProps } from './common.js';
 
@@ -15,10 +15,7 @@ export function AddFundsAsset() {
   const { assets, setAsset, network, setNetwork } = useAddFunds();
   const { data: activeWallet } = useWallet();
 
-  const [isAtBottom, setIsAtBottom] = useState(false);
-  const [isAtTop, setIsAtTop] = useState(true);
   const [searchStr, setSearchStr] = useState('');
-  const ref = useRef<HTMLDivElement>(null);
 
   const onSelect = async (_asset: OnRampAsset) => {
     await setAsset(_asset);
@@ -29,23 +26,6 @@ export function AddFundsAsset() {
           assets: [_asset],
         })[0],
       );
-    }
-  };
-
-  const onScroll = () => {
-    if (ref.current) {
-      const { scrollTop, scrollHeight, clientHeight } = ref.current;
-      if (scrollTop + clientHeight >= scrollHeight - 30) {
-        setIsAtBottom(true);
-      } else {
-        setIsAtBottom(false);
-      }
-
-      if (scrollTop < 30) {
-        setIsAtTop(true);
-      } else {
-        setIsAtTop(false);
-      }
     }
   };
 
@@ -66,7 +46,7 @@ export function AddFundsAsset() {
           </motion.div>
         )}
       </AnimatePresence>
-      <ScrollContainer isAtBottom={isAtBottom} isAtTop={isAtTop} ref={ref} onScroll={onScroll}>
+      <GradientScroll height="calc(100% - 56px)" gap="8px">
         <AssetList>
           <AnimatePresence mode="sync">
             {assets
@@ -89,35 +69,22 @@ export function AddFundsAsset() {
                   <AssetButton key={asset} fullWidth variant="secondary" onClick={() => onSelect(asset)}>
                     <AssetIcon asset={asset} size="48px" />
                     <Info>
-                      <Code variant="bodyL">{ON_RAMP_ASSETS[asset].code}</Code>
-                      <Name variant="bodyS">{ON_RAMP_ASSETS[asset].name}</Name>
+                      <Code color="contrast" variant="bodyL">
+                        {ON_RAMP_ASSETS[asset].code}
+                      </Code>
+                      <Name color="contrast" variant="bodyS">
+                        {ON_RAMP_ASSETS[asset].name}
+                      </Name>
                     </Info>
                   </AssetButton>
                 </motion.li>
               ))}
           </AnimatePresence>
         </AssetList>
-      </ScrollContainer>
+      </GradientScroll>
     </>
   );
 }
-
-const ScrollContainer = safeStyled.div<{ isAtBottom; isAtTop }>`
-  height: calc(100% - 56px);
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  overflow-y: auto;
-  mask-image: ${({ isAtBottom, isAtTop }) =>
-    !isAtBottom && !isAtTop
-      ? 'linear-gradient(to bottom, transparent 0%, black 24px, black calc(100% - 24px), transparent 100%)'
-      : !isAtBottom
-        ? 'linear-gradient(to bottom, black calc(100% - 24px), transparent 100%)'
-        : !isAtTop
-          ? 'linear-gradient(to top, black calc(100% - 24px), transparent 100%)'
-          : 'none'};
-`;
 
 const AssetList = safeStyled.ul`
   display: flex;

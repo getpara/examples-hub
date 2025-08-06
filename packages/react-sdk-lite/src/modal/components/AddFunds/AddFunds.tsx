@@ -5,7 +5,7 @@ import { CpslIcon, CpslSpinner, CpslTab, CpslTabs } from '@getpara/react-compone
 import { OnRampStep } from '../../stores/index.js';
 import { useModalStore } from '../../stores/modal/useModalStore.js';
 import { useEffect, useMemo } from 'react';
-import { getAddFundsStep } from '../../utils/steps.js';
+import { getAddFundsStep, ModalStep } from '../../utils/steps.js';
 import { safeStyled } from '@getpara/react-common';
 import { useAccount, useWallet } from '../../../provider/index.js';
 import { AddFundsProvider } from './AddFundsProvider.js';
@@ -13,8 +13,10 @@ import { AddFundsReceive } from './AddFundsReceive.js';
 import { AddFundsContextProvider, Tab, TABS } from './AddFundsContext.js';
 import { AnimatePresence } from 'framer-motion';
 import { AddFundsSettings } from './AddFundsSettings.js';
+import { WalletSelect } from '../WalletSelect/WalletSelect.js';
 
 export const AddFunds = () => {
+  const step = useModalStore(state => state.step);
   const onRampConfig = useModalStore(state => state.onRampConfig);
   const onRampStep = useModalStore(state => state.onRampStep);
   const storedTab = useModalStore(state => state.accountAddFundTab);
@@ -29,7 +31,7 @@ export const AddFunds = () => {
     ([enabledFlow, key]) => !!onRampConfig?.[key] && (!isGuestMode || enabledFlow === EnabledFlow.RECEIVE),
   );
   const tab = storedTab ?? tabs[0][0];
-  const isMultiFlow = tabs.length > 1;
+  const isMultiFlow = (tab === EnabledFlow.BUY || tab === EnabledFlow.RECEIVE) && tabs.length > 1;
 
   const onSetTab = (event: CpslTabsCustomEvent<TabsChangedEventDetail>) => {
     setModalStep(getAddFundsStep(event.detail.tab as Tab));
@@ -68,15 +70,18 @@ export const AddFunds = () => {
       {isMultiFlow && (
         <InnerStepContainer>
           <CpslTabs selectedTab={tab} onCpslTabsChanged={onSetTab}>
-            {TABS.map(([tab, _, icon, title]) => (
-              <CpslTab key={tab} tab={tab}>
-                <CpslIcon slot="start" icon={icon} />
-                {title}
-              </CpslTab>
-            ))}
+            {TABS.filter(([enabledFlow]) => enabledFlow === EnabledFlow.BUY || enabledFlow === EnabledFlow.WITHDRAW).map(
+              ([tab, _, icon, title]) => (
+                <CpslTab key={tab} tab={tab}>
+                  <CpslIcon slot="start" icon={icon} />
+                  {title}
+                </CpslTab>
+              ),
+            )}
           </CpslTabs>
         </InnerStepContainer>
       )}
+      {(step === ModalStep.ADD_FUNDS_RECEIVE || (embedded?.wallets && embedded.wallets.length > 1)) && <WalletSelect />}
       <AnimatePresence mode="wait">
         <AddFundsContextProvider data-testid="add-funds" tab={tab}>
           {Content}

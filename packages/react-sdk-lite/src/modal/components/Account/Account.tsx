@@ -1,35 +1,24 @@
 import { safeStyled } from '@getpara/react-common';
-import { InnerStepContainer, StepContainer, StyledCpslTileButton } from '../common.js';
-import { CpslButton, CpslIcon, CpslSpinner, CpslText } from '@getpara/react-components';
+import { InnerStepContainer, StepContainer } from '../common.js';
+import { CpslButton, CpslIcon, CpslSpinner, CpslText, CpslTileButton } from '@getpara/react-components';
 import { OnRampStep, useModalStore } from '../../stores/index.js';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { ModalStep } from '../../utils/steps.js';
 import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
-import { useExternalWallets } from '../../../provider/providers/ExternalWalletProvider.js';
-import { useStore } from '../../../provider/stores/useStore.js';
-import { formatBalanceString } from '../../utils/stringFormatters.js';
 import { useAccount, useWalletBalance } from '../../../provider/index.js';
 import { EnabledFlow } from '@getpara/web-sdk';
 import { useAccountLinking } from '../../../provider/providers/AccountLinkProvider.js';
+import { AccountHeader } from './AccountHeader.js';
 
-interface AccountProps {
-  onClose: () => void;
-}
-
-export const Account = ({ onClose }: AccountProps) => {
+export const Account = () => {
   const onRampConfig = useModalStore(state => state.onRampConfig);
   const setStep = useModalStore(state => state.setStep);
-  const setFlow = useModalStore(state => state.setFlow);
   const setGuestAddFundsTab = useModalStore(state => state.setGuestAddFundsTab);
   const setOnRampStep = useModalStore(state => state.setOnRampStep);
-  const hideWallets = useStore(state => state.modalConfig?.hideWallets);
-  const { disconnectExternalWallet } = useExternalWallets();
   const para = useInternalClient();
   const { embedded } = useAccount();
-  const { data: balance, isLoading: isBalanceLoading } = useWalletBalance();
+  const { data: balance } = useWalletBalance();
   const { isEnabled } = useAccountLinking();
-
-  const [isDisconnecting, setIsDisconnecting] = useState(false);
 
   const isGuestMode = embedded.isConnected && embedded.isGuestMode;
   // Users using external wallets with connection only can't buy or withdraw
@@ -67,97 +56,64 @@ export const Account = ({ onClose }: AccountProps) => {
     setStep(ModalStep.ACCOUNT_PROFILE);
   };
 
-  const handleDisconnectClick = async () => {
-    setIsDisconnecting(true);
-    await para.logout();
-    await disconnectExternalWallet();
-    onClose();
-    setStep(ModalStep.AUTH_MAIN);
-    setFlow(undefined);
-    setIsDisconnecting(false);
-  };
-
   useEffect(() => {
     setGuestAddFundsTab();
   }, []);
 
   return (
     <StepContainer $wide>
-      <InnerStepContainer>
-        {isBalanceLoading ? (
-          <BalanceContainer>
-            <CpslSpinner size={39} />
-          </BalanceContainer>
-        ) : (
-          balance !== undefined &&
-          balance !== null && (
-            <BalanceContainer>
-              <CpslText variant="headingS" weight="medium">
-                {formatBalanceString(balance)}
-              </CpslText>
-            </BalanceContainer>
-          )
-        )}
-        {isGuestMode && (
-          <>
-            {balance && parseFloat(balance) > 0 && (
-              <Alert>
-                <CpslIcon icon="alertTriangle" size="24px" style={{ color: 'var(--cpsl-color-utility-yellow)' }} />
-                You've funded this account - complete account setup to maintain access.
-              </Alert>
-            )}
-            <CpslButton
-              fullWidth
-              variant="primary"
-              onClick={() => {
-                setStep(ModalStep.AUTH_GUEST_SIGNUP);
-              }}
-            >
-              <CpslIcon icon="stars02" />
-              Complete Account Setup
-            </CpslButton>
-          </>
-        )}
-        <ButtonContainer>
-          {isOnRampLoaded ? (
+      <$InnerStepContainer>
+        <AccountHeader withBalance />
+        <LowerContainer>
+          {isGuestMode && (
             <>
-              {onRampConfig.isBuyEnabled && !cantBuyAndWithdraw && (
-                <OptionButton icon="creditCard" onClick={handleBuyClick}>
-                  <CpslText variant="bodyXS" color="secondary" weight="medium">
-                    Receive
-                  </CpslText>
-                </OptionButton>
+              {balance && parseFloat(balance) > 0 && (
+                <Alert>
+                  <CpslIcon icon="alertTriangle" size="24px" style={{ color: 'var(--cpsl-color-utility-yellow)' }} />
+                  You've funded this account - complete account setup to maintain access.
+                </Alert>
               )}
-              {onRampConfig.isWithdrawEnabled && !cantBuyAndWithdraw && (
-                <OptionButton icon="arrowCircleBrokenDownLeft" onClick={handleSellClick}>
-                  <CpslText variant="bodyXS" color="secondary" weight="medium">
-                    Withdraw
-                  </CpslText>
-                </OptionButton>
-              )}
-              <OptionButton icon="user" onClick={handleProfileClick}>
-                <CpslText variant="bodyXS" color="secondary" weight="medium">
-                  {isEnabled ? 'Profile' : 'Settings'}
-                </CpslText>
-              </OptionButton>
+              <CpslButton
+                fullWidth
+                variant="primary"
+                onClick={() => {
+                  setStep(ModalStep.AUTH_GUEST_SIGNUP);
+                }}
+              >
+                <CpslIcon icon="stars02" />
+                Complete Account Setup
+              </CpslButton>
             </>
-          ) : (
-            <CpslSpinner />
           )}
-        </ButtonContainer>
-        {!isGuestMode && (
-          <DisconnectButton variant="destructive" fullWidth onClick={handleDisconnectClick} disabled={isDisconnecting}>
-            {isDisconnecting ? (
-              <CpslSpinner size={16} />
-            ) : (
+          <ButtonContainer>
+            {isOnRampLoaded ? (
               <>
-                {hideWallets ? 'Logout' : 'Disconnect Wallet'}
-                <CpslIcon icon="logOut" slot="end" />
+                {onRampConfig.isBuyEnabled && !cantBuyAndWithdraw && (
+                  <OptionButton icon="plusCircle" onClick={handleBuyClick}>
+                    <CpslText variant="bodyXS" color="secondary" weight="medium">
+                      Add Funds
+                    </CpslText>
+                  </OptionButton>
+                )}
+                {onRampConfig.isWithdrawEnabled && !cantBuyAndWithdraw && (
+                  <OptionButton icon="arrowCircleDown" onClick={handleSellClick}>
+                    <CpslText variant="bodyXS" color="secondary" weight="medium">
+                      Withdraw
+                    </CpslText>
+                  </OptionButton>
+                )}
+                <OptionButton icon="user01" onClick={handleProfileClick}>
+                  <CpslText variant="bodyXS" color="secondary" weight="medium">
+                    {isEnabled ? 'Profile' : 'Settings'}
+                  </CpslText>
+                </OptionButton>
               </>
+            ) : (
+              <CpslSpinner />
             )}
-          </DisconnectButton>
-        )}
-      </InnerStepContainer>
+          </ButtonContainer>
+        </LowerContainer>
+      </$InnerStepContainer>
     </StepContainer>
   );
 };
@@ -168,26 +124,23 @@ const ButtonContainer = safeStyled.div`
   justify-content: center;
   gap: 8px;
   width: 100%;
-  height: 88px;
 `;
 
-const OptionButton = safeStyled(StyledCpslTileButton)`
+const OptionButton = safeStyled(CpslTileButton)`
+  --button-gap: 4px;
+  --button-width: 100%;
+  --button-icon-height: 24px;
+  --button-icon-width: 24px;
+  --button-padding-top: 12px;
+  --button-padding-bottom: 12px;
+  --button-icon-color: var(--cpsl-color-text-contrast);
+  --button-height: auto;
   flex: 1;
-
-  --button-icon-color: var(--cpsl-color-text-primary);
 `;
 
-const DisconnectButton = safeStyled(CpslButton)`
-  --button-border-width: 0px;
-`;
-
-const BalanceContainer = safeStyled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding-top: 8px;
-  padding-bottom: 24px;
-`;
+const $InnerStepContainer = safeStyled(InnerStepContainer)`
+  gap: 24px;
+  `;
 
 const Alert = safeStyled.div`
   --icon-color: var(--cpsl-color-utility-yellow);
@@ -203,4 +156,11 @@ const Alert = safeStyled.div`
   border: 1px solid var(--cpsl-color-utility-yellow);
   background: var(--cpsl-color-utility-yellow-light);
   font-size: 14px;
+`;
+
+const LowerContainer = safeStyled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
 `;

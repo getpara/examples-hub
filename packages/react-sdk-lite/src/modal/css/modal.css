@@ -5,6 +5,18 @@
   src: url('../public/Inter-VariableFont_slnt,wght.ttf') format('truetype');
 }
 
+@font-face {
+  font-family: 'PP Mori';
+  src: url('../public/PPMori-Regular.woff2') format('woff2');
+  font-weight: 500;
+}
+
+@font-face {
+  font-family: 'PP Mori';
+  src: url('../public/PPMori-SemiBold.woff2') format('woff2');
+  font-weight: 600;
+}
+
 html {
   --cpsl-default-font: 'Inter', sans-serif;
   -webkit-overflow-scrolling: touch;

@@ -21,9 +21,7 @@ export const ExternalWalletVerificationStep = () => {
   return (
     <StepContainer $wide>
       <InnerStepContainer>
-        <Heading variant="headingS" weight="bold">
-          Verify Your Wallet
-        </Heading>
+        <Heading>Verify Your Wallet</Heading>
         <InlineText variant="bodyS" color="secondary">
           Sign the message with your wallet to complete sign up.
         </InlineText>

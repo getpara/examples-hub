@@ -13,9 +13,7 @@ export const Waiting = ({ heading, subheading }: WaitingProps) => {
         <CpslSpinner size={100} />
       </SpinnerContainer>
       <InnerStepContainer>
-        <Heading variant="headingS" weight="bold">
-          {heading}
-        </Heading>
+        <Heading>{heading}</Heading>
         {subheading && (
           <CpslText variant="bodyS" color="secondary" weight="medium">
             {subheading}

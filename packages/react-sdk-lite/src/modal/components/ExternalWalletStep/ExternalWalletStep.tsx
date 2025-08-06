@@ -1,8 +1,8 @@
 import { CpslButton, CpslIcon, CpslQrCode, CpslSpinner, CpslText } from '@getpara/react-components';
-import { CenteredText, ErrorContainer, ErrorIcon, InnerStepContainer, QRContainer, StepContainer } from '../common.js';
+import { CenteredText, HeroAccountTypeIcon, InnerStepContainer, QRContainer, StepContainer } from '../common.js';
 import { useEffect, useMemo, useState } from 'react';
 import { useModalStore } from '../../stores/index.js';
-import { CommonWallet, safeStyled } from '@getpara/react-common';
+import { CommonWallet, HeroSpinner, safeStyled } from '@getpara/react-common';
 import { useCopyToClipboard } from '@getpara/react-common';
 import { ModalStep } from '../../utils/steps.js';
 import { isMobile, isTablet } from '@getpara/web-sdk';
@@ -159,30 +159,32 @@ export const ExternalWalletStep = () => {
 
     if (showExtension) {
       const isInstalled = wallet.installed;
+      const isError = !isInstalled || externalWalletError?.length;
       return (
         <InnerStepContainer>
-          {isInstalled && !externalWalletError?.length ? (
-            <CenteredText color="contrast" weight="semiBold">
-              {`Confirm connection request in the ${wallet.name} browser extension.`}
-            </CenteredText>
-          ) : (
-            <ErrorContainer>
-              <ErrorIcon icon="alertCircle" />
-              <CpslText weight="semiBold" color="error">
-                {isInstalled ? externalWalletError?.[0] : `${wallet.name} not detected`}
-              </CpslText>
-            </ErrorContainer>
+          <HeroSpinner
+            icon={<HeroAccountTypeIcon accountType={wallet.internalId} src={wallet ? wallet.iconUrl : undefined} />}
+            status={isError ? 'error' : 'pending'}
+            text={
+              isError
+                ? isInstalled
+                  ? externalWalletError?.[0]
+                  : `${wallet.name} not detected`
+                : `Confirm connection request in the ${wallet.name} browser extension.`
+            }
+          />
+          {isError && (
+            <CpslButton
+              as={isInstalled ? 'button' : 'a'}
+              href={wallet.downloadUrl ?? ''}
+              target="_blank"
+              variant="secondary"
+              onClick={handleTryAgainClick}
+            >
+              <CpslIcon fullWidth slot="start" icon={isInstalled ? 'refresh' : 'linkExternal'} />
+              {isInstalled ? 'Try Again' : `Get ${wallet.name}`}
+            </CpslButton>
           )}
-          <CpslButton
-            as={isInstalled ? 'button' : 'a'}
-            href={wallet.downloadUrl ?? ''}
-            target="_blank"
-            variant="secondary"
-            onClick={handleTryAgainClick}
-          >
-            <CpslIcon slot="start" icon={isInstalled ? 'refresh' : 'linkExternal'} />
-            {isInstalled ? 'Try Again' : `Get ${wallet.name}`}
-          </CpslButton>
         </InnerStepContainer>
       );
     }

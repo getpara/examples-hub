@@ -11,7 +11,7 @@ import { useExternalWallets } from '../../../provider/providers/ExternalWalletPr
 type ModalContentProps = Omit<
   ParaModalProps,
   'para' | 'isOpen' | 'theme' | 'branding' | 'onModalStepChange' | 'onExpandModalChange'
->;
+> & { onDisconnect: () => void; isDisconnecting: boolean };
 
 export type ModalContentHandle = {
   /**
@@ -29,6 +29,8 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
       disablePhoneLogin,
       isGuestModeEnabled = false,
       onClose,
+      onDisconnect,
+      isDisconnecting,
       onRampTestMode,
     },
     ref,
@@ -104,6 +106,8 @@ export const ModalContent = forwardRef<ModalContentHandle, ModalContentProps>(
           disablePhoneLogin={!!disablePhoneLogin}
           isGuestModeEnabled={isGuestModeEnabled}
           onClose={handleClose}
+          onDisconnect={onDisconnect}
+          isDisconnecting={isDisconnecting}
         />
         <Footer />
       </>

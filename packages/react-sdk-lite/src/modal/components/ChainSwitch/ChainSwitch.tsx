@@ -1,8 +1,8 @@
 import { CpslButton, CpslIcon, CpslQrCode, CpslSpinner, CpslText } from '@getpara/react-components';
-import { CenteredText, InnerStepContainer, QRContainer, StepContainer } from '../common.js';
+import { HeroAccountTypeIcon, InnerStepContainer, QRContainer, StepContainer } from '../common.js';
 import { useEffect, useMemo } from 'react';
 import { useModalStore } from '../../stores/index.js';
-import { safeStyled } from '@getpara/react-common';
+import { HeroSpinner, safeStyled } from '@getpara/react-common';
 import { useCopyToClipboard } from '@getpara/react-common';
 import { ModalStep } from '../../utils/steps.js';
 import { routeMobileExternalWallet } from '../../utils/routeMobileExternalWallet.js';
@@ -65,29 +65,17 @@ export const ChainSwitch = () => {
       );
     }
 
+    const isError = !!externalWalletError?.[0];
     return (
       <InnerStepContainer>
-        {!externalWalletError?.length ? (
-          <CenteredText color="contrast" weight="semiBold">
-            {`Confirm the request to change networks in your ${wallet.name} wallet.`}
-          </CenteredText>
-        ) : (
-          <>
-            <ErrorContainer>
-              <ErrorIcon icon="alertCircle" />
-              <CenteredText weight="semiBold" color="error">
-                {externalWalletError[0]}
-              </CenteredText>
-            </ErrorContainer>
-            {externalWalletError[1] && (
-              <CenteredText color="secondary" weight="medium">
-                {externalWalletError[1]}
-              </CenteredText>
-            )}
-          </>
-        )}
+        <HeroSpinner
+          icon={<HeroAccountTypeIcon accountType={wallet.internalId} src={wallet ? wallet.iconUrl : undefined} />}
+          status={isError ? 'error' : 'pending'}
+          text={isError ? externalWalletError[0] : `Confirm the request to change networks in your ${wallet.name} wallet.`}
+          secondaryText={externalWalletError?.[1]}
+        />
         {externalWalletError?.[0]?.toLowerCase() !== NETWORK_NOT_SUPPORTED_ERROR && (
-          <CpslButton variant="secondary" onClick={handleTryAgainClick}>
+          <CpslButton fullWidth variant="secondary" onClick={handleTryAgainClick}>
             <CpslIcon slot="start" icon="refresh" />
             Try Again
           </CpslButton>
@@ -106,17 +94,4 @@ export const ChainSwitch = () => {
 const Container = safeStyled(StepContainer)`
   flex: 1;
   justify-content: space-between;
-`;
-
-const ErrorContainer = safeStyled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-`;
-
-const ErrorIcon = safeStyled(CpslIcon)`
-  --height: 16px;
-  --width: 16px;
-  --icon-color: var(--cpsl-color-text-error);
 `;

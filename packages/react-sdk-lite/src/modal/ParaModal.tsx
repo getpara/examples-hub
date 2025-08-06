@@ -44,11 +44,12 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
   const setAuthStepRoute = useModalStore(state => state.setAuthStepRoute);
   const { signUpOrLogIn, isCreateGuestWalletsPending } = useAuthActions();
   const { isReady, isFarcasterMiniApp } = useParaStatus();
-  const { isLoading: isAccountLoading, isConnected } = useAccount();
+  const { isLoading: isAccountLoading, isConnected, embedded } = useAccount();
   const setIFrameUrl = useModalStore(state => state.setIFrameUrl);
   const setIsIFrameReady = useModalStore(state => state.setIsIFrameReady);
 
   const [isModalMounted, setIsModalMounted] = useState(false);
+  const [isDisconnecting, setIsDisconnecting] = useState(false);
   const externalWallets = useStore(state => state.externalWallets);
   const providerProps = useStore(state => state.providerProps);
   const setAccountLinkOptions = useModalStore(state => state.setAccountLinkOptions);
@@ -191,11 +192,13 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
       isInitialized.current = true;
     }
 
-    if (isReady && !isOpen && isInitialized.current) {
-      initModal();
-      isInitialized.current = false;
+    if (!bareModal && isReady && !isOpen && isInitialized.current) {
+      setTimeout(() => {
+        initModal();
+        isInitialized.current = false;
+      }, 250);
     }
-  }, [isReady, isOpen, isAccountLoading]);
+  }, [bareModal, isReady, isOpen, isAccountLoading]);
 
   useEffect(() => {
     let _authLayout = authLayout;
@@ -247,6 +250,29 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
   const handleClose = () => {
     closeModal();
     onClose?.();
+  };
+
+  const handleDisconnect = async () => {
+    setIsDisconnecting(true);
+    handleClose();
+
+    const reset = async () => {
+      await para.logout({ clearPregenWallets: embedded?.isGuestMode });
+      await disconnectExternalWallet();
+
+      setStep(ModalStep.AUTH_MAIN);
+      setFlow(undefined);
+      setIsDisconnecting(false);
+    };
+
+    if (bareModal) {
+      reset();
+      return;
+    }
+
+    setTimeout(() => {
+      reset();
+    }, 250);
   };
 
   const handleModalEntering = () => {
@@ -314,6 +340,8 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
           disablePhoneLogin={disablePhoneLogin}
           isGuestModeEnabled={isGuestModeEnabled}
           onClose={handleClose}
+          onDisconnect={handleDisconnect}
+          isDisconnecting={isDisconnecting}
           {...rest}
         />
       )}

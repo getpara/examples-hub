@@ -23,7 +23,6 @@ import { Account } from '../Account/Account.js';
 import { AuthOptions } from '../AuthOptions/AuthOptions.js';
 import { ExternalWallets } from '../ExternalWallets/ExternalWallets.js';
 import { ExternalWalletStep } from '../ExternalWalletStep/ExternalWalletStep.js';
-import { Hero } from '../Hero/Hero.js';
 import { AnimatedHeightWrapper } from './AnimatedHeightWrapper.js';
 import { ChainSwitch } from '../ChainSwitch/ChainSwitch.js';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -41,6 +40,7 @@ import { AccountProfileLink } from '../Account/AccountProfileLink.js';
 import { AccountProfileUnlink } from '../Account/AccountProfileUnlink.js';
 import { ExternalWalletNetworkSelectStep } from '../ExternalWalletNetworkSelectStep/ExternalWalletNetworkSelectStep.js';
 import { AwaitingIFrameStep } from '../AwaitingIFrameStep/AwaitingIFrameStep.js';
+import { Footer } from '../Footer/Footer.js';
 
 interface BodyProps {
   oAuthMethods?: TOAuthMethod[];
@@ -48,6 +48,8 @@ interface BodyProps {
   disableEmailLogin: boolean;
   disablePhoneLogin: boolean;
   isGuestModeEnabled?: boolean;
+  onDisconnect: () => void;
+  isDisconnecting: boolean;
   onClose: () => void;
 }
 
@@ -59,14 +61,6 @@ const PADDING_TOP = {
   [ModalStep.TELEGRAM_OAUTH]: '36px',
 };
 
-const PADDING_BOTTOM = {
-  [ModalStep.TELEGRAM_OAUTH]: '16px',
-};
-
-const PADDING_X = {
-  [ModalStep.ACCOUNT_PROFILE]: '32px',
-};
-
 export const Body = ({
   oAuthMethods,
   twoFactorAuthEnabled,
@@ -74,6 +68,8 @@ export const Body = ({
   disablePhoneLogin,
   isGuestModeEnabled = false,
   onClose,
+  onDisconnect,
+  isDisconnecting,
 }: BodyProps) => {
   const currentStep = useModalStore(state => state.step);
   const onRampConfig = useModalStore(state => state.onRampConfig);
@@ -178,10 +174,10 @@ export const Body = ({
         return <AddFundsDone onClose={onClose} />;
       }
       case ModalStep.ACCOUNT_MAIN: {
-        return <Account onClose={onClose} />;
+        return <Account />;
       }
       case ModalStep.ACCOUNT_PROFILE: {
-        return <AccountProfile />;
+        return <AccountProfile onDisconnect={onDisconnect} isDisconnecting={isDisconnecting} />;
       }
       case ModalStep.ACCOUNT_PROFILE_LIST: {
         return <AccountProfileLinkOptions />;
@@ -262,7 +258,6 @@ export const Body = ({
             exit="exit"
             transition={BODY_TRANSITION}
           >
-            <Hero />
             <InnerContainer
               $embeddedModal={!!embeddedModal}
               $step={currentStep}
@@ -295,6 +290,7 @@ export const Body = ({
         </AnimatePresence>
         {/* Leaving IFrameStep outside of the animation container to avoid unnecessary rerenders and excessive data loading */}
         <IFrameStep />
+        <Footer />
       </AnimatedWrapper>
     </Container>
   );
@@ -302,10 +298,12 @@ export const Body = ({
 
 const Container = safeStyled.div`
   position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 `;
 
 const AnimatedWrapper = safeStyled(AnimatedHeightWrapper)`
-  margin-top: -16px;
 `;
 
 const BodyContainer = safeStyled(motion.div)`
@@ -323,12 +321,7 @@ const InnerContainer = safeStyled.div<{ $embeddedModal: boolean; $step: ModalSte
   flex-direction: column;
   justify-content: flex-start;
   gap: 24px;
-  padding: ${({ $embeddedModal, $step, $isIFrameStep }) =>
-    $isIFrameStep
-      ? '0px'
-      : $embeddedModal
-        ? '12px 0px 0px'
-        : `${PADDING_TOP[$step] ?? '72px'} ${PADDING_X[$step] ?? '72px'} ${PADDING_BOTTOM[$step] ?? '32px'}`};
+  padding: 0px;
   min-height: ${({ $step }) => MIN_HEIGHT[$step] ?? 'auto'};
   height: ${({ $step }) => MIN_HEIGHT[$step] ?? 'auto'};
 

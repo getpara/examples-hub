@@ -2,7 +2,7 @@
 @import '../../themes/capsule.globals';
 
 :host {
-  --container-width: 560px;
+  --container-width: 420px;
   --container-gap: 8px;
 
   --card-box-shadow: 0px 2px 5px 0px rgba(0, 0, 0, 0.08);
@@ -121,9 +121,9 @@
 
 .modal-body-card {
   --card-padding-top: 16px;
-  --card-padding-bottom: 16px;
-  --card-padding-start: 16px;
-  --card-padding-end: 16px;
+  --card-padding-bottom: 24px;
+  --card-padding-start: 24px;
+  --card-padding-end: 24px;
   --card-border-width: 0px;
 }
 

@@ -1,13 +1,18 @@
 import { safeStyled } from '@getpara/react-common';
 import { useModalStore } from '../../stores/index.js';
-import { CpslButton, CpslIdenticon, CpslText } from '@getpara/react-components';
+import { CpslButton, CpslIcon, CpslText } from '@getpara/react-components';
 import { truncateAddress, TWalletType } from '@getpara/web-sdk';
 import { ModalStep } from '../../utils/steps.js';
 import { useWalletState } from '../../../provider/index.js';
 import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
 import { useStore } from '../../../provider/stores/useStore.js';
+import { ReactNode } from 'react';
+import { WalletTypeIcon } from '../common.js';
 
-export const ExternalWalletCard = ({ address, showAddFunds }: Pick<SharedWalletCardProps, 'address' | 'showAddFunds'>) => {
+export const ExternalWalletCard = ({
+  address,
+  showAddFunds,
+}: Pick<SharedWalletCardProps, 'showAddFunds'> & { address: string }) => {
   const para = useInternalClient();
 
   const wallet = para.externalWallets[address];
@@ -18,9 +23,20 @@ export const ExternalWalletCard = ({ address, showAddFunds }: Pick<SharedWalletC
 
   return (
     <SharedWalletCard
+      name={wallet.name}
       address={wallet.ensName ?? truncateAddress(wallet.address, wallet.type)}
-      identiconHash={para.getIdenticonHash(wallet.id, wallet.type) ?? ''}
       showAddFunds={showAddFunds}
+      Icon={
+        <WalletTypeIcon
+          externalWallet={wallet.externalProviderId}
+          walletType={wallet.type}
+          size="48px"
+          inset="6px"
+          radius="theme"
+          background="var(--cpsl-color-background-0)"
+          border="1px solid var(--cpsl-color-background-16)"
+        />
+      }
     />
   );
 };
@@ -41,29 +57,38 @@ export const WalletCard = ({ id, type, showAddFunds }: WalletCardProps) => {
     return null;
   }
 
-  const address = para.getDisplayAddress(wallet.id, { addressType: type });
-
   return (
     <SharedWalletCard
       id={wallet.id}
       type={wallet.type}
-      address={wallet.ensName ?? truncateAddress(address, type, { prefix: para.cosmosPrefix })}
       name={wallet.name ?? `${appName ? `${appName} ` : ''}Wallet`}
-      identiconHash={para.getIdenticonHash(wallet.id, type) ?? ''}
       showAddFunds={showAddFunds}
+      Icon={
+        <CpslIcon
+          icon={para.partnerLogo ? undefined : 'wallet02'}
+          src={para.partnerLogo}
+          color="var(--cpsl-color-text-contrast)"
+          radius="theme"
+          background="var(--cpsl-color-background-0)"
+          border="1px solid var(--cpsl-color-background-16)"
+          size="48px"
+          inset={para.partnerLogo ? '8px' : '12px'}
+        />
+      }
     />
   );
 };
 
 interface SharedWalletCardProps {
-  address: string;
+  address?: string;
   id?: string;
   type?: TWalletType;
   name?: string;
-  identiconHash: string;
   showAddFunds?: boolean;
+  Icon: ReactNode;
 }
-const SharedWalletCard = ({ address, name, identiconHash, showAddFunds, id, type }: SharedWalletCardProps) => {
+
+const SharedWalletCard = ({ address, name, showAddFunds, id, type, Icon }: SharedWalletCardProps) => {
   const onRampConfig = useModalStore(state => state.onRampConfig);
   const { setSelectedWallet } = useWalletState();
   const setStep = useModalStore(state => state.setStep);
@@ -79,16 +104,18 @@ const SharedWalletCard = ({ address, name, identiconHash, showAddFunds, id, type
   return (
     <Container>
       <InnerContainer>
-        <CpslIdenticon size="48px" hash={identiconHash} />
+        {Icon}
         <WalletNameContainer>
           {!!name && (
             <Name color="contrast" variant="bodyL" weight="semiBold">
               {name}
             </Name>
           )}
-          <Name color="secondary" variant="bodyS" weight="medium">
-            {address}
-          </Name>
+          {!!address && (
+            <Name color="secondary" variant="bodyS" weight="medium">
+              {address}
+            </Name>
+          )}
         </WalletNameContainer>
       </InnerContainer>
       {showAddFunds && isAddFundsEnabled && (
@@ -111,7 +138,7 @@ export const WalletCards = safeStyled.div`
 
 const Container = safeStyled.div`
   width: 100%;
-  padding: 24px;
+  padding: 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;

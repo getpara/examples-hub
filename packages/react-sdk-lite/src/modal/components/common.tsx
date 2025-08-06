@@ -1,10 +1,10 @@
 import { CpslIcon, CpslInput, CpslSelect, CpslSelectItem, CpslText, CpslTileButton } from '@getpara/react-components';
 import { safeStyled } from '@getpara/react-common';
-import { MOBILE_SIZE, NETWORKS, ON_RAMP_ASSETS } from '../constants/constants.js';
-import { Network, OnRampAsset, TLinkedAccountType } from '@getpara/web-sdk';
+import { MOBILE_SIZE, NETWORKS, ON_RAMP_ASSETS, WALLET_TYPES_METADATA } from '../constants/constants.js';
+import { Network, OnRampAsset, TExternalWallet, TLinkedAccountType, TWalletType } from '@getpara/web-sdk';
 import { useStore } from '../../provider/stores/useStore.js';
 import { ACCOUNT_TYPES } from '../constants/oAuthLogos.js';
-import { PropsWithChildren, useEffect, useRef, useState } from 'react';
+import { ComponentProps, PropsWithChildren, useEffect, useRef, useState } from 'react';
 
 export const SpinnerContainer = safeStyled.div`
   display: flex;
@@ -68,7 +68,13 @@ export const StepContainer = safeStyled(InnerStepContainer)<{ $wide?: boolean }>
   gap: ${({ $wide }) => ($wide ? '32px' : '24px')};
 `;
 
-export const Heading: typeof CpslText = safeStyled(CenteredText)``;
+export const Heading = ({ children, ...props }: PropsWithChildren & ComponentProps<typeof CpslText>) => {
+  return (
+    <CpslText variant="bodyL" weight="semiBold" {...props} style={{ ...props.style, textAlign: 'center', width: '100%' }}>
+      {children}
+    </CpslText>
+  );
+};
 
 export const StyledCpslTileButton: typeof CpslTileButton = safeStyled(CpslTileButton)`
   --button-width: 100%;
@@ -86,13 +92,14 @@ export const HeroIcon = safeStyled(CpslIcon)`
 export const HeaderSelect = safeStyled(CpslSelect)<{ $width: number; $top?: number }>`
   --container-height: 26px;
   --container-border-width: 0px;
-  --container-padding-end: 0px;
+  --container-padding-end: 4px;
   --container-padding-start: 0px;
-  --container-background-color: transparent;
   --container-box-shadow: none;
   --container-gap: 2px;
   --icon-width: 16px;
   --icon-height: 16px;
+  --dropdown-inner-padding: 16px;
+  --dropdown-inner-gap: 10px;
   position: relative;
 
   &::part(selected-text) {
@@ -121,10 +128,15 @@ export const HeaderSelect = safeStyled(CpslSelect)<{ $width: number; $top?: numb
 `;
 
 export const HeaderSelectItem = safeStyled(CpslSelectItem)`
-  --outer-container-padding-start: 4px;
-  --outer-container-padding-end: 4px;
-  --outer-container-padding-top: 4px;
-  --outer-container-padding-bottom: 4px;
+  --outer-container-padding-start: 0px;
+  --outer-container-padding-end: 0px;
+  --outer-container-padding-top: 0px;
+  --outer-container-padding-bottom: 0px;
+  --container-padding-start: 0px;
+  --container-padding-end: 0px;
+  --container-padding-top: 0px;
+  --container-padding-bottom: 0px;
+  width: 236px;
 `;
 
 export const HeaderSelectContainer = safeStyled.div`
@@ -132,9 +144,8 @@ export const HeaderSelectContainer = safeStyled.div`
   display: flex;
   align-items: center;
   gap: 8px;
-  border-radius: 1000px;
+  border-radius: var(--cpsl-border-radius-tile-button);
   background-color: var(--cpsl-color-background-8);
-  padding: 4px;
 `;
 
 const StyledIcon = safeStyled(CpslIcon)`
@@ -159,6 +170,36 @@ export function NetworkIcon({ network, size }: { network: Network; size?: string
     <StyledIcon size={size} icon={data.icon} inset={data.isCircular ? undefined : '15%'} invert={isDark && data.isDark} />
   );
 }
+
+export function WalletTypeIcon({
+  className,
+  walletType,
+  externalWallet,
+  ...props
+}: {
+  className?: string;
+  walletType: TWalletType;
+  externalWallet?: TExternalWallet | string;
+} & Parameters<typeof CpslIcon>[0]) {
+  const isDark = useStore(state => state.modalConfig?.theme?.mode === 'dark');
+  const data = (externalWallet ? ACCOUNT_TYPES[externalWallet] : WALLET_TYPES_METADATA[walletType]) || {
+    icon: 'wallet02',
+    isDark: true,
+  };
+
+  props.size;
+
+  return (
+    <CpslIcon
+      className={className}
+      icon={data.icon}
+      invert={isDark && data.isDark}
+      {...props}
+      inset={props.inset ?? '10%'}
+    />
+  );
+}
+
 export const ErrorContainer = safeStyled.div`
   display: flex;
   align-items: center;
@@ -187,7 +228,7 @@ export function AccountTypeIcon({
   const data = accountType ? ACCOUNT_TYPES[accountType] : null;
 
   return data || src ? (
-    <CpslIcon size={size} inset={inset} icon={data?.logoBranded ?? data?.logo} src={src} invert={isDark && data?.isDark} />
+    <CpslIcon size={size} inset={inset} icon={data?.iconBranded ?? data?.icon} src={src} invert={isDark && data?.isDark} />
   ) : null;
 }
 

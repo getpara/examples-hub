@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Heading, HeroIcon, StepContainer } from '../common.js';
 import { ExternalWalletCard, WalletCard, WalletCards } from '../WalletCard/WalletCard.js';
 import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
@@ -17,6 +17,20 @@ export const LoginDoneStep = ({ onClose }: LoginDoneStep) => {
   const setFlow = useModalStore(state => state.setFlow);
   const hideWallets = useStore(state => state.modalConfig?.hideWallets);
 
+  const content = useMemo(() => {
+    if (para.externalWalletConnectionType === 'CONNECTION_ONLY' || para.externalWalletConnectionType === 'VERIFICATION') {
+      return (
+        <ExternalWalletCard address={Object.values(para.externalWallets || {})[0]?.address ?? ''} showAddFunds={false} />
+      );
+    }
+
+    const { id, type } = Object.values(para.wallets || {})[0] || {};
+
+    if (!id || !type) return null;
+
+    return <WalletCard key={`${id}-${type}`} id={id} type={type} showAddFunds={false} />;
+  }, [para.externalWalletConnectionType, para.externalWallets, para.wallets]);
+
   useEffect(() => {
     setTimeout(() => {
       if (bareModal) {
@@ -31,21 +45,8 @@ export const LoginDoneStep = ({ onClose }: LoginDoneStep) => {
   return (
     <StepContainer>
       <HeroIcon icon="checkCircleFilled" />
-      <Heading variant="headingS" weight="bold">
-        Connected
-      </Heading>
-      {!hideWallets && (
-        <WalletCards>
-          {para.externalWalletConnectionType === 'CONNECTION_ONLY' ||
-          para.externalWalletConnectionType === 'VERIFICATION' ? (
-            <ExternalWalletCard address={Object.values(para.externalWallets || {})[0]?.address ?? ''} />
-          ) : (
-            para.currentWalletIdsArray.map(([id, type]) => {
-              return <WalletCard key={`${id}-${type}`} id={id} type={type} />;
-            })
-          )}
-        </WalletCards>
-      )}
+      <Heading>Connected</Heading>
+      {!hideWallets && <WalletCards>{content}</WalletCards>}
     </StepContainer>
   );
 };

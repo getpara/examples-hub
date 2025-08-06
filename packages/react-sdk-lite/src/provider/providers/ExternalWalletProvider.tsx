@@ -600,7 +600,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
   };
 
   const disconnectExternalWallet = async () => {
-    await para.logout();
+    if (para.isExternalWalletAuth) await para.logout();
     await evmDisconnect();
     await cosmosDisconnect();
     setSelectedExternalWallet();

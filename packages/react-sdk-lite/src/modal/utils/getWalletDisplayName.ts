@@ -1,10 +1,5 @@
 import ParaWeb from '@getpara/web-sdk';
-
-const WALLET_TYPES = {
-  EVM: 'EVM',
-  SOLANA: 'Solana',
-  COSMOS: 'Cosmos',
-};
+import { WALLET_TYPES_METADATA } from '../constants/constants.js';
 
 export function getWalletDisplayName(
   para: ParaWeb,
@@ -24,7 +19,7 @@ export function getWalletDisplayName(
   if (para.isMultiWallet) {
     return (
       name ??
-      `${isExternal ? 'External ' : ''}${type ? WALLET_TYPES[type] : ''}${!hideWallets && (isMenu || isExternal) ? ' Wallet' : ''}`
+      `${isExternal ? 'External ' : ''}${type ? (WALLET_TYPES_METADATA[type]?.name ?? '') : ''}${!hideWallets && (isMenu || isExternal) ? ' Wallet' : ''}`
     );
   }
 

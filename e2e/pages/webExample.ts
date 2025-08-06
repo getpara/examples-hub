@@ -197,7 +197,11 @@ export class WebExamplePage {
 
   async logout({ openModalText = 'Open Modal' }: { openModalText?: string }) {
     await this.page.getByRole('button', { name: openModalText }).click();
-    await this.page.getByRole('button', { name: 'Disconnect Wallet' }).last().click();
+
+    await this.page.locator('#para-modal').getByRole('button', { name: 'Profile' }).click();
     await this.page.waitForTimeout(250);
+
+    await this.page.getByRole('button', { name: 'Disconnect Wallet' }).last().click();
+    await this.page.waitForTimeout(2000);
   }
 }

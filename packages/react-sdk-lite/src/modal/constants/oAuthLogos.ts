@@ -1,154 +1,150 @@
 import { IconType } from '@getpara/react-components';
 import { TLinkedAccountType } from '@getpara/web-sdk';
+import { DisplayMetadata } from '../types/commonTypes.js';
 
 export const ACCOUNT_TYPES: {
-  [key in TLinkedAccountType | string]: {
-    logo: IconType;
-    logoBranded?: IconType;
-    name: string;
-    isDark?: boolean;
-    inline?: string;
+  [key in TLinkedAccountType | string]: DisplayMetadata & {
     isExternalWallet?: boolean;
   };
 } = {
   'EMAIL': {
-    logo: 'mail',
+    icon: 'mail',
     name: 'Email',
-    inline: 'email address',
+    inlineText: 'email address',
     isDark: true,
   },
   'PHONE': {
-    logo: 'phone',
+    icon: 'phone',
     name: 'Phone',
-    inline: 'phone number',
+    inlineText: 'phone number',
     isDark: true,
   },
   'EXTERNAL_WALLET': {
-    logo: 'wallet',
+    icon: 'wallet',
     name: 'External Wallet',
-    inline: 'external wallet',
+    inlineText: 'external wallet',
     isDark: true,
   },
   'GOOGLE': {
-    logo: 'google',
-    logoBranded: 'googleBrand',
+    icon: 'google',
+    iconBranded: 'googleBrand',
     name: 'Google',
   },
   'TWITTER': {
-    logo: 'twitter',
-    logoBranded: 'twitterBrand',
+    icon: 'twitter',
+    iconBranded: 'twitterBrand',
     name: 'X / Twitter',
-    inline: 'X account',
+    inlineText: 'X account',
     isDark: true,
   },
   'APPLE': {
-    logo: 'apple',
-    logoBranded: 'appleBrand',
+    icon: 'apple',
+    iconBranded: 'appleBrand',
     name: 'Apple',
     isDark: true,
   },
   'DISCORD': {
-    logo: 'discord',
-    logoBranded: 'discordBrand',
+    icon: 'discord',
+    iconBranded: 'discordBrand',
     name: 'Discord',
   },
   'FACEBOOK': {
-    logo: 'facebook',
-    logoBranded: 'facebookBrand',
+    icon: 'facebook',
+    iconBranded: 'facebookBrand',
     name: 'Facebook',
   },
   'FARCASTER': {
-    logo: 'farcaster',
-    logoBranded: 'farcasterBrand',
+    icon: 'farcaster',
+    iconBranded: 'farcasterBrand',
     name: 'Farcaster',
   },
   'TELEGRAM': {
-    logo: 'telegram',
-    logoBranded: 'telegramBrand',
+    icon: 'telegram',
+    iconBranded: 'telegramBrand',
     name: 'Telegram',
   },
   'MetaMask': {
-    logo: 'metamask',
+    icon: 'metamask',
     name: 'MetaMask',
     isExternalWallet: true,
   },
   'Rainbow': {
-    logo: 'rainbow',
+    icon: 'rainbow',
     name: 'Rainbow',
     isExternalWallet: true,
   },
   'Coinbase Wallet': {
-    logo: 'coinbase',
+    icon: 'coinbase',
     name: 'Coinbase Wallet',
     isExternalWallet: true,
   },
   'WalletConnect': {
-    logo: 'walletConnect',
+    icon: 'walletConnect',
     name: 'WalletConnect',
     isExternalWallet: true,
   },
   'Zerion': {
-    logo: 'zerion',
+    icon: 'zerion',
     name: 'Zerion',
     isExternalWallet: true,
   },
   'Safe': {
-    logo: 'safe',
+    icon: 'safe',
     name: 'Safe',
     isExternalWallet: true,
   },
   'Rabby': {
-    logo: 'rabby',
+    icon: 'rabby',
     name: 'Rabby',
     isExternalWallet: true,
   },
   'OKX Wallet': {
-    logo: 'okx',
+    icon: 'okx',
     name: 'OKX Wallet',
     isExternalWallet: true,
   },
   'Phantom': {
-    logo: 'phantom',
+    icon: 'phantom',
     name: 'Phantom',
     isExternalWallet: true,
   },
   'Glow': {
-    logo: 'glow',
+    icon: 'glow',
     name: 'Glow',
     isExternalWallet: true,
   },
   'Backpack': {
-    logo: 'backpack',
+    icon: 'backpack',
     name: 'Backpack',
     isExternalWallet: true,
   },
   'Keplr': {
-    logo: 'keplr',
+    icon: 'keplr',
     name: 'Keplr',
     isExternalWallet: true,
   },
   'Leap': {
-    logo: 'leap',
+    icon: 'leap',
     name: 'Leap',
     isExternalWallet: true,
   },
   'HaHa': {
-    logo: 'haha',
+    icon: 'haha',
     name: 'HaHa',
     isExternalWallet: true,
   },
   'Cosmostation': {
-    logo: 'cosmostation',
+    icon: 'cosmostation',
     name: 'Cosmostation',
     isExternalWallet: true,
   },
   'Solflare': {
-    logo: 'solflare',
+    icon: 'solflare',
     name: 'Solflare',
     isExternalWallet: true,
   },
   'Valora': {
-    logo: 'valora',
+    icon: 'valora',
     name: 'Valora',
     isExternalWallet: true,
   },
@@ -161,11 +157,11 @@ export function getAccountTypeName(
   const data = type ? ACCOUNT_TYPES[type] : undefined;
   return data
     ? inline
-      ? (data.inline ?? `${data.name} ${data.isExternalWallet ? 'wallet' : 'account'}`)
+      ? (data.inlineText ?? `${data.name} ${data.isExternalWallet ? 'wallet' : 'account'}`)
       : data.name
     : undefined;
 }
 
 export function getAccountTypeLogo(type: TLinkedAccountType | undefined): IconType | undefined {
-  return type ? ACCOUNT_TYPES[type]!.logoBranded || ACCOUNT_TYPES[type]!.logo : undefined;
+  return type ? ACCOUNT_TYPES[type]!.iconBranded || ACCOUNT_TYPES[type]!.icon : undefined;
 }
