@@ -21,6 +21,7 @@ const AuthLogin = lazy(() => import('./pages/AuthLogin/AuthLogin').then(module =
 const PasswordCreation = lazy(() =>
   import('./pages/PasswordCreation/PasswordCreation').then(module => ({ default: module.PasswordCreation })),
 );
+const PINCreation = lazy(() => import('./pages/PINCreation/PINCreation').then(module => ({ default: module.PINCreation })));
 const TransactionReview = lazy(() => import('./pages/TransactionReview/TransactionReview'));
 const OnRampTransaction = lazy(() =>
   import('./pages/OnRampTransaction').then(module => ({ default: module.OnRampTransaction })),
@@ -50,8 +51,10 @@ export const App = () => {
         <Route element={<ModalLayout />} path="/web">
           <Route element={<AuthCreation />} path="users/:userId/biometrics/:biometricId" />
           <Route element={<AuthLogin authMethod={AuthMethod.PASSKEY} />} path="biometrics/login" />
-          <Route element={<AuthLogin authMethod={AuthMethod.PASSWORD} />} path="passwords/login" />
+          <Route element={<AuthLogin authMethod={AuthMethod.PASSWORD} />} path="passwords/login/:version?" />
+          <Route element={<AuthLogin authMethod={AuthMethod.PIN} />} path="pin/login" />
           <Route element={<PasswordCreation />} path="users/:userId/passwords/:passwordId" />
+          <Route element={<PINCreation />} path="users/:userId/pin/:passwordId" />
           <Route element={<TransactionReview />} path="users/:userId/transaction-review/:pendingTransactionId" />
           <Route element={<OnRampTransaction />} path="users/:userId/on-ramp-transaction/:purchaseId" />
           <Route element={<OnRampTransactionV2 />} path="users/:userId/on-ramp-transaction/v2/:purchaseId" />

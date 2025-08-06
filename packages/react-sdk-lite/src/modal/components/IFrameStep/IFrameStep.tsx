@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useModalStore } from '../../stores/index.js';
 import { IFrameSteps } from '../../utils/steps.js';
 import { safeStyled } from '@getpara/react-common';
@@ -16,6 +16,7 @@ export const IFrameStep = () => {
   const currentStep = useModalStore(state => state.step);
   const embeddedModal = useStore(state => state.modalConfig?.embeddedModal);
   const para = useInternalClient();
+  const [height, setHeight] = useState(0);
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
@@ -25,8 +26,11 @@ export const IFrameStep = () => {
         return; // Ignore messages from untrusted origins
       }
 
-      if (event.data && event.data.type === 'LOADED') {
-        setIsReady(true);
+      if (event.data) {
+        if (event.data.type === 'HEIGHT') {
+          setHeight(event.data.height);
+          setIsReady(true);
+        }
       }
     };
     window.addEventListener('message', handleMessage);
@@ -34,8 +38,8 @@ export const IFrameStep = () => {
   }, [setIsReady]);
 
   return (
-    <OuterContainer $isVisible={IFrameSteps.includes(currentStep)} $embeddedModal={!!embeddedModal}>
-      <Container $isReady={!!isReady}>
+    <OuterContainer $isVisible={IFrameSteps.includes(currentStep)} $embeddedModal={!!embeddedModal} $isReady={!!isReady}>
+      <Container $isReady={!!isReady} $height={height}>
         <iframe src={iFrameUrl} />
       </Container>
       {!isReady && (
@@ -47,9 +51,9 @@ export const IFrameStep = () => {
   );
 };
 
-const OuterContainer = safeStyled.div<{ $isVisible: boolean; $embeddedModal: boolean }>`
+const OuterContainer = safeStyled.div<{ $isVisible: boolean; $embeddedModal: boolean; $isReady: boolean }>`
   position: relative;
-  height: ${({ $isVisible }) => ($isVisible ? '528px' : '0px')};
+  height: ${({ $isVisible, $isReady }) => ($isVisible ? ($isReady ? 'auto' : '200px') : '0px')};
   width: ${({ $isVisible }) => ($isVisible ? '100%' : '0px')};
   flex: ${({ $isVisible }) => ($isVisible ? 1 : 'auto')};
   padding: ${({ $embeddedModal, $isVisible }) => (!$isVisible ? '0px' : $embeddedModal ? '12px 0px 0px' : '72px 72px 32px')};
@@ -63,13 +67,13 @@ const OuterContainer = safeStyled.div<{ $isVisible: boolean; $embeddedModal: boo
   }
 `;
 
-const Container = safeStyled.div<{ $isReady: boolean }>`
-  height: 360px;
+const Container = safeStyled.div<{ $isReady: boolean; $height: number }>`
+  height: ${({ $height }) => $height}px;
   width: 100%;
   opacity: ${({ $isReady }) => ($isReady ? 1 : 0)};
 
   & > iframe {
-    height: 360px;
+    height: ${({ $height }) => $height}px;
     width: 100%;
     border: none;
     background: transparent;

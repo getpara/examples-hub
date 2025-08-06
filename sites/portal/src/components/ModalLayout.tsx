@@ -1,6 +1,6 @@
 import { Buffer } from 'buffer';
 global.Buffer = Buffer;
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import { Outlet, useSearchParams } from 'react-router-dom';
 import { styled } from 'styled-components';
 import { Partner } from '../types';
@@ -12,13 +12,25 @@ import { Theme } from '@getpara/web-sdk';
 import { usePara } from './ParaContext';
 import { ModalLoading } from './ModalLoading';
 import { NetworkSpeedBanner } from '@getpara/react-common';
+import { isIFramed } from '../utils/isIFramed';
 
 const DEFAULT_THEME = {
   foregroundColor: '#000',
   backgroundColor: '#FFF',
 };
 
+const sendHeightToParent = (height: number) => {
+  (window.opener || window.parent)?.postMessage(
+    {
+      type: 'HEIGHT',
+      height,
+    },
+    '*',
+  );
+};
+
 export const ModalLayout = () => {
+  const contentRef = useRef<HTMLDivElement>(null);
   const para = usePara();
   const [searchParams] = useSearchParams();
   // TODO: Move this to the partner config
@@ -49,7 +61,6 @@ export const ModalLayout = () => {
   const portalBorderRadius = searchParams.get('portalPrimaryButtonTextColor');
   const portalFont = searchParams.get('portalFont');
   const portalThemeMode = searchParams.get('portalThemeMode');
-  const isEmbed = searchParams.get('isEmbed') === 'true';
 
   const [partner, setPartner] = useState<Partner | undefined>();
   const [isDark, setIsDark] = useState<boolean>(false);
@@ -139,32 +150,64 @@ export const ModalLayout = () => {
     (window.opener || window.parent)?.postMessage({ type: 'LOADED' }, '*');
   }, []);
 
+  // Add this effect to measure content height
+  useEffect(() => {
+    if (contentRef.current && partner) {
+      const observer = new ResizeObserver(entries => {
+        for (const entry of entries) {
+          const height = entry.contentRect.height;
+          sendHeightToParent(height);
+        }
+      });
+
+      observer.observe(contentRef.current);
+
+      // Send initial height
+      const initialHeight = contentRef.current.scrollHeight;
+      sendHeightToParent(initialHeight);
+
+      return () => {
+        observer.disconnect();
+      };
+    }
+  }, [partner]);
+
   if (!partner) return null;
 
   return (
     <>
       <BetaBannerNoChakra />
       <NetworkSpeedBanner maxWidth="75%" />
-      <OuterContainer isBranded={isBranded} isEmbed={isEmbed}>
-        <Suspense fallback={<ModalLoading noText />}>
-          <Outlet context={{ partner, homepageUrl, isDark, toggleBranding }} />
-        </Suspense>
+      <OuterContainer isBranded={isBranded}>
+        <ContentMeasurer ref={contentRef}>
+          <Suspense fallback={<ModalLoading noText />}>
+            <Outlet context={{ partner, homepageUrl, isDark, toggleBranding }} />
+          </Suspense>
+        </ContentMeasurer>
       </OuterContainer>
     </>
   );
 };
 
-const OuterContainer = styled.div<{ isBranded?: boolean; isEmbed?: boolean }>`
-  background-color: ${({ isBranded, isEmbed }) =>
-    isEmbed ? 'transparent' : isBranded ? 'var(--cpsl-color-modal-surface-footer)' : 'white'};
+const ContentMeasurer = styled.div`
+  width: 100%;
+  height: ${() => (!isIFramed ? '100%' : 'auto')};
+  display: flex;
+  flex-direction: column;
+`;
 
-  height: 100vh;
+const OuterContainer = styled.div<{ isBranded?: boolean }>`
+  background-color: ${({ isBranded }) =>
+    isIFramed ? 'transparent' : isBranded ? 'var(--cpsl-color-modal-surface-footer)' : 'white'};
+
+  height: 100%;
   width: 100vw;
   width: 100dvw;
 
   display: flex;
   justify-content: center;
   align-items: center;
+  overflow: ${() => (!isIFramed ? 'auto' : 'hidden')};
 
   body {
     overflow: hidden;

@@ -14,11 +14,13 @@ export async function passwordCreation(
     partnerId,
     password,
     passwordId,
+    isPIN,
   }: {
     partnerId: string;
     userId: string;
     password: string;
     passwordId: string;
+    isPIN?: boolean;
   },
 ): Promise<void> {
   const keyPair = await getAsymmetricKeyPair(para.ctx);
@@ -34,5 +36,6 @@ export async function passwordCreation(
     salt: salt,
     encryptedWalletPrivateKey: encryptedPrivateKeyHex,
     encryptionKeyHash: encryptionKeyHash,
+    isPIN,
   });
 }

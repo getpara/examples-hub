@@ -19,7 +19,10 @@ export type LoginRes = Awaited<ReturnType<typeof utils.authLogin>>;
 type Login = {
   fns: {
     authLogin: () => Promise<Awaited<ReturnType<typeof utils.authLogin>>>;
-    authLoginWithPassword: (password: string) => Promise<Awaited<ReturnType<typeof utils.authLoginWithPassword>>>;
+    authLoginWithPassword: (
+      password: string,
+      isPIN?: boolean,
+    ) => Promise<Awaited<ReturnType<typeof utils.authLoginWithPassword>>>;
     authUpdateKeyShares: (_?: LoginRes) => Promise<void>;
     fetchWallets: () => Promise<Wallets>;
     finishLogin: (_?: boolean) => Promise<void>;
@@ -63,12 +66,16 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
   }, [para, authInfo, params]);
 
   const authLoginWithPassword = useCallback(
-    async (password: string): Promise<Awaited<ReturnType<typeof utils.authLoginWithPassword>>> => {
-      const loginRes = await utils.authLoginWithPassword(para.ctx, {
-        password,
-        auth: authInfo.auth,
-        ...params,
-      });
+    async (password: string, isPIN?: boolean): Promise<Awaited<ReturnType<typeof utils.authLoginWithPassword>>> => {
+      const loginRes = await utils.authLoginWithPassword(
+        para.ctx,
+        {
+          password,
+          auth: authInfo.auth,
+          ...params,
+        },
+        isPIN,
+      );
 
       setLoginRes(loginRes);
       return loginRes;

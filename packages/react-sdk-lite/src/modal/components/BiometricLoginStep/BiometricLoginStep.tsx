@@ -16,17 +16,18 @@ export const BiometricLoginStep = () => {
     return null;
   }
 
-  const { passkeyUrl, passkeyKnownDeviceUrl, passwordUrl, isPasskeySupported } = loginState;
+  const { passkeyUrl, pinUrl, passkeyKnownDeviceUrl, passwordUrl, isPasskeySupported } = loginState;
   const { isOnKnownDevice = false, formattedHints } = biometricHints || {};
 
   const isPasskey = !!passkeyUrl,
     isPassword = !!passwordUrl,
+    isPIN = !!pinUrl,
     isNeither = !isPasskey && !isPassword,
     hasHints = formattedHints?.length ?? 0 > 0,
     isPasskeyOnKnownDevice = isPasskeySupported && isOnKnownDevice,
     isPasskeyUnavailable = (hasHints && !isOnKnownDevice) || !isPasskeySupported || isNeither,
     displayKnownDevices = isPasskeyUnavailable && !!biometricHints && (hasHints || !!passkeyKnownDeviceUrl),
-    displayWelcomeBack = isPasskeyOnKnownDevice || isPassword;
+    displayWelcomeBack = isPasskeyOnKnownDevice || isPassword || isPIN;
 
   return (
     <StepContainer $wide>
@@ -35,8 +36,8 @@ export const BiometricLoginStep = () => {
         <UserIdentifier authInfo={para.authInfo} />
       </InnerStepContainer>
       <MainContainer>
-        {isPassword && (
-          <CpslButton fullWidth onClick={() => presentLoginUi(AuthMethod.PASSWORD, loginState)}>
+        {(isPassword || isPIN) && (
+          <CpslButton fullWidth onClick={() => presentLoginUi(isPIN ? AuthMethod.PIN : AuthMethod.PASSWORD, loginState)}>
             Login
           </CpslButton>
         )}

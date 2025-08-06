@@ -28,6 +28,7 @@ export class MockPara extends ParaCore {
   verifyFarcasterLink = super.verifyFarcasterLink;
   verifyExternalWalletLink = super.verifyExternalWalletLink;
   verifyOAuthLink = super.verifyOAuthLink;
+  sendLoginCode = super.sendLoginCode;
 
   ready = (): Promise<void> => {
     this.isReady = true;

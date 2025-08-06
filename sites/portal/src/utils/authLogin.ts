@@ -64,9 +64,16 @@ export async function authLogin(
 export async function authLoginWithPassword(
   ctx: Ctx,
   { auth, password, partnerId, sessionId, newDeviceSessionLookupId }: AuthLoginPasswordParams,
+  isPIN?: boolean,
 ) {
-  const passwordEntity = (await ctx.client.getPasswords(auth))[0];
-  const encryptedWalletPrivateKey = (await ctx.client.getEncryptedWalletPrivateKey(passwordEntity.id)).data
+  const allPasswords = await ctx.client.getPasswords(auth);
+  const passwordEntity = isPIN ? allPasswords.find(p => p.isPIN) : allPasswords.find(p => !p.isPIN);
+
+  if (!passwordEntity) {
+    throw new Error(`No ${isPIN ? 'PIN' : 'password'} found for user`);
+  }
+
+  const encryptedWalletPrivateKey = (await ctx.client.getEncryptedWalletPrivateKey(passwordEntity.id, sessionId)).data
     .encryptedWalletPrivateKey;
   const challenge = (await ctx.client.getWebChallenge(auth)).challenge;
 

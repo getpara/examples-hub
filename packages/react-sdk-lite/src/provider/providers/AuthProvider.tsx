@@ -246,6 +246,17 @@ export function AuthProvider({
             setAuthStepRoute(ModalStep.PASSWORD_CREATION);
           }
           break;
+        case AuthMethod.PIN:
+          setupListener();
+
+          if (isIFrameReady) {
+            setStep(ModalStep.PASSWORD_CREATION);
+          } else {
+            setIFrameUrl(authState.pinUrl!);
+            setIsIFrameReady(false);
+            setAuthStepRoute(ModalStep.PASSWORD_CREATION);
+          }
+          break;
       }
     },
     [isIFrameReady],
@@ -257,7 +268,7 @@ export function AuthProvider({
     } else {
       setupListener();
 
-      setIFrameUrl(authState.passwordUrl!);
+      setIFrameUrl(authState.passwordUrl! || authState.pinUrl!);
       setIsIFrameReady(false);
       setStep(ModalStep.EMBEDDED_PASSWORD_LOGIN);
     }
@@ -307,8 +318,8 @@ export function AuthProvider({
 
   const presentLoginUi = useCallback(
     (method: AuthMethod, authState: AuthStateLogin) => {
-      const isPasskey = method === AuthMethod.PASSKEY,
-        isPassword = !isPasskey;
+      const isPassword = method === AuthMethod.PASSWORD,
+        isPIN = method === AuthMethod.PIN;
 
       if (overrides.login) {
         async function loginOverride() {
@@ -323,13 +334,13 @@ export function AuthProvider({
       }
 
       refs.popupWindow.current = openPopup({
-        url: isPassword ? authState.passwordUrl! : authState.passkeyUrl!,
-        target: isPassword ? 'ParaPassword' : 'ParaPasskey',
-        type: isPassword ? 'LOGIN_PASSWORD' : 'LOGIN_PASSKEY',
+        url: isPIN ? authState.pinUrl! : isPassword ? authState.passwordUrl! : authState.passkeyUrl!,
+        target: isPIN ? 'ParaPIN' : isPassword ? 'ParaPassword' : 'ParaPasskey',
+        type: isPIN ? 'LOGIN_PASSWORD' : isPassword ? 'LOGIN_PASSWORD' : 'LOGIN_PASSKEY',
         current: refs.popupWindow.current,
       });
 
-      setStep(isPassword ? ModalStep.AWAITING_PASSWORD_LOGIN : ModalStep.AWAITING_BIOMETRIC_LOGIN);
+      setStep(isPassword || isPIN ? ModalStep.AWAITING_PASSWORD_LOGIN : ModalStep.AWAITING_BIOMETRIC_LOGIN);
     },
     [loginState, biometricHints],
   );
@@ -352,19 +363,21 @@ export function AuthProvider({
       case 'signup':
         {
           const isPassword = !!authState.passwordUrl,
-            isPasswordOnly =
-              isPassword &&
+            isPIN = !!authState.pinUrl,
+            isPasswordOrPIN = isPassword || isPIN,
+            isPasswordOrPINOnly =
+              isPasswordOrPIN &&
               (!authState.passkeyUrl || (userAgent?.device.type === 'mobile' && !authState.isPasskeySupported));
 
-          if (isPassword) {
-            setIFrameUrl(authState.passwordUrl!);
+          if (isPasswordOrPIN) {
+            setIFrameUrl(authState.passwordUrl || authState.pinUrl);
             setIsIFrameReady(false);
           }
 
           signup();
 
-          if (isPasswordOnly) {
-            presentSignupUi(AuthMethod.PASSWORD, authState);
+          if (isPasswordOrPINOnly) {
+            presentSignupUi(isPassword ? AuthMethod.PASSWORD : AuthMethod.PIN, authState);
           } else {
             setStep(ModalStep.BIOMETRIC_CREATION);
           }

@@ -26,7 +26,9 @@ export const BiometricCreationStep = () => {
     presentSignupUi(method, signupState!);
   };
 
-  const isBoth = !!signupState?.passkeyUrl && !!signupState?.passwordUrl;
+  const isBoth = !!signupState?.passkeyUrl && (!!signupState?.passwordUrl || !!signupState?.pinUrl);
+
+  const isPIN = !!signupState?.pinUrl;
 
   if (!signupState) {
     return null;
@@ -44,7 +46,7 @@ export const BiometricCreationStep = () => {
         </Heading>
         <UserIdentifier authInfo={authInfo} />
         <CpslText variant="bodyS" color="secondary" weight="medium">
-          {isBoth ? 'Choose a password or set up a passkey' : 'Your Passkey keeps your account safe.'}
+          {isBoth ? `Choose a ${isPIN ? 'PIN' : 'password'} or set up a passkey` : 'Your Passkey keeps your account safe.'}
         </CpslText>
       </InnerStepContainer>
 
@@ -71,9 +73,9 @@ export const BiometricCreationStep = () => {
           <>
             <CpslDivider>or</CpslDivider>
 
-            <CpslButton fullWidth onClick={onClick(AuthMethod.PASSWORD)} disabled={!!authStepRoute}>
+            <CpslButton fullWidth onClick={onClick(isPIN ? AuthMethod.PIN : AuthMethod.PASSWORD)} disabled={!!authStepRoute}>
               <CpslIcon slot="start" icon="passcode" />
-              Choose Password
+              Choose {isPIN ? 'PIN' : 'Password'}
             </CpslButton>
           </>
         )}

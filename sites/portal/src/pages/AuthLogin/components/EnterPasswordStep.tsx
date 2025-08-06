@@ -5,6 +5,10 @@ import { useEffect, useState } from 'react';
 import { usePara } from '../../../components/ParaContext';
 import { CpslInputCustomEvent, InputInputEventDetail } from '@getpara/core-components';
 import { UserIdentifier } from '@getpara/react-common';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { AuthMethod } from '@getpara/user-management-client';
+import { ModalLoading } from '../../../components';
+import { supportedLoginAuthMethods } from '../../../utils/supportedLoginAuthMethods';
 
 interface EnterPasswordStepProps {
   error: string | undefined;
@@ -13,10 +17,18 @@ interface EnterPasswordStepProps {
 }
 
 export const EnterPasswordStep = ({ error, onLoginClick, isEmbedded }: EnterPasswordStepProps) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const params = useParams();
+
+  const isV1 = !params.version || params.version === 'v1';
+
   const para = usePara();
   const [recoveryUrl, setRecoveryUrl] = useState<string | undefined>();
   const [password, setPassword] = useState<string>('');
   const [passwordVisible, setPasswordVisible] = useState<boolean>(false);
+  const [isLoadingAuthMethods, setIsLoadingAuthMethods] = useState<boolean>(isV1);
+
   const authInfo = para.authInfo;
 
   const [isProcessing, setIsProcessing] = useState(false);
@@ -43,6 +55,23 @@ export const EnterPasswordStep = ({ error, onLoginClick, isEmbedded }: EnterPass
   };
 
   useEffect(() => {
+    const loadAuthMethods = async () => {
+      if (authInfo.auth) {
+        setIsLoadingAuthMethods(true);
+        const supportedAuthMethods = await supportedLoginAuthMethods(para);
+        if (supportedAuthMethods.has(AuthMethod.PIN) && !supportedAuthMethods.has(AuthMethod.PASSWORD)) {
+          navigate(`/web/pin/login${location.search}`, { replace: true });
+        }
+        setIsLoadingAuthMethods(false);
+      }
+    };
+
+    if (isV1) {
+      loadAuthMethods();
+    }
+  }, [isV1, authInfo.auth]);
+
+  useEffect(() => {
     getPortalUrl();
   }, [para]);
 
@@ -51,6 +80,10 @@ export const EnterPasswordStep = ({ error, onLoginClick, isEmbedded }: EnterPass
       setPassword('');
     }
   }, [error]);
+
+  if (isLoadingAuthMethods) {
+    return <ModalLoading noText />;
+  }
 
   return (
     <Container
@@ -130,10 +163,11 @@ const Container = styled.form<{ $isEmbedded?: boolean }>`
   padding-left: ${({ $isEmbedded }) => ($isEmbedded ? '0px' : '83px')};
   padding-right: ${({ $isEmbedded }) => ($isEmbedded ? '0px' : '83px')};
   padding-top: ${({ $isEmbedded }) => ($isEmbedded ? '0px' : '24px')};
+  box-sizing: border-box;
+  width: 100%;
 
   display: flex;
   align-items: center;
   flex-direction: column;
   gap: ${({ $isEmbedded }) => ($isEmbedded ? '4px' : '24px')};
-  width: ${({ $isEmbedded }) => ($isEmbedded ? '100%' : 'auto')};
 `;

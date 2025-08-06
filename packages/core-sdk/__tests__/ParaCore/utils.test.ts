@@ -4,6 +4,7 @@ import { getWorkerContent, prepareMock } from '../utils';
 import { API_KEY, USER_EMAIL, USER_ID } from '../constants';
 import { Environment, Wallet } from '../../src';
 import { faker } from '@faker-js/faker';
+import { mockSendLoginVerificationCode } from '../mocks/mockUserManagementClient';
 
 describe('ParaCore - utils', () => {
   let para: MockPara;
@@ -306,6 +307,20 @@ describe('ParaCore - utils', () => {
           },
         ]),
       ),
+    });
+  });
+
+  describe('sendLoginCode', () => {
+    beforeEach(() => {
+      para = new MockPara(Environment.DEV, API_KEY);
+    });
+
+    it('sendLoginCode', async () => {
+      para.setAuth({ email: USER_EMAIL });
+
+      await para.sendLoginCode();
+
+      expect(mockSendLoginVerificationCode).toHaveBeenCalledWith(para.authInfo);
     });
   });
 });

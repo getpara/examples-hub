@@ -317,13 +317,13 @@ describe('Client', () => {
       expect(mocks.post).toBeCalledWith('/users/external-wallets/login/v2', body);
     });
 
-    it('verifyNewAccount', async () => {
+    it('verifyAccount', async () => {
       const body = {
         email,
         verificationCode: 'verification-code',
       };
 
-      await client.verifyNewAccount(userId, body);
+      await client.verifyAccount(userId, body);
 
       expect(mocks.post).toBeCalledWith(`/users/${userId}/verify`, body);
     });
@@ -1302,9 +1302,11 @@ describe('Client', () => {
     });
 
     it('getEncryptedWalletPrivateKey', async () => {
-      await client.getEncryptedWalletPrivateKey(passwordId);
+      await client.getEncryptedWalletPrivateKey(passwordId, 'session-lookup-id');
 
-      expect(mocks.get).toBeCalledWith(`/encrypted-wallet-private-keys?passwordId=${passwordId}`);
+      expect(mocks.get).toBeCalledWith(
+        `/encrypted-wallet-private-keys?passwordId=${passwordId}&sessionLookupId=session-lookup-id`,
+      );
     });
 
     it('getUser', async () => {
@@ -1388,6 +1390,32 @@ describe('Client', () => {
       await client.unlinkAccount({ linkedAccountId, userId });
 
       expect(mocks.delete).toBeCalledWith(`/users/${userId}/linked-accounts/${linkedAccountId}`);
+    });
+
+    it('sendLoginVerificationCode', async () => {
+      await client.sendLoginVerificationCode({
+        auth: { email },
+        authType: 'email',
+        identifier: email,
+      });
+
+      expect(mocks.post).toBeCalledWith('/users/send-login-code', { auth: { email }, authType: 'email', identifier: email });
+    });
+
+    it('sessionAuthVerified', async () => {
+      await client.sessionAuthVerified('session-lookup-id');
+
+      expect(mocks.get).toBeCalledWith('/sessions/session-lookup-id/auth-verified');
+    });
+
+    it('getSupportedAuthMethodsV2', async () => {
+      await client.getSupportedAuthMethodsV2({ email });
+
+      expect(mocks.get).toBeCalledWith('/users/supported-auth-methods/v2', {
+        params: {
+          email: 'email@test.com',
+        },
+      });
     });
   });
 });

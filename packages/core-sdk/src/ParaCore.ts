@@ -718,8 +718,8 @@ export abstract class ParaCore implements CoreInterface {
 
   protected async constructPortalUrl(type: PortalUrlType, opts: PortalUrlOptions = {}) {
     const [isCreate, isLogin, isOnRamp] = [
-      ['createAuth', 'createPassword'].includes(type),
-      ['loginAuth', 'loginPassword'].includes(type),
+      ['createAuth', 'createPassword', 'createPIN'].includes(type),
+      ['loginAuth', 'loginPassword', 'loginPIN'].includes(type),
       type === 'onRamp',
     ];
 
@@ -749,6 +749,10 @@ export abstract class ParaCore implements CoreInterface {
         path = `/web/users/${this.userId}/passwords/${opts.pathId}`;
         break;
       }
+      case 'createPIN': {
+        path = `/web/users/${this.userId}/pin/${opts.pathId}`;
+        break;
+      }
       case 'createAuth': {
         path = `/web/users/${this.userId}/biometrics/${opts.pathId}`;
         break;
@@ -759,6 +763,10 @@ export abstract class ParaCore implements CoreInterface {
       }
       case 'loginAuth': {
         path = '/web/biometrics/login';
+        break;
+      }
+      case 'loginPIN': {
+        path = '/web/pin/login';
         break;
       }
       case 'txReview': {
@@ -2108,6 +2116,7 @@ export abstract class ParaCore implements CoreInterface {
     let type: 'EMAIL' | 'PHONE', linkedAccountId;
     switch (reason) {
       case 'SIGNUP':
+      case 'LOGIN':
         {
           const authInfo = this.assertIsAuthSet(['email', 'phone']) as VerifiedAuthInfo;
           type = authInfo.authType.toUpperCase() as 'EMAIL' | 'PHONE';
@@ -2220,6 +2229,9 @@ export abstract class ParaCore implements CoreInterface {
     );
   }
 
+  /**
+   * Get the auth methods available to an existing user
+   */
   protected async supportedAuthMethods(auth: Auth<PrimaryAuthType | 'userId'>): Promise<Set<AuthMethod>> {
     const { supportedAuthMethods } = await this.ctx.client.getSupportedAuthMethods(auth);
 
@@ -3816,7 +3828,7 @@ export abstract class ParaCore implements CoreInterface {
   }: NewCredentialUrlParams = {}): Promise<{ credentialId: string; url?: string }> {
     this.assertIsAuthSet();
 
-    let credentialId: string, urlType: Extract<PortalUrlType, 'createAuth' | 'createPassword'>;
+    let credentialId: string, urlType: Extract<PortalUrlType, 'createAuth' | 'createPassword' | 'createPIN'>;
     switch (authMethod) {
       case 'PASSKEY':
         ({
@@ -3835,6 +3847,14 @@ export abstract class ParaCore implements CoreInterface {
         }));
         urlType = 'createPassword';
         break;
+      case 'PIN':
+        ({
+          data: { id: credentialId },
+        } = await this.ctx.client.addSessionPasswordPublicKey(this.userId, {
+          status: PasswordStatus.PENDING,
+        }));
+        urlType = 'createPIN';
+        break;
     }
 
     const url =
@@ -3851,7 +3871,7 @@ export abstract class ParaCore implements CoreInterface {
   }
 
   /**
-   * Returns a Para Portal URL for logging in with a WebAuth passkey or a password.
+   * Returns a Para Portal URL for logging in with a WebAuth passkey, password or PIN.
    * @param {Object} opts the options object
    * @param {String} opts.auth - the user auth to sign up or log in with, in the form ` { email: string } | { phone: `+${number}` } `
    * @param {boolean} opts.useShortUrls - whether to shorten the generated portal URLs
@@ -3870,13 +3890,16 @@ export abstract class ParaCore implements CoreInterface {
 
     this.assertIsAuthSet();
 
-    let urlType: 'loginAuth' | 'loginPassword';
+    let urlType: 'loginAuth' | 'loginPassword' | 'loginPIN';
     switch (authMethod) {
       case 'PASSKEY':
         urlType = 'loginAuth';
         break;
       case 'PASSWORD':
         urlType = 'loginPassword';
+        break;
+      case 'PIN':
+        urlType = 'loginPIN';
         break;
       default:
         throw new Error(`invalid authentication method: '${authMethod}'`);
@@ -3975,11 +3998,12 @@ export abstract class ParaCore implements CoreInterface {
       sessionLookupId: string;
     },
   ): Promise<AuthStateLogin> {
-    const { loginAuthMethods, ...authState } = loginState;
+    const { loginAuthMethods, hasPasswordWithoutPIN, ...authState } = loginState;
 
     const isPasskeySupported = await this.isPasskeySupported(),
       isPasskeyPossible = loginAuthMethods.includes(AuthMethod.PASSKEY) && !this.isNativePasskey,
-      isPasswordPossible = loginAuthMethods.includes(AuthMethod.PASSWORD);
+      isPasswordPossible = loginAuthMethods.includes(AuthMethod.PASSWORD) && hasPasswordWithoutPIN,
+      isPINPossible = loginAuthMethods.includes(AuthMethod.PIN);
 
     return {
       ...authState,
@@ -4008,6 +4032,16 @@ export abstract class ParaCore implements CoreInterface {
             }),
           }
         : {}),
+      ...(isPINPossible
+        ? {
+            pinUrl: await this.constructPortalUrl('loginPIN', {
+              sessionId: sessionLookupId,
+              shorten,
+              portalTheme,
+              params: { isEmbedded: `${!loginState.isWalletSelectionNeeded}` },
+            }),
+          }
+        : {}),
     };
   }
 
@@ -4019,14 +4053,15 @@ export abstract class ParaCore implements CoreInterface {
 
     const isPasskeySupported = await this.isPasskeySupported();
 
-    const [isPasskey, isPassword] = [
+    const [isPasskey, isPassword, isPIN] = [
       signupAuthMethods.includes(AuthMethod.PASSKEY),
       signupAuthMethods.includes(AuthMethod.PASSWORD) || !isPasskeySupported,
+      signupAuthMethods.includes(AuthMethod.PIN),
     ];
 
-    if (!isPasskey && !isPassword) {
+    if (!isPasskey && !isPassword && !isPIN) {
       throw new Error(
-        'No supported authentication methods found. Please ensure you have enabled either WebAuth passkeys or passwords in your Developer Portal settings.',
+        'No supported authentication methods found. Please ensure you have enabled either WebAuth passkeys, passwords or PINs in your Developer Portal settings.',
       );
     }
 
@@ -4051,6 +4086,17 @@ export abstract class ParaCore implements CoreInterface {
 
       signupState.passwordUrl = passwordUrl;
       signupState.passwordId = passwordId;
+    }
+
+    if (isPIN) {
+      const { url: pinUrl, credentialId: pinId } = await this.getNewCredentialAndUrl({
+        authMethod: 'PIN',
+        portalTheme,
+        shorten,
+      });
+
+      signupState.pinUrl = pinUrl;
+      signupState.pinId = pinId;
     }
 
     return <AuthStateSignup>signupState;
@@ -4080,9 +4126,13 @@ export abstract class ParaCore implements CoreInterface {
     this.assertIsAuthSet(['email', 'phone']);
     const userId = this.assertUserId({ allowGuestMode: true });
 
-    const serverAuthState = await this.ctx.client.verifyNewAccount(userId, {
+    const serverAuthState = await this.ctx.client.verifyAccount(userId, {
       verificationCode,
     });
+
+    if (serverAuthState.stage === 'login') {
+      throw new Error('Account already exists.');
+    }
 
     return this.#prepareAuthState(serverAuthState, urlOptions);
   }
@@ -4227,5 +4277,11 @@ export abstract class ParaCore implements CoreInterface {
     });
 
     return accounts;
+  }
+
+  protected async sendLoginCode() {
+    const { userId } = await this.ctx.client.sendLoginVerificationCode(this.authInfo);
+
+    this.setUserId(userId);
   }
 }

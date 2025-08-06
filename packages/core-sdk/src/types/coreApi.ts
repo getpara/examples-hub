@@ -102,6 +102,7 @@ export const PARA_INTERNAL_METHODS = [
   'verifyExternalWalletLink',
   'accountLinkInProgress',
   'prepareLogin',
+  'sendLoginCode',
 ] as const;
 
 export type CoreMethodName = (typeof PARA_CORE_METHODS)[number];
@@ -291,7 +292,7 @@ export type CoreMethods = Record<CoreMethodName, { params?: unknown; response?: 
     response: AuthStateSignup;
   };
   resendVerificationCode: {
-    params: { type?: 'SIGNUP' | 'LINK_ACCOUNT' } | undefined;
+    params: { type?: 'SIGNUP' | 'LINK_ACCOUNT' | 'LOGIN' } | undefined;
     response: void;
   };
   logout: {
@@ -663,6 +664,10 @@ export type InternalMethods = {
   prepareLogin: {
     params: void;
     response: string;
+  };
+  sendLoginCode: {
+    params: void;
+    response: void;
   };
 };
 

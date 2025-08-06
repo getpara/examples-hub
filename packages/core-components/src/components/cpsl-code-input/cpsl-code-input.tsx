@@ -43,20 +43,41 @@ export class CpslCodeInput {
 
   private handleInput = (ind: number, ev: InputEvent) => {
     const inputElements = this.inputs;
+
     // If getting an insertFromPaste remove the last element value since the value setting is handled in the paste event
     if (ev.inputType === 'insertFromPaste') {
       inputElements[Math.min(this.length - 1, ind)].value = '';
       return;
     }
+
     if (ev.inputType === 'insertText') {
       if (this.type === 'number' && isNaN(parseInt(ev.data))) {
         inputElements[ind].value = '';
         return;
       }
+
+      // Prevent input beyond the maximum length
+      if (this.code && this.code.length >= this.length) {
+        inputElements[ind].value = this.code[ind] || '';
+        return;
+      }
+
       const newCode = `${this.code ?? ''}${ev.data}`;
-      inputElements[Math.min(this.length - 1, newCode.length)].focus();
-      this.cpslInput.emit({ value: newCode });
-      this.code = newCode;
+
+      // Ensure we don't exceed the maximum length
+      if (newCode.length > this.length) {
+        const truncatedCode = newCode.substring(0, this.length);
+        this.cpslInput.emit({ value: truncatedCode });
+        this.code = truncatedCode;
+        // Set each input to its corresponding character
+        inputElements.forEach((input, index) => {
+          input.value = truncatedCode[index] || '';
+        });
+      } else {
+        inputElements[Math.min(this.length - 1, newCode.length)].focus();
+        this.cpslInput.emit({ value: newCode });
+        this.code = newCode;
+      }
     }
   };
 
@@ -109,23 +130,34 @@ export class CpslCodeInput {
 
   private handlePaste = (e: ClipboardEvent) => {
     const inputElements = this.inputs;
-    const pastedCode = e.clipboardData.getData('text');
+    let pastedCode = e.clipboardData.getData('text');
 
-    if (this.type === 'number' && isNaN(parseInt(pastedCode))) {
-      // Remove illegal value from the first input. Not using a timeout here doesn't change the value properly.
-      setTimeout(() => {
-        inputElements[0].value = '';
-      }, 0);
-      return;
+    // Filter based on type
+    if (this.type === 'number') {
+      // Remove all non-numeric characters
+      pastedCode = pastedCode.replace(/\D/g, '');
+
+      // If no valid numbers remain, clear and return
+      if (!pastedCode) {
+        setTimeout(() => {
+          inputElements[0].value = '';
+        }, 0);
+        return;
+      }
     }
 
+    // Truncate pasted code to match the expected length
+    const truncatedCode = pastedCode.substring(0, this.length);
+
     this.cpslInput.emit({
-      value: pastedCode,
+      value: truncatedCode,
     });
+
     inputElements.forEach((input, index) => {
-      input.value = pastedCode.charAt(index);
+      input.value = truncatedCode.charAt(index) || '';
     });
-    inputElements[Math.min(this.length - 1, pastedCode.length)].focus();
+
+    inputElements[Math.min(this.length - 1, truncatedCode.length)].focus();
   };
 
   private get inputs() {

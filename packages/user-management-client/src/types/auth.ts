@@ -179,6 +179,12 @@ export type SupportedAccountLinks = (TLinkedAccountType | TExternalWallet)[];
 export enum AuthMethod {
   PASSWORD = 'PASSWORD',
   PASSKEY = 'PASSKEY',
+  PIN = 'PIN',
+}
+
+export enum LegacyAuthMethod {
+  PASSWORD = 'PASSWORD',
+  BIOMETRIC = 'BIOMETRIC',
 }
 
 export type BiometricLocationHint = { useragent?: string; aaguid?: string };
@@ -229,6 +235,7 @@ export type ServerAuthStateLogin = ServerAuthStateBase & {
   biometricHints?: BiometricLocationHint[];
   loginAuthMethods: AuthMethod[];
   isWalletSelectionNeeded?: boolean;
+  hasPasswordWithoutPIN?: boolean;
 };
 
 export type VerifyThirdPartyAuth = ServerAuthStateSignup | ServerAuthStateLogin;

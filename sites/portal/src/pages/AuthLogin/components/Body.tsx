@@ -10,12 +10,15 @@ import { BiometricLocationHint } from '@getpara/user-management-client';
 import { LoginFailedStep } from './LoginFailedStep';
 import { LoginFailedTroubleshootingStep } from './LoginFailedTroubleshootingStep';
 import { SuccessFromKnownDeviceStep } from './SuccessFromKnownDeviceStep';
+import { EnterPINStep } from './EnterPINStep';
+import { AuthVerificationStep } from './AuthVerificationStep';
+import { isIFramed } from '../../../utils/isIFramed';
 
 interface BodyProps {
   addDeviceUrl?: string;
   step: AuthLoginStep;
   onLoginClick: () => void;
-  onLoginWithPasswordClick: (password: string) => void;
+  onLoginWithPasswordClick: (password: string, isPIN?: boolean) => void;
   onLoginFromAnotherDevice: () => Promise<void>;
   setStep: (step: AuthLoginStep) => void;
   onAddPasskeyClick: () => void;
@@ -73,8 +76,18 @@ export const Body = ({
           />
         );
       }
-      case AuthLoginStep.SUCCESS: {
+      case AuthLoginStep.ENTER_PIN: {
         return (
+          <EnterPINStep
+            isEmbedded={isEmbedded}
+            error={loginWithPasswordError}
+            onLoginClick={onLoginWithPasswordClick}
+            setStep={setStep}
+          />
+        );
+      }
+      case AuthLoginStep.SUCCESS: {
+        return !isIFramed ? (
           <ModalSuccess
             heading="You’re Logged In!"
             subHeading={
@@ -85,10 +98,13 @@ export const Body = ({
                   : `If you are not automatically redirected, you can close this window and return to ${partner.displayName}.`
             }
           />
-        );
+        ) : null;
       }
       case AuthLoginStep.SUCCESS_FROM_KNOWN_DEVICE: {
         return <SuccessFromKnownDeviceStep onAddPasskeyClick={onAddPasskeyClick} />;
+      }
+      case AuthLoginStep.AUTH_VERIFICATION: {
+        return <AuthVerificationStep isEmbedded={isEmbedded} setStep={setStep} />;
       }
     }
   };

@@ -54,6 +54,9 @@ import {
   LinkAccountParams,
   LinkedAccounts,
   ResendVerificationCodeParams,
+  LegacyAuthMethod,
+  PrimaryAuthInfo,
+  ServerAuthStateLogin,
 } from './types/index.js';
 import { extractWalletRef, fromAccountMetadata, fromLinkedAccounts } from './utils.js';
 import { SESSION_COOKIE_HEADER_NAME, VERSION_HEADER_NAME, PARTNER_ID_HEADER_NAME, API_KEY_HEADER_NAME } from './consts.js';
@@ -80,6 +83,7 @@ interface createUserIdRes {
 
 interface verifyBody {
   verificationCode: string;
+  sessionLookupId?: string;
 }
 
 interface getWebChallengeRes {
@@ -145,6 +149,7 @@ interface PasswordEntity {
   status: PasswordStatus;
   sigDerivedPublicKey: string;
   salt: string;
+  isPIN?: boolean;
 }
 
 interface createWalletBody {
@@ -206,6 +211,7 @@ interface sessionPasswordBody {
   salt?: string;
   encryptedWalletPrivateKey?: string;
   encryptionKeyHash?: string;
+  isPIN?: boolean;
 }
 
 interface EncryptedWalletPrivateKey {
@@ -395,8 +401,14 @@ class Client {
     return res.data;
   };
 
-  verifyNewAccount = async (userId: string, body: verifyBody): Promise<ServerAuthStateSignup> => {
-    const res = await this.baseRequest.post<ServerAuthStateSignup>(`/users/${userId}/verify`, body);
+  verifyAccount = async (userId: string, body: verifyBody): Promise<ServerAuthStateSignup | ServerAuthStateLogin> => {
+    const res = await this.baseRequest.post<ServerAuthStateSignup | ServerAuthStateLogin>(`/users/${userId}/verify`, body);
+    return res.data;
+  };
+
+  // POST /users/send-login-code
+  sendLoginVerificationCode = async (auth: PrimaryAuthInfo, isRecovery?: boolean): Promise<{ userId: string }> => {
+    const res = await this.baseRequest.post(`/users/send-login-code`, { ...auth, isRecovery });
     return res.data;
   };
 
@@ -537,9 +549,15 @@ class Client {
     return res.data;
   };
 
-  // GET /session/origin
+  // GET /sessions/:sessionLookupId/origin
   sessionOrigin = async (sessionLookupId: string): Promise<{ origin?: string }> => {
     const res = await this.baseRequest.get<{ origin?: string }>(`/sessions/${sessionLookupId}/origin`);
+    return res.data;
+  };
+
+  // GET /sessions/:sessionLookupId/auth-verified
+  sessionAuthVerified = async (sessionLookupId: string): Promise<{ authVerified?: boolean }> => {
+    const res = await this.baseRequest.get<{ authVerified?: boolean }>(`/sessions/${sessionLookupId}/auth-verified`);
     return res.data;
   };
 
@@ -1171,9 +1189,19 @@ class Client {
   };
 
   async getSupportedAuthMethods(auth: Auth) {
-    const res = await this.baseRequest.get<any>('/users/supported-auth-methods', {
+    const res = await this.baseRequest.get<{ supportedAuthMethods: LegacyAuthMethod[] }>('/users/supported-auth-methods', {
       params: { ...auth },
     });
+    return res.data;
+  }
+
+  async getSupportedAuthMethodsV2(auth: Auth) {
+    const res = await this.baseRequest.get<{ supportedAuthMethods: AuthMethod[]; hasPasswordWithoutPIN: boolean }>(
+      '/users/supported-auth-methods/v2',
+      {
+        params: { ...auth },
+      },
+    );
     return res.data;
   }
 
@@ -1196,8 +1224,9 @@ class Client {
 
   async getEncryptedWalletPrivateKey(
     passwordId: string,
+    sessionLookupId: string,
   ): Promise<{ data: { encryptedWalletPrivateKey: EncryptedWalletPrivateKey } }> {
-    const query = new URLSearchParams({ passwordId }).toString();
+    const query = new URLSearchParams({ passwordId, sessionLookupId }).toString();
     const res = await this.baseRequest.get<any>(`/encrypted-wallet-private-keys?${query}`);
     return res;
   }

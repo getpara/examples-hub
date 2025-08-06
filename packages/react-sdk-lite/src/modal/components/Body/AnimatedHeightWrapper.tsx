@@ -4,9 +4,10 @@ import { safeStyled } from '@getpara/react-common';
 
 interface AnimatedHeightWrapperProps extends PropsWithChildren {
   className?: string;
+  noAnimate?: boolean;
 }
 
-export const AnimatedHeightWrapper: React.FC<AnimatedHeightWrapperProps> = ({ children, className }) => {
+export const AnimatedHeightWrapper: React.FC<AnimatedHeightWrapperProps> = ({ children, className, noAnimate }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [height, setHeight] = useState<number | 'auto'>('auto');
 
@@ -29,7 +30,7 @@ export const AnimatedHeightWrapper: React.FC<AnimatedHeightWrapperProps> = ({ ch
   }, []);
 
   return (
-    <Container className={className} style={{ height }} animate={{ height }} transition={{ duration: 0.2 }}>
+    <Container className={className} style={{ height }} animate={{ height }} transition={{ duration: noAnimate ? 0 : 0.2 }}>
       <div ref={containerRef}>{children}</div>
     </Container>
   );

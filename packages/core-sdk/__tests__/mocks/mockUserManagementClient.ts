@@ -76,13 +76,24 @@ export const getSignupState = (auth: PrimaryAuth): ServerAuthStateSignup => ({
   ...authExtras(auth),
 });
 
+export const getSignupStateWithPIN = (auth: PrimaryAuth): ServerAuthStateSignup => ({
+  ...getSignupState(auth),
+  signupAuthMethods: [AuthMethod.PASSKEY, AuthMethod.PIN],
+});
+
 export const getLoginState = (auth: PrimaryAuth): ServerAuthStateLogin => ({
   auth,
   stage: 'login',
   userId: USER_ID,
   biometricHints: USER_BIOMETRIC_HINTS,
   loginAuthMethods: [AuthMethod.PASSKEY, AuthMethod.PASSWORD],
+  hasPasswordWithoutPIN: true,
   ...authExtras(auth),
+});
+
+export const getLoginStateWithPIN = (auth: PrimaryAuth): ServerAuthStateLogin => ({
+  ...getLoginState(auth),
+  loginAuthMethods: [AuthMethod.PASSKEY, AuthMethod.PIN],
 });
 
 export const mockLoginExternalWallet = vi.fn();
@@ -90,7 +101,7 @@ export const mockVerifyExternalWallet = vi.fn();
 export const mockSignUpOrLogIn = vi.fn();
 export const mockCreateUser = vi.fn();
 export const mockCheckUserExists = vi.fn();
-export const mockVerifyNewAccount = vi.fn();
+export const mockVerifyAccount = vi.fn();
 export const mockVerifyEmail = vi.fn();
 export const mockVerifyPhone = vi.fn();
 export const mockVerifyOAuth = vi.fn();
@@ -138,6 +149,8 @@ export const mockLinkAccount = vi.fn();
 export const mockUnlinkAccount = vi.fn();
 export const mockVerifyLink = vi.fn();
 export const mockIssueJwt = vi.fn();
+export const mockGetSupportedAuthMethodsV2 = vi.fn();
+export const mockSendLoginVerificationCode = vi.fn();
 
 mockLinkAccount.mockImplementation(async (args: LinkAccountParams) => {
   switch (true) {
@@ -158,7 +171,7 @@ export function resetClientMocks() {
   mockSignUpOrLogIn.mockResolvedValue(getVerifyState({ email: USER_EMAIL }));
   mockCreateUser.mockResolvedValue({ userId: USER_ID });
   mockCheckUserExists.mockResolvedValue({ exists: true });
-  mockVerifyNewAccount.mockResolvedValue(getSignupState({ email: USER_EMAIL }));
+  mockVerifyAccount.mockResolvedValue(getSignupState({ email: USER_EMAIL }));
   mockVerifyEmail.mockResolvedValue({});
   mockVerifyPhone.mockResolvedValue({});
   mockVerifyOAuth.mockResolvedValue(getSignupState({ email: USER_EMAIL }));
@@ -208,6 +221,13 @@ export function resetClientMocks() {
   mockKeepSessionAlive.mockResolvedValue({});
   mockCreateOnRampPurchase.mockImplementation(({ params }) => ({ id: 'id', userId: USER_ID, ...params }));
   mockTrackError.mockResolvedValue({});
+  mockGetSupportedAuthMethodsV2.mockResolvedValue({
+    supportedAuthMethods: ['PASSKEY', 'PASSWORD'],
+    hasPasswordWithoutPIN: true,
+  });
+  mockSendLoginVerificationCode.mockResolvedValue({
+    userId: USER_ID,
+  });
 }
 
 resetClientMocks();
@@ -224,7 +244,7 @@ vi.mock('@getpara/user-management-client', async importOriginal => {
       setCurrentWalletIds: mockSetCurrentWalletIds,
       createUser: mockCreateUser,
       checkUserExists: mockCheckUserExists,
-      verifyNewAccount: mockVerifyNewAccount,
+      verifyAccount: mockVerifyAccount,
       verifyEmail: mockVerifyEmail,
       verifyPhone: mockVerifyPhone,
       verifyOAuth: mockVerifyOAuth,
@@ -271,6 +291,8 @@ vi.mock('@getpara/user-management-client', async importOriginal => {
       unlinkAccount: mockUnlinkAccount,
       verifyLink: mockVerifyLink,
       issueJwt: mockIssueJwt,
+      getSupportedAuthMethodsV2: mockGetSupportedAuthMethodsV2,
+      sendLoginVerificationCode: mockSendLoginVerificationCode,
     })),
   };
 });

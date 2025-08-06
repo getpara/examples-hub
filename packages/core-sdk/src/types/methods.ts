@@ -37,7 +37,9 @@ export type PortalUrlType =
   | 'loginPassword'
   | 'txReview'
   | 'onRamp'
-  | 'telegramLogin';
+  | 'telegramLogin'
+  | 'createPIN'
+  | 'loginPIN';
 
 export type PortalUrlOptions = {
   params?: Record<string, string | undefined | null>;
@@ -53,7 +55,7 @@ export type PortalUrlOptions = {
 
 export type WithAuthMethod = {
   /**
-   * Which authorization method to use for the URL, either `'passkey'` or `'passwprd'`.
+   * Which authorization method to use for the URL, either `'passkey'` or `'password'`.
    */
   authMethod?: Uppercase<AuthMethod>;
 };
@@ -179,6 +181,10 @@ export type AuthStateLogin = Omit<ServerAuthStateLogin, 'loginAuthMethods'> &
      * A Para Portal URL for logging in via a password.
      */
     passwordUrl?: string;
+    /**
+     * A Para Portal URL for logging in via a PIN.
+     */
+    pinUrl?: string;
   };
 
 export type AuthStateSignup = Omit<ServerAuthStateSignup, 'signupAuthMethods'> &
@@ -192,6 +198,10 @@ export type AuthStateSignup = Omit<ServerAuthStateSignup, 'signupAuthMethods'> &
      */
     passwordUrl?: string;
     /**
+     * A Para Portal URL for creating a new user PIN.
+     */
+    pinUrl?: string;
+    /**
      * The Para system ID for the newly generated passkey.
      */
     passkeyId?: string;
@@ -199,6 +209,10 @@ export type AuthStateSignup = Omit<ServerAuthStateSignup, 'signupAuthMethods'> &
      * The Para system ID for the newly generated password.
      */
     passwordId?: string;
+    /**
+     * The Para system ID for the newly generated PIN.
+     */
+    pinId?: string;
   };
 
 export type AuthStateVerifyOrLogin = AuthStateVerify | AuthStateLogin;

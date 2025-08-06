@@ -1,5 +1,6 @@
 import { CpslIcon, CpslInput, CpslText, CpslCard } from '@getpara/react-components';
 import { styled } from 'styled-components';
+import { isIFramed } from '../utils/isIFramed';
 
 export const Heading: typeof CpslText = styled(CpslText)`
   text-align: center;
@@ -55,6 +56,7 @@ export const Card = styled(CpslCard)`
     height: 100%;
     border-radius: 0px;
     padding-bottom: 0px;
+    padding-top: ${() => (!isIFramed ? '24px' : '0px')};
     border: none;
   }
 `;

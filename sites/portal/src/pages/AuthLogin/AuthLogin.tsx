@@ -12,7 +12,7 @@ import { useCloseWindow } from '../../hooks/useCloseWindow';
 import { AuthMethod, isPasskeySupported } from '@getpara/web-sdk';
 import { validateCallbackUrl } from '../../utils/validateCallbackUrl';
 
-const AuthLoginBase = ({ authMethod }) => {
+const AuthLoginBase = ({ authMethod }: { authMethod: AuthMethod }) => {
   const para = usePara();
   const closeWindow = useCloseWindow();
   const { toggleBranding, partner } = useModalOutletContext();
@@ -99,22 +99,36 @@ const AuthLoginBase = ({ authMethod }) => {
     }
   };
 
-  const loginWithPassword = async (password: string) => {
+  const loginWithPassword = async (password: string, isPIN?: boolean) => {
     try {
       setLoginWithPasswordError(undefined);
       await para.touchSession();
-      const loginRes = await authLoginWithPassword(password);
+      const loginRes = await authLoginWithPassword(password, isPIN);
 
       await postLogin({ loginRes });
     } catch (err) {
-      setLoginWithPasswordError('Password is incorrect');
+      if (err.message === 'PIN creation requires auth verification') {
+        setLoginWithPasswordError('User must be verified before logging in with PIN');
+        return;
+      }
+      if (err.message === 'Rate limit exceeded, try again in a few minutes.') {
+        setLoginWithPasswordError('Too many attempts, please try again in a few minutes.');
+        return;
+      }
+      setLoginWithPasswordError(`${isPIN ? 'PIN' : 'Password'} is incorrect`);
     }
   };
 
   const login = useCallback(async () => {
-    setStep(authMethod === AuthMethod.PASSWORD ? AuthLoginStep.ENTER_PASSWORD : AuthLoginStep.WAITING);
+    setStep(
+      authMethod === AuthMethod.PASSWORD
+        ? AuthLoginStep.ENTER_PASSWORD
+        : authMethod === AuthMethod.PIN
+          ? AuthLoginStep.ENTER_PIN
+          : AuthLoginStep.WAITING,
+    );
 
-    if (authMethod === AuthMethod.PASSWORD) {
+    if (authMethod === AuthMethod.PASSWORD || authMethod === AuthMethod.PIN) {
       return;
     }
 
@@ -159,6 +173,12 @@ const AuthLoginBase = ({ authMethod }) => {
 
     setUrlForNewDeviceLogin(url);
   }
+
+  useEffect(() => {
+    if (authMethod === AuthMethod.PASSWORD || authMethod === AuthMethod.PIN) {
+      setStep(authMethod === AuthMethod.PASSWORD ? AuthLoginStep.ENTER_PASSWORD : AuthLoginStep.ENTER_PIN);
+    }
+  }, [authMethod]);
 
   useEffect(() => {
     if (step === AuthLoginStep.SUCCESS) {

@@ -238,7 +238,7 @@ export const Body = ({
           <Header />
         </>
       )}
-      <AnimatedWrapper>
+      <AnimatedWrapper noAnimate={IFrameSteps.includes(currentStep)}>
         <AnimatePresence
           mode="popLayout"
           initial={false}
