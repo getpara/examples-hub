@@ -601,13 +601,13 @@ export function AuthProvider({
   );
 
   useEffect(() => {
-    if (!!authStepRoute && isIFrameReady && refs.currentStep.current !== authStepRoute) {
+    if (!!authStepRoute && refs.currentStep.current !== authStepRoute) {
       // Using a small timeout here to fully ensure the iframe is loaded before triggering any animation
       setTimeout(() => {
         setStep(authStepRoute);
       }, 200);
     }
-  }, [authStepRoute, isIFrameReady]);
+  }, [authStepRoute]);
 
   useEffect(() => {
     refs.currentStep.current = currentStep;

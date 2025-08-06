@@ -32,14 +32,16 @@ export const ACCOUNT_TYPES: {
   },
   'TWITTER': {
     icon: 'twitter',
-    iconBranded: 'twitterBrand',
+    // Not using branded here to ensure the icon looks correct in dark mode
+    iconBranded: 'twitter',
     name: 'X / Twitter',
     inlineText: 'X account',
     isDark: true,
   },
   'APPLE': {
     icon: 'apple',
-    iconBranded: 'appleBrand',
+    // Not using branded here to ensure the icon looks correct in dark mode
+    iconBranded: 'apple',
     name: 'Apple',
     isDark: true,
   },

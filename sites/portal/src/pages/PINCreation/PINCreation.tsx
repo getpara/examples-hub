@@ -10,7 +10,6 @@ import { usePara } from '../../components';
 import { useExtractedParams } from '../../hooks/useExtractedParams';
 import { validateCallbackUrl } from '../../utils/validateCallbackUrl';
 import { useCloseWindow } from '../../hooks/useCloseWindow';
-import { isCommonPin } from '../../utils/commonPINs';
 
 export const PINCreation = () => {
   const inputRef = useRef<HTMLCpslCodeInputElement>(null);
@@ -57,10 +56,6 @@ export const PINCreation = () => {
 
     if (!pinHasNoSpaces) {
       return 'PIN must contain no spaces.';
-    }
-
-    if (isCommonPin(pin)) {
-      return 'This PIN is too common. Please choose a more secure PIN.';
     }
 
     if (isOnVerificationStep && pinVerification?.length === 4 && !pinMatches) {
@@ -136,10 +131,10 @@ export const PINCreation = () => {
           ) : (
             <>
               <InnerContainer>
-                <CpslText variant="headingS" weight="regular">
+                <CpslText variant="bodyL" weight="semiBold">
                   {isOnVerificationStep ? 'Confirm PIN' : 'Set PIN'}
                 </CpslText>
-                <CpslText variant="bodyM" weight="regular" color="secondary" style={{ textAlign: 'center' }}>
+                <CpslText variant="bodyS" color="secondary" weight="medium" style={{ textAlign: 'center' }}>
                   {isOnVerificationStep
                     ? 'Enter your PIN again to confirm it was set correctly.'
                     : ' Write down or store your PIN safely, it cannot be recovered.'}
@@ -186,7 +181,7 @@ const Container = styled.div`
   display: flex;
   align-items: center;
   flex-direction: column;
-  gap: 34px;
+  gap: 32px;
 `;
 
 const innerContainer = `

@@ -105,10 +105,10 @@ export const PasswordCreation = () => {
           ) : (
             <>
               <InnerContainer>
-                <CpslText variant="headingS" weight="regular">
+                <CpslText variant="bodyL" weight="semiBold">
                   Create Password
                 </CpslText>
-                <CpslText variant="bodyM" weight="regular" color="secondary" style={{ textAlign: 'center' }}>
+                <CpslText variant="bodyS" color="secondary" weight="medium" style={{ textAlign: 'center' }}>
                   Write down your password somewhere safe. It cannot be recovered.
                 </CpslText>
               </InnerContainer>
@@ -172,7 +172,7 @@ const Container = styled.div`
   display: flex;
   align-items: center;
   flex-direction: column;
-  gap: 34px;
+  gap: 32px;
 `;
 
 const innerContainer = `

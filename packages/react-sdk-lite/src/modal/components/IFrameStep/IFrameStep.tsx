@@ -19,7 +19,17 @@ export const IFrameStep = () => {
   const [height, setHeight] = useState(0);
 
   useEffect(() => {
+    if (!IFrameSteps.includes(currentStep)) {
+      setHeight(0);
+    }
+  }, [currentStep]);
+
+  useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
+      if (!iFrameUrl) {
+        return; // No iFrame URL to check against
+      }
+
       const portalBase = getPortalBaseURL(para.ctx);
 
       if (!event.origin.startsWith(portalBase)) {
@@ -35,7 +45,7 @@ export const IFrameStep = () => {
     };
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
-  }, [setIsReady]);
+  }, [setIsReady, iFrameUrl]);
 
   return (
     <OuterContainer $isVisible={IFrameSteps.includes(currentStep)} $embeddedModal={!!embeddedModal} $isReady={!!isReady}>
@@ -56,7 +66,7 @@ const OuterContainer = safeStyled.div<{ $isVisible: boolean; $embeddedModal: boo
   height: ${({ $isVisible, $isReady }) => ($isVisible ? ($isReady ? 'auto' : '200px') : '0px')};
   width: ${({ $isVisible }) => ($isVisible ? '100%' : '0px')};
   flex: ${({ $isVisible }) => ($isVisible ? 1 : 'auto')};
-  padding: ${({ $embeddedModal, $isVisible }) => (!$isVisible ? '0px' : $embeddedModal ? '12px 0px 0px' : '72px 72px 32px')};
+  padding: 0px;
   display: flex;
   align-items: center;
   justify-content: center;

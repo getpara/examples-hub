@@ -93,7 +93,9 @@ export const EnterPasswordStep = ({ error, onLoginClick, isEmbedded }: EnterPass
         onSubmit();
       }}
     >
-      <CpslText variant="headingS">{isEmbedded ? 'Welcome back,' : 'Login'}</CpslText>
+      <CpslText variant="bodyL" weight="semiBold">
+        {isEmbedded ? 'Welcome back,' : 'Login'}
+      </CpslText>
       <UserIdentifier authInfo={authInfo} />
       <ButtonContainer>
         <CpslInput

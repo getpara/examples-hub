@@ -12,7 +12,7 @@ export const ModalSuccess = ({ heading, subHeading }: ModalSuccessProps) => {
     <InnerContainer>
       <HeroIcon icon="checkCircleFilled" />
       <TextContainer>
-        <CenteredText weight="bold" variant="headingS">
+        <CenteredText variant="bodyL" weight="semiBold">
           {heading}
         </CenteredText>
         <CenteredText weight="medium" variant="bodyS" color="secondary">

@@ -84,10 +84,12 @@ export const VerificationCode = ({ authInfo, onResend, onSubmit, isPending, erro
   return (
     <>
       <>
-        <CpslText variant="headingS">Verify {isEmail ? 'Email' : 'Phone Number'}</CpslText>
-        <InlineText variant="bodyS" color="secondary">
+        <CpslText variant="bodyL" weight="semiBold">
+          Verify {isEmail ? 'Email' : 'Phone Number'}
+        </CpslText>
+        <InlineText variant="bodyS" color="secondary" weight="medium">
           Please enter the code we sent to{' '}
-          <InlineText variant="bodyS">
+          <InlineText variant="bodyS" weight="medium">
             {authInfo?.authType === 'phone' ? displayPhoneNumber(authInfo.identifier) : authInfo!.identifier}
           </InlineText>
         </InlineText>

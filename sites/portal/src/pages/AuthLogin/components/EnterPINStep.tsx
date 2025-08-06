@@ -83,11 +83,13 @@ export const EnterPINStep = ({ error, onLoginClick, isEmbedded, setStep }: Enter
         onSubmit();
       }}
     >
-      <CpslText variant="headingS">{isEmbedded ? 'Welcome back,' : 'Enter Pin'}</CpslText>
+      <CpslText variant="bodyL" weight="semiBold">
+        {isEmbedded ? 'Welcome back,' : 'Enter Pin'}
+      </CpslText>
       <UserIdentifier authInfo={authInfo} />
       <ButtonContainer>
         <InputContainer>
-          <CpslText weight="medium" variant="bodyS" color="secondary">
+          <CpslText variant="bodyS" color="secondary" weight="medium">
             Enter your PIN
           </CpslText>
           <StyledCodeInput
