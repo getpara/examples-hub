@@ -1,9 +1,9 @@
 {
   "name": "@getpara/server-sdk",
-  "version": "2.0.0-alpha.39",
+  "version": "2.0.0-alpha.40",
   "dependencies": {
-    "@getpara/core-sdk": "2.0.0-alpha.39",
-    "@getpara/user-management-client": "2.0.0-alpha.39",
+    "@getpara/core-sdk": "2.0.0-alpha.40",
+    "@getpara/user-management-client": "2.0.0-alpha.40",
     "uuid": "^11.1.0",
     "ws": "^8.14.2"
   },

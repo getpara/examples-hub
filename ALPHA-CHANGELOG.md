@@ -1,3 +1,45 @@
+# Release (Wed Aug 06 2025)
+
+## Package Versions
+- @getpara/web-sdk@2.0.0-alpha.40
+- @getpara/wagmi-v2-integration@2.0.0-alpha.40
+- @getpara/wagmi-v2-connector@2.0.0-alpha.40
+- @getpara/viem-v2-integration@2.0.0-alpha.40
+- @getpara/viem-v1-integration@2.0.0-alpha.40
+- @getpara/user-management-client@2.0.0-alpha.40
+- @getpara/solana-web3.js-v1-integration@2.0.0-alpha.40
+- @getpara/solana-wallet-connectors@2.0.0-alpha.40
+- @getpara/solana-signers-v2-integration@2.0.0-alpha.40
+- @getpara/server-sdk@2.0.0-alpha.40
+- @getpara/react-sdk-lite@2.0.0-alpha.40
+- @getpara/react-sdk@2.0.0-alpha.40
+- @getpara/react-native-wallet@2.0.0-alpha.40
+- @getpara/react-components@2.0.0-alpha.40
+- @getpara/react-component-library@1.0.0-alpha.35
+- @getpara/react-common@2.0.0-alpha.40
+- @getpara/evm-wallet-connectors@2.0.0-alpha.40
+- @getpara/ethers-v6-integration@2.0.0-alpha.40
+- @getpara/ethers-v5-integration@2.0.0-alpha.40
+- @getpara/cosmos-wallet-connectors@2.0.0-alpha.40
+- @getpara/cosmjs-v0-integration@2.0.0-alpha.40
+- @getpara/core-sdk@2.0.0-alpha.40
+- @getpara/core-components@2.0.0-alpha.40
+
+### Features
+- PIN Option (#1124) - 527cffa59
+
+### Fixes
+- PIN Condensed Styling (#1139) - b90ff70b8
+- WalletConnect modal (#1138) - 04a9b2e14
+- Hook void args (#1137) - 6d9488c2a
+- External wallet network selection showing improperly on react-sdk (#1133) - eaae65a15
+
+### Chores
+- Dev Portal - Add PIN selection (#1135) - 221de2996
+- Condensed modal redesign pt 2 (#1127) - 301408eea
+- Condensed modal redesign pt 1 (#1126) - 8e013621b
+- Dev Portal - update fixed session lengths (#1134) - b2c65a04e
+
 # Release (Wed Jul 30 2025)
 
 ## Package Versions
