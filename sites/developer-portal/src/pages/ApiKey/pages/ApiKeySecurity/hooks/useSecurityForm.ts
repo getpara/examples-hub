@@ -32,6 +32,9 @@ const formSchema = z.object({
     .refine(val => val.every(method => AUTH_METHODS.map(m => m.value).includes(method)), {
       message: 'Invalid authentication method',
     })
+    .refine(val => !(val.includes('PIN') && val.includes('PASSWORD')), {
+      message: 'PIN and password cannot be selected at the same time',
+    })
     .optional()
     .nullable(),
   sessionMaxAge: z

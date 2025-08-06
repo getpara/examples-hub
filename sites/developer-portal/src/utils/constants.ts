@@ -164,6 +164,10 @@ export const AUTH_METHODS = [
     label: 'Passwords',
     value: 'PASSWORD',
   },
+  {
+    label: 'PINs',
+    value: 'PIN',
+  },
 ];
 
 export const MAX_ORGS = 3;
