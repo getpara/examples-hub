@@ -11,19 +11,19 @@ export const ACCOUNT_TYPES: {
     icon: 'mail',
     name: 'Email',
     inlineText: 'email address',
-    isDark: true,
+    isPlain: true,
   },
   'PHONE': {
     icon: 'phone',
     name: 'Phone',
     inlineText: 'phone number',
-    isDark: true,
+    isPlain: true,
   },
   'EXTERNAL_WALLET': {
     icon: 'wallet',
     name: 'External Wallet',
     inlineText: 'external wallet',
-    isDark: true,
+    isPlain: true,
   },
   'GOOGLE': {
     icon: 'google',

@@ -228,7 +228,14 @@ export function AccountTypeIcon({
   const data = accountType ? ACCOUNT_TYPES[accountType] : null;
 
   return data || src ? (
-    <CpslIcon size={size} inset={inset} icon={data?.iconBranded ?? data?.icon} src={src} invert={isDark && data?.isDark} />
+    <CpslIcon
+      size={size}
+      inset={inset}
+      icon={data?.iconBranded ?? data?.icon}
+      color={data?.isPlain ? 'var(--cpsl-color-text-contrast)' : undefined}
+      src={src}
+      invert={isDark && data?.isDark}
+    />
   ) : null;
 }
 

@@ -9,4 +9,5 @@ export type DisplayMetadata = {
   iconBranded?: IconType;
   isDark?: boolean;
   isCircular?: boolean;
+  isPlain?: boolean;
 };

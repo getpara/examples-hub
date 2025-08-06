@@ -44,6 +44,7 @@ export const AccountHeader = ({ withBalance = false }: { withBalance?: boolean }
         size="48px"
         inset="8px"
         border="1px solid var(--cpsl-color-background-8)"
+        color="var(--cpsl-color-foreground-0)"
         radius="theme"
         icon={icon}
         src={src}
