@@ -21,5 +21,6 @@ html {
   --cpsl-default-font: 'Inter', sans-serif;
   -webkit-overflow-scrolling: touch;
 
-  --wcm-z-index: 11000 !important;
+  --wcm-z-index: 99999 !important;
+  --w3m-z-index: 99999 !important;
 }

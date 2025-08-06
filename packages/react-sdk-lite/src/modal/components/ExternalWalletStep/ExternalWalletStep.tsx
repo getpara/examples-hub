@@ -24,7 +24,7 @@ export const ExternalWalletMobileConnect = ({
   const [isCopied, copy] = useCopyToClipboard();
   const appName = useStore(state => state.appName);
   const [qrUri, setQrUri] = useState<string | undefined>(isSelfFetching ? undefined : propsQrUri);
-  const isWalletConnect = wallet.id === 'walletConnect';
+  const isWalletConnect = wallet.id === 'WalletConnect';
 
   const handleCopy = () => {
     if (qrUri) {
@@ -58,7 +58,7 @@ export const ExternalWalletMobileConnect = ({
             </CpslText>
           </InnerStepContainer>
         )}
-        {wallet.id !== 'walletConnect' && (
+        {wallet.id !== 'WalletConnect' && (
           <InnerStepContainer>
             {(wallet.type === 'SOLANA' && qrUri && !wallet.hasIosSafariExtension) || wallet.type !== 'SOLANA' ? (
               <CpslButton onClick={() => routeMobileExternalWallet(qrUri)} fullWidth>
@@ -86,7 +86,7 @@ export const ExternalWalletMobileConnect = ({
   }
 
   const GetWalletButton = (
-    <ExternalButton variant="secondary" onClick={isWalletConnect ? onConnectWc : undefined}>
+    <ExternalButton variant="secondary" onClick={isWalletConnect ? () => onConnectWc(wallet) : undefined}>
       {`${isWalletConnect ? 'Open' : 'Get'} ${wallet.name}`}
       <ExternalIcon icon="linkExternal" />
     </ExternalButton>
@@ -137,7 +137,7 @@ export const ExternalWalletStep = () => {
       return null;
     }
 
-    const isWalletConnect = wallet.id === 'walletConnect';
+    const isWalletConnect = wallet.id === 'WalletConnect';
     const isMobileWalletConnect = isMobile() && isWalletConnect;
 
     if (isMobileWalletConnect) {

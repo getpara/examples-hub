@@ -399,7 +399,6 @@ export function EvmExternalWalletProvider({
     isManualWalletConnect?: boolean,
   ): Promise<{ address?: string; error?: string }> => {
     const _isMobile = isManualWalletConnect !== undefined ? isManualWalletConnect : isMobile();
-
     // If on mobile and the connector contains the wallet connect modal connector, use it.
     const _connector =
       connector.walletConnectModalConnector && _isMobile ? connector.walletConnectModalConnector : connector;
@@ -481,7 +480,7 @@ export function EvmExternalWalletProvider({
       }
 
       // Return the WC connector with the attached WC modal connector
-      if (c.paraDetails?.id === 'WALLETCONNECT' && walletConnectModalConnector) {
+      if (c.paraDetails?.internalId === 'WALLETCONNECT' && walletConnectModalConnector) {
         return { ...c, walletConnectModalConnector };
       }
 
