@@ -69,12 +69,12 @@ export class CpslIcon {
           ...(this.color ? { ['--icon-color']: this.color } : {}),
         }}
       >
-        {this.icon ? (
-          <div innerHTML={Icons[this.icon]} />
-        ) : (
+        {this.src ? (
           <div>
             <img src={this.src} />
           </div>
+        ) : (
+          <div innerHTML={Icons[this.icon]} />
         )}
       </Host>
     );

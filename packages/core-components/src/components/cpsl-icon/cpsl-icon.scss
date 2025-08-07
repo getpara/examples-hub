@@ -16,9 +16,6 @@
 
   width: var(--width);
   height: var(--height);
-  border-radius: var(--border-radius, 0);
-  border: var(--border, auto);
-  background: var(--background, transparent);
 
   .foreground-0 {
     fill: var(--cpsl-color-foreground-0);
@@ -36,6 +33,9 @@
   align-items: center;
   width: 100%;
   height: 100%;
+  border: var(--border, auto);
+  border-radius: var(--border-radius, 0);
+  background: var(--background, transparent);
 
   color: var(--icon-color);
 }

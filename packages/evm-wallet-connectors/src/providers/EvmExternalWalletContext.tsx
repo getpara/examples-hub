@@ -441,7 +441,7 @@ export function EvmExternalWalletProvider({
 
     isLinkingAccount.current = true;
     try {
-      await connector.disconnect();
+      await connector?.disconnect();
     } catch (e) {
       throw new Error(e?.message ?? e);
     }
