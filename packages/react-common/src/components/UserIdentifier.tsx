@@ -1,5 +1,5 @@
 import { CpslAvatar, CpslIcon, CpslText, IconType } from '@getpara/react-components';
-import { CoreAuthInfo, displayPhoneNumber } from '@getpara/web-sdk';
+import { CoreAuthInfo, displayPhoneNumber, truncateAddress } from '@getpara/web-sdk';
 import { getExternalWalletDisplayName, safeStyled } from '../utils/index.js';
 
 export function getAuthDisplay(authInfo: CoreAuthInfo): { name: string | null; icon?: IconType; src?: string } {
@@ -18,7 +18,10 @@ export function getAuthDisplay(authInfo: CoreAuthInfo): { name: string | null; i
         ...(pfpUrl ? { src: pfpUrl } : { icon: 'telegramBrand' }),
       };
     case 'externalWallet':
-      return { name: getExternalWalletDisplayName(externalWallet), icon: 'wallet' };
+      return {
+        name: externalWallet ? getExternalWalletDisplayName(externalWallet) : truncateAddress(identifier, 'EVM'),
+        icon: 'wallet',
+      };
     default:
       return { name: null, icon: null };
   }

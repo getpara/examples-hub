@@ -1,5 +1,5 @@
 import { PropsWithChildren, createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { isMobile, truncateAddress, TWalletType } from '@getpara/web-sdk';
+import { AuthStateLogin, isMobile, truncateAddress, TWalletType } from '@getpara/web-sdk';
 import { useInternalClient } from '../hooks/utils/useInternalClient.js';
 import { useStore } from '../stores/useStore.js';
 import { ModalStep } from '../../modal/index.js';
@@ -97,6 +97,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
   const externalWalletsWithFullAuth = useStore(state => state.externalWalletsWithFullAuth);
   const includeWalletVerification = useStore(state => state.includeWalletVerification);
   const connectionOnly = useStore(state => state.connectionOnly);
+  const authState = useModalStore(state => state.authState);
 
   const {
     wallets: evmWallets,
@@ -377,7 +378,10 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
     }
 
     try {
-      const d = await verifyExternalWalletAsync(verifyExternalWalletParams);
+      const d = await verifyExternalWalletAsync({
+        ...verifyExternalWalletParams,
+        verifyOnly: authState?.stage === 'login' && !!(authState as AuthStateLogin)?.pinUrl,
+      });
       if (wallet && externalWalletsWithFullAuth?.includes(wallet.name?.toUpperCase() as TExternalWallet)) {
         await onNewAuthState(d);
       } else {

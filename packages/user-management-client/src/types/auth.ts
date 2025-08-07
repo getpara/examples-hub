@@ -236,6 +236,7 @@ export type ServerAuthStateLogin = ServerAuthStateBase & {
   loginAuthMethods: AuthMethod[];
   isWalletSelectionNeeded?: boolean;
   hasPasswordWithoutPIN?: boolean;
+  signatureVerificationMessage?: string;
 };
 
 export type VerifyThirdPartyAuth = ServerAuthStateSignup | ServerAuthStateLogin;

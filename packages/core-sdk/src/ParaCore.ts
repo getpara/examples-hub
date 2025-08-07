@@ -1983,6 +1983,7 @@ export abstract class ParaCore implements CoreInterface {
     signedMessage,
     cosmosPublicKeyHex,
     cosmosSigner,
+    verifyOnly,
     ...urlOptions
   }: CoreMethodParams<'verifyExternalWallet'>): CoreMethodResponse<'verifyExternalWallet'> {
     const serverAuthState = await this.ctx.client.verifyExternalWallet(this.userId, {
@@ -1991,6 +1992,10 @@ export abstract class ParaCore implements CoreInterface {
       cosmosPublicKeyHex,
       cosmosSigner,
     });
+
+    if (verifyOnly) {
+      return { ...serverAuthState, isPasskeySupported: await this.isPasskeySupported() };
+    }
 
     return this.#prepareAuthState(serverAuthState, urlOptions);
   }

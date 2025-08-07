@@ -107,7 +107,7 @@ export const App = () => {
           connectionOnly: externalWalletConnectionOnly,
           includeWalletVerification: externalWalletIncludeVerification,
           wallets: externalWallets,
-          // createLinkedEmbeddedForExternalWallets: 'ALL',
+          createLinkedEmbeddedForExternalWallets: 'ALL',
           // appDescription
           // appIcon
           // appUrl

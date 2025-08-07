@@ -366,7 +366,7 @@ export function EvmExternalWalletProvider({
             address,
             ...loginInfo,
           });
-          verificationMessage.current = authState.stage === 'verify' ? authState.signatureVerificationMessage : undefined;
+          verificationMessage.current = authState.signatureVerificationMessage;
         } catch (err) {
           address = undefined;
           error = err;

@@ -358,7 +358,12 @@ export function AuthProvider({
         }
         break;
       case 'login':
-        login(authState);
+        if (authState.pinUrl && authState.signatureVerificationMessage) {
+          setStep(ModalStep.EXTERNAL_WALLET_VERIFICATION);
+        } else {
+          login(authState);
+        }
+
         break;
       case 'signup':
         {
