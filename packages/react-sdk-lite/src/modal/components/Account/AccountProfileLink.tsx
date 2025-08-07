@@ -43,7 +43,9 @@ export function AccountProfileLink() {
     ),
     status = accountLinkInProgress?.isComplete ? 'success' : isTelegram ? telegramStatus : linkAccountStatus,
     commonWallet = useMemo(() => {
-      const wallet = wallets.find(w => w.internalId === externalWalletProvider && w.type === externalWalletType);
+      const wallet = wallets.find(
+        w => [w.name, w.internalId, w.id].includes(externalWalletProvider ?? '') && w.type === externalWalletType,
+      );
 
       return wallet;
     }, [wallets]),

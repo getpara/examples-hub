@@ -104,7 +104,10 @@ export function EvmExternalWalletProvider({
 
   const switchAccount = useCallback(
     (connectorName: string) => {
-      const connector = connections.find(c => c.connector.name === connectorName)?.connector;
+      const connector = connectionsRef.current.find(c => {
+        const paraDetails = c.connector?.paraDetails as ParaDetails | undefined;
+        return [paraDetails?.name, paraDetails?.id, paraDetails?.internalId].includes(connectorName);
+      })?.connector;
 
       if (!connector) {
         console.warn(`connector not found: ${connectorName}`);
@@ -113,7 +116,7 @@ export function EvmExternalWalletProvider({
 
       wagmiSwitchAccount({ connector });
     },
-    [connections, wagmiSwitchAccount],
+    [wagmiSwitchAccount],
   );
 
   const findConnectorAndAccount = (externalWallet: ExternalWalletInfo): SignOptions => {
@@ -207,6 +210,8 @@ export function EvmExternalWalletProvider({
     let signOpts: SignOptions = {};
     if (externalWallet) {
       signOpts = findConnectorAndAccount(externalWallet);
+
+      await switchAccount(externalWallet.providerId ?? '');
     }
 
     try {
@@ -406,24 +411,32 @@ export function EvmExternalWalletProvider({
     return await connect(_connector);
   };
 
+  const findConnector = (providerId: string): WagmiConnectorInstance | undefined => {
+    return connectorsRef.current.find(w =>
+      [w?.paraDetails?.name, w?.paraDetails?.id, w?.paraDetails?.internalId].includes(providerId),
+    );
+  };
+
   // old solution, kept for reference
   // const getQrUri = (connector: WagmiConnectorInstance) => () => {
   //   return getWalletConnectUri(connector, connector.paraDetails?.getUri);
   // };
 
   const requestInfo = async (providerId: string): Promise<ExternalWalletInfo> => {
-    const connector = connectors.find(c => c.name === providerId || c.paraDetails?.internalId === providerId);
+    const connector = findConnector(providerId);
 
     isLinkingAccount.current = true;
     try {
       const address = await connectBase(connector);
 
+      const providerId = wallets.find(w => w?.name === (connector?.paraDetails?.name ?? ''))?.name ?? connector?.name;
+
       return {
         partnerId: para.partnerId,
         address,
         type: 'EVM',
-        providerId: connector.name,
-        provider: connector.name,
+        providerId,
+        provider: providerId,
         ensName,
         ensAvatar,
       };
@@ -437,9 +450,7 @@ export function EvmExternalWalletProvider({
       throw new Error('Provider ID is required to disconnect');
     }
 
-    const connector = connectors.find(
-      c => c.id === providerId || c.name === providerId || c.paraDetails?.internalId === providerId,
-    );
+    const connector = findConnector(providerId);
 
     isLinkingAccount.current = true;
     try {
