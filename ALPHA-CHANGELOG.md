@@ -1,6 +1,41 @@
 # Release (Wed Aug 06 2025)
 
 ## Package Versions
+- @getpara/web-sdk@2.0.0-alpha.41
+- @getpara/wagmi-v2-integration@2.0.0-alpha.41
+- @getpara/wagmi-v2-connector@2.0.0-alpha.41
+- @getpara/viem-v2-integration@2.0.0-alpha.41
+- @getpara/viem-v1-integration@2.0.0-alpha.41
+- @getpara/user-management-client@2.0.0-alpha.41
+- @getpara/solana-web3.js-v1-integration@2.0.0-alpha.41
+- @getpara/solana-wallet-connectors@2.0.0-alpha.41
+- @getpara/solana-signers-v2-integration@2.0.0-alpha.41
+- @getpara/server-sdk@2.0.0-alpha.41
+- @getpara/react-sdk-lite@2.0.0-alpha.41
+- @getpara/react-sdk@2.0.0-alpha.41
+- @getpara/react-native-wallet@2.0.0-alpha.41
+- @getpara/react-components@2.0.0-alpha.41
+- @getpara/react-component-library@1.0.0-alpha.36
+- @getpara/react-common@2.0.0-alpha.41
+- @getpara/evm-wallet-connectors@2.0.0-alpha.41
+- @getpara/ethers-v6-integration@2.0.0-alpha.41
+- @getpara/ethers-v5-integration@2.0.0-alpha.41
+- @getpara/cosmos-wallet-connectors@2.0.0-alpha.41
+- @getpara/cosmjs-v0-integration@2.0.0-alpha.41
+- @getpara/core-sdk@2.0.0-alpha.41
+- @getpara/core-components@2.0.0-alpha.41
+
+
+### Fixes
+- another ex wallet pin fix (#1146) - eea2302fd
+- Some account link issues fixed (#1145) - 0835b5f5e
+- Styling issues & already linked error (#1144) - a897e0e5f
+- Add ex wallet verification for PIN (#1143) - 6655bd244
+- Base icons rendering wrong color in dark mode (#1141) - 6fc4cd7c5
+
+# Release (Wed Aug 06 2025)
+
+## Package Versions
 - @getpara/web-sdk@2.0.0-alpha.40
 - @getpara/wagmi-v2-integration@2.0.0-alpha.40
 - @getpara/wagmi-v2-connector@2.0.0-alpha.40
