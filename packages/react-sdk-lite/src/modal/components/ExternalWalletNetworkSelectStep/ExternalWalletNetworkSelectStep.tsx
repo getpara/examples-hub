@@ -27,7 +27,7 @@ export const ExternalWalletNetworkSelectStep = () => {
 
   const handleWalletClick = (wallet: CommonWallet) => () => {
     if (accountLinkInProgress) {
-      linkAccount({ externalWallet: { provider: wallet.id } });
+      linkAccount({ externalWallet: { provider: wallet.id, type: wallet.type } });
       return;
     }
 

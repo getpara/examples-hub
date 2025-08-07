@@ -412,9 +412,9 @@ export function EvmExternalWalletProvider({
   // };
 
   const requestInfo = async (providerId: string): Promise<ExternalWalletInfo> => {
-    const connector = connectors.find(c => c.name === providerId);
+    const connector = connectors.find(c => c.name === providerId || c.paraDetails?.internalId === providerId);
 
-    if (connector.isAuthorized) isLinkingAccount.current = true;
+    isLinkingAccount.current = true;
     try {
       const address = await connectBase(connector);
 
@@ -437,7 +437,9 @@ export function EvmExternalWalletProvider({
       throw new Error('Provider ID is required to disconnect');
     }
 
-    const connector = connectors.find(c => c.id === providerId);
+    const connector = connectors.find(
+      c => c.id === providerId || c.name === providerId || c.paraDetails?.internalId === providerId,
+    );
 
     isLinkingAccount.current = true;
     try {

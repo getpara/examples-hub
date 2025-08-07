@@ -1,6 +1,6 @@
 import { AccountTypeIcon, GradientScroll, StepContainer, WalletTypeIcon } from '../common.js';
 import { CpslButton, CpslIcon, CpslText } from '@getpara/react-components';
-import { useClient } from '../../../provider/index.js';
+import { useAccount, useClient } from '../../../provider/index.js';
 import { useLinkedAccounts } from '../../../provider/hooks/index.js';
 import { getWalletDisplayName } from '../../utils/getWalletDisplayName.js';
 import { LinkedAccount as TLinkedAccount, TLinkedAccountType, truncateAddress } from '@getpara/web-sdk';
@@ -72,6 +72,7 @@ export const AccountProfile = ({
   onDisconnect: () => void;
 }) => {
   const para = useClient();
+  const { connectionType, embedded } = useAccount();
   const { data: linkedAccounts } = useLinkedAccounts();
   const { wallets } = useExternalWallets();
   const { isEnabled, linkAccount, unlinkAccount } = useAccountLinking();
@@ -105,7 +106,7 @@ export const AccountProfile = ({
           Connected Wallets
         </Title>
         <Content>
-          {externalWallet ? (
+          {externalWallet && connectionType === 'external' ? (
             <Entry
               key={externalWallet.address}
               icon={
@@ -143,57 +144,58 @@ export const AccountProfile = ({
           </Title>
           <Content>
             <GradientScroll gap="12px" height="360px">
-              {[
-                ...(linkedAccounts?.primary || []).map(p => ({ ...p, isPrimary: true })),
-                ...(linkedAccounts?.linked || []),
-              ].map((linkedAccount: TLinkedAccount & { isPrimary?: boolean }) => {
-                const { identifier, displayName, type, isPrimary = false, externalWallet } = linkedAccount;
+              {[...(linkedAccounts?.primary || []).map(p => ({ ...p, isPrimary: true })), ...(linkedAccounts?.linked || [])]
+                .filter(({ externalWallet }) => {
+                  return !externalWallet || externalWallet.address !== embedded?.externalWalletAddress;
+                })
+                .map((linkedAccount: TLinkedAccount & { isPrimary?: boolean }) => {
+                  const { identifier, displayName, type, isPrimary = false, externalWallet } = linkedAccount;
 
-                const externalWalletConnector = wallets.find(wallet => wallet.id === externalWallet?.providerId);
-                let accountType: TLinkedAccountType | string | undefined = type;
-                let src: string | undefined = undefined;
+                  const externalWalletConnector = wallets.find(wallet => wallet.id === externalWallet?.providerId);
+                  let accountType: TLinkedAccountType | string | undefined = type;
+                  let src: string | undefined = undefined;
 
-                if (externalWallet) {
-                  if (externalWalletConnector) {
-                    accountType = undefined;
-                    src = externalWalletConnector.iconUrl;
-                  } else if (externalWallet.providerId && ACCOUNT_TYPES[externalWallet.providerId]) {
-                    accountType = externalWallet.providerId;
-                    src = undefined;
-                  } else {
-                    accountType = 'EXTERNAL_WALLET';
-                    src = undefined;
+                  if (externalWallet) {
+                    if (externalWalletConnector) {
+                      accountType = undefined;
+                      src = externalWalletConnector.iconUrl;
+                    } else if (externalWallet.providerId && ACCOUNT_TYPES[externalWallet.providerId]) {
+                      accountType = externalWallet.providerId;
+                      src = undefined;
+                    } else {
+                      accountType = 'EXTERNAL_WALLET';
+                      src = undefined;
+                    }
                   }
-                }
 
-                return (
-                  <Entry
-                    key={identifier}
-                    icon={<AccountTypeIcon accountType={accountType} src={src} size="24px" />}
-                    name={
-                      externalWallet
-                        ? (externalWallet.ensName ?? externalWalletConnector?.name ?? externalWallet.provider ?? '')
-                        : (displayName ?? identifier)
-                    }
-                    address={externalWallet?.addressBech32 ?? externalWallet?.address}
-                    addressShort={
-                      externalWallet
-                        ? truncateAddress(externalWallet.addressBech32 ?? externalWallet.address, externalWallet.type, {
-                            prefix: para.cosmosPrefix,
-                          })
-                        : undefined
-                    }
-                    onUnlink={
-                      isPrimary
-                        ? undefined
-                        : e => {
-                            e.preventDefault();
-                            unlinkAccount(linkedAccount);
-                          }
-                    }
-                  />
-                );
-              })}
+                  return (
+                    <Entry
+                      key={identifier}
+                      icon={<AccountTypeIcon accountType={accountType} src={src} size="24px" />}
+                      name={
+                        externalWallet
+                          ? (externalWallet.ensName ?? externalWalletConnector?.name ?? externalWallet.provider ?? '')
+                          : (displayName ?? identifier)
+                      }
+                      address={externalWallet?.addressBech32 ?? externalWallet?.address}
+                      addressShort={
+                        externalWallet
+                          ? truncateAddress(externalWallet.addressBech32 ?? externalWallet.address, externalWallet.type, {
+                              prefix: para.cosmosPrefix,
+                            })
+                          : undefined
+                      }
+                      onUnlink={
+                        isPrimary
+                          ? undefined
+                          : e => {
+                              e.preventDefault();
+                              unlinkAccount(linkedAccount);
+                            }
+                      }
+                    />
+                  );
+                })}
             </GradientScroll>
             <CpslButton fullWidth variant="tertiary" onClick={() => linkAccount(undefined)}>
               <CpslIcon icon="userPlus" slot="start" />

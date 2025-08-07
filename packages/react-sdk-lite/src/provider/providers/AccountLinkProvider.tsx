@@ -24,6 +24,7 @@ import { generateInternalMutation } from '../hooks/mutations/utils.js';
 import { validateAuth } from '../../modal/utils/authInputHelpers.js';
 import { EXTERNAL_WALLET_TYPES, extractAuthInfo, TExternalWallet, TWalletType } from '@getpara/user-management-client';
 import { useStore } from '../stores/useStore.js';
+import { LINKED_ACCOUNTS_BASE_KEY } from '../hooks/queries/useLinkedAccounts.js';
 
 type AccountLinkInProgress = Partial<
   CoreAccountLinkInProgress & { pendingWalletProvider?: string; pendingWalletType?: TWalletType }
@@ -107,7 +108,7 @@ const useVerifyExternalWalletLink = generateInternalMutation('verifyExternalWall
 export const AccountLinkProvider = ({ children }: PropsWithChildren) => {
   const para = useInternalClient();
   const queryClient = useQueryClient();
-  const { embedded } = useAccount();
+  const account = useAccount();
   const { data: coreAccountLinkInProgress } = useAccountLinkInProgress();
   const {
     wallet: connectedWallet,
@@ -125,6 +126,7 @@ export const AccountLinkProvider = ({ children }: PropsWithChildren) => {
   const externalWalletError = useModalStore(state => state.externalWalletError);
   const accountLinkOptions = useModalStore(state => state.accountLinkOptions) || [...LINKED_ACCOUNT_TYPES];
   const setAccountLinkOptions = useModalStore(state => state.setAccountLinkOptions);
+  const externalWalletsWithFullAuth = useStore(state => state.externalWalletsWithFullAuth);
   const goBack = useGoBack();
 
   const { mutateAsync: mutateLinkAccountAsync, isPending: isLinkAccountPending } = useLinkAccount();
@@ -151,8 +153,14 @@ export const AccountLinkProvider = ({ children }: PropsWithChildren) => {
     reset: resetVerifyExternalWalletLink,
   } = useVerifyExternalWalletLink();
 
+  const { embedded } = account;
+
   const isEnabled =
-    !!embedded?.isConnected && !embedded?.isGuestMode && (!para.authInfo?.externalWallet || includeWalletVerification);
+    embedded?.isConnected ||
+    (!embedded?.isGuestMode &&
+      (!para.authInfo?.externalWallet ||
+        includeWalletVerification ||
+        externalWalletsWithFullAuth.includes(para.authInfo?.externalWallet?.providerId as TExternalWallet)));
 
   const [accountLinkInProgress, setAccountLinkInProgress] = useState<AccountLinkInProgress | undefined>(
     coreAccountLinkInProgress || undefined,
@@ -254,7 +262,8 @@ export const AccountLinkProvider = ({ children }: PropsWithChildren) => {
             await onAccountLinkVerified(updatedAccounts);
           } catch (e) {
             console.error(e);
-            setLinkAccountError(`Error authenticating external wallet: ${e.message}`);
+
+            setLinkAccountError(e.message);
           } finally {
             if (linkWallet.type === 'EVM' || linkWallet.type === 'SOLANA') {
               await disconnectBase(providerId, linkWallet.type);
@@ -394,6 +403,7 @@ export const AccountLinkProvider = ({ children }: PropsWithChildren) => {
   };
 
   const onAccountLinkVerified = (updatedAccounts: LinkedAccounts) => {
+    queryClient.invalidateQueries({ queryKey: [LINKED_ACCOUNTS_BASE_KEY] });
     queryClient.setQueryData<LinkedAccounts>(['getLinkedAccounts'], () => updatedAccounts);
 
     setTimeout(() => {
