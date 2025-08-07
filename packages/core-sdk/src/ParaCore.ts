@@ -1983,7 +1983,6 @@ export abstract class ParaCore implements CoreInterface {
     signedMessage,
     cosmosPublicKeyHex,
     cosmosSigner,
-    verifyOnly,
     ...urlOptions
   }: CoreMethodParams<'verifyExternalWallet'>): CoreMethodResponse<'verifyExternalWallet'> {
     const serverAuthState = await this.ctx.client.verifyExternalWallet(this.userId, {
@@ -1993,8 +1992,9 @@ export abstract class ParaCore implements CoreInterface {
       cosmosSigner,
     });
 
-    if (verifyOnly) {
-      return { ...serverAuthState, isPasskeySupported: await this.isPasskeySupported() };
+    if (serverAuthState.stage === 'login' && serverAuthState.loginAuthMethods?.includes(AuthMethod.PIN)) {
+      const { sessionLookupId } = await this.touchSession();
+      return this.#prepareLoginState(serverAuthState, { ...urlOptions, sessionLookupId });
     }
 
     return this.#prepareAuthState(serverAuthState, urlOptions);
@@ -3918,13 +3918,18 @@ export abstract class ParaCore implements CoreInterface {
 
   async #prepareAuthState<T extends ServerAuthStateVerify | ServerAuthStateLogin | ServerAuthStateSignup>(
     serverAuthState: T,
-    opts: WithCustomTheme & WithUseShortUrls & { sessionLookupId?: string } = {},
+    opts: WithCustomTheme & WithUseShortUrls & { sessionLookupId?: string; isFromExternalWallet?: boolean } = {},
   ): Promise<
     | (T extends ServerAuthStateVerify ? AuthStateVerify : never)
     | (T extends ServerAuthStateLogin ? AuthStateLogin : never)
     | (T extends ServerAuthStateSignup ? AuthStateSignup : never)
   > {
-    if (!opts.sessionLookupId && serverAuthState.stage === 'login') {
+    if (
+      !opts.sessionLookupId &&
+      serverAuthState.stage === 'login' &&
+      (!serverAuthState.externalWallet ||
+        !(serverAuthState.externalWallet?.withFullParaAuth && serverAuthState.loginAuthMethods?.includes(AuthMethod.PIN)))
+    ) {
       opts.sessionLookupId = await this.prepareLogin();
     }
 

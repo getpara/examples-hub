@@ -1,6 +1,6 @@
 import { CpslButton, CpslInput, CpslText } from '@getpara/react-components';
 import { Card, OverflowText, ProfileInnerContainer } from './common';
-import { useAccount, useClient, useWallet } from '@getpara/react-sdk';
+import { ParaCore, useAccount, useClient, useWallet } from '@getpara/react-sdk';
 import { useEffect, useState } from 'react';
 import { useViemClient } from '@getpara/react-sdk/evm';
 import { useCosmjsProtoSigner } from '@getpara/react-sdk/cosmos';
@@ -167,6 +167,15 @@ export const ParaProfile = () => {
           }}
         >
           Export Session
+        </CpslButton>
+        <CpslButton
+          onClick={async () => {
+            await paraClient?.ctx.client.deleteSelf((paraClient as ParaCore).getUserId());
+
+            await paraClient?.logout();
+          }}
+        >
+          Delete User
         </CpslButton>
       </ProfileInnerContainer>
     </Card>

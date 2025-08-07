@@ -288,8 +288,8 @@ export type CoreMethods = Record<CoreMethodName, { params?: unknown; response?: 
     response: AuthStateVerifyOrLogin;
   };
   verifyExternalWallet: {
-    params: AuthStateBaseParams & VerifyExternalWalletParams & { verifyOnly?: boolean };
-    response: AuthStateSignup;
+    params: AuthStateBaseParams & VerifyExternalWalletParams;
+    response: AuthStateSignup | AuthStateLogin;
   };
   resendVerificationCode: {
     params: { type?: 'SIGNUP' | 'LINK_ACCOUNT' | 'LOGIN' } | undefined;

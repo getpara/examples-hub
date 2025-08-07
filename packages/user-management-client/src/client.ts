@@ -488,8 +488,14 @@ class Client {
     return res;
   };
 
-  verifyExternalWallet = async (userId: string, body: VerifyExternalWalletParams): Promise<ServerAuthStateSignup> => {
-    const res = await this.baseRequest.post<ServerAuthStateSignup>(`/users/${userId}/external-wallets/verify/v2`, body);
+  verifyExternalWallet = async (
+    userId: string,
+    body: VerifyExternalWalletParams,
+  ): Promise<ServerAuthStateSignup | ServerAuthStateLogin> => {
+    const res = await this.baseRequest.post<ServerAuthStateSignup | ServerAuthStateLogin>(
+      `/users/${userId}/external-wallets/verify/v2`,
+      body,
+    );
     return res.data;
   };
 
