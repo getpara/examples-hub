@@ -162,12 +162,21 @@ export function AssetIcon({ asset, size }: { asset: OnRampAsset; size?: string }
   );
 }
 
-export function NetworkIcon({ network, size }: { network: Network; size?: string }) {
+export function NetworkIcon({ network, size }: { network?: Network; size?: string }) {
   const isDark = useStore(state => state.modalConfig?.theme?.mode === 'dark');
-  const data = NETWORKS[network];
+  const data = NETWORKS[network ?? ''] ?? {
+    icon: 'globe',
+    isPlain: true,
+  };
 
   return (
-    <StyledIcon size={size} icon={data.icon} inset={data.isCircular ? undefined : '15%'} invert={isDark && data.isDark} />
+    <StyledIcon
+      size={size}
+      icon={data.icon}
+      inset={data.isCircular ? undefined : '15%'}
+      color={data?.isPlain ? 'var(--cpsl-color-text-contrast)' : undefined}
+      invert={isDark && data.isDark}
+    />
   );
 }
 

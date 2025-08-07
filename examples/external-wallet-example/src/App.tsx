@@ -1,4 +1,4 @@
-import { sepolia, celo, mainnet, polygon } from 'wagmi/chains';
+import { sepolia, celo, mainnet, polygon, fluentTestnet } from 'wagmi/chains';
 import { Content } from './components/Content';
 import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
 import { clusterApiUrl } from '@solana/web3.js';
@@ -107,13 +107,13 @@ export const App = () => {
           connectionOnly: externalWalletConnectionOnly,
           includeWalletVerification: externalWalletIncludeVerification,
           wallets: externalWallets,
-          createLinkedEmbeddedForExternalWallets: 'ALL',
+          // createLinkedEmbeddedForExternalWallets: 'ALL',
           // appDescription
           // appIcon
           // appUrl
           evmConnector: {
             config: {
-              chains: [mainnet, polygon, sepolia, celo],
+              chains: [mainnet, polygon, sepolia, celo, fluentTestnet],
             },
             // wagmiProviderProps={}
           },

@@ -1,6 +1,5 @@
 import { CpslText } from '@getpara/react-components';
-import { getNetworkFromChainId, safeStyled } from '@getpara/react-common';
-import { Network } from '@getpara/web-sdk';
+import { CommonChain, getNetworkFromChainId, safeStyled } from '@getpara/react-common';
 import { useEffect, useRef } from 'react';
 import { useDropdownPosition } from '../AuthInput/hooks/useDropdownPosition.js';
 import { useWallet } from '../../../provider/index.js';
@@ -8,9 +7,17 @@ import { HeaderSelect, HeaderSelectContainer, HeaderSelectItem, NetworkIcon } fr
 import { useExternalWallets } from '../../../provider/providers/ExternalWalletProvider.js';
 import { getNetworkName } from '../../constants/constants.js';
 
-const Chain = ({ chainId, slot, isLarge = false }: { chainId: string; slot?: string; isLarge?: boolean }) => {
-  const network = getNetworkFromChainId(chainId) as Network;
-  const name = getNetworkName(network);
+const Chain = ({
+  chain: { id, name },
+  slot,
+  isLarge = false,
+}: {
+  chain: Pick<CommonChain, 'id'> & Partial<CommonChain>;
+  slot?: string;
+  isLarge?: boolean;
+}) => {
+  const network = getNetworkFromChainId(id.toString());
+  const networkName = name ?? getNetworkName(id.toString()) ?? `Chain ID ${id.toString()}`;
 
   return (
     <div
@@ -19,7 +26,7 @@ const Chain = ({ chainId, slot, isLarge = false }: { chainId: string; slot?: str
     >
       <NetworkIcon network={network} size={isLarge ? '24px' : '16px'} />
       <ChainName variant={isLarge ? 'bodyS' : 'bodyXS'} color="contrast">
-        {name}
+        {networkName}
       </ChainName>
     </div>
   );
@@ -67,10 +74,15 @@ export const ChainSelect = () => {
           alignCenter
           selectedItemVariant="bodyXS"
         >
-          {chainIdToUse && <Chain slot="selected-item" chainId={chainIdToUse} />}
+          {chainIdToUse && (
+            <Chain
+              slot="selected-item"
+              chain={{ id: chainIdToUse, name: chains.find(c => c.id.toString() === chainIdToUse)?.name }}
+            />
+          )}
           {chains?.map(chain => (
             <HeaderSelectItem key={chain.id} slot="items" value={chain.id.toString()}>
-              <Chain isLarge chainId={chain.id.toString()} />
+              <Chain isLarge chain={chain} />
             </HeaderSelectItem>
           ))}
         </HeaderSelect>
