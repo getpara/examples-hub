@@ -1001,9 +1001,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@getpara/core-components@npm:2.0.0-alpha.39":
-  version: 2.0.0-alpha.39
-  resolution: "@getpara/core-components@npm:2.0.0-alpha.39"
+"@getpara/core-components@npm:2.0.0-alpha.42":
+  version: 2.0.0-alpha.42
+  resolution: "@getpara/core-components@npm:2.0.0-alpha.42"
   dependencies:
     "@stencil/core": "npm:^4.7.0"
     color-blend: "npm:^4.0.0"
@@ -1011,47 +1011,47 @@ __metadata:
     gsap: "npm:^3.12.5"
     inputmask: "npm:5.0.9"
     qrcode-with-logos: "npm:1.1.1"
-  checksum: 10c0/67b68b22834e30cfb5d9b3489bf3a535db78b7a02bd5592830b580aa5e4200f313f95494881b4f1cff049b7d064971a3fa3008e814e38550d5f6d8daa4f3ae2c
+  checksum: 10c0/2ab485303d40e061238c5c71f435ea1b2b8035aa45044bd8822cbc7396df1617409a56c3d9fc61965e10d8f43a72bb1ccbe9035cf2dc4cc58daf6565a613b39b
   languageName: node
   linkType: hard
 
-"@getpara/core-sdk@npm:2.0.0-alpha.39":
-  version: 2.0.0-alpha.39
-  resolution: "@getpara/core-sdk@npm:2.0.0-alpha.39"
+"@getpara/core-sdk@npm:2.0.0-alpha.42":
+  version: 2.0.0-alpha.42
+  resolution: "@getpara/core-sdk@npm:2.0.0-alpha.42"
   dependencies:
     "@celo/utils": "npm:^8.0.2"
     "@cosmjs/encoding": "npm:^0.32.4"
     "@ethereumjs/util": "npm:^9.1.0"
-    "@getpara/user-management-client": "npm:2.0.0-alpha.39"
+    "@getpara/user-management-client": "npm:2.0.0-alpha.42"
     "@noble/hashes": "npm:^1.5.0"
     base64url: "npm:^3.0.1"
     libphonenumber-js: "npm:^1.11.7"
     node-forge: "npm:^1.3.1"
     uuid: "npm:^11.1.0"
-  checksum: 10c0/af5f315a2fe3635c45baae19f3c50c834a2b6f7c2460c3378f9c855bb87a95065d7fca3a1193a22efa1d42dc2fee755e4eae5af5108b6782d8b4fddf9044c858
+  checksum: 10c0/44c48fd2f3ae136d2715d7feac88d85fdca98d292bb7f7aa8b6395a14f3ee8f9f08d55b3090507e631575f1893f87a8df75d0de9374dc10a356b20b879b4f280
   languageName: node
   linkType: hard
 
-"@getpara/cosmjs-v0-integration@npm:2.0.0-alpha.39":
-  version: 2.0.0-alpha.39
-  resolution: "@getpara/cosmjs-v0-integration@npm:2.0.0-alpha.39"
+"@getpara/cosmjs-v0-integration@npm:2.0.0-alpha.42":
+  version: 2.0.0-alpha.42
+  resolution: "@getpara/cosmjs-v0-integration@npm:2.0.0-alpha.42"
   dependencies:
-    "@getpara/core-sdk": "npm:2.0.0-alpha.39"
+    "@getpara/core-sdk": "npm:2.0.0-alpha.42"
   peerDependencies:
     "@cosmjs/amino": ">= 0.31.3 < 1"
     "@cosmjs/encoding": ">= 0.31.3 < 1"
     "@cosmjs/proto-signing": ">= 0.31.3 < 1"
     "@cosmjs/stargate": ">= 0.31.3 < 1"
-  checksum: 10c0/d563df6579565cf6fd5d9735cca8073e05da43e8d1266e596a922fd7b804dc91b14fdd297f57850bb8dfe0f6f744100f05ff9abb6ddc05d52da3622377157421
+  checksum: 10c0/149b196b2c7a16f828ece8fe32bc68d9fd49101d1ff66420433d55fbe29b09d5cc3234545d8173bbc878ed1a251ab2b715302fea1cbf19645c6a5880159eb7b9
   languageName: node
   linkType: hard
 
-"@getpara/cosmos-wallet-connectors@npm:2.0.0-alpha.39":
-  version: 2.0.0-alpha.39
-  resolution: "@getpara/cosmos-wallet-connectors@npm:2.0.0-alpha.39"
+"@getpara/cosmos-wallet-connectors@npm:2.0.0-alpha.42":
+  version: 2.0.0-alpha.42
+  resolution: "@getpara/cosmos-wallet-connectors@npm:2.0.0-alpha.42"
   dependencies:
-    "@getpara/react-common": "npm:2.0.0-alpha.39"
-    "@getpara/web-sdk": "npm:2.0.0-alpha.39"
+    "@getpara/react-common": "npm:2.0.0-alpha.42"
+    "@getpara/web-sdk": "npm:2.0.0-alpha.42"
     "@leapwallet/cosmos-social-login-capsule-provider": "npm:^0.0.41"
     starknet: "npm:^6.11.0"
     zustand: "npm:^4.5.2"
@@ -1060,17 +1060,17 @@ __metadata:
     "@getpara/graz": ">=2.0.0-alpha.5"
     react: ">=18"
     react-dom: ">=18"
-  checksum: 10c0/268c96831120dcc9f4df9b8dcffb7313e9079cfe84816c45ba97b7b0a705deec58f1de486e2b9eda21239f1ed2fd241c42f9f530d1f20673cbd3e40466e0b672
+  checksum: 10c0/e66dc4be0bf39cd0b278f80b72aa321e1676c6146cbe685c98a93f79e2214325d4847abc1777175e215faf6c2df034615a9b83a05e37646b344fb7c934f63516
   languageName: node
   linkType: hard
 
-"@getpara/evm-wallet-connectors@npm:2.0.0-alpha.39":
-  version: 2.0.0-alpha.39
-  resolution: "@getpara/evm-wallet-connectors@npm:2.0.0-alpha.39"
+"@getpara/evm-wallet-connectors@npm:2.0.0-alpha.42":
+  version: 2.0.0-alpha.42
+  resolution: "@getpara/evm-wallet-connectors@npm:2.0.0-alpha.42"
   dependencies:
     "@coinbase/wallet-sdk": "npm:4.3.0"
-    "@getpara/wagmi-v2-connector": "npm:2.0.0-alpha.39"
-    "@getpara/web-sdk": "npm:2.0.0-alpha.39"
+    "@getpara/wagmi-v2-connector": "npm:2.0.0-alpha.42"
+    "@getpara/web-sdk": "npm:2.0.0-alpha.42"
     zustand: "npm:^4.5.2"
     zustand-sync-tabs: "npm:^0.2.2"
   peerDependencies:
@@ -1083,18 +1083,18 @@ __metadata:
   peerDependenciesMeta:
     "@farcaster/miniapp-wagmi-connector":
       optional: true
-  checksum: 10c0/ebc0be0f43e30debf46fc23d1abf6282a6bc31391101817f627e5701446193214f4ccda78c970019400474397f517d42a9bdc766df01f4fc1cf2892f758daf48
+  checksum: 10c0/d2ee6b6bef5b66beba98e0d8edf9295027fc6f41e06bf97f7eb838ceffb90048925f54fe714dd9448fcdc2eac220cf83727419f2bfffb62e1bef5ee97f476869
   languageName: node
   linkType: hard
 
-"@getpara/graz@npm:2.0.0-alpha.6":
-  version: 2.0.0-alpha.6
-  resolution: "@getpara/graz@npm:2.0.0-alpha.6"
+"@getpara/graz@npm:2.0.0-alpha.8":
+  version: 2.0.0-alpha.8
+  resolution: "@getpara/graz@npm:2.0.0-alpha.8"
   dependencies:
     "@cosmsnap/snapper": "npm:0.1.29"
     "@dao-dao/cosmiframe": "npm:0.1.0"
-    "@getpara/cosmjs-v0-integration": "npm:2.0.0-alpha.37"
-    "@getpara/react-sdk": "npm:2.0.0-alpha.37"
+    "@getpara/cosmjs-v0-integration": "npm:2.0.0-alpha.41"
+    "@getpara/react-sdk": "npm:2.0.0-alpha.41"
     "@keplr-wallet/cosmos": "npm:0.12.156"
     "@keplr-wallet/types": "npm:0.12.156"
     "@metamask/providers": "npm:12.0.0"
@@ -1119,16 +1119,16 @@ __metadata:
     react: ">=17"
   bin:
     graz: dist/cli.js
-  checksum: 10c0/ed2f0e2be7a3dfb5c36ed95c9995af21cf9dadbd32a23b23a4ef7d06987e57eab54445d706d19760765bda9774b1c964e6894d2c72b7a04444e66a8a51127de3
+  checksum: 10c0/b00f4a3ac083fa8aea4458e7b47f609b4c21282f1de4a6391b131402d5060d4e884eb1955e1b2111cf31e7cc612bad3b9e59315ae925de4fc59c376b88847dd8
   languageName: node
   linkType: hard
 
-"@getpara/react-common@npm:2.0.0-alpha.39":
-  version: 2.0.0-alpha.39
-  resolution: "@getpara/react-common@npm:2.0.0-alpha.39"
+"@getpara/react-common@npm:2.0.0-alpha.42":
+  version: 2.0.0-alpha.42
+  resolution: "@getpara/react-common@npm:2.0.0-alpha.42"
   dependencies:
-    "@getpara/react-components": "npm:2.0.0-alpha.39"
-    "@getpara/web-sdk": "npm:2.0.0-alpha.39"
+    "@getpara/react-components": "npm:2.0.0-alpha.42"
+    "@getpara/web-sdk": "npm:2.0.0-alpha.42"
     "@moonpay/moonpay-react": "npm:^1.8.3"
     "@ramp-network/ramp-instant-sdk": "npm:^4.0.5"
     libphonenumber-js: "npm:^1.11.7"
@@ -1137,26 +1137,26 @@ __metadata:
   peerDependencies:
     react: "*"
     react-dom: "*"
-  checksum: 10c0/b603148ab134c60e155702d0e4e3f3c12de11108d64cdf634e87b376770e9a6cbd3cea23604b020c947ba5d79e9da8d07e6cc6a27a900e08507221ec6ef0495c
+  checksum: 10c0/46b2b992b473603241e3739e1d8a5bbdde8b358a82cbea2beaac9564d88a641fcc19a6afbd7706465afb9b8a7cc96cd549486145f68e48de76453ff21ecb0bda
   languageName: node
   linkType: hard
 
-"@getpara/react-components@npm:2.0.0-alpha.39":
-  version: 2.0.0-alpha.39
-  resolution: "@getpara/react-components@npm:2.0.0-alpha.39"
+"@getpara/react-components@npm:2.0.0-alpha.42":
+  version: 2.0.0-alpha.42
+  resolution: "@getpara/react-components@npm:2.0.0-alpha.42"
   dependencies:
-    "@getpara/core-components": "npm:2.0.0-alpha.39"
-  checksum: 10c0/40318b64c7c16222a9cb92a2addec11273d78be1daf57272921a02f03d1a8ffa0eec088060a651427fd7411650a79737ed8b5d06d2381d0ade3c8f00d5337fe3
+    "@getpara/core-components": "npm:2.0.0-alpha.42"
+  checksum: 10c0/83ae1a0d867246453f0819c84b545ca2e1f70ab344ff07dea7325bdafeedc79b3749051f069f3a5525f77a6dde0a4141f5f203a5261c6640de98b88354116773
   languageName: node
   linkType: hard
 
-"@getpara/react-sdk-lite@npm:2.0.0-alpha.39":
-  version: 2.0.0-alpha.39
-  resolution: "@getpara/react-sdk-lite@npm:2.0.0-alpha.39"
+"@getpara/react-sdk-lite@npm:2.0.0-alpha.42":
+  version: 2.0.0-alpha.42
+  resolution: "@getpara/react-sdk-lite@npm:2.0.0-alpha.42"
   dependencies:
-    "@getpara/react-common": "npm:2.0.0-alpha.39"
-    "@getpara/react-components": "npm:2.0.0-alpha.39"
-    "@getpara/web-sdk": "npm:2.0.0-alpha.39"
+    "@getpara/react-common": "npm:2.0.0-alpha.42"
+    "@getpara/react-components": "npm:2.0.0-alpha.42"
+    "@getpara/web-sdk": "npm:2.0.0-alpha.42"
     date-fns: "npm:^3.6.0"
     framer-motion: "npm:^11.3.31"
     libphonenumber-js: "npm:^1.11.7"
@@ -1169,36 +1169,36 @@ __metadata:
     react-dom: "*"
   bin:
     setup-para: dist/cli/cli.mjs
-  checksum: 10c0/770a0f08d0fb2e4771417ffe485accd3f29829cce1882f44280f90e7d0e975e9121e7a173896a9bafcc9038b50e18d162d9496b04216f0f4ff754d31ab46d3bb
+  checksum: 10c0/df2f1e7c606b5bf8701f2a7970688410c4341c01ec8e624130c2953650f5e9f375250d204dfef4a4ce08914edf18e7be2d0277f78edc4f785f1452af8cb9feb0
   languageName: node
   linkType: hard
 
-"@getpara/react-sdk@npm:2.0.0-alpha.39":
-  version: 2.0.0-alpha.39
-  resolution: "@getpara/react-sdk@npm:2.0.0-alpha.39"
+"@getpara/react-sdk@npm:2.0.0-alpha.42":
+  version: 2.0.0-alpha.42
+  resolution: "@getpara/react-sdk@npm:2.0.0-alpha.42"
   dependencies:
-    "@getpara/cosmjs-v0-integration": "npm:2.0.0-alpha.39"
-    "@getpara/cosmos-wallet-connectors": "npm:2.0.0-alpha.39"
-    "@getpara/evm-wallet-connectors": "npm:2.0.0-alpha.39"
-    "@getpara/react-sdk-lite": "npm:2.0.0-alpha.39"
-    "@getpara/solana-signers-v2-integration": "npm:2.0.0-alpha.39"
-    "@getpara/solana-wallet-connectors": "npm:2.0.0-alpha.39"
-    "@getpara/viem-v2-integration": "npm:2.0.0-alpha.39"
+    "@getpara/cosmjs-v0-integration": "npm:2.0.0-alpha.42"
+    "@getpara/cosmos-wallet-connectors": "npm:2.0.0-alpha.42"
+    "@getpara/evm-wallet-connectors": "npm:2.0.0-alpha.42"
+    "@getpara/react-sdk-lite": "npm:2.0.0-alpha.42"
+    "@getpara/solana-signers-v2-integration": "npm:2.0.0-alpha.42"
+    "@getpara/solana-wallet-connectors": "npm:2.0.0-alpha.42"
+    "@getpara/viem-v2-integration": "npm:2.0.0-alpha.42"
   peerDependencies:
     "@tanstack/react-query": ">=5.0.0"
     react: "*"
     react-dom: "*"
   bin:
     setup-para: dist/cli/cli.mjs
-  checksum: 10c0/0fa1986bb27aa380085086263210b225cb837605a9ce9c5a34641314f63c3ed2dbe61415b3ccf5b9c4ed101f6ea13e28d35387bca4e6f739fd8d00ce04694fc3
+  checksum: 10c0/6dcf1df7e9b14cb357df7553d6863bcb538f96ab95a8f07bdde00581d0c1a47493fdab34b1401c2af523961ce1b9712724fe22675ea87cb5b932409adcbad625
   languageName: node
   linkType: hard
 
-"@getpara/solana-signers-v2-integration@npm:2.0.0-alpha.39":
-  version: 2.0.0-alpha.39
-  resolution: "@getpara/solana-signers-v2-integration@npm:2.0.0-alpha.39"
+"@getpara/solana-signers-v2-integration@npm:2.0.0-alpha.42":
+  version: 2.0.0-alpha.42
+  resolution: "@getpara/solana-signers-v2-integration@npm:2.0.0-alpha.42"
   dependencies:
-    "@getpara/core-sdk": "npm:2.0.0-alpha.39"
+    "@getpara/core-sdk": "npm:2.0.0-alpha.42"
     bs58: "npm:^6.0.0"
   peerDependencies:
     "@solana/addresses": 2.x
@@ -1207,16 +1207,16 @@ __metadata:
     "@solana/rpc-spec": 2.x
     "@solana/signers": 2.x
     "@solana/transactions": 2.x
-  checksum: 10c0/71e9269493871a35063f3d3e85876096523113f281641d161a92dcc9dc4a92aa618d6e0bb518adf9f223fe4a3fc4671cea2df574912a98aaeb9fb3f0d76bed15
+  checksum: 10c0/1fce332ad376b118551f4245b739598bfa30c4922b7cb5b2486f1a659024c82a1c3dd9c24cec30d12a16fbd7966e346090e8659609c03704a8fa0823140c6498
   languageName: node
   linkType: hard
 
-"@getpara/solana-wallet-connectors@npm:2.0.0-alpha.39":
-  version: 2.0.0-alpha.39
-  resolution: "@getpara/solana-wallet-connectors@npm:2.0.0-alpha.39"
+"@getpara/solana-wallet-connectors@npm:2.0.0-alpha.42":
+  version: 2.0.0-alpha.42
+  resolution: "@getpara/solana-wallet-connectors@npm:2.0.0-alpha.42"
   dependencies:
-    "@getpara/react-common": "npm:2.0.0-alpha.39"
-    "@getpara/web-sdk": "npm:2.0.0-alpha.39"
+    "@getpara/react-common": "npm:2.0.0-alpha.42"
+    "@getpara/web-sdk": "npm:2.0.0-alpha.42"
     bs58: "npm:6.0.0"
   peerDependencies:
     "@farcaster/mini-app-solana": ^1.0.0
@@ -1229,52 +1229,52 @@ __metadata:
   peerDependenciesMeta:
     "@farcaster/mini-app-solana":
       optional: true
-  checksum: 10c0/f19a57a42411b60b8e02394281f914909cd3aa3d29c6b454e07544fe5748ac7c98ba57875b6ba81d539793d760f1517912b248e10a53b4387b6371a39722c2f3
+  checksum: 10c0/f367e28fe1ab4da630173739b2356ee0d5d5f463c9f145b0337b3605e5f284fa1ae884b8cdaf8ea3fd7284b91f7a617877ae6ba78022c0775f39dcdad545446e
   languageName: node
   linkType: hard
 
-"@getpara/user-management-client@npm:2.0.0-alpha.39":
-  version: 2.0.0-alpha.39
-  resolution: "@getpara/user-management-client@npm:2.0.0-alpha.39"
+"@getpara/user-management-client@npm:2.0.0-alpha.42":
+  version: 2.0.0-alpha.42
+  resolution: "@getpara/user-management-client@npm:2.0.0-alpha.42"
   dependencies:
     axios: "npm:^1.8.4"
     libphonenumber-js: "npm:^1.11.7"
-  checksum: 10c0/eb39d28a5a974a98f7173e75dbc845eafb7dda49397f8ee319f775ad16b345f176ce9b185b88a4278b8df5339500761dbe9ff61d07da3788e37eb6e74a75c69b
+  checksum: 10c0/75e57bae0863e8185996faf40a199d0ff8b8df781e91f42eb968c9f15d28b8a5cce99845f5e807628da8426770e4f4c93521b00b947af4ec8f87338cd2c22dfd
   languageName: node
   linkType: hard
 
-"@getpara/viem-v2-integration@npm:2.0.0-alpha.39":
-  version: 2.0.0-alpha.39
-  resolution: "@getpara/viem-v2-integration@npm:2.0.0-alpha.39"
+"@getpara/viem-v2-integration@npm:2.0.0-alpha.42":
+  version: 2.0.0-alpha.42
+  resolution: "@getpara/viem-v2-integration@npm:2.0.0-alpha.42"
   dependencies:
-    "@getpara/core-sdk": "npm:2.0.0-alpha.39"
+    "@getpara/core-sdk": "npm:2.0.0-alpha.42"
   peerDependencies:
     viem: 2.x
-  checksum: 10c0/4d12f9f56410e8c633b69f7186a2d137b8538044b7cd6266b4f020a115be20452e7de769a7b284f4ca95c2722d0119dc31f577c34c6c7430e3b9825fd7f2e5f3
+  checksum: 10c0/01144b7bb4a157f62c900212458b6b47a9a06318488aacb87de06294016d6075570309c6610d4ffdcfb2d88c2383592ae81c8aafe49ec8c51cff1717150a2c47
   languageName: node
   linkType: hard
 
-"@getpara/wagmi-v2-connector@npm:2.0.0-alpha.39":
-  version: 2.0.0-alpha.39
-  resolution: "@getpara/wagmi-v2-connector@npm:2.0.0-alpha.39"
+"@getpara/wagmi-v2-connector@npm:2.0.0-alpha.42":
+  version: 2.0.0-alpha.42
+  resolution: "@getpara/wagmi-v2-connector@npm:2.0.0-alpha.42"
   dependencies:
-    "@getpara/viem-v2-integration": "npm:2.0.0-alpha.39"
-    "@getpara/web-sdk": "npm:2.0.0-alpha.39"
+    "@getpara/viem-v2-integration": "npm:2.0.0-alpha.42"
+    "@getpara/web-sdk": "npm:2.0.0-alpha.42"
   peerDependencies:
     react: "*"
     react-dom: "*"
     viem: 2.x
     wagmi: ^2.9.0
-  checksum: 10c0/5335a3ed8dd1bced4833a0bae93eefe185111a07d3931200007f608d3f1f3afa1b12c9eef629db7da189cd13409438fee5b302dee4865ecbff30a76a0861d3dc
+  checksum: 10c0/714c6ee064eb759060098c41d4900f897be9ab0baae6340cf55facd587de8909e3d3e6d8617f092d147a9995f5dddd1cedb727b7791978c2d126c9091c5c04cf
   languageName: node
   linkType: hard
 
-"@getpara/web-sdk@npm:2.0.0-alpha.39":
-  version: 2.0.0-alpha.39
-  resolution: "@getpara/web-sdk@npm:2.0.0-alpha.39"
+"@getpara/web-sdk@npm:2.0.0-alpha.42":
+  version: 2.0.0-alpha.42
+  resolution: "@getpara/web-sdk@npm:2.0.0-alpha.42"
   dependencies:
-    "@getpara/core-sdk": "npm:2.0.0-alpha.39"
-    "@getpara/user-management-client": "npm:2.0.0-alpha.39"
+    "@getpara/core-sdk": "npm:2.0.0-alpha.42"
+    "@getpara/user-management-client": "npm:2.0.0-alpha.42"
     base64url: "npm:^3.0.1"
     buffer: "npm:6.0.3"
     cbor-web: "npm:^9.0.2"
@@ -1285,7 +1285,7 @@ __metadata:
   peerDependenciesMeta:
     "@farcaster/miniapp-sdk":
       optional: true
-  checksum: 10c0/19485c7c02a0db7c00f4f4812bd64148ac5dc0298fe99ddaffad5e36d9b0aea425049b8ad7acc4fdd1ed9ddb343adfb4f1fff91d243c9d761abcd320bae06bfd
+  checksum: 10c0/f4e22d20f88aba96b6e3948ce6aa241a299b4e79f4028643e070920aacad34b3d3a00b5662dfbe90c8c15256ea1dd8c95cccf93139fc7e99ae90bf5953694319
   languageName: node
   linkType: hard
 
@@ -8739,8 +8739,8 @@ __metadata:
     "@cosmjs/stargate": "npm:^0.34.0"
     "@cosmjs/tendermint-rpc": "npm:^0.34.0"
     "@eslint/js": "npm:^9.29.0"
-    "@getpara/graz": "npm:2.0.0-alpha.6"
-    "@getpara/react-sdk": "npm:2.0.0-alpha.39"
+    "@getpara/graz": "npm:2.0.0-alpha.8"
+    "@getpara/react-sdk": "npm:2.0.0-alpha.42"
     "@leapwallet/cosmos-social-login-capsule-provider": "npm:^0.0.44"
     "@solana-mobile/wallet-adapter-mobile": "npm:^2.2.2"
     "@solana/wallet-adapter-base": "npm:^0.9.27"

@@ -99,7 +99,7 @@ const runTestsForApp = async (appName: string): Promise<TestResult> => {
     if (config.installCommand) {
       await runCommandAsync(config.installCommand, appFullPath, {}, true);
     } else {
-      await runCommandAsync("yarn install", appFullPath, {}, true);
+      await runCommandAsync("yarn install --verbose", appFullPath, {}, true);
     }
 
     const playwrightArgs = [
