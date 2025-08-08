@@ -99,6 +99,7 @@ const runTestsForApp = async (appName: string): Promise<TestResult> => {
     if (config.installCommand) {
       await runCommandAsync(config.installCommand, appFullPath, {}, true);
     } else {
+      // Don't use --immutable to allow yarn.lock updates for file: protocol dependencies
       await runCommandAsync("yarn install", appFullPath, {}, true);
     }
 
