@@ -38,8 +38,9 @@ export class ParaModalExamplePage {
     // Wait for the frame to be loaded and visible
     await frameLocator.locator('body').waitFor({ state: 'visible', timeout: 10000 });
     
-    // Ensure password input is visible in the iframe
-    await expect(frameLocator.getByRole('textbox', { name: 'Enter password' })).toBeVisible({ timeout: 10000 });
+    // Ensure password input is visible in the iframe - check for the wrapper element
+    const passwordInputWrapper = frameLocator.locator('cpsl-input[placeholder="Enter password"]');
+    await expect(passwordInputWrapper).toBeVisible({ timeout: 10000 });
     this.logger.logInfo('Found password input in iframe');
     
     return frameLocator;
@@ -60,9 +61,24 @@ export class ParaModalExamplePage {
   async waitForUIStability() {
     this.logger.logStep('Waiting for UI stability before modal interaction...');
     
-    // Wait for the modal button to be visible and stable
-    const modalButton = this.page.getByTestId('header-connect-button');
-    await modalButton.waitFor({ state: 'visible', timeout: 10000 });
+    // Check which button is present (connected or disconnected state)
+    // The button changes based on connection state
+    const accountButton = this.page.getByTestId('account-address-display');
+    const connectButton = this.page.getByTestId('header-connect-button');
+    
+    // Wait for either button to be visible
+    let modalButton;
+    try {
+      // First check if we're in connected state
+      await accountButton.waitFor({ state: 'visible', timeout: 2000 });
+      modalButton = accountButton;
+      this.logger.logInfo('Found account button (connected state)');
+    } catch {
+      // Otherwise we should be in disconnected state
+      await connectButton.waitFor({ state: 'visible', timeout: 10000 });
+      modalButton = connectButton;
+      this.logger.logInfo('Found connect button (disconnected state)');
+    }
     
     // Additional wait to ensure any animations or async operations complete
     await this.page.waitForTimeout(1500);
@@ -90,40 +106,88 @@ export class ParaModalExamplePage {
     // Ensure UI is stable before opening modal
     await this.waitForUIStability();
     
-    await this.page.getByTestId('header-connect-button').click();
-    // Wait for modal to be visible
-    await expect(this.page.getByRole('textbox', { name: 'Enter email or phone' })).toBeVisible({ timeout: 5000 });
+    // Click whichever button is present to open modal
+    const accountButton = this.page.getByTestId('account-address-display');
+    const connectButton = this.page.getByTestId('header-connect-button');
+    
+    const accountVisible = await accountButton.isVisible().catch(() => false);
+    if (accountVisible) {
+      await accountButton.click();
+    } else {
+      await connectButton.click();
+    }
+    
+    // Wait for auth input to be visible using data-testid
+    const authInputWrapper = this.page.getByTestId('auth-input');
+    await expect(authInputWrapper).toBeVisible({ timeout: 5000 });
 
     const emailOrPhone = usePhoneNumber ? getRandomPhoneNumber() : getRandomEmail();
-    const enterEmailOrPhoneInput = this.page.getByRole('textbox', { name: 'Enter email or phone' });
-    await enterEmailOrPhoneInput.click();
-    await enterEmailOrPhoneInput.fill(emailOrPhone);
-    await expect(enterEmailOrPhoneInput).toHaveValue(emailOrPhone);
-    await this.page.locator('.primary > .hydrated > div > svg').first().click();
-    // Wait for OTP inputs to be visible
-    await expect(this.page.locator('#code-input-0')).toBeVisible({ timeout: 5000 });
+    
+    // Fill the auth input - target the native input inside the shadow DOM
+    // The input starts with placeholder "Enter email or phone" and changes dynamically
+    // For phone numbers, it will change to "Enter phone" after detecting numeric input
+    const authInput = authInputWrapper.locator('input.native-input').first();
+    
+    await authInput.click();
+    
+    if (usePhoneNumber) {
+      // For phone numbers, type slowly to allow the UI to detect it's a phone number
+      // and switch to phone mode with the country dropdown
+      await authInput.pressSequentially(emailOrPhone, { delay: 100 });
+    } else {
+      await authInput.fill(emailOrPhone);
+    }
+    
+    await expect(authInputWrapper).toHaveAttribute('value', emailOrPhone);
+    
+    // Press Enter to continue (or click the continue arrow button)
+    // The button is: cpsl-button[slot="end"] > shadow root > button.button-native
+    // Pressing Enter is more reliable for this flow
+    await authInput.press('Enter');
+    
+    // Wait for OTP code input to be visible
+    const codeInputWrapper = this.page.locator('cpsl-code-input');
+    await expect(codeInputWrapper).toBeVisible({ timeout: 5000 });
+    
+    // The OTP inputs are already native inputs with IDs in the shadow DOM
+    // Wait for first OTP input to be ready
+    const firstCodeInput = codeInputWrapper.locator('#code-input-0');
+    await expect(firstCodeInput).toBeVisible({ timeout: 5000 });
 
     for (let i = 0; i < 6; i++) {
-      await this.page.locator(`#code-input-${i}`).click();
-      await this.page.locator(`#code-input-${i}`).fill((i + 1).toString());
+      const otpInput = codeInputWrapper.locator(`#code-input-${i}`);
+      await otpInput.click();
+      await otpInput.fill((i + 1).toString());
     }
 
     let credentials: Protocol.WebAuthn.Credential[] = [];
     if (password) {
-      await this.page.getByRole('button', { name: 'Choose Password' }).click();
+      // Click the "Choose Password" button - target native button in shadow DOM
+      const choosePasswordButton = this.page.locator('cpsl-button:has-text("Choose Password") button.button-native');
+      await choosePasswordButton.click();
       
       // Use helper function to get iframe
       const iframeLocator = await this.getParaIframe();
       
-      // Enter password in iframe
-      await iframeLocator.getByRole('textbox', { name: 'Enter password' }).click();
-      await iframeLocator.getByRole('textbox', { name: 'Enter password' }).fill(password);
-      await iframeLocator.getByRole('textbox', { name: 'Confirm password' }).click();
-      await iframeLocator.getByRole('textbox', { name: 'Confirm password' }).fill(password);
-      await iframeLocator.getByRole('button', { name: 'Save Password' }).click();
+      // Enter password in iframe - target native inputs in shadow DOM
+      const passwordInputWrapper = iframeLocator.locator('cpsl-input[placeholder="Enter password"]');
+      const passwordInput = passwordInputWrapper.locator('input.native-input');
+      await passwordInput.click();
+      await passwordInput.fill(password);
+      
+      const confirmPasswordInputWrapper = iframeLocator.locator('cpsl-input[placeholder="Confirm password"]');
+      const confirmPasswordInput = confirmPasswordInputWrapper.locator('input.native-input');
+      await confirmPasswordInput.click();
+      await confirmPasswordInput.fill(password);
+      
+      // Click Save Password button - target native button in shadow DOM
+      const savePasswordButton = iframeLocator.locator('cpsl-button:has-text("Save Password") button.button-native');
+      await savePasswordButton.click();
     } else {
       const page1Promise = this.page.waitForEvent('popup');
-      await this.page.getByTestId('modal-content').getByRole('button', { name: 'Create' }).click();
+      // Click the "Create Passkey" button - target native button in shadow DOM
+      const createPasskeyButton = this.page.locator('cpsl-button:has-text("Create Passkey") button.button-native');
+      await createPasskeyButton.click();
 
       const page1 = await page1Promise;
       const authPortal = new AuthPortalPage(page1);
@@ -132,16 +196,39 @@ export class ParaModalExamplePage {
 
     let clipboardText = '';
     if (isRecoverySecretEnabled) {
-      await this.page.getByTestId('modal-content').getByRole('button', { name: 'Copy' }).click();
+      // Wait for the recovery secret screen to be visible
+      await this.page.waitForTimeout(2000);
+      
+      // Look for the copy tile button with the correct structure
+      // The tile button has icon="copy" and contains "Copy" text
+      const copyTileButton = this.page.locator('cpsl-tile-button[icon="copy"]:has(cpsl-text:has-text("Copy"))');
+      
+      // Wait for the tile button to be visible
+      await copyTileButton.waitFor({ state: 'visible', timeout: 10000 });
+      
+      // Click the tile button directly - Playwright should handle the shadow DOM
+      await copyTileButton.click();
+      
+      // Wait for clipboard operation to complete
+      await this.page.waitForTimeout(500);
       clipboardText = await this.page.evaluate('navigator.clipboard.readText()');
-      await this.page.getByRole('button', { name: 'I’ve saved my recovery secret' }).click();
+      
+      // Click "I've saved my recovery secret" button - try multiple selectors
+      // The text might vary slightly, so let's be more flexible
+      const savedSecretButton = this.page.locator('cpsl-button').filter({ hasText: /saved.*recovery|recovery.*saved/i }).locator('button.button-native');
+      await savedSecretButton.waitFor({ state: 'visible', timeout: 5000 });
+      await savedSecretButton.click();
     }
 
     if (is2FAEnabled) {
-      await this.page.getByRole('button', { name: 'Continue' }).click();
-      await this.page.getByRole('button', { name: 'Skip' }).click();
+      const continueButton = this.page.locator('cpsl-button:has-text("Continue") button.button-native');
+      await continueButton.click();
+      const skipButton = this.page.locator('cpsl-button:has-text("Skip") button.button-native');
+      await skipButton.click();
     } else {
-      await this.page.getByRole('button', { name: 'Done' }).click();
+      // Click the Done button - target native button in shadow DOM
+      const doneButton = this.page.locator('cpsl-button:has-text("Done") button.button-native');
+      await doneButton.click();
     }
 
     // Wait for modal to close and app state to update
@@ -172,26 +259,35 @@ export class ParaModalExamplePage {
     password?: string;
   }) {
     this.logger.logInfo('Starting login flow...');
-    await this.page.reload();
-    await this.page.waitForLoadState('networkidle'); // Wait for reload to complete
     
+    // With fresh context, we start in disconnected state
     // Ensure UI is stable before opening modal
     await this.waitForUIStability();
     
+    // Click the connect button (will always be disconnected with fresh context)
     this.logger.logInfo('Looking for connect button');
-    await this.page.getByTestId('header-connect-button').click();
+    const connectButton = this.page.getByTestId('header-connect-button');
+    await connectButton.click();
     this.logger.logInfo('Modal opened');
-    // Wait for modal to be visible
-    await expect(this.page.getByRole('textbox', { name: 'Enter email or phone' })).toBeVisible({ timeout: 5000 });
-
-    const enterEmailOrPhoneInput = this.page.getByRole('textbox', { name: 'Enter email or phone' });
-    this.logger.logInfo('Found email/phone input');
-    await enterEmailOrPhoneInput.click();
-    await enterEmailOrPhoneInput.fill(emailOrPhone);
-    await expect(enterEmailOrPhoneInput).toHaveValue(emailOrPhone);
+    
+    // Wait for auth input to be visible using data-testid
+    const authInputWrapper = this.page.getByTestId('auth-input');
+    await expect(authInputWrapper).toBeVisible({ timeout: 5000 });
+    this.logger.logInfo('Found auth input');
+    
+    // Fill the auth input - target the native input inside the shadow DOM
+    // Use .first() to avoid conflicts with country search input when using phone
+    const authInput = authInputWrapper.locator('input.native-input').first();
+    await authInput.click();
+    await authInput.fill(emailOrPhone);
+    await expect(authInputWrapper).toHaveAttribute('value', emailOrPhone);
     this.logger.logInfo(`Entered email/phone: ${emailOrPhone}`);
-    await this.page.locator('.primary > .hydrated > div > svg').first().click();
-    this.logger.logInfo('Clicked arrow button to proceed');
+    
+    // Press Enter to continue (or click the continue arrow button)
+    // The button is: cpsl-button[slot="end"] > shadow root > button.button-native
+    // Pressing Enter is more reliable for this flow
+    await authInput.press('Enter');
+    this.logger.logInfo('Pressed Enter to proceed');
     if (password) {
       this.logger.logInfo('Password login flow - looking for password input in iframe...');
       try {
@@ -199,15 +295,16 @@ export class ParaModalExamplePage {
         // Use helper function to get iframe
         const iframeLocator = await this.getParaIframe();
         
-        // Enter password in iframe
-        const passwordInput = await iframeLocator.getByRole('textbox', { name: 'Enter password' });
+        // Enter password in iframe - target native input in shadow DOM
+        const passwordInputWrapper = iframeLocator.locator('cpsl-input[placeholder="Enter password"]');
+        const passwordInput = passwordInputWrapper.locator('input.native-input');
         this.logger.logInfo('Found password input in iframe');
         await passwordInput.click();
         await passwordInput.fill(password);
         this.logger.logInfo('Entered password');
         
-        // Now the Login button should be enabled
-        const loginButton = iframeLocator.getByRole('button', { name: 'Login' });
+        // Now the Login button should be enabled - target native button in shadow DOM
+        const loginButton = iframeLocator.locator('cpsl-button:has-text("Login") button.button-native');
         await expect(loginButton).toBeEnabled({ timeout: 5000 });
         this.logger.logInfo('Found Login button in iframe, clicking...');
         
@@ -236,7 +333,8 @@ export class ParaModalExamplePage {
     await this.page.waitForTimeout(2000);
     
     if (is2FAEnabled) {
-      await this.page.getByRole('button', { name: 'Skip' }).click();
+      const skipButton = this.page.locator('cpsl-button:has-text("Skip") button.button-native');
+      await skipButton.click();
       await this.page.waitForTimeout(2100);
     }
     
@@ -257,8 +355,28 @@ export class ParaModalExamplePage {
     // Click on the connected address button to open modal
     await this.page.getByTestId('account-address-display').click();
     await this.page.waitForTimeout(500);
-    await this.page.getByRole('button', { name: 'Disconnect Wallet' }).click();
-    await this.page.waitForTimeout(250);
+    
+    // Wait for modal content to be visible
+    const modalContent = this.page.getByTestId('modal-content');
+    await modalContent.waitFor({ state: 'visible', timeout: 5000 });
+    
+    // Click the Profile button first (new UI flow) - target native button in shadow DOM
+    const profileButton = modalContent.locator('cpsl-tile-button:has-text("Profile") button.button-native');
+    await profileButton.waitFor({ state: 'visible', timeout: 5000 });
+    await profileButton.click();
+    await this.page.waitForTimeout(500);
+    
+    // Now click the Disconnect Wallet button - target native button in shadow DOM
+    const disconnectButton = modalContent.locator('cpsl-button:has-text("Disconnect Wallet") button.button-native');
+    await disconnectButton.waitFor({ state: 'visible', timeout: 5000 });
+    await disconnectButton.click();
+    
+    // Wait for logout to complete - header should show connect button again
+    this.logger.logInfo('Waiting for logout to complete...');
+    await this.page.waitForTimeout(1000);
+    const connectButton = this.page.getByTestId('header-connect-button');
+    await expect(connectButton).toBeVisible({ timeout: 5000 });
+    this.logger.logInfo('Logout completed - connect button visible');
   }
 
   async signMessage(message: string): Promise<string> {
