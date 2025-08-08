@@ -309,7 +309,7 @@ const ParaConnect = safeStyled.a`
 `;
 
 const ParaIcon = safeStyled(CpslIcon)`
-  --border-radius: 4px;
+  --icon-border-radius: 4px;
 `;
 
 const Dots = safeStyled.div`

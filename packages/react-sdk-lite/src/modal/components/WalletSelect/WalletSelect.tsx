@@ -158,9 +158,9 @@ export const SelectContainer = safeStyled.div`
 `;
 
 const WalletTypeIcon = safeStyled(common.WalletTypeIcon)`
-  --border: 1px solid var(--cpsl-color-background-8);
-  --background: var(--cpsl-color-background-0);
-  --border-radius: 4px;
+  --icon-border: 1px solid var(--cpsl-color-background-8);
+  --icon-background: var(--cpsl-color-background-0);
+  --icon-border-radius: 4px;
 `;
 
 const CopyButton = safeStyled(CpslButton)`

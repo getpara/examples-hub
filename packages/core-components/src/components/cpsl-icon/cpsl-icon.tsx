@@ -62,10 +62,10 @@ export class CpslIcon {
           ...(this.inset ? { ['--inset']: this.inset } : {}),
           ...(this.size ? { ['--height']: this.size, ['--width']: this.size } : {}),
           ...(this.invert ? { ['--filter']: 'invert(100%)' } : {}),
-          ...(this.radius === 'full' ? { ['--border-radius']: '1000px' } : {}),
-          ...(this.radius === 'theme' ? { ['--border-radius']: 'var(--cpsl-border-radius-tile-button)' } : {}),
-          ...(this.background ? { ['--background']: this.background } : {}),
-          ...(this.border ? { ['--border']: this.border } : {}),
+          ...(this.radius === 'full' ? { ['--icon-border-radius']: '1000px' } : {}),
+          ...(this.radius === 'theme' ? { ['--icon-border-radius']: 'var(--cpsl-border-radius-tile-button)' } : {}),
+          ...(this.background ? { ['--icon-background']: this.background } : {}),
+          ...(this.border ? { ['--icon-border']: this.border } : {}),
           ...(this.color ? { ['--icon-color']: this.color } : {}),
         }}
       >

@@ -194,6 +194,7 @@ const ContentMeasurer = styled.div`
   height: ${() => (!isIFramed ? '100%' : 'auto')};
   display: flex;
   flex-direction: column;
+  align-items: center;
 `;
 
 const OuterContainer = styled.div<{ isBranded?: boolean }>`
