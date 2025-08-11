@@ -36,6 +36,10 @@ npx expo prebuild --clean
 ## Running the App
 
 ### iOS
+```bash
+npx expo run:ios
+```
+
 **Note:** The iOS version is configured with Para's team ID and will not run locally without modification.
 
 To run on iOS with your own credentials:
