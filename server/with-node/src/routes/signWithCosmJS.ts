@@ -55,7 +55,7 @@ export async function cosmjsPregenSignHandler(req: Request, res: Response): Prom
 
     console.log("Connecting to Cosmos RPC...");
     const stargateClient = await SigningStargateClient.connectWithSigner(
-      "https://rpc.provider-sentry-01.ics-testnet.polypore.xyz",
+      "https://rpc-rs.cosmos.nodestake.top/,
       paraProtoSigner
     );
     console.log("Connected to Cosmos RPC");
