@@ -131,7 +131,7 @@ function pickCosmosAccount(account: CosmosAccountType | undefined): CosmosAccoun
  */
 export const useAccount = ({ cosmos }: UseAccountParameters = {}): UseAccountReturn => {
   const client = useInternalClient();
-  const { data: isFullyLoggedIn, isSuccess } = useIsFullyLoggedIn();
+  const { data: isFullyLoggedIn, isSuccess, isLoading: isFullyLoggedInLoading } = useIsFullyLoggedIn();
 
   const evmContext = useStore(state => state.evmContext);
   const { useAccount: useEvmAccount } = useContext(evmContext);
@@ -158,6 +158,7 @@ export const useAccount = ({ cosmos }: UseAccountParameters = {}): UseAccountRet
     queryKey: [
       ACCOUNT_BASE_KEY,
       isFullyLoggedIn ?? null,
+      isFullyLoggedInLoading,
       client?.userId ?? null,
       evmQueryKeys,
       cosmosQueryKeys,
@@ -248,5 +249,5 @@ export const useAccount = ({ cosmos }: UseAccountParameters = {}): UseAccountRet
     },
   };
 
-  return { ...(data ?? defaultResp), isLoading };
+  return { ...(data ?? defaultResp), isLoading: isFullyLoggedInLoading || isLoading };
 };

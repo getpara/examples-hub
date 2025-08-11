@@ -14,7 +14,7 @@ test.describe('web sandbox', () => {
     await webExamplePage.visit();
     await page
       .locator('div:nth-child(3) > .chakra-select__wrapper > .chakra-select')
-      .selectOption('dfb222ff8b602eb492974a6ed68c35b2');
+      .selectOption('sandbox_dfb222ff8b602eb492974a6ed68c35b2');
 
     const { emailOrPhone, credential } = await webExamplePage.createUser({ context, is2FAEnabled: true });
 
