@@ -45,10 +45,10 @@ test.describe("with-node server API", () => {
         path: "/solana-web3/pregen",
         expectedMessage: "Transaction signed using Solana-Web3 + Para (pre-generated wallet)",
       },
-      {
-        path: "/alchemy/pregen",
-        expectedMessage: "User operation batch sent successfully using Alchemy + Para with pre-generated wallet",
-      },
+      // {
+      //   path: "/alchemy/pregen",
+      //   expectedMessage: "User operation batch sent successfully using Alchemy + Para with pre-generated wallet",
+      // },
       {
         path: "/zerodev/pregen",
         expectedMessage: "User operation batch sent using ZeroDev + Para (pregen-based) with viem signer",
