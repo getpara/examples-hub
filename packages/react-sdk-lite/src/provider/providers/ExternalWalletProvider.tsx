@@ -16,6 +16,8 @@ import {
 import { ExternalWalletInfo, VerifyExternalWalletParams } from '@getpara/web-sdk';
 import { useAuthActions } from './AuthProvider.js';
 import { CosmosSignResult } from '@getpara/cosmos-wallet-connectors';
+import { IS_FULLY_LOGGED_IN_BASE_KEY } from '../hooks/queries/useIsFullyLoggedIn.js';
+import { useQueryClient } from '@tanstack/react-query';
 
 export const useWalletDisplayHelpers = (wallet: CommonWallet | undefined) => {
   const isUsingMobileConnector = useModalStore(state => state.isUsingMobileConnector);
@@ -149,6 +151,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
   const { setSelectedWallet } = useWalletState();
   const { onNewAuthState } = useAuthActions();
   const { verifyExternalWalletAsync } = useVerifyExternalWallet();
+  const queryClient = useQueryClient();
 
   const [qrUri, setQrUri] = useState<string>();
   const [chainIdSwitchingTo, setChainIdSwitchingTo] = useState<string>();
@@ -378,6 +381,8 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
 
     try {
       const d = await verifyExternalWalletAsync(verifyExternalWalletParams);
+
+      await queryClient.refetchQueries({ queryKey: [IS_FULLY_LOGGED_IN_BASE_KEY] });
       if (wallet && externalWalletsWithFullAuth?.includes(wallet.name?.toUpperCase() as TExternalWallet)) {
         await onNewAuthState(d);
       } else {
