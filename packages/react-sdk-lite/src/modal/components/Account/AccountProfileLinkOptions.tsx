@@ -1,13 +1,12 @@
 import { AuthInput } from '../AuthInput/AuthInput.js';
 import { AccountTypeIcon, GradientScroll, StepContainer } from '../common.js';
 import { CpslButton, CpslDivider, CpslText } from '@getpara/react-components';
-import { getAccountTypeName } from '../../constants/oAuthLogos.js';
 import { useExternalWallets } from '../../../provider/providers/ExternalWalletProvider.js';
 import { useAccountLinking } from '../../../provider/providers/AccountLinkProvider.js';
 import { useEffect, useMemo } from 'react';
 import { TLinkedAccountType } from '@getpara/web-sdk';
 import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
-import { safeStyled } from '@getpara/react-common';
+import { getAccountTypeName, safeStyled } from '@getpara/react-common';
 
 type Option = Exclude<TLinkedAccountType, 'EXTERNAL_WALLET'> | string;
 

@@ -1,7 +1,7 @@
 import { Network, OnRampAsset, OnRampMethod, OnRampProvider, TWalletType } from '@getpara/core-sdk';
 import { IconType } from '@getpara/react-components';
 import { Transition, Variants } from 'framer-motion';
-import { DisplayMetadata } from '../types/commonTypes.js';
+import { DisplayMetadata } from '@getpara/react-common';
 
 export const PARA_CONNECT = 'https://connect.getpara.com/';
 export const PARA_TERMS_AND_CONDITIONS = 'https://getpara.com/terms';

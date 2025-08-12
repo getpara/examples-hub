@@ -2,6 +2,7 @@ import { AuthInfo, OnRampPurchaseUpdateParams } from '@getpara/user-management-c
 import { OfframpDepositRequest, type OnRampConfig, type OnRampPurchase } from '@getpara/web-sdk';
 
 export * from './externalWalletCommon.js';
+export * from './commonTypes.js';
 
 export type OnRampProps = {
   appName?: string;

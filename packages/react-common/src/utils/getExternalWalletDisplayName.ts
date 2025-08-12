@@ -1,21 +1,18 @@
 import { ExternalWalletInfo } from '@getpara/user-management-client';
 import { truncateAddress, TWalletType } from '@getpara/web-sdk';
 
-export const getExternalWalletDisplayName = ({ address, type, addressBech32 }: ExternalWalletInfo) => {
+export const getExternalWalletDisplayName = (
+  { address, type, providerId, addressBech32 }: ExternalWalletInfo,
+  { withAddress = false }: { withAddress?: boolean } = {},
+) => {
   const walletType = type as TWalletType;
-  let walletTypeDisplay: string;
 
-  switch (walletType) {
-    case 'EVM':
-      walletTypeDisplay = 'EVM';
-      break;
-    case 'SOLANA':
-      walletTypeDisplay = 'Solana';
-      break;
-    case 'COSMOS':
-      walletTypeDisplay = 'Cosmos';
-      break;
-  }
-
-  return `${walletTypeDisplay} ${truncateAddress(addressBech32 ?? address, walletType)}`;
+  return `${
+    providerId ??
+    {
+      EVM: 'EVM',
+      SOLANA: 'Solana',
+      COSMOS: 'Cosmos',
+    }[type]
+  }${withAddress ? ` ${truncateAddress(addressBech32 ?? address, walletType)}` : ''}`;
 };

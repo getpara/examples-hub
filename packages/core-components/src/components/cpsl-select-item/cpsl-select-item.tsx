@@ -33,6 +33,12 @@ export class CpslSelectItem {
           part="outer-container"
           class="outer-container"
           onClick={e => {
+            const targetId = (e.target as any).id ?? '';
+
+            if (targetId === 'ignore-click') {
+              return;
+            }
+
             this.handleItemClick();
             e.stopPropagation();
           }}

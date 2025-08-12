@@ -58,6 +58,7 @@ export const App = () => {
   const externalWalletConnectionOnly = useModalStateStore(state => state.externalWalletConnectionOnly);
   const externalWalletIncludeVerification = useModalStateStore(state => state.externalWalletIncludeVerification);
   const farcasterDisableAutoConnect = useModalStateStore(state => state.farcasterDisableAutoConnect);
+  const isFullAuth = useModalStateStore(state => state.isFullAuth);
 
   useEffect(() => {
     sdk.actions.ready();
@@ -107,7 +108,7 @@ export const App = () => {
           connectionOnly: externalWalletConnectionOnly,
           includeWalletVerification: externalWalletIncludeVerification,
           wallets: externalWallets,
-          // createLinkedEmbeddedForExternalWallets: 'ALL',
+          createLinkedEmbeddedForExternalWallets: isFullAuth ? 'ALL' : undefined,
           // appDescription
           // appIcon
           // appUrl

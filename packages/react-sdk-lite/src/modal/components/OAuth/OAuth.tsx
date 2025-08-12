@@ -1,10 +1,9 @@
 import { TOAuthMethod } from '@getpara/web-sdk';
-import { safeStyled } from '@getpara/react-common';
+import { ACCOUNT_TYPES, safeStyled } from '@getpara/react-common';
 import { useModalStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
 import { getTileButtonFlex } from '../../utils/getTileButtonFlex.js';
 import { StyledCpslTileButton } from '../common.js';
-import { ACCOUNT_TYPES } from '../../constants/oAuthLogos.js';
 import { useStore } from '../../../provider/stores/useStore.js';
 import { useAuthActions } from '../../../provider/providers/AuthProvider.js';
 

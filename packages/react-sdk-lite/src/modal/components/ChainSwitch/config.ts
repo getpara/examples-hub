@@ -1,4 +1,4 @@
-import { Tab } from '../../types/commonTypes.js';
+import { Tab } from '@getpara/react-common';
 
 export enum TabValue {
   extension = 'extension',

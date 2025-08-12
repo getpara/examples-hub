@@ -12,6 +12,7 @@ export const Theme = () => {
   const externalWalletConnectionOnly = useModalStateStore(state => state.externalWalletConnectionOnly);
   const externalWalletIncludeVerification = useModalStateStore(state => state.externalWalletIncludeVerification);
   const farcasterDisableAutoConnect = useModalStateStore(state => state.farcasterDisableAutoConnect);
+  const isFullAuth = useModalStateStore(state => state.isFullAuth);
 
   return (
     <>
@@ -32,6 +33,15 @@ export const Theme = () => {
           checked={externalWalletIncludeVerification}
           onCpslCheckboxChanged={(e: any) => {
             updateState({ externalWalletIncludeVerification: e.detail ?? false });
+          }}
+        />
+        <CpslText variant="bodyL" weight="semiBold">
+          With Full Auth
+        </CpslText>
+        <CpslCheckbox
+          checked={isFullAuth}
+          onCpslCheckboxChanged={(e: any) => {
+            updateState({ isFullAuth: e.detail ?? false });
           }}
         />
         <CpslText variant="bodyL" weight="semiBold">

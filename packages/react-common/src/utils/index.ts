@@ -140,4 +140,5 @@ export * from './getDeviceModelName.js';
 export * from './getBrowserName.js';
 export * from './formatBiometricHints.js';
 export * from './getExternalWalletDisplayName.js';
+export * from './getExternalWalletIcon.js';
 export * from './safeStyled.js';

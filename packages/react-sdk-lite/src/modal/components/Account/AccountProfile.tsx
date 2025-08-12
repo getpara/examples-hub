@@ -6,9 +6,8 @@ import { getWalletDisplayName } from '../../utils/getWalletDisplayName.js';
 import { LinkedAccount as TLinkedAccount, TLinkedAccountType, truncateAddress } from '@getpara/web-sdk';
 import { useAccountLinking } from '../../../provider/providers/AccountLinkProvider.js';
 import { ReactNode } from 'react';
-import { safeStyled, useCopyToClipboard } from '@getpara/react-common';
+import { ACCOUNT_TYPES, safeStyled, useCopyToClipboard } from '@getpara/react-common';
 import { useExternalWallets } from '../../../provider/providers/ExternalWalletProvider.js';
-import { ACCOUNT_TYPES } from '../../constants/oAuthLogos.js';
 import { useStore } from '../../../provider/stores/useStore.js';
 import { AccountHeader } from './AccountHeader.js';
 

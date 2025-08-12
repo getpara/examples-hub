@@ -13,7 +13,7 @@ import { AddFundsReceive } from './AddFundsReceive.js';
 import { AddFundsContextProvider, Tab, TABS } from './AddFundsContext.js';
 import { AnimatePresence } from 'framer-motion';
 import { AddFundsSettings } from './AddFundsSettings.js';
-import { WalletSelect } from '../WalletSelect/WalletSelect.js';
+import { WalletSelectOld } from '../WalletSelectOld/WalletSelectOld.js';
 
 export const AddFunds = () => {
   const step = useModalStore(state => state.step);
@@ -70,7 +70,7 @@ export const AddFunds = () => {
       {isMultiFlow && (
         <InnerStepContainer>
           <CpslTabs selectedTab={tab} onCpslTabsChanged={onSetTab}>
-            {TABS.filter(([enabledFlow]) => enabledFlow === EnabledFlow.BUY || enabledFlow === EnabledFlow.WITHDRAW).map(
+            {TABS.filter(([enabledFlow]) => enabledFlow === EnabledFlow.BUY || enabledFlow === EnabledFlow.RECEIVE).map(
               ([tab, _, icon, title]) => (
                 <CpslTab key={tab} tab={tab}>
                   <CpslIcon slot="start" icon={icon} />
@@ -81,7 +81,7 @@ export const AddFunds = () => {
           </CpslTabs>
         </InnerStepContainer>
       )}
-      {(step === ModalStep.ADD_FUNDS_RECEIVE || (embedded?.wallets && embedded.wallets.length > 1)) && <WalletSelect />}
+      {(step === ModalStep.ADD_FUNDS_RECEIVE || (embedded?.wallets && embedded.wallets.length > 1)) && <WalletSelectOld />}
       <AnimatePresence mode="wait">
         <AddFundsContextProvider data-testid="add-funds" tab={tab}>
           {Content}

@@ -1,12 +1,11 @@
 import { Fragment, ReactNode, useMemo } from 'react';
 import { CpslButton, CpslDivider, CpslIcon, CpslIconGroup, IconType } from '@getpara/react-components';
-import { safeStyled } from '@getpara/react-common';
+import { ACCOUNT_TYPES, safeStyled } from '@getpara/react-common';
 import { TOAuthMethod } from '@getpara/web-sdk';
 import { ExternalWallets } from '../ExternalWallets/ExternalWallets.js';
 import { useModalStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
 import { AuthLayout } from '../../types/modalProps.js';
-import { ACCOUNT_TYPES } from '../../constants/oAuthLogos.js';
 import { AuthOptions } from '../AuthOptions/AuthOptions.js';
 import { useExternalWallets } from '../../../provider/providers/ExternalWalletProvider.js';
 import { useStore } from '../../../provider/stores/useStore.js';

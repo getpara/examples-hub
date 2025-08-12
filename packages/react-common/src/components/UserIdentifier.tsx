@@ -1,8 +1,11 @@
 import { CpslAvatar, CpslIcon, CpslText, IconType } from '@getpara/react-components';
 import { CoreAuthInfo, displayPhoneNumber, truncateAddress } from '@getpara/web-sdk';
-import { getExternalWalletDisplayName, safeStyled } from '../utils/index.js';
+import { getExternalWalletDisplayName, getExternalWalletIcon, safeStyled } from '../utils/index.js';
 
-export function getAuthDisplay(authInfo: CoreAuthInfo): { name: string | null; icon?: IconType; src?: string } {
+export function getAuthDisplay(
+  authInfo: CoreAuthInfo,
+  { withAddress = false }: { withAddress?: boolean } = {},
+): { name: string | null; icon?: IconType; src?: string } {
   const { authType, displayName, identifier, pfpUrl, externalWallet } = authInfo;
 
   switch (authType) {
@@ -19,8 +22,10 @@ export function getAuthDisplay(authInfo: CoreAuthInfo): { name: string | null; i
       };
     case 'externalWallet':
       return {
-        name: externalWallet ? getExternalWalletDisplayName(externalWallet) : truncateAddress(identifier, 'EVM'),
-        icon: 'wallet',
+        name: externalWallet
+          ? getExternalWalletDisplayName(externalWallet, { withAddress })
+          : truncateAddress(identifier, 'EVM'),
+        icon: getExternalWalletIcon(externalWallet?.providerId) ?? 'wallet02',
       };
     default:
       return { name: null, icon: null };
@@ -34,7 +39,7 @@ export const UserIdentifier = ({ authInfo }: { authInfo?: CoreAuthInfo }) => {
 
   const { authType } = authInfo;
 
-  const { name, icon, src } = getAuthDisplay(authInfo);
+  const { name, icon, src } = getAuthDisplay(authInfo, { withAddress: true });
 
   return (
     <Container>

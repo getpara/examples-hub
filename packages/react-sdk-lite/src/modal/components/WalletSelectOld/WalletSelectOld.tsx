@@ -1,57 +1,42 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
 import { useDropdownPosition } from '../AuthInput/hooks/useDropdownPosition.js';
-import { getExternalWalletIcon, safeStyled, useCopyToClipboard } from '@getpara/react-common';
+import { safeStyled, useCopyToClipboard } from '@getpara/react-common';
 import { useAccount, useWallet, useWalletState } from '../../../provider/index.js';
 import { CpslButton, CpslIcon, CpslSelect, CpslSelectItem, CpslText } from '@getpara/react-components';
-import { TWalletType, Wallet as TWallet, truncateAddress } from '@getpara/web-sdk';
+import { TWalletType, Wallet as TWallet } from '@getpara/web-sdk';
+import * as common from '../common.js';
 
 const getValue = (id?: string, type?: TWalletType) => {
   return id && type ? `${id}~${type}` : undefined;
 };
 
-// TODO: remove the old wallet select component
 const Wallet = ({
   wallet,
   withCopy,
   slot,
   withIcon,
-  isMenu,
 }: {
   wallet: Omit<TWallet, 'signer'>;
   withCopy?: boolean;
   slot?: string;
   withIcon?: boolean;
-  isMenu?: boolean;
 }) => {
   const para = useInternalClient();
   const [isCopied, copy] = useCopyToClipboard();
 
-  const { name, icon, src } = useMemo(() => {
-    let name, icon, src;
-
-    if (wallet.isExternal) {
-      name = wallet.ensName ?? truncateAddress(wallet.address!, wallet.type!, { prefix: para.cosmosPrefix });
-      src = wallet.ensAvatar;
-      icon = getExternalWalletIcon(wallet.externalProviderId);
-    } else {
-      name = `${para.partnerName} Wallet`;
-      src = para.partnerLogo;
-      icon = 'wallet02';
-    }
-    return { name, icon, src };
-  }, [wallet, para.partnerName, para.partnerLogo, para.externalWallets]);
-
   return (
-    <WalletContainer slot={slot} style={isMenu ? undefined : { flex: '0' }}>
-      {withIcon && <WalletIcon icon={icon} src={src} size="32px" inset="6px" />}
-      <CpslText
-        variant={slot === 'selected-item' ? 'headingXS' : 'bodyM'}
-        weight="semiBold"
-        color="contrast"
-        style={{ overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', flex: isMenu ? '1' : undefined }}
-      >
-        {name}
+    <WalletContainer slot={slot} style={{ flex: '1' }}>
+      {withIcon && (
+        <WalletTypeIcon
+          externalWallet={wallet.isExternal ? wallet.externalProviderId : undefined}
+          walletType={wallet.type}
+          size="32px"
+          inset="6px"
+        />
+      )}
+      <CpslText variant="bodyM" color="contrast" style={{ flex: '1' }}>
+        {para.getDisplayAddress(wallet.id, { truncate: true, addressType: wallet.type })}
       </CpslText>
       {withCopy && (
         <CopyButton
@@ -71,7 +56,7 @@ const Wallet = ({
   );
 };
 
-export const WalletSelect = () => {
+export const WalletSelectOld = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const { dropdownMaxHeight, dropdownWidth, mobileAnchor, resize } = useDropdownPosition(containerRef);
 
@@ -79,15 +64,10 @@ export const WalletSelect = () => {
   const { data: activeWallet } = useWallet();
   const { embedded } = useAccount();
 
-  // Only need the first embedded wallet here since that effectively represents the "profile"
-  const firstEmbeddedWallet = embedded?.wallets?.filter(wallet => !wallet.isExternal)?.[0];
-  const availableExternalWallets = embedded?.wallets?.filter(wallet => wallet.isExternal) || [];
-  const availableWallets = [...(firstEmbeddedWallet ? [firstEmbeddedWallet] : []), ...availableExternalWallets];
+  const availableWallets = embedded?.wallets;
   const isMultiWallet = availableWallets && availableWallets.length > 1;
 
-  const ActiveWalletNode = activeWallet ? (
-    <Wallet wallet={activeWallet} slot="selected-item" withCopy={activeWallet.isExternal} />
-  ) : null;
+  const ActiveWalletNode = activeWallet ? <Wallet withCopy wallet={activeWallet} slot="selected-item" withIcon /> : null;
 
   useEffect(() => {
     if (dropdownMaxHeight && activeWallet?.address) {
@@ -97,6 +77,11 @@ export const WalletSelect = () => {
 
   return (
     <Container>
+      {isMultiWallet && (
+        <CpslText variant="bodyM" color="secondary" weight="semiBold">
+          Select Wallet
+        </CpslText>
+      )}
       <SelectContainer ref={containerRef} id="addressInputContainer">
         <Select
           selectedValue={getValue(activeWallet?.id, activeWallet?.type)}
@@ -116,16 +101,11 @@ export const WalletSelect = () => {
           disabled={!isMultiWallet}
         >
           {activeWallet && ActiveWalletNode}
-          {firstEmbeddedWallet && (
-            <SelectItem key="embedded" slot="items" value={getValue(firstEmbeddedWallet?.id, firstEmbeddedWallet?.type)}>
-              <Wallet isMenu wallet={firstEmbeddedWallet} withIcon />
-            </SelectItem>
-          )}
-          {(availableExternalWallets || []).map(wallet => {
+          {(availableWallets || []).map(wallet => {
             const key = getValue(wallet.id, wallet.type);
             return (
               <SelectItem key={key} slot="items" value={key}>
-                <Wallet isMenu wallet={wallet} withIcon withCopy />
+                <Wallet wallet={wallet} withIcon />
               </SelectItem>
             );
           })}
@@ -146,29 +126,18 @@ const WalletContainer = safeStyled.div`
   display: flex;
   align-items: center;
   gap: 8px;
-  width: 100%;
 `;
 
 export const Select = safeStyled(CpslSelect)<{ $width: number; $top?: number }>`
   --icon-width: 32px;
   --icon-height: 32px;
-  --container-border-color: transparent;
-  --container-background-color: transparent;
-  --container-border-width: 0px;
+  --container-border-color: var(--cpsl-color-background-16);
   --container-background-color-disabled: var(--container-background-color);
-  --container-box-shadow: none !important;
-  --dropdown-border-width: 0px;
-  --dropdown-background-color: var(--cpsl-color-background-4);
-  
   width: 286px;
   position: relative;
 
   &::part(selected-text) {
     white-space: nowrap;
-  }
-
-  &::part(select-container) {
-    justify-content: center;
   }
 
   &::part(dropdown) {
@@ -189,9 +158,6 @@ export const SelectItem = safeStyled(CpslSelectItem)`
   --container-padding-end: 12px;
   --container-padding-top: 8px;
   --container-padding-bottom: 8px;
-  --container-background-color: var(--cpsl-color-background-4);
-  --container-hover-background-color: var(--cpsl-color-background-8);
-  width: 100%;
 `;
 
 export const SelectContainer = safeStyled.div`
@@ -200,12 +166,13 @@ export const SelectContainer = safeStyled.div`
   align-items: center;
   gap: 8px;
   border-radius: var(--cpsl-border-radius-tile-button);
-  background-color: transparent;
+  background-color: var(--cpsl-color-background-4);
 `;
 
-const WalletIcon = safeStyled(CpslIcon)`  --icon-border: 1px solid var(--cpsl-color-background-8);
-  --icon-background: var(--cpsl-color-background-0);
-  --icon-border-radius: 4px;
+const WalletTypeIcon = safeStyled(common.WalletTypeIcon)`
+  --border: 1px solid var(--cpsl-color-background-8);
+  --background: var(--cpsl-color-background-0);
+  --border-radius: 4px;
 `;
 
 const CopyButton = safeStyled(CpslButton)`

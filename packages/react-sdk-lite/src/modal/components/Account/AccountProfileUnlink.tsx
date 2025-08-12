@@ -1,9 +1,8 @@
 import { CpslButton, CpslText } from '@getpara/react-components';
 import { useEffect, useState } from 'react';
 import { AccountTypeIcon } from '../common.js';
-import { getAccountTypeName } from '../../constants/oAuthLogos.js';
 import { useAccountLinking } from '../../../provider/providers/AccountLinkProvider.js';
-import { safeStyled } from '@getpara/react-common';
+import { getAccountTypeName, safeStyled } from '@getpara/react-common';
 
 export function AccountProfileUnlink() {
   const { unlinkingAccount, unlinkAccountConfirm, isUnlinkAccountPending } = useAccountLinking(),

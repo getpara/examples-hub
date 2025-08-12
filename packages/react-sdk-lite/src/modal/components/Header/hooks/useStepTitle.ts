@@ -4,7 +4,7 @@ import { ModalStep } from '../../../utils/steps.js';
 import { useExternalWallets } from '../../../../provider/providers/ExternalWalletProvider.js';
 import { useStore } from '../../../../provider/stores/useStore.js';
 import { useAccountLinking } from '../../../../provider/providers/AccountLinkProvider.js';
-import { useAccount } from '../../../../provider/index.js';
+import { useWallet } from '../../../../provider/index.js';
 
 export const signUpOrLogInTitle = 'Sign Up or Login';
 
@@ -16,7 +16,7 @@ export const useStepTitle = () => {
   const isLogin = useModalStore(state => state.isLogin());
   const currentStep = useModalStore(state => state.step);
   const authLayout = useModalStore(state => state.authLayout) || [];
-  const { connectionType } = useAccount();
+  const { data: activeWallet } = useWallet();
 
   const [isAuthFirst, isAuthCondensed, isExternalFirst, isExternalCondensed, isBothCondensed] = [
     authLayout[0]?.includes('AUTH'),
@@ -87,8 +87,12 @@ export const useStepTitle = () => {
   }, [currentStep, titles]);
 
   const isControls = useMemo(() => {
-    return connectionType === 'external' && [ModalStep.ACCOUNT_MAIN, ModalStep.CHAIN_SWITCH].includes(currentStep);
-  }, [connectionType, currentStep]);
+    return (
+      activeWallet?.isExternal &&
+      activeWallet?.type === 'EVM' &&
+      [ModalStep.ACCOUNT_MAIN, ModalStep.CHAIN_SWITCH].includes(currentStep)
+    );
+  }, [activeWallet, currentStep]);
 
   const isTitleDisplayed = useMemo(() => {
     return !isControls && (currentStep !== ModalStep.AUTH_MAIN || !logo);

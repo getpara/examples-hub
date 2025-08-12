@@ -1,9 +1,8 @@
 import { CpslIcon, CpslInput, CpslSelect, CpslSelectItem, CpslText, CpslTileButton } from '@getpara/react-components';
-import { safeStyled } from '@getpara/react-common';
+import { ACCOUNT_TYPES, safeStyled } from '@getpara/react-common';
 import { MOBILE_SIZE, NETWORKS, ON_RAMP_ASSETS, WALLET_TYPES_METADATA } from '../constants/constants.js';
 import { Network, OnRampAsset, TExternalWallet, TLinkedAccountType, TWalletType } from '@getpara/web-sdk';
 import { useStore } from '../../provider/stores/useStore.js';
-import { ACCOUNT_TYPES } from '../constants/oAuthLogos.js';
 import { ComponentProps, PropsWithChildren, useEffect, useRef, useState } from 'react';
 
 export const SpinnerContainer = safeStyled.div`

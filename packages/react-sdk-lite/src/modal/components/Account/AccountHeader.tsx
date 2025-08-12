@@ -1,11 +1,11 @@
-import { safeStyled } from '@getpara/react-common';
+import { getExternalWalletIcon, safeStyled } from '@getpara/react-common';
 import { formatBalanceString } from '../../utils/stringFormatters.js';
 import { CpslIcon, CpslText } from '@getpara/react-components';
 import { useMemo } from 'react';
 import { truncateAddress } from '@getpara/web-sdk';
 import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
-import { getExternalWalletIcon } from '../../utils/icons.js';
-import { useWalletBalance } from '../../../provider/index.js';
+import { useAccount, useWallet, useWalletBalance } from '../../../provider/index.js';
+import { WalletSelect } from '../WalletSelect/WalletSelect.js';
 
 const Balance = () => {
   const { data: balance } = useWalletBalance();
@@ -18,10 +18,12 @@ const Balance = () => {
 
 export const AccountHeader = ({ withBalance = false }: { withBalance?: boolean } = {}) => {
   const para = useInternalClient();
+  const { connectionType } = useAccount();
+  const { data: activeWallet } = useWallet();
   const { name, icon, src } = useMemo(() => {
     let name, icon, src;
     switch (true) {
-      case Object.keys(para?.externalWallets).length > 0:
+      case activeWallet?.isExternal:
         {
           const wallet = Object.values(para.externalWallets)[0];
           name = wallet.ensName ?? truncateAddress(wallet.address!, wallet.type!, { prefix: para.cosmosPrefix });
@@ -36,7 +38,7 @@ export const AccountHeader = ({ withBalance = false }: { withBalance?: boolean }
         break;
     }
     return { name, icon, src };
-  }, [para.partnerName, para.partnerLogo, para.externalWallets]);
+  }, [activeWallet, para.partnerName, para.partnerLogo, para.externalWallets]);
 
   return (
     <AccountContainer>
@@ -49,9 +51,13 @@ export const AccountHeader = ({ withBalance = false }: { withBalance?: boolean }
         icon={icon}
         src={src}
       />
-      <CpslText variant="headingXS" weight="semiBold" color="contrast">
-        {name}
-      </CpslText>
+      {connectionType === 'both' ? (
+        <WalletSelect />
+      ) : (
+        <CpslText variant="headingXS" weight="semiBold" color="contrast">
+          {name}
+        </CpslText>
+      )}
       {withBalance && <Balance />}
     </AccountContainer>
   );
