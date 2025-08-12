@@ -1,8 +1,8 @@
 {
   "name": "@getpara/cosmjs-v0-integration",
-  "version": "2.0.0-alpha.43",
+  "version": "2.0.0-alpha.44",
   "dependencies": {
-    "@getpara/core-sdk": "2.0.0-alpha.43"
+    "@getpara/core-sdk": "2.0.0-alpha.44"
   },
   "devDependencies": {
     "@cosmjs/amino": "^0.33.1",
