@@ -45,7 +45,7 @@ export const EnterPINStep = ({ error, onLoginClick, isEmbedded, setStep }: Enter
     // Using a small timeout here to ensure the input is mounted before attempting focus
     setTimeout(() => {
       inputRef.current?.shadowRoot?.querySelectorAll('input')?.[0]?.focus();
-    }, 10);
+    }, 60);
   }, []);
 
   const handlePINInput = (e: CpslCodeInputCustomEvent<CodeChangeEventDetail>) => {
@@ -162,6 +162,7 @@ const Container = styled.form<{ $isEmbedded?: boolean }>`
 
   display: flex;
   align-items: center;
+  justify-content: center;
   flex-direction: column;
   gap: ${({ $isEmbedded }) => ($isEmbedded ? '8px' : '24px')};
 `;

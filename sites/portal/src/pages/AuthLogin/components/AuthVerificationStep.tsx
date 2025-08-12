@@ -29,7 +29,7 @@ export const VerificationCode = ({ authInfo, onResend, onSubmit, isPending, erro
     // Using a small timeout here to ensure the input is mounted before attempting focus
     setTimeout(() => {
       inputRef.current?.shadowRoot?.querySelectorAll('input')?.[0]?.focus();
-    }, 10);
+    }, 60);
   }, []);
 
   useEffect(() => {
@@ -199,6 +199,7 @@ const Container = styled.form<{ $isEmbedded?: boolean }>`
 
   display: flex;
   align-items: center;
+  justify-content: center;
   flex-direction: column;
   gap: ${({ $isEmbedded }) => ($isEmbedded ? '24px' : '24px')};
 `;

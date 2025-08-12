@@ -203,7 +203,7 @@ describe('openPopup', () => {
   });
   it('LOGIN_PASSWORD', () => {
     const resp = openPopup({ url: URL, target: TARGET, type: 'LOGIN_PASSWORD' });
-    popUpHeight = 460;
+    popUpHeight = 798;
 
     expect(resp.location.href).toBe(URL);
     expect(mockWindowOpen).toBeCalledTimes(1);

@@ -20,7 +20,7 @@ export function openPopup({
 
   switch (type) {
     case 'LOGIN_PASSWORD': {
-      popUpHeight = 460;
+      popUpHeight = 798;
       break;
     }
     case 'LOGIN_PASSKEY': {

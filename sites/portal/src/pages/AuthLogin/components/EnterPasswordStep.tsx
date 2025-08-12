@@ -170,6 +170,7 @@ const Container = styled.form<{ $isEmbedded?: boolean }>`
 
   display: flex;
   align-items: center;
+  justify-content: center;
   flex-direction: column;
   gap: ${({ $isEmbedded }) => ($isEmbedded ? '4px' : '24px')};
 `;
