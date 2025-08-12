@@ -345,6 +345,7 @@ class _EVMWalletViewState extends State<EVMWalletView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: const Key('walletDetailView'),
       backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.surface,
@@ -506,6 +507,7 @@ class _EVMWalletViewState extends State<EVMWalletView> {
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
+                          key: const Key('signMessageButton'),
                           onPressed: _isLoading || _messageToSign.isEmpty
                               ? null
                               : _signMessage,

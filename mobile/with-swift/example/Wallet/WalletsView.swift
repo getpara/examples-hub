@@ -200,6 +200,7 @@ struct WalletsView: View {
                 .shadow(color: chainColor(for: wallet.type ?? .evm).opacity(0.3), radius: 8, x: 0, y: 4)
         }
         .buttonStyle(PlainButtonStyle())
+        .accessibilityIdentifier("walletCell_\(wallet.type?.rawValue.uppercased() ?? "UNKNOWN")")
     }
 
     private func formatAddress(_ address: String) -> String {

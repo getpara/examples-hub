@@ -219,11 +219,13 @@ struct CosmosWalletView: View {
                         .buttonStyle(.bordered)
                         .frame(maxWidth: .infinity)
                         .disabled(isLoading || paraCosmosSigner == nil)
+                        .accessibilityIdentifier("Sign Transaction")
 
                     Button("Sign Amino", action: testSignAmino)
                         .buttonStyle(.bordered)
                         .frame(maxWidth: .infinity)
                         .disabled(isLoading || paraCosmosSigner == nil)
+                        .accessibilityIdentifier("Sign Amino")
                 }
 
                 if paraCosmosSigner != nil {
