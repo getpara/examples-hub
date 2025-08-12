@@ -1,3 +1,41 @@
+# Release (Mon Aug 11 2025)
+
+## Package Versions
+- @getpara/web-sdk@2.0.0-alpha.43
+- @getpara/wagmi-v2-integration@2.0.0-alpha.43
+- @getpara/wagmi-v2-connector@2.0.0-alpha.43
+- @getpara/viem-v2-integration@2.0.0-alpha.43
+- @getpara/viem-v1-integration@2.0.0-alpha.43
+- @getpara/user-management-client@2.0.0-alpha.43
+- @getpara/solana-web3.js-v1-integration@2.0.0-alpha.43
+- @getpara/solana-wallet-connectors@2.0.0-alpha.43
+- @getpara/solana-signers-v2-integration@2.0.0-alpha.43
+- @getpara/server-sdk@2.0.0-alpha.43
+- @getpara/react-sdk-lite@2.0.0-alpha.43
+- @getpara/react-sdk@2.0.0-alpha.43
+- @getpara/react-native-wallet@2.0.0-alpha.43
+- @getpara/react-components@2.0.0-alpha.43
+- @getpara/react-component-library@1.0.0-alpha.38
+- @getpara/react-common@2.0.0-alpha.43
+- @getpara/evm-wallet-connectors@2.0.0-alpha.43
+- @getpara/ethers-v6-integration@2.0.0-alpha.43
+- @getpara/ethers-v5-integration@2.0.0-alpha.43
+- @getpara/cosmos-wallet-connectors@2.0.0-alpha.43
+- @getpara/cosmjs-v0-integration@2.0.0-alpha.43
+- @getpara/core-sdk@2.0.0-alpha.43
+- @getpara/core-components@2.0.0-alpha.43
+
+### Features
+- Add 'both' connectionType dropdown (#1151) - 671268e34
+
+### Fixes
+- useIsFullyLoggedIn hook stale time (#1156) - 785db26ed
+- Icon background var leak (#1154) - 2812cbf70
+- Unsupported networks in chain select (#1150) - 24288df2e
+
+### Chores
+- Update popup height (#1155) - 0d8d9281a
+
 # Release (Wed Aug 06 2025)
 
 ## Package Versions
