@@ -496,10 +496,18 @@ export abstract class ParaCore implements CoreInterface {
    */
   clearStorage = async (type: CoreMethodParams<'clearStorage'> = 'all'): CoreMethodResponse<'clearStorage'> => {
     const isAll = type === 'all';
-    (isAll || type === 'local') && this.platformUtils.localStorage.clear(constants.PREFIX);
-    (isAll || type === 'session') && this.platformUtils.sessionStorage.clear(constants.PREFIX);
+    // clear both @CAPSULE/ and @PARA/ prefixed items to ensure complete cleanup
+    if (isAll || type === 'local') {
+      this.platformUtils.localStorage.clear(constants.PREFIX);
+      this.platformUtils.localStorage.clear(constants.PARA_PREFIX);
+    }
+    if (isAll || type === 'session') {
+      this.platformUtils.sessionStorage.clear(constants.PREFIX);
+      this.platformUtils.sessionStorage.clear(constants.PARA_PREFIX);
+    }
     if ((isAll || type === 'secure') && this.platformUtils.secureStorage) {
       this.platformUtils.secureStorage.clear(constants.PREFIX);
+      this.platformUtils.secureStorage.clear(constants.PARA_PREFIX);
     }
   };
 

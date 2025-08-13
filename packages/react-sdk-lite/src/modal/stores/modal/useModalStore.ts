@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
+import { PARA_STORAGE_PREFIX } from '@getpara/core-sdk';
 import { ModalStep } from '../../utils/steps.js';
 import { getActions } from './actions.js';
 import {
@@ -150,7 +151,7 @@ export const useModalStore = create<ModalStore>()(
     }),
     {
       version: 1,
-      name: '@PARA/modalState',
+      name: `${PARA_STORAGE_PREFIX}modalState`,
       storage: createJSONStorage(() => localStorage),
       partialize: state => ({
         step: state.step,

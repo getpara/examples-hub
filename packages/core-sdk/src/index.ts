@@ -79,7 +79,7 @@ export * from './types/coreApi.js';
 export * from './types/events.js';
 export * from './types/config.js';
 export { getPortalDomain, entityToWallet, constructUrl, shortenUrl } from './utils/index.js';
-export { PREFIX as STORAGE_PREFIX } from './constants.js';
+export { PREFIX as STORAGE_PREFIX, PARA_PREFIX as PARA_STORAGE_PREFIX } from './constants.js';
 export { distributeNewShare } from './shares/shareDistribution.js';
 export { KeyContainer } from './shares/KeyContainer.js';
 export type { PlatformUtils } from './PlatformUtils.js';

@@ -1,6 +1,7 @@
 export const PARA_CORE_VERSION = process.env.PARA_CORE_VERSION;
 
 export const PREFIX = '@CAPSULE/';
+export const PARA_PREFIX = '@PARA/'; // prefix used for modal and provider states
 export const LOCAL_STORAGE_AUTH_INFO = `${PREFIX}authInfo`;
 export const LOCAL_STORAGE_EMAIL = `${PREFIX}e-mail`;
 export const LOCAL_STORAGE_PHONE = `${PREFIX}phone`;

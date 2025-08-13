@@ -9,6 +9,7 @@ import {
 import { Store } from './types.js';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { createConfigSlice } from './slices/config.js';
+import { PARA_STORAGE_PREFIX } from '@getpara/core-sdk';
 
 export const vanillaStore = createStore<Store>()(
   persist<Store, [], [], Pick<Store, 'selectedWalletId' | 'selectedWalletType'>>(
@@ -22,7 +23,7 @@ export const vanillaStore = createStore<Store>()(
     }),
     {
       version: 1,
-      name: '@PARA/provider-state',
+      name: `${PARA_STORAGE_PREFIX}provider-state`,
       storage: createJSONStorage(() => localStorage),
       partialize: state => ({
         selectedWalletId: state.selectedWalletId,

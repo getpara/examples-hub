@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { vi } from 'vitest';
 
 const toHexSig = (tag: string) => `0x${tag}-deadbeef`;
