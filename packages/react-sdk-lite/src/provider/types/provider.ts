@@ -171,7 +171,7 @@ export interface ParaProviderProps<
         /**
          * Environment for your Para instance.
          */
-        env: Environment;
+        env?: Environment;
         /**
          * API key for you Para instance.
          *

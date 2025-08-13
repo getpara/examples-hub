@@ -890,16 +890,67 @@ export abstract class ParaCore implements CoreInterface {
     return extractAuthInfo(auth);
   }
 
+  static resolveEnvironment(env: Environment | undefined, apiKey: string | undefined): Environment {
+    if (!apiKey) {
+      throw new Error('A Para API key is required.');
+    }
+
+    if (apiKey.includes('_')) {
+      const validEnvironmentPrefixes = Object.values(Environment);
+      const envPrefix = apiKey.split('_')[0]?.toUpperCase();
+      const hasValidPrefix = validEnvironmentPrefixes.some(envValue => envValue === envPrefix);
+
+      if (!hasValidPrefix) {
+        throw new Error(`Invalid API key environment prefix.`);
+      }
+
+      return envPrefix as Environment;
+    }
+
+    if (!env) {
+      throw new Error('Environment parameter is required.');
+    }
+
+    return env;
+  }
+
   /**
    * Constructs a new `ParaCore` instance.
-   * @param env - `Environment` to use.
+   * @param env - `Environment` to use. Optional if the apiKey contains an environment prefix (e.g., "prod_your_api_key"). Updated API keys can be found at https://developer.getpara.com.
    * @param apiKey - API key to use.
    * @param opts - Additional constructor options; see `ConstructorOpts`.
    * @returns - A new ParaCore instance.
    */
-  constructor(env: Environment, apiKey: string, opts?: ConstructorOpts) {
-    if (!apiKey) {
-      throw new Error('A Para API key is required.');
+  constructor(env: Environment | undefined, apiKey: string, opts?: ConstructorOpts);
+  constructor(apiKey: string, opts?: ConstructorOpts);
+  constructor(
+    envOrApiKey: Environment | undefined | string,
+    apiKeyOrOpts?: string | ConstructorOpts,
+    opts?: ConstructorOpts,
+  ) {
+    let env: Environment | undefined, apiKey: string;
+
+    if (arguments.length === 1) {
+      // 1-parameter constructor: (apiKey)
+      env = ParaCore.resolveEnvironment(undefined, envOrApiKey as string);
+      apiKey = envOrApiKey as string;
+      opts = undefined;
+    } else if (arguments.length === 2) {
+      if (typeof apiKeyOrOpts === 'object' && apiKeyOrOpts !== null) {
+        // 2-parameter constructor: (apiKey, opts)
+        env = ParaCore.resolveEnvironment(undefined, envOrApiKey as string);
+        apiKey = envOrApiKey as string;
+        opts = apiKeyOrOpts as ConstructorOpts;
+      } else {
+        // 2-parameter constructor: (env, apiKey)
+        env = ParaCore.resolveEnvironment(envOrApiKey as Environment | undefined, apiKeyOrOpts as string);
+        apiKey = apiKeyOrOpts as string;
+        opts = undefined;
+      }
+    } else {
+      // 3-parameter constructor: (env, apiKey, opts)
+      env = ParaCore.resolveEnvironment(envOrApiKey as Environment | undefined, apiKeyOrOpts as string);
+      apiKey = apiKeyOrOpts as string;
     }
 
     // TODO: consider using sessionStorage instead of localStorage
@@ -1212,7 +1263,32 @@ export abstract class ParaCore implements CoreInterface {
       !supportedWalletTypesEq(this.partner?.supportedWalletTypes || [], session.supportedWalletTypes) ||
       (this.partner?.cosmosPrefix || 'cosmos') !== session.cosmosPrefix
     ) {
-      await this.#getPartner(session.partnerId);
+      if (!session.partnerId) {
+        console.error(`
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🚨 PARA SDK CONFIGURATION ERROR 🚨
+
+INVALID API KEY FOR CONFIGURED ENVIRONMENT
+
+Your API key does not match the configured environment. This usually means:
+
+1. You're using a production API key with a development environment
+2. You're using a development API key with a production environment  
+3. Your API key is invalid or has been regenerated
+
+SOLUTION:
+• Verify your API key at: https://developer.getpara.com
+• If your API key doesn't contain an environment prefix, ensure your API key is the correct key for your target environment
+
+Current Environment: ${this.ctx.env}
+API Key Prefix: ${this.ctx.apiKey?.split('_')[0].toUpperCase() || 'None'}
+
+Need help? Visit: https://docs.getpara.com or contact support
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        `);
+      } else {
+        await this.#getPartner(session.partnerId);
+      }
     }
 
     return session;

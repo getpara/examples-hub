@@ -43,12 +43,70 @@ export class ParaMobile extends ParaCore {
   private relyingPartyId: string;
   /**
    * Creates an instance of ParaMobile.
-   * @param {Environment} env - The environment to use (DEV, SANDBOX, BETA, or PROD).
+   * @param {Environment} env - The environment to use (DEV, SANDBOX, BETA, or PROD). Optional if the apiKey contains an environment prefix (e.g., "prod_your_api_key"). Updated API keys can be found at https://developer.getpara.com.
    * @param {string} [apiKey] - The API key for authentication.
    * @param {string} [relyingPartyId] - The relying party ID for WebAuthn.
    * @param {ConstructorOpts} [opts] - Additional constructor options.
    */
-  constructor(env: Environment, apiKey: string, relyingPartyId?: string, opts?: ConstructorOpts) {
+  constructor(env: Environment | undefined, apiKey: string, relyingPartyId?: string, opts?: ConstructorOpts);
+  constructor(apiKey: string, relyingPartyId?: string, opts?: ConstructorOpts);
+  constructor(
+    envOrApiKey: Environment | undefined | string,
+    apiKeyOrRelyingPartyId?: string,
+    relyingPartyIdOrOpts?: string | ConstructorOpts,
+    optsArg?: ConstructorOpts,
+  ) {
+    let env: Environment | undefined, apiKey: string, relyingPartyId: string | undefined, opts: ConstructorOpts | undefined;
+
+    // Helper function to check if value is a valid Environment
+    const isEnvironment = (value: any): value is Environment => {
+      return Object.values(Environment).includes(value);
+    };
+
+    if (arguments.length === 1) {
+      // 1-parameter case: (apiKey)
+      env = undefined;
+      apiKey = envOrApiKey as string;
+      relyingPartyId = undefined;
+      opts = undefined;
+    } else if (arguments.length === 2) {
+      if (isEnvironment(envOrApiKey)) {
+        // 2-parameter case: (env, apiKey)
+        env = envOrApiKey;
+        apiKey = apiKeyOrRelyingPartyId as string;
+        relyingPartyId = undefined;
+        opts = undefined;
+      } else {
+        // 2-parameter case: (apiKey, relyingPartyId)
+        env = undefined;
+        apiKey = envOrApiKey as string;
+        relyingPartyId = apiKeyOrRelyingPartyId;
+        opts = undefined;
+      }
+    } else if (arguments.length === 3) {
+      if (isEnvironment(envOrApiKey)) {
+        // 3-parameter case: (env, apiKey, relyingPartyId)
+        env = envOrApiKey;
+        apiKey = apiKeyOrRelyingPartyId as string;
+        relyingPartyId = relyingPartyIdOrOpts as string;
+        opts = undefined;
+      } else {
+        // 3-parameter case: (apiKey, relyingPartyId, opts)
+        env = undefined;
+        apiKey = envOrApiKey as string;
+        relyingPartyId = apiKeyOrRelyingPartyId;
+        opts = relyingPartyIdOrOpts as ConstructorOpts;
+      }
+    } else {
+      // 4-parameter case: (env, apiKey, relyingPartyId, opts)
+      env = envOrApiKey as Environment | undefined;
+      apiKey = apiKeyOrRelyingPartyId as string;
+      relyingPartyId = relyingPartyIdOrOpts as string | undefined;
+      opts = optsArg;
+    }
+
+    env = ParaCore.resolveEnvironment(env, apiKey); // Ensure the environment is resolved before calling super
+
     super(env, apiKey, opts);
 
     setEnv(env);

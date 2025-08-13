@@ -13,12 +13,12 @@ describe('Utility Functions', () => {
       expect(isConfigType(validConfig)).toBe(true);
     });
 
-    it('should return false for an object missing env', () => {
-      const invalidConfig = {
+    it('should return true for an object missing env', () => {
+      const validConfig = {
         apiKey: 'test-api-key',
         opts: {} as ConstructorOpts,
       };
-      expect(isConfigType(invalidConfig)).toBe(false);
+      expect(isConfigType(validConfig)).toBe(true);
     });
 
     it('should return false for an object missing apiKey', () => {

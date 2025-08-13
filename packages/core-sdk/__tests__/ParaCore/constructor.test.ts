@@ -40,6 +40,65 @@ describe('ParaCore - constructor', () => {
       expect((para as unknown as any).sessionStorageSetItem).toEqual(opts.sessionStorageSetItemOverride);
       expect((para as unknown as any).clearStorage).toEqual(opts.clearStorageOverride);
     });
+
+    describe('constructor overloads', () => {
+      it('should handle 1-parameter constructor (apiKey)', () => {
+        const apiKey = 'dev_testApiKey';
+        const para = new MockPara(apiKey);
+
+        expect(para).toBeInstanceOf(MockPara);
+        expect(para.ctx.apiKey).toBe(apiKey);
+        expect(para.ctx.env).toBe(Environment.DEV); // Default environment
+      });
+
+      it('should handle 2-parameter constructor (apiKey, opts)', () => {
+        const apiKey = 'dev_testApiKey';
+        const opts = {};
+        const para = new MockPara(apiKey, opts);
+
+        expect(para).toBeInstanceOf(MockPara);
+        expect(para.ctx.apiKey).toBe(apiKey);
+        expect(para.ctx.env).toBe(Environment.DEV); // Default environment
+      });
+
+      it('should handle 2-parameter constructor (env, apiKey)', () => {
+        const env = Environment.DEV;
+        const apiKey = 'dev_testApiKey';
+        const para = new MockPara(env, apiKey);
+
+        expect(para).toBeInstanceOf(MockPara);
+        expect(para.ctx.env).toBe(env);
+        expect(para.ctx.apiKey).toBe(apiKey);
+      });
+
+      it('should handle 3-parameter constructor (env, apiKey, opts)', () => {
+        const env = Environment.DEV;
+        const apiKey = 'dev_testApiKey';
+        const opts = {};
+        const para = new MockPara(env, apiKey, opts);
+
+        expect(para).toBeInstanceOf(MockPara);
+        expect(para.ctx.env).toBe(env);
+        expect(para.ctx.apiKey).toBe(apiKey);
+      });
+
+      it('should handle undefined environment in 2-parameter constructor', () => {
+        const apiKey = 'dev_testApiKey';
+        const para = new MockPara(undefined, apiKey);
+
+        expect(para).toBeInstanceOf(MockPara);
+        expect(para.ctx.apiKey).toBe(apiKey);
+      });
+
+      it('should handle undefined environment in 3-parameter constructor', () => {
+        const apiKey = 'dev_testApiKey';
+        const opts = {};
+        const para = new MockPara(undefined, apiKey, opts);
+
+        expect(para).toBeInstanceOf(MockPara);
+        expect(para.ctx.apiKey).toBe(apiKey);
+      });
+    });
   });
 
   describe('partner helpers', () => {

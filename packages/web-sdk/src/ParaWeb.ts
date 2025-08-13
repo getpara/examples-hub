@@ -9,8 +9,15 @@ export class Para extends ParaCore {
   isReady = false;
   isFarcasterMiniApp = false;
 
-  constructor(env: Environment, apiKey?: string, opts?: ConstructorOpts) {
-    super(env, apiKey, opts);
+  // Redeclare all constructor overloads from ParaCore
+  constructor(env: Environment | undefined, apiKey: string, opts?: ConstructorOpts);
+  constructor(apiKey: string, opts?: ConstructorOpts);
+  constructor(
+    envOrApiKey: Environment | undefined | string,
+    apiKeyOrOpts?: string | ConstructorOpts,
+    opts?: ConstructorOpts,
+  ) {
+    super(envOrApiKey as any, apiKeyOrOpts as any, opts);
 
     if (typeof window !== 'undefined') {
       window.addEventListener('message', this.portalEventListener);

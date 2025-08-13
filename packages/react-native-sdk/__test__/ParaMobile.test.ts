@@ -54,13 +54,13 @@ describe('ParaMobile', () => {
     vi.clearAllMocks();
     mockReactNativeUtils.reset && mockReactNativeUtils.reset();
     Object.values(webSdkMocks).forEach(fn => fn.mockReset());
-    paraMobile = new ParaMobile(Environment.BETA, 'test_api_key');
+    paraMobile = new ParaMobile(Environment.BETA, 'testapikey');
   });
 
   it('should create an instance of ParaMobile and set env and apiKey', async () => {
     expect(paraMobile).toBeInstanceOf(ParaMobile);
     expect(paraMobile.ctx.env).toBe(Environment.BETA);
-    expect(paraMobile.ctx.apiKey).toBe('test_api_key');
+    expect(paraMobile.ctx.apiKey).toBe('testapikey');
 
     await (paraMobile as unknown as any).ready(); // Force ready to be called for testing
     expect(paraMobile.isReady).toBe(true);
@@ -71,22 +71,22 @@ describe('ParaMobile', () => {
   });
 
   it('should throw error when relyingPartyId is not provided for DEV environment', () => {
-    expect(() => new ParaMobile(Environment.DEV, 'test_api_key')).toThrow('relyingPartyId is required');
+    expect(() => new ParaMobile(Environment.DEV, 'testapikey')).toThrow('relyingPartyId is required');
   });
 
   it('should set correct relyingPartyId based on environment', () => {
-    const betaInstance = new ParaMobile(Environment.BETA, 'test_api_key') as any;
+    const betaInstance = new ParaMobile(Environment.BETA, 'testapikey') as any;
     expect(betaInstance.relyingPartyId).toBe('app.beta.usecapsule.com');
 
-    const sandboxInstance = new ParaMobile(Environment.SANDBOX, 'test_api_key') as any;
+    const sandboxInstance = new ParaMobile(Environment.SANDBOX, 'testapikey') as any;
     expect(sandboxInstance.relyingPartyId).toBe('app.sandbox.usecapsule.com');
 
-    const prodInstance = new ParaMobile(Environment.PROD, 'test_api_key') as any;
+    const prodInstance = new ParaMobile(Environment.PROD, 'testapikey') as any;
     expect(prodInstance.relyingPartyId).toBe('app.usecapsule.com');
   });
 
   it('should use custom relyingPartyId when provided', () => {
-    const customInstance = new ParaMobile(Environment.BETA, 'test_api_key', 'custom.domain.com') as any;
+    const customInstance = new ParaMobile(Environment.BETA, 'testapikey', 'custom.domain.com') as any;
     expect(customInstance.relyingPartyId).toBe('custom.domain.com');
   });
 

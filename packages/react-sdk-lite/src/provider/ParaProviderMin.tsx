@@ -80,9 +80,9 @@ export const ParaProviderMin = forwardRef<
     if (includeWalletVerification !== externalWalletConfig?.includeWalletVerification) {
       if (
         externalWalletConfig?.connectionOnly ||
-        (isConfigType(paraClientConfig)
-          ? paraClientConfig.opts?.externalWalletConnectionOnly
-          : paraClientConfig.externalWalletConnectionOnly)
+        (isParaWeb(paraClientConfig)
+          ? paraClientConfig.externalWalletConnectionOnly
+          : paraClientConfig.opts?.externalWalletConnectionOnly)
       ) {
         console.warn('includeWalletVerification has no effect when using connection only external wallets');
         setIncludeWalletVerification(false);
@@ -102,9 +102,9 @@ export const ParaProviderMin = forwardRef<
     if (externalWalletsWithFullAuth !== externalWalletConfig?.createLinkedEmbeddedForExternalWallets) {
       if (
         externalWalletConfig?.connectionOnly ||
-        (isConfigType(paraClientConfig)
-          ? paraClientConfig.opts?.externalWalletConnectionOnly
-          : paraClientConfig.externalWalletConnectionOnly)
+        (isParaWeb(paraClientConfig)
+          ? paraClientConfig.externalWalletConnectionOnly
+          : paraClientConfig.opts?.externalWalletConnectionOnly)
       ) {
         console.warn('createLinkedEmbeddedForExternalWallets has no effect when using connection only external wallets');
         setExternalWalletsWithFullAuth([]);
@@ -123,9 +123,9 @@ export const ParaProviderMin = forwardRef<
       throw new Error('Invalid Para config');
     }
 
-    const newClient = isConfigType(paraClientConfig)
-      ? new ParaWeb(paraClientConfig.env, paraClientConfig.apiKey, paraClientConfig.opts)
-      : paraClientConfig;
+    const newClient = isParaWeb(paraClientConfig)
+      ? paraClientConfig
+      : new ParaWeb(paraClientConfig.env, paraClientConfig.apiKey, paraClientConfig.opts);
 
     if (newClient.isReady) {
       setIsClientReady(true);

@@ -8,8 +8,15 @@ import ParaCore, {
 import { ServerUtils } from './ServerUtils.js';
 
 export class Para extends ParaCore {
-  constructor(env: Environment, apiKey?: string, opts?: ConstructorOpts) {
-    super(env, apiKey, opts);
+  // Redeclare all constructor overloads from ParaCore
+  constructor(env: Environment | undefined, apiKey: string, opts?: ConstructorOpts);
+  constructor(apiKey: string, opts?: ConstructorOpts);
+  constructor(
+    envOrApiKey: Environment | undefined | string,
+    apiKeyOrOpts?: string | ConstructorOpts,
+    opts?: ConstructorOpts,
+  ) {
+    super(envOrApiKey as any, apiKeyOrOpts as any, opts);
   }
 
   async ready() {
