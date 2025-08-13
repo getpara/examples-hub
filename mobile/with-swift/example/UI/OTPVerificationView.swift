@@ -234,7 +234,12 @@ struct OTPVerificationView: View {
                 showError = true
             }
         } catch {
-            errorMessage = error.localizedDescription
+            // Prefer LocalizedError message if available
+            if let message = (error as? LocalizedError)?.errorDescription, !message.isEmpty {
+                errorMessage = message
+            } else {
+                errorMessage = error.localizedDescription
+            }
             showError = true
         }
 
@@ -248,7 +253,7 @@ struct OTPVerificationView: View {
         do {
             try await paraManager.resendVerificationCode()
         } catch {
-            errorMessage = "Failed to resend code"
+            errorMessage = (error as? LocalizedError)?.errorDescription ?? "Failed to resend code"
             showError = true
         }
 
