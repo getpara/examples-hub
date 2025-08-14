@@ -84,11 +84,11 @@ export const MODAL_BUILDER_DEFAULT_CONFIG: ModalBuilderConfig = {
     networks: [Network.ETHEREUM, Network.SOLANA, Network.COSMOS],
   },
   authentication: {
-    oAuthMethods: ['GOOGLE', 'FARCASTER'],
+    oAuthMethods: ['GOOGLE', 'TWITTER', 'TELEGRAM'],
     disableEmailLogin: false,
     disablePhoneLogin: false,
     authLayout: ['AUTH:FULL', 'EXTERNAL:FULL'] as TAuthLayout[],
-    externalWallets: ['METAMASK', 'PHANTOM', 'SAFE'],
+    externalWallets: ['METAMASK', 'PHANTOM', 'WALLETCONNECT'],
     isWeb2AuthEnabled: true,
     isWeb3AuthEnabled: true,
     isGuestModeEnabled: true,
