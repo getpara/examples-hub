@@ -1,0 +1,17 @@
+import Foundation
+
+let url = URL(string: "https://kernel-api.zerodev.app/v2/accounts/counterfactual-address")!
+var components = URLComponents(url: url, resolvingAgainstBaseURL: true)!
+let queryItems: [URLQueryItem] = [
+  URLQueryItem(name: "entryPointAddress", value: "0x0000000071727De22E5E9d8BAf0edAc6f37da032"),
+  URLQueryItem(name: "index", value: "0"),
+]
+components.queryItems = components.queryItems.map { $0 + queryItems } ?? queryItems
+
+var request = URLRequest(url: components.url!)
+request.httpMethod = "GET"
+request.timeoutInterval = 10
+request.allHTTPHeaderFields = ["accept": "application/json"]
+
+let (data, _) = try await URLSession.shared.data(for: request)
+print(String(decoding: data, as: UTF8.self))
