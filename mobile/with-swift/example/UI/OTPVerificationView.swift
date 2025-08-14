@@ -23,6 +23,8 @@ struct OTPVerificationView: View {
     @State private var showError = false
     @State private var errorMessage = ""
     @State private var statusMessage = ""
+    @State private var showSignupMethodAlert = false
+    @State private var verifiedAuthState: AuthState?
     @FocusState private var isTextFieldFocused: Bool
 
     private var contactDisplay: String {
@@ -129,7 +131,7 @@ struct OTPVerificationView: View {
                             ProgressView()
                                 .progressViewStyle(CircularProgressViewStyle(tint: .white))
                         } else {
-                            Text("Next: Setup Passkey")
+                            Text("Continue")
                                 .fontWeight(.medium)
                         }
                     }
@@ -152,6 +154,20 @@ struct OTPVerificationView: View {
                     Button("OK", role: .cancel) {}
                 } message: {
                     Text(errorMessage)
+                }
+                .alert("Choose Authentication Method", isPresented: $showSignupMethodAlert) {
+                    Button("Use Passkey") {
+                        Task {
+                            await handleSignupMethod(.passkey)
+                        }
+                    }
+                    Button("Use Password") {
+                        Task {
+                            await handleSignupMethod(.password)
+                        }
+                    }
+                } message: {
+                    Text("How would you like to secure your account?")
                 }
                 .accessibilityElement(children: .combine)
                 .accessibilityLabel("Verification code entry")
@@ -199,25 +215,9 @@ struct OTPVerificationView: View {
 
             switch resultState.stage {
             case .signup:
-                // New user - proceed to passkey setup
-                statusMessage = "Creating your wallet..."
-
-                do {
-                    try await paraManager.handleSignup(
-                        authState: resultState,
-                        method: .passkey,
-                        authorizationController: authorizationController,
-                        webAuthenticationSession: webAuthenticationSession,
-                    )
-
-                    // Now navigate after everything is complete
-                    appRootManager.setAuthenticated(true)
-                    showOTP = false
-                } catch {
-                    errorMessage = error.localizedDescription
-                    showError = true
-                    statusMessage = ""
-                }
+                // New user - let them choose authentication method
+                verifiedAuthState = resultState
+                showSignupMethodAlert = true
 
             case .login:
                 // Existing user verified - log them in
@@ -252,6 +252,33 @@ struct OTPVerificationView: View {
             showError = true
         }
 
+        isLoading = false
+        statusMessage = ""
+    }
+    
+    private func handleSignupMethod(_ method: ParaManager.SignupMethod) async {
+        guard let authState = verifiedAuthState else { return }
+        
+        isLoading = true
+        statusMessage = "Setting up \(method.description) authentication..."
+        
+        do {
+            try await paraManager.handleSignup(
+                authState: authState,
+                method: method,
+                authorizationController: authorizationController,
+                webAuthenticationSession: webAuthenticationSession
+            )
+            
+            // Authentication successful
+            appRootManager.setAuthenticated(true)
+            showOTP = false
+            
+        } catch {
+            errorMessage = error.localizedDescription
+            showError = true
+        }
+        
         isLoading = false
         statusMessage = ""
     }
