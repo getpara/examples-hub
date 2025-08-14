@@ -25,7 +25,7 @@ export const AuthAppBar = ({}: AuthAppBarProps) => {
     updateHeight();
     window.addEventListener('resize', updateHeight);
     return () => window.removeEventListener('resize', updateHeight);
-  }, []);
+  }, [setAppBarHeight]);
 
   return (
     <>

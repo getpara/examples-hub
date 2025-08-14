@@ -154,8 +154,10 @@ export async function authUpdateKeyShares(
   }
 
   // get all shares that are associated with this partnerId
+
+  const hasWalletSelection = para.currentWalletIds && Object.keys(para.currentWalletIds).length > 0;
   const potentialSharesForPartnerToDecrypt = encryptedShares
-    .filter(share => !para.currentWalletIds || para.currentWalletIdsUnique.includes(share.walletId))
+    .filter(share => !hasWalletSelection || para.currentWalletIdsUnique.includes(share.walletId))
     .filter(share => {
       return share.walletScheme !== 'DKLS' || share.partnerId === partnerId;
     });
@@ -216,7 +218,8 @@ export async function authUpdateKeyShares(
       userId,
       encryptedPrivateKeyHex,
       encryptionKeyHash,
-      signature.id,
+      signature?.id,
+      passwordId,
     );
     // add the created encrypted private key to the list of encrypted private keys in case we need to use it
     // later in this function

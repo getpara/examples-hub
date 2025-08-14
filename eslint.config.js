@@ -9,6 +9,22 @@ const importPlugin = require('eslint-plugin-import');
 
 module.exports = [
   {
+    name: 'Global Ignores',
+    ignores: [
+      '**/node_modules/**',
+      '**/.nx/**',
+      '**/playwright-report/**',
+      '**/test-results/**',
+      '**/coverage/**',
+      '**/dist/**',
+      '**/build/**',
+      '**/*.min.js',
+      '**/stencil-generated/**',
+      '**/loader/**',
+      '**/www/**',
+    ],
+  },
+  {
     name: 'Ensure all JavaScript imports have a .js extension',
     plugins: {
       import: importPlugin,
@@ -139,12 +155,11 @@ module.exports = [
     ignores: ['**/dist/**', '**/loader/**', '**/www/**', '**/stencil.config.ts'],
     plugins: {
       '@stencil-community': require('@stencil-community/eslint-plugin'),
-      'storybook': require('storybook'),
+      'storybook': require('eslint-plugin-storybook'),
       '@typescript-eslint': tsPlugin,
     },
     rules: Object.assign({}, prettierConfig.rules, {
       '@stencil-community/required-prefix': ['error', ['cpsl']],
-      '@stencil-community/ban-default-true': 'error',
       '@typescript-eslint/no-unused-vars': [
         'error',
         {

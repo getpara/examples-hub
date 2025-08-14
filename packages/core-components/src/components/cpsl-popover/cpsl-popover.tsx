@@ -43,7 +43,7 @@ export class CpslPopover {
    * If `true` the container will use the width of the content, else it will be set to the width of the trigger.
    * Default is `true`
    */
-  // eslint-disable-next-line @stencil-community/ban-default-true
+
   @Prop() autoWidth?: boolean = true;
 
   /**

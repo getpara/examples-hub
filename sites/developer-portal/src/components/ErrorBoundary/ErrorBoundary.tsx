@@ -33,7 +33,7 @@ export const ErrorBoundary = ({
     if (pathname !== errorLocation.current) {
       onResetError?.();
     }
-  }, [pathname]);
+  }, [pathname, onResetError]);
 
   useEffect(() => {
     if (captureSentryError) {

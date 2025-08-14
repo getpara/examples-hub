@@ -9,7 +9,8 @@
 - `yarn lint` - ESLint all packages
 - `yarn lint-fix` - Fix ESLint issues
 - `yarn check-bundle-size` - Check bundle sizes against thresholds
-- `cd /sites/developer-portal && yarn legacy-deploy-sandbox` - Deploy dev portal to sandbox
+- `cd /web-sdk/sites/developer-portal && yarn legacy-deploy-sandbox` - Deploy dev portal to sandbox
+- `cd /web-sdk/sites/bridge-v2 && yarn deploy-sandbox` - Deploy bridge to sandbox
 
 ## Key Architecture
 - **Monorepo:** Lerna-managed packages in `/packages/`

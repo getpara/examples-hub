@@ -36,12 +36,22 @@ const AuthLoginBase = ({ authMethod }: { authMethod: AuthMethod }) => {
   const postLogin = async ({ fromKnownDevice, loginRes }: { fromKnownDevice?: boolean; loginRes?: LoginRes }) => {
     await para.userSetupAfterLogin();
 
+    // For native apps, we need to ensure wallet signers are persisted before redirecting
     // Check for native callback URL
     const urlParams = new URLSearchParams(window.location.search);
     const nativeCallbackUrl = urlParams.get('nativeCallbackUrl');
 
     if (nativeCallbackUrl && validateCallbackUrl(nativeCallbackUrl)) {
-      // Redirect to the native callback URL if it exists and is valid
+      // For native apps, persist wallet signers before redirecting
+      if (loginRes) {
+        try {
+          await authUpdateKeyShares(loginRes);
+        } catch (error) {
+          console.error('Failed to update keyshares before native redirect', error);
+          return; // Avoid redirecting if we failed to persist signers
+        }
+      }
+      // Redirect to the native callback URL
       window.location.href = nativeCallbackUrl;
       return; // Exit early after redirect
     }

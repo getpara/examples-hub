@@ -20,7 +20,7 @@ export function useIsInView<T extends HTMLElement = HTMLElement>(
     return () => {
       observer.disconnect();
     };
-  }, [options]);
+  }, [options, onIntersectionCallback]);
 
   return { ref, isInView };
 }

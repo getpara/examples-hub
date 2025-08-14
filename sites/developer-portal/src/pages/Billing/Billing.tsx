@@ -18,7 +18,7 @@ export const Billing = () => {
     if (!isMemberLoading && !capabilities?.canViewOrganizationBilling) {
       navigate('/', { replace: true });
     }
-  }, [isMemberLoading, navigate]);
+  }, [isMemberLoading, navigate, capabilities?.canViewOrganizationBilling]);
 
   if (isMemberLoading || isLoadingSubscription) {
     return <Loader className="para:m-auto para:size-14" />;

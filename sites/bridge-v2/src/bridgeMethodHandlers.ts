@@ -215,4 +215,38 @@ export const bridgeMethodHandlers: Record<string, (para: ParaWeb, args: any) => 
     logger.info('Web challenge verified:', verifyWebChallengeResult);
     return verifyWebChallengeResult;
   },
+  loadTransmissionKeyshares: async (para, _) => {
+    logger.info('Loading transmission keyshares...');
+    try {
+      const tempSharesRes = await (para as any).getTransmissionKeyShares();
+      const temporaryShares = tempSharesRes.data.temporaryShares;
+
+      if (temporaryShares.length > 0) {
+        await (para as any).setupAfterLogin({ temporaryShares });
+
+        // Build currentWalletIds from the loaded wallets
+        const currentWalletIds = {};
+        const fetchedWallets = await para.fetchWallets();
+
+        fetchedWallets.forEach(wallet => {
+          if (!currentWalletIds[wallet.type]) {
+            currentWalletIds[wallet.type] = [];
+          }
+          currentWalletIds[wallet.type].push(wallet.id);
+        });
+
+        // Set the current wallet IDs so wallets are marked as usable
+        await (para as any).setCurrentWalletIds(currentWalletIds);
+
+        logger.info(`Loaded ${temporaryShares.length} transmission keyshares and set currentWalletIds:`, currentWalletIds);
+        return { sharesLoaded: temporaryShares.length };
+      } else {
+        logger.info('No transmission keyshares found.');
+        return { sharesLoaded: 0 };
+      }
+    } catch (error) {
+      logger.error('Failed to load transmission keyshares:', error);
+      throw error;
+    }
+  },
 };
