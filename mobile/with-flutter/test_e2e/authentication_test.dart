@@ -387,51 +387,6 @@ Future<void> _clickContinueButton(AppiumWebDriver driver) async {
   throw Exception('Continue button not found or not enabled after 10 attempts');
 }
 
-Future<void> _handleOTPVerification(AppiumWebDriver driver) async {
-  // Wait for OTP verification view with more robust detection
-  print('⏳ Waiting for OTP verification view...');
-  
-  for (int attempt = 0; attempt < 20; attempt++) {
-    try {
-      // Check for OTP fields specifically
-      final textFields = await driver.findElements(AppiumBy.className('XCUIElementTypeTextField')).toList();
-      
-      if (textFields.length >= 6) {
-        print('✅ OTP verification view found with ${textFields.length} text fields');
-        break;
-      }
-      
-      // Also check for resend button as backup
-      final buttons = await driver.findElements(AppiumBy.className('XCUIElementTypeButton')).toList();
-      for (final button in buttons) {
-        try {
-          final label = await button.attributes['label'];
-          if (label.toLowerCase().contains('resend')) {
-            print('✅ OTP verification view found (resend button detected)');
-            break;
-          }
-        } catch (e) {
-          // Continue
-        }
-      }
-      
-      if (attempt % 3 == 0) {
-        print('⏳ Waiting for OTP fields... (attempt ${attempt + 1}, found ${textFields.length} text fields)');
-      }
-      
-    } catch (e) {
-      print('⚠️ Error checking for OTP view: $e');
-    }
-    
-    await Future.delayed(Duration(seconds: 1));
-  }
-  
-  // Enter OTP code
-  await _enterOTPCode(driver, TestConstants.verificationCode);
-  
-  // After OTP entry, handle biometric authentication
-  await _performBiometricAuth(driver);
-}
 
 Future<void> _enterOTPCode(AppiumWebDriver driver, String code) async {
   print('🔢 Entering OTP code: $code');
