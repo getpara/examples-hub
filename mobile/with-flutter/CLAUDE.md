@@ -9,6 +9,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Build iOS: `flutter build ios`
 - Format code: `flutter format .`
 - **Lint code: `flutter analyze`** (REQUIRED: Always run and fix issues before completing tasks)
+- Run on iOS simulator: `cd ~/para/examples-hub/mobile/with-flutter && flutter run -d C30E9754-F295-4A90-A70F-63DFE3F53DB8`
 - Run tests: `flutter test`
 - Run single test: `flutter test test/path_to_test.dart`
 - E2E test setup: `cd test_e2e && dart run tool/setup.dart`

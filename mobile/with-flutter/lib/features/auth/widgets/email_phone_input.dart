@@ -123,7 +123,7 @@ class _EmailPhoneInputState extends State<EmailPhoneInput> {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  dialogTheme: const DialogTheme(
+                  dialogTheme: const DialogThemeData(
                     backgroundColor: Colors.white,
                     titleTextStyle: TextStyle(
                       color: Colors.black,
@@ -185,7 +185,7 @@ class _EmailPhoneInputState extends State<EmailPhoneInput> {
                   padding: EdgeInsets.zero,
                   dialogSize: const Size(400, 600), // Much larger dialog
                   dialogBackgroundColor: Colors.white,
-                  barrierColor: Colors.black.withOpacity(0.5),
+                  barrierColor: Colors.black.withValues(alpha: 0.5),
                 ),
               ),
             ),
