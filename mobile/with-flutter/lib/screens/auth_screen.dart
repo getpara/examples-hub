@@ -87,17 +87,43 @@ class _AuthScreenState extends State<AuthScreen> {
         
         // Handle navigation based on result
         if (result is AuthState && result.stage == AuthStage.signup && mounted) {
-          // Navigate to wallet creation loading screen
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => WalletCreationLoadingScreen(
-                onComplete: widget.onSuccess,
+          // Let user choose signup method (Passkey or Password)
+          final chosen = await _chooseSignupMethod();
+
+          if (chosen == SignupMethod.passkey) {
+            if (!mounted) return;
+            // Navigate to wallet creation loading screen
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => WalletCreationLoadingScreen(
+                  onComplete: widget.onSuccess,
+                ),
               ),
-            ),
-          );
-          
-          // Start wallet creation
-          _handleWalletCreation(result);
+            );
+
+            // Start wallet creation with passkey
+            _handleWalletCreation(result);
+          } else if (chosen == SignupMethod.password) {
+            // Handle password signup via web auth session
+            try {
+              setState(() => _isProcessing = true);
+              await para.handleSignup(
+                authState: result,
+                signupMethod: SignupMethod.password,
+                webAuthenticationSession: _webAuthSession,
+              );
+              if (!mounted) return;
+              widget.onSuccess();
+            } catch (e) {
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Password setup failed: ${e.toString()}')),
+                );
+              }
+            } finally {
+              if (mounted) setState(() => _isProcessing = false);
+            }
+          }
         }
       } else if (authState.stage == AuthStage.login) {
         // Existing user - try to login
@@ -163,6 +189,29 @@ class _AuthScreenState extends State<AuthScreen> {
         );
       }
     }
+  }
+
+  Future<SignupMethod?> _chooseSignupMethod() async {
+    return showDialog<SignupMethod>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Choose Authentication Method'),
+          content: const Text('How would you like to secure your account?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(SignupMethod.passkey),
+              child: const Text('Use Passkey'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(SignupMethod.password),
+              child: const Text('Use Password'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Future<void> _handleLogin(AuthState authState) async {
