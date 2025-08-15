@@ -39,9 +39,9 @@ jobs:
         with:
           path: |
             **/node_modules
-          key: ${{ runner.os }}-yarn-${{ env.CACHE_KEY_PREFIX }}-${{ hashFiles('**/package.json') }}
+          key: ${{ runner.os }}-yarn-${{ env.CACHE_KEY_PREFIX }}-${{ github.run_id }}
           restore-keys: |
-            ${{ runner.os }}-yarn-${{ env.CACHE_KEY_PREFIX }}
+            ${{ runner.os }}-yarn-${{ env.CACHE_KEY_PREFIX }}-
 
       - name: Install dependencies
         run: yarn
@@ -53,9 +53,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: .nx
-          key: ${{ runner.os }}-nx-dir-${{ env.CACHE_KEY_PREFIX }}-${{ hashFiles('packages/**/*.ts') }}-${{ hashFiles('packages/**/*.tsx') }}
+          key: ${{ runner.os }}-nx-dir-${{ env.CACHE_KEY_PREFIX }}-${{ github.run_id }}
           restore-keys: |
-            ${{ runner.os }}-nx-dir-${{ env.CACHE_KEY_PREFIX }}
+            ${{ runner.os }}-nx-dir-${{ env.CACHE_KEY_PREFIX }}-
 
       - name: Build packages
         run: yarn build
@@ -91,17 +91,18 @@ jobs:
         with:
           path: |
             **/node_modules
-          key: ${{ runner.os }}-yarn-${{ env.CACHE_KEY_PREFIX }}-${{ hashFiles('**/package.json') }}
+          key: ${{ runner.os }}-yarn-${{ env.CACHE_KEY_PREFIX }}-${{ github.run_id }}
           restore-keys: |
-            ${{ runner.os }}-yarn-${{ env.CACHE_KEY_PREFIX }}
+            ${{ runner.os }}-yarn-${{ env.CACHE_KEY_PREFIX }}-
 
       - name: Nx cache
         uses: actions/cache@v4
         with:
           path: .nx
-          key: ${{ runner.os }}-nx-dir-${{ env.CACHE_KEY_PREFIX }}-${{ hashFiles('packages/**/*.ts') }}-${{ hashFiles('packages/**/*.tsx') }}
+          key: ${{ runner.os }}-nx-dir-${{ env.CACHE_KEY_PREFIX }}-${{ github.run_id }}-tests
           restore-keys: |
-            ${{ runner.os }}-nx-dir-${{ env.CACHE_KEY_PREFIX }}
+            ${{ runner.os }}-nx-dir-${{ env.CACHE_KEY_PREFIX }}-${{ github.run_id }}
+            ${{ runner.os }}-nx-dir-${{ env.CACHE_KEY_PREFIX }}-
 
       - name: Build packages
         run: yarn build
@@ -115,10 +116,14 @@ jobs:
 
       - name: Run tests
         run: yarn test
+        env:
+          NX_REJECT_UNKNOWN_LOCAL_CACHE: 0
+          NX_IGNORE_MACHINE_CACHE: true
+          NODE_OPTIONS: '--max_old_space_size=14336'
 
   e2e-test:
     runs-on: FourCoreRunner
-    needs: unit-test
+    needs: build
     permissions:
       id-token: write
       contents: read
@@ -146,17 +151,17 @@ jobs:
         with:
           path: |
             **/node_modules
-          key: ${{ runner.os }}-yarn-${{ env.CACHE_KEY_PREFIX }}-${{ hashFiles('**/package.json') }}
+          key: ${{ runner.os }}-yarn-${{ env.CACHE_KEY_PREFIX }}-${{ github.run_id }}
           restore-keys: |
-            ${{ runner.os }}-yarn-${{ env.CACHE_KEY_PREFIX }}
+            ${{ runner.os }}-yarn-${{ env.CACHE_KEY_PREFIX }}-
 
       - name: Nx cache
         uses: actions/cache@v4
         with:
           path: .nx
-          key: ${{ runner.os }}-nx-dir-${{ env.CACHE_KEY_PREFIX }}-${{ hashFiles('packages/**/*.ts') }}-${{ hashFiles('packages/**/*.tsx') }}
+          key: ${{ runner.os }}-nx-dir-${{ env.CACHE_KEY_PREFIX }}-${{ github.run_id }}
           restore-keys: |
-            ${{ runner.os }}-nx-dir-${{ env.CACHE_KEY_PREFIX }}
+            ${{ runner.os }}-nx-dir-${{ env.CACHE_KEY_PREFIX }}-
 
       - name: Build packages
         run: yarn build
@@ -200,7 +205,7 @@ jobs:
 
   example-hub-e2e-tests:
     runs-on: FourCoreRunner
-    needs: unit-test
+    needs: build
     permissions:
       id-token: write
       contents: read
@@ -228,17 +233,17 @@ jobs:
         with:
           path: |
             **/node_modules
-          key: ${{ runner.os }}-yarn-${{ env.CACHE_KEY_PREFIX }}-${{ hashFiles('**/package.json') }}
+          key: ${{ runner.os }}-yarn-${{ env.CACHE_KEY_PREFIX }}-${{ github.run_id }}
           restore-keys: |
-            ${{ runner.os }}-yarn-${{ env.CACHE_KEY_PREFIX }}
+            ${{ runner.os }}-yarn-${{ env.CACHE_KEY_PREFIX }}-
 
       - name: Nx cache
         uses: actions/cache@v4
         with:
           path: .nx
-          key: ${{ runner.os }}-nx-dir-${{ env.CACHE_KEY_PREFIX }}-${{ hashFiles('packages/**/*.ts') }}-${{ hashFiles('packages/**/*.tsx') }}
+          key: ${{ runner.os }}-nx-dir-${{ env.CACHE_KEY_PREFIX }}-${{ github.run_id }}
           restore-keys: |
-            ${{ runner.os }}-nx-dir-${{ env.CACHE_KEY_PREFIX }}
+            ${{ runner.os }}-nx-dir-${{ env.CACHE_KEY_PREFIX }}-
 
       - name: Build packages
         run: yarn build
