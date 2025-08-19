@@ -21,7 +21,6 @@ class SolanaWalletView extends StatefulWidget {
 
 class _SolanaWalletViewState extends State<SolanaWalletView> {
   late solana.SolanaClient _solanaClient;
-  para_sdk.ParaSolanaWeb3Signer? _signer;
   
   String? _balance;
   String _messageToSign = '';
@@ -51,12 +50,6 @@ class _SolanaWalletViewState extends State<SolanaWalletView> {
     );
     
     try {
-      _signer = para_sdk.ParaSolanaWeb3Signer(
-        para: para,
-        solanaClient: _solanaClient,
-        walletId: widget.wallet.id,
-      );
-      
       if (widget.wallet.address != null) {
         setState(() {
           _balance = '0.0000 SOL'; // Set default balance
@@ -72,7 +65,7 @@ class _SolanaWalletViewState extends State<SolanaWalletView> {
     } catch (e) {
       // Debug: initialization error
       // print('SolanaWalletView - Error initializing: $e');
-      _showResult('Error', 'Failed to initialize Solana signer: $e');
+      _showResult('Error', 'Failed to initialize: $e');
       setState(() {
         _isLoading = false;
       });
@@ -123,9 +116,16 @@ class _SolanaWalletViewState extends State<SolanaWalletView> {
     try {
       // Debug: fetching balance
       // print('SolanaWalletView - Fetching balance for address: ${widget.wallet.address}');
-      final pubKey = solana.Ed25519HDPublicKey.fromBase58(widget.wallet.address!);
-      final lamports = await _solanaClient.rpcClient.getBalance(pubKey.toBase58());
-      final solBalance = lamports.value / solana.lamportsPerSol;
+      
+      // Use the unified getBalance API
+      final balance = await para.getBalance(
+        walletId: widget.wallet.id!,
+        rpcUrl: _rpcUrl,
+      );
+      
+      // Convert lamports to SOL (balance is returned in lamports as a string)
+      final lamports = BigInt.parse(balance);
+      final solBalance = lamports / BigInt.from(solana.lamportsPerSol);
       setState(() => _balance = '${solBalance.toStringAsFixed(4)} SOL');
       // Debug: balance fetched
       // print('SolanaWalletView - Balance fetched: $_balance');
@@ -183,20 +183,38 @@ class _SolanaWalletViewState extends State<SolanaWalletView> {
   }
   
   Future<void> _signTransaction() async {
-    final message = await _createTestTransaction(lamports: 1000000);
-    if (message == null || _signer == null) return;
-    
     setState(() => _isLoading = true);
     final startTime = DateTime.now();
     
     try {
-      await _signer!.signTransaction(message);
+      // Use the new SolanaTransaction type
+      final transaction = para_sdk.SolanaTransaction(
+        to: _testAddress,
+        lamports: '1000000', // 0.001 SOL
+        memo: 'Test transaction from Flutter',
+      );
+      
+      final result = await para.formatAndSignTransaction(
+        walletId: widget.wallet.id!,
+        transaction: transaction.toJson(),
+        rpcUrl: _rpcUrl,
+      );
       
       final duration = DateTime.now().difference(startTime).inMilliseconds / 1000;
-      _showResult(
-        'Success', 
-        'Transaction signed successfully\nDuration: ${duration.toStringAsFixed(2)}s',
-      );
+      
+      if (result is para_sdk.SuccessfulSignatureResult) {
+        _showResult(
+          'Success', 
+          'Transaction signed successfully\nDuration: ${duration.toStringAsFixed(2)}s',
+        );
+      } else if (result is para_sdk.DeniedSignatureResultWithUrl) {
+        _showResult(
+          'Denied', 
+          'Transaction denied\nReview URL: ${result.transactionReviewUrl}',
+        );
+      } else {
+        _showResult('Error', 'Failed to sign transaction');
+      }
     } catch (e) {
       final duration = DateTime.now().difference(startTime).inMilliseconds / 1000;
       _showResult(
@@ -230,17 +248,36 @@ class _SolanaWalletViewState extends State<SolanaWalletView> {
       }
     }
     
-    final message = await _createTestTransaction(lamports: 100000);
-    if (message == null || _signer == null) return;
-    
     setState(() => _isLoading = true);
     final startTime = DateTime.now();
     
     try {
-      final signedTx = await _signer!.signTransaction(message);
-      final signature = await _signer!.sendTransaction(
-        signedTx,
-        commitment: solana.Commitment.confirmed,
+      // Use the new SolanaTransaction type
+      final transaction = para_sdk.SolanaTransaction(
+        to: _testAddress,
+        lamports: '100000', // 0.0001 SOL
+        memo: 'Test transaction from Flutter',
+      );
+      
+      final result = await para.formatAndSignTransaction(
+        walletId: widget.wallet.id!,
+        transaction: transaction.toJson(),
+        rpcUrl: _rpcUrl,
+      );
+      
+      if (result is! para_sdk.SuccessfulSignatureResult) {
+        throw Exception('Failed to sign transaction');
+      }
+      
+      // The signed transaction is in the signature field as base64
+      final signedTxBase64 = result.signature;
+      final signedTxBytes = base64Decode(signedTxBase64);
+      final signedTx = SignedTx.fromBytes(signedTxBytes);
+      
+      // Send the transaction using SolanaClient
+      final signature = await _solanaClient.rpcClient.sendTransaction(
+        signedTx.encode(),
+        preflightCommitment: solana.Commitment.confirmed,
       );
       
       final duration = DateTime.now().difference(startTime).inMilliseconds / 1000;
@@ -275,43 +312,6 @@ class _SolanaWalletViewState extends State<SolanaWalletView> {
       setState(() => _isLoading = false);
     }
   }
-  
-  Future<CompiledMessage?> _createTestTransaction({required int lamports}) async {
-    if (widget.wallet.address == null) {
-      _showResult('Error', 'No wallet address found');
-      return null;
-    }
-    
-    try {
-      final fromPubkey = solana.Ed25519HDPublicKey.fromBase58(widget.wallet.address!);
-      final toPubkey = solana.Ed25519HDPublicKey.fromBase58(_testAddress);
-      
-      // Get recent blockhash
-      final recentBlockhash = await _solanaClient.rpcClient.getLatestBlockhash();
-      
-      // Create transfer instruction
-      final transferInstruction = solana.SystemInstruction.transfer(
-        fundingAccount: fromPubkey,
-        recipientAccount: toPubkey,
-        lamports: lamports,
-      );
-      
-      // Create message
-      final message = solana.Message(
-        instructions: [transferInstruction],
-      );
-      
-      // Compile message
-      return message.compile(
-        recentBlockhash: recentBlockhash.value.blockhash,
-        feePayer: fromPubkey,
-      );
-    } catch (e) {
-      _showResult('Error', 'Failed to create transaction: $e');
-      return null;
-    }
-  }
-  
   
   void _showFundingInstructions() {
     final address = widget.wallet.address;

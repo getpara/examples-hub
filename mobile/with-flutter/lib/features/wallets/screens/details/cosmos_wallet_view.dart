@@ -18,7 +18,6 @@ class CosmosWalletView extends StatefulWidget {
 }
 
 class _CosmosWalletViewState extends State<CosmosWalletView> {
-  para_sdk.ParaCosmosSigner? _signer; // ignore: unused_field
   String _selectedChain = 'provider'; // Default to testnet
   
   String? _balance;
@@ -86,71 +85,17 @@ class _CosmosWalletViewState extends State<CosmosWalletView> {
   @override
   void initState() {
     super.initState();
-    // Debug: wallet initialization
-    // print('CosmosWalletView initState - wallet id: ${widget.wallet.id}');
-    // print('CosmosWalletView initState - address: ${widget.wallet.address}');
-    // print('CosmosWalletView initState - addressSecondary: ${widget.wallet.addressSecondary}');
-    _initializeCosmos();
+    _fetchBalance();
   }
   
-  Future<void> _initializeCosmos() async {
-    try {
-      _signer = para_sdk.ParaCosmosSigner(
-        para: para,
-        chainId: _currentConfig.chainId,
-        prefix: _currentConfig.prefix,
-        rpcUrl: _currentConfig.rpcUrl,
-      );
-      
-      // Initialize the signer with the wallet
-      await _signer!.selectWallet(widget.wallet.id!);
-      // Debug: signer initialization
-      // print('CosmosWalletView - Signer initialized with wallet: ${widget.wallet.id}');
-      
-      // Cosmos addresses might be in addressSecondary
-      final cosmosAddress = widget.wallet.addressSecondary ?? widget.wallet.address;
-      // Debug: address selection
-      // print('CosmosWalletView - Using address: $cosmosAddress');
-      
-      if (cosmosAddress != null) {
-        // Update the UI with the Cosmos address and set initial balance
-        setState(() {
-          _balance = '0.0000 ATOM'; // Set default balance
-        });
-        await _fetchBalance();
-      } else {
-        // Debug: no address found
-        // print('CosmosWalletView - No address found, wallet might need initialization');
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    } catch (e) {
-      // Debug: initialization error
-      // print('CosmosWalletView - Error initializing: $e');
-      _showResult('Error', 'Failed to initialize Cosmos signer: $e');
-      setState(() {
-        _isLoading = false;
-      });
-    }
-  }
   
-  Future<void> _reinitializeSigner() async {
+  Future<void> _switchChain(String chainId) async {
     setState(() {
       _isLoading = true;
-      _balance = null; // Reset balance when switching chains
+      _selectedChain = chainId;
     });
+    
     try {
-      _signer = para_sdk.ParaCosmosSigner(
-        para: para,
-        chainId: _currentConfig.chainId,
-        prefix: _currentConfig.prefix,
-        rpcUrl: _currentConfig.rpcUrl,
-      );
-      
-      // Initialize the signer with the wallet
-      await _signer!.selectWallet(widget.wallet.id!);
-      
       await _fetchBalance();
       _showResult('Success', 'Switched to ${_currentConfig.name}');
     } catch (e) {
@@ -161,37 +106,19 @@ class _CosmosWalletViewState extends State<CosmosWalletView> {
   }
   
   Future<void> _fetchBalance() async {
-    if (_signer == null) {
-      // Debug: signer not initialized
-      // print('CosmosWalletView - Cannot fetch balance: signer not initialized');
-      return;
-    }
-    
-    final address = widget.wallet.addressSecondary ?? widget.wallet.address;
-    if (address == null) {
-      // Debug: no address for balance fetch
-      // print('CosmosWalletView - Cannot fetch balance: no address');
-      setState(() => _balance = 'No address available');
-      return;
-    }
-    
     setState(() => _isLoading = true);
     try {
-      // Debug: fetching balance
-      // print('CosmosWalletView - Fetching balance for address: $address, denom: ${_currentConfig.denom}');
-      final balanceString = await _signer!.getBalance(denom: _currentConfig.denom);
-      // Debug: balance received
-      // print('CosmosWalletView - Received balance: $balanceString');
+      final balanceString = await para.getBalance(
+        walletId: widget.wallet.id!,
+        rpcUrl: _currentConfig.rpcUrl,
+        chainPrefix: _currentConfig.prefix,  // Critical for correct address derivation
+        denom: _currentConfig.denom,
+      );
+      
       final balanceAmount = BigInt.tryParse(balanceString) ?? BigInt.zero;
-      
-      // Convert from smallest unit to display unit (divide by 10^6 for most Cosmos denoms)
       final displayBalance = balanceAmount.toDouble() / 1000000;
-      
       setState(() => _balance = '${displayBalance.toStringAsFixed(4)} ${_currentConfig.denom.substring(1).toUpperCase()}');
     } catch (e) {
-      // Debug: balance fetch error
-      // print('CosmosWalletView - Error fetching balance: $e');
-      // If balance fetch fails, show 0 balance
       setState(() => _balance = '0.0000 ${_currentConfig.denom.substring(1).toUpperCase()}');
     } finally {
       setState(() => _isLoading = false);
@@ -208,110 +135,118 @@ class _CosmosWalletViewState extends State<CosmosWalletView> {
     final startTime = DateTime.now();
     
     try {
-      final messageBytes = utf8.encode(_messageToSign);
-      final messageBase64 = base64Encode(messageBytes);
-      
-      final result = await para.signMessage(
+      final messageBase64 = base64Encode(utf8.encode(_messageToSign));
+      final signature = await para.signMessage(
         walletId: widget.wallet.id!,
         messageBase64: messageBase64,
       );
       
       final duration = DateTime.now().difference(startTime).inMilliseconds / 1000;
-      
-      if (result is para_sdk.SuccessfulSignatureResult) {
-        _showResult(
-          'Success', 
-          'Message signed successfully\nDuration: ${duration.toStringAsFixed(2)}s',
-        );
-      } else if (result is para_sdk.DeniedSignatureResultWithUrl) {
-        _showResult(
-          'Denied', 
-          'Signature denied\nReview URL: ${result.transactionReviewUrl}',
-        );
+      if (signature is para_sdk.SuccessfulSignatureResult) {
+        _showResult('Success', 'Message signed successfully\nDuration: ${duration.toStringAsFixed(2)}s');
       } else {
         _showResult('Error', 'Signature denied');
       }
     } catch (e) {
       final duration = DateTime.now().difference(startTime).inMilliseconds / 1000;
-      _showResult(
-        'Error', 
-        'Failed to sign message: $e\nDuration: ${duration.toStringAsFixed(2)}s',
-      );
+      _showResult('Error', 'Failed to sign message: $e\nDuration: ${duration.toStringAsFixed(2)}s');
     } finally {
       setState(() => _isLoading = false);
     }
   }
   
   Future<void> _signTransaction() async {
-    if (_signer == null) {
-      _showResult('Error', 'Signer not initialized');
-      return;
-    }
-    
     setState(() => _isLoading = true);
     final startTime = DateTime.now();
     
     try {
-      // Show dialog to choose signing method
       final signingMethod = await _showSigningMethodDialog();
       if (signingMethod == null) {
         setState(() => _isLoading = false);
         return;
       }
       
-      if (signingMethod == 'proto') {
-        // Create a minimal but valid protobuf SignDoc
-        final signDocBase64 = _createProtoSignDoc();
-        await _signer!.signDirect(signDocBase64: signDocBase64);
-        
-      } else {
-        // Create an amino SignDoc for demo
-        final signDocBase64 = _createAminoSignDoc();
-        await _signer!.signAmino(signDocBase64: signDocBase64);
-      }
+      final transaction = para_sdk.CosmosTransaction(
+        to: _currentConfig.testAddress,
+        amount: '1000000',  // 1 token in smallest denomination
+        denom: _currentConfig.denom,
+        memo: 'Test ${signingMethod.toUpperCase()} Transaction',
+        chainId: _currentConfig.chainId,
+        format: signingMethod,  // "proto" or "amino"
+      );
+      
+      final result = await para.formatAndSignTransaction(
+        walletId: widget.wallet.id!,
+        transaction: transaction.toJson(),
+        chainId: _currentConfig.chainId,
+        rpcUrl: _currentConfig.rpcUrl,
+      );
       
       final duration = DateTime.now().difference(startTime).inMilliseconds / 1000;
-      _showResult(
-        'Success',
-        'Transaction signed successfully using ${signingMethod.toUpperCase()}\nDuration: ${duration.toStringAsFixed(2)}s',
-      );
+      
+      if (result is para_sdk.SuccessfulSignatureResult) {
+        _showResult(
+          'Success',
+          'Transaction signed successfully using ${signingMethod.toUpperCase()}\nDuration: ${duration.toStringAsFixed(2)}s',
+        );
+      } else if (result is para_sdk.DeniedSignatureResultWithUrl) {
+        _showResult(
+          'Denied',
+          'Transaction denied\nReview URL: ${result.transactionReviewUrl}',
+        );
+      } else {
+        _showResult('Error', 'Failed to sign transaction');
+      }
     } catch (e) {
       final duration = DateTime.now().difference(startTime).inMilliseconds / 1000;
-      _showResult(
-        'Error',
-        'Failed to sign transaction: $e\nDuration: ${duration.toStringAsFixed(2)}s',
-      );
+      _showResult('Error', 'Failed to sign transaction: $e\nDuration: ${duration.toStringAsFixed(2)}s');
     } finally {
       setState(() => _isLoading = false);
     }
   }
   
   Future<void> _sendTransaction() async {
-    if (_signer == null) {
-      _showResult('Error', 'Signer not initialized');
-      return;
-    }
-    
     setState(() => _isLoading = true);
     final startTime = DateTime.now();
     
     try {
-      // For demo purposes, we'll sign with amino and show the result
-      final signDocBase64 = _createAminoSignDoc();
-      await _signer!.signAmino(signDocBase64: signDocBase64);
+      final transaction = para_sdk.CosmosTransaction(
+        to: _currentConfig.testAddress,
+        amount: '1000000',  // 1 token in smallest denomination
+        denom: _currentConfig.denom,
+        memo: 'Test Transaction from Para Flutter',
+        chainId: _currentConfig.chainId,
+        format: 'amino',  // Use amino for demo
+      );
+      
+      final result = await para.formatAndSignTransaction(
+        walletId: widget.wallet.id!,
+        transaction: transaction.toJson(),
+        chainId: _currentConfig.chainId,
+        rpcUrl: _currentConfig.rpcUrl,
+      );
       
       final duration = DateTime.now().difference(startTime).inMilliseconds / 1000;
       
-      // In a real app, you would broadcast the signed transaction to the chain
-      _showResult(
-        'Success',
-        'Transaction signed and ready to broadcast\n'
+      if (result is para_sdk.SuccessfulSignatureResult) {
+        // In a real app, you would broadcast the signed transaction to the chain
+        _showResult(
+          'Success',
+          'Transaction signed and ready to broadcast\n'
         'Chain: ${_currentConfig.name}\n'
         'To: ${_currentConfig.testAddress}\n'
         'Amount: 1.0 ${_currentConfig.denom.substring(1).toUpperCase()}\n'
         'Duration: ${duration.toStringAsFixed(2)}s\n\n'
         'Note: Broadcasting not implemented in demo',
-      );
+        );
+      } else if (result is para_sdk.DeniedSignatureResultWithUrl) {
+        _showResult(
+          'Denied',
+          'Transaction denied\nReview URL: ${result.transactionReviewUrl}',
+        );
+      } else {
+        _showResult('Error', 'Failed to sign transaction');
+      }
     } catch (e) {
       final duration = DateTime.now().difference(startTime).inMilliseconds / 1000;
       _showResult(
@@ -379,63 +314,6 @@ class _CosmosWalletViewState extends State<CosmosWalletView> {
     }
   }
   
-  
-  String _createProtoSignDoc() {
-    // Create a minimal but valid protobuf SignDoc
-    // This must match the binary protobuf format, not JSON
-    final chainId = _currentConfig.chainId;
-    final chainIdBytes = utf8.encode(chainId);
-    
-    final protobufBytes = <int>[];
-    
-    // body_bytes (field 1, wire type 2) - empty
-    protobufBytes.add(0x0A); // tag (field 1, wire type 2)
-    protobufBytes.add(0x00); // length 0
-    
-    // auth_info_bytes (field 2, wire type 2) - empty  
-    protobufBytes.add(0x12); // tag (field 2, wire type 2)
-    protobufBytes.add(0x00); // length 0
-    
-    // chain_id (field 3, wire type 2)
-    protobufBytes.add(0x1A); // tag (field 3, wire type 2)
-    protobufBytes.add(chainIdBytes.length); // length
-    protobufBytes.addAll(chainIdBytes); // chain ID string
-    
-    // account_number (field 4, wire type 0) - value 0
-    protobufBytes.add(0x20); // tag (field 4, wire type 0)
-    protobufBytes.add(0x00); // value 0
-    
-    return base64Encode(protobufBytes);
-  }
-
-  String _createAminoSignDoc() {
-    final signDocJson = {
-      'chain_id': _currentConfig.chainId,
-      'account_number': '0',
-      'sequence': '0',
-      'fee': {
-        'amount': [
-          {'denom': _currentConfig.denom, 'amount': '5000'}
-        ],
-        'gas': '200000',
-      },
-      'msgs': [
-        {
-          'type': 'cosmos-sdk/MsgSend',
-          'value': {
-            'from_address': widget.wallet.addressSecondary ?? widget.wallet.address ?? '',
-            'to_address': _currentConfig.testAddress,
-            'amount': [
-              {'denom': _currentConfig.denom, 'amount': '1000000'}
-            ],
-          },
-        },
-      ],
-      'memo': 'Test transaction from Para Flutter',
-    };
-    
-    return base64Encode(utf8.encode(jsonEncode(signDocJson)));
-  }
 
   void _showFundingInstructions() {
     final address = widget.wallet.addressSecondary ?? widget.wallet.address;
@@ -627,8 +505,7 @@ class _CosmosWalletViewState extends State<CosmosWalletView> {
               }).toList(),
               onChanged: (value) {
                 if (value != null) {
-                  setState(() => _selectedChain = value);
-                  _reinitializeSigner();
+                  _switchChain(value);
                 }
               },
           ),
