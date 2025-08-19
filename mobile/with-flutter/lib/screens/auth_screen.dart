@@ -358,6 +358,7 @@ class _AuthScreenState extends State<AuthScreen> {
               const SizedBox(height: 24),
               // Email/Phone input
               EmailPhoneInput(
+                key: const Key('emailPhoneInput'),
                 onSubmit: _isProcessing ? (_, __) {} : _handleEmailPhone,
               ),
               const SizedBox(height: 20),

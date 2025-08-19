@@ -17,6 +17,7 @@ class WalletCard extends StatelessWidget {
     final chain = wallet.type?.toChain ?? WalletChain.evm;
     
     return GestureDetector(
+      key: Key('walletCell_${wallet.type?.value ?? 'unknown'}'),
       onTap: onTap,
       child: Container(
         height: 150,
