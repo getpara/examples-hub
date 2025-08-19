@@ -938,12 +938,19 @@ export abstract class ParaCore implements CoreInterface {
   ) {
     let env: Environment | undefined, apiKey: string;
 
-    if (arguments.length === 1) {
-      // 1-parameter constructor: (apiKey)
-      env = ParaCore.resolveEnvironment(undefined, envOrApiKey as string);
-      apiKey = envOrApiKey as string;
+    // Filter out undefined arguments to get actual argument count
+    const actualArgs = Array.from(arguments).filter(arg => arg !== undefined);
+    const actualArgumentCount = actualArgs.length;
+
+    if (actualArgumentCount === 1) {
+      if (Object.values(Environment).includes(envOrApiKey as Environment)) {
+        throw new Error('A Para API key is required.');
+      }
+      // Using actualArgs[0] here to handle case where env is undefined i.e. (undefined, API_KEY)
+      env = ParaCore.resolveEnvironment(undefined, actualArgs[0] as string);
+      apiKey = actualArgs[0] as string;
       opts = undefined;
-    } else if (arguments.length === 2) {
+    } else if (actualArgumentCount === 2) {
       if (typeof apiKeyOrOpts === 'object' && apiKeyOrOpts !== null) {
         // 2-parameter constructor: (apiKey, opts)
         env = ParaCore.resolveEnvironment(undefined, envOrApiKey as string);
