@@ -15,7 +15,7 @@ struct SolanaWalletView: View {
     @State private var isLoading = false
     @State private var balance: String?
 
-    @State private var paraSolanaSigner: ParaSolanaSigner?
+    // Removed ParaSolanaSigner - now using unified API
 
     // Solana RPC URL (devnet for testing)
     private let rpcUrl = "https://api.devnet.solana.com"
@@ -32,16 +32,26 @@ struct SolanaWalletView: View {
     }
 
     private func fetchBalance() {
-        guard let signer = paraSolanaSigner else {
-            result = ("Error", "Solana signer not initialized")
-            return
-        }
-
         Task {
             do {
-                let balanceInLamports = try await signer.getBalance()
-                let solBalance = Double(balanceInLamports) / 1_000_000_000 // lamportsPerSol conversion
-                balance = String(format: "%.4f SOL", solBalance)
+                // Using unified getBalance API with RPC URL
+                // For Solana devnet (testing)
+                let rpcUrl = "https://api.devnet.solana.com"
+                // For mainnet with API key (production):
+                // let rpcUrl = "https://solana-mainnet.g.alchemy.com/v2/YOUR_API_KEY"
+                
+                let balanceString = try await paraManager.getBalance(
+                    walletId: selectedWallet.id,
+                    token: nil, // Native SOL balance
+                    rpcUrl: rpcUrl // Pass RPC to avoid 403/CORS issues
+                )
+                // Balance is returned as a string, parse if needed
+                if let balanceValue = Double(balanceString) {
+                    let solBalance = balanceValue / 1_000_000_000 // lamportsPerSol conversion
+                    balance = String(format: "%.4f SOL", solBalance)
+                } else {
+                    balance = balanceString // Use as-is if parsing fails
+                }
             } catch {
                 result = ("Error", "Failed to fetch balance: \(error.localizedDescription)")
             }
@@ -50,15 +60,21 @@ struct SolanaWalletView: View {
 
     private func signTransaction() {
         guard let transaction = createTransaction(lamports: 1_000_000) else { return }
-        guard let signer = paraSolanaSigner else {
-            result = ("Error", "Solana signer not initialized")
-            return
-        }
 
         isLoading = true
         Task {
             let (duration, error) = await measureTime {
-                _ = try await signer.signTransaction(transaction)
+                // Pass RPC URL to avoid needing to include recentBlockhash
+                let rpcUrl = "https://api.devnet.solana.com"
+                // For mainnet: "https://solana-mainnet.g.alchemy.com/v2/YOUR_API_KEY"
+                
+                // Pass the transaction object directly - bridge will format it
+                _ = try await paraManager.signTransaction(
+                    walletId: selectedWallet.id,
+                    transaction: transaction,
+                    chainId: nil, // Not needed for Solana
+                    rpcUrl: rpcUrl // Pass RPC for blockhash fetching
+                )
             }
 
             if let error {
@@ -72,10 +88,6 @@ struct SolanaWalletView: View {
 
     private func sendTransaction() {
         guard let transaction = createTransaction(lamports: 100_000) else { return }
-        guard let signer = paraSolanaSigner else {
-            result = ("Error", "Solana signer not initialized")
-            return
-        }
 
         // Check if we have balance info and sufficient funds
         if let balanceString = balance {
@@ -99,7 +111,13 @@ struct SolanaWalletView: View {
         isLoading = true
         Task {
             let (duration, error) = await measureTime {
-                _ = try await signer.sendTransaction(transaction)
+                // Using the high-level transfer method
+                _ = try await paraManager.transfer(
+                    walletId: selectedWallet.id,
+                    to: "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM",
+                    amount: "100000", // Lamports
+                    token: nil // Native SOL transfer
+                )
             }
 
             if let error {
@@ -244,11 +262,11 @@ struct SolanaWalletView: View {
                         isSigning = true
                         Task {
                             let (duration, error) = await measureTime {
-                                let messageBytes = messageToSign.data(using: .utf8)
-                                guard let base64Message = messageBytes?.base64EncodedString() else {
-                                    throw ParaError.bridgeError("Failed to encode message.")
-                                }
-                                _ = try await paraManager.signMessage(walletId: selectedWallet.id, message: base64Message)
+                                // Using the new unified signMessage API
+                                _ = try await paraManager.signMessage(
+                                    walletId: selectedWallet.id,
+                                    message: messageToSign // Pass plain text directly
+                                )
                             }
 
                             isSigning = false
@@ -365,27 +383,8 @@ struct SolanaWalletView: View {
             )
         }
         .onAppear {
-            Task {
-                isLoading = true
-                do {
-                    // Initialize Para Solana signer with bridge pattern
-                    let signer = try ParaSolanaSigner(
-                        paraManager: paraManager,
-                        rpcUrl: rpcUrl,
-                    )
-
-                    // Explicitly select the wallet to ensure it's properly initialized
-                    try await signer.selectWallet(walletId: selectedWallet.id)
-
-                    await MainActor.run {
-                        paraSolanaSigner = signer
-                        fetchBalance()
-                    }
-                } catch {
-                    result = ("Error", "Failed to initialize Solana signer: \(error.localizedDescription)")
-                }
-                isLoading = false
-            }
+            // No signer initialization needed - using unified API
+            fetchBalance()
         }
         .overlay {
             if isLoading {

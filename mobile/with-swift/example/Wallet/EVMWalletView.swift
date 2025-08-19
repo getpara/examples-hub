@@ -18,7 +18,7 @@ struct EVMWalletView: View {
     @State private var isLoading = false
     @State private var balance: String?
 
-    @State private var paraEvmSigner: ParaEvmSigner?
+    // Removed ParaEvmSigner - now using unified API
 
     private let web3: Web3
 
@@ -68,15 +68,16 @@ struct EVMWalletView: View {
 
     private func signTransaction() {
         guard let transaction = createTransaction(value: "1000000000") else { return }
-        guard let signer = paraEvmSigner else {
-            result = ("Error", "EVM signer not initialized")
-            return
-        }
 
         isLoading = true
         Task {
             let (duration, error) = await measureTime {
-                _ = try await signer.signTransaction(transactionB64: transaction.b64Encoded())
+                // Pass the transaction object directly - bridge will format it
+                _ = try await paraManager.signTransaction(
+                    walletId: selectedWallet.id,
+                    transaction: transaction,
+                    chainId: "11155111" // Sepolia chain ID
+                )
             }
 
             if let error {
@@ -90,10 +91,6 @@ struct EVMWalletView: View {
 
     private func sendTransaction() {
         guard let transaction = createTransaction(value: "100000000000000") else { return }
-        guard let signer = paraEvmSigner else {
-            result = ("Error", "EVM signer not initialized")
-            return
-        }
 
         // Check if we have balance info and sufficient funds
         if let balanceString = balance {
@@ -122,7 +119,14 @@ struct EVMWalletView: View {
         isLoading = true
         Task {
             let (duration, error) = await measureTime {
-                _ = try await signer.sendTransaction(transactionB64: transaction.b64Encoded())
+                // Using the high-level transfer method for simplicity
+                // For raw transaction sending, you would use signTransaction + broadcast
+                _ = try await paraManager.transfer(
+                    walletId: selectedWallet.id,
+                    to: "0x301d75d850c878b160ad9e1e3f6300202de9e97f",
+                    amount: "100000000000000", // Wei amount
+                    token: nil // Native ETH transfer
+                )
             }
 
             if let error {
@@ -291,11 +295,11 @@ struct EVMWalletView: View {
                         isSigning = true
                         Task {
                             let (duration, error) = await measureTime {
-                                let messageBytes = messageToSign.data(using: .utf8)
-                                guard let base64Message = messageBytes?.base64EncodedString() else {
-                                    throw ParaError.bridgeError("Failed to encode message.")
-                                }
-                                _ = try await paraManager.signMessage(walletId: selectedWallet.id, message: base64Message)
+                                // Using the new unified signMessage API
+                                _ = try await paraManager.signMessage(
+                                    walletId: selectedWallet.id,
+                                    message: messageToSign // Pass plain text directly
+                                )
                             }
 
                             isSigning = false
@@ -412,28 +416,8 @@ struct EVMWalletView: View {
             )
         }
         .onAppear {
-            Task {
-                isLoading = true
-                do {
-                    // Initialize Para EVM signer
-                    let signer = try ParaEvmSigner(
-                        paraManager: paraManager,
-                        rpcUrl: rpcUrl,
-                        walletId: nil,
-                    )
-
-                    // Select the wallet for this signer
-                    try await signer.selectWallet(walletId: selectedWallet.id)
-
-                    await MainActor.run {
-                        paraEvmSigner = signer
-                        fetchBalance()
-                    }
-                } catch {
-                    result = ("Error", "Failed to initialize EVM signer: \(error.localizedDescription)")
-                }
-                isLoading = false
-            }
+            // No signer initialization needed - using unified API
+            fetchBalance()
         }
         .overlay {
             if isLoading {
