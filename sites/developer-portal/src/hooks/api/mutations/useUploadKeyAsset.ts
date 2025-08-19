@@ -53,11 +53,7 @@ export const useUploadKeyAsset = (
       await invalidateCloudFront('PARTNER_ASSETS', [invalidationPath]);
 
       return encodeURI(
-        `https://partner-assets.${
-          vars.env.toUpperCase() === Environment.PROD
-            ? ''
-            : `${vars.env.toUpperCase() === Environment.DEV ? 'sandbox' : vars.env.toLowerCase()}.`
-        }getpara.com/${fields.key}`,
+        `https://partner-assets.${vars.env.toUpperCase() === Environment.DEV ? 'sandbox' : vars.env.toLowerCase()}.getpara.com/${fields.key}`,
       );
     },
     ...options,

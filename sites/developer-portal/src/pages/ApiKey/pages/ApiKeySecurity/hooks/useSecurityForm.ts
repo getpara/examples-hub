@@ -54,7 +54,8 @@ export const useSecurityForm = () => {
   const defaultData = {
     ...apiKeyData,
     origins: apiKeyData?.origins?.join(', ') ?? '',
-    sessionMaxAge: apiKeyData?.sessionMaxAge ? parseInt(apiKeyData.sessionMaxAge) : null,
+    // convert from ms to minutes
+    sessionMaxAge: apiKeyData?.sessionMaxAge ? parseInt(apiKeyData.sessionMaxAge) / (60 * 1000) : null,
   };
 
   const onSubmit = async (updateData: SecurityForm, { projectId, apiKey, env }: SubmitVars) => {

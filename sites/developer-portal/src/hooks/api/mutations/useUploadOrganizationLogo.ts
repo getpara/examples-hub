@@ -1,7 +1,7 @@
 import { MutationOptions, useMutation } from '@tanstack/react-query';
 import axios from 'axios';
 import { getLogoUploadUrl } from '../../../api/organizations/mutations';
-import { ENV_VARS, IS_DEV, IS_PROD } from '../../../utils/constants';
+import { ENV_VARS, IS_DEV } from '../../../utils/constants';
 import { Environment } from '../../../types/environment';
 import { invalidateCloudFront } from '../../../api/aws/mutations';
 
@@ -41,7 +41,7 @@ export const useUploadOrganizationLogo = (
       await invalidateCloudFront('PARTNER_ASSETS', [invalidationPath]);
 
       return encodeURI(
-        `https://partner-assets.${IS_PROD ? '' : `${IS_DEV ? Environment.SANDBOX.toLowerCase() : ENV_VARS.environment.toLowerCase()}.`}getpara.com/${fields.key}`,
+        `https://partner-assets.${IS_DEV ? Environment.SANDBOX.toLowerCase() : ENV_VARS.environment.toLowerCase()}.getpara.com/${fields.key}`,
       );
     },
     ...options,
