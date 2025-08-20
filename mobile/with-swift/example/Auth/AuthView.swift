@@ -218,7 +218,7 @@ struct AuthView: View {
                 }
             } catch {
                 // Handle any errors
-                errorMessage = error.localizedDescription
+                errorMessage = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
                 showErrorAlert = true
             }
         }

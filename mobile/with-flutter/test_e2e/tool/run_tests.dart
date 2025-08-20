@@ -62,13 +62,18 @@ void main(List<String> args) async {
       case 'wallets':
         testFiles = ['evm_wallet_test.dart', 'solana_wallet_test.dart', 'cosmos_wallet_test.dart'];
         break;
+      case 'error':
+      case 'errors':
+        testFiles = ['simple_error_test.dart'];
+        break;
       case 'all':
       default:
         testFiles = [
           'authentication_test.dart',
           'evm_wallet_test.dart',
           'solana_wallet_test.dart',
-          'cosmos_wallet_test.dart'
+          'cosmos_wallet_test.dart',
+          'simple_error_test.dart'
         ];
         break;
     }

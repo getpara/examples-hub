@@ -303,12 +303,14 @@ struct SolanaWalletView: View {
                         }
                         .buttonStyle(.bordered)
                         .frame(maxWidth: .infinity)
+                        .accessibilityIdentifier("Send Transaction")
 
                         Button("Sign Transaction") {
                             signTransaction()
                         }
                         .buttonStyle(.bordered)
                         .frame(maxWidth: .infinity)
+                        .accessibilityIdentifier("Sign Transaction")
                     }
                     .disabled(isLoading)
                 }

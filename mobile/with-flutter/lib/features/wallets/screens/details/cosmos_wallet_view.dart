@@ -640,6 +640,7 @@ class _CosmosWalletViewState extends State<CosmosWalletView> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
+      key: const Key('walletDetailView'),
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: theme.scaffoldBackgroundColor,

@@ -219,11 +219,13 @@ struct CosmosWalletView: View {
                         .buttonStyle(.bordered)
                         .frame(maxWidth: .infinity)
                         .disabled(isLoading)
+                        .accessibilityIdentifier("Sign Transaction")
 
                     Button("Sign Amino", action: testSignAmino)
                         .buttonStyle(.bordered)
                         .frame(maxWidth: .infinity)
                         .disabled(isLoading)
+                        .accessibilityIdentifier("Sign Amino")
                 }
 
                 if true { // Always show signing options with unified API
