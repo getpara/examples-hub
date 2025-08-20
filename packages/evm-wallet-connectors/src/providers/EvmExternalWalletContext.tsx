@@ -176,6 +176,12 @@ export function EvmExternalWalletProvider({
   }, [isLocalConnecting, wagmiAddress, isConnected]);
 
   useEffect(() => {
+    // If the connected connector is using WC, pull the name from the Para details so we correctly compare it to the connected wallet name
+    const connectedConnectorName =
+      connectedConnector?.name === 'WalletConnect'
+        ? (connectedConnector as WagmiConnectorInstance)?.paraDetails?.name
+        : connectedConnector?.name;
+
     if (
       !isLocalConnecting &&
       !isConnecting &&
@@ -183,7 +189,7 @@ export function EvmExternalWalletProvider({
       connectedWallet &&
       connectedConnector &&
       connectedWallet.type === 'EVM' &&
-      connectedConnector.name !== connectedWallet.name
+      connectedConnectorName !== connectedWallet.name
     ) {
       switchAccount(connectedWallet.isExternal ? connectedWallet.name : 'Para');
     }
