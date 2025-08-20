@@ -1,3 +1,35 @@
+# Release (Tue Aug 19 2025)
+
+## Package Versions
+- @getpara/web-sdk@2.0.0-alpha.46
+- @getpara/wagmi-v2-integration@2.0.0-alpha.46
+- @getpara/wagmi-v2-connector@2.0.0-alpha.46
+- @getpara/viem-v2-integration@2.0.0-alpha.46
+- @getpara/viem-v1-integration@2.0.0-alpha.46
+- @getpara/user-management-client@2.0.0-alpha.46
+- @getpara/solana-web3.js-v1-integration@2.0.0-alpha.46
+- @getpara/solana-wallet-connectors@2.0.0-alpha.46
+- @getpara/solana-signers-v2-integration@2.0.0-alpha.46
+- @getpara/server-sdk@2.0.0-alpha.46
+- @getpara/react-sdk-lite@2.0.0-alpha.46
+- @getpara/react-sdk@2.0.0-alpha.46
+- @getpara/react-native-wallet@2.0.0-alpha.46
+- @getpara/react-components@2.0.0-alpha.46
+- @getpara/react-component-library@1.0.0-alpha.41
+- @getpara/react-common@2.0.0-alpha.46
+- @getpara/evm-wallet-connectors@2.0.0-alpha.46
+- @getpara/ethers-v6-integration@2.0.0-alpha.46
+- @getpara/ethers-v5-integration@2.0.0-alpha.46
+- @getpara/cosmos-wallet-connectors@2.0.0-alpha.46
+- @getpara/cosmjs-v0-integration@2.0.0-alpha.46
+- @getpara/core-sdk@2.0.0-alpha.46
+- @getpara/core-components@2.0.0-alpha.46
+
+
+### Fixes
+- args length (#1178) - 178ee5539
+- Dev Portal - image url (#1177) - 54359b1ba
+
 # Release (Thu Aug 14 2025)
 
 ## Package Versions
