@@ -1,11 +1,18 @@
 import { ParaWeb, Environment, CoreMethodName, PARA_CORE_METHODS } from '@getpara/web-sdk';
 import { logger, formatError } from './logging';
 import { coreMethodHandlers, bridgeMethodHandlers } from './bridgeMethodHandlers';
-import { BridgeResponse, MessageArguments, Platform } from './types';
+import {
+  BridgeResponse,
+  MessageArguments,
+  Platform,
+  BridgeError,
+  BRIDGE_ERROR_CODES,
+  normalizeError,
+  reportError,
+} from './types';
 import { ParaBridge } from './classes/ParaBridge';
 
-// Immediate console log to verify bridge is loaded
-console.warn('[BRIDGE] Bridge script loaded at', new Date().toISOString());
+logger.info('Bridge script loaded at', new Date().toISOString());
 
 let platform: Platform;
 let version: string | undefined;
@@ -55,22 +62,27 @@ function logNetworkInformation() {
 
 window.addEventListener('message', event => {
   try {
-    console.warn('[BRIDGE] Received message from event:', JSON.stringify(event.data, null, 2));
-    logger.info('Received message from event:', event.data);
+    logger.debug('Received message from event:', event.data);
     const data = event.data;
 
     switch (data.messageType) {
       case 'Para#init': {
-        console.warn('[BRIDGE] Para#init received');
+        logger.info('Para#init received');
         logNetworkInformation();
 
-        console.warn('[BRIDGE] Initializing Para with args:', JSON.stringify(data.arguments, null, 2));
         logger.info('Initializing Para with args:', data.arguments);
-        initPara(data.arguments);
 
-        console.warn('[BRIDGE] Para initialized successfully. Platform:', platform, 'Version:', version);
-        logger.info('Para initialized successfully. Platform:', platform, 'Version:', version);
-        sendResponse(data.messageType, data.requestId, true);
+        try {
+          initPara(data.arguments);
+          logger.info('Para initialized successfully. Platform:', platform, 'Version:', version);
+          sendResponse(data.messageType, data.requestId, true);
+        } catch (error) {
+          const bridgeError = normalizeError(error);
+          logger.error('Para initialization failed:', bridgeError);
+          // Report initialization errors
+          reportError('Para#init', error, platform || Platform.flutter, version);
+          sendResponse(data.messageType, data.requestId, null, bridgeError);
+        }
 
         break;
       }
@@ -106,11 +118,18 @@ const convertBigIntsToStrings = (obj: any): any => {
   return obj;
 };
 
-function sendResponse(method: string, requestId: string, responseData: any, error?: string) {
+function sendResponse(method: string, requestId: string, responseData: any, error?: string | BridgeError) {
   const serializedResponseData = convertBigIntsToStrings(responseData);
-  const payload: BridgeResponse = { method, requestId, responseData: serializedResponseData, error };
-  console.warn('[BRIDGE] Sending response:', JSON.stringify(payload, null, 2));
-  logger.info('Sending response:', payload);
+
+  // Handle structured errors vs simple string errors
+  let processedError: string | BridgeError | undefined = error;
+  if (error && typeof error === 'object' && 'code' in error) {
+    // It's a BridgeError - serialize it properly
+    processedError = convertBigIntsToStrings(error) as BridgeError;
+  }
+
+  const payload: BridgeResponse = { method, requestId, responseData: serializedResponseData, error: processedError };
+  logger.debug('Sending response:', payload);
   switch (platform) {
     case Platform.flutter:
       window['flutter_inappwebview'].callHandler('asyncResult', payload);
@@ -128,10 +147,11 @@ function initPara({ environment, apiKey, isPasskeySupported, ...metadata }: Mess
       logger.warn('Para already initialized, aborting init.');
       throw new Error('Para already initialized');
     }
+
     logger.info('Creating ParaBridge instance...');
     const para = new ParaBridge(environment as Environment, apiKey, {
       disableWorkers: false,
-      disableWebSockets: false, // should this be true?
+      disableWebSockets: false,
       isPasskeySupported: isPasskeySupported === false ? false : true,
     });
 
@@ -143,14 +163,12 @@ function initPara({ environment, apiKey, isPasskeySupported, ...metadata }: Mess
     version = metadata.version;
     logger.info('ParaBridge initialized. Platform:', platform, 'Version:', version);
   } catch (err) {
-    const errStr = formatError(err);
-    logger.error('Error initializing Para:', errStr);
+    logger.error('Para initialization failed:', err);
     throw err;
   }
 }
 
 async function invokeParaMethod(methodName: string, args: any, requestId: string) {
-  const startTime = performance.now();
   try {
     const para = window['para'] as ParaWeb;
     const handler =
@@ -159,8 +177,16 @@ async function invokeParaMethod(methodName: string, args: any, requestId: string
         : bridgeMethodHandlers[methodName];
 
     if (!handler) {
-      throw new Error(`Method ${methodName} not implemented`);
+      const error: BridgeError = {
+        code: BRIDGE_ERROR_CODES.METHOD_NOT_IMPLEMENTED,
+        message: `Method ${methodName} not implemented`,
+      };
+
+      logger.error(`Method not implemented: ${methodName}`);
+      sendResponse(methodName, requestId, null, error);
+      return;
     }
+
     const result = await handler(para, args);
     if (methodName === 'verifyWebChallenge') {
       sendResponse(methodName, requestId, platform === Platform.iOS ? result['data']['userId'] : result);
@@ -168,12 +194,15 @@ async function invokeParaMethod(methodName: string, args: any, requestId: string
       sendResponse(methodName, requestId, result);
     }
   } catch (error) {
-    const errorStr = formatError(error);
-    logger.error(`Error invoking method ${methodName}:`, errorStr);
-    sendResponse(methodName, requestId, null, errorStr);
-  } finally {
-    const endTime = performance.now();
-    logger.info(`Method "${methodName}" took ${(endTime - startTime).toFixed(2)} ms to execute.`);
+    logger.error(`Error invoking method ${methodName}:`, error);
+    logger.error(
+      `Error details - type: ${typeof error}, constructor: ${error?.constructor?.name}, keys: ${Object.keys(error || {})}`,
+    );
+    // Report error to backend (non-blocking)
+    reportError(methodName, error, platform, version);
+    const normalizedError = normalizeError(error);
+    logger.error(`Normalized error:`, normalizedError);
+    sendResponse(methodName, requestId, null, normalizedError);
   }
 }
 

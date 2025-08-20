@@ -56,11 +56,22 @@ export enum Platform {
   iOS,
 }
 
+// Minimal error handling - just pass through SDK errors
+export const BRIDGE_ERROR_CODES = {
+  METHOD_NOT_IMPLEMENTED: 'METHOD_NOT_IMPLEMENTED',
+} as const;
+
+export interface BridgeError {
+  message: string;
+  code?: string;
+  details?: any; // Original error from SDK
+}
+
 export interface BridgeResponse {
   method: string;
   requestId: string;
   responseData: any;
-  error?: string;
+  error?: string | BridgeError;
 }
 
 export interface Ctx {
@@ -168,4 +179,93 @@ export type GetWebChallengeArgs = Auth<'email' | 'phone'>;
 
 export interface SetEmailArgs {
   email: string;
+}
+
+// Simple pass-through - just return the original error from SDK
+export function normalizeError(error: any): BridgeError {
+  // Try multiple ways to extract the error message from Para SDK errors
+  let message = 'Unknown error';
+
+  if (error?.message) {
+    message = error.message;
+  } else if (error?.error?.message) {
+    message = error.error.message;
+  } else if (error?.description) {
+    message = error.description;
+  } else if (error?.data?.message) {
+    message = error.data.message;
+  } else if (typeof error === 'string') {
+    message = error;
+  } else if (error?.toString && typeof error.toString === 'function') {
+    const stringified = error.toString();
+    if (stringified !== '[object Object]') {
+      message = stringified;
+    }
+  }
+
+  return {
+    message,
+    code: error?.code || error?.error?.code,
+    details: error,
+  };
+}
+
+// Simple error reporting to backend
+export async function reportError(methodName: string, error: any, platform: Platform, version?: string): Promise<void> {
+  const env = (window['para'] as any)?.env || 'unknown';
+
+  try {
+    const envUrls = {
+      production: 'https://api.usecapsule.com',
+      beta: 'https://api.beta.usecapsule.com',
+      sandbox: 'https://api.sandbox.usecapsule.com',
+    };
+    const baseUrl = (window['para'] as any)?.ctx?.client?.baseUrl || envUrls[env as keyof typeof envUrls] || envUrls.sandbox;
+    const userId = (window['para'] as any)?.userId;
+
+    const payload = {
+      methodName,
+      error: {
+        name: error?.name || 'Error',
+        message: error?.message || error?.toString() || 'Unknown error',
+      },
+      sdkType: platform === Platform.iOS ? 'SWIFT' : 'FLUTTER',
+      sdkVersion: version || 'unknown',
+      environment: env,
+      userId: userId || null,
+    };
+
+    await fetch(`${baseUrl}/errors/sdk`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+  } catch (reportingError) {
+    // Log in non-production for debugging, but don't throw to avoid error loops
+    if (env !== 'production') {
+      console.warn('[Bridge] Error reporting failed:', reportingError);
+    }
+  }
+}
+
+// Minimal wrapper - just log and re-throw original error
+export function withErrorHandling<T extends any[], R>(
+  operation: string,
+  methodName: string,
+  handler: (...args: T) => Promise<R>,
+  _walletType?: string,
+): (...args: T) => Promise<R> {
+  return async (...args: T): Promise<R> => {
+    try {
+      const result = await handler(...args);
+      // Using console.warn which is allowed by eslint config
+      console.warn(`✅ ${methodName} completed`);
+      return result;
+    } catch (error) {
+      console.error(`❌ ${methodName} failed:`, error);
+      throw error; // Just re-throw the original error
+    }
+  };
 }

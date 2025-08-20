@@ -13,11 +13,11 @@
 
     // Append to the main JS file
     await fs.appendFile(distIndexPath, exportStatementJS, 'utf8');
-    console.log(`Successfully appended JavaScript exports to ${distIndexPath}`);
+    console.warn(`Successfully appended JavaScript exports to ${distIndexPath}`);
 
     // Append to the main types file
     await fs.appendFile(distTypesPath, exportStatementTypes, 'utf8');
-    console.log(`Successfully appended type exports to ${distTypesPath}`);
+    console.warn(`Successfully appended type exports to ${distTypesPath}`);
 
     const loaderRelativePackageJsonPath = './dist/loader/package.json';
     const customPackageJson = {
@@ -29,7 +29,7 @@
     };
 
     await fs.writeFile(loaderRelativePackageJsonPath, JSON.stringify(customPackageJson, null, 2));
-    console.log('Custom package.json written to loader directory.');
+    console.warn('Custom package.json written to loader directory.');
   } catch (error) {
     console.error('Error appending loader exports:', error);
     process.exit(1);

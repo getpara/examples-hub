@@ -55,6 +55,7 @@ export const coreMethodHandlers: CoreMethodHandlers = PARA_CORE_METHODS.reduce((
       return result;
     } catch (e) {
       logger.info(`${method} failed:`, e?.message?.toString() ?? e?.toString() ?? 'Unknown error'); // Log the error message
+      throw e; // Re-throw the error so it can be handled properly by the bridge
     }
   };
 
