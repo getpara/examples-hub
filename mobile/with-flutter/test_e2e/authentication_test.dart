@@ -14,39 +14,17 @@ void main() {
     
     setUpAll(() async {
       // Load environment and validate prerequisites
-      final env = DotEnv(includePlatformEnvironment: true)..load(['.env']);
-      final apiKey = Platform.environment['PARA_API_KEY'] ?? env['PARA_API_KEY'];
+      final env = DotEnv(includePlatformEnvironment: true)
+        ..load(['.env', '../.env']);
+      final apiKey = Platform.environment['PARA_API_KEY']
+          ?? env['PARA_API_KEY']
+          ?? Platform.environment['PARA_BETA_API_KEY']
+          ?? env['PARA_BETA_API_KEY'];
       if (apiKey == null || apiKey.isEmpty) {
-        throw Exception('PARA_API_KEY must be set in environment variables or .env file');
+        throw Exception('PARA_API_KEY or PARA_BETA_API_KEY must be set in environment variables or .env/.env in project root');
       }
       
-      final currentDir = Directory.current.path;
-      final projectRoot = currentDir.endsWith('test_e2e') 
-          ? Directory.current.parent.path 
-          : currentDir;
-      final appPath = '$projectRoot/build/ios/iphonesimulator/Runner.app';
-      
-      final capabilities = <String, dynamic>{
-        'platformName': 'iOS',
-        'platformVersion': '26.0',
-        'deviceName': 'iPhone 16 Pro',
-        'automationName': 'XCUITest',
-        'bundleId': 'com.usecapsule.example.flutter',
-        'app': appPath,
-        'newCommandTimeout': 300,
-        'connectHardwareKeyboard': false,
-        'useNewWDA': true,
-        'wdaLaunchTimeout': 60000,
-        'wdaConnectionTimeout': 60000,
-        'allowTouchIdEnroll': true,
-        'touchIdMatch': true,
-        'simpleIsVisibleCheck': true,
-      };
-      
-      driver = await createDriver(
-        uri: Uri.parse('http://127.0.0.1:4723/'),
-        desired: capabilities,
-      );
+      driver = await createIOSDriver();
       
       // Enroll biometrics for all tests
       try {
@@ -162,6 +140,22 @@ Future<void> _performLoginFlow(AppiumWebDriver driver, String credential) async 
     await _enterEmailAndContinue(driver, credential);
   } else {
     await _switchToPhoneMode(driver);
+    // Prefer passkey-only login for returning phone users if available
+    try {
+      final buttons = await driver.findElements(AppiumBy.className('XCUIElementTypeButton')).toList();
+      for (final b in buttons) {
+        final label = await b.attributes['label'];
+        if (label.contains('Use Passkey')) {
+          await b.click();
+          print('🪪 Selected passkey login for phone user');
+          await _performBiometricAuthForLogin(driver);
+          print('✅ Login flow completed');
+          return;
+        }
+      }
+    } catch (_) {}
+
+    // Fallback: explicit phone entry if passkey button not visible
     await _enterPhoneAndContinue(driver, credential);
   }
   
@@ -426,22 +420,7 @@ Future<void> _performBiometricAuth(AppiumWebDriver driver, {bool isSignup = fals
   // Handle system dialog with coordinate tap (like Swift implementation)
   // Tap at normalized coordinates (0.5, 0.92) - center horizontally, 92% from top
   try {
-    print('📱 Tapping Continue button location (coordinate-based)...');
-    final window = await driver.window;
-    final size = await window.size;
-    
-    // Calculate tap coordinates - center horizontally, 85% from top for Continue button
-    final x = size.width ~/ 2;
-    final y = (size.height * 0.85).round();
-    
-    // Perform tap at coordinates
-    await driver.execute('mobile:tap', <dynamic>[<String, dynamic>{
-      'x': x,
-      'y': y
-    }]);
-    
-    print('✅ Tapped at coordinates ($x, $y)');
-    await Future.delayed(Duration(seconds: 1));
+    await tapSystemContinueAndAuthenticate(driver);
   } catch (e) {
     print('⚠️ Could not perform coordinate tap: $e');
   }
@@ -473,33 +452,12 @@ Future<void> _performBiometricAuthForLogin(AppiumWebDriver driver) async {
     // Wait for the Sign in dialog to appear
     await Future.delayed(Duration(seconds: 2));
     
-    // Tap the Continue button on the Sign in dialog
-    // This button is lower on the screen (around 85% from top)
-    final window = await driver.window;
-    final size = await window.size;
-    
-    final x = size.width ~/ 2;
-    final y = (size.height * 0.85).round();
-    
-    print('📱 Tapping Continue button on Sign in dialog at ($x, $y)...');
-    await driver.execute('mobile:tap', <dynamic>[<String, dynamic>{
-      'x': x,
-      'y': y
-    }]);
-    
-    print('✅ Tapped Continue on Sign in dialog');
-    await Future.delayed(Duration(seconds: 2));
-    
-    // Now handle the biometric authentication
-    await driver.execute('mobile:sendBiometricMatch', <dynamic>[<String, dynamic>{
-      'type': 'touchId',
-      'match': true
-    }]);
+    // Tap the Continue button and perform biometric
+    await tapSystemContinueAndAuthenticate(driver);
     print('✅ Biometric authentication successful (login)');
     
-    // Wait for authentication to complete and navigation to happen
-    print('⏳ Waiting for authentication to complete...');
-    await Future.delayed(Duration(seconds: 5));
+    // Small settle time
+    await Future.delayed(Duration(seconds: 1));
     
   } catch (e) {
     throw Exception('Login authentication failed: $e');

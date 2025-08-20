@@ -1,6 +1,7 @@
 // Wallet Test Foundation - Deep Implementation
 // Provides robust, isolated test contexts for wallet operations
 
+import 'dart:io';
 import 'package:appium_driver/async_io.dart';
 import 'test_constants.dart';
 
@@ -290,11 +291,33 @@ class WalletTestHelper {
     
     // Handle OTP verification
     await _handleOTPVerification();
+    // Pick passkey as the method when prompted
+    await handleAuthMethodDialogIfPresent();
     
     // Complete biometric authentication
     await _performBiometricAuth();
     
     print('✅ Email authentication completed');
+  }
+
+  /// If the "Choose Authentication Method" dialog appears, choose "Use Passkey".
+  Future<void> handleAuthMethodDialogIfPresent() async {
+    try {
+      // small wait to allow sheet/dialog to appear
+      await Future.delayed(const Duration(milliseconds: 400));
+      final buttons = await driver.findElements(AppiumBy.className('XCUIElementTypeButton')).toList();
+      for (final button in buttons) {
+        try {
+          final label = await button.attributes['label'];
+          if (label.contains('Use Passkey')) {
+            print('🪪 Selecting "Use Passkey" on auth method dialog');
+            await button.click();
+            await Future.delayed(const Duration(seconds: 1));
+            return;
+          }
+        } catch (_) {}
+      }
+    } catch (_) {}
   }
   
   /// Waits for wallets view with advanced debugging and refresh strategies
@@ -308,9 +331,10 @@ class WalletTestHelper {
     await _forceAppiumRefresh();
     
     // Wait for login screen to disappear and wallets screen to appear
-    const maxAttempts = 40;
+    const maxAttempts = 120; // allow up to ~2 minutes total
     const loginScreenIdentifiers = ['Sign Up or Log In', 'Phone', 'Email', 'Powered by'];
     const walletScreenIdentifiers = ['Wallets', 'Logout', 'Create Your First Wallet', 'Create First Wallet'];
+    const pendingSetupIdentifiers = ['Setting up your account', 'Creating your secure wallets'];
     
     for (int attempt = 0; attempt < maxAttempts; attempt++) {
       try {
@@ -334,7 +358,9 @@ class WalletTestHelper {
           return;
         }
         
-        if (screenState.hasLoadingIndicator) {
+        // Handle explicit setup screen messaging as a loading state
+        final isPendingSetup = await _detectTexts(pendingSetupIdentifiers);
+        if (screenState.hasLoadingIndicator || isPendingSetup) {
           print('⏳ Loading indicator detected, waiting for transition...');
           await Future.delayed(Duration(seconds: 2));
           continue;
@@ -345,6 +371,8 @@ class WalletTestHelper {
             print('⚠️ Still on login screen (attempt $attempt)');
             print('  - Found login elements: ${screenState.foundLoginElements}');
           }
+          // Opportunistically pick passkey if dialog is up
+          await handleAuthMethodDialogIfPresent();
         } else if (!screenState.isOnWalletScreen) {
           print('🔍 Unknown screen state (attempt $attempt)');
           print('  - Not login, not wallet, checking for any activity...');
@@ -383,6 +411,22 @@ class WalletTestHelper {
     await _dumpPageSource('Final state - timeout reached');
     print('❌ Failed to detect wallet screen after $maxAttempts attempts');
     print('⚠️ Proceeding anyway, but test may fail');
+  }
+
+  // Utility: check if any of the given texts exist on screen
+  Future<bool> _detectTexts(List<String> texts) async {
+    try {
+      final staticTexts = await driver.findElements(AppiumBy.className('XCUIElementTypeStaticText')).toList();
+      for (final element in staticTexts) {
+        try {
+          final value = await element.text;
+          for (final t in texts) {
+            if (value.contains(t)) return true;
+          }
+        } catch (_) {}
+      }
+    } catch (_) {}
+    return false;
   }
   
   // Helper method to dump page source for debugging
@@ -662,25 +706,50 @@ class WalletTestHelper {
     print('🏦 Ensuring Solana wallet exists...');
     
     try {
-      await ensureEVMWalletExists(); // EVM wallet must exist first
-      
-      // Look for Create SOLANA Wallet button
+      // Check if SOLANA wallet exists already by scanning wallet cells
+      final cells = await driver.findElements(AppiumBy.className('XCUIElementTypeCell')).toList();
+      for (final cell in cells) {
+        try {
+          final texts = await cell.findElements(AppiumBy.className('XCUIElementTypeStaticText')).toList();
+          for (final t in texts) {
+            final content = await t.text;
+            if (content.contains('SOLANA')) {
+              print('✅ Solana wallet already exists');
+              return;
+            }
+          }
+        } catch (_) {}
+      }
+
+      // Create via Add Wallet bottom sheet
+      print('📱 Opening Add Wallet and selecting SOLANA...');
       final buttons = await driver.findElements(AppiumBy.className('XCUIElementTypeButton')).toList();
       for (final button in buttons) {
         try {
           final label = await button.attributes['label'];
-          if (label.contains('Create SOLANA Wallet')) {
+          if (label.contains('Add Wallet')) {
             await button.click();
-            await Future.delayed(Duration(seconds: 3));
+            await Future.delayed(Duration(seconds: 1));
+            break;
+          }
+        } catch (_) {}
+      }
+
+      // In bottom sheet, choose SOLANA
+      final sheetButtons = await driver.findElements(AppiumBy.className('XCUIElementTypeButton')).toList();
+      for (final button in sheetButtons) {
+        try {
+          final label = await button.attributes['label'];
+          if (label.contains('SOLANA')) {
+            await button.click();
+            await Future.delayed(Duration(seconds: 5));
             print('✅ Solana wallet created');
             return;
           }
-        } catch (e) {
-          // Continue searching
-        }
+        } catch (_) {}
       }
-      
-      print('✅ Solana wallet already exists or not needed');
+
+      throw Exception('Could not find SOLANA option in Add Wallet');
       
     } catch (e) {
       throw Exception('Solana wallet setup failed: $e');
@@ -692,25 +761,50 @@ class WalletTestHelper {
     print('🏦 Ensuring Cosmos wallet exists...');
     
     try {
-      await ensureEVMWalletExists(); // EVM wallet must exist first
-      
-      // Look for Create COSMOS Wallet button
+      // Check if COSMOS wallet exists already
+      final cells = await driver.findElements(AppiumBy.className('XCUIElementTypeCell')).toList();
+      for (final cell in cells) {
+        try {
+          final texts = await cell.findElements(AppiumBy.className('XCUIElementTypeStaticText')).toList();
+          for (final t in texts) {
+            final content = await t.text;
+            if (content.contains('COSMOS')) {
+              print('✅ Cosmos wallet already exists');
+              return;
+            }
+          }
+        } catch (_) {}
+      }
+
+      // Create via Add Wallet bottom sheet
+      print('📱 Opening Add Wallet and selecting COSMOS...');
       final buttons = await driver.findElements(AppiumBy.className('XCUIElementTypeButton')).toList();
       for (final button in buttons) {
         try {
           final label = await button.attributes['label'];
-          if (label.contains('Create COSMOS Wallet')) {
+          if (label.contains('Add Wallet')) {
             await button.click();
-            await Future.delayed(Duration(seconds: 3));
+            await Future.delayed(Duration(seconds: 1));
+            break;
+          }
+        } catch (_) {}
+      }
+
+      // In bottom sheet, choose COSMOS
+      final sheetButtons = await driver.findElements(AppiumBy.className('XCUIElementTypeButton')).toList();
+      for (final button in sheetButtons) {
+        try {
+          final label = await button.attributes['label'];
+          if (label.contains('COSMOS')) {
+            await button.click();
+            await Future.delayed(Duration(seconds: 5));
             print('✅ Cosmos wallet created');
             return;
           }
-        } catch (e) {
-          // Continue searching
-        }
+        } catch (_) {}
       }
-      
-      print('✅ Cosmos wallet already exists or not needed');
+
+      throw Exception('Could not find COSMOS option in Add Wallet');
       
     } catch (e) {
       throw Exception('Cosmos wallet setup failed: $e');
@@ -819,44 +913,235 @@ class WalletTestHelper {
   }
   
   Future<void> _performBiometricAuth() async {
-    await Future.delayed(Duration(seconds: 3));
-    
-    // Handle system dialog with coordinate tap (like Swift implementation)
-    // Tap at normalized coordinates (0.5, 0.92) - center horizontally, 92% from top
-    try {
-      print('📱 Tapping Continue button location (coordinate-based)...');
-      final window = await driver.window;
-      final size = await window.size;
-      
-      // Calculate tap coordinates - center horizontally, 85% from top for Continue button
-      final x = size.width ~/ 2;
-      final y = (size.height * 0.85).round();
-      
-      // Perform tap at coordinates
-      await driver.execute('mobile:tap', <dynamic>[<String, dynamic>{
-        'x': x,
-        'y': y
-      }]);
-      
-      print('✅ Tapped at coordinates ($x, $y)');
-      await Future.delayed(Duration(seconds: 1));
-    } catch (e) {
-      print('⚠️ Could not perform coordinate tap: $e');
-    }
-    
-    try {
-      await driver.execute('mobile:sendBiometricMatch', <dynamic>[<String, dynamic>{
-        'type': 'touchId',
-        'match': true
-      }]);
-      print('✅ Biometric authentication successful');
-      
-      // Wait longer for authentication to complete and navigation to happen
-      print('⏳ Waiting for authentication to complete...');
-      await Future.delayed(Duration(seconds: 5));
-      
-    } catch (e) {
-      throw Exception('Biometric authentication failed: $e');
+    // Short grace to allow sheet to present
+    await Future.delayed(const Duration(milliseconds: 800));
+    await tapSystemContinueAndAuthenticate(driver);
+  }
+}
+
+// --- Shared driver/capabilities helpers for iOS Appium tests ---
+
+/// Resolve project root from current directory (supports running inside `test_e2e/`).
+String resolveProjectRoot() {
+  final currentDir = Directory.current.path;
+  final projectRoot = currentDir.endsWith('test_e2e')
+      ? Directory.current.parent.path
+      : currentDir;
+  return projectRoot;
+}
+
+/// Resolve built app path for iOS simulator.
+String resolveIOSAppPath() {
+  final root = resolveProjectRoot();
+  return '$root/build/ios/iphonesimulator/Runner.app';
+}
+
+/// Build a set of sane default capabilities for iOS XCUITest.
+/// Allows overriding via environment variables when needed:
+/// - IOS_SIM_UDID: target a specific booted simulator
+/// - IOS_DEVICE_NAME: e.g. "iPhone 16 Pro"
+/// - IOS_PLATFORM_VERSION: e.g. "18.0"
+/// - BUNDLE_ID: override the bundle identifier if app id changed
+Map<String, dynamic> buildIOSCapabilities() {
+  final env = Platform.environment;
+
+  final udid = env['IOS_SIM_UDID'];
+  final deviceName = env['IOS_DEVICE_NAME'];
+  final platformVersion = env['IOS_PLATFORM_VERSION'];
+  final bundleId = env['BUNDLE_ID'] ?? 'com.usecapsule.example.flutter';
+
+  final capabilities = <String, dynamic>{
+    'platformName': 'iOS',
+    'automationName': 'XCUITest',
+    // App under test
+    'bundleId': bundleId,
+    'app': resolveIOSAppPath(),
+    // Useful stability flags
+    'newCommandTimeout': 300,
+    'connectHardwareKeyboard': false,
+    'useNewWDA': true,
+    'wdaLaunchTimeout': 60000,
+    'wdaConnectionTimeout': 60000,
+    'allowTouchIdEnroll': true,
+    'touchIdMatch': true,
+    'simpleIsVisibleCheck': true,
+  };
+
+  // Only set optional selectors if provided, to avoid mismatches with local Xcode
+  if (udid != null && udid.isNotEmpty) {
+    capabilities['udid'] = udid;
+  }
+  if (deviceName != null && deviceName.isNotEmpty) {
+    capabilities['deviceName'] = deviceName;
+  } else {
+    // Provide a sensible default to satisfy Appium when creating simulator
+    capabilities['deviceName'] = 'iPhone';
+  }
+  if (platformVersion != null && platformVersion.isNotEmpty) {
+    capabilities['platformVersion'] = platformVersion;
+  }
+
+  // Auto-detect a booted simulator if UDID not provided
+  if (!capabilities.containsKey('udid')) {
+    final detected = _detectSimulator();
+    if (detected != null) {
+      capabilities.addAll(detected);
     }
   }
+
+  return capabilities;
+}
+
+/// Create an iOS Appium driver using defaults and optional APPIUM_SERVER_URL env override.
+Future<AppiumWebDriver> createIOSDriver() async {
+  final serverUrl = Platform.environment['APPIUM_SERVER_URL'] ?? 'http://127.0.0.1:4723/';
+  // Ensure a simulator is booted to avoid Appium trying to create a new one
+  final booted = _detectSimulator();
+  if (booted == null) {
+    final ensured = _ensureBootedSimulator();
+    if (ensured != null) {
+      // give Simulator app time to launch and settle
+      await Future.delayed(const Duration(seconds: 3));
+    }
+  }
+
+  final desired = buildIOSCapabilities();
+  return createDriver(
+    uri: Uri.parse(serverUrl),
+    desired: desired,
+  );
+}
+
+/// Inspect local simulators and find a booted one; else pick the first available iPhone.
+Map<String, String>? _detectSimulator() {
+  try {
+    // Prefer booted
+    final booted = _firstMatchFromCommand(
+      ['xcrun', 'simctl', 'list', 'devices', 'booted'],
+      RegExp(r'^(.*) \(([A-F0-9-]{36})\) \(Booted\)'),
+    );
+    if (booted != null) {
+      final deviceName = booted.group(1)!.trim();
+      final udid = booted.group(2)!.trim();
+      return {
+        'udid': udid,
+        'deviceName': deviceName,
+      };
+    }
+
+    // Fallback: any available iPhone device
+    final available = _firstMatchFromCommand(
+      ['xcrun', 'simctl', 'list', 'devices', 'available'],
+      // Example: "iPhone 14 (C30E...-UDID) (Shutdown)"
+      RegExp(r'^(iPhone[^\(]+) \(([A-F0-9-]{36})\) \((?:Shutdown|Booted)\)'),
+    );
+    if (available != null) {
+      final deviceName = available.group(1)!.trim();
+      final udid = available.group(2)!.trim();
+      return {
+        'udid': udid,
+        'deviceName': deviceName,
+      };
+    }
+  } catch (_) {
+    // Ignore auto-detect errors
+  }
+  return null;
+}
+
+RegExpMatch? _firstMatchFromCommand(List<String> command, RegExp pattern) {
+  try {
+    final result = Process.runSync(command.first, command.sublist(1));
+    if (result.exitCode != 0) return null;
+    final lines = result.stdout.toString().split('\n');
+    for (final line in lines.map((l) => l.trim())) {
+      final m = pattern.firstMatch(line);
+      if (m != null) return m;
+    }
+  } catch (_) {}
+  return null;
+}
+
+/// Try to boot a simulator if none is booted.
+Map<String, String>? _ensureBootedSimulator() {
+  try {
+    // Already booted?
+    final booted = _detectSimulator();
+    if (booted != null) return booted;
+
+    // Find any available iPhone simulator
+    final m = _firstMatchFromCommand(
+      ['xcrun', 'simctl', 'list', 'devices', 'available'],
+      RegExp(r'^(iPhone[^\(]+) \(([A-F0-9-]{36})\) \((?:Shutdown|Booted)\)'),
+    );
+    if (m == null) return null;
+
+    final deviceName = m.group(1)!.trim();
+    final udid = m.group(2)!.trim();
+
+    // Launch Simulator app
+    Process.runSync('open', ['-a', 'Simulator']);
+    // Boot device
+    Process.runSync('xcrun', ['simctl', 'boot', udid]);
+
+    // Small wait for boot
+    sleep(const Duration(seconds: 2));
+
+    return {
+      'udid': udid,
+      'deviceName': deviceName,
+    };
+  } catch (_) {
+    return null;
+  }
+}
+
+/// Try coordinate taps for Continue and immediately attempt biometric match.
+Future<void> tapSystemContinueAndAuthenticate(AppiumWebDriver driver) async {
+  try {
+    final window = await driver.window;
+    final size = await window.size;
+    final x = size.width ~/ 2;
+    // Keep taps well above bottom actions like "Save on another device"
+    final yFactors = <double>[0.885, 0.895, 0.905, 0.915, 0.925];
+    print('📱 Attempting system Continue + biometric match...');
+    for (final factor in yFactors) {
+      final y = (size.height * factor).round();
+      await driver.execute('mobile:tap', <dynamic>[<String, dynamic>{'x': x, 'y': y}]);
+      print('✅ Tapped at ($x, $y) [factor=$factor]');
+      // Brief wait for biometric prompt to appear
+      await Future.delayed(const Duration(milliseconds: 400));
+      final matched = await _attemptBiometricMatch(driver);
+      if (matched) {
+        print('✅ Biometric authentication successful');
+        // Small settle time
+        await Future.delayed(const Duration(seconds: 1));
+        return;
+      }
+    }
+    throw Exception('Unable to trigger biometric prompt via coordinate tap');
+  } catch (e) {
+    throw Exception('Coordinate tap/biometric failed: $e');
+  }
+}
+
+/// Try Face ID first, then Touch ID. Returns true if accepted.
+Future<bool> _attemptBiometricMatch(AppiumWebDriver driver) async {
+  // Try Face ID
+  try {
+    await driver.execute('mobile:sendBiometricMatch', <dynamic>[<String, dynamic>{
+      'type': 'faceId',
+      'match': true,
+    }]);
+    return true;
+  } catch (_) {}
+  // Try Touch ID
+  try {
+    await driver.execute('mobile:sendBiometricMatch', <dynamic>[<String, dynamic>{
+      'type': 'touchId',
+      'match': true,
+    }]);
+    return true;
+  } catch (_) {}
+  return false;
 }
