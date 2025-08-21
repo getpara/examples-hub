@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import { Button } from '.';
 import { useAtom } from 'jotai';
@@ -8,6 +8,7 @@ import { useClient } from '@getpara/react-sdk';
 export const AccountActionButtons: React.FC = () => {
   const para = useClient();
   const [, resetConfig] = useAtom(resetConfigAtom);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleLogout = async () => {
     try {
@@ -16,15 +17,22 @@ export const AccountActionButtons: React.FC = () => {
       console.error('Error logging out:', error);
     }
   };
+
   const handleDeleteAndReset = async () => {
+    setIsDeleting(true);
     try {
-      resetConfig(null);
-      await handleLogout();
       if (para?.userId) {
-        await para?.ctx.client.deleteSelf(para.userId);
+        try {
+          await para?.ctx.client.deleteSelf(para.userId);
+        } catch (error: any) {
+          throw new Error(`Failed to delete account: ${error.message}`);
+        }
       }
+      await handleLogout();
+      resetConfig(null);
     } catch (error) {
-      console.error('Error deleting account:', error);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -33,8 +41,8 @@ export const AccountActionButtons: React.FC = () => {
       <Button variant="secondary" onClick={handleLogout}>
         Log Out
       </Button>
-      <Button variant="secondary" onClick={handleDeleteAndReset}>
-        Delete Account & Reset Demo
+      <Button variant="secondary" onClick={handleDeleteAndReset} disabled={isDeleting}>
+        {isDeleting ? 'Deleting...' : 'Delete Account & Reset Demo'}
       </Button>
     </ButtonContainer>
   );

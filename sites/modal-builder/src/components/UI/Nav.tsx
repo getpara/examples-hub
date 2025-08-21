@@ -28,7 +28,7 @@ export const NavBar: React.FC = () => {
             </Text>
             <ButtonIcon icon="linkExternal" />
           </ButtonContent>
-        </Button>{' '}
+        </Button>
       </NavButtons>
     </NavWrapper>
   );

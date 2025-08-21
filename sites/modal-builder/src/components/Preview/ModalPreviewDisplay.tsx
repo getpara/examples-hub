@@ -5,17 +5,18 @@ import '@getpara/react-sdk/styles.css';
 
 import iPhoneImage from '../../assets/iphone.png';
 import { useAtom } from 'jotai';
-import { viewAtom } from '../../atoms';
+import { viewAtom, modalConfigAtom } from '../../atoms';
 
 interface ModalPreviewDisplayProps {}
 
 export const ModalPreviewDisplay: React.FC<ModalPreviewDisplayProps> = () => {
   const [view] = useAtom(viewAtom);
+  const [modalConfig] = useAtom(modalConfigAtom);
 
   return (
     <IPhoneOuterContainer $isMobile={view === 'mobile'}>
       <ModalContainer $isMobile={view === 'mobile'}>
-        <ParaModal key={`modal-${view}`} />
+        <ParaModal key={`modal-${view}-${modalConfig.authentication.authLayout?.join(',')}`} />
       </ModalContainer>
       <StyledIPhoneImage $isMobile={view === 'mobile'} src={iPhoneImage} alt="iPhone" />
     </IPhoneOuterContainer>

@@ -1,21 +1,26 @@
 import { atom, WritableAtom } from 'jotai';
 import { TExternalWallet, TOAuthMethod } from '@getpara/react-sdk';
-import qs from 'qs';
-import merge from 'lodash.merge';
+import mergeWith from 'lodash.mergewith';
 import debounce from 'lodash.debounce';
 import { getModalCodeString } from '../utils/codeGenerator';
 import { ModalBuilderConfig, ViewType, TAuthLayout } from '../types';
 import { MODAL_BUILDER_DEFAULT_CONFIG } from '../constants';
 import { logError } from '../utils';
 import { getModalConfigDiff } from '../utils/configDiff';
-import {
-  compressConfigDiff,
-  decompressConfigDiff,
-  encodeCompressedConfig,
-  decodeCompressedConfig,
-} from '../utils/urlCompression';
+import { encodeConfig, decodeConfig } from '../utils/urlCompression';
+import { validateConfigDiff } from '../utils/configValidation';
 
-export const modalConfigAtom = atom<ModalBuilderConfig>(MODAL_BUILDER_DEFAULT_CONFIG);
+const baseModalConfigAtom = atom<ModalBuilderConfig>(MODAL_BUILDER_DEFAULT_CONFIG);
+
+export const modalConfigAtom = atom(
+  get => get(baseModalConfigAtom),
+  (get, set, newValue: ModalBuilderConfig | ((prev: ModalBuilderConfig) => ModalBuilderConfig)) => {
+    const prevValue = get(baseModalConfigAtom);
+    const nextValue = typeof newValue === 'function' ? newValue(prevValue) : newValue;
+
+    set(baseModalConfigAtom, nextValue);
+  },
+);
 export const viewAtom = atom<ViewType>('desktop');
 
 interface PreviousWeb2State {
@@ -32,42 +37,55 @@ interface PreviousWeb3State {
 export const previousWeb2StateAtom = atom<PreviousWeb2State | null>(null);
 export const previousWeb3StateAtom = atom<PreviousWeb3State | null>(null);
 
+// Flag to track initialization state
+let isInitializing = false;
+
 export const initializeConfigAtom: WritableAtom<null, [null], void> = atom(null, (_, set) => {
+  isInitializing = true;
   const searchParams = new URLSearchParams(window.location.search);
   const encodedConfig = searchParams.get('c');
   try {
     let configDiff: Partial<ModalBuilderConfig> | null = null;
 
     if (encodedConfig) {
-      const compressed = decodeCompressedConfig(encodedConfig);
-      if (compressed) configDiff = decompressConfigDiff(compressed);
-    } else {
-      const parsedParams = qs.parse(searchParams.toString(), { allowDots: true, depth: 10, arrayLimit: 100 });
-      const parsedParamsBoolean = JSON.parse(JSON.stringify(parsedParams), (_k, v) => {
-        if (v === 'true') return true;
-        if (v === 'false') return false;
-        if (v === '1') return 1;
-        if (v === '0') return 0;
-        return v;
-      });
-      configDiff = decompressConfigDiff(parsedParamsBoolean);
+      const decoded = decodeConfig(encodedConfig);
+      if (decoded) {
+        configDiff = validateConfigDiff(decoded);
+        if (!configDiff) {
+          logError('Invalid configuration in URL, using defaults');
+        }
+      }
     }
 
-    const mergedConfig = merge({}, MODAL_BUILDER_DEFAULT_CONFIG, configDiff || {});
+    const mergedConfig = configDiff
+      ? mergeWith({}, MODAL_BUILDER_DEFAULT_CONFIG, configDiff, (_objValue: any, srcValue: any) => {
+          if (Array.isArray(srcValue)) {
+            return srcValue;
+          }
+          return undefined;
+        })
+      : MODAL_BUILDER_DEFAULT_CONFIG;
     set(modalConfigAtom, mergedConfig);
   } catch (error) {
     logError('Failed to parse query parameters:', error);
     set(modalConfigAtom, MODAL_BUILDER_DEFAULT_CONFIG);
+  } finally {
+    setTimeout(() => {
+      isInitializing = false;
+    }, 100);
   }
 });
 
 const createConfigSectionAtom = <T extends keyof ModalBuilderConfig>(sectionKey: T) => {
   return atom(
     get => get(modalConfigAtom)[sectionKey],
-    (_, set, update: Partial<ModalBuilderConfig[T]>) => {
+    (_get, set, update: Partial<ModalBuilderConfig[T]>) => {
       set(modalConfigAtom, prev => {
         const newConfig = { ...prev, [sectionKey]: { ...prev[sectionKey], ...update } };
-        debouncedSyncUrlWithConfig(newConfig);
+
+        if (!isInitializing) {
+          debouncedSyncUrlWithConfig(newConfig);
+        }
         return newConfig;
       });
     },
@@ -97,8 +115,7 @@ export const getShareUrlAtom = atom<string>(get => {
   const config = get(modalConfigAtom);
   const diff = getModalConfigDiff(config, MODAL_BUILDER_DEFAULT_CONFIG);
   if (!diff) return `${window.location.origin}${window.location.pathname}`;
-  const compressed = compressConfigDiff(diff);
-  const encoded = encodeCompressedConfig(compressed);
+  const encoded = encodeConfig(diff);
   return `${window.location.origin}${window.location.pathname}?c=${encoded}`;
 });
 
@@ -120,13 +137,17 @@ const syncUrlWithConfig = (config: ModalBuilderConfig) => {
   try {
     const diff = getModalConfigDiff(config, MODAL_BUILDER_DEFAULT_CONFIG);
     if (!diff) {
-      window.history.replaceState(null, '', window.location.pathname);
+      if (window.location.search !== '') {
+        window.history.replaceState(null, '', window.location.pathname);
+      }
       return;
     }
-    const compressed = compressConfigDiff(diff);
-    const encoded = encodeCompressedConfig(compressed);
-    const newUrl = `${window.location.pathname}?c=${encoded}`;
-    window.history.replaceState(null, '', newUrl);
+    const encoded = encodeConfig(diff);
+    const newSearch = `?c=${encoded}`;
+
+    if (window.location.search !== newSearch) {
+      window.history.replaceState(null, '', `${window.location.pathname}${newSearch}`);
+    }
   } catch (error) {
     logError('Failed to synchronize URL with config:', error);
   }
