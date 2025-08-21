@@ -15,8 +15,8 @@ export const AuthMethods = () => {
 
   return (
     <ConfigCard
-      title="Passkeys and Passwords"
-      subtitle="You can prompt users to create accounts using a passkey, a password, or let them choose. Enabling both the passkeys and passwords will allow the user to choose their method and Passkeys will be preferenced."
+      title="Passkey, Password, and PIN Settings"
+      subtitle="You can prompt users to secure accounts using a passkey, password, or PIN. Enabling multiple options will allow the user to choose their method. At least one method must be selected"
       ActionComponent={
         <Link to={AUTH_METHODS_DOCS_LINK} className="para:flex para:gap-2 para:items-center">
           <Button variant="outline">
