@@ -1,11 +1,11 @@
 {
   "name": "@getpara/core-sdk",
-  "version": "2.0.0-alpha.47",
+  "version": "2.0.0-alpha.48",
   "dependencies": {
     "@celo/utils": "^8.0.2",
     "@cosmjs/encoding": "^0.32.4",
     "@ethereumjs/util": "^9.1.0",
-    "@getpara/user-management-client": "2.0.0-alpha.47",
+    "@getpara/user-management-client": "2.0.0-alpha.48",
     "@noble/hashes": "^1.5.0",
     "base64url": "^3.0.1",
     "libphonenumber-js": "^1.11.7",
