@@ -356,6 +356,7 @@ class _SolanaWalletViewState extends State<SolanaWalletView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: const Key('walletDetailView'),
       backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.surface,
@@ -575,6 +576,7 @@ class _SolanaWalletViewState extends State<SolanaWalletView> {
                           const SizedBox(width: 12),
                           Expanded(
                             child: ElevatedButton(
+                              key: const Key('signTransactionButton'),
                               onPressed: _isLoading ? null : _signTransaction,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.grey[300],
