@@ -21,6 +21,7 @@ export const ExternalWalletMobileConnect = ({
   onConnectWc: (_: CommonWallet) => Promise<void>;
   isSelfFetching?: boolean;
 }) => {
+  const externalWalletError = useModalStore(state => state.externalWalletError);
   const [isCopied, copy] = useCopyToClipboard();
   const appName = useStore(state => state.appName);
   const [qrUri, setQrUri] = useState<string | undefined>(isSelfFetching ? undefined : propsQrUri);
@@ -48,18 +49,28 @@ export const ExternalWalletMobileConnect = ({
     setQrUri(propsQrUri);
   }, [propsQrUri]);
 
+  const isError = !!externalWalletError?.[0];
   if (wallet.type === 'SOLANA' || (isMobile() && !isTablet())) {
     return (
       <>
         {wallet.type === 'SOLANA' && qrUri && (
           <InnerStepContainer>
-            <CpslText weight="semiBold" color="error">
-              {`Continue in the ${wallet.name} mobile app.`}
-            </CpslText>
+            <HeroSpinner
+              icon={<HeroAccountTypeIcon accountType={wallet.internalId} src={wallet ? wallet.iconUrl : undefined} />}
+              status={isError ? 'error' : 'pending'}
+              text={isError ? externalWalletError[0] : `Continue in the ${wallet.name} mobile app.`}
+              secondaryText={externalWalletError?.[1]}
+            />
           </InnerStepContainer>
         )}
         {wallet.id !== 'WalletConnect' && (
           <InnerStepContainer>
+            <HeroSpinner
+              icon={<HeroAccountTypeIcon accountType={wallet.internalId} src={wallet ? wallet.iconUrl : undefined} />}
+              status={isError ? 'error' : 'pending'}
+              text={isError ? externalWalletError[0] : `Confirm connection request in the ${wallet.name} app.`}
+              secondaryText={externalWalletError?.[1]}
+            />
             {(wallet.type === 'SOLANA' && qrUri && !wallet.hasIosSafariExtension) || wallet.type !== 'SOLANA' ? (
               <CpslButton onClick={() => routeMobileExternalWallet(qrUri)} fullWidth>
                 Connect Wallet

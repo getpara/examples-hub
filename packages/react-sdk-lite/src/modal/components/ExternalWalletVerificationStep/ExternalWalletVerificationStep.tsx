@@ -7,7 +7,7 @@ import { useEffect, useRef } from 'react';
 
 export const ExternalWalletVerificationStep = () => {
   const effectRan = useRef(false);
-  const { verifyWalletSignature } = useExternalWallets();
+  const { verifyWalletSignature, verificationStage } = useExternalWallets();
   const externalWalletError = useModalStore(state => state.externalWalletError);
 
   useEffect(() => {
@@ -18,12 +18,18 @@ export const ExternalWalletVerificationStep = () => {
     }
   }, []);
 
+  const isVerifying = verificationStage === 'verifying';
+  const header = isVerifying ? 'Verifying Your Wallet' : 'Switching Network';
+  const subheader = isVerifying
+    ? 'Sign the message with your wallet to complete sign up.'
+    : 'Confirm the request to switch the network in your wallet.';
+
   return (
     <StepContainer $wide>
       <InnerStepContainer>
-        <Heading>Verify Your Wallet</Heading>
+        <Heading>{header}</Heading>
         <InlineText variant="bodyS" color="secondary">
-          Sign the message with your wallet to complete sign up.
+          {subheader}
         </InlineText>
         {!!externalWalletError?.[0] && (
           <ErrorContainer>

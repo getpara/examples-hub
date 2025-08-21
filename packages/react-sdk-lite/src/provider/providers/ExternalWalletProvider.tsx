@@ -56,6 +56,7 @@ export const defaultExternalWallet = {
   requestInfo: (_: string) => Promise.resolve({} as ExternalWalletInfo),
   disconnectBase: (_: string, __: TWalletType) => Promise.resolve(),
   connectFarcasterMiniApp: () => Promise.resolve(),
+  verificationStage: undefined,
 };
 
 type Value = Omit<
@@ -83,6 +84,7 @@ type Value = Omit<
     requestInfo: (_: string, __: TWalletType) => Promise<ExternalWalletInfo>;
     disconnectBase: (_: string, __: TWalletType) => Promise<void>;
     connectFarcasterMiniApp: () => Promise<void>;
+    verificationStage?: 'verifying' | 'switchingChain';
   };
 
 export const ExternalWalletContext = createContext<Value>(defaultExternalWallet);
@@ -115,6 +117,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
     requestInfo: evmRequestInfo,
     disconnectBase: evmDisconnectBase,
     farcasterStatus: evmFarcasterStatus,
+    verificationStage: evmVerificationStage,
   } = useContext(evmContext);
   const {
     wallets: solanaWallets,
@@ -245,6 +248,19 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
     }
   }, [cosmosChains, evmChains, selectedExternalWallet]);
 
+  const verificationStage: 'verifying' | 'switchingChain' = useMemo(() => {
+    const walletType = Object.values(para.externalWallets || {})[0]?.type;
+
+    switch (walletType) {
+      case 'EVM': {
+        return evmVerificationStage;
+      }
+      default: {
+        return 'verifying';
+      }
+    }
+  }, [selectedExternalWallet, evmVerificationStage]);
+
   const switchChain = useCallback(
     async (chainId: string) => {
       const walletType = Object.values(para.externalWallets || {})[0]?.type;
@@ -314,6 +330,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
 
           if (error) {
             setExternalWalletError([error]);
+            return;
           } else if (signature && address) {
             // If signature is returned address, cosmosPublicKeyHex and cosmosSigner will also be returned
             verifyExternalWalletParams = {
@@ -337,6 +354,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
 
           if (error) {
             setExternalWalletError([error]);
+            return;
           } else if (signature && address) {
             verifyExternalWalletParams = {
               externalWallet: {
@@ -356,6 +374,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
 
           if (error) {
             setExternalWalletError([error]);
+            return;
           } else if (signature && address) {
             verifyExternalWalletParams = {
               externalWallet: {
@@ -740,6 +759,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
           requestInfo,
           disconnectBase,
           connectFarcasterMiniApp,
+          verificationStage,
         }),
         [
           wallets,
@@ -763,6 +783,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
           requestInfo,
           disconnectBase,
           connectFarcasterMiniApp,
+          verificationStage,
         ],
       )}
     >

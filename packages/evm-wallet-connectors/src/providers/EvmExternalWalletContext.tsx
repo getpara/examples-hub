@@ -1,4 +1,4 @@
-import { PropsWithChildren, createContext, useCallback, useEffect, useMemo, useRef } from 'react';
+import { PropsWithChildren, createContext, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   useAccount,
   useSwitchChain,
@@ -43,11 +43,12 @@ export type EvmExternalWalletContextType = ExternalWalletContextType &
   TExternalHooks & {
     username?: string;
     avatar?: string;
-  } & FarcasterMiniAppManagement;
+  } & FarcasterMiniAppManagement & { verificationStage: 'verifying' | 'switchingChain' };
 
 export const EvmExternalWalletContext = createContext<EvmExternalWalletContextType>({
   ...defaultEvmExternalWallet,
   farcasterStatus: undefined,
+  verificationStage: undefined,
 });
 
 export type EvmExternalWalletProviderConfig = ExternalWalletProviderConfigBase;
@@ -87,6 +88,7 @@ export function EvmExternalWalletProvider({
   const connectors = untypedConnectors as WagmiConnectorInstance[];
   const connectionsRef = useRef(connections);
   const connectorsRef = useRef(connectors);
+  const [verificationStage, setVerificationStage] = useState<'verifying' | 'switchingChain'>('verifying');
 
   const isLocalConnecting = useExternalWalletStore(state => state.isConnecting);
   const updateExternalWalletState = useExternalWalletStore(state => state.updateState);
@@ -212,6 +214,24 @@ export function EvmExternalWalletProvider({
     await para.logout();
   };
 
+  // Create wallet_addEthereumChain params from configured chains
+  const getChainParams = (chainId: number) => {
+    const chain = chains.find(c => c.id === chainId);
+    if (!chain) return null;
+
+    return {
+      chainId: `0x${chainId.toString(16)}`,
+      chainName: chain.name,
+      nativeCurrency: {
+        name: chain.nativeCurrency.name,
+        symbol: chain.nativeCurrency.symbol,
+        decimals: chain.nativeCurrency.decimals,
+      },
+      rpcUrls: [chain.rpcUrls.default.http[0]],
+      blockExplorerUrls: chain.blockExplorers?.default ? [chain.blockExplorers.default.url] : undefined,
+    };
+  };
+
   const signMessage = async ({ message, externalWallet }: SignArgs) => {
     let signOpts: SignOptions = {};
     if (externalWallet) {
@@ -220,15 +240,15 @@ export function EvmExternalWalletProvider({
       await switchAccount(externalWallet.providerId ?? '');
     }
 
-    try {
-      const address = (
-        signOpts.account
-          ? typeof signOpts.account === 'string'
-            ? signOpts.account
-            : signOpts.account.getAddress()
-          : wagmiAddress
-      ) as `0x${string}`;
+    const address = (
+      signOpts.account
+        ? typeof signOpts.account === 'string'
+          ? signOpts.account
+          : signOpts.account.getAddress()
+        : wagmiAddress
+    ) as `0x${string}`;
 
+    try {
       const signature = await signMessageAsync({
         message,
         account: address,
@@ -241,6 +261,34 @@ export function EvmExternalWalletProvider({
       };
     } catch (e) {
       console.error('Error signing message:', e);
+      console.error('Error signing message:', e.message, e.details);
+
+      if (e.message.includes('Chain not configured') || e.details.includes('Chain not configured')) {
+        setVerificationStage('switchingChain');
+
+        const currentChainParams = getChainParams(chains[0]?.id ?? chainId);
+        if (!currentChainParams) {
+          return {
+            error: `Chain ${chainId} not found in configuration`,
+          };
+        }
+
+        try {
+          await switchChainAsync({
+            addEthereumChainParameter: currentChainParams,
+            chainId: chains[0]?.id ?? chainId,
+          });
+
+          setVerificationStage('verifying');
+          return await signMessage({ message, externalWallet });
+        } catch (error) {
+          console.error('Error adding chain:', error);
+          return {
+            error: `Error adding chain. You may need to add ${currentChainParams?.chainName} support to ${(connectedConnector as WagmiConnectorInstance)?.paraDetails?.name ?? connectedConnector?.name ?? 'the wallet'} manually.`,
+          };
+        }
+      }
+
       switch (e.name) {
         case 'UserRejectedRequestError': {
           return { error: 'Signature request rejected' };
@@ -253,6 +301,7 @@ export function EvmExternalWalletProvider({
   };
 
   const signVerificationMessage = async () => {
+    setVerificationStage('verifying');
     const signature = await signMessage({ message: verificationMessage.current });
 
     return signature;
@@ -619,6 +668,7 @@ export function EvmExternalWalletProvider({
         requestInfo,
         disconnectBase,
         farcasterStatus,
+        verificationStage,
         ...externalHooks,
       }}
     >
