@@ -106,7 +106,7 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
     trackAnalytics();
   }, []);
 
-  const isOpen = configIsOpen ?? storedIsOpen;
+  const isOpen = bareModal || (configIsOpen ?? storedIsOpen);
 
   useImperativeHandle(ref, () => {
     return {

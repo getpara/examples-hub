@@ -83,6 +83,7 @@ export type Theme = {
   mode?: 'light' | 'dark';
   borderRadius?: BorderRadius;
   font?: string;
+  overlayBackground?: string;
   customPalette?: CustomPalette;
   customFontSizes?: CustomFontSizes;
   customBorderRadii?: CustomBorderRadii;

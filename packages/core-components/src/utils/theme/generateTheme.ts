@@ -21,6 +21,7 @@ export const generateTheme = ({
   borderRadius,
   customFontSizes,
   customBorderRadii,
+  overlayBackground,
 }: Theme) => {
   const isDarkTheme = mode === 'dark';
 
@@ -30,6 +31,7 @@ export const generateTheme = ({
     accentColor: isDarkTheme ? (darkAccentColor ?? accentColor) : accentColor,
     customPalette,
     isDarkTheme,
+    overlayBackground,
   });
 
   generateFont({ font, customFontSizes });

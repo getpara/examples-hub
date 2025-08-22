@@ -15,7 +15,8 @@ export const generatePalette = ({
   accentColor,
   isDarkTheme,
   customPalette,
-}: Pick<Theme, 'foregroundColor' | 'backgroundColor' | 'accentColor' | 'customPalette'> & { isDarkTheme: boolean }) => {
+  overlayBackground,
+}: Pick<Theme, 'foregroundColor' | 'backgroundColor' | 'accentColor' | 'customPalette' | 'overlayBackground'> & { isDarkTheme: boolean }) => {
   if (!foregroundColor || !isColor(foregroundColor)) {
     foregroundColor = DEFAULT_THEME.foregroundColor;
   }
@@ -92,6 +93,9 @@ export const generatePalette = ({
   document.documentElement.style.setProperty('--cpsl-color-utility-red-light', mix(red, utilityLightMixColor, utilityLightMixValue));
   document.documentElement.style.setProperty('--cpsl-color-utility-yellow-light', mix(yellow, utilityLightMixColor, utilityLightMixValue));
   document.documentElement.style.setProperty('--cpsl-color-utility-green-light', mix(green, utilityLightMixColor, utilityLightMixValue));
+
+  // OVERLAY BACKGROUND
+  document.documentElement.style.setProperty('--cpsl-overlay-background', overlayBackground ?? 'linear-gradient(180deg, rgba(0, 0, 0, 0.14) 0%, rgba(0, 0, 0, 0.7) 100%)');
 
   if (customPalette) {
     const cssColorVars = getCssColors(customPalette);

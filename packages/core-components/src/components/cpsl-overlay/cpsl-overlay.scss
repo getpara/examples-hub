@@ -12,7 +12,7 @@
   opacity: 0%;
   display: none;
 
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.14) 0%, rgba(0, 0, 0, 0.7) 100%);
+  background: var(--cpsl-overlay-background, linear-gradient(180deg, rgba(0, 0, 0, 0.14) 0%, rgba(0, 0, 0, 0.7) 100%));
 }
 
 :host(.over-modal) {
