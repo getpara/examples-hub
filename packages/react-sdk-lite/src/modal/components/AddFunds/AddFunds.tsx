@@ -31,7 +31,8 @@ export const AddFunds = () => {
     ([enabledFlow, key]) => !!onRampConfig?.[key] && (!isGuestMode || enabledFlow === EnabledFlow.RECEIVE),
   );
   const tab = storedTab ?? tabs[0][0];
-  const isMultiFlow = (tab === EnabledFlow.BUY || tab === EnabledFlow.RECEIVE) && tabs.length > 1;
+  const isMultiFlow =
+    (tab === EnabledFlow.BUY || tab === EnabledFlow.RECEIVE) && onRampConfig?.isBuyEnabled && onRampConfig?.isReceiveEnabled;
 
   const onSetTab = (event: CpslTabsCustomEvent<TabsChangedEventDetail>) => {
     setModalStep(getAddFundsStep(event.detail.tab as Tab));
@@ -70,14 +71,14 @@ export const AddFunds = () => {
       {isMultiFlow && (
         <InnerStepContainer>
           <CpslTabs selectedTab={tab} onCpslTabsChanged={onSetTab}>
-            {TABS.filter(([enabledFlow]) => enabledFlow === EnabledFlow.BUY || enabledFlow === EnabledFlow.RECEIVE).map(
-              ([tab, _, icon, title]) => (
+            {tabs
+              .filter(([enabledFlow]) => enabledFlow !== EnabledFlow.WITHDRAW)
+              .map(([tab, _, icon, title]) => (
                 <CpslTab key={tab} tab={tab}>
                   <CpslIcon slot="start" icon={icon} />
                   {title}
                 </CpslTab>
-              ),
-            )}
+              ))}
           </CpslTabs>
         </InnerStepContainer>
       )}

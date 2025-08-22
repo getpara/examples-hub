@@ -36,9 +36,9 @@ export const Account = () => {
         setGuestAddFundsTab(EnabledFlow.BUY);
         setStep(ModalStep.AUTH_GUEST_SIGNUP);
       }
-    } else {
+    } else if (onRampConfig?.isBuyEnabled || onRampConfig?.isReceiveEnabled) {
       setOnRampStep(OnRampStep.SETTINGS);
-      setStep(ModalStep.ADD_FUNDS_BUY);
+      setStep(onRampConfig?.isBuyEnabled ? ModalStep.ADD_FUNDS_BUY : ModalStep.ADD_FUNDS_RECEIVE);
     }
   };
 
@@ -88,7 +88,7 @@ export const Account = () => {
           <ButtonContainer>
             {isOnRampLoaded ? (
               <>
-                {onRampConfig.isBuyEnabled && !cantBuyAndWithdraw && (
+                {(onRampConfig.isBuyEnabled || onRampConfig.isReceiveEnabled) && !cantBuyAndWithdraw && (
                   <OptionButton icon="plusCircle" onClick={handleBuyClick}>
                     <CpslText variant="bodyXS" color="secondary" weight="medium">
                       Add Funds
