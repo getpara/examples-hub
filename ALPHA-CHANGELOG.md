@@ -1,3 +1,37 @@
+# Release (Fri Aug 22 2025)
+
+## Package Versions
+- @getpara/web-sdk@2.0.0-alpha.49
+- @getpara/wagmi-v2-integration@2.0.0-alpha.49
+- @getpara/wagmi-v2-connector@2.0.0-alpha.49
+- @getpara/viem-v2-integration@2.0.0-alpha.49
+- @getpara/viem-v1-integration@2.0.0-alpha.49
+- @getpara/user-management-client@2.0.0-alpha.49
+- @getpara/solana-web3.js-v1-integration@2.0.0-alpha.49
+- @getpara/solana-wallet-connectors@2.0.0-alpha.49
+- @getpara/solana-signers-v2-integration@2.0.0-alpha.49
+- @getpara/server-sdk@2.0.0-alpha.49
+- @getpara/react-sdk-lite@2.0.0-alpha.49
+- @getpara/react-sdk@2.0.0-alpha.49
+- @getpara/react-native-wallet@2.0.0-alpha.49
+- @getpara/react-components@2.0.0-alpha.49
+- @getpara/react-component-library@1.0.0-alpha.44
+- @getpara/react-common@2.0.0-alpha.49
+- @getpara/evm-wallet-connectors@2.0.0-alpha.49
+- @getpara/ethers-v6-integration@2.0.0-alpha.49
+- @getpara/ethers-v5-integration@2.0.0-alpha.49
+- @getpara/cosmos-wallet-connectors@2.0.0-alpha.49
+- @getpara/cosmjs-v0-integration@2.0.0-alpha.49
+- @getpara/core-sdk@2.0.0-alpha.49
+- @getpara/core-components@2.0.0-alpha.49
+
+### Features
+- Custom overlay background https
+- Include PIN in dev portal copy (#1183) - 768d3f296
+
+### Fixes
+- modal builder share url (#1186) - cc4883837
+
 # Release (Wed Aug 20 2025)
 
 ## Package Versions
