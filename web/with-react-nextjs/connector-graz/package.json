@@ -12,15 +12,15 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@cosmjs/amino": "^0.34.0",
-    "@cosmjs/cosmwasm-stargate": "^0.34.0",
-    "@cosmjs/encoding": "^0.34.0",
-    "@cosmjs/proto-signing": "^0.34.0",
-    "@cosmjs/stargate": "^0.34.0",
-    "@getpara/graz-integration": "2.0.0-alpha.43",
-    "@getpara/react-sdk-lite": "2.0.0-alpha.43",
-    "@tanstack/react-query": "^5.84.2",
-    "graz": "^0.3.4",
+    "@cosmjs/amino": "0.36.0",
+    "@cosmjs/cosmwasm-stargate": "0.36.0",
+    "@cosmjs/encoding": "0.36.0",
+    "@cosmjs/proto-signing": "0.36.0",
+    "@cosmjs/stargate": "0.36.0",
+    "@getpara/graz": "0.3.3-dev.3",
+    "@getpara/graz-integration": "2.0.0-dev.12",
+    "@getpara/react-sdk-lite": "2.0.0-alpha.44",
+    "@tanstack/react-query": "5.85.3",
     "next": "15.1.5",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
@@ -37,10 +37,5 @@
     "tailwindcss": "^4.1.10",
     "typescript": "^5",
     "typescript-eslint": "^8.29.0"
-  },
-  "resolutions": {
-    "graz": "file:../../../../graz/packages/graz",
-    "@getpara/graz-connector": "file:../../../../web-sdk/packages/graz-connector",
-    "@getpara/graz-integration": "file:../../../../web-sdk/packages/graz-integration"
   }
 }

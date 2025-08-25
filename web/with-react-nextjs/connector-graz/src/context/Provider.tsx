@@ -3,8 +3,8 @@
 import { para } from "@/lib/para/client";
 import { ParaGrazConfig } from "@getpara/graz-integration";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { GrazProvider } from "graz";
-import { cosmosicsprovidertestnet } from "graz/chains";
+import { GrazProvider } from "@getpara/graz";
+import { cosmosicsprovidertestnet } from "@getpara/graz/chains";
 import { PropsWithChildren } from "react";
 
 const queryClient = new QueryClient();

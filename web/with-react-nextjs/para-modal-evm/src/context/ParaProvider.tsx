@@ -3,6 +3,7 @@
 import { ParaProvider as Provider } from "@getpara/react-sdk";
 import { API_KEY, ENVIRONMENT } from "@/config/constants";
 import { sepolia, celo, mainnet, polygon } from "wagmi/chains";
+import { cookieStorage, createStorage } from "wagmi";
 
 export function ParaProvider({
   children,
@@ -21,6 +22,9 @@ export function ParaProvider({
         evmConnector: {
           config: {
             chains: [mainnet, polygon, sepolia, celo],
+            storage: createStorage({
+              storage: cookieStorage,
+            }),
           },
         },
         walletConnect: {
@@ -34,6 +38,7 @@ export function ParaProvider({
         authLayout: ["AUTH:FULL", "EXTERNAL:FULL"],
         oAuthMethods: ["APPLE", "DISCORD", "FACEBOOK", "FARCASTER", "GOOGLE", "TWITTER"],
         onRampTestMode: true,
+        bareModal: true,
         theme: {
           foregroundColor: "#222222",
           backgroundColor: "#FFFFFF",

@@ -31,6 +31,7 @@ export function ParaProvider({
           mode: "light",
           borderRadius: "none",
           font: "Inter",
+          customPalette: {},
         },
         logo: "/para.svg",
         recoverySecretStepEnabled: true,
