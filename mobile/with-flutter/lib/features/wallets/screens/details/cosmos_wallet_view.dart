@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:para/para.dart' as para_sdk;
@@ -135,10 +134,9 @@ class _CosmosWalletViewState extends State<CosmosWalletView> {
     final startTime = DateTime.now();
     
     try {
-      final messageBase64 = base64Encode(utf8.encode(_messageToSign));
       final signature = await para.signMessage(
         walletId: widget.wallet.id!,
-        messageBase64: messageBase64,
+        message: _messageToSign,
       );
       
       final duration = DateTime.now().difference(startTime).inMilliseconds / 1000;
@@ -175,7 +173,7 @@ class _CosmosWalletViewState extends State<CosmosWalletView> {
         format: signingMethod,  // "proto" or "amino"
       );
       
-      final result = await para.formatAndSignTransaction(
+      final result = await para.signTransaction(
         walletId: widget.wallet.id!,
         transaction: transaction.toJson(),
         chainId: _currentConfig.chainId,
@@ -219,7 +217,7 @@ class _CosmosWalletViewState extends State<CosmosWalletView> {
         format: 'amino',  // Use amino for demo
       );
       
-      final result = await para.formatAndSignTransaction(
+      final result = await para.signTransaction(
         walletId: widget.wallet.id!,
         transaction: transaction.toJson(),
         chainId: _currentConfig.chainId,

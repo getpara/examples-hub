@@ -1,4 +1,4 @@
-import 'dart:convert';
+import 'dart:convert' show base64Decode;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:para/para.dart' as para_sdk;
@@ -148,12 +148,9 @@ class _SolanaWalletViewState extends State<SolanaWalletView> {
     final startTime = DateTime.now();
     
     try {
-      final messageBytes = utf8.encode(_messageToSign);
-      final messageBase64 = base64Encode(messageBytes);
-      
       final result = await para.signMessage(
         walletId: widget.wallet.id!,
-        messageBase64: messageBase64,
+        message: _messageToSign,
       );
       
       final duration = DateTime.now().difference(startTime).inMilliseconds / 1000;
@@ -194,7 +191,7 @@ class _SolanaWalletViewState extends State<SolanaWalletView> {
         memo: 'Test transaction from Flutter',
       );
       
-      final result = await para.formatAndSignTransaction(
+      final result = await para.signTransaction(
         walletId: widget.wallet.id!,
         transaction: transaction.toJson(),
         rpcUrl: _rpcUrl,
@@ -259,7 +256,7 @@ class _SolanaWalletViewState extends State<SolanaWalletView> {
         memo: 'Test transaction from Flutter',
       );
       
-      final result = await para.formatAndSignTransaction(
+      final result = await para.signTransaction(
         walletId: widget.wallet.id!,
         transaction: transaction.toJson(),
         rpcUrl: _rpcUrl,

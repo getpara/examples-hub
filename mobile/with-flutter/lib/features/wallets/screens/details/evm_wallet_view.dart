@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart';
@@ -148,12 +147,9 @@ class _EVMWalletViewState extends State<EVMWalletView> {
     final startTime = DateTime.now();
     
     try {
-      final messageBytes = utf8.encode(_messageToSign);
-      final messageBase64 = base64Encode(messageBytes);
-      
       final result = await para.signMessage(
         walletId: widget.wallet.id!,
-        messageBase64: messageBase64,
+        message: _messageToSign,
       );
       
       final duration = DateTime.now().difference(startTime).inMilliseconds / 1000;
@@ -195,7 +191,7 @@ class _EVMWalletViewState extends State<EVMWalletView> {
         type: 2, // EIP-1559 transaction
       );
       
-      final result = await para.formatAndSignTransaction(
+      final result = await para.signTransaction(
         walletId: widget.wallet.id!,
         transaction: transaction.toJson(),
         // Ensure chainId is explicitly provided for the bridge
@@ -265,7 +261,7 @@ class _EVMWalletViewState extends State<EVMWalletView> {
         type: 2, // EIP-1559 transaction
       );
       
-      final result = await para.formatAndSignTransaction(
+      final result = await para.signTransaction(
         walletId: widget.wallet.id!,
         transaction: transaction.toJson(),
         // Ensure chainId is explicitly provided for the bridge
