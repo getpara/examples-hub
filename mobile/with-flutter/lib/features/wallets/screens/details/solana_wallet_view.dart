@@ -1,9 +1,7 @@
-import 'dart:convert' show base64Decode;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:para/para.dart' as para_sdk;
 import 'package:solana/solana.dart' as solana;
-import 'package:solana/encoder.dart';
 import '../../../../client/para.dart';
 import '../../widgets/wallet_management_card.dart';
 
@@ -20,8 +18,6 @@ class SolanaWalletView extends StatefulWidget {
 }
 
 class _SolanaWalletViewState extends State<SolanaWalletView> {
-  late solana.SolanaClient _solanaClient;
-  
   String? _balance;
   String _messageToSign = '';
   bool _isLoading = false;
@@ -44,11 +40,6 @@ class _SolanaWalletViewState extends State<SolanaWalletView> {
   }
   
   Future<void> _initializeSolana() async {
-    _solanaClient = solana.SolanaClient(
-      rpcUrl: Uri.parse(_rpcUrl),
-      websocketUrl: Uri.parse(_rpcUrl.replaceFirst('https', 'wss')),
-    );
-    
     try {
       if (widget.wallet.address != null) {
         setState(() {
@@ -74,7 +65,6 @@ class _SolanaWalletViewState extends State<SolanaWalletView> {
   
   @override
   void dispose() {
-    // SolanaClient doesn't have a dispose method
     super.dispose();
   }
   
@@ -249,38 +239,19 @@ class _SolanaWalletViewState extends State<SolanaWalletView> {
     final startTime = DateTime.now();
     
     try {
-      // Use the new SolanaTransaction type
-      final transaction = para_sdk.SolanaTransaction(
-        to: _testAddress,
-        lamports: '100000', // 0.0001 SOL
-        memo: 'Test transaction from Flutter',
-      );
-      
-      final result = await para.signTransaction(
+      // Using the high-level transfer method (simpler, recommended)
+      // This matches the Swift SDK implementation
+      final transactionHash = await para.transfer(
         walletId: widget.wallet.id!,
-        transaction: transaction.toJson(),
-        rpcUrl: _rpcUrl,
-      );
-      
-      if (result is! para_sdk.SuccessfulSignatureResult) {
-        throw Exception('Failed to sign transaction');
-      }
-      
-      // The signed transaction is in the signature field as base64
-      final signedTxBase64 = result.signature;
-      final signedTxBytes = base64Decode(signedTxBase64);
-      final signedTx = SignedTx.fromBytes(signedTxBytes);
-      
-      // Send the transaction using SolanaClient
-      final signature = await _solanaClient.rpcClient.sendTransaction(
-        signedTx.encode(),
-        preflightCommitment: solana.Commitment.confirmed,
+        to: _testAddress,
+        amount: '100000', // 0.0001 SOL in lamports
+        token: null, // Native SOL transfer
       );
       
       final duration = DateTime.now().difference(startTime).inMilliseconds / 1000;
       _showResult(
         'Success', 
-        'Transaction sent successfully\nSignature: $signature\nDuration: ${duration.toStringAsFixed(2)}s',
+        'Transaction sent successfully\nHash: $transactionHash\nDuration: ${duration.toStringAsFixed(2)}s',
       );
       
       // Refresh balance after successful transaction
