@@ -66,7 +66,6 @@ struct CosmosWalletView: View {
                 chainConfigurationCard
                 messageSigningCard
                 transactionOperationsCard
-                walletManagementCard
             }
             .padding(.horizontal)
         }
@@ -237,28 +236,6 @@ struct CosmosWalletView: View {
         }
     }
 
-    private var walletManagementCard: some View {
-        CardView {
-            VStack(spacing: 16) {
-                Text("Wallet Management")
-                    .font(.headline)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-
-                HStack(spacing: 16) {
-                    Button("Check Session", action: checkSession)
-                        .buttonStyle(.bordered)
-                        .frame(maxWidth: .infinity)
-                        .accessibilityIdentifier("checkSessionButton")
-
-                    Button("Fetch Wallets", action: fetchWallets)
-                        .buttonStyle(.bordered)
-                        .frame(maxWidth: .infinity)
-                        .accessibilityIdentifier("fetchWalletsButton")
-                }
-                .disabled(isLoading)
-            }
-        }
-    }
 
     // MARK: - Actions
 
@@ -300,11 +277,11 @@ struct CosmosWalletView: View {
         Task {
             do {
                 // Using unified signMessage API
-                _ = try await paraManager.signMessage(
+                let signature = try await paraManager.signMessage(
                     walletId: selectedWallet.id,
                     message: messageToSign
                 )
-                showResult("Success", "Message signed successfully")
+                showResult("Message Signed", "Message: \(messageToSign)\n\nSignature:\n\(signature.signature)")
             } catch {
                 showResult("Error", "Failed to sign message: \(error.localizedDescription)")
             }
@@ -380,32 +357,6 @@ struct CosmosWalletView: View {
         }
     }
 
-    private func checkSession() {
-        isLoading = true
-        Task {
-            do {
-                let active = try await paraManager.isSessionActive()
-                showResult("Session Status", "Session Active: \(active)")
-            } catch {
-                showResult("Error", "Failed to check session: \(error.localizedDescription)")
-            }
-            isLoading = false
-        }
-    }
-
-    private func fetchWallets() {
-        isLoading = true
-        Task {
-            do {
-                let wallets = try await paraManager.fetchWallets()
-                let addresses = wallets.map { $0.address ?? "No Address" }
-                showResult("Wallets", addresses.joined(separator: "\n"))
-            } catch {
-                showResult("Error", "Failed to fetch wallets: \(error.localizedDescription)")
-            }
-            isLoading = false
-        }
-    }
 
     // MARK: - Helper Methods
 

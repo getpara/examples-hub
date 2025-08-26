@@ -59,17 +59,31 @@ struct SolanaWalletView: View {
     }
 
     private func signTransaction() {
-        guard let transaction = createTransaction(lamports: 1_000_000) else { return }
+        // Create a simple transfer transaction for demo purposes
+        let toAddress = "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM"
+        let lamports: UInt64 = 1_000_000
+        
+        let transaction: SolanaTransaction
+        do {
+            transaction = try SolanaTransaction(
+                to: toAddress,
+                lamports: lamports
+            )
+        } catch {
+            result = ("Error", "Failed to create transaction: \(error.localizedDescription)")
+            return
+        }
 
         isLoading = true
         Task {
+            var signature: SignatureResult?
             let (duration, error) = await measureTime {
                 // Pass RPC URL to avoid needing to include recentBlockhash
                 let rpcUrl = "https://api.devnet.solana.com"
                 // For mainnet: "https://solana-mainnet.g.alchemy.com/v2/YOUR_API_KEY"
                 
                 // Pass the transaction object directly - bridge will format it
-                _ = try await paraManager.signTransaction(
+                signature = try await paraManager.signTransaction(
                     walletId: selectedWallet.id,
                     transaction: transaction,
                     chainId: nil, // Not needed for Solana
@@ -79,81 +93,10 @@ struct SolanaWalletView: View {
 
             if let error {
                 result = ("Error", "Failed to sign transaction: \(error.localizedDescription)\nDuration: \(String(format: "%.2f", duration))s")
-            } else {
-                result = ("Success", "Transaction signed successfully\nDuration: \(String(format: "%.2f", duration))s")
+            } else if let sig = signature {
+                result = ("Transaction Signed", "To: 9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM\nAmount: 0.001 SOL (1,000,000 lamports)\nNetwork: Devnet\n\nSignature:\n\(sig.signature)\n\nDuration: \(String(format: "%.3f", duration))s")
             }
             isLoading = false
-        }
-    }
-
-    private func sendTransaction() {
-        guard let transaction = createTransaction(lamports: 100_000) else { return }
-
-        // Check if we have balance info and sufficient funds
-        if let balanceString = balance {
-            // Extract numeric value from balance string (e.g., "0.0000 SOL" -> 0.0)
-            let balanceValue = balanceString.replacingOccurrences(of: " SOL", with: "")
-            if let balanceDouble = Double(balanceValue) {
-                let requiredSOL = 0.0001 + 0.000005 // Transaction amount + estimated fee
-                if balanceDouble < requiredSOL {
-                    result = ("Insufficient Balance",
-                              "You need at least \(String(format: "%.6f", requiredSOL)) SOL to send this transaction.\n\n" +
-                                  "Current balance: \(balanceString)\n\n" +
-                                  "To fund your wallet on Solana Devnet:\n" +
-                                  "1. Copy your wallet address\n" +
-                                  "2. Visit https://faucet.solana.com\n" +
-                                  "3. Paste your address and request SOL")
-                    return
-                }
-            }
-        }
-
-        isLoading = true
-        Task {
-            let (duration, error) = await measureTime {
-                // Using the high-level transfer method
-                _ = try await paraManager.transfer(
-                    walletId: selectedWallet.id,
-                    to: "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM",
-                    amount: "100000", // Lamports
-                    token: nil // Native SOL transfer
-                )
-            }
-
-            if let error {
-                let errorMessage = error.localizedDescription
-                if errorMessage.contains("insufficient") || errorMessage.contains("0x1") {
-                    result = ("Insufficient Balance",
-                              "Transaction failed due to insufficient balance.\n\n" +
-                                  "To fund your wallet on Solana Devnet:\n" +
-                                  "1. Copy your wallet address\n" +
-                                  "2. Visit https://faucet.solana.com\n" +
-                                  "3. Paste your address and request SOL\n\n" +
-                                  "Duration: \(String(format: "%.2f", duration))s")
-                } else {
-                    result = ("Error", "Failed to send transaction: \(errorMessage)\nDuration: \(String(format: "%.2f", duration))s")
-                }
-            } else {
-                result = ("Success", "Transaction sent successfully\nDuration: \(String(format: "%.2f", duration))s")
-                // Refresh balance after successful transaction
-                fetchBalance()
-            }
-            isLoading = false
-        }
-    }
-
-    private func createTransaction(lamports: UInt64) -> SolanaTransaction? {
-        // Create a simple transfer transaction for demo purposes
-        let toAddress = "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM"
-
-        do {
-            return try SolanaTransaction(
-                to: toAddress,
-                lamports: lamports,
-            )
-        } catch {
-            result = ("Error", "Failed to create transaction: \(error.localizedDescription)")
-            return nil
         }
     }
 
@@ -261,9 +204,10 @@ struct SolanaWalletView: View {
                         }
                         isSigning = true
                         Task {
+                            var signature: SignatureResult?
                             let (duration, error) = await measureTime {
                                 // Using the new unified signMessage API
-                                _ = try await paraManager.signMessage(
+                                signature = try await paraManager.signMessage(
                                     walletId: selectedWallet.id,
                                     message: messageToSign // Pass plain text directly
                                 )
@@ -272,8 +216,8 @@ struct SolanaWalletView: View {
                             isSigning = false
                             if let error {
                                 result = ("Error", "Failed to sign message: \(error.localizedDescription)\nDuration: \(String(format: "%.2f", duration))s")
-                            } else {
-                                result = ("Success", "Message signed successfully\nDuration: \(String(format: "%.2f", duration))s")
+                            } else if let sig = signature {
+                                result = ("Message Signed", "Message: \(messageToSign)\n\nSignature:\n\(sig.signature)\n\nDuration: \(String(format: "%.3f", duration))s")
                             }
                         }
                     }
@@ -297,21 +241,12 @@ struct SolanaWalletView: View {
                         .font(.headline)
                         .frame(maxWidth: .infinity, alignment: .leading)
 
-                    HStack(spacing: 16) {
-                        Button("Send Transaction") {
-                            sendTransaction()
-                        }
-                        .buttonStyle(.bordered)
-                        .frame(maxWidth: .infinity)
-                        .accessibilityIdentifier("Send Transaction")
-
-                        Button("Sign Transaction") {
-                            signTransaction()
-                        }
-                        .buttonStyle(.bordered)
-                        .frame(maxWidth: .infinity)
-                        .accessibilityIdentifier("Sign Transaction")
+                    Button("Sign Transaction") {
+                        signTransaction()
                     }
+                    .buttonStyle(.bordered)
+                    .frame(maxWidth: .infinity)
+                    .accessibilityIdentifier("Sign Transaction")
                     .disabled(isLoading)
                 }
                 .padding()
@@ -319,57 +254,6 @@ struct SolanaWalletView: View {
                 .cornerRadius(16)
                 .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
 
-                // Wallet Management
-                VStack(spacing: 16) {
-                    Text("Wallet Management")
-                        .font(.headline)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-
-                    HStack(spacing: 16) {
-                        Button("Check Session") {
-                            isFetching = true
-                            Task {
-                                do {
-                                    let active = try await paraManager.isSessionActive()
-                                    result = ("Session Status", "Session Active: \(active)")
-                                    isFetching = false
-                                } catch {
-                                    isFetching = false
-                                    result = ("Error", "Failed to check session: \(error.localizedDescription)")
-                                }
-                            }
-                        }
-                        .buttonStyle(.bordered)
-                        .frame(maxWidth: .infinity)
-
-                        Button("Fetch Wallets") {
-                            isFetching = true
-                            Task {
-                                do {
-                                    let wallets = try await paraManager.fetchWallets()
-                                    let addresses = wallets.map { $0.address ?? "No Address" }
-                                    result = ("Wallets", addresses.joined(separator: "\n"))
-                                    isFetching = false
-                                } catch {
-                                    isFetching = false
-                                    result = ("Error", "Failed to fetch wallets: \(error.localizedDescription)")
-                                }
-                            }
-                        }
-                        .buttonStyle(.bordered)
-                        .frame(maxWidth: .infinity)
-                    }
-                    .disabled(isFetching)
-                    .overlay {
-                        if isFetching {
-                            ProgressView()
-                        }
-                    }
-                }
-                .padding()
-                .background(Color(.systemBackground))
-                .cornerRadius(16)
-                .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
             }
             .padding(.horizontal)
         }

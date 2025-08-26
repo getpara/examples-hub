@@ -4,7 +4,7 @@ import 'package:http/http.dart';
 import 'package:para/para.dart' as para_sdk;
 import 'package:web3dart/web3dart.dart';
 import '../../../../client/para.dart';
-import '../../widgets/wallet_management_card.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class EVMWalletView extends StatefulWidget {
   final para_sdk.Wallet wallet;
@@ -156,8 +156,10 @@ class _EVMWalletViewState extends State<EVMWalletView> {
       
       if (result is para_sdk.SuccessfulSignatureResult) {
         _showResult(
-          'Success', 
-          'Message signed successfully\nDuration: ${duration.toStringAsFixed(2)}s',
+          'Message Signed', 
+          'Message: $_messageToSign\n\n'
+          'Signature:\n${result.signature}\n\n'
+          'Duration: ${duration.toStringAsFixed(3)}s',
         );
       } else if (result is para_sdk.DeniedSignatureResultWithUrl) {
         _showResult(
@@ -203,8 +205,15 @@ class _EVMWalletViewState extends State<EVMWalletView> {
       
       if (result is para_sdk.SuccessfulSignatureResult) {
         _showResult(
-          'Success', 
-          'Transaction signed successfully\nDuration: ${duration.toStringAsFixed(2)}s',
+          'Transaction Signed', 
+          'Type: EIP-1559\n'
+          'To: 0x301d75d850c878b160ad9e1e3f6300202de9e97f\n'
+          'Value: 0.001 ETH\n'
+          'Gas: 21000\n'
+          'Max Fee: 3 gwei\n'
+          'Chain: Sepolia (11155111)\n\n'
+          'Signature:\n${result.signature}\n\n'
+          'Duration: ${duration.toStringAsFixed(3)}s',
         );
       } else if (result is para_sdk.DeniedSignatureResultWithUrl) {
         _showResult(
@@ -253,39 +262,30 @@ class _EVMWalletViewState extends State<EVMWalletView> {
     final startTime = DateTime.now();
     
     try {
-      // Use the new EVMTransaction type
-      final transaction = para_sdk.EVMTransaction(
-        to: _testAddress,
-        value: '100000000000000', // 0.0001 ETH in wei
-        chainId: _chainId.toString(),
-        type: 2, // EIP-1559 transaction
-      );
-      
-      final result = await para.signTransaction(
+      // Use the new transfer method that handles everything
+      final result = await para.transfer(
         walletId: widget.wallet.id!,
-        transaction: transaction.toJson(),
-        // Ensure chainId is explicitly provided for the bridge
-        rpcUrl: _rpcUrl,
+        to: _testAddress,
+        amount: '100000000000000', // 0.0001 ETH in wei
         chainId: _chainId.toString(),
+        rpcUrl: _rpcUrl,
       );
       
-      if (result is para_sdk.SuccessfulSignatureResult) {
-        // The signed transaction is in the signature field as hex
-        final signedTxHex = result.signature;
-        final signedTxBytes = _hexToBytes(signedTxHex);
-        final txHash = await _web3Client.sendRawTransaction(signedTxBytes);
-        
-        final duration = DateTime.now().difference(startTime).inMilliseconds / 1000;
-        _showResult(
-          'Success', 
-          'Transaction sent successfully\nTx Hash: $txHash\nDuration: ${duration.toStringAsFixed(2)}s',
-        );
-        
-        // Refresh balance after successful transaction
-        await _fetchBalance();
-      } else {
-        _showResult('Error', 'Failed to sign transaction');
-      }
+      final duration = DateTime.now().difference(startTime).inMilliseconds / 1000;
+      final etherscanUrl = 'https://sepolia.etherscan.io/tx/${result.hash}';
+      _showResult(
+        'Transaction Broadcast', 
+        'Hash: ${result.hash}\n'
+        'To: 0x301d75d850c878b160ad9e1e3f6300202de9e97f\n'
+        'Value: 0.0001 ETH\n'
+        'Gas Used: ~21000\n'
+        'Status: Pending\n\n'
+        'View on Etherscan:\n$etherscanUrl\n\n'
+        'Duration: ${duration.toStringAsFixed(3)}s',
+      );
+      
+      // Refresh balance after successful transaction
+      await _fetchBalance();
     } catch (e) {
       final duration = DateTime.now().difference(startTime).inMilliseconds / 1000;
       final errorMessage = e.toString();
@@ -323,18 +323,6 @@ class _EVMWalletViewState extends State<EVMWalletView> {
         'Note: Sepolia ETH has no real value',
       );
     }
-  }
-  
-  Uint8List _hexToBytes(String hex) {
-    // Remove 0x prefix if present
-    if (hex.startsWith('0x')) {
-      hex = hex.substring(2);
-    }
-    final bytes = <int>[];
-    for (int i = 0; i < hex.length; i += 2) {
-      bytes.add(int.parse(hex.substring(i, i + 2), radix: 16));
-    }
-    return Uint8List.fromList(bytes);
   }
   
   bool _shouldShowFundButton() {
@@ -544,7 +532,7 @@ class _EVMWalletViewState extends State<EVMWalletView> {
                             elevation: 2,
                           ),
                           child: Text(
-                            'Sign Message',
+                            'Sign Message (EIP-191)',
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
@@ -601,11 +589,6 @@ class _EVMWalletViewState extends State<EVMWalletView> {
                       ),
                     ],
                   ),
-                ),
-                const SizedBox(height: 16),
-                // Wallet Management Card
-                WalletManagementCard(
-                  onRefresh: _fetchBalance,
                 ),
                 const SizedBox(height: 32), // Add bottom padding
               ],

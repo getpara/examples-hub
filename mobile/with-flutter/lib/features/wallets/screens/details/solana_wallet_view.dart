@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:para/para.dart' as para_sdk;
 import 'package:solana/solana.dart' as solana;
 import '../../../../client/para.dart';
-import '../../widgets/wallet_management_card.dart';
 
 class SolanaWalletView extends StatefulWidget {
   final para_sdk.Wallet wallet;
@@ -147,8 +146,10 @@ class _SolanaWalletViewState extends State<SolanaWalletView> {
       
       if (result is para_sdk.SuccessfulSignatureResult) {
         _showResult(
-          'Success', 
-          'Message signed successfully\nDuration: ${duration.toStringAsFixed(2)}s',
+          'Message Signed', 
+          'Message: $_messageToSign\n\n'
+          'Signature:\n${result.signature}\n\n'
+          'Duration: ${duration.toStringAsFixed(3)}s',
         );
       } else if (result is para_sdk.DeniedSignatureResultWithUrl) {
         _showResult(
@@ -191,8 +192,13 @@ class _SolanaWalletViewState extends State<SolanaWalletView> {
       
       if (result is para_sdk.SuccessfulSignatureResult) {
         _showResult(
-          'Success', 
-          'Transaction signed successfully\nDuration: ${duration.toStringAsFixed(2)}s',
+          'Transaction Signed', 
+          'To: 9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM\n'
+          'Amount: 0.001 SOL (1,000,000 lamports)\n'
+          'Network: Devnet\n'
+          'Memo: Test transaction from Flutter\n\n'
+          'Signature:\n${result.signature}\n\n'
+          'Duration: ${duration.toStringAsFixed(3)}s',
         );
       } else if (result is para_sdk.DeniedSignatureResultWithUrl) {
         _showResult(
@@ -208,74 +214,6 @@ class _SolanaWalletViewState extends State<SolanaWalletView> {
         'Error', 
         'Failed to sign transaction: $e\nDuration: ${duration.toStringAsFixed(2)}s',
       );
-    } finally {
-      setState(() => _isLoading = false);
-    }
-  }
-  
-  Future<void> _sendTransaction() async {
-    // Check balance before sending
-    if (_balance != null) {
-      final balanceValue = double.tryParse(
-        _balance!.replaceAll(' SOL', '')
-      ) ?? 0;
-      
-      const requiredSOL = 0.0001 + 0.000005; // Transaction + fee
-      if (balanceValue < requiredSOL) {
-        _showResult(
-          'Insufficient Balance',
-          'You need at least ${requiredSOL.toStringAsFixed(6)} SOL to send this transaction.\n\n'
-          'Current balance: $_balance\n\n'
-          'To fund your wallet on Solana Devnet:\n'
-          '1. Copy your wallet address\n'
-          '2. Visit https://faucet.solana.com\n'
-          '3. Paste your address and request SOL',
-        );
-        return;
-      }
-    }
-    
-    setState(() => _isLoading = true);
-    final startTime = DateTime.now();
-    
-    try {
-      // Using the high-level transfer method (simpler, recommended)
-      // This matches the Swift SDK implementation
-      final transactionHash = await para.transfer(
-        walletId: widget.wallet.id!,
-        to: _testAddress,
-        amount: '100000', // 0.0001 SOL in lamports
-        token: null, // Native SOL transfer
-      );
-      
-      final duration = DateTime.now().difference(startTime).inMilliseconds / 1000;
-      _showResult(
-        'Success', 
-        'Transaction sent successfully\nHash: $transactionHash\nDuration: ${duration.toStringAsFixed(2)}s',
-      );
-      
-      // Refresh balance after successful transaction
-      await _fetchBalance();
-    } catch (e) {
-      final duration = DateTime.now().difference(startTime).inMilliseconds / 1000;
-      final errorMessage = e.toString();
-      
-      if (errorMessage.contains('insufficient') || errorMessage.contains('0x1')) {
-        _showResult(
-          'Insufficient Balance',
-          'Transaction failed due to insufficient balance.\n\n'
-          'To fund your wallet on Solana Devnet:\n'
-          '1. Copy your wallet address\n'
-          '2. Visit https://faucet.solana.com\n'
-          '3. Paste your address and request SOL\n\n'
-          'Duration: ${duration.toStringAsFixed(2)}s',
-        );
-      } else {
-        _showResult(
-          'Error', 
-          'Failed to send transaction: $errorMessage\nDuration: ${duration.toStringAsFixed(2)}s',
-        );
-      }
     } finally {
       setState(() => _isLoading = false);
     }
@@ -500,7 +438,7 @@ class _SolanaWalletViewState extends State<SolanaWalletView> {
                             elevation: 2,
                           ),
                           child: Text(
-                            'Sign Message',
+                            'Sign Message (Ed25519)',
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
@@ -528,41 +466,29 @@ class _SolanaWalletViewState extends State<SolanaWalletView> {
                         ),
                       ),
                       const SizedBox(height: 16),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: ElevatedButton(
-                              onPressed: _isLoading ? null : _sendTransaction,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.grey[300],
-                                foregroundColor: Colors.black,
-                                padding: const EdgeInsets.symmetric(vertical: 16),
-                              ),
-                              child: const Text('Send Transaction'),
-                            ),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          key: const Key('signTransactionButton'),
+                          onPressed: _isLoading ? null : _signTransaction,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.grey[300],
+                            foregroundColor: Colors.black,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
                           ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: ElevatedButton(
-                              key: const Key('signTransactionButton'),
-                              onPressed: _isLoading ? null : _signTransaction,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.grey[300],
-                                foregroundColor: Colors.black,
-                                padding: const EdgeInsets.symmetric(vertical: 16),
-                              ),
-                              child: const Text('Sign Transaction'),
-                            ),
-                          ),
-                        ],
+                          child: const Text('Sign Transaction'),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Signs 0.001 SOL transfer (offline only)',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                        ),
                       ),
                     ],
                   ),
-                ),
-                const SizedBox(height: 16),
-                // Wallet Management Card
-                WalletManagementCard(
-                  onRefresh: _fetchBalance,
                 ),
                 const SizedBox(height: 32), // Add bottom padding
               ],

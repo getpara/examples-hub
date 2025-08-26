@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:para/para.dart' as para_sdk;
 import '../../../../client/para.dart';
-import '../../widgets/wallet_management_card.dart';
 
 class CosmosWalletView extends StatefulWidget {
   final para_sdk.Wallet wallet;
@@ -141,7 +140,12 @@ class _CosmosWalletViewState extends State<CosmosWalletView> {
       
       final duration = DateTime.now().difference(startTime).inMilliseconds / 1000;
       if (signature is para_sdk.SuccessfulSignatureResult) {
-        _showResult('Success', 'Message signed successfully\nDuration: ${duration.toStringAsFixed(2)}s');
+        _showResult(
+          'Message Signed', 
+          'Message: $_messageToSign\n\n'
+          'Signature:\n${signature.signature}\n\n'
+          'Duration: ${duration.toStringAsFixed(3)}s',
+        );
       } else {
         _showResult('Error', 'Signature denied');
       }
@@ -184,8 +188,13 @@ class _CosmosWalletViewState extends State<CosmosWalletView> {
       
       if (result is para_sdk.SuccessfulSignatureResult) {
         _showResult(
-          'Success',
-          'Transaction signed successfully using ${signingMethod.toUpperCase()}\nDuration: ${duration.toStringAsFixed(2)}s',
+          '✅ ${signingMethod.toUpperCase()} Signed',
+          '🔗 Chain: ${_currentConfig.name} (${_currentConfig.chainId})\n'
+          'To: ${_currentConfig.testAddress.substring(0, 20)}...\n'
+          'Amount: 1 ${_currentConfig.denom.substring(1).toUpperCase()}\n'
+          'Format: ${signingMethod.toUpperCase()}\n\n'
+          '🔐 Signature:\n${result.signature}\n\n'
+          'Duration: ${duration.toStringAsFixed(3)}s',
         );
       } else if (result is para_sdk.DeniedSignatureResultWithUrl) {
         _showResult(
@@ -198,59 +207,6 @@ class _CosmosWalletViewState extends State<CosmosWalletView> {
     } catch (e) {
       final duration = DateTime.now().difference(startTime).inMilliseconds / 1000;
       _showResult('Error', 'Failed to sign transaction: $e\nDuration: ${duration.toStringAsFixed(2)}s');
-    } finally {
-      setState(() => _isLoading = false);
-    }
-  }
-  
-  Future<void> _sendTransaction() async {
-    setState(() => _isLoading = true);
-    final startTime = DateTime.now();
-    
-    try {
-      final transaction = para_sdk.CosmosTransaction(
-        to: _currentConfig.testAddress,
-        amount: '1000000',  // 1 token in smallest denomination
-        denom: _currentConfig.denom,
-        memo: 'Test Transaction from Para Flutter',
-        chainId: _currentConfig.chainId,
-        format: 'amino',  // Use amino for demo
-      );
-      
-      final result = await para.signTransaction(
-        walletId: widget.wallet.id!,
-        transaction: transaction.toJson(),
-        chainId: _currentConfig.chainId,
-        rpcUrl: _currentConfig.rpcUrl,
-      );
-      
-      final duration = DateTime.now().difference(startTime).inMilliseconds / 1000;
-      
-      if (result is para_sdk.SuccessfulSignatureResult) {
-        // In a real app, you would broadcast the signed transaction to the chain
-        _showResult(
-          'Success',
-          'Transaction signed and ready to broadcast\n'
-        'Chain: ${_currentConfig.name}\n'
-        'To: ${_currentConfig.testAddress}\n'
-        'Amount: 1.0 ${_currentConfig.denom.substring(1).toUpperCase()}\n'
-        'Duration: ${duration.toStringAsFixed(2)}s\n\n'
-        'Note: Broadcasting not implemented in demo',
-        );
-      } else if (result is para_sdk.DeniedSignatureResultWithUrl) {
-        _showResult(
-          'Denied',
-          'Transaction denied\nReview URL: ${result.transactionReviewUrl}',
-        );
-      } else {
-        _showResult('Error', 'Failed to sign transaction');
-      }
-    } catch (e) {
-      final duration = DateTime.now().difference(startTime).inMilliseconds / 1000;
-      _showResult(
-        'Error',
-        'Failed to send transaction: $e\nDuration: ${duration.toStringAsFixed(2)}s',
-      );
     } finally {
       setState(() => _isLoading = false);
     }
@@ -574,7 +530,7 @@ class _CosmosWalletViewState extends State<CosmosWalletView> {
                 elevation: 2,
               ),
               child: const Text(
-                'Sign Message',
+                'Sign Message (ADR-36)',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
@@ -601,32 +557,26 @@ class _CosmosWalletViewState extends State<CosmosWalletView> {
             ),
           ),
           const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: _isLoading ? null : _sendTransaction,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.grey[300],
-                    foregroundColor: Colors.black,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                  ),
-                  child: const Text('Send Transaction'),
-                ),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: _isLoading ? null : _signTransaction,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.grey[300],
+                foregroundColor: Colors.black,
+                padding: const EdgeInsets.symmetric(vertical: 16),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: _isLoading ? null : _signTransaction,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.grey[300],
-                    foregroundColor: Colors.black,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                  ),
-                  child: const Text('Sign Transaction'),
-                ),
-              ),
-            ],
+              child: const Text('Sign Transaction (Proto/Amino)'),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Chain: ${_currentConfig.name} (${_currentConfig.prefix}1...)\n'
+            'Signs 1 ${_currentConfig.denom.substring(1).toUpperCase()} transfer (offline only)',
+            style: TextStyle(
+              fontSize: 12,
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+            ),
           ),
         ],
       ),
@@ -662,11 +612,6 @@ class _CosmosWalletViewState extends State<CosmosWalletView> {
                 _buildMessageSigningCard(),
                 const SizedBox(height: 16),
                 _buildTransactionOperationsCard(),
-                const SizedBox(height: 16),
-                // Wallet Management Card
-                WalletManagementCard(
-                  onRefresh: _fetchBalance,
-                ),
                 const SizedBox(height: 32), // Add bottom padding
               ],
             ),

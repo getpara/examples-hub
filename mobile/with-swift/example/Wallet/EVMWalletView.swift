@@ -71,9 +71,10 @@ struct EVMWalletView: View {
 
         isLoading = true
         Task {
+            var signature: SignatureResult?
             let (duration, error) = await measureTime {
                 // Pass the transaction object directly - bridge will format it
-                _ = try await paraManager.signTransaction(
+                signature = try await paraManager.signTransaction(
                     walletId: selectedWallet.id,
                     transaction: transaction,
                     chainId: "11155111" // Sepolia chain ID
@@ -82,8 +83,8 @@ struct EVMWalletView: View {
 
             if let error {
                 result = ("Error", "Failed to sign transaction: \(error.localizedDescription)\nDuration: \(String(format: "%.2f", duration))s")
-            } else {
-                result = ("Success", "Transaction signed successfully\nDuration: \(String(format: "%.2f", duration))s")
+            } else if let sig = signature {
+                result = ("Transaction Signed", "Type: EIP-1559\nTo: 0x301d75d850c878b160ad9e1e3f6300202de9e97f\nValue: 1 gwei\nGas: 21000\nMax Fee: 3 gwei\nChain: Sepolia (11155111)\n\nSignature:\n\(sig.signature)\n\nDuration: \(String(format: "%.3f", duration))s")
             }
             isLoading = false
         }
@@ -118,15 +119,20 @@ struct EVMWalletView: View {
 
         isLoading = true
         Task {
+            var transferResult: TransferResult?
             let (duration, error) = await measureTime {
-                // Using the high-level transfer method for simplicity
-                // For raw transaction sending, you would use signTransaction + broadcast
-                _ = try await paraManager.transfer(
+                // Using the high-level transfer method that handles everything
+                transferResult = try await paraManager.transfer(
                     walletId: selectedWallet.id,
                     to: "0x301d75d850c878b160ad9e1e3f6300202de9e97f",
                     amount: "100000000000000", // Wei amount
-                    token: nil // Native ETH transfer
+                    chainId: "11155111", // Sepolia chain ID
+                    rpcUrl: rpcUrl // Use the defined Sepolia RPC URL
                 )
+                // Log the transaction hash
+                if let hash = transferResult?.hash {
+                    print("Transaction sent: \(hash)")
+                }
             }
 
             if let error {
@@ -145,8 +151,10 @@ struct EVMWalletView: View {
                 } else {
                     result = ("Error", "Failed to send transaction: \(errorMessage)\nDuration: \(String(format: "%.2f", duration))s")
                 }
-            } else {
-                result = ("Success", "Transaction sent successfully\nDuration: \(String(format: "%.2f", duration))s")
+            } else if let txResult = transferResult {
+                let etherscanUrl = "https://sepolia.etherscan.io/tx/\(txResult.hash)"
+                
+                result = ("Transaction Broadcast", "Hash: \(txResult.hash)\nTo: \(txResult.to)\nValue: 0.0001 ETH\nGas Used: ~21000\nStatus: Pending\n\nView on Etherscan:\n\(etherscanUrl)\n\nDuration: \(String(format: "%.3f", duration))s")
                 // Refresh balance after successful transaction
                 fetchBalance()
             }
@@ -287,16 +295,17 @@ struct EVMWalletView: View {
                         .background(Color(.systemGray6))
                         .cornerRadius(10)
 
-                    Button("Sign Message") {
+                    Button("Sign Message (EIP-191)") {
                         guard !messageToSign.isEmpty else {
                             result = ("Error", "Please enter a message to sign.")
                             return
                         }
                         isSigning = true
                         Task {
+                            var signature: SignatureResult?
                             let (duration, error) = await measureTime {
                                 // Using the new unified signMessage API
-                                _ = try await paraManager.signMessage(
+                                signature = try await paraManager.signMessage(
                                     walletId: selectedWallet.id,
                                     message: messageToSign // Pass plain text directly
                                 )
@@ -305,8 +314,8 @@ struct EVMWalletView: View {
                             isSigning = false
                             if let error {
                                 result = ("Error", "Failed to sign message: \(error.localizedDescription)\nDuration: \(String(format: "%.2f", duration))s")
-                            } else {
-                                result = ("Success", "Message signed successfully\nDuration: \(String(format: "%.2f", duration))s")
+                            } else if let sig = signature {
+                                result = ("Message Signed", "Message: \(messageToSign)\n\nSignature:\n\(sig.signature)\n\nDuration: \(String(format: "%.3f", duration))s")
                             }
                         }
                     }
@@ -330,11 +339,11 @@ struct EVMWalletView: View {
                         .font(.headline)
                         .frame(maxWidth: .infinity, alignment: .leading)
 
-                    HStack(spacing: 16) {
+                    HStack(spacing: 12) {
                         Button("Send Transaction") {
                             sendTransaction()
                         }
-                        .buttonStyle(.bordered)
+                        .buttonStyle(.borderedProminent)
                         .frame(maxWidth: .infinity)
 
                         Button("Sign Transaction") {
@@ -344,63 +353,17 @@ struct EVMWalletView: View {
                         .frame(maxWidth: .infinity)
                     }
                     .disabled(isLoading)
-                }
-                .padding()
-                .background(Color(.systemBackground))
-                .cornerRadius(16)
-                .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
-
-                // Wallet Management
-                VStack(spacing: 16) {
-                    Text("Wallet Management")
-                        .font(.headline)
+                    
+                    Text("Send: 0.0001 ETH → 0x301d...e97f (broadcasts)\nSign: 0.000000001 ETH (offline only)")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
                         .frame(maxWidth: .infinity, alignment: .leading)
-
-                    HStack(spacing: 16) {
-                        Button("Check Session") {
-                            isFetching = true
-                            Task {
-                                do {
-                                    let active = try await paraManager.isSessionActive()
-                                    result = ("Session Status", "Session Active: \(active)")
-                                    isFetching = false
-                                } catch {
-                                    isFetching = false
-                                    result = ("Error", "Failed to check session: \(error.localizedDescription)")
-                                }
-                            }
-                        }
-                        .buttonStyle(.bordered)
-                        .frame(maxWidth: .infinity)
-
-                        Button("Fetch Wallets") {
-                            isFetching = true
-                            Task {
-                                do {
-                                    let wallets = try await paraManager.fetchWallets()
-                                    let addresses = wallets.map { $0.address ?? "No Address" }
-                                    result = ("Wallets", addresses.joined(separator: "\n"))
-                                    isFetching = false
-                                } catch {
-                                    isFetching = false
-                                    result = ("Error", "Failed to fetch wallets: \(error.localizedDescription)")
-                                }
-                            }
-                        }
-                        .buttonStyle(.bordered)
-                        .frame(maxWidth: .infinity)
-                    }
-                    .disabled(isFetching)
-                    .overlay {
-                        if isFetching {
-                            ProgressView()
-                        }
-                    }
                 }
                 .padding()
                 .background(Color(.systemBackground))
                 .cornerRadius(16)
                 .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
+
             }
             .padding(.horizontal)
         }
