@@ -1,11 +1,8 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:para/para.dart' as para_sdk;
 import 'package:solana/solana.dart' as solana;
-import 'package:solana/encoder.dart';
 import '../../../../client/para.dart';
-import '../../widgets/wallet_management_card.dart';
 
 class SolanaWalletView extends StatefulWidget {
   final para_sdk.Wallet wallet;
@@ -20,9 +17,6 @@ class SolanaWalletView extends StatefulWidget {
 }
 
 class _SolanaWalletViewState extends State<SolanaWalletView> {
-  late solana.SolanaClient _solanaClient;
-  para_sdk.ParaSolanaWeb3Signer? _signer;
-  
   String? _balance;
   String _messageToSign = '';
   bool _isLoading = false;
@@ -45,18 +39,7 @@ class _SolanaWalletViewState extends State<SolanaWalletView> {
   }
   
   Future<void> _initializeSolana() async {
-    _solanaClient = solana.SolanaClient(
-      rpcUrl: Uri.parse(_rpcUrl),
-      websocketUrl: Uri.parse(_rpcUrl.replaceFirst('https', 'wss')),
-    );
-    
     try {
-      _signer = para_sdk.ParaSolanaWeb3Signer(
-        para: para,
-        solanaClient: _solanaClient,
-        walletId: widget.wallet.id,
-      );
-      
       if (widget.wallet.address != null) {
         setState(() {
           _balance = '0.0000 SOL'; // Set default balance
@@ -72,7 +55,7 @@ class _SolanaWalletViewState extends State<SolanaWalletView> {
     } catch (e) {
       // Debug: initialization error
       // print('SolanaWalletView - Error initializing: $e');
-      _showResult('Error', 'Failed to initialize Solana signer: $e');
+      _showResult('Error', 'Failed to initialize: $e');
       setState(() {
         _isLoading = false;
       });
@@ -81,7 +64,6 @@ class _SolanaWalletViewState extends State<SolanaWalletView> {
   
   @override
   void dispose() {
-    // SolanaClient doesn't have a dispose method
     super.dispose();
   }
   
@@ -123,9 +105,16 @@ class _SolanaWalletViewState extends State<SolanaWalletView> {
     try {
       // Debug: fetching balance
       // print('SolanaWalletView - Fetching balance for address: ${widget.wallet.address}');
-      final pubKey = solana.Ed25519HDPublicKey.fromBase58(widget.wallet.address!);
-      final lamports = await _solanaClient.rpcClient.getBalance(pubKey.toBase58());
-      final solBalance = lamports.value / solana.lamportsPerSol;
+      
+      // Use the unified getBalance API
+      final balance = await para.getBalance(
+        walletId: widget.wallet.id!,
+        rpcUrl: _rpcUrl,
+      );
+      
+      // Convert lamports to SOL (balance is returned in lamports as a string)
+      final lamports = BigInt.parse(balance);
+      final solBalance = lamports / BigInt.from(solana.lamportsPerSol);
       setState(() => _balance = '${solBalance.toStringAsFixed(4)} SOL');
       // Debug: balance fetched
       // print('SolanaWalletView - Balance fetched: $_balance');
@@ -148,20 +137,19 @@ class _SolanaWalletViewState extends State<SolanaWalletView> {
     final startTime = DateTime.now();
     
     try {
-      final messageBytes = utf8.encode(_messageToSign);
-      final messageBase64 = base64Encode(messageBytes);
-      
       final result = await para.signMessage(
         walletId: widget.wallet.id!,
-        messageBase64: messageBase64,
+        message: _messageToSign,
       );
       
       final duration = DateTime.now().difference(startTime).inMilliseconds / 1000;
       
       if (result is para_sdk.SuccessfulSignatureResult) {
         _showResult(
-          'Success', 
-          'Message signed successfully\nDuration: ${duration.toStringAsFixed(2)}s',
+          'Message Signed', 
+          'Message: $_messageToSign\n\n'
+          'Signature:\n${result.signature}\n\n'
+          'Duration: ${duration.toStringAsFixed(3)}s',
         );
       } else if (result is para_sdk.DeniedSignatureResultWithUrl) {
         _showResult(
@@ -183,20 +171,43 @@ class _SolanaWalletViewState extends State<SolanaWalletView> {
   }
   
   Future<void> _signTransaction() async {
-    final message = await _createTestTransaction(lamports: 1000000);
-    if (message == null || _signer == null) return;
-    
     setState(() => _isLoading = true);
     final startTime = DateTime.now();
     
     try {
-      await _signer!.signTransaction(message);
+      // Use the new SolanaTransaction type
+      final transaction = para_sdk.SolanaTransaction(
+        to: _testAddress,
+        lamports: '1000000', // 0.001 SOL
+        memo: 'Test transaction from Flutter',
+      );
+      
+      final result = await para.signTransaction(
+        walletId: widget.wallet.id!,
+        transaction: transaction.toJson(),
+        rpcUrl: _rpcUrl,
+      );
       
       final duration = DateTime.now().difference(startTime).inMilliseconds / 1000;
-      _showResult(
-        'Success', 
-        'Transaction signed successfully\nDuration: ${duration.toStringAsFixed(2)}s',
-      );
+      
+      if (result is para_sdk.SuccessfulSignatureResult) {
+        _showResult(
+          'Transaction Signed', 
+          'To: 9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM\n'
+          'Amount: 0.001 SOL (1,000,000 lamports)\n'
+          'Network: Devnet\n'
+          'Memo: Test transaction from Flutter\n\n'
+          'Signature:\n${result.signature}\n\n'
+          'Duration: ${duration.toStringAsFixed(3)}s',
+        );
+      } else if (result is para_sdk.DeniedSignatureResultWithUrl) {
+        _showResult(
+          'Denied', 
+          'Transaction denied\nReview URL: ${result.transactionReviewUrl}',
+        );
+      } else {
+        _showResult('Error', 'Failed to sign transaction');
+      }
     } catch (e) {
       final duration = DateTime.now().difference(startTime).inMilliseconds / 1000;
       _showResult(
@@ -207,111 +218,6 @@ class _SolanaWalletViewState extends State<SolanaWalletView> {
       setState(() => _isLoading = false);
     }
   }
-  
-  Future<void> _sendTransaction() async {
-    // Check balance before sending
-    if (_balance != null) {
-      final balanceValue = double.tryParse(
-        _balance!.replaceAll(' SOL', '')
-      ) ?? 0;
-      
-      const requiredSOL = 0.0001 + 0.000005; // Transaction + fee
-      if (balanceValue < requiredSOL) {
-        _showResult(
-          'Insufficient Balance',
-          'You need at least ${requiredSOL.toStringAsFixed(6)} SOL to send this transaction.\n\n'
-          'Current balance: $_balance\n\n'
-          'To fund your wallet on Solana Devnet:\n'
-          '1. Copy your wallet address\n'
-          '2. Visit https://faucet.solana.com\n'
-          '3. Paste your address and request SOL',
-        );
-        return;
-      }
-    }
-    
-    final message = await _createTestTransaction(lamports: 100000);
-    if (message == null || _signer == null) return;
-    
-    setState(() => _isLoading = true);
-    final startTime = DateTime.now();
-    
-    try {
-      final signedTx = await _signer!.signTransaction(message);
-      final signature = await _signer!.sendTransaction(
-        signedTx,
-        commitment: solana.Commitment.confirmed,
-      );
-      
-      final duration = DateTime.now().difference(startTime).inMilliseconds / 1000;
-      _showResult(
-        'Success', 
-        'Transaction sent successfully\nSignature: $signature\nDuration: ${duration.toStringAsFixed(2)}s',
-      );
-      
-      // Refresh balance after successful transaction
-      await _fetchBalance();
-    } catch (e) {
-      final duration = DateTime.now().difference(startTime).inMilliseconds / 1000;
-      final errorMessage = e.toString();
-      
-      if (errorMessage.contains('insufficient') || errorMessage.contains('0x1')) {
-        _showResult(
-          'Insufficient Balance',
-          'Transaction failed due to insufficient balance.\n\n'
-          'To fund your wallet on Solana Devnet:\n'
-          '1. Copy your wallet address\n'
-          '2. Visit https://faucet.solana.com\n'
-          '3. Paste your address and request SOL\n\n'
-          'Duration: ${duration.toStringAsFixed(2)}s',
-        );
-      } else {
-        _showResult(
-          'Error', 
-          'Failed to send transaction: $errorMessage\nDuration: ${duration.toStringAsFixed(2)}s',
-        );
-      }
-    } finally {
-      setState(() => _isLoading = false);
-    }
-  }
-  
-  Future<CompiledMessage?> _createTestTransaction({required int lamports}) async {
-    if (widget.wallet.address == null) {
-      _showResult('Error', 'No wallet address found');
-      return null;
-    }
-    
-    try {
-      final fromPubkey = solana.Ed25519HDPublicKey.fromBase58(widget.wallet.address!);
-      final toPubkey = solana.Ed25519HDPublicKey.fromBase58(_testAddress);
-      
-      // Get recent blockhash
-      final recentBlockhash = await _solanaClient.rpcClient.getLatestBlockhash();
-      
-      // Create transfer instruction
-      final transferInstruction = solana.SystemInstruction.transfer(
-        fundingAccount: fromPubkey,
-        recipientAccount: toPubkey,
-        lamports: lamports,
-      );
-      
-      // Create message
-      final message = solana.Message(
-        instructions: [transferInstruction],
-      );
-      
-      // Compile message
-      return message.compile(
-        recentBlockhash: recentBlockhash.value.blockhash,
-        feePayer: fromPubkey,
-      );
-    } catch (e) {
-      _showResult('Error', 'Failed to create transaction: $e');
-      return null;
-    }
-  }
-  
   
   void _showFundingInstructions() {
     final address = widget.wallet.address;
@@ -532,7 +438,7 @@ class _SolanaWalletViewState extends State<SolanaWalletView> {
                             elevation: 2,
                           ),
                           child: Text(
-                            'Sign Message',
+                            'Sign Message (Ed25519)',
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
@@ -560,41 +466,29 @@ class _SolanaWalletViewState extends State<SolanaWalletView> {
                         ),
                       ),
                       const SizedBox(height: 16),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: ElevatedButton(
-                              onPressed: _isLoading ? null : _sendTransaction,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.grey[300],
-                                foregroundColor: Colors.black,
-                                padding: const EdgeInsets.symmetric(vertical: 16),
-                              ),
-                              child: const Text('Send Transaction'),
-                            ),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          key: const Key('signTransactionButton'),
+                          onPressed: _isLoading ? null : _signTransaction,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.grey[300],
+                            foregroundColor: Colors.black,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
                           ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: ElevatedButton(
-                              key: const Key('signTransactionButton'),
-                              onPressed: _isLoading ? null : _signTransaction,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.grey[300],
-                                foregroundColor: Colors.black,
-                                padding: const EdgeInsets.symmetric(vertical: 16),
-                              ),
-                              child: const Text('Sign Transaction'),
-                            ),
-                          ),
-                        ],
+                          child: const Text('Sign Transaction'),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Signs 0.001 SOL transfer (offline only)',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                        ),
                       ),
                     ],
                   ),
-                ),
-                const SizedBox(height: 16),
-                // Wallet Management Card
-                WalletManagementCard(
-                  onRefresh: _fetchBalance,
                 ),
                 const SizedBox(height: 32), // Add bottom padding
               ],

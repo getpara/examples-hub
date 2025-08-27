@@ -1,11 +1,10 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart';
 import 'package:para/para.dart' as para_sdk;
 import 'package:web3dart/web3dart.dart';
 import '../../../../client/para.dart';
-import '../../widgets/wallet_management_card.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class EVMWalletView extends StatefulWidget {
   final para_sdk.Wallet wallet;
@@ -21,7 +20,6 @@ class EVMWalletView extends StatefulWidget {
 
 class _EVMWalletViewState extends State<EVMWalletView> {
   late Web3Client _web3Client;
-  para_sdk.ParaEvmSigner? _signer;
   
   String? _balance;
   String _messageToSign = '';
@@ -51,11 +49,6 @@ class _EVMWalletViewState extends State<EVMWalletView> {
     _web3Client = Web3Client(_rpcUrl, Client());
     
     try {
-      _signer = para_sdk.ParaEvmSigner(
-        para: para,
-        walletId: widget.wallet.id,
-      );
-      
       if (widget.wallet.address != null) {
         setState(() {
           _balance = '0.0000 ETH'; // Set default balance
@@ -71,7 +64,7 @@ class _EVMWalletViewState extends State<EVMWalletView> {
     } catch (e) {
       // Debug: initialization error
       // print('EVMWalletView - Error initializing: $e');
-      _showResult('Error', 'Failed to initialize EVM signer: $e');
+      _showResult('Error', 'Failed to initialize: $e');
       setState(() {
         _isLoading = false;
       });
@@ -122,9 +115,16 @@ class _EVMWalletViewState extends State<EVMWalletView> {
     try {
       // Debug: fetching balance
       // print('EVMWalletView - Fetching balance for address: ${widget.wallet.address}');
-      final address = EthereumAddress.fromHex(widget.wallet.address!);
-      final balance = await _web3Client.getBalance(address);
-      final ethBalance = balance.getValueInUnit(EtherUnit.ether);
+      
+      // Use the unified getBalance API
+      final balance = await para.getBalance(
+        walletId: widget.wallet.id!,
+        rpcUrl: _rpcUrl,
+      );
+      
+      // Convert wei to ETH (balance is returned in wei as a string)
+      final weiBalance = BigInt.parse(balance);
+      final ethBalance = weiBalance / BigInt.from(10).pow(18);
       setState(() => _balance = '${ethBalance.toStringAsFixed(4)} ETH');
       // Debug: balance fetched
       // print('EVMWalletView - Balance fetched: $_balance');
@@ -147,20 +147,19 @@ class _EVMWalletViewState extends State<EVMWalletView> {
     final startTime = DateTime.now();
     
     try {
-      final messageBytes = utf8.encode(_messageToSign);
-      final messageBase64 = base64Encode(messageBytes);
-      
       final result = await para.signMessage(
         walletId: widget.wallet.id!,
-        messageBase64: messageBase64,
+        message: _messageToSign,
       );
       
       final duration = DateTime.now().difference(startTime).inMilliseconds / 1000;
       
       if (result is para_sdk.SuccessfulSignatureResult) {
         _showResult(
-          'Success', 
-          'Message signed successfully\nDuration: ${duration.toStringAsFixed(2)}s',
+          'Message Signed', 
+          'Message: $_messageToSign\n\n'
+          'Signature:\n${result.signature}\n\n'
+          'Duration: ${duration.toStringAsFixed(3)}s',
         );
       } else if (result is para_sdk.DeniedSignatureResultWithUrl) {
         _showResult(
@@ -182,23 +181,48 @@ class _EVMWalletViewState extends State<EVMWalletView> {
   }
   
   Future<void> _signTransaction() async {
-    final transaction = _createTestTransaction(value: BigInt.from(1000000000));
-    if (transaction == null || _signer == null) return;
-    
     setState(() => _isLoading = true);
     final startTime = DateTime.now();
     
     try {
-      await _signer!.signTransaction(
-        transaction,
-        chainId: _chainId,
+      // Use the new EVMTransaction type
+      final transaction = para_sdk.EVMTransaction(
+        to: _testAddress,
+        value: '1000000000000000', // 0.001 ETH in wei
+        chainId: _chainId.toString(),
+        type: 2, // EIP-1559 transaction
+      );
+      
+      final result = await para.signTransaction(
+        walletId: widget.wallet.id!,
+        transaction: transaction.toJson(),
+        // Ensure chainId is explicitly provided for the bridge
+        rpcUrl: _rpcUrl,
+        chainId: _chainId.toString(),
       );
       
       final duration = DateTime.now().difference(startTime).inMilliseconds / 1000;
-      _showResult(
-        'Success', 
-        'Transaction signed successfully\nDuration: ${duration.toStringAsFixed(2)}s',
-      );
+      
+      if (result is para_sdk.SuccessfulSignatureResult) {
+        _showResult(
+          'Transaction Signed', 
+          'Type: EIP-1559\n'
+          'To: 0x301d75d850c878b160ad9e1e3f6300202de9e97f\n'
+          'Value: 0.001 ETH\n'
+          'Gas: 21000\n'
+          'Max Fee: 3 gwei\n'
+          'Chain: Sepolia (11155111)\n\n'
+          'Signature:\n${result.signature}\n\n'
+          'Duration: ${duration.toStringAsFixed(3)}s',
+        );
+      } else if (result is para_sdk.DeniedSignatureResultWithUrl) {
+        _showResult(
+          'Denied', 
+          'Transaction denied\nReview URL: ${result.transactionReviewUrl}',
+        );
+      } else {
+        _showResult('Error', 'Failed to sign transaction');
+      }
     } catch (e) {
       final duration = DateTime.now().difference(startTime).inMilliseconds / 1000;
       _showResult(
@@ -234,24 +258,30 @@ class _EVMWalletViewState extends State<EVMWalletView> {
       }
     }
     
-    final transaction = _createTestTransaction(value: BigInt.from(100000000000000));
-    if (transaction == null || _signer == null) return;
-    
     setState(() => _isLoading = true);
     final startTime = DateTime.now();
     
     try {
-      final signedTx = await _signer!.signTransaction(
-        transaction,
-        chainId: _chainId,
+      // Use the new transfer method that handles everything
+      final result = await para.transfer(
+        walletId: widget.wallet.id!,
+        to: _testAddress,
+        amount: '100000000000000', // 0.0001 ETH in wei
+        chainId: _chainId.toString(),
+        rpcUrl: _rpcUrl,
       );
       
-      final txHash = await _web3Client.sendRawTransaction(signedTx);
-      
       final duration = DateTime.now().difference(startTime).inMilliseconds / 1000;
+      final etherscanUrl = 'https://sepolia.etherscan.io/tx/${result.hash}';
       _showResult(
-        'Success', 
-        'Transaction sent successfully\nTx Hash: $txHash\nDuration: ${duration.toStringAsFixed(2)}s',
+        'Transaction Broadcast', 
+        'Hash: ${result.hash}\n'
+        'To: 0x301d75d850c878b160ad9e1e3f6300202de9e97f\n'
+        'Value: 0.0001 ETH\n'
+        'Gas Used: ~21000\n'
+        'Status: Pending\n\n'
+        'View on Etherscan:\n$etherscanUrl\n\n'
+        'Duration: ${duration.toStringAsFixed(3)}s',
       );
       
       // Refresh balance after successful transaction
@@ -280,27 +310,6 @@ class _EVMWalletViewState extends State<EVMWalletView> {
       setState(() => _isLoading = false);
     }
   }
-  
-  Transaction? _createTestTransaction({required BigInt value}) {
-    if (_signer == null) {
-      _showResult('Error', 'EVM signer not initialized');
-      return null;
-    }
-    
-    try {
-      return Transaction(
-        to: EthereumAddress.fromHex(_testAddress),
-        value: EtherAmount.fromBigInt(EtherUnit.wei, value),
-        gasPrice: EtherAmount.fromBigInt(EtherUnit.gwei, BigInt.from(3)),
-        maxGas: 21000,
-        nonce: 3, // This should be fetched dynamically in production
-      );
-    } catch (e) {
-      _showResult('Error', 'Failed to create transaction: $e');
-      return null;
-    }
-  }
-  
   
   void _showFundingInstructions() {
     final address = widget.wallet.address;
@@ -523,7 +532,7 @@ class _EVMWalletViewState extends State<EVMWalletView> {
                             elevation: 2,
                           ),
                           child: Text(
-                            'Sign Message',
+                            'Sign Message (EIP-191)',
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
@@ -580,11 +589,6 @@ class _EVMWalletViewState extends State<EVMWalletView> {
                       ),
                     ],
                   ),
-                ),
-                const SizedBox(height: 16),
-                // Wallet Management Card
-                WalletManagementCard(
-                  onRefresh: _fetchBalance,
                 ),
                 const SizedBox(height: 32), // Add bottom padding
               ],

@@ -14,40 +14,18 @@ void main() {
     
     setUpAll(() async {
       // Load environment variables
-      final env = DotEnv(includePlatformEnvironment: true)..load(['.env']);
-      final apiKey = Platform.environment['PARA_API_KEY'] ?? env['PARA_API_KEY'];
+      final env = DotEnv(includePlatformEnvironment: true)
+        ..load(['.env', '../.env']);
+      final apiKey = Platform.environment['PARA_API_KEY']
+          ?? env['PARA_API_KEY']
+          ?? Platform.environment['PARA_BETA_API_KEY']
+          ?? env['PARA_BETA_API_KEY'];
       if (apiKey == null || apiKey.isEmpty) {
-        throw Exception('PARA_API_KEY must be set in environment variables or .env file');
+        throw Exception('PARA_API_KEY or PARA_BETA_API_KEY must be set in environment variables or .env/.env in project root');
       }
 
       // Initialize driver
-      final currentDir = Directory.current.path;
-      final projectRoot = currentDir.endsWith('test_e2e') 
-          ? Directory.current.parent.path 
-          : currentDir;
-      final appPath = '$projectRoot/build/ios/iphonesimulator/Runner.app';
-      
-      final capabilities = <String, dynamic>{
-        'platformName': 'iOS',
-        'platformVersion': '26.0',
-        'deviceName': 'iPhone 16 Pro',
-        'automationName': 'XCUITest',
-        'bundleId': 'com.usecapsule.example.flutter',
-        'app': appPath,
-        'newCommandTimeout': 300,
-        'connectHardwareKeyboard': false,
-        'useNewWDA': true,
-        'wdaLaunchTimeout': 60000,
-        'wdaConnectionTimeout': 60000,
-        'allowTouchIdEnroll': true,
-        'touchIdMatch': true,
-        'simpleIsVisibleCheck': true,
-      };
-      
-      driver = await createDriver(
-        uri: Uri.parse('http://127.0.0.1:4723/'),
-        desired: capabilities,
-      );
+      driver = await createIOSDriver();
       
       // Enroll biometrics for all tests
       try {

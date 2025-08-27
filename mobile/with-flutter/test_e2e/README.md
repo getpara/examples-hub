@@ -1,53 +1,70 @@
 # Para Flutter E2E Tests
 
-End-to-end tests for the Para Flutter example app using Appium.
+End-to-end tests for the Para Flutter example app using Appium (iOS Simulator).
 
 ## Prerequisites
 
-1. **Install Appium**:
-   ```bash
-   npm install -g appium
-   appium driver install xcuitest
-   ```
+- Node 18+, Dart SDK 3.5+, Xcode (with iOS simulators installed)
+- Appium + XCUITest driver:
+  ```bash
+  npm install -g appium
+  appium driver install xcuitest
+  ```
 
-2. **Environment Setup**:
-   - Set `PARA_API_KEY` in `.env` file or environment variable
-   - iOS Simulator must be available
+## Environment
 
-## Quick Start
+Create `.env` in either project root or `test_e2e/` with one of:
 
-```bash
-# Run all tests
-dart test para_flutter_e2e_test.dart --timeout 300s
+```env
+# Preferred
+PARA_API_KEY=your_api_key
 
-# Run single test
-dart run tool/run_single_test.dart 01
+# Fallback supported by tests
+PARA_BETA_API_KEY=your_api_key
 ```
 
-## Test Coverage (12 Tests)
+Optional overrides:
 
-1. **Email Authentication** - Signup and login with passkey
-2. **Phone Authentication** - Signup and login with passkey
-3. **Email Password Authentication** - Signup and login with password
-4. **Wallet Verification** - Verify existing wallets and addresses
-5. **Copy Wallet Address** - Test address copying functionality
-6. **EVM Transaction Signing** - EVM transaction with gas fees
-7. **Session Validation** - Verify session validity
-8. **Logout** - Test logout functionality
-9. **Solana Signing** - Solana transaction signing
-10. **Cosmos Wallet Creation and Message Signing** - Create Cosmos wallet and sign messages
-11. **Cosmos Transaction Signing** - Cosmos bank send transactions
-12. **Cosmos Signing Method Validation** - Test Amino vs Proto signing methods
+```bash
+# Target a specific booted simulator
+export IOS_SIM_UDID=<device-udid>
+# Or specify name/version
+export IOS_DEVICE_NAME="iPhone 16 Pro"
+export IOS_PLATFORM_VERSION="18.0"
+# If you changed the app id
+export BUNDLE_ID=com.usecapsule.example.flutter
+```
 
-## Architecture
+## Usage
 
-- All tests can run independently (isolated)
-- Each test performs authentication if needed
-- Tests validate real wallet and signing functionality
-- Simplified codebase following "less is more" philosophy
+From `examples-hub/mobile/with-flutter/test_e2e`:
+
+```bash
+# One-time setup (builds the iOS app); run again if you change Dart/iOS code
+dart run tool/setup.dart
+
+# Run all tests (starts/stops Appium automatically)
+dart run tool/run_tests.dart
+
+# Run a subset
+dart run tool/run_tests.dart authentication
+dart run tool/run_tests.dart wallets
+
+# Run a single suite
+dart run tool/run_single_test.dart authentication
+```
+
+The runners will build the iOS simulator app if missing, start Appium, run tests, and shut it down.
+
+## Suites
+
+- Authentication: email + phone passkey flows
+- EVM wallet: basic ops, session, signing
+- Solana wallet: address detection, signing
+- Cosmos wallet: address detection, signing
 
 ## Troubleshooting
 
-- **Tests timing out**: Use `--timeout 300s` flag
-- **Simulator issues**: Ensure iOS Simulator is running
-- **Appium errors**: Check `appium driver list --installed`
+- Make sure a simulator is booted: `xcrun simctl list | rg Booted`
+- If Appium can’t find a device, set `IOS_SIM_UDID` or `IOS_DEVICE_NAME/IOS_PLATFORM_VERSION`
+- Check Appium install: `appium driver list --installed`

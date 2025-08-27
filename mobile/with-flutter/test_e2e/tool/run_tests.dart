@@ -9,6 +9,19 @@ void main(List<String> args) async {
   
   print('🧪 Running Para Flutter E2E tests ($testType)...\n');
 
+  // Ensure Flutter app is built for iOS simulator once before running
+  final appPath = '../build/ios/iphonesimulator/Runner.app';
+  if (!File(appPath).existsSync()) {
+    print('📦 iOS app not found at $appPath. Building...');
+    final build = await Process.run('flutter', ['build', 'ios', '--simulator'], workingDirectory: '..');
+    if (build.exitCode != 0) {
+      print('❌ Build failed:');
+      stderr.write(build.stderr);
+      exit(1);
+    }
+    print('✅ Build complete');
+  }
+
   // Check if Appium is available
   final appiumCheck = await Process.run('which', ['appium']);
   if (appiumCheck.exitCode != 0) {

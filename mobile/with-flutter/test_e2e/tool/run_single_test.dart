@@ -37,6 +37,19 @@ void main(List<String> args) async {
   }
   
   print('🧪 Running $testType tests ($testFile)...\n');
+
+  // Ensure Flutter app is built for iOS simulator
+  final appPath = '../build/ios/iphonesimulator/Runner.app';
+  if (!File(appPath).existsSync()) {
+    print('📦 iOS app not found at $appPath. Building...');
+    final build = await Process.run('flutter', ['build', 'ios', '--simulator'], workingDirectory: '..');
+    if (build.exitCode != 0) {
+      print('❌ Build failed:');
+      stderr.write(build.stderr);
+      exit(1);
+    }
+    print('✅ Build complete');
+  }
   
   // Start Appium server
   print('🚀 Starting Appium server...');

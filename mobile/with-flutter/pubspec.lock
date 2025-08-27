@@ -614,7 +614,7 @@ packages:
       path: "../../../flutter-sdk"
       relative: true
     source: path
-    version: "2.0.0-alpha.1"
+    version: "2.0.0-alpha.2"
   passkeys:
     dependency: transitive
     description:

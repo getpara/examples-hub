@@ -15,7 +15,7 @@ struct SolanaWalletView: View {
     @State private var isLoading = false
     @State private var balance: String?
 
-    @State private var paraSolanaSigner: ParaSolanaSigner?
+    // Removed ParaSolanaSigner - now using unified API
 
     // Solana RPC URL (devnet for testing)
     private let rpcUrl = "https://api.devnet.solana.com"
@@ -32,16 +32,26 @@ struct SolanaWalletView: View {
     }
 
     private func fetchBalance() {
-        guard let signer = paraSolanaSigner else {
-            result = ("Error", "Solana signer not initialized")
-            return
-        }
-
         Task {
             do {
-                let balanceInLamports = try await signer.getBalance()
-                let solBalance = Double(balanceInLamports) / 1_000_000_000 // lamportsPerSol conversion
-                balance = String(format: "%.4f SOL", solBalance)
+                // Using unified getBalance API with RPC URL
+                // For Solana devnet (testing)
+                let rpcUrl = "https://api.devnet.solana.com"
+                // For mainnet with API key (production):
+                // let rpcUrl = "https://solana-mainnet.g.alchemy.com/v2/YOUR_API_KEY"
+                
+                let balanceString = try await paraManager.getBalance(
+                    walletId: selectedWallet.id,
+                    token: nil, // Native SOL balance
+                    rpcUrl: rpcUrl // Pass RPC to avoid 403/CORS issues
+                )
+                // Balance is returned as a string, parse if needed
+                if let balanceValue = Double(balanceString) {
+                    let solBalance = balanceValue / 1_000_000_000 // lamportsPerSol conversion
+                    balance = String(format: "%.4f SOL", solBalance)
+                } else {
+                    balance = balanceString // Use as-is if parsing fails
+                }
             } catch {
                 result = ("Error", "Failed to fetch balance: \(error.localizedDescription)")
             }
@@ -49,93 +59,98 @@ struct SolanaWalletView: View {
     }
 
     private func signTransaction() {
-        guard let transaction = createTransaction(lamports: 1_000_000) else { return }
-        guard let signer = paraSolanaSigner else {
-            result = ("Error", "Solana signer not initialized")
+        // Create a simple transfer transaction for demo purposes
+        let toAddress = "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM"
+        let lamports: UInt64 = 1_000_000
+        
+        let transaction: SolanaTransaction
+        do {
+            transaction = try SolanaTransaction(
+                to: toAddress,
+                lamports: lamports
+            )
+        } catch {
+            result = ("Error", "Failed to create transaction: \(error.localizedDescription)")
             return
         }
 
         isLoading = true
         Task {
+            var signature: SignatureResult?
             let (duration, error) = await measureTime {
-                _ = try await signer.signTransaction(transaction)
+                // Pass RPC URL to avoid needing to include recentBlockhash
+                let rpcUrl = "https://api.devnet.solana.com"
+                // For mainnet: "https://solana-mainnet.g.alchemy.com/v2/YOUR_API_KEY"
+                
+                // Pass the transaction object directly - bridge will format it
+                signature = try await paraManager.signTransaction(
+                    walletId: selectedWallet.id,
+                    transaction: transaction,
+                    chainId: nil, // Not needed for Solana
+                    rpcUrl: rpcUrl // Pass RPC for blockhash fetching
+                )
             }
 
             if let error {
                 result = ("Error", "Failed to sign transaction: \(error.localizedDescription)\nDuration: \(String(format: "%.2f", duration))s")
-            } else {
-                result = ("Success", "Transaction signed successfully\nDuration: \(String(format: "%.2f", duration))s")
+            } else if let sig = signature {
+                result = ("Transaction Signed", "To: 9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM\nAmount: 0.001 SOL (1,000,000 lamports)\nNetwork: Devnet\n\nSignature:\n\(sig.signature)\n\nDuration: \(String(format: "%.3f", duration))s")
             }
             isLoading = false
         }
     }
 
-    private func sendTransaction() {
-        guard let transaction = createTransaction(lamports: 100_000) else { return }
-        guard let signer = paraSolanaSigner else {
-            result = ("Error", "Solana signer not initialized")
-            return
-        }
-
-        // Check if we have balance info and sufficient funds
-        if let balanceString = balance {
-            // Extract numeric value from balance string (e.g., "0.0000 SOL" -> 0.0)
-            let balanceValue = balanceString.replacingOccurrences(of: " SOL", with: "")
-            if let balanceDouble = Double(balanceValue) {
-                let requiredSOL = 0.0001 + 0.000005 // Transaction amount + estimated fee
-                if balanceDouble < requiredSOL {
-                    result = ("Insufficient Balance",
-                              "You need at least \(String(format: "%.6f", requiredSOL)) SOL to send this transaction.\n\n" +
-                                  "Current balance: \(balanceString)\n\n" +
-                                  "To fund your wallet on Solana Devnet:\n" +
-                                  "1. Copy your wallet address\n" +
-                                  "2. Visit https://faucet.solana.com\n" +
-                                  "3. Paste your address and request SOL")
-                    return
-                }
-            }
-        }
-
+    private func signPreSerializedTransaction() {
+        // This tests the new pre-serialized transaction signing feature
         isLoading = true
         Task {
-            let (duration, error) = await measureTime {
-                _ = try await signer.sendTransaction(transaction)
-            }
-
-            if let error {
-                let errorMessage = error.localizedDescription
-                if errorMessage.contains("insufficient") || errorMessage.contains("0x1") {
-                    result = ("Insufficient Balance",
-                              "Transaction failed due to insufficient balance.\n\n" +
-                                  "To fund your wallet on Solana Devnet:\n" +
-                                  "1. Copy your wallet address\n" +
-                                  "2. Visit https://faucet.solana.com\n" +
-                                  "3. Paste your address and request SOL\n\n" +
-                                  "Duration: \(String(format: "%.2f", duration))s")
-                } else {
-                    result = ("Error", "Failed to send transaction: \(errorMessage)\nDuration: \(String(format: "%.2f", duration))s")
+            do {
+                // In a real scenario, a customer would have a pre-serialized Solana transaction
+                // from an external source (e.g., a dApp, another SDK, or a backend service).
+                // 
+                // This is a REAL base64-encoded Solana transaction message, exactly as produced
+                // by transaction.serializeMessage() from @solana/web3.js
+                
+                // This transaction represents:
+                // - Transfer: 1,000,000 lamports (0.001 SOL)
+                // - To: 9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM
+                // - Recent blockhash: DWJ5ey2uFfQQvTkKVzpmDbZqWPNPtJ1ZPo7F8NMBhWTu
+                // 
+                // In production, this would come from:
+                // - A dApp that constructs transactions
+                // - A backend service that prepares transactions
+                // - Another SDK that has already formatted the transaction
+                
+                // Real serialized Solana transaction (200 characters)
+                let realSerializedTx = "AQABA8GlkLb8bd/L6i5/YftGpxyig/iBvof2eNEF9WPF2o0ZfowIh2C/3h3dzzLBfyCbgkLuUqrxMfrNiNDqLG0LBvIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOMy2vkvq+zotj/3pEAF5f39mvoVh1a2HFqV+QSzuNCBAQICAAEMAgAAAEBCDwAAAAAA"
+                
+                // Now test signing the pre-serialized transaction using the new extension
+                var signature: SignatureResult?
+                let (duration, error) = await measureTime {
+                    // Test the new convenience method with the real serialized transaction
+                    signature = try await paraManager.signSolanaSerializedTransaction(
+                        walletId: selectedWallet.id,
+                        base64Tx: realSerializedTx
+                    )
                 }
-            } else {
-                result = ("Success", "Transaction sent successfully\nDuration: \(String(format: "%.2f", duration))s")
-                // Refresh balance after successful transaction
-                fetchBalance()
+                
+                if let error {
+                    result = ("Error", "Failed to sign pre-serialized transaction: \(error.localizedDescription)\nDuration: \(String(format: "%.2f", duration))s")
+                } else if let sig = signature {
+                    result = ("Pre-Serialized Transaction Signed", 
+                             "This demonstrates signing a pre-serialized base64 transaction\n\n" +
+                             "Real serialized tx (first 50 chars):\n\(String(realSerializedTx.prefix(50)))...\n\n" +
+                             "Signature:\n\(sig.signature)\n\n" +
+                             "Duration: \(String(format: "%.3f", duration))s\n\n" +
+                             "Note: In production, the base64 transaction would come from:\n" +
+                             "• A dApp that constructs transactions\n" +
+                             "• A backend service\n" +
+                             "• Another SDK that has already formatted the transaction")
+                }
+            } catch {
+                result = ("Error", "Failed to sign pre-serialized transaction: \(error.localizedDescription)")
             }
             isLoading = false
-        }
-    }
-
-    private func createTransaction(lamports: UInt64) -> SolanaTransaction? {
-        // Create a simple transfer transaction for demo purposes
-        let toAddress = "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM"
-
-        do {
-            return try SolanaTransaction(
-                to: toAddress,
-                lamports: lamports,
-            )
-        } catch {
-            result = ("Error", "Failed to create transaction: \(error.localizedDescription)")
-            return nil
         }
     }
 
@@ -243,19 +258,20 @@ struct SolanaWalletView: View {
                         }
                         isSigning = true
                         Task {
+                            var signature: SignatureResult?
                             let (duration, error) = await measureTime {
-                                let messageBytes = messageToSign.data(using: .utf8)
-                                guard let base64Message = messageBytes?.base64EncodedString() else {
-                                    throw ParaError.bridgeError("Failed to encode message.")
-                                }
-                                _ = try await paraManager.signMessage(walletId: selectedWallet.id, message: base64Message)
+                                // Using the new unified signMessage API
+                                signature = try await paraManager.signMessage(
+                                    walletId: selectedWallet.id,
+                                    message: messageToSign // Pass plain text directly
+                                )
                             }
 
                             isSigning = false
                             if let error {
                                 result = ("Error", "Failed to sign message: \(error.localizedDescription)\nDuration: \(String(format: "%.2f", duration))s")
-                            } else {
-                                result = ("Success", "Message signed successfully\nDuration: \(String(format: "%.2f", duration))s")
+                            } else if let sig = signature {
+                                result = ("Message Signed", "Message: \(messageToSign)\n\nSignature:\n\(sig.signature)\n\nDuration: \(String(format: "%.3f", duration))s")
                             }
                         }
                     }
@@ -279,79 +295,32 @@ struct SolanaWalletView: View {
                         .font(.headline)
                         .frame(maxWidth: .infinity, alignment: .leading)
 
-                    HStack(spacing: 16) {
-                        Button("Send Transaction") {
-                            sendTransaction()
-                        }
-                        .buttonStyle(.bordered)
-                        .frame(maxWidth: .infinity)
-                        .accessibilityIdentifier("Send Transaction")
-
-                        Button("Sign Transaction") {
-                            signTransaction()
-                        }
-                        .buttonStyle(.bordered)
-                        .frame(maxWidth: .infinity)
-                        .accessibilityIdentifier("Sign Transaction")
+                    Button("Sign Transaction") {
+                        signTransaction()
                     }
+                    .buttonStyle(.bordered)
+                    .frame(maxWidth: .infinity)
+                    .accessibilityIdentifier("Sign Transaction")
                     .disabled(isLoading)
+                    
+                    Button("Sign Pre-Serialized Transaction") {
+                        signPreSerializedTransaction()
+                    }
+                    .buttonStyle(.bordered)
+                    .frame(maxWidth: .infinity)
+                    .accessibilityIdentifier("Sign Pre-Serialized Transaction")
+                    .disabled(isLoading)
+                    .foregroundColor(.orange)
+
+                    Text("Tests signing a base64-encoded serialized transaction")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
                 }
                 .padding()
                 .background(Color(.systemBackground))
                 .cornerRadius(16)
                 .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
 
-                // Wallet Management
-                VStack(spacing: 16) {
-                    Text("Wallet Management")
-                        .font(.headline)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-
-                    HStack(spacing: 16) {
-                        Button("Check Session") {
-                            isFetching = true
-                            Task {
-                                do {
-                                    let active = try await paraManager.isSessionActive()
-                                    result = ("Session Status", "Session Active: \(active)")
-                                    isFetching = false
-                                } catch {
-                                    isFetching = false
-                                    result = ("Error", "Failed to check session: \(error.localizedDescription)")
-                                }
-                            }
-                        }
-                        .buttonStyle(.bordered)
-                        .frame(maxWidth: .infinity)
-
-                        Button("Fetch Wallets") {
-                            isFetching = true
-                            Task {
-                                do {
-                                    let wallets = try await paraManager.fetchWallets()
-                                    let addresses = wallets.map { $0.address ?? "No Address" }
-                                    result = ("Wallets", addresses.joined(separator: "\n"))
-                                    isFetching = false
-                                } catch {
-                                    isFetching = false
-                                    result = ("Error", "Failed to fetch wallets: \(error.localizedDescription)")
-                                }
-                            }
-                        }
-                        .buttonStyle(.bordered)
-                        .frame(maxWidth: .infinity)
-                    }
-                    .disabled(isFetching)
-                    .overlay {
-                        if isFetching {
-                            ProgressView()
-                        }
-                    }
-                }
-                .padding()
-                .background(Color(.systemBackground))
-                .cornerRadius(16)
-                .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
             }
             .padding(.horizontal)
         }
@@ -367,27 +336,8 @@ struct SolanaWalletView: View {
             )
         }
         .onAppear {
-            Task {
-                isLoading = true
-                do {
-                    // Initialize Para Solana signer with bridge pattern
-                    let signer = try ParaSolanaSigner(
-                        paraManager: paraManager,
-                        rpcUrl: rpcUrl,
-                    )
-
-                    // Explicitly select the wallet to ensure it's properly initialized
-                    try await signer.selectWallet(walletId: selectedWallet.id)
-
-                    await MainActor.run {
-                        paraSolanaSigner = signer
-                        fetchBalance()
-                    }
-                } catch {
-                    result = ("Error", "Failed to initialize Solana signer: \(error.localizedDescription)")
-                }
-                isLoading = false
-            }
+            // No signer initialization needed - using unified API
+            fetchBalance()
         }
         .overlay {
             if isLoading {

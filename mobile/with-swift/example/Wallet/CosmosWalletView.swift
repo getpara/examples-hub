@@ -25,7 +25,7 @@ struct CosmosWalletView: View {
     @State private var customPrefix = ""
     @State private var customRpcUrl = ""
     @State private var useCustomConfig = false
-    @State private var paraCosmosSigner: ParaCosmosSigner?
+    // Removed ParaCosmosSigner - now using unified API
 
     // MARK: - Constants
 
@@ -66,7 +66,6 @@ struct CosmosWalletView: View {
                 chainConfigurationCard
                 messageSigningCard
                 transactionOperationsCard
-                walletManagementCard
             }
             .padding(.horizontal)
         }
@@ -218,17 +217,17 @@ struct CosmosWalletView: View {
                     Button("Sign Proto", action: testSignDirect)
                         .buttonStyle(.bordered)
                         .frame(maxWidth: .infinity)
-                        .disabled(isLoading || paraCosmosSigner == nil)
+                        .disabled(isLoading)
                         .accessibilityIdentifier("Sign Transaction")
 
                     Button("Sign Amino", action: testSignAmino)
                         .buttonStyle(.bordered)
                         .frame(maxWidth: .infinity)
-                        .disabled(isLoading || paraCosmosSigner == nil)
+                        .disabled(isLoading)
                         .accessibilityIdentifier("Sign Amino")
                 }
 
-                if paraCosmosSigner != nil {
+                if true { // Always show signing options with unified API
                     Text("Current Chain: \(getCurrentChainInfo())")
                         .font(.caption)
                         .foregroundColor(.secondary)
@@ -237,28 +236,6 @@ struct CosmosWalletView: View {
         }
     }
 
-    private var walletManagementCard: some View {
-        CardView {
-            VStack(spacing: 16) {
-                Text("Wallet Management")
-                    .font(.headline)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-
-                HStack(spacing: 16) {
-                    Button("Check Session", action: checkSession)
-                        .buttonStyle(.bordered)
-                        .frame(maxWidth: .infinity)
-                        .accessibilityIdentifier("checkSessionButton")
-
-                    Button("Fetch Wallets", action: fetchWallets)
-                        .buttonStyle(.bordered)
-                        .frame(maxWidth: .infinity)
-                        .accessibilityIdentifier("fetchWalletsButton")
-                }
-                .disabled(isLoading)
-            }
-        }
-    }
 
     // MARK: - Actions
 
@@ -272,101 +249,118 @@ struct CosmosWalletView: View {
     }
 
     private func fetchBalance() {
-        performAsyncOperation { signer in
-            let amount = try await signer.getBalance()
-            await MainActor.run { balance = amount }
-            showResult("Success", "Balance fetched successfully")
+        isLoading = true
+        Task {
+            do {
+                // Get chain configuration including prefix for proper address derivation
+                let (_, chainPrefix, rpcUrl) = getChainConfig()
+                
+                // Using unified getBalance API with RPC URL and chain prefix
+                // Chain prefix is critical for Cosmos to derive the correct bech32 address
+                let amount = try await paraManager.getBalance(
+                    walletId: selectedWallet.id,
+                    token: nil, // Native token balance
+                    rpcUrl: rpcUrl, // Pass RPC to avoid public endpoint issues
+                    chainPrefix: chainPrefix // Pass prefix for correct address derivation (e.g., "stars" for Stargaze)
+                )
+                await MainActor.run { balance = amount }
+                showResult("Success", "Balance fetched successfully")
+            } catch {
+                showResult("Error", "Failed to fetch balance: \(error.localizedDescription)")
+            }
+            isLoading = false
         }
     }
 
     private func signMessage() {
-        performAsyncOperation { signer in
-            _ = try await signer.signMessage(messageToSign)
-            showResult("Success", "Message signed successfully")
+        isLoading = true
+        Task {
+            do {
+                // Using unified signMessage API
+                let signature = try await paraManager.signMessage(
+                    walletId: selectedWallet.id,
+                    message: messageToSign
+                )
+                showResult("Message Signed", "Message: \(messageToSign)\n\nSignature:\n\(signature.signature)")
+            } catch {
+                showResult("Error", "Failed to sign message: \(error.localizedDescription)")
+            }
+            isLoading = false
         }
     }
 
     private func testSignDirect() {
-        performAsyncOperation { signer in
-            // Create a sample proto SignDoc encoded as base64
-            // This would normally come from constructing a real transaction
-            let sampleSignDocBase64 = createSampleProtoSignDoc()
-
-            let result = try await signer.signDirect(signDocBase64: sampleSignDocBase64)
-
-            if let signature = result["signature"] as? [String: Any],
-               let signatureData = signature["signature"] as? String
-            {
-                showResult("✅ Proto Signed", "Direct signing completed!\n\n🔗 Chain: \(getCurrentChainInfo())\n🔐 Signature: \(String(signatureData.prefix(20)))...")
-            } else {
-                showResult("✅ Proto Signed", "Direct signing completed!\n\n🔗 Chain: \(getCurrentChainInfo())")
+        isLoading = true
+        Task {
+            do {
+                let (chainId, _, rpcUrl) = getChainConfig()
+                let denom = getCurrentDenom()
+                let toAddress = getTestAddress(for: chainId)
+                
+                // Create a proper Cosmos transaction with proto format
+                let transaction = CosmosTransaction(
+                    to: toAddress,
+                    amount: "1000000", // 1 token in smallest denomination
+                    denom: denom,
+                    memo: "Test Proto Transaction",
+                    chainId: chainId,
+                    format: "proto"
+                )
+                
+                // Using unified signTransaction API for proto signing with RPC
+                let result = try await paraManager.signTransaction(
+                    walletId: selectedWallet.id,
+                    transaction: transaction,
+                    chainId: chainId,
+                    rpcUrl: rpcUrl // Pass RPC for any chain operations
+                )
+                
+                showResult("✅ Proto Signed", "Direct signing completed!\n\n🔗 Chain: \(getCurrentChainInfo())\n🔐 Signature: \(String(result.signature.prefix(20)))...")
+            } catch {
+                showResult("Error", "Failed to sign: \(error.localizedDescription)")
             }
+            isLoading = false
         }
     }
 
     private func testSignAmino() {
-        performAsyncOperation { signer in
-            // Create a sample amino SignDoc encoded as base64
-            // This would normally come from constructing a real transaction
-            let sampleSignDocBase64 = createSampleAminoSignDoc()
-
-            let result = try await signer.signAmino(signDocBase64: sampleSignDocBase64)
-
-            if let signature = result["signature"] as? [String: Any],
-               let signatureData = signature["signature"] as? String
-            {
-                showResult("✅ Amino Signed", "Legacy signing completed!\n\n🔗 Chain: \(getCurrentChainInfo())\n🔐 Signature: \(String(signatureData.prefix(20)))...")
-            } else {
-                showResult("✅ Amino Signed", "Legacy signing completed!\n\n🔗 Chain: \(getCurrentChainInfo())")
-            }
-        }
-    }
-
-    private func checkSession() {
         isLoading = true
         Task {
             do {
-                let active = try await paraManager.isSessionActive()
-                showResult("Session Status", "Session Active: \(active)")
+                let (chainId, _, rpcUrl) = getChainConfig()
+                let denom = getCurrentDenom()
+                let toAddress = getTestAddress(for: chainId)
+                
+                // Create a proper Cosmos transaction with amino format
+                let transaction = CosmosTransaction(
+                    to: toAddress,
+                    amount: "1000000", // 1 token in smallest denomination
+                    denom: denom,
+                    memo: "Test Amino Transaction",
+                    chainId: chainId,
+                    format: "amino"
+                )
+                
+                // Using unified signTransaction API for amino signing with RPC
+                let result = try await paraManager.signTransaction(
+                    walletId: selectedWallet.id,
+                    transaction: transaction,
+                    chainId: chainId,
+                    rpcUrl: rpcUrl // Pass RPC for any chain operations
+                )
+                
+                showResult("✅ Amino Signed", "Legacy signing completed!\n\n🔗 Chain: \(getCurrentChainInfo())\n🔐 Signature: \(String(result.signature.prefix(20)))...")
             } catch {
-                showResult("Error", "Failed to check session: \(error.localizedDescription)")
+                showResult("Error", "Failed to sign: \(error.localizedDescription)")
             }
             isLoading = false
         }
     }
 
-    private func fetchWallets() {
-        isLoading = true
-        Task {
-            do {
-                let wallets = try await paraManager.fetchWallets()
-                let addresses = wallets.map { $0.address ?? "No Address" }
-                showResult("Wallets", addresses.joined(separator: "\n"))
-            } catch {
-                showResult("Error", "Failed to fetch wallets: \(error.localizedDescription)")
-            }
-            isLoading = false
-        }
-    }
 
     // MARK: - Helper Methods
 
-    private func performAsyncOperation(_ operation: @escaping (ParaCosmosSigner) async throws -> Void) {
-        guard let signer = paraCosmosSigner else {
-            showResult("Error", "Cosmos signer not initialized")
-            return
-        }
-
-        isLoading = true
-        Task {
-            do {
-                try await operation(signer)
-            } catch {
-                showResult("Error", "Operation failed: \(error.localizedDescription)")
-            }
-            isLoading = false
-        }
-    }
+    // Removed performAsyncOperation - no longer needed with unified API
 
     private func showResult(_ title: String, _ message: String) {
         result = (title, message)
@@ -382,35 +376,35 @@ struct CosmosWalletView: View {
     }
 
     private func initializeSigner() {
-        Task {
-            isLoading = true
-            do {
-                let (chainId, prefix, rpcUrl) = getChainConfig()
-
-                let signer = try ParaCosmosSigner(
-                    paraManager: paraManager,
-                    chainId: chainId,
-                    rpcUrl: rpcUrl.isEmpty ? Self.defaultRpcUrl : rpcUrl,
-                    prefix: prefix,
-                )
-
-                try await signer.selectWallet(walletId: selectedWallet.id)
-                let chainSpecificAddress = try await signer.getAddress()
-
-                await MainActor.run {
-                    paraCosmosSigner = signer
-                    cosmosAddress = chainSpecificAddress
-                }
-            } catch {
-                showResult("Error", "Failed to initialize Cosmos signer: \(error.localizedDescription)")
-            }
-            isLoading = false
-        }
+        // No signer initialization needed - using unified API
+        // Derive the correct bech32 address for the selected chain
+        updateCosmosAddress()
     }
 
     private func reinitializeSigner() {
-        paraCosmosSigner = nil
-        initializeSigner()
+        // No signer to reinitialize - using unified API
+        // Update address when chain changes
+        updateCosmosAddress()
+    }
+    
+    private func updateCosmosAddress() {
+        // For Cosmos wallets, the address changes based on the chain prefix
+        // The wallet stores a default address, but we need to show the chain-specific one
+        let (_, chainPrefix, _) = getChainConfig()
+        
+        // If this is a Cosmos wallet with addressSecondary, use that as base
+        if let addressSecondary = (selectedWallet as? [String: Any])?["addressSecondary"] as? String {
+            // The addressSecondary is the cosmos-prefixed address
+            // For display, we should ideally derive the correct prefix
+            // but for now, we'll show the address as stored
+            cosmosAddress = addressSecondary
+        } else {
+            // Fallback to main address
+            cosmosAddress = selectedWallet.address
+        }
+        
+        // Note: Proper address derivation happens in the bridge when making calls
+        // The displayed address is for user reference
     }
 
     private func getChainConfig() -> (chainId: String, prefix: String, rpcUrl: String) {
