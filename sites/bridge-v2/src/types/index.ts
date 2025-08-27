@@ -95,62 +95,7 @@ export interface ParaInitArgs {
   version?: string;
 }
 
-// Signer Interfaces
-export interface EthersSignerInitArgs {
-  walletId: string;
-  providerUrl: string;
-}
-
-export interface SolanaSignerInitArgs {
-  walletId: string;
-  rpcUrl: string;
-}
-
-export interface EthersSignMessageArgs {
-  message: string;
-}
-
-export interface EthersSignTransactionArgs {
-  b64EncodedTx: string;
-}
-
-export interface EthersSendTransactionArgs {
-  b64EncodedTx: string;
-}
-
-export interface EthersSignTypedDataArgs {
-  domain: any;
-  types: any;
-  value: any;
-}
-
-export interface SolanaSignTransactionArgs {
-  b64EncodedTx: string;
-}
-
-export interface SolanaSignVersionedTransactionArgs {
-  b64EncodedTx: string;
-}
-
-export interface SolanaSendTransactionArgs {
-  b64EncodedTx: string;
-}
-
-export interface CosmJsSignersInitArgs {
-  walletId: string;
-  prefix?: string;
-  messageSigningTimeoutMs?: number;
-}
-
-export interface CosmJsSignDirectArgs {
-  signerAddress: string;
-  signDocBase64: string;
-}
-
-export interface CosmJsSignAminoArgs {
-  signerAddress: string;
-  signDocBase64: string;
-}
+// Note: Signer interfaces have been removed as we now use core SDK auto-forwarding
 
 // Auth Interfaces
 export interface GeneratePasskeyArgs {

@@ -46,12 +46,15 @@
     "stream-browserify": "^3.0.0",
     "ts-loader": "^9.5.1",
     "vite": "^5.3.5",
-    "vite-plugin-node-polyfills": "^0.22.0"
+    "vite-plugin-node-polyfills": "^0.22.0",
+    "tsx": "^4.16.2"
   },
   "main": "src/index.tsx",
   "private": true,
   "scripts": {
     "build": "rm -rf build && tsc && vite build",
+    "test": "vitest --run",
+    "test:watch": "vitest",
     "deploy-beta": "VITE_ENV=beta VITE_BUCKET_NAME=capsule-beta-alpha-js-bridge-site yarn deploy-s3",
     "deploy-prod": "VITE_ENV=prod VITE_BUCKET_NAME=capsule-prod-alpha-js-bridge-site yarn deploy-s3",
     "deploy-s3": "yarn && yarn build && aws s3 sync dist/ s3://$VITE_BUCKET_NAME --profile $VITE_ENV --delete",
