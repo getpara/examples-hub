@@ -100,6 +100,60 @@ struct SolanaWalletView: View {
         }
     }
 
+    private func signPreSerializedTransaction() {
+        // This tests the new pre-serialized transaction signing feature
+        isLoading = true
+        Task {
+            do {
+                // In a real scenario, a customer would have a pre-serialized Solana transaction
+                // from an external source (e.g., a dApp, another SDK, or a backend service).
+                // 
+                // This is a REAL base64-encoded Solana transaction message, exactly as produced
+                // by transaction.serializeMessage() from @solana/web3.js
+                
+                // This transaction represents:
+                // - Transfer: 1,000,000 lamports (0.001 SOL)
+                // - To: 9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM
+                // - Recent blockhash: DWJ5ey2uFfQQvTkKVzpmDbZqWPNPtJ1ZPo7F8NMBhWTu
+                // 
+                // In production, this would come from:
+                // - A dApp that constructs transactions
+                // - A backend service that prepares transactions
+                // - Another SDK that has already formatted the transaction
+                
+                // Real serialized Solana transaction (200 characters)
+                let realSerializedTx = "AQABA8GlkLb8bd/L6i5/YftGpxyig/iBvof2eNEF9WPF2o0ZfowIh2C/3h3dzzLBfyCbgkLuUqrxMfrNiNDqLG0LBvIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOMy2vkvq+zotj/3pEAF5f39mvoVh1a2HFqV+QSzuNCBAQICAAEMAgAAAEBCDwAAAAAA"
+                
+                // Now test signing the pre-serialized transaction using the new extension
+                var signature: SignatureResult?
+                let (duration, error) = await measureTime {
+                    // Test the new convenience method with the real serialized transaction
+                    signature = try await paraManager.signSolanaSerializedTransaction(
+                        walletId: selectedWallet.id,
+                        base64Tx: realSerializedTx
+                    )
+                }
+                
+                if let error {
+                    result = ("Error", "Failed to sign pre-serialized transaction: \(error.localizedDescription)\nDuration: \(String(format: "%.2f", duration))s")
+                } else if let sig = signature {
+                    result = ("Pre-Serialized Transaction Signed", 
+                             "This demonstrates signing a pre-serialized base64 transaction\n\n" +
+                             "Real serialized tx (first 50 chars):\n\(String(realSerializedTx.prefix(50)))...\n\n" +
+                             "Signature:\n\(sig.signature)\n\n" +
+                             "Duration: \(String(format: "%.3f", duration))s\n\n" +
+                             "Note: In production, the base64 transaction would come from:\n" +
+                             "• A dApp that constructs transactions\n" +
+                             "• A backend service\n" +
+                             "• Another SDK that has already formatted the transaction")
+                }
+            } catch {
+                result = ("Error", "Failed to sign pre-serialized transaction: \(error.localizedDescription)")
+            }
+            isLoading = false
+        }
+    }
+
     var body: some View {
         ScrollView {
             VStack(spacing: 24) {
@@ -248,6 +302,19 @@ struct SolanaWalletView: View {
                     .frame(maxWidth: .infinity)
                     .accessibilityIdentifier("Sign Transaction")
                     .disabled(isLoading)
+                    
+                    Button("Sign Pre-Serialized Transaction") {
+                        signPreSerializedTransaction()
+                    }
+                    .buttonStyle(.bordered)
+                    .frame(maxWidth: .infinity)
+                    .accessibilityIdentifier("Sign Pre-Serialized Transaction")
+                    .disabled(isLoading)
+                    .foregroundColor(.orange)
+
+                    Text("Tests signing a base64-encoded serialized transaction")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
                 }
                 .padding()
                 .background(Color(.systemBackground))
