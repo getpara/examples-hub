@@ -1,3 +1,36 @@
+# Release (Fri Aug 29 2025)
+
+## Package Versions
+- @getpara/web-sdk@2.0.0-alpha.51
+- @getpara/wagmi-v2-integration@2.0.0-alpha.51
+- @getpara/wagmi-v2-connector@2.0.0-alpha.51
+- @getpara/viem-v2-integration@2.0.0-alpha.51
+- @getpara/viem-v1-integration@2.0.0-alpha.51
+- @getpara/user-management-client@2.0.0-alpha.51
+- @getpara/solana-web3.js-v1-integration@2.0.0-alpha.51
+- @getpara/solana-wallet-connectors@2.0.0-alpha.51
+- @getpara/solana-signers-v2-integration@2.0.0-alpha.51
+- @getpara/server-sdk@2.0.0-alpha.51
+- @getpara/react-sdk-lite@2.0.0-alpha.51
+- @getpara/react-sdk@2.0.0-alpha.51
+- @getpara/react-native-wallet@2.0.0-alpha.51
+- @getpara/react-components@2.0.0-alpha.51
+- @getpara/react-component-library@1.0.0-alpha.46
+- @getpara/react-common@2.0.0-alpha.51
+- @getpara/evm-wallet-connectors@2.0.0-alpha.51
+- @getpara/ethers-v6-integration@2.0.0-alpha.51
+- @getpara/ethers-v5-integration@2.0.0-alpha.51
+- @getpara/cosmos-wallet-connectors@2.0.0-alpha.51
+- @getpara/cosmjs-v0-integration@2.0.0-alpha.51
+- @getpara/core-sdk@2.0.0-alpha.51
+- @getpara/core-components@2.0.0-alpha.51
+
+### Features
+- Unified wallet architecture for all blockchain operations (#1182) - 84e265b9b
+
+### Fixes
+- Create embedded auth for autodetected wallets (#1194) - 316540a2b
+
 # Release (Fri Aug 22 2025)
 
 ## Package Versions

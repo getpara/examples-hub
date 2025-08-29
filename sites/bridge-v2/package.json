@@ -1,6 +1,6 @@
 {
   "name": "para-js-bridge",
-  "version": "2.0.0-alpha.50",
+  "version": "2.0.0-alpha.51",
   "browserslist": [
     "chrome > 52",
     "opera > 39",
@@ -15,11 +15,11 @@
     "@cosmjs/encoding": "^0.33.1",
     "@cosmjs/proto-signing": "^0.33.1",
     "@cosmjs/stargate": "^0.33.1",
-    "@getpara/cosmjs-v0-integration": "2.0.0-alpha.50",
-    "@getpara/ethers-v6-integration": "2.0.0-alpha.50",
-    "@getpara/solana-web3.js-v1-integration": "2.0.0-alpha.50",
-    "@getpara/user-management-client": "2.0.0-alpha.50",
-    "@getpara/web-sdk": "2.0.0-alpha.50",
+    "@getpara/cosmjs-v0-integration": "2.0.0-alpha.51",
+    "@getpara/ethers-v6-integration": "2.0.0-alpha.51",
+    "@getpara/solana-web3.js-v1-integration": "2.0.0-alpha.51",
+    "@getpara/user-management-client": "2.0.0-alpha.51",
+    "@getpara/web-sdk": "2.0.0-alpha.51",
     "@metamask/eth-sig-util": "7.0.3",
     "@metamask/utils": "^8.1.0",
     "@solana/web3.js": "^1.98.0",
@@ -45,9 +45,9 @@
     "serve": "^14.2.4",
     "stream-browserify": "^3.0.0",
     "ts-loader": "^9.5.1",
+    "tsx": "^4.16.2",
     "vite": "^5.3.5",
-    "vite-plugin-node-polyfills": "^0.22.0",
-    "tsx": "^4.16.2"
+    "vite-plugin-node-polyfills": "^0.22.0"
   },
   "main": "src/index.tsx",
   "private": true,
