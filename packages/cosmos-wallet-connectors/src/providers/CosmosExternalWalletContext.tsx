@@ -344,7 +344,8 @@ export function CosmosExternalWalletProvider({
     updateExternalWalletState({ isConnecting: true });
 
     const walletId = getWallet(walletType)?.id;
-    const isFullAuthWallet = walletsWithFullAuth.includes(walletId.toUpperCase() as TExternalWallet);
+    const isFullAuthWallet =
+      walletsWithFullAuth === 'ALL' || walletsWithFullAuth.includes(walletId.toUpperCase() as TExternalWallet);
 
     try {
       const externalWallet = await connectBase(walletType, chainId);

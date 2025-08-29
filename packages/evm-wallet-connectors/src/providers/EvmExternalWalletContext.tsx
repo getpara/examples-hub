@@ -596,7 +596,7 @@ export function EvmExternalWalletProvider({
 
   const getConnectorInfo = (connector: WagmiConnectorInstance): Partial<ExternalWalletInfo> => {
     const paraDetails = connector.paraDetails as ParaDetails | undefined;
-    const withFullParaAuth = walletsWithFullAuth?.includes(paraDetails?.internalId);
+    const withFullParaAuth = walletsWithFullAuth === 'ALL' || walletsWithFullAuth?.includes(paraDetails?.internalId);
     return {
       type: 'EVM',
       providerId: connector.name,

@@ -107,7 +107,7 @@ export type ExternalWalletContextType<S extends SignResult = SignResult> = {
 export type ExternalWalletProviderConfigBase = {
   onSwitchWallet?: (args: { address?: string; error?: string }) => void;
   para: ParaWeb;
-  walletsWithFullAuth: TExternalWallet[];
+  walletsWithFullAuth: TExternalWallet[] | 'ALL';
   includeWalletVerification?: boolean;
   connectionOnly?: boolean;
   connectedWallet?: Omit<Wallet, 'signer'> | null;

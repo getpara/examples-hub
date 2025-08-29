@@ -74,8 +74,8 @@ export interface ExternalWalletsSlice {
   includeWalletVerification: boolean;
   setIncludeWalletVerification: (_: boolean) => void;
 
-  externalWalletsWithFullAuth: TExternalWallet[];
-  setExternalWalletsWithFullAuth: (_: TExternalWallet[]) => void;
+  externalWalletsWithFullAuth: TExternalWallet[] | 'ALL';
+  setExternalWalletsWithFullAuth: (_: TExternalWallet[] | 'ALL') => void;
 
   evmLib: typeof paraEvmLib | undefined;
   setEvmLib: (_: typeof paraEvmLib) => void;

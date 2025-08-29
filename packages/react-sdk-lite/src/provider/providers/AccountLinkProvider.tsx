@@ -160,6 +160,7 @@ export const AccountLinkProvider = ({ children }: PropsWithChildren) => {
     (!embedded?.isGuestMode &&
       (!para.authInfo?.externalWallet ||
         includeWalletVerification ||
+        externalWalletsWithFullAuth === 'ALL' ||
         externalWalletsWithFullAuth.includes(para.authInfo?.externalWallet?.providerId as TExternalWallet)));
 
   const [accountLinkInProgress, setAccountLinkInProgress] = useState<AccountLinkInProgress | undefined>(

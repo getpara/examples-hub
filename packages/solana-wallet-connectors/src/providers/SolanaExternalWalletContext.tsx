@@ -77,9 +77,9 @@ export function SolanaExternalWalletProvider({
           type: 'SOLANA',
           provider: providerName,
           providerId,
-          withFullParaAuth: walletsWithFullAuth?.includes(
-            (getWallet(providerName ?? '')?.id.toUpperCase() ?? '') as TExternalWallet,
-          ),
+          withFullParaAuth:
+            walletsWithFullAuth === 'ALL' ||
+            walletsWithFullAuth?.includes((getWallet(providerName ?? '')?.id.toUpperCase() ?? '') as TExternalWallet),
           withVerification: includeWalletVerification,
           isConnectionOnly: connectionOnly,
         },

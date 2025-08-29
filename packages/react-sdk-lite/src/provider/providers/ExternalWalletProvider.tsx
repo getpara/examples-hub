@@ -1,5 +1,5 @@
 import { PropsWithChildren, createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { isMobile, truncateAddress, TWalletType } from '@getpara/web-sdk';
+import { isMobile, truncateAddress, TWalletType, Wallet } from '@getpara/web-sdk';
 import { useInternalClient } from '../hooks/utils/useInternalClient.js';
 import { useStore } from '../stores/useStore.js';
 import { ModalStep } from '../../modal/index.js';
@@ -173,14 +173,13 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
     .sort(
       (a, b) =>
         externalWallets.indexOf(a.internalId as TExternalWallet) - externalWallets.indexOf(b.internalId as TExternalWallet),
-    )
-    .sort((a, b) => (a.installed === b.installed ? 0 : a.installed ? -1 : 1));
+    );
 
   const injectedWallets = allWallets.filter(
     w => w?.id !== 'Para' && !wallets.some(wallet => wallet.id === w.id) && w.installed,
   );
 
-  wallets = [...wallets, ...injectedWallets];
+  wallets = [...wallets, ...injectedWallets].sort((a, b) => (a.installed === b.installed ? 0 : a.installed ? -1 : 1));
 
   const wallet = useMemo(
     () => wallets.find(w => w.id === selectedExternalWallet?.id && w.type === selectedExternalWallet?.type),
@@ -202,6 +201,18 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
       setQrUri(undefined);
     }
   }, [wallet]);
+
+  const isWithFullAuth = (wallet: Wallet | CommonWallet) => {
+    if (connectionOnly) {
+      return false;
+    }
+
+    if (externalWalletsWithFullAuth === 'ALL') {
+      return true;
+    }
+
+    return !!wallet.name && externalWalletsWithFullAuth.includes(wallet.name.toUpperCase() as TExternalWallet);
+  };
 
   const getWalletBalance = useCallback(async () => {
     const walletType = Object.values(para.externalWallets || {})[0]?.type;
@@ -309,9 +320,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
 
     const withVerification = includeWalletVerification;
     const isConnectionOnly = connectionOnly;
-    const withFullParaAuth = wallet?.name
-      ? externalWalletsWithFullAuth.includes(wallet.name.toUpperCase() as TExternalWallet)
-      : false;
+    const withFullParaAuth = wallet?.name ? isWithFullAuth(wallet) : false;
 
     const defaultWalletInfo = {
       withVerification,
@@ -402,7 +411,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
       const d = await verifyExternalWalletAsync(verifyExternalWalletParams);
 
       await queryClient.refetchQueries({ queryKey: [IS_FULLY_LOGGED_IN_BASE_KEY] });
-      if (wallet && externalWalletsWithFullAuth?.includes(wallet.name?.toUpperCase() as TExternalWallet)) {
+      if (wallet && isWithFullAuth(wallet)) {
         await onNewAuthState(d);
       } else {
         setStep(ModalStep.LOGIN_DONE);
@@ -517,11 +526,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
             return;
           }
         } else if (address) {
-          if (
-            !!authState &&
-            (externalWalletsWithFullAuth?.includes(wallet.name.toUpperCase() as TExternalWallet) ||
-              includeWalletVerification)
-          ) {
+          if (!!authState && (isWithFullAuth(wallet) || includeWalletVerification)) {
             onNewAuthState(authState);
           } else {
             setStep(ModalStep.LOGIN_DONE);

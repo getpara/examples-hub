@@ -109,11 +109,7 @@ export const ParaProviderMin = forwardRef<
         console.warn('createLinkedEmbeddedForExternalWallets has no effect when using connection only external wallets');
         setExternalWalletsWithFullAuth([]);
       } else {
-        setExternalWalletsWithFullAuth(
-          externalWalletConfig?.createLinkedEmbeddedForExternalWallets === 'ALL'
-            ? [...EXTERNAL_WALLET_TYPES]
-            : (externalWalletConfig?.createLinkedEmbeddedForExternalWallets ?? []),
-        );
+        setExternalWalletsWithFullAuth(externalWalletConfig?.createLinkedEmbeddedForExternalWallets ?? []);
       }
     }
   }, [externalWalletConfig?.createLinkedEmbeddedForExternalWallets]);
