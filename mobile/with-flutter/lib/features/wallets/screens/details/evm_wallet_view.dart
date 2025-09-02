@@ -4,7 +4,6 @@ import 'package:http/http.dart';
 import 'package:para/para.dart' as para_sdk;
 import 'package:web3dart/web3dart.dart';
 import '../../../../client/para.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class EVMWalletView extends StatefulWidget {
   final para_sdk.Wallet wallet;
@@ -204,6 +203,14 @@ class _EVMWalletViewState extends State<EVMWalletView> {
       final duration = DateTime.now().difference(startTime).inMilliseconds / 1000;
       
       if (result is para_sdk.SuccessfulSignatureResult) {
+        // Check if we have the new signedTransaction field
+        final hasSignedTx = result.signedTransaction != null;
+        final signedTxInfo = hasSignedTx 
+            ? '✅ Full signed transaction available!\n'
+              'Length: ${result.signedTransaction!.length} chars\n'
+              'Preview: ${result.signedTransaction!.substring(0, 50)}...\n\n'
+            : '⚠️ Only signature available (bridge update needed)\n\n';
+        
         _showResult(
           'Transaction Signed', 
           'Type: EIP-1559\n'
@@ -212,7 +219,9 @@ class _EVMWalletViewState extends State<EVMWalletView> {
           'Gas: 21000\n'
           'Max Fee: 3 gwei\n'
           'Chain: Sepolia (11155111)\n\n'
+          '$signedTxInfo'
           'Signature:\n${result.signature}\n\n'
+          'TransactionData getter:\n${result.transactionData.substring(0, 50)}...\n\n'
           'Duration: ${duration.toStringAsFixed(3)}s',
         );
       } else if (result is para_sdk.DeniedSignatureResultWithUrl) {
@@ -234,6 +243,7 @@ class _EVMWalletViewState extends State<EVMWalletView> {
     }
   }
   
+
   Future<void> _sendTransaction() async {
     // Check balance before sending
     if (_balance != null) {
@@ -566,8 +576,8 @@ class _EVMWalletViewState extends State<EVMWalletView> {
                             child: ElevatedButton(
                               onPressed: _isLoading ? null : _sendTransaction,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.grey[300],
-                                foregroundColor: Colors.black,
+                                backgroundColor: Colors.blue,
+                                foregroundColor: Colors.white,
                                 padding: const EdgeInsets.symmetric(vertical: 16),
                               ),
                               child: const Text('Send Transaction'),
@@ -586,6 +596,15 @@ class _EVMWalletViewState extends State<EVMWalletView> {
                             ),
                           ),
                         ],
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Send: Signs & broadcasts 0.0001 ETH\nSign: Signs only (offline), returns full signed transaction',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey[600],
+                        ),
+                        textAlign: TextAlign.center,
                       ),
                     ],
                   ),

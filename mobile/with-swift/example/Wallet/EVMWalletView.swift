@@ -84,7 +84,10 @@ struct EVMWalletView: View {
             if let error {
                 result = ("Error", "Failed to sign transaction: \(error.localizedDescription)\nDuration: \(String(format: "%.2f", duration))s")
             } else if let sig = signature {
-                result = ("Transaction Signed", "Type: EIP-1559\nTo: 0x301d75d850c878b160ad9e1e3f6300202de9e97f\nValue: 1 gwei\nGas: 21000\nMax Fee: 3 gwei\nChain: Sepolia (11155111)\n\nSignature:\n\(sig.signature)\n\nDuration: \(String(format: "%.3f", duration))s")
+                // Use transactionData which prefers signedTransaction for EVM (complete RLP-encoded tx)
+                // This is what you'd broadcast with eth_sendRawTransaction
+                let txData = sig.transactionData
+                result = ("Transaction Signed", "Type: EIP-1559\nTo: 0x301d75d850c878b160ad9e1e3f6300202de9e97f\nValue: 1 gwei\nGas: 21000\nMax Fee: 3 gwei\nChain: Sepolia (11155111)\n\nSigned Transaction:\n\(txData)\n\nDuration: \(String(format: "%.3f", duration))s")
             }
             isLoading = false
         }
@@ -354,7 +357,7 @@ struct EVMWalletView: View {
                     }
                     .disabled(isLoading)
                     
-                    Text("Send: 0.0001 ETH → 0x301d...e97f (broadcasts)\nSign: 0.000000001 ETH (offline only)")
+                    Text("Send: Signs & broadcasts 0.0001 ETH → 0x301d...e97f\nSign: Signs only (offline), returns full signed transaction")
                         .font(.caption)
                         .foregroundColor(.secondary)
                         .frame(maxWidth: .infinity, alignment: .leading)
