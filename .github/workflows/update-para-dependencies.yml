@@ -71,13 +71,20 @@ jobs:
             echo "✅ $summary"
           fi
 
-      - name: Commit changes
+      - name: Create branch and commit changes
         if: steps.apply_updates.outputs.changes_made == 'true'
         id: commit_changes
         run: |
+          # Create a new branch for the changes
+          BRANCH_NAME="automated-para-deps-update-$(date +%Y%m%d-%H%M%S)"
+          git checkout -b $BRANCH_NAME
+          echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
+          
+          # Configure git
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           
+          # Stage and commit changes
           git add .
           
           if git diff --cached --quiet; then
@@ -86,43 +93,41 @@ jobs:
           else
             git commit -F commit_message.txt
             echo "committed=true" >> $GITHUB_OUTPUT
-            echo "✅ Changes committed successfully"
+            echo "✅ Changes committed successfully to branch $BRANCH_NAME"
           fi
 
       - name: Push changes
         if: steps.commit_changes.outputs.committed == 'true'
         run: |
-          git push origin HEAD
-          echo "✅ Changes pushed to current branch"
+          git push -u origin ${{ steps.commit_changes.outputs.branch_name }}
+          echo "✅ Changes pushed to branch ${{ steps.commit_changes.outputs.branch_name }}"
 
       - name: Create Pull Request
         if: steps.commit_changes.outputs.committed == 'true' && (inputs.create_pr || github.event_name == 'schedule')
-        uses: peter-evans/create-pull-request@v6
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: ${{ steps.apply_updates.outputs.commit_message }}
-          title: "chore: update @getpara/* dependencies to latest alpha versions"
-          body: |
-            ## 🔄 Automated Dependency Update
-            
-            This PR updates @getpara/* packages to their latest alpha versions.
-            
-            ### Changes Made
-            ${{ steps.apply_updates.outputs.commit_message }}
-            
-            ### Verification
-            - [ ] All package.json files have been updated
-            - [ ] Yarn.lock files have been refreshed
-            - [ ] Dependencies are consistent across the monorepo
-            
-            ---
-            *This PR was created automatically by the GitHub Action workflow.*
-            
-            cc @jlm0
-          branch: "automated-para-deps-update-${{ github.run_number }}"
-          base: "2.0.0-alpha"
-          delete-branch: true
-          reviewers: jlm0
+        run: |
+          gh pr create \
+            --title "chore: update @getpara/* dependencies to latest alpha versions" \
+            --body "## 🔄 Automated Dependency Update
+          
+          This PR updates @getpara/* packages to their latest alpha versions.
+          
+          ### Changes Made
+          $(cat commit_message.txt)
+          
+          ### Verification
+          - [ ] All package.json files have been updated
+          - [ ] Yarn.lock files have been refreshed
+          - [ ] Dependencies are consistent across the monorepo
+          
+          ---
+          *This PR was created automatically by the GitHub Action workflow.*
+          
+          cc @jlm0" \
+            --base "2.0.0-alpha" \
+            --head "${{ steps.commit_changes.outputs.branch_name }}" \
+            --reviewer "jlm0"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Summary
         if: always()
