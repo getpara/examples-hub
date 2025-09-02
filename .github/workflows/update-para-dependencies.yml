@@ -42,25 +42,8 @@ jobs:
       - name: Install dependencies
         run: yarn install --immutable --network-timeout 60000
 
-      - name: Check for updates
-        id: check_updates
-        run: |
-          echo "🔍 Checking for @getpara/* package updates..."
-          
-          # Run the check command and capture output
-          if yarn deps:check 2>&1 | tee check_output.txt; then
-            echo "✅ All dependencies are up to date"
-            echo "updates_available=false" >> $GITHUB_OUTPUT
-          else
-            echo "📦 Updates are available"
-            echo "updates_available=true" >> $GITHUB_OUTPUT
-            
-            # Extract update information from the output
-            cat check_output.txt
-          fi
-
       - name: Apply updates
-        if: steps.check_updates.outputs.updates_available == 'true' && !inputs.dry_run
+        if: !inputs.dry_run
         id: apply_updates
         run: |
           echo "🔄 Applying dependency updates..."
@@ -118,7 +101,7 @@ jobs:
           echo "✅ Changes pushed to current branch"
 
       - name: Create Pull Request
-        if: steps.commit_changes.outputs.committed == 'true' && inputs.create_pr && !inputs.dry_run
+        if: steps.commit_changes.outputs.committed == 'true' && (inputs.create_pr || github.event_name == 'schedule') && !inputs.dry_run
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -151,12 +134,12 @@ jobs:
         run: |
           echo "## 📊 Dependency Update Summary" >> $GITHUB_STEP_SUMMARY
           
-          if [ "${{ steps.check_updates.outputs.updates_available }}" == "true" ]; then
+          if [ "${{ inputs.dry_run }}" == "true" ]; then
+            echo "🔍 **Dry run mode** - No changes were made" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ steps.apply_updates.outputs.changes_made }}" == "true" ]; then
             echo "✅ Updates were available and processed" >> $GITHUB_STEP_SUMMARY
             
-            if [ "${{ inputs.dry_run }}" == "true" ]; then
-              echo "🔍 **Dry run mode** - No changes were made" >> $GITHUB_STEP_SUMMARY
-            elif [ "${{ steps.commit_changes.outputs.committed }}" == "true" ]; then
+            if [ "${{ steps.commit_changes.outputs.committed }}" == "true" ]; then
               echo "✅ Changes committed and pushed successfully" >> $GITHUB_STEP_SUMMARY
               echo "" >> $GITHUB_STEP_SUMMARY
               echo "${{ steps.apply_updates.outputs.update_summary }}" >> $GITHUB_STEP_SUMMARY
