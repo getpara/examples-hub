@@ -94,7 +94,7 @@ struct SolanaWalletView: View {
             if let error {
                 result = ("Error", "Failed to sign transaction: \(error.localizedDescription)\nDuration: \(String(format: "%.2f", duration))s")
             } else if let sig = signature {
-                result = ("Transaction Signed", "To: 9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM\nAmount: 0.001 SOL (1,000,000 lamports)\nNetwork: Devnet\n\nSignature:\n\(sig.signature)\n\nDuration: \(String(format: "%.3f", duration))s")
+                result = ("Transaction Signed", "To: 9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM\nAmount: 0.001 SOL (1,000,000 lamports)\nNetwork: Devnet\n\nSignature:\n\(sig.signedTransaction)\n\nDuration: \(String(format: "%.3f", duration))s")
             }
             isLoading = false
         }
@@ -140,7 +140,7 @@ struct SolanaWalletView: View {
                     result = ("Pre-Serialized Transaction Signed", 
                              "This demonstrates signing a pre-serialized base64 transaction\n\n" +
                              "Real serialized tx (first 50 chars):\n\(String(realSerializedTx.prefix(50)))...\n\n" +
-                             "Signature:\n\(sig.signature)\n\n" +
+                             "Signature:\n\(sig.signedTransaction)\n\n" +
                              "Duration: \(String(format: "%.3f", duration))s\n\n" +
                              "Note: In production, the base64 transaction would come from:\n" +
                              "• A dApp that constructs transactions\n" +
@@ -271,7 +271,7 @@ struct SolanaWalletView: View {
                             if let error {
                                 result = ("Error", "Failed to sign message: \(error.localizedDescription)\nDuration: \(String(format: "%.2f", duration))s")
                             } else if let sig = signature {
-                                result = ("Message Signed", "Message: \(messageToSign)\n\nSignature:\n\(sig.signature)\n\nDuration: \(String(format: "%.3f", duration))s")
+                                result = ("Message Signed", "Message: \(messageToSign)\n\nSignature:\n\(sig.signedTransaction)\n\nDuration: \(String(format: "%.3f", duration))s")
                             }
                         }
                     }
