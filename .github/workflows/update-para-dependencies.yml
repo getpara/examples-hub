@@ -3,10 +3,6 @@ name: Update Para Dependencies Direct
 on:
   workflow_dispatch:
     inputs:
-      dry_run:
-        description: "Dry run (check only, no changes)"
-        type: boolean
-        default: false
       create_pr:
         description: "Create pull request if updates found"
         type: boolean
@@ -43,7 +39,6 @@ jobs:
         run: yarn install --immutable --network-timeout 60000
 
       - name: Apply updates
-        if: !inputs.dry_run
         id: apply_updates
         run: |
           echo "🔄 Applying dependency updates..."
@@ -77,7 +72,7 @@ jobs:
           fi
 
       - name: Commit changes
-        if: steps.apply_updates.outputs.changes_made == 'true' && !inputs.dry_run
+        if: steps.apply_updates.outputs.changes_made == 'true'
         id: commit_changes
         run: |
           git config --local user.email "action@github.com"
@@ -95,13 +90,13 @@ jobs:
           fi
 
       - name: Push changes
-        if: steps.commit_changes.outputs.committed == 'true' && !inputs.dry_run
+        if: steps.commit_changes.outputs.committed == 'true'
         run: |
           git push origin HEAD
           echo "✅ Changes pushed to current branch"
 
       - name: Create Pull Request
-        if: steps.commit_changes.outputs.committed == 'true' && (inputs.create_pr || github.event_name == 'schedule') && !inputs.dry_run
+        if: steps.commit_changes.outputs.committed == 'true' && (inputs.create_pr || github.event_name == 'schedule')
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -134,9 +129,7 @@ jobs:
         run: |
           echo "## 📊 Dependency Update Summary" >> $GITHUB_STEP_SUMMARY
           
-          if [ "${{ inputs.dry_run }}" == "true" ]; then
-            echo "🔍 **Dry run mode** - No changes were made" >> $GITHUB_STEP_SUMMARY
-          elif [ "${{ steps.apply_updates.outputs.changes_made }}" == "true" ]; then
+          if [ "${{ steps.apply_updates.outputs.changes_made }}" == "true" ]; then
             echo "✅ Updates were available and processed" >> $GITHUB_STEP_SUMMARY
             
             if [ "${{ steps.commit_changes.outputs.committed }}" == "true" ]; then
