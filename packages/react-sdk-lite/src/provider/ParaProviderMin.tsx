@@ -1,5 +1,6 @@
 import { forwardRef, useEffect, useState } from 'react';
 import { useStore } from './stores/useStore.js';
+import { useModalStore } from '../modal/stores/index.js';
 import { useAutoSessionKeepAlive } from './hooks/utils/useAutoSessionKeepAlive.js';
 import { useEventListeners } from './hooks/utils/useEventListeners.js';
 import { ParaProviderProps } from './types/provider.js';
@@ -9,6 +10,7 @@ import { ParaModal } from '../modal/ParaModal.js';
 import { ParaModalHandle } from '../modal/index.js';
 import { isConfigType, isParaWeb } from './utils/paraConfigTypeGuards.js';
 import ParaWeb from '@getpara/web-sdk';
+import { ParaInternal } from '@getpara/react-common';
 import { EXTERNAL_WALLET_TYPES } from '@getpara/web-sdk';
 import { AuthProvider } from './providers/AuthProvider.js';
 import { AccountLinkProvider } from './providers/AccountLinkProvider.js';
@@ -39,6 +41,7 @@ export const ParaProviderMin = forwardRef<
   const rpcUrl = useStore(state => state.rpcUrl);
   const setRpcUrl = useStore(state => state.setRpcUrl);
   const setProviderProps = useStore(state => state.setProviderProps);
+  const setModalError = useModalStore(state => state.setModalError);
 
   const [isClientReady, setIsClientReady] = useState(client?.isReady);
 
@@ -122,6 +125,9 @@ export const ParaProviderMin = forwardRef<
     const newClient = isParaWeb(paraClientConfig)
       ? paraClientConfig
       : new ParaWeb(paraClientConfig.env, paraClientConfig.apiKey, paraClientConfig.opts);
+
+    // Set the setModalError function on pre-instantiated ParaInternal instances
+    (newClient as ParaInternal).setModalError = setModalError;
 
     if (newClient.isReady) {
       setIsClientReady(true);

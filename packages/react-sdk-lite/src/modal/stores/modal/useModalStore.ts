@@ -52,6 +52,7 @@ interface ModalState {
   isUsingMobileConnector?: boolean;
   isExternalWalletConnecting?: boolean;
   externalWalletError?: string[];
+  modalError?: string;
   activeWallet: ActiveWallet | undefined;
   farcasterConnectUri: string | undefined;
   twoFactorStatus: Setup2faResponse | undefined;
@@ -95,6 +96,7 @@ export interface ModalActions {
   setIsUsingMobileConnector: (isUsingMobileConnector?: boolean) => void;
   setIsExternalWalletConnecting: (isExternalWalletConnecting: boolean) => void;
   setExternalWalletError: (externalWalletError?: string[]) => void;
+  setModalError: (modalError?: string) => void;
   setStepDirection: (stepDirection: 1 | -1) => void;
   setFarcasterConnectUri: (_: string | undefined) => void;
   setTwoFactorStatus: (twoFactorStatus?: Setup2faResponse) => void;
@@ -122,6 +124,7 @@ export const DEFAULT_MODAL_STATE: Omit<ModalState, 'step' | 'onRampConfig'> = {
   guestAddFundsTab: undefined,
   isExternalWalletConnecting: false,
   externalWalletError: undefined,
+  modalError: undefined,
   activeWallet: [undefined, undefined],
   farcasterConnectUri: undefined,
   twoFactorStatus: undefined,

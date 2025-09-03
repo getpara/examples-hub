@@ -41,6 +41,7 @@ import { AccountProfileUnlink } from '../Account/AccountProfileUnlink.js';
 import { ExternalWalletNetworkSelectStep } from '../ExternalWalletNetworkSelectStep/ExternalWalletNetworkSelectStep.js';
 import { AwaitingIFrameStep } from '../AwaitingIFrameStep/AwaitingIFrameStep.js';
 import { Footer } from '../Footer/Footer.js';
+import { renderTextWithLinks } from '../../utils/renderTextWithLinks.js';
 
 interface BodyProps {
   oAuthMethods?: TOAuthMethod[];
@@ -77,6 +78,8 @@ export const Body = ({
   const setStepDirection = useModalStore(state => state.setStepDirection);
   const accountAddFundTab = useModalStore(state => state.accountAddFundTab);
   const setAccountAddFundTab = useModalStore(state => state.setAccountAddFundTab);
+  const modalError = useModalStore(state => state.modalError);
+  const setModalError = useModalStore(state => state.setModalError);
   const embeddedModal = useStore(state => state.modalConfig?.embeddedModal);
   const appName = useStore(state => state.appName);
 
@@ -286,6 +289,16 @@ export const Body = ({
                   </TestModeAlert>
                 )}
             </InnerContainer>
+            {modalError && (
+              <ModalErrorAlert>
+                <ErrorContent>
+                  <ErrorCloseButton onClick={() => setModalError(undefined)}>
+                    <ErrorCloseIcon icon="x" />
+                  </ErrorCloseButton>
+                  <ErrorText>{renderTextWithLinks(modalError)}</ErrorText>
+                </ErrorContent>
+              </ModalErrorAlert>
+            )}
           </BodyContainer>
         </AnimatePresence>
         {/* Leaving IFrameStep outside of the animation container to avoid unnecessary rerenders and excessive data loading */}
@@ -310,7 +323,7 @@ const BodyContainer = safeStyled(motion.div)`
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 12px;
   will-change: auto !important;
 `;
 
@@ -344,16 +357,63 @@ const TestModeAlert = safeStyled(CpslAlert)`
   z-index: 1000;
 `;
 
+const ModalErrorAlert = safeStyled.div`
+  background: #fffcec;
+  border: 2px solid var(--cpsl-color-utility-yellow);
+  border-radius: 4px;
+  padding: 8px 8px;
+`;
+
+const ErrorContent = safeStyled.div`
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  position: relative;
+`;
+
+const ErrorText = safeStyled.div`
+  flex: 1;
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--cpsl-color-black);
+  font-weight: 400;
+`;
+
+const ErrorCloseButton = safeStyled.button`
+  background-color: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  margin-top: 1px;
+`;
+
+const ErrorCloseIcon = safeStyled(CpslIcon)`
+  --icon-color: var(--cpsl-color-utility-yellow);
+  --height: 20px;
+  --width: 20px;
+`;
+
 const CloseButton = safeStyled.button`
   background-color: transparent;
   border: none;
-  padding: 4px;
+  padding: 0;
   cursor: pointer;
-  position: absolute;
-  top: 0;
-  right: 0;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
 `;
 
 const CloseX = safeStyled(CpslIcon)`
-  --icon-color: var(--cpsl-color-foreground-0);
+  --icon-color: var(--cpsl-color-utility-yellow-dark, #92400e);
+  --height: 18px;
+  --width: 18px;
 `;

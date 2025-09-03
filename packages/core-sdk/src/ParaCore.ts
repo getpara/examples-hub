@@ -58,6 +58,7 @@ import {
   isPregenAuth,
   VerifiedAuthInfo,
   OnRampPurchase,
+  SignUpOrLogInResponse,
 } from '@getpara/user-management-client';
 import type { pki as pkiType, jsbn as jsbnType } from 'node-forge';
 import forge from 'node-forge';
@@ -151,6 +152,10 @@ export abstract class ParaCore implements CoreInterface {
   protected isNativePasskey: boolean = false;
 
   protected isPartnerOptional?: boolean;
+
+  protected setModalError(_error?: string): void {
+    return;
+  }
 
   isReady: boolean = false;
 
@@ -1270,7 +1275,13 @@ export abstract class ParaCore implements CoreInterface {
       await this.ready();
     }
 
-    const session = await this.ctx.client.touchSession(regenerate);
+    let session: SessionInfo;
+    try {
+      session = await this.ctx.client.touchSession(regenerate);
+    } catch (error) {
+      this.handleTouchSessionError(error);
+      throw error;
+    }
 
     if (
       !this.partner ||
@@ -1279,6 +1290,9 @@ export abstract class ParaCore implements CoreInterface {
       (this.partner?.cosmosPrefix || 'cosmos') !== session.cosmosPrefix
     ) {
       if (!session.partnerId) {
+        this.displayModalError(
+          `Invalid API Key. Please ensure you have a valid API key for the current environment: ${this.ctx.env?.toUpperCase()}.`,
+        );
         console.error(`
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 🚨 PARA SDK CONFIGURATION ERROR 🚨
@@ -1301,6 +1315,7 @@ API Key Prefix: ${this.ctx.apiKey?.split('_')[0].toUpperCase() || 'None'}
 Need help? Visit: https://docs.getpara.com or contact support
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         `);
+        throw new Error('Invalid API Key.');
       } else {
         await this.#getPartner(session.partnerId);
       }
@@ -1477,6 +1492,39 @@ Need help? Visit: https://docs.getpara.com or contact support
     }
 
     return this.#authInfo;
+  }
+
+  /**
+   * Display an error message in the modal (if available)
+   * @internal
+   */
+  protected displayModalError(error?: string): void {
+    if (this.ctx.env !== Environment.PROD) {
+      this.setModalError(error);
+    }
+  }
+
+  /**
+   * Handle specific touchSession errors with user-friendly messages
+   * @private
+   */
+  private handleTouchSessionError(error: any): void {
+    const errorStr = String(error);
+    const errorMessage = error instanceof Error ? error.message : '';
+
+    // AWS WAF/CORS errors
+    if (errorStr.includes('blocked by CORS policy') && errorStr.includes('Access-Control-Allow-Origin')) {
+      this.displayModalError('Request rate limit reached. Please wait a couple of minutes and try again.');
+      return;
+    }
+
+    // Origin validation errors
+    if (error.status === 403 && errorMessage.includes('origin not authorized')) {
+      this.displayModalError(
+        'The current origin is not allowed. Update your allowed origins in the Para developer portal to allow the current origin.',
+      );
+      return;
+    }
   }
 
   protected assertUserId({ allowGuestMode = false }: { allowGuestMode?: boolean } = {}): string {
@@ -3810,9 +3858,16 @@ Need help? Visit: https://docs.getpara.com or contact support
   }
 
   async issueJwt({ keyIndex = 0 }: CoreMethodParams<'issueJwt'> = {}): CoreMethodResponse<'issueJwt'> {
-    const res = await this.ctx.client.issueJwt({ keyIndex });
-
-    return res;
+    try {
+      return await this.ctx.client.issueJwt({ keyIndex });
+    } catch (error) {
+      if (error.status === 403 || error.status === 401) {
+        const errorMessage = 'The user needs to be logged in to issue a JWT. Please log in and try again.';
+        this.displayModalError(errorMessage);
+        console.warn(errorMessage);
+      }
+      throw error;
+    }
   }
 
   /**
@@ -4204,10 +4259,20 @@ Need help? Visit: https://docs.getpara.com or contact support
   }
 
   async signUpOrLogIn({ auth, ...urlOptions }: CoreMethodParams<'signUpOrLogIn'>): CoreMethodResponse<'signUpOrLogIn'> {
-    const serverAuthState = await this.ctx.client.signUpOrLogIn({
-      ...auth,
-      ...this.getVerificationEmailProps(),
-    });
+    let serverAuthState: SignUpOrLogInResponse;
+    try {
+      serverAuthState = await this.ctx.client.signUpOrLogIn({
+        ...auth,
+        ...this.getVerificationEmailProps(),
+      });
+    } catch (error) {
+      if (error.message.includes('max beta users reached')) {
+        this.displayModalError(
+          `50 user limit reached. [Go to Production.](https://docs.getpara.com/v2/general/checklist#go-live-checklist)`,
+        );
+      }
+      throw error;
+    }
 
     const authInfo = serverAuthState.auth;
     if (this.fetchPregenWalletsOverride && isPregenAuth(authInfo)) {

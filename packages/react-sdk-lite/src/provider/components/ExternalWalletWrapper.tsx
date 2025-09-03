@@ -13,6 +13,7 @@ import { CosmosWalletWrapper } from './CosmosWalletWrapper.js';
 import { SolanaWalletWrapper } from './SolanaWalletWrapper.js';
 import { useStore } from '../stores/useStore.js';
 import { ParaGrazProviderProps } from '@getpara/cosmos-wallet-connectors';
+import { useInternalClient } from '../hooks/utils/useInternalClient.js';
 
 interface ExternalWalletWrapperProps<
   chains extends readonly [Chain, ...Chain[]],
@@ -33,9 +34,13 @@ export const ExternalWalletWrapper = <
   const appName = useStore(state => state.appName);
   const resetModalState = useModalStore(state => state.resetState);
   const wallets = useStore(state => state.externalWallets);
+  const para = useInternalClient();
 
   useEffect(() => {
     if (!!wallets.length && !walletConnect?.projectId) {
+      para.setModalError(
+        'It is recommended to provide a WalletConnect project id to ensure wallet connection works as expected. Refer to our docs at [https://docs.getpara.com/v2/react/guides/external-wallets/evm#configure-the-providers](https://docs.getpara.com/v2/react/guides/external-wallets/evm#configure-the-providers) for configuration details and sign up for your free key at [https://cloud.walletconnect.com/sign-in](https://cloud.walletconnect.com/sign-in)',
+      );
       console.warn(
         'It is recommended to provide a WalletConnect project id to ensure wallet connection works as expected. Sign up for your free key at https://cloud.walletconnect.com/sign-in',
       );
