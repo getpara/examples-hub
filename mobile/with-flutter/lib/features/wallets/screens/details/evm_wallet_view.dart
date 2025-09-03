@@ -157,7 +157,7 @@ class _EVMWalletViewState extends State<EVMWalletView> {
         _showResult(
           'Message Signed', 
           'Message: $_messageToSign\n\n'
-          'Signature:\n${result.signature}\n\n'
+          'Signature:\n${result.signedTransaction}\n\n'
           'Duration: ${duration.toStringAsFixed(3)}s',
         );
       } else if (result is para_sdk.DeniedSignatureResultWithUrl) {
@@ -220,7 +220,7 @@ class _EVMWalletViewState extends State<EVMWalletView> {
           'Max Fee: 3 gwei\n'
           'Chain: Sepolia (11155111)\n\n'
           '$signedTxInfo'
-          'Signature:\n${result.signature}\n\n'
+          'Signature:\n${result.signedTransaction}\n\n'
           'TransactionData getter:\n${result.transactionData.substring(0, 50)}...\n\n'
           'Duration: ${duration.toStringAsFixed(3)}s',
         );

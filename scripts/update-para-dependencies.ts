@@ -475,6 +475,10 @@ Examples:
     
     if (mode === "--check-only") {
       console.log("\n🔍 Check complete. Run without --check-only to apply updates.");
+      // Exit with error code if updates are needed
+      if (filesUpdated > 0) {
+        process.exit(1);
+      }
     } else if (filesUpdated > 0) {
       console.log("\n✅ Update complete! Package.json and yarn.lock files have been updated.");
     }

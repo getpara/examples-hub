@@ -148,7 +148,7 @@ class _SolanaWalletViewState extends State<SolanaWalletView> {
         _showResult(
           'Message Signed', 
           'Message: $_messageToSign\n\n'
-          'Signature:\n${result.signature}\n\n'
+          'Signature:\n${result.signedTransaction}\n\n'
           'Duration: ${duration.toStringAsFixed(3)}s',
         );
       } else if (result is para_sdk.DeniedSignatureResultWithUrl) {
@@ -197,7 +197,7 @@ class _SolanaWalletViewState extends State<SolanaWalletView> {
           'Amount: 0.001 SOL (1,000,000 lamports)\n'
           'Network: Devnet\n'
           'Memo: Test transaction from Flutter\n\n'
-          'Signature:\n${result.signature}\n\n'
+          'Signature:\n${result.signedTransaction}\n\n'
           'Duration: ${duration.toStringAsFixed(3)}s',
         );
       } else if (result is para_sdk.DeniedSignatureResultWithUrl) {

@@ -143,7 +143,7 @@ class _CosmosWalletViewState extends State<CosmosWalletView> {
         _showResult(
           'Message Signed', 
           'Message: $_messageToSign\n\n'
-          'Signature:\n${signature.signature}\n\n'
+          'Signature:\n${signature.signedTransaction}\n\n'
           'Duration: ${duration.toStringAsFixed(3)}s',
         );
       } else {
@@ -193,7 +193,7 @@ class _CosmosWalletViewState extends State<CosmosWalletView> {
           'To: ${_currentConfig.testAddress.substring(0, 20)}...\n'
           'Amount: 1 ${_currentConfig.denom.substring(1).toUpperCase()}\n'
           'Format: ${signingMethod.toUpperCase()}\n\n'
-          '🔐 Signature:\n${result.signature}\n\n'
+          '🔐 Signature:\n${result.signedTransaction}\n\n'
           'Duration: ${duration.toStringAsFixed(3)}s',
         );
       } else if (result is para_sdk.DeniedSignatureResultWithUrl) {

@@ -318,7 +318,7 @@ struct EVMWalletView: View {
                             if let error {
                                 result = ("Error", "Failed to sign message: \(error.localizedDescription)\nDuration: \(String(format: "%.2f", duration))s")
                             } else if let sig = signature {
-                                result = ("Message Signed", "Message: \(messageToSign)\n\nSignature:\n\(sig.signature)\n\nDuration: \(String(format: "%.3f", duration))s")
+                                result = ("Message Signed", "Message: \(messageToSign)\n\nSignature:\n\(sig.signedTransaction)\n\nDuration: \(String(format: "%.3f", duration))s")
                             }
                         }
                     }
