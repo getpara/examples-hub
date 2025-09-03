@@ -39,6 +39,7 @@
   },
   "scripts": {
     "alpha-publish": "lerna publish from-package --no-private --dist-tag alpha",
+    "alpha-release": "node scripts/alpha-publish-workflow.mjs",
     "alpha-version": "lerna version prerelease --preid alpha --no-push --no-git-tag-version && yarn gen-changelog-alpha",
     "build": "lerna run build --parallel --concurrency 2",
     "build:dev": "lerna run build --scope=@getpara/* --scope=capsule-mpc-worker --scope=capsule-mpc-worker-server --concurrency 4",

@@ -1,3 +1,36 @@
+# Release (Tue Sep 02 2025)
+
+## Package Versions
+- @getpara/web-sdk@2.0.0-alpha.52
+- @getpara/wagmi-v2-integration@2.0.0-alpha.52
+- @getpara/wagmi-v2-connector@2.0.0-alpha.52
+- @getpara/viem-v2-integration@2.0.0-alpha.52
+- @getpara/viem-v1-integration@2.0.0-alpha.52
+- @getpara/user-management-client@2.0.0-alpha.52
+- @getpara/solana-web3.js-v1-integration@2.0.0-alpha.52
+- @getpara/solana-wallet-connectors@2.0.0-alpha.52
+- @getpara/solana-signers-v2-integration@2.0.0-alpha.52
+- @getpara/server-sdk@2.0.0-alpha.52
+- @getpara/react-sdk-lite@2.0.0-alpha.52
+- @getpara/react-sdk@2.0.0-alpha.52
+- @getpara/react-native-wallet@2.0.0-alpha.52
+- @getpara/react-components@2.0.0-alpha.52
+- @getpara/react-component-library@1.0.0-alpha.47
+- @getpara/react-common@2.0.0-alpha.52
+- @getpara/evm-wallet-connectors@2.0.0-alpha.52
+- @getpara/ethers-v6-integration@2.0.0-alpha.52
+- @getpara/ethers-v5-integration@2.0.0-alpha.52
+- @getpara/cosmos-wallet-connectors@2.0.0-alpha.52
+- @getpara/cosmjs-v0-integration@2.0.0-alpha.52
+- @getpara/core-sdk@2.0.0-alpha.52
+- @getpara/core-components@2.0.0-alpha.52
+
+### Features
+- add support for returning complete signed EVM transactions (#1199) - cf44c7e2a
+
+### Fixes
+- Issue opening modal to onramps (#1200) - a2db6b458
+
 # Release (Fri Aug 29 2025)
 
 ## Package Versions
