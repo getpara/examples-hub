@@ -281,7 +281,7 @@ struct CosmosWalletView: View {
                     walletId: selectedWallet.id,
                     message: messageToSign
                 )
-                showResult("Message Signed", "Message: \(messageToSign)\n\nSignature:\n\(signature.signature)")
+                showResult("Message Signed", "Message: \(messageToSign)\n\nSignature:\n\(signature.signedTransaction)")
             } catch {
                 showResult("Error", "Failed to sign message: \(error.localizedDescription)")
             }
@@ -315,7 +315,7 @@ struct CosmosWalletView: View {
                     rpcUrl: rpcUrl // Pass RPC for any chain operations
                 )
                 
-                showResult("✅ Proto Signed", "Direct signing completed!\n\n🔗 Chain: \(getCurrentChainInfo())\n🔐 Signature: \(String(result.signature.prefix(20)))...")
+                showResult("✅ Proto Signed", "Direct signing completed!\n\n🔗 Chain: \(getCurrentChainInfo())\n🔐 Signature: \(String(result.signedTransaction.prefix(20)))...")
             } catch {
                 showResult("Error", "Failed to sign: \(error.localizedDescription)")
             }
@@ -349,7 +349,7 @@ struct CosmosWalletView: View {
                     rpcUrl: rpcUrl // Pass RPC for any chain operations
                 )
                 
-                showResult("✅ Amino Signed", "Legacy signing completed!\n\n🔗 Chain: \(getCurrentChainInfo())\n🔐 Signature: \(String(result.signature.prefix(20)))...")
+                showResult("✅ Amino Signed", "Legacy signing completed!\n\n🔗 Chain: \(getCurrentChainInfo())\n🔐 Signature: \(String(result.signedTransaction.prefix(20)))...")
             } catch {
                 showResult("Error", "Failed to sign: \(error.localizedDescription)")
             }
