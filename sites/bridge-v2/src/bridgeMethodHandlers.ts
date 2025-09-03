@@ -599,11 +599,50 @@ export const bridgeMethodHandlers: Record<string, (para: ParaWeb, args: any) => 
           // Cast to EVMTransactionParams since we know this is an EVM wallet
           const evmParams = args.transaction as EVMTransactionParams;
 
+          // Handle smart contract encoding if ABI and function are provided
+          let data = evmParams.data;
+
+          // Check if we have smart contract parameters from Flutter/other SDKs
+          const smartContractAbi = (evmParams as any).smartContractAbi;
+          const smartContractFunctionName = (evmParams as any).smartContractFunctionName;
+          const smartContractFunctionArgs = (evmParams as any).smartContractFunctionArgs;
+
+          if (smartContractAbi && smartContractFunctionName) {
+            logger.info('Encoding smart contract function call', {
+              functionName: smartContractFunctionName,
+              args: smartContractFunctionArgs,
+            });
+
+            try {
+              // Parse and validate ABI
+              const abi = typeof smartContractAbi === 'string' ? JSON.parse(smartContractAbi) : smartContractAbi;
+              const iface = new ethers.Interface(abi);
+
+              // Validate function exists in ABI
+              const fragment = iface.getFunction(smartContractFunctionName);
+              if (!fragment) {
+                throw new Error(`Function ${smartContractFunctionName} not found in ABI`);
+              }
+
+              // Encode the function call
+              data = iface.encodeFunctionData(smartContractFunctionName, smartContractFunctionArgs || []);
+
+              logger.info('Encoded function data', { data });
+            } catch (error) {
+              const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+              logger.error('Failed to encode smart contract function', {
+                functionName: smartContractFunctionName,
+                error: errorMessage,
+              });
+              throw new Error(`Failed to encode function ${smartContractFunctionName}: ${errorMessage}`);
+            }
+          }
+
           // Build transaction request - ParaEthersSigner will handle validation
           const txRequest: ethers.TransactionRequest = {
             to: evmParams.to,
             value: evmParams.value,
-            data: evmParams.data,
+            data,
             gasLimit: evmParams.gasLimit,
             gasPrice: evmParams.gasPrice,
             maxFeePerGas: evmParams.maxFeePerGas,
