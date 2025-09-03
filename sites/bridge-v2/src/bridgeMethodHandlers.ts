@@ -2,15 +2,17 @@ import { CoreAction, CoreMethod, CoreMethodName, CoreMethodParams, PARA_CORE_MET
 import { Secp256k1, sha256, Sha256 } from '@cosmjs/crypto';
 import { SignDoc } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 import { VerifiedAuth, isEmail, isPhone } from '@getpara/user-management-client';
+import { ethers } from 'ethers';
+import { ParaEthersSigner } from '@getpara/ethers-v6-integration';
 import { logger } from './logging';
 import { getBlockchainBalance, getSolanaRecentBlockhash } from './utils/balanceUtils';
 import { loginWithPasskey, generatePasskey, verifyWebChallenge } from './bridgeAuth';
 import {
-  formatTransaction,
   formatMessage,
   TransactionParams,
   formatCosmosTransaction,
   CosmosTransactionParams,
+  EVMTransactionParams,
 } from './formatters';
 import { getCosmosAddress } from '@getpara/core-sdk';
 import {
@@ -244,8 +246,16 @@ export const bridgeMethodHandlers: Record<string, (para: ParaWeb, args: any) => 
         messageBase64,
       });
 
+      // Check if signing was denied
+      if ('pendingTransactionId' in result) {
+        return result;
+      }
+
+      // Message signing returns just the signature (not a transaction)
       logger.info('formatAndSignMessage completed successfully');
-      return result;
+      return {
+        signature: result.signature,
+      };
     } catch (error) {
       logger.error('formatAndSignMessage failed:', error);
       throw error;
@@ -328,49 +338,25 @@ export const bridgeMethodHandlers: Record<string, (para: ParaWeb, args: any) => 
         rpcUrl,
       });
 
-      logger.info('Transaction signed', { signature: signResult.signature?.substring(0, 20) + '...' });
-
-      // The signature from formatAndSignTransaction is a hex string without 0x prefix
-      // We need to properly format it for ethers
-      const signature = signResult.signature.startsWith('0x') ? signResult.signature : '0x' + signResult.signature;
-
-      // Validate signature length (65 bytes = 130 hex chars + 0x prefix)
-      const sigHex = signature.replace('0x', '');
-      if (sigHex.length !== 130) {
-        throw new Error(`Invalid signature length: expected 130 hex chars, got ${sigHex.length}`);
+      // Check if signing was denied
+      if ('pendingTransactionId' in signResult) {
+        throw new Error('Transaction was denied or is pending review');
       }
 
-      // Parse the signature components (r, s, v)
-      // The signature is 65 bytes: r (32 bytes) + s (32 bytes) + v (1 byte)
-      const r = '0x' + signature.slice(2, 66);
-      const s = '0x' + signature.slice(66, 130);
-      const v = parseInt(signature.slice(130, 132), 16);
+      logger.info('Transaction signed', { signedTransaction: signResult.signedTransaction?.substring(0, 20) + '...' });
 
-      // Build the signed transaction
-      const tx = ethers.Transaction.from({
-        to: args.toAddress,
-        value: args.amount,
-        nonce,
-        gasLimit,
-        maxFeePerGas: feeData.maxFeePerGas,
-        maxPriorityFeePerGas: feeData.maxPriorityFeePerGas,
-        chainId: BigInt(chainId),
-        type: 2,
-        signature: {
-          r,
-          s,
-          v,
-        },
-      });
-
-      const signedTxHex = tx.serialized;
+      // formatAndSignTransaction returns a complete signed transaction for EVM
+      // No need to reconstruct it - just use it directly
+      const serializedTx = signResult.signedTransaction.startsWith('0x')
+        ? signResult.signedTransaction
+        : '0x' + signResult.signedTransaction;
 
       logger.info('Broadcasting signed transaction', {
-        signedTxLength: signedTxHex.length,
-        preview: signedTxHex.substring(0, 20) + '...',
+        signedTxLength: serializedTx.length,
+        preview: serializedTx.substring(0, 20) + '...',
       });
 
-      const txResponse = await provider.broadcastTransaction(signedTxHex);
+      const txResponse = await provider.broadcastTransaction(serializedTx);
 
       logger.info('Transaction broadcasted', {
         hash: txResponse.hash,
@@ -468,74 +454,183 @@ export const bridgeMethodHandlers: Record<string, (para: ParaWeb, args: any) => 
         }
 
         // Call signMessage (NOT signTransaction) for Cosmos
-        const result = await para.signMessage({
+        const signResult = await para.signMessage({
           walletId: args.walletId,
           messageBase64,
           cosmosSignDocBase64, // Only included for Proto
         });
 
-        return result;
-      } else if (wallet.type === 'SOLANA') {
-        // Check if this is a pre-serialized transaction
-        if ('type' in args.transaction && args.transaction.type === 'serialized' && 'data' in args.transaction) {
-          // Direct signing of pre-serialized transaction
-          logger.info('Signing pre-serialized Solana transaction');
-          const result = await para.signMessage({
-            walletId: args.walletId,
-            messageBase64: args.transaction.data,
-          });
-          return result;
+        // Check if signing was denied
+        if ('pendingTransactionId' in signResult) {
+          return signResult;
         }
 
-        // Regular formatting path for structured transactions
-        const messageBase64 = await formatTransaction(
-          args.transaction,
-          wallet.type,
-          wallet.address,
-          undefined,
-          undefined,
-          args.rpcUrl,
-        );
+        // Use Para's Cosmos signers for complete signed transaction
+        try {
+          const { ParaProtoSigner, ParaAminoSigner } = await import('@getpara/cosmjs-v0-integration');
+          const { TxRaw } = await import('cosmjs-types/cosmos/tx/v1beta1/tx');
 
-        const result = await para.signMessage({
-          walletId: args.walletId,
-          messageBase64,
-        });
+          // Determine chain prefix from chainId (e.g., 'cosmoshub-4' -> 'cosmos')
+          const chainPrefix = args.chainId?.split('-')[0] || 'cosmos';
 
-        return result;
+          if (format === 'proto') {
+            // Use ParaProtoSigner for Proto format
+            const signer = new ParaProtoSigner(para, chainPrefix, args.walletId);
+
+            // Sign using Para's signer
+            const signResponse = await signer.signDirect(wallet.address, signDoc);
+
+            // Create the complete signed transaction
+            const txRaw = TxRaw.fromPartial({
+              bodyBytes: signResponse.signed.bodyBytes,
+              authInfoBytes: signResponse.signed.authInfoBytes,
+              signatures: [Buffer.from(signResponse.signature.signature, 'base64')],
+            });
+
+            // Serialize the complete signed transaction
+            const signedTransaction = Buffer.from(TxRaw.encode(txRaw).finish()).toString('hex');
+
+            logger.info('Cosmos Proto transaction signed successfully', { signedTransaction });
+
+            return {
+              signedTransaction,
+            };
+          } else {
+            // Use ParaAminoSigner for Amino format
+            const signer = new ParaAminoSigner(para, chainPrefix, args.walletId);
+
+            // Sign using Para's signer
+            const signResponse = await signer.signAmino(wallet.address, signDoc);
+
+            // Create complete signed transaction with signature
+            const signedDoc = {
+              ...signResponse.signed,
+              signature: signResponse.signature,
+            };
+
+            // Serialize as JSON for Amino
+            const signedTransaction = JSON.stringify(signedDoc);
+
+            logger.info('Cosmos Amino transaction signed successfully', { signedTransaction });
+
+            return {
+              signedTransaction,
+            };
+          }
+        } catch (error) {
+          logger.error('Failed to sign Cosmos transaction with Para signers:', error);
+          // Fallback: if Para signers fail, we can only return the signature
+          // The caller will need to handle transaction construction manually
+          return {
+            signature: signResult.signature,
+          };
+        }
+      } else if (wallet.type === 'SOLANA') {
+        // Solana transaction signing using Para's Solana signer
+        try {
+          // Check if this is a pre-serialized transaction
+          if ('type' in args.transaction && args.transaction.type === 'serialized' && 'data' in args.transaction) {
+            // For pre-serialized, we can't reconstruct the full transaction
+            // Just sign and return the signature (caller has the full tx)
+            logger.info('Signing pre-serialized Solana transaction');
+            const result = await para.signMessage({
+              walletId: args.walletId,
+              messageBase64: args.transaction.data,
+            });
+
+            // Check if signing was denied
+            if ('pendingTransactionId' in result) {
+              return result;
+            }
+
+            // For pre-serialized transactions, we can only return the signature
+            // The caller already has the full transaction and must combine them
+            return {
+              signature: result.signature,
+            };
+          }
+
+          // Use Para's Solana signer for complete signed transaction
+          const { ParaSolanaWeb3Signer } = await import('@getpara/solana-web3.js-v1-integration');
+          const { Connection } = await import('@solana/web3.js');
+          const { formatSolanaTransactionWithObject } = await import('./formatters/solanaFormatter');
+
+          // Create connection
+          const rpcUrl = args.rpcUrl || 'https://api.mainnet-beta.solana.com';
+          const connection = new Connection(rpcUrl);
+
+          // Create Para signer
+          const signer = new ParaSolanaWeb3Signer(para, connection, args.walletId);
+
+          // Use the formatter to build the transaction (avoiding duplication)
+          const { transaction } = await formatSolanaTransactionWithObject(
+            args.transaction as any,
+            wallet.address,
+            args.rpcUrl,
+          );
+
+          // Sign transaction using Para signer
+          const signedTx = await signer.signTransaction(transaction);
+
+          // Serialize the complete signed transaction
+          const signedTransaction = Buffer.from(signedTx.serialize()).toString('hex');
+
+          logger.info('Solana transaction signed successfully', { signedTransaction });
+
+          return {
+            signedTransaction,
+          };
+        } catch (error) {
+          if (error && typeof error === 'object' && 'pendingTransactionId' in error) {
+            return error;
+          }
+          logger.error('Failed to sign Solana transaction:', error);
+          throw error;
+        }
       } else {
-        // EVM uses signTransaction with RLP-encoded tx base64
+        // EVM transaction signing using ParaEthersSigner
         // Enforce single convention: chainId must be provided at top-level
         const effectiveChainId = args.chainId;
         if (!effectiveChainId) {
           throw new Error('EVM transaction requires top-level chainId');
         }
 
-        const rlpEncodedTxBase64 = await formatTransaction(
-          args.transaction,
-          wallet.type,
-          wallet.address,
-          effectiveChainId,
-          undefined,
-          args.rpcUrl,
-        );
+        try {
+          // Cast to EVMTransactionParams since we know this is an EVM wallet
+          const evmParams = args.transaction as EVMTransactionParams;
 
-        // Normalize chainId to a base-10 string for downstream MPC systems
-        const normalizedChainId = (() => {
-          try {
-            return BigInt(String(effectiveChainId)).toString(10);
-          } catch (_) {
-            return String(effectiveChainId);
+          // Build transaction request - ParaEthersSigner will handle validation
+          const txRequest: ethers.TransactionRequest = {
+            to: evmParams.to,
+            value: evmParams.value,
+            data: evmParams.data,
+            gasLimit: evmParams.gasLimit,
+            gasPrice: evmParams.gasPrice,
+            maxFeePerGas: evmParams.maxFeePerGas,
+            maxPriorityFeePerGas: evmParams.maxPriorityFeePerGas,
+            nonce: evmParams.nonce ? Number(evmParams.nonce) : undefined,
+            type: evmParams.type,
+            chainId: BigInt(effectiveChainId),
+          };
+
+          // Sign using ParaEthersSigner
+          const signer = new ParaEthersSigner(para, null, args.walletId);
+          const signedTransaction = await signer.signTransaction(txRequest);
+
+          logger.info('EVM transaction signed successfully', { signedTransaction });
+
+          return {
+            signedTransaction,
+          };
+        } catch (error) {
+          // Check if it's a denial or pending review
+          if (error && typeof error === 'object' && 'pendingTransactionId' in error) {
+            return error; // Return the denial result as-is
           }
-        })();
 
-        const result = await para.signTransaction({
-          walletId: args.walletId,
-          rlpEncodedTxBase64,
-          chainId: normalizedChainId as any, // core expects string; may be undefined and handled upstream
-        });
-
-        return result;
+          logger.error('Failed to sign transaction with ParaEthersSigner:', error);
+          throw error;
+        }
       }
     } catch (error) {
       logger.error('formatAndSignTransaction failed:', error);

@@ -20,14 +20,14 @@ export interface SolanaTransactionParams {
 }
 
 /**
- * Formats a Solana transaction from JSON parameters to base64-encoded binary
- * Following Solana's native serialization format
+ * Formats a Solana transaction and returns both the transaction object and base64 message
+ * This version is used when we need to reconstruct the complete signed transaction
  */
-export async function formatSolanaTransaction(
+export async function formatSolanaTransactionWithObject(
   params: SolanaTransactionParams,
   fromAddress: string,
   rpcUrl?: string,
-): Promise<string> {
+): Promise<{ transaction: Transaction; messageBase64: string }> {
   try {
     logger.info('Formatting Solana transaction', { params, fromAddress });
 
@@ -105,11 +105,24 @@ export async function formatSolanaTransaction(
     const base64 = messageBytes.toString('base64');
 
     logger.info('Solana transaction formatted successfully', { base64 });
-    return base64;
+    return { transaction, messageBase64: base64 };
   } catch (error) {
     logger.error('Failed to format Solana transaction:', formatError(error));
     throw error;
   }
+}
+
+/**
+ * Formats a Solana transaction from JSON parameters to base64-encoded binary
+ * Following Solana's native serialization format
+ */
+export async function formatSolanaTransaction(
+  params: SolanaTransactionParams,
+  fromAddress: string,
+  rpcUrl?: string,
+): Promise<string> {
+  const { messageBase64 } = await formatSolanaTransactionWithObject(params, fromAddress, rpcUrl);
+  return messageBase64;
 }
 
 /**
