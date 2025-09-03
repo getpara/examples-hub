@@ -6,6 +6,7 @@ import { EvmProfile } from './EvmProfile';
 import { CosmosProfile } from './CosmosProfile';
 import { ModalConfig } from './ModalConfig/ModalConfig';
 import { ParaProfile } from './ParaProfile';
+import { ModalStepSelector } from './ModalStepSelector';
 
 export const Content = () => {
   const { openModal } = useModal();
@@ -24,6 +25,7 @@ export const Content = () => {
           <EvmProfile />
           <CosmosProfile />
           <SolanaProfile />
+          <ModalStepSelector />
           <CpslButton onClick={openModal}>{isConnected ? 'Open Modal' : 'Login'}</CpslButton>
         </InnerContainer>
       )}

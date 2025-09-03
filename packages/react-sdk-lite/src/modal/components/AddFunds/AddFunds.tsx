@@ -30,7 +30,7 @@ export const AddFunds = () => {
   const tabs = TABS.filter(
     ([enabledFlow, key]) => !!onRampConfig?.[key] && (!isGuestMode || enabledFlow === EnabledFlow.RECEIVE),
   );
-  const tab = storedTab ?? tabs[0][0];
+  const tab = storedTab ?? tabs[0]?.[0];
   const isMultiFlow =
     (tab === EnabledFlow.BUY || tab === EnabledFlow.RECEIVE) && onRampConfig?.isBuyEnabled && onRampConfig?.isReceiveEnabled;
 
@@ -58,7 +58,7 @@ export const AddFunds = () => {
     setOnRampPurchase(undefined);
   }, []);
 
-  if (!onRampConfig || !activeWallet) {
+  if (!onRampConfig || !activeWallet || !tab) {
     return (
       <SpinnerContainer>
         <CpslSpinner />
