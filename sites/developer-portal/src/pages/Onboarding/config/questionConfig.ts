@@ -30,6 +30,7 @@ export const selectQuestionOptions: Record<string, { label: string; value: strin
     { label: 'Word of mouth', value: 'Word of mouth' },
     { label: 'Twitter', value: 'Twitter' },
     { label: 'Google', value: 'Google' },
+    { label: 'LinkedIn', value: 'LinkedIn' },
     { label: 'Youtube', value: 'Youtube' },
     { label: 'Conference', value: 'Conference' },
     { label: 'Other', value: 'Other' },
