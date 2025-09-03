@@ -251,8 +251,8 @@ class _EVMWalletViewState extends State<EVMWalletView> {
     try {
       // Test token contract on Sepolia (USDC or similar test token)
       const String testTokenAddress = '0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238'; // USDC on Sepolia
-      const String recipientAddress = '0x301d75d850c878b160ad9e1e3f6300202de9e97f'; // Test recipient
-      const String transferAmount = '1000000'; // 1 USDC (6 decimals)
+      const String recipientAddress = '0xcb53FD7529d257D40618992993c5F863f5d86572'; // Test recipient
+      const String transferAmount = '100000'; // 0.1 USDC (6 decimals)
       
       // ERC20 ABI for transfer function
       const String erc20Abi = '''[
@@ -295,7 +295,7 @@ class _EVMWalletViewState extends State<EVMWalletView> {
           'Token: USDC (Sepolia)\n'
           'Contract: ${testTokenAddress.substring(0, 10)}...${testTokenAddress.substring(testTokenAddress.length - 8)}\n'
           'To: ${recipientAddress.substring(0, 10)}...${recipientAddress.substring(recipientAddress.length - 8)}\n'
-          'Amount: 1 USDC\n'
+          'Amount: 0.1 USDC\n'
           'Gas Limit: 100000\n\n'
           '${hasSignedTx ? "✅ Signed transaction with encoded function call" : "⚠️ Only signature available"}\n\n'
           'Transaction Data:\n${result.signedTransaction?.substring(0, 100)}...\n\n'
