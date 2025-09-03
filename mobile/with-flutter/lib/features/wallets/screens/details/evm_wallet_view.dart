@@ -244,6 +244,83 @@ class _EVMWalletViewState extends State<EVMWalletView> {
   }
   
 
+  Future<void> _testERC20Transfer() async {
+    setState(() => _isLoading = true);
+    final startTime = DateTime.now();
+    
+    try {
+      // Test token contract on Sepolia (USDC or similar test token)
+      const String testTokenAddress = '0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238'; // USDC on Sepolia
+      const String recipientAddress = '0x301d75d850c878b160ad9e1e3f6300202de9e97f'; // Test recipient
+      const String transferAmount = '1000000'; // 1 USDC (6 decimals)
+      
+      // ERC20 ABI for transfer function
+      const String erc20Abi = '''[
+        {
+          "inputs": [
+            {"name": "recipient", "type": "address"},
+            {"name": "amount", "type": "uint256"}
+          ],
+          "name": "transfer",
+          "outputs": [{"name": "", "type": "bool"}],
+          "type": "function"
+        }
+      ]''';
+      
+      // Sign the ERC20 transfer transaction
+      final result = await para.signTransaction(
+        walletId: widget.wallet.id!,
+        transaction: para_sdk.EVMTransaction(
+          to: testTokenAddress,
+          value: '0', // No ETH value for ERC20 transfer
+          gasLimit: '100000', // Higher gas limit for smart contract
+          maxPriorityFeePerGas: '1500000000', // 1.5 gwei
+          maxFeePerGas: '3000000000', // 3 gwei
+          chainId: _chainId.toString(),
+          smartContractAbi: erc20Abi,
+          smartContractFunctionName: 'transfer',
+          smartContractFunctionArgs: [recipientAddress, transferAmount],
+          type: 2, // EIP-1559
+        ).toJson(),
+        chainId: _chainId.toString(), // Pass chainId at top level for bridge
+        rpcUrl: _rpcUrl, // Also provide RPC URL
+      );
+      
+      final duration = DateTime.now().difference(startTime).inMilliseconds / 1000;
+      
+      if (result is para_sdk.SuccessfulSignatureResult) {
+        final hasSignedTx = result.signedTransaction != null;
+        _showResult(
+          'ERC20 Transfer Signed',
+          'Token: USDC (Sepolia)\n'
+          'Contract: ${testTokenAddress.substring(0, 10)}...${testTokenAddress.substring(testTokenAddress.length - 8)}\n'
+          'To: ${recipientAddress.substring(0, 10)}...${recipientAddress.substring(recipientAddress.length - 8)}\n'
+          'Amount: 1 USDC\n'
+          'Gas Limit: 100000\n\n'
+          '${hasSignedTx ? "✅ Signed transaction with encoded function call" : "⚠️ Only signature available"}\n\n'
+          'Transaction Data:\n${result.signedTransaction?.substring(0, 100)}...\n\n'
+          'Duration: ${duration.toStringAsFixed(3)}s\n\n'
+          'Note: This is a test signature. To broadcast, you would need USDC tokens.',
+        );
+      } else if (result is para_sdk.DeniedSignatureResultWithUrl) {
+        _showResult(
+          'Denied',
+          'ERC20 transfer denied\nReview URL: ${result.transactionReviewUrl}',
+        );
+      } else {
+        _showResult('Error', 'Failed to sign ERC20 transfer');
+      }
+    } catch (e) {
+      final duration = DateTime.now().difference(startTime).inMilliseconds / 1000;
+      _showResult(
+        'Error',
+        'Failed to sign ERC20 transfer: $e\nDuration: ${duration.toStringAsFixed(2)}s',
+      );
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
   Future<void> _sendTransaction() async {
     // Check balance before sending
     if (_balance != null) {
@@ -596,6 +673,19 @@ class _EVMWalletViewState extends State<EVMWalletView> {
                             ),
                           ),
                         ],
+                      ),
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: _isLoading ? null : _testERC20Transfer,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                          ),
+                          child: const Text('Test ERC20 Transfer'),
+                        ),
                       ),
                       const SizedBox(height: 8),
                       Text(
