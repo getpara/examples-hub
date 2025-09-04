@@ -1,13 +1,13 @@
 {
   "name": "@getpara/react-sdk-lite",
-  "version": "2.0.0-alpha.52",
+  "version": "2.0.0-alpha.53",
   "bin": {
     "setup-para": "dist/cli/cli.mjs"
   },
   "dependencies": {
-    "@getpara/react-common": "2.0.0-alpha.52",
-    "@getpara/react-components": "2.0.0-alpha.52",
-    "@getpara/web-sdk": "2.0.0-alpha.52",
+    "@getpara/react-common": "2.0.0-alpha.53",
+    "@getpara/react-components": "2.0.0-alpha.53",
+    "@getpara/web-sdk": "2.0.0-alpha.53",
     "date-fns": "^3.6.0",
     "framer-motion": "^11.3.31",
     "libphonenumber-js": "^1.11.7",
@@ -16,9 +16,9 @@
     "zustand-sync-tabs": "^0.2.2"
   },
   "devDependencies": {
-    "@getpara/cosmos-wallet-connectors": "2.0.0-alpha.52",
-    "@getpara/evm-wallet-connectors": "2.0.0-alpha.52",
-    "@getpara/solana-wallet-connectors": "2.0.0-alpha.52",
+    "@getpara/cosmos-wallet-connectors": "2.0.0-alpha.53",
+    "@getpara/evm-wallet-connectors": "2.0.0-alpha.53",
+    "@getpara/solana-wallet-connectors": "2.0.0-alpha.53",
     "@tanstack/react-query": "^5.74.0",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/react": "^16.3.0",

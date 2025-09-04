@@ -1,3 +1,41 @@
+# Release (Thu Sep 04 2025)
+
+## Package Versions
+- @getpara/web-sdk@2.0.0-alpha.53
+- @getpara/wagmi-v2-integration@2.0.0-alpha.53
+- @getpara/wagmi-v2-connector@2.0.0-alpha.53
+- @getpara/viem-v2-integration@2.0.0-alpha.53
+- @getpara/viem-v1-integration@2.0.0-alpha.53
+- @getpara/user-management-client@2.0.0-alpha.53
+- @getpara/solana-web3.js-v1-integration@2.0.0-alpha.53
+- @getpara/solana-wallet-connectors@2.0.0-alpha.53
+- @getpara/solana-signers-v2-integration@2.0.0-alpha.53
+- @getpara/server-sdk@2.0.0-alpha.53
+- @getpara/react-sdk-lite@2.0.0-alpha.53
+- @getpara/react-sdk@2.0.0-alpha.53
+- @getpara/react-native-wallet@2.0.0-alpha.53
+- @getpara/react-components@2.0.0-alpha.53
+- @getpara/react-component-library@1.0.0-alpha.48
+- @getpara/react-common@2.0.0-alpha.53
+- @getpara/evm-wallet-connectors@2.0.0-alpha.53
+- @getpara/ethers-v6-integration@2.0.0-alpha.53
+- @getpara/ethers-v5-integration@2.0.0-alpha.53
+- @getpara/cosmos-wallet-connectors@2.0.0-alpha.53
+- @getpara/cosmjs-v0-integration@2.0.0-alpha.53
+- @getpara/core-sdk@2.0.0-alpha.53
+- @getpara/core-components@2.0.0-alpha.53
+
+### Features
+- beta modal error box for improved debugging (#1166) - 8e96dba91
+
+### Fixes
+- Clean up token balance getter (#1204) - 3904a6a5b
+
+### Chores
+- e2e improvements (#1192) - 0f2adc8f5
+- Use @getpara/shared package (#1193) - 6c4cc40ae
+- Add linkedin as onboarding option (#1203) - 87f9262ce
+
 # Release (Tue Sep 02 2025)
 
 ## Package Versions
