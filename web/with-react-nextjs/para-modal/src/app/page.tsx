@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useAccount, useModal, useWallet, useSignMessage } from "@getpara/react-sdk";
+import { useAccount, useModal, useWallet, useSignMessage, ModalStep } from "@getpara/react-sdk";
 import { StatusAlert } from "@/components/ui/StatusAlert";
 import { ConnectWalletCard } from "@/components/ui/ConnectWalletCard";
 import { SignMessageForm } from "@/components/ui/SignMessageForm";
@@ -61,6 +61,7 @@ export default function Home() {
           built-in modal and React SDK hooks.
         </p>
       </div>
+      <button onClick={() => openModal({ step: ModalStep.ADD_FUNDS_BUY })}>Open Modal</button>
 
       {!isConnected ? (
         <ConnectWalletCard onConnect={openModal} />
