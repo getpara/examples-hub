@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { OnrampSession, OnrampSessionResult, StripeOnramp, loadStripeOnramp } from '@stripe/crypto';
-import { Network, OnRampAsset, OnRampProvider } from '@getpara/web-sdk';
+import { OnRampProvider } from '@getpara/web-sdk';
 import { CpslSpinner } from '@getpara/react-components';
 import { OnRampProps, SpinnerContainer } from '@getpara/react-common';
 import styled from 'styled-components';
@@ -11,17 +11,17 @@ export const STRIPE_PUBLISHABLE_KEY_TEST =
   'pk_test_51MvquNGrzDeP5yP98WgPaAUgQ50I3OpfPhVfiLO47FBHepJnZRPO62IzZY2uxT5ovhSS10RwcTcnaVil1mcJOzIi00dHapODdS';
 
 const AssetCodes = {
-  eth: OnRampAsset.ETHEREUM,
-  matic: OnRampAsset.POLYGON,
-  sol: OnRampAsset.SOLANA,
-  usdc: OnRampAsset.USDC,
+  eth: 'ETHEREUM',
+  matic: 'POLYGON',
+  sol: 'SOLANA',
+  usdc: 'USDC',
 };
 
 const NetworkCodes = {
-  base: Network.BASE,
-  ethereum: Network.ETHEREUM,
-  polygon: Network.POLYGON,
-  solana: Network.SOLANA,
+  base: 'BASE',
+  ethereum: 'ETHEREUM',
+  polygon: 'POLYGON',
+  solana: 'SOLANA',
 };
 
 const CryptoElementsContext = React.createContext(null);

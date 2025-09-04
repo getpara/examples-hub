@@ -22,7 +22,7 @@ import {
   PasskeyGetRequest,
   PasskeyGetResult,
 } from 'react-native-passkey';
-import { CurrentWalletIds, PublicKeyStatus, TWalletScheme } from '@getpara/user-management-client';
+import { CurrentWalletIds, AuthMethodStatus, TWalletScheme } from '@getpara/user-management-client';
 import { setEnv } from '../config.js';
 import base64url from 'base64url';
 import { webcrypto } from 'crypto';
@@ -217,7 +217,7 @@ export class ParaMobile extends ParaCore {
       sigDerivedPublicKey: publicKeyHex,
       cosePublicKey,
       clientDataJSON,
-      status: PublicKeyStatus.COMPLETE,
+      status: AuthMethodStatus.COMPLETE,
     });
 
     await this.ctx.client.uploadEncryptedWalletPrivateKey(userId, encryptedPrivateKeyHex, encryptionKeyHash, resultJson.id);

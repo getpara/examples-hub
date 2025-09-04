@@ -6,7 +6,7 @@ export {
   type ConstructorOpts,
   Environment,
   type OnRampConfig,
-  type OnRampAllowedAssets,
+  type OnRampAssets,
 } from '@getpara/core-sdk';
 export { createCredential, generateSignature, parseCredentialCreationRes } from './cryptography/webAuth.js';
 export { truncateEthAddress, isPasskeySupported, offRampSend } from './utils/index.js';

@@ -66,7 +66,8 @@ const WalletButton = ({ wallet, disabled, onClick, isClaimable, isNew, isSelecte
   const displayCreation = isNew || !para.ctx.apiKey || !wallet.lastUsedAt;
 
   const timestamp = useMemo(() => {
-    return formatDistanceToNowStrict(parseISO(displayCreation ? wallet.createdAt : wallet.lastUsedAt), {
+    const date = displayCreation ? wallet.createdAt : wallet.lastUsedAt;
+    return formatDistanceToNowStrict(typeof date === 'string' ? parseISO(date) : date, {
       addSuffix: true,
     });
   }, [displayCreation, wallet.createdAt, wallet.lastUsedAt]);

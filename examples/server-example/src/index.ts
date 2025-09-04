@@ -4,7 +4,7 @@ import * as uuid from 'uuid';
 import * as ethers from 'ethers';
 import { sepolia } from 'viem/chains';
 import { http } from 'viem';
-import { PublicKeyStatus } from '@getpara/user-management-client';
+import { AuthMethodStatus } from '@getpara/user-management-client';
 import * as solana from '@solana/web3.js';
 import { ParaSolanaWeb3Signer } from '@getpara/solana-web3.js-v1-integration';
 
@@ -66,7 +66,7 @@ async function createUserAndWallet(params: Params) {
       sigDerivedPublicKey: SAMPLE_SIG_DERIVED_PUBLIC_KEY,
       cosePublicKey: SAMPLE_COSE_PUBLIC_KEY,
       clientDataJSON: SAMPLE_CLIENT_DATA_JSON,
-      status: PublicKeyStatus.COMPLETE,
+      status: AuthMethodStatus.COMPLETE,
     });
     // ~~~~~~~
     await para.createWalletPerType();

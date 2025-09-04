@@ -1,7 +1,7 @@
 import { CpslIcon, CpslInput, CpslSelect, CpslSelectItem, CpslText, CpslTileButton } from '@getpara/react-components';
 import { ACCOUNT_TYPES, safeStyled } from '@getpara/react-common';
 import { MOBILE_SIZE, NETWORKS, ON_RAMP_ASSETS, WALLET_TYPES_METADATA } from '../constants/constants.js';
-import { Network, OnRampAsset, TExternalWallet, TLinkedAccountType, TWalletType } from '@getpara/web-sdk';
+import { TExternalWallet, TLinkedAccountType, TNetwork, TOnRampAsset, TWalletType } from '@getpara/web-sdk';
 import { useStore } from '../../provider/stores/useStore.js';
 import { ComponentProps, PropsWithChildren, useEffect, useRef, useState } from 'react';
 
@@ -152,7 +152,7 @@ const StyledIcon = safeStyled(CpslIcon)`
   border-radius: 100%;
 `;
 
-export function AssetIcon({ asset, size }: { asset: OnRampAsset; size?: string }) {
+export function AssetIcon({ asset, size }: { asset: TOnRampAsset; size?: string }) {
   const isDark = useStore(state => state.modalConfig?.theme?.mode === 'dark');
   const data = ON_RAMP_ASSETS[asset];
 
@@ -161,7 +161,7 @@ export function AssetIcon({ asset, size }: { asset: OnRampAsset; size?: string }
   );
 }
 
-export function NetworkIcon({ network, size }: { network?: Network; size?: string }) {
+export function NetworkIcon({ network, size }: { network?: TNetwork; size?: string }) {
   const isDark = useStore(state => state.modalConfig?.theme?.mode === 'dark');
   const data = NETWORKS[network ?? ''] ?? {
     icon: 'globe',

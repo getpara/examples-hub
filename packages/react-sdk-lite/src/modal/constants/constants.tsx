@@ -1,4 +1,4 @@
-import { Network, OnRampAsset, OnRampMethod, OnRampProvider, TWalletType } from '@getpara/core-sdk';
+import { TNetwork, TOnRampAsset, OnRampMethod, OnRampProvider, TWalletType } from '@getpara/core-sdk';
 import { IconType } from '@getpara/react-components';
 import { Transition, Variants } from 'framer-motion';
 import { DisplayMetadata } from '@getpara/react-common';
@@ -51,7 +51,7 @@ const ICON_TYPES = {
   tetherBrand: { isCircular: true },
 };
 
-type Networks = Record<Network, DisplayMetadata>;
+type Networks = Record<TNetwork, DisplayMetadata>;
 
 export const WALLET_TYPES_METADATA: Record<TWalletType, DisplayMetadata> = {
   EVM: { name: 'EVM', icon: 'ethereum', isDark: true },
@@ -60,18 +60,18 @@ export const WALLET_TYPES_METADATA: Record<TWalletType, DisplayMetadata> = {
 };
 
 export const NETWORKS: Networks = Object.entries({
-  [Network.ETHEREUM]: { name: 'Ethereum', icon: 'ethereum' },
-  [Network.SEPOLIA]: { name: 'Sepolia', icon: 'ethereum' },
-  [Network.ARBITRUM]: { name: 'Arbitrum', icon: 'arbitrumBrand' },
-  [Network.BASE]: { name: 'Base', icon: 'baseBrand' },
-  [Network.OPTIMISM]: { name: 'Optimism', icon: 'optimismBrand' },
-  [Network.POLYGON]: { name: 'Polygon', icon: 'polygonBrand' },
-  [Network.SOLANA]: { name: 'Solana', icon: 'solana' },
-  [Network.COSMOS]: { name: 'Cosmos', icon: 'cosmos' },
-  [Network.CELO]: { name: 'Celo', icon: 'celoBrand' },
-  [Network.SOLANA_DEVNET]: { name: 'Solana Devnet', icon: 'solana' },
-  [Network.NOBLE]: { name: 'Noble', icon: 'nobleBrand' },
-  [Network.BERACHAIN]: { name: 'Berachain', icon: 'beraBrand' },
+  ['ETHEREUM']: { name: 'Ethereum', icon: 'ethereum' },
+  ['SEPOLIA']: { name: 'Sepolia', icon: 'ethereum' },
+  ['ARBITRUM']: { name: 'Arbitrum', icon: 'arbitrumBrand' },
+  ['BASE']: { name: 'Base', icon: 'baseBrand' },
+  ['OPTIMISM']: { name: 'Optimism', icon: 'optimismBrand' },
+  ['POLYGON']: { name: 'Polygon', icon: 'polygonBrand' },
+  ['SOLANA']: { name: 'Solana', icon: 'solana' },
+  ['COSMOS']: { name: 'Cosmos', icon: 'cosmos' },
+  ['CELO']: { name: 'Celo', icon: 'celoBrand' },
+  ['SOLANA_DEVNET']: { name: 'Solana Devnet', icon: 'solana' },
+  ['NOBLE']: { name: 'Noble', icon: 'nobleBrand' },
+  ['BERACHAIN']: { name: 'Berachain', icon: 'beraBrand' },
 }).reduce((acc: Networks, [key, entry]) => {
   return {
     ...acc,
@@ -82,23 +82,23 @@ export const NETWORKS: Networks = Object.entries({
   };
 }, {} as Networks);
 
-type OnRampAssets = Record<OnRampAsset, DisplayMetadata & { code: string }>;
+type OnRampAssets = Record<TOnRampAsset, DisplayMetadata & { code: string }>;
 
 export const ON_RAMP_ASSETS: Record<
-  OnRampAsset,
+  TOnRampAsset,
   { name: string; code: string; icon: IconType; isCircular?: boolean; isDark?: boolean }
 > = Object.entries({
-  [OnRampAsset.ETHEREUM]: { name: 'Ethereum', code: 'ETH', icon: 'ethereum' },
-  [OnRampAsset.USDC]: { name: 'USD Coin', code: 'USDC', icon: 'usdcBrand' },
-  [OnRampAsset.POLYGON]: { name: 'Polygon', code: 'POL', icon: 'polygonBrand' },
-  [OnRampAsset.SOLANA]: { name: 'Solana', code: 'SOL', icon: 'solana' },
-  [OnRampAsset.ATOM]: { name: 'Atom', code: 'ATOM', icon: 'cosmos' },
-  [OnRampAsset.CELO]: { name: 'Celo', code: 'CELO', icon: 'celoBrand' },
-  [OnRampAsset.TETHER]: { name: 'Tether', code: 'USDT', icon: 'tetherBrand' },
-  [OnRampAsset.CUSD]: { name: 'Celo Dollar', code: 'CUSD', icon: 'celoBrand' },
-  [OnRampAsset.CEUR]: { name: 'Celo Euro', code: 'CEUR', icon: 'celoBrand' },
-  [OnRampAsset.CREAL]: { name: 'Celo Real', code: 'CREAL', icon: 'celoBrand' },
-  [OnRampAsset.BERA]: { name: 'Berachain', code: 'BERA', icon: 'beraBrand' },
+  ['ETHEREUM']: { name: 'Ethereum', code: 'ETH', icon: 'ethereum' },
+  ['USDC']: { name: 'USD Coin', code: 'USDC', icon: 'usdcBrand' },
+  ['POLYGON']: { name: 'Polygon', code: 'POL', icon: 'polygonBrand' },
+  ['SOLANA']: { name: 'Solana', code: 'SOL', icon: 'solana' },
+  ['ATOM']: { name: 'Atom', code: 'ATOM', icon: 'cosmos' },
+  ['CELO']: { name: 'Celo', code: 'CELO', icon: 'celoBrand' },
+  ['TETHER']: { name: 'Tether', code: 'USDT', icon: 'tetherBrand' },
+  ['CUSD']: { name: 'Celo Dollar', code: 'CUSD', icon: 'celoBrand' },
+  ['CEUR']: { name: 'Celo Euro', code: 'CEUR', icon: 'celoBrand' },
+  ['CREAL']: { name: 'Celo Real', code: 'CREAL', icon: 'celoBrand' },
+  ['BERA']: { name: 'Berachain', code: 'BERA', icon: 'beraBrand' },
 }).reduce((acc: OnRampAssets, [key, entry]) => {
   return {
     ...acc,
@@ -109,24 +109,24 @@ export const ON_RAMP_ASSETS: Record<
   };
 }, {} as OnRampAssets);
 
-export function getNetworkName(str: Network | string) {
-  return NETWORKS[str as Network]?.name ?? `${str[0]}${str.slice(1).toLowerCase()}`;
+export function getNetworkName(str: TNetwork | string) {
+  return NETWORKS[str as TNetwork]?.name ?? `${str[0]}${str.slice(1).toLowerCase()}`;
 }
 
-export function getNetworkIcon(str: Network | string): IconType {
-  return NETWORKS[str as Network]?.icon ?? 'globe';
+export function getNetworkIcon(str: TNetwork | string): IconType {
+  return NETWORKS[str as TNetwork]?.icon ?? 'globe';
 }
 
-export function getAssetCode(str: OnRampAsset | string) {
-  return ON_RAMP_ASSETS[str as OnRampAsset]?.code ?? str;
+export function getAssetCode(str: TOnRampAsset | string) {
+  return ON_RAMP_ASSETS[str as TOnRampAsset]?.code ?? str;
 }
 
-export function getAssetName(str: OnRampAsset | string) {
-  return ON_RAMP_ASSETS[str as OnRampAsset]?.name ?? str;
+export function getAssetName(str: TOnRampAsset | string) {
+  return ON_RAMP_ASSETS[str as TOnRampAsset]?.name ?? str;
 }
 
-export function getAssetIcon(str: OnRampAsset | string) {
-  return ON_RAMP_ASSETS[str as OnRampAsset]?.icon ?? 'emptyCircle';
+export function getAssetIcon(str: TOnRampAsset | string) {
+  return ON_RAMP_ASSETS[str as TOnRampAsset]?.icon ?? 'emptyCircle';
 }
 
 export const MOBILE_SIZE = 480;

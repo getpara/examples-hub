@@ -8,8 +8,6 @@ import {
   VerifiedAuth,
   WalletParams,
   WalletRef,
-} from './types/index.js';
-import {
   AccountMetadata,
   AccountMetadataKey,
   LinkedAccounts,
@@ -17,8 +15,9 @@ import {
   PregenAuthInfo,
   PregenAuthType,
   PregenOrGuestAuth,
-} from './types/auth.js';
-import { PregenIds, TPregenIdentifierType } from './types/wallet.js';
+  PregenIds,
+  TPregenIdentifierType,
+} from '@getpara/shared';
 
 export function isWalletId(params: WalletParams): params is { walletId: string } {
   return !!params.walletId && !params.externalWalletAddress;

@@ -7,8 +7,8 @@ import Client, {
   PregenAuth,
   TWalletScheme,
   TWalletType,
+  Theme,
 } from '@getpara/user-management-client';
-import { Theme } from './theme.js';
 
 export enum Environment {
   // Internal Environments

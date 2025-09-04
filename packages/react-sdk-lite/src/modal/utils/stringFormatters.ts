@@ -1,8 +1,8 @@
-import { Network } from '@getpara/web-sdk';
+import { TNetwork } from '@getpara/web-sdk';
 import { getNetworkName } from '../constants/constants.js';
 import { format } from 'date-fns';
 
-export const formatNetworkList = (networks: Network[]) => {
+export const formatNetworkList = (networks: TNetwork[]) => {
   return networks.length === 1
     ? getNetworkName(networks[0])
     : `${networks

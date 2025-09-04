@@ -1,12 +1,13 @@
 import {
-  EmbeddedWalletType,
-  ExternalWalletType,
+  IWalletEntity,
   PartnerEntity,
   TPregenIdentifierType,
   TWalletScheme,
+  TWalletType,
 } from '@getpara/user-management-client';
 
-export interface Wallet {
+export interface Wallet
+  extends Omit<IWalletEntity, 'createdAt' | 'updatedAt' | 'lastUsedAt' | 'scheme' | 'type' | 'userId' | 'keyGenComplete'> {
   createdAt?: string;
   id: string;
   name?: string;
@@ -15,7 +16,7 @@ export interface Wallet {
   addressSecondary?: string;
   publicKey?: string;
   scheme?: TWalletScheme;
-  type?: EmbeddedWalletType | ExternalWalletType;
+  type?: TWalletType;
   isPregen?: boolean;
   pregenIdentifier?: string;
   pregenIdentifierType?: TPregenIdentifierType;

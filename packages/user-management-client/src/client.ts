@@ -28,10 +28,9 @@ import {
   OnRampPurchase,
   OnRampPurchaseCreateParams,
   OnRampPurchaseUpdateParams,
-  PasswordStatus,
+  AuthMethodStatus,
   PregenIds,
   PrimaryAuth,
-  PublicKeyStatus,
   PublicKeyType,
   ServerAuthStateSignup,
   SessionInfo,
@@ -57,7 +56,7 @@ import {
   LegacyAuthMethod,
   PrimaryAuthInfo,
   ServerAuthStateLogin,
-} from './types/index.js';
+} from '@getpara/shared';
 import { extractWalletRef, fromAccountMetadata, fromLinkedAccounts } from './utils.js';
 import { SESSION_COOKIE_HEADER_NAME, VERSION_HEADER_NAME, PARTNER_ID_HEADER_NAME, API_KEY_HEADER_NAME } from './consts.js';
 import { ParaApiError } from './error.js';
@@ -98,7 +97,7 @@ interface GetParaShareRes {
 interface sessionPublicKeyBody {
   publicKey?: string; // only not included when status is PENDING
   sigDerivedPublicKey?: string; // only include for type 'WEB'
-  status?: PublicKeyStatus;
+  status?: AuthMethodStatus;
   type?: PublicKeyType;
   cosePublicKey?: string;
   clientDataJSON?: string;
@@ -146,7 +145,7 @@ interface GetWalletsRes {
 interface PasswordEntity {
   id: string;
   userId: string;
-  status: PasswordStatus;
+  status: AuthMethodStatus;
   sigDerivedPublicKey: string;
   salt: string;
   isPIN?: boolean;
@@ -206,7 +205,7 @@ interface AcceptScopesBody {
 }
 
 interface sessionPasswordBody {
-  status?: PasswordStatus;
+  status?: AuthMethodStatus;
   sigDerivedPublicKey?: string;
   salt?: string;
   encryptedWalletPrivateKey?: string;

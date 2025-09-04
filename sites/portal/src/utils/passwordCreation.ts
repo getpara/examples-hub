@@ -5,7 +5,7 @@ import Para, {
   getSHA256HashHex,
   hashPasswordWithSalt,
 } from '@getpara/web-sdk';
-import { PasswordStatus } from '@getpara/user-management-client';
+import { AuthMethodStatus } from '@getpara/user-management-client';
 
 export async function passwordCreation(
   para: Para,
@@ -31,7 +31,7 @@ export async function passwordCreation(
   const encryptedPrivateKeyHex = await encryptPrivateKeyWithPassword(keyPair, userHandle);
 
   await para.ctx.client.patchSessionPassword(partnerId, userId, passwordId, {
-    status: PasswordStatus.COMPLETE,
+    status: AuthMethodStatus.COMPLETE,
     sigDerivedPublicKey: publicKeyHex,
     salt: salt,
     encryptedWalletPrivateKey: encryptedPrivateKeyHex,

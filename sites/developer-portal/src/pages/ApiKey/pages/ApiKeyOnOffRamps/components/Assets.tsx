@@ -14,7 +14,7 @@ import {
 } from '@getpara/react-component-library';
 import { OnOffRampsForm } from '../hooks/useOnOffRampsForm';
 import { useOnRampAllAssets } from '../../../../../hooks/api/queries/useOnRampAssets';
-import { getAssetCode, getOnRampAssets, OnRampAsset, Network as TNetwork } from '@getpara/react-sdk';
+import { getAssetCode, getOnRampAssets, TOnRampAsset, TNetwork } from '@getpara/react-sdk';
 import { Trash2 } from 'lucide-react';
 import { FormControl } from '../../../../../components/formComponents';
 
@@ -46,7 +46,7 @@ export const Assets = ({ network }: AssetsProps) => {
           a => !Array.isArray(networkAssets) || !networkAssets.includes(a),
         );
 
-        const handleRemoveAsset = (asset: OnRampAsset) => () => {
+        const handleRemoveAsset = (asset: TOnRampAsset) => () => {
           let newVal = { ...value };
           newVal[network] = networkAssets.filter(a => a !== asset);
           onChange(newVal);
@@ -86,7 +86,7 @@ export const Assets = ({ network }: AssetsProps) => {
                   disabled={disabled}
                   onValueChange={selectVal => {
                     let newVal = { ...value };
-                    newVal[network] = [...networkAssets, selectVal as OnRampAsset];
+                    newVal[network] = [...networkAssets, selectVal as TOnRampAsset];
                     onChange(newVal);
                   }}
                 >

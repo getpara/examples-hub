@@ -1,4 +1,4 @@
-import { ThemeMode } from '../types/api';
+import { ThemeMode } from '@getpara/react-sdk';
 
 // Utility to get luminance from a hex color
 function getLuminance(hex: string): number {

@@ -1,7 +1,7 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import { authCreation, AuthCreationParams } from '../../src/utils/authCreation';
 import { ParaPortal } from '../../src/classes/ParaPortal';
-import { KeyShareType, PublicKeyStatus, EncryptorType } from '@getpara/user-management-client';
+import { KeyShareType, AuthMethodStatus, EncryptorType } from '@getpara/user-management-client';
 
 vi.mock('@getpara/web-sdk', async () => {
   const actual = await vi.importActual('@getpara/web-sdk');
@@ -134,7 +134,7 @@ describe('authCreation', () => {
         sigDerivedPublicKey: mockPublicKeyHex,
         cosePublicKey: mockCosePublicKey,
         clientDataJSON: mockClientDataJSON,
-        status: PublicKeyStatus.COMPLETE,
+        status: AuthMethodStatus.COMPLETE,
         aaguid: mockAaguid,
       },
     );

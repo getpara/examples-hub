@@ -74,6 +74,8 @@ export function getEquivalentTypes(types: TWalletType[] | TWalletType): TWalletT
 export function entityToWallet(w: WalletEntity): Omit<Wallet, 'signer'> {
   return {
     ...w,
+    createdAt: typeof w.createdAt === 'string' ? w.createdAt : w.createdAt.toISOString(),
+    lastUsedAt: typeof w.lastUsedAt === 'string' ? w.lastUsedAt : w.lastUsedAt?.toISOString(),
     scheme: w.scheme as TWalletScheme,
     type: w.type as TWalletType,
     pregenIdentifierType: w.pregenIdentifierType as TPregenIdentifierType,

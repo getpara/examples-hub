@@ -1,6 +1,7 @@
 import { ParaWeb } from '@getpara/web-sdk';
 import { parseCredentialCreationRes } from '@getpara/web-sdk';
 import {
+  AuthMethodStatus,
   getAsymmetricKeyPair,
   getPublicKeyHex,
   getSHA256HashHex,
@@ -9,7 +10,6 @@ import {
   getDerivedPrivateKeyAndDecrypt,
   Wallet,
 } from '@getpara/core-sdk';
-import { PublicKeyStatus } from '@getpara/user-management-client';
 import { logger, formatError } from './logging';
 import { GeneratePasskeyArgs, VerifyWebChallengeArgs, LoginWithPasskeyArgs } from './types';
 
@@ -74,7 +74,7 @@ export async function generatePasskey(para: ParaWeb, args: GeneratePasskeyArgs) 
         sigDerivedPublicKey: publicKeyHex,
         cosePublicKey,
         clientDataJSON,
-        status: PublicKeyStatus.COMPLETE,
+        status: AuthMethodStatus.COMPLETE,
       });
     } catch (patchErr) {
       logger.error('Error patching session public key in generatePasskey:', formatError(patchErr));

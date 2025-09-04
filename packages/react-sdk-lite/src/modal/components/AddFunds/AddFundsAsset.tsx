@@ -1,5 +1,5 @@
 import * as comp from '@getpara/react-components';
-import { getOnRampNetworks, OnRampAsset } from '@getpara/web-sdk';
+import { getOnRampNetworks, TOnRampAsset } from '@getpara/web-sdk';
 import { safeStyled } from '@getpara/react-common';
 import { getAssetCode, getAssetName, ON_RAMP_ASSETS } from '../../constants/constants.js';
 import { useModalStore } from '../../stores/index.js';
@@ -17,7 +17,7 @@ export function AddFundsAsset() {
 
   const [searchStr, setSearchStr] = useState('');
 
-  const onSelect = async (_asset: OnRampAsset) => {
+  const onSelect = async (_asset: TOnRampAsset) => {
     await setAsset(_asset);
     if (!network && !!onRampConfig && !!activeWallet) {
       await setNetwork(

@@ -17,13 +17,12 @@ import {
   CurrentWalletIds,
   EmailTheme,
   PartnerEntity,
-  PublicKeyStatus,
+  AuthMethodStatus,
   PublicKeyType,
   VerificationEmailProps,
   TWalletType,
   WalletParams,
   PregenIds,
-  PasswordStatus,
   BiometricLocationHint,
   Auth,
   extractAuthInfo,
@@ -58,6 +57,7 @@ import {
   isPregenAuth,
   VerifiedAuthInfo,
   OnRampPurchase,
+  Theme,
   SignUpOrLogInResponse,
 } from '@getpara/user-management-client';
 import type { pki as pkiType, jsbn as jsbnType } from 'node-forge';
@@ -71,7 +71,6 @@ import { distributeNewShare } from './shares/shareDistribution.js';
 import {
   Ctx,
   Environment,
-  Theme,
   SuccessfulSignatureRes,
   DeniedSignatureRes,
   PopupType,
@@ -3985,7 +3984,7 @@ Need help? Visit: https://docs.getpara.com or contact support
         ({
           data: { id: credentialId },
         } = await this.ctx.client.addSessionPublicKey(this.userId, {
-          status: PublicKeyStatus.PENDING,
+          status: AuthMethodStatus.PENDING,
           type: PublicKeyType.WEB,
         }));
         urlType = 'createAuth';
@@ -3994,7 +3993,7 @@ Need help? Visit: https://docs.getpara.com or contact support
         ({
           data: { id: credentialId },
         } = await this.ctx.client.addSessionPasswordPublicKey(this.userId, {
-          status: PasswordStatus.PENDING,
+          status: AuthMethodStatus.PENDING,
         }));
         urlType = 'createPassword';
         break;
@@ -4002,7 +4001,7 @@ Need help? Visit: https://docs.getpara.com or contact support
         ({
           data: { id: credentialId },
         } = await this.ctx.client.addSessionPasswordPublicKey(this.userId, {
-          status: PasswordStatus.PENDING,
+          status: AuthMethodStatus.PENDING,
         }));
         urlType = 'createPIN';
         break;

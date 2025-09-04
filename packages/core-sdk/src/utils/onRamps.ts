@@ -1,5 +1,12 @@
-import { Network, OnRampAsset, OnRampProvider, OnRampPurchaseType, TWalletType } from '@getpara/user-management-client';
-import { OnRampAssetInfoRow, OnRampAssetInfo } from '../types/index.js';
+import {
+  TNetwork,
+  TOnRampAsset,
+  OnRampProvider,
+  OnRampPurchaseType,
+  OnRampAssetInfoRow,
+  OnRampAssetInfo,
+  TWalletType,
+} from '@getpara/user-management-client';
 
 export function toAssetInfoArray(data: OnRampAssetInfo): OnRampAssetInfoRow[] {
   const result = [];
@@ -31,12 +38,12 @@ export function getOnRampNetworks(
     action,
   }: {
     walletType?: TWalletType;
-    allowed?: Network[];
-    assets?: OnRampAsset[];
+    allowed?: TNetwork[];
+    assets?: TOnRampAsset[];
     providers?: OnRampProvider[];
     action?: OnRampPurchaseType;
   } = {},
-): Network[] {
+): TNetwork[] {
   return [
     ...new Set(
       toAssetInfoArray(data)
@@ -62,12 +69,12 @@ export function getOnRampAssets(
     action,
   }: {
     walletType?: TWalletType;
-    network?: Network;
-    allowed?: OnRampAsset[];
+    network?: TNetwork;
+    allowed?: TOnRampAsset[];
     providers?: OnRampProvider[];
     action?: OnRampPurchaseType;
   } = {},
-): OnRampAsset[] {
+): TOnRampAsset[] {
   return [
     ...new Set(
       toAssetInfoArray(data)
@@ -83,11 +90,11 @@ export function getOnRampAssets(
   ];
 }
 
-export const NETWORK_PREFIXES: Partial<Record<Network, string>> = {
-  [Network.COSMOS]: 'cosmos',
-  [Network.NOBLE]: 'noble',
+export const NETWORK_PREFIXES: Partial<Record<TNetwork, string>> = {
+  COSMOS: 'cosmos',
+  NOBLE: 'noble',
 };
 
-export function getNetworkPrefix(network: Network): string | undefined {
+export function getNetworkPrefix(network: TNetwork): string | undefined {
   return NETWORK_PREFIXES[network];
 }

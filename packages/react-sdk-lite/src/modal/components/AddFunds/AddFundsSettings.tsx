@@ -3,7 +3,7 @@ import { useAddFunds } from './AddFundsContext.js';
 import { CpslButton, CpslIcon, CpslInput, CpslRow, CpslText } from '@getpara/react-components';
 import { AssetIcon, HeaderSelect, HeaderSelectContainer, HeaderSelectItem, NetworkIcon } from '../common.js';
 import { getAssetCode, getNetworkName } from '../../constants/constants.js';
-import { EnabledFlow, getOnRampNetworks, Network, OnRampAsset, OnRampPurchaseType } from '@getpara/web-sdk';
+import { EnabledFlow, getOnRampNetworks, TNetwork, TOnRampAsset, OnRampPurchaseType } from '@getpara/web-sdk';
 import { OnRampStep, useModalStore } from '../../stores/index.js';
 import { useStore } from '../../../provider/stores/useStore.js';
 import { safeStyled } from '@getpara/react-common';
@@ -18,7 +18,7 @@ function NetworkPill({
   start,
   fix = false,
 }: {
-  network: Network;
+  network: TNetwork;
   gap?: string;
   slot?: string;
   start?: ReactNode;
@@ -35,7 +35,7 @@ function NetworkPill({
   );
 }
 
-function AssetPill({ asset, gap = '4px', slot, fix }: { asset: OnRampAsset; gap?: string; slot?: string; fix?: boolean }) {
+function AssetPill({ asset, gap = '4px', slot, fix }: { asset: TOnRampAsset; gap?: string; slot?: string; fix?: boolean }) {
   if (!asset) {
     return null;
   }
@@ -84,7 +84,7 @@ export function AddFundsSettings() {
           allowed: onRampConfig.allowedAssets
             ? Object.entries(onRampConfig.allowedAssets)
                 .filter(([_, value]) => value === true || value.includes(asset))
-                .map(([key]) => key as Network)
+                .map(([key]) => key as TNetwork)
             : undefined,
           assets: [asset],
           providers: onRampConfig.providers,
@@ -113,7 +113,7 @@ export function AddFundsSettings() {
                   <HeaderSelect
                     selectedValue={asset}
                     onCpslSelectValueChange={e => {
-                      setAsset(e.detail as OnRampAsset);
+                      setAsset(e.detail as TOnRampAsset);
                     }}
                     showFormattedSelectedItem
                     placeholder="Choose asset..."
@@ -141,7 +141,7 @@ export function AddFundsSettings() {
                   <HeaderSelect
                     selectedValue={network}
                     onCpslSelectValueChange={e => {
-                      setNetwork(e.detail as Network);
+                      setNetwork(e.detail as TNetwork);
                     }}
                     showFormattedSelectedItem
                     placeholder="Choose network..."
@@ -229,7 +229,7 @@ export function AddFundsSettings() {
 
   useEffect(() => {
     if (!network || !narrowedNetworks.includes(network)) {
-      setNetwork(narrowedNetworks[0]);
+      setNetwork(narrowedNetworks[0] as TNetwork);
     }
   }, [narrowedNetworks, network, tab]);
 

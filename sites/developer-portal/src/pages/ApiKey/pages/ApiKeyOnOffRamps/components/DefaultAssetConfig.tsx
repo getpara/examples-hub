@@ -13,7 +13,7 @@ import {
 import { FormControl, FormMessage } from '../../../../../components/formComponents';
 import { OnOffRampsForm } from '../hooks/useOnOffRampsForm';
 import { useEffect, useMemo } from 'react';
-import { getOnRampAssets, getOnRampNetworks, Network, OnRampAsset } from '@getpara/react-sdk';
+import { getOnRampAssets, getOnRampNetworks, TNetwork, TOnRampAsset } from '@getpara/react-sdk';
 import { useOnRampAllAssets } from '../../../../../hooks/api/queries/useOnRampAssets';
 import { DollarSign } from 'lucide-react';
 import { formatAssetOption, formatAssetOptionName, parseAssetOption } from '../helpers';
@@ -40,17 +40,17 @@ export const DefaultAssetConfig = () => {
 
       networks.forEach(network => {
         options = options.concat(
-          getOnRampAssets(allAssets, { network: network as Network }).map(a => formatAssetOption(a, network)),
+          getOnRampAssets(allAssets, { network: network as TNetwork }).map(a => formatAssetOption(a, network)),
         );
       });
       return options;
     }
 
     Object.entries(onRampAssets ?? {}).forEach(([network, assets]) => {
-      let availableAssets: OnRampAsset[] = [];
+      let availableAssets: TOnRampAsset[] = [];
 
       if (assets === true) {
-        availableAssets = getOnRampAssets(allAssets, { network: network as Network });
+        availableAssets = getOnRampAssets(allAssets, { network: network as TNetwork });
       } else {
         availableAssets = assets;
       }
@@ -97,7 +97,7 @@ export const DefaultAssetConfig = () => {
                   const { asset, network } = parseAssetOption(value);
 
                   restField.onChange(asset);
-                  form.setValue('defaultOnRampNetwork', network as Network, { shouldDirty: true });
+                  form.setValue('defaultOnRampNetwork', network as TNetwork, { shouldDirty: true });
                 }}
               >
                 <FormControl>

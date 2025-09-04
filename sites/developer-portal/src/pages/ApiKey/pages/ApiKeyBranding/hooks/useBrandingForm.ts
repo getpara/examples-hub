@@ -1,7 +1,8 @@
 import { useParams } from 'react-router-dom';
 import { useGetOrganizationKey } from '../../../../../hooks/api/queries/useOrganizationKeys';
 import { Environment } from '../../../../../types/environment';
-import { ThemeMode, UpdateApiKeyFormData } from '../../../../../types/api';
+import { UpdateApiKeyFormData } from '../../../../../types/api';
+import { ThemeMode } from '@getpara/react-sdk';
 import { z } from 'zod';
 import { SchemaFromInterface } from '../../../../../types/helpers';
 import { useUpdateApiKey } from '../../../../../hooks/api/mutations/useUpdateApiKey';

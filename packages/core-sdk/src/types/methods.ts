@@ -6,12 +6,12 @@ import {
   ServerAuthStateVerify,
   VerifiedAuth,
   AuthExtras,
+  RecoveryStatus,
+  Theme,
   TOAuthMethod,
   TWalletType,
   TelegramAuthResponse,
 } from '@getpara/user-management-client';
-import { Theme } from './theme.js';
-import { RecoveryStatus } from './recovery.js';
 import { Wallet } from './wallet.js';
 
 type Device = {

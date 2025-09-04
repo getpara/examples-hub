@@ -1,4 +1,4 @@
-import { Network, OnRampAsset, OnRampAssetInfo, OnRampProvider } from '@getpara/react-sdk';
+import { TNetwork, TOnRampAsset, OnRampAssets, ThemeMode, OnRampAssetInfo, OnRampProvider } from '@getpara/react-sdk';
 import { Environment } from './environment';
 import { SupportedWalletTypes } from '@getpara/user-management-client';
 
@@ -145,12 +145,6 @@ export type UpdateOrganizationMemberBody = Pick<OrganizationMember, 'owner' | 'p
 // API Keys
 // *********************
 
-export type OnRampAssets = Partial<Record<Network, true | OnRampAsset[]>>;
-export enum ThemeMode {
-  LIGHT = 'LIGHT',
-  DARK = 'DARK',
-}
-
 export type ApiKeyOnboarding = {
   isSkipped?: boolean;
   isComplete?: boolean;
@@ -192,8 +186,8 @@ export type ApiKey = {
   onRampProviders: OnRampProvider[];
   onRampAssets?: OnRampAssets;
   rampApiKey?: string;
-  defaultOnRampAsset?: OnRampAsset;
-  defaultOnRampNetwork?: Network;
+  defaultOnRampAsset?: TOnRampAsset;
+  defaultOnRampNetwork?: TNetwork;
   defaultBuyAmount?: string;
   isUsed: boolean;
   isInstalled: boolean;

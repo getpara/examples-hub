@@ -2,7 +2,7 @@ import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { Environment } from '@getpara/core-sdk';
 
 import mockReactNativeUtils from './mocks/mockReactNativeUtils';
-import { WalletScheme, PublicKeyStatus } from '@getpara/user-management-client';
+import { WalletScheme, AuthMethodStatus } from '@getpara/user-management-client';
 import { Passkey } from './mocks/mockPasskey';
 
 vi.mock('../src/react-native/ReactNativeUtils', () => ({
@@ -150,7 +150,7 @@ describe('ParaMobile', () => {
           sigDerivedPublicKey: 'mock-public-key-hex',
           cosePublicKey: 'mock-cose-public-key',
           clientDataJSON: 'mock-client-data-json',
-          status: PublicKeyStatus.COMPLETE,
+          status: AuthMethodStatus.COMPLETE,
         }),
       );
 

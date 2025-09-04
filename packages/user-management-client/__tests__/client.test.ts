@@ -10,8 +10,7 @@ import {
   OnRampAsset,
   OnRampProvider,
   OnRampPurchaseType,
-  PasswordStatus,
-  PublicKeyStatus,
+  AuthMethodStatus,
   PublicKeyType,
   TLinkedAccountType,
   TWalletScheme,
@@ -367,7 +366,7 @@ describe('Client', () => {
       const body = {
         publicKey: 'public-key',
         sigDerivedPublicKey: 'sig-derived-public-key',
-        status: PublicKeyStatus.PENDING,
+        status: AuthMethodStatus.PENDING,
         type: PublicKeyType.WEB,
         cosePublicKey: 'cose-public-key',
         clientDataJSON: 'client-data-json',
@@ -408,7 +407,7 @@ describe('Client', () => {
       const body = {
         publicKey: 'public-key',
         sigDerivedPublicKey: 'sig-derived-public-key',
-        status: PublicKeyStatus.PENDING,
+        status: AuthMethodStatus.PENDING,
         type: PublicKeyType.WEB,
         cosePublicKey: 'cose-public-key',
         clientDataJSON: 'client-data-json',
@@ -1232,7 +1231,7 @@ describe('Client', () => {
       const body = {
         publicKey: 'public-key',
         sigDerivedPublicKey: 'sig-derived-public-key',
-        status: PasswordStatus.PENDING,
+        status: AuthMethodStatus.PENDING,
       };
 
       await client.addSessionPasswordPublicKey(userId, body);
@@ -1244,7 +1243,7 @@ describe('Client', () => {
       const body = {
         publicKey: 'public-key',
         sigDerivedPublicKey: 'sig-derived-public-key',
-        status: PasswordStatus.PENDING,
+        status: AuthMethodStatus.PENDING,
       };
 
       await client.patchSessionPassword(partnerId, userId, passwordId, body);
@@ -1417,5 +1416,43 @@ describe('Client', () => {
         },
       });
     });
+  });
+
+  it('should handle useFetchAdapter option', () => {
+    const clientWithFetchAdapter = new Client({
+      userManagementHost: 'http://localhost:3000',
+      opts: {
+        useFetchAdapter: true,
+      },
+    });
+
+    // This test covers the useFetchAdapter branch in the constructor
+    expect(clientWithFetchAdapter).toBeDefined();
+  });
+
+  it('should handle error response without status', () => {
+    const error = new AxiosError('Test Error', 'ERR_NETWORK', undefined, undefined, {
+      data: 'Error data',
+      status: undefined,
+      statusText: 'Error',
+      headers: {},
+      config: {} as any,
+      request: {} as any,
+    });
+
+    expect(() => handleResponseError(error)).toThrow('Connection error');
+  });
+
+  it('should handle error response without request URL', () => {
+    const error = new AxiosError('Test Error', 'ERR_NETWORK', undefined, undefined, {
+      data: 'Error data',
+      status: 500,
+      statusText: 'Error',
+      headers: {},
+      config: {} as any,
+      request: {} as any,
+    });
+
+    expect(() => handleResponseError(error)).toThrow('Connection error');
   });
 });

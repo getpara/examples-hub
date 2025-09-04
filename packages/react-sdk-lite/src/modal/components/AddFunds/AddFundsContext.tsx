@@ -16,8 +16,8 @@ import {
   EnabledFlow,
   getOnRampAssets,
   getOnRampNetworks,
-  Network,
-  OnRampAsset,
+  TNetwork,
+  TOnRampAsset,
   OnRampConfig,
   OnRampProvider,
   OnRampPurchaseType,
@@ -40,14 +40,14 @@ export const TABS: [
 ];
 
 type Value = {
-  network: Network | undefined;
+  network: TNetwork | undefined;
   setNetwork: Dispatch<SetStateAction<Value['network']>>;
-  asset: OnRampAsset | undefined;
+  asset: TOnRampAsset | undefined;
   setAsset: Dispatch<SetStateAction<Value['asset']>>;
   fiatQuantity: string | undefined;
   setFiatQuantity: Dispatch<SetStateAction<Value['fiatQuantity']>>;
-  networks: Network[];
-  assets: OnRampAsset[];
+  networks: TNetwork[];
+  assets: TOnRampAsset[];
   isProviderAllowed: Partial<Record<OnRampProvider, boolean>>;
   tab: Tab;
   activeWallet: ReturnType<typeof useWallet>['data'];
@@ -72,8 +72,8 @@ const DEFAULT = {
 function isValid(
   onRampConfig: OnRampConfig | undefined,
   walletType: TWalletType | undefined,
-  network: Network | undefined,
-  asset: OnRampAsset | undefined,
+  network: TNetwork | undefined,
+  asset: TOnRampAsset | undefined,
 ) {
   return network && asset && walletType ? !!onRampConfig?.assetInfo[walletType]?.[network]?.[asset] : false;
 }
@@ -101,7 +101,7 @@ export function AddFundsContextProvider({ tab, children }: PropsWithChildren<{ t
       ? [getNetworkOrMainNetEquivalent(detectedNetwork, onRampConfig.testMode)]
       : getOnRampNetworks(onRampConfig.assetInfo, {
           walletType: activeWallet?.type,
-          allowed: onRampConfig.allowedAssets ? (Object.keys(onRampConfig.allowedAssets) as Network[]) : undefined,
+          allowed: onRampConfig.allowedAssets ? (Object.keys(onRampConfig.allowedAssets) as TNetwork[]) : undefined,
           providers: onRampConfig.providers,
           action: OnRampPurchaseType[tab === EnabledFlow.BUY ? 'BUY' : 'SELL'],
         });
@@ -133,16 +133,16 @@ export function AddFundsContextProvider({ tab, children }: PropsWithChildren<{ t
         ).flat(),
       ),
     ];
-  }, [networks, onRampConfig, activeWallet, tab]) as OnRampAsset[];
+  }, [networks, onRampConfig, activeWallet, tab]) as TOnRampAsset[];
 
-  const [network, setNetwork] = useState<Network | undefined>(
+  const [network, setNetwork] = useState<TNetwork | undefined>(
     !!activeWallet?.type &&
       !!onRampConfig?.defaultOnRampNetwork &&
       !!onRampConfig.assetInfo[activeWallet.type][onRampConfig.defaultOnRampNetwork]
       ? onRampConfig.defaultOnRampNetwork
       : undefined,
   );
-  const [asset, setAsset] = useState<OnRampAsset | undefined>(
+  const [asset, setAsset] = useState<TOnRampAsset | undefined>(
     !!network && !!onRampConfig?.defaultOnRampAsset && assets.includes(onRampConfig.defaultOnRampAsset)
       ? onRampConfig.defaultOnRampAsset
       : undefined,
@@ -175,7 +175,7 @@ export function AddFundsContextProvider({ tab, children }: PropsWithChildren<{ t
     return {
       tab,
       networks,
-      assets: assets as OnRampAsset[],
+      assets: assets as TOnRampAsset[],
       isProviderAllowed,
       asset,
       setAsset,

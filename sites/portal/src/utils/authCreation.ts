@@ -10,7 +10,7 @@ import {
   CoreAuthInfo,
 } from '@getpara/web-sdk';
 import { ENV } from '../constants';
-import { EncryptorType, KeyShareType, PrimaryAuthInfo, PublicKeyStatus } from '@getpara/user-management-client';
+import { EncryptorType, KeyShareType, PrimaryAuthInfo, AuthMethodStatus } from '@getpara/user-management-client';
 import { ParaPortal } from '../classes/ParaPortal';
 
 export type AuthCreationParams = {
@@ -54,7 +54,7 @@ export async function authCreation(
     sigDerivedPublicKey: publicKeyHex,
     cosePublicKey,
     clientDataJSON,
-    status: PublicKeyStatus.COMPLETE,
+    status: AuthMethodStatus.COMPLETE,
     aaguid,
   });
 

@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { RampInstantPurchase, RampInstantSDK } from '@ramp-network/ramp-instant-sdk';
-import { Network, OnRampAsset, OnRampProvider } from '@getpara/web-sdk';
+import { TNetwork, TOnRampAsset, OnRampProvider } from '@getpara/web-sdk';
 import { getChainId, getContractAddressFromAsset, getCurrencyCodes, reverseCurrencyLookup } from '../utils/index.js';
 import { OnRampProps } from '../types/index.js';
 
@@ -47,7 +47,7 @@ export const RampEmbed = ({
             const p = (e as { payload: { purchase: RampInstantPurchase } }).payload.purchase;
 
             const [network, asset] = onRampPurchase.testMode
-              ? [Network.ETHEREUM, OnRampAsset.ETHEREUM]
+              ? ['ETHEREUM' as TNetwork, 'ETHEREUM' as TOnRampAsset]
               : reverseCurrencyLookup(onRampConfig.assetInfo, OnRampProvider.RAMP, p.asset.symbol) || [];
 
             onUpdate({
