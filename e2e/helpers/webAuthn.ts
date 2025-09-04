@@ -39,10 +39,42 @@ export async function getCredentials(authenticator: CDPSession, authenticatorId:
 
 export async function setIsUserVerifyingPlatformAuthenticatorAvailable(page: Page) {
   await page.addInitScript(() => {
-    globalThis.PublicKeyCredential = class {
+    globalThis.PublicKeyCredential = class extends (globalThis as any).PublicKeyCredential {
       static async isUserVerifyingPlatformAuthenticatorAvailable() {
         return true;
       }
+
+      static async getClientCapabilities() {
+        return {};
+      }
+
+      static async isConditionalMediationAvailable() {
+        return false;
+      }
+
+      static parseCreationOptionsFromJSON(options: any) {
+        return options;
+      }
+
+      static parseRequestOptionsFromJSON(options: any) {
+        return options;
+      }
     };
   });
+}
+
+export async function removeVirtualAuthenticator(authenticator: CDPSession, authenticatorId: string) {
+  await authenticator.send('WebAuthn.removeVirtualAuthenticator', {
+    authenticatorId,
+  });
+}
+
+export async function clearCredentials(authenticator: CDPSession, authenticatorId: string) {
+  await authenticator.send('WebAuthn.clearCredentials', {
+    authenticatorId,
+  });
+}
+
+export async function disableWebAuthn(authenticator: CDPSession) {
+  await authenticator.send('WebAuthn.disable');
 }

@@ -34,7 +34,6 @@
     "axios": "^1.8.4",
     "cross-spawn": "^7.0.6",
     "elliptic": "^6.6.1",
-    "examples/capsule-legacy-example/react": "18.2.0",
     "nth-check": "^2.1.1"
   },
   "scripts": {
@@ -45,8 +44,12 @@
     "build:dev": "yarn link-shared-symlink && lerna run build --scope=@getpara/* --scope=capsule-mpc-worker --scope=capsule-mpc-worker-server --concurrency 4",
     "check-bundle-size": "node scripts/check-bundle-size.js",
     "dev": "yarn build:dev; concurrently \"yarn start\" \"yarn watch:affected\"",
-    "e2e": "playwright test --headed",
-    "e2e-examples-hub-script": "yarn && yarn build:dev && ts-node e2e/scripts/runExampleHubTests.ts",
+    "e2e": "playwright test --headed --config=e2e/configs/sdk.playwright.config.ts",
+    "e2e-debug": "PWDEBUG=1 playwright test --config=e2e/configs/sdk.playwright.config.ts",
+    "e2e-examples-hub": "ts-node e2e/examples-hub/runner.ts",
+    "e2e-examples-hub-local": "ts-node e2e/examples-hub/runner.ts --local-path ../examples-hub",
+    "e2e-headed": "playwright test --headed --config=e2e/configs/sdk.playwright.config.ts",
+    "e2e-ui": "playwright test --ui --config=e2e/configs/sdk.playwright.config.ts",
     "gen-changelog": "node ./scripts/gen-changelog.mjs --branch main",
     "gen-changelog-alpha": "node ./scripts/gen-changelog.mjs --branch 2.0.0-alpha --alpha",
     "lerna-publish": "false && lerna publish from-package --no-private",
@@ -65,7 +68,6 @@
     "start-demo": "lerna run dev --scope=modal-builder",
     "start-dev-portal": "yarn link-shared-symlink && lerna run dev --scope=developer-portal",
     "start-e2e": "lerna run start-e2e  --scope=capsule-legacy-example --scope=para-portal",
-    "start-e2e-portal": "lerna run start-e2e --scope=para-portal",
     "start-server": "lerna run start --scope=capsule-server-example",
     "test": "lerna run test",
     "watch:affected": "node scripts/watch-affected.js"
@@ -75,5 +77,7 @@
     "sites/*",
     "examples/*",
     "workers/*"
-  ]
+  ],
+  "packageManager": "yarn@1.22.22",
+  "version": "0.0.0"
 }

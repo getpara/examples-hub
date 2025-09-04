@@ -5,6 +5,14 @@ on:
     branches:
       - main
       - 2.0.0-alpha
+  workflow_dispatch:
+    inputs:
+      examples_hub_ref:
+        description: 'Examples Hub PR number or branch name (e.g., "123" or "my-branch"; defaults to "2.0.0-alpha")'
+        required: false
+        type: string
+        default: '2.0.0-alpha'
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -28,7 +36,6 @@ jobs:
           else
             echo "CACHE_KEY_PREFIX=${{ github.ref_name }}" >> $GITHUB_ENV
           fi
-
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
@@ -42,7 +49,6 @@ jobs:
           key: ${{ runner.os }}-yarn-${{ env.CACHE_KEY_PREFIX }}-${{ github.run_id }}
           restore-keys: |
             ${{ runner.os }}-yarn-${{ env.CACHE_KEY_PREFIX }}-
-
       - name: Install dependencies
         run: yarn
 
@@ -56,7 +62,6 @@ jobs:
           key: ${{ runner.os }}-nx-dir-${{ env.CACHE_KEY_PREFIX }}-${{ github.run_id }}
           restore-keys: |
             ${{ runner.os }}-nx-dir-${{ env.CACHE_KEY_PREFIX }}-
-
       - name: Build packages
         run: yarn build
         env:
@@ -85,7 +90,6 @@ jobs:
           else
             echo "CACHE_KEY_PREFIX=${{ github.ref_name }}" >> $GITHUB_ENV
           fi
-
       - name: Yarn cache
         uses: actions/cache@v4
         with:
@@ -94,7 +98,6 @@ jobs:
           key: ${{ runner.os }}-yarn-${{ env.CACHE_KEY_PREFIX }}-${{ github.run_id }}
           restore-keys: |
             ${{ runner.os }}-yarn-${{ env.CACHE_KEY_PREFIX }}-
-
       - name: Nx cache
         uses: actions/cache@v4
         with:
@@ -103,7 +106,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nx-dir-${{ env.CACHE_KEY_PREFIX }}-${{ github.run_id }}
             ${{ runner.os }}-nx-dir-${{ env.CACHE_KEY_PREFIX }}-
-
       - name: Build packages
         run: yarn build
         env:
@@ -145,7 +147,6 @@ jobs:
           else
             echo "CACHE_KEY_PREFIX=${{ github.ref_name }}" >> $GITHUB_ENV
           fi
-
       - name: Yarn cache
         uses: actions/cache@v4
         with:
@@ -154,7 +155,6 @@ jobs:
           key: ${{ runner.os }}-yarn-${{ env.CACHE_KEY_PREFIX }}-${{ github.run_id }}
           restore-keys: |
             ${{ runner.os }}-yarn-${{ env.CACHE_KEY_PREFIX }}-
-
       - name: Nx cache
         uses: actions/cache@v4
         with:
@@ -162,7 +162,6 @@ jobs:
           key: ${{ runner.os }}-nx-dir-${{ env.CACHE_KEY_PREFIX }}-${{ github.run_id }}
           restore-keys: |
             ${{ runner.os }}-nx-dir-${{ env.CACHE_KEY_PREFIX }}-
-
       - name: Build packages
         run: yarn build
         env:
@@ -203,21 +202,20 @@ jobs:
         if: failure()
         run: echo "View failed test artifacts at https://artifacts.sandbox.usecapsule.com/e2e-runs/${{ github.run_id }}/legacy-example/index.html"
 
-  example-hub-e2e-tests:
+  e2e-examples-hub:
     runs-on: FourCoreRunner
     needs: build
     permissions:
       id-token: write
       contents: read
-
+    env:
+      NODE_OPTIONS: '--max_old_space_size=14336'
     steps:
-      - name: Checkout monorepo
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: '20.19.3'
+          node-version: '22.17.0'
 
       - name: Set up cache key prefix
         id: vars
@@ -228,8 +226,8 @@ jobs:
             echo "CACHE_KEY_PREFIX=${{ github.ref_name }}" >> $GITHUB_ENV
           fi
 
-      - name: Yarn cache
-        uses: actions/cache@v4
+      - uses: actions/cache@v4
+        id: yarn-cache
         with:
           path: |
             **/node_modules
@@ -237,13 +235,29 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-yarn-${{ env.CACHE_KEY_PREFIX }}-
 
-      - name: Nx cache
-        uses: actions/cache@v4
+      - uses: actions/cache@v4
+        id: nx-cache
         with:
           path: .nx
           key: ${{ runner.os }}-nx-dir-${{ env.CACHE_KEY_PREFIX }}-${{ github.run_id }}
           restore-keys: |
             ${{ runner.os }}-nx-dir-${{ env.CACHE_KEY_PREFIX }}-
+
+      - uses: actions/cache@v4
+        id: browser-cache
+        with:
+          path: |
+            ~/.cache/puppeteer
+            ~/.cache/ms-playwright
+          key: ${{ runner.os }}-browsers-${{ hashFiles('yarn.lock', '**/package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-browsers-
+
+      - name: Install test browsers
+        if: steps.browser-cache.outputs.cache-hit != 'true'
+        run: |
+          npx puppeteer browsers install chrome
+          npx playwright install chromium
 
       - name: Build packages
         run: yarn build
@@ -256,26 +270,32 @@ jobs:
         run: yarn build
         working-directory: ./workers/mpc-worker
 
-      - name: Build Server MPC Worker
+      - name: Build Server MPC Worker  
         run: yarn build
         working-directory: ./workers/server-mpc-worker
 
-      - name: Install Playwright Browsers
-        run: npx playwright install chromium
-
-      - name: Checkout examples repo
-        uses: actions/checkout@v4
-        with:
-          repository: getpara/examples-hub
-          path: examples-hub
-
-      - name: Move examples-hub outside to be parallel with web-sdk
+      - name: Determine Examples Hub branch
+        id: get-branch
         run: |
-          mv examples-hub ../examples-hub
+          REF="${{ github.event.inputs.examples_hub_ref || '2.0.0-alpha' }}"
+          if [[ "$REF" =~ ^[0-9]+$ ]]; then
+            BRANCH="pull/$REF/head"
+            echo "📌 Using Examples Hub PR #$REF"
+          else
+            BRANCH="$REF"
+            echo "🌿 Using Examples Hub branch: $REF"
+          fi
+          echo "branch=$BRANCH" >> $GITHUB_OUTPUT
 
-      - name: Run Examples Hub E2Es
-        shell: bash
-        run: xvfb-run yarn e2e-examples-hub-script
+      - name: Run examples-hub E2E tests
+        run: |
+          export PLAYWRIGHT_HTML_REPORT=./playwright-report
+          xvfb-run -a yarn e2e-examples-hub --branch "${{ steps.get-branch.outputs.branch }}" --verbose
+        env:
+          CI: true
+          SHELL: /bin/bash
+          NX_REJECT_UNKNOWN_LOCAL_CACHE: 0
+          NX_IGNORE_MACHINE_CACHE: true
 
       - name: Configure AWS credentials
         if: failure()

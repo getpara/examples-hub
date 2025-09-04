@@ -1,6 +1,5 @@
 import { BrowserContext, Page } from '@playwright/test';
 import { Protocol } from 'playwright-core/types/protocol';
-
 import * as webAuthn from '../helpers/webAuthn';
 
 export class AuthPortalPage {

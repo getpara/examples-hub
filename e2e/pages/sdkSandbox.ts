@@ -49,11 +49,11 @@ export class WebExamplePage {
 
     const emailOrPhone = usePhoneNumber ? getRandomPhoneNumber() : getRandomEmail();
     const enterEmailOrPhoneInput = await this.page.getByRole('textbox', { name: /Enter/ }).elementHandle();
-    await enterEmailOrPhoneInput.click();
+    await enterEmailOrPhoneInput?.click();
 
     await this.page.waitForTimeout(300);
     for (let i = 0; i < emailOrPhone.length; i++) {
-      await enterEmailOrPhoneInput.press(emailOrPhone[i]);
+      await enterEmailOrPhoneInput?.press(emailOrPhone[i]);
       await this.page.waitForTimeout(50);
     }
     await this.page.waitForTimeout(500);
@@ -127,10 +127,10 @@ export class WebExamplePage {
     await this.page.waitForTimeout(1000);
 
     const enterEmailOrPhoneInput = await this.page.getByRole('textbox', { name: /Enter/ }).elementHandle();
-    await enterEmailOrPhoneInput.click();
+    await enterEmailOrPhoneInput?.click();
     await this.page.waitForTimeout(300);
     for (let i = 0; i < emailOrPhone.length; i++) {
-      await enterEmailOrPhoneInput.press(emailOrPhone[i]);
+      await enterEmailOrPhoneInput?.press(emailOrPhone[i]);
     }
     await this.page.waitForTimeout(250);
     await this.page.locator('.primary > .hydrated > div > svg').first().click();

@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-import { WebExamplePage } from '../pages/webExample';
+import { WebExamplePage } from '../pages/sdkSandbox';
 import * as webauthn from '../helpers/webAuthn';
 
 test.describe('web sandbox', () => {

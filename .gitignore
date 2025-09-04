@@ -12,7 +12,8 @@ mpcWorkerServer-esm.js
 *.wasm
 .nx/cache
 .eslintcache
-.yarn
+.yarn/*
+!.yarn/releases
 .yarnrc
 **/.env
 **/.env.development

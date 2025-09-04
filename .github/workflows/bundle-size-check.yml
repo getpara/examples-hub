@@ -9,6 +9,10 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  NODE_VERSION: '22.11.0'
+  CACHE_KEY_PREFIX: ${{ github.event_name == 'pull_request' && github.head_ref || github.ref_name }}
+
 jobs:
   bundle-size:
     runs-on: ubuntu-latest
@@ -20,13 +24,36 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22.17.0'
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Yarn cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            .yarn/cache
+            .yarn/install-state.gz
+            node_modules
+            !node_modules/.cache
+          key: ${{ runner.os }}-yarn-v4-${{ env.CACHE_KEY_PREFIX }}-${{ hashFiles('yarn.lock') }}
+          restore-keys: ${{ runner.os }}-yarn-v4-${{ env.CACHE_KEY_PREFIX }}
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: yarn install --immutable
+
+      - name: NX cache
+        uses: actions/cache@v4
+        with:
+          path: .nx
+          key: ${{ runner.os }}-nx-${{ env.CACHE_KEY_PREFIX }}-${{ hashFiles('packages/**/*.ts', 'packages/**/*.tsx', 'workers/**/*.ts', 'workers/**/*.tsx') }}
+          restore-keys: ${{ runner.os }}-nx-${{ env.CACHE_KEY_PREFIX }}
 
       - name: Build packages
         run: yarn build:dev
+        env:
+          NODE_OPTIONS: '--max_old_space_size=8192'
 
       - name: Check bundle sizes
         run: yarn check-bundle-size
