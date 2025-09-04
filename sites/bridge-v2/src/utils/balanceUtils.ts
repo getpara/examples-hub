@@ -17,7 +17,7 @@ export async function getBlockchainBalance(
 ): Promise<string> {
   switch (walletType) {
     case 'EVM':
-      return getEVMBalance(address, options?.rpcUrl);
+      return getEVMBalance(address, options?.rpcUrl, options?.token);
 
     case 'SOLANA':
       return getSolanaBalance(address, options?.rpcUrl);
@@ -31,17 +31,21 @@ export async function getBlockchainBalance(
 }
 
 /**
- * Get EVM balance in wei
+ * Get EVM balance in wei (for ETH) or smallest unit (for tokens)
  */
-async function getEVMBalance(address: string, rpcUrl?: string): Promise<string> {
+async function getEVMBalance(address: string, rpcUrl?: string, tokenAddress?: string): Promise<string> {
   try {
-    logger.info('Getting EVM balance', { address, rpcUrl });
-
     const url = rpcUrl || 'https://eth.llamarpc.com';
     const provider = new ethers.JsonRpcProvider(url);
-    const balance = await provider.getBalance(address);
+    if (!tokenAddress) {
+      const balance = await provider.getBalance(address);
+      return balance.toString();
+    }
 
-    logger.info('EVM balance retrieved', { address, balance: balance.toString() });
+    const erc20Abi = ['function balanceOf(address owner) view returns (uint256)'];
+
+    const tokenContract = new ethers.Contract(tokenAddress, erc20Abi, provider);
+    const balance = await tokenContract.balanceOf(address);
     return balance.toString();
   } catch (error) {
     logger.error('Failed to get EVM balance:', error);
@@ -53,20 +57,15 @@ async function getEVMBalance(address: string, rpcUrl?: string): Promise<string> 
  * Get Solana balance in lamports
  */
 async function getSolanaBalance(address: string, rpcUrl?: string): Promise<string> {
-  // Use RPC URL provided by SDK, or fall back to devnet for testing
   const url = rpcUrl || 'https://api.devnet.solana.com';
 
   try {
-    logger.info('Getting Solana balance', { address, rpcUrl: url });
-
     const connection = new Connection(url, 'confirmed');
     const publicKey = new PublicKey(address);
     const balance = await connection.getBalance(publicKey);
 
-    logger.info('Solana balance retrieved', { address, balance });
     return balance.toString();
   } catch (error) {
-    // Provide more detailed error information
     const errorMessage = error instanceof Error ? error.message : String(error);
     logger.error('Failed to get Solana balance:', {
       error: errorMessage,
@@ -75,7 +74,6 @@ async function getSolanaBalance(address: string, rpcUrl?: string): Promise<strin
       errorType: error?.constructor?.name,
     });
 
-    // If it's a network error, suggest using devnet for testing
     if (errorMessage.includes('Load failed') || errorMessage.includes('CORS')) {
       throw new Error(
         `Network error getting Solana balance. This might be a CORS issue. Try using Solana devnet for testing: ${errorMessage}`,
@@ -90,8 +88,6 @@ async function getSolanaBalance(address: string, rpcUrl?: string): Promise<strin
  */
 async function getCosmosBalance(address: string, rpcUrl?: string, denom?: string): Promise<string> {
   try {
-    logger.info('Getting Cosmos balance', { address, rpcUrl, denom });
-
     const url = rpcUrl || 'https://cosmos-rpc.publicnode.com';
     const client = await StargateClient.connect(url);
     const balances = await client.getAllBalances(address);
@@ -99,7 +95,6 @@ async function getCosmosBalance(address: string, rpcUrl?: string, denom?: string
     const targetDenom = denom || 'uatom';
     const balance = balances.find(b => b.denom === targetDenom);
 
-    logger.info('Cosmos balance retrieved', { address, balance });
     return balance?.amount || '0';
   } catch (error) {
     logger.error('Failed to get Cosmos balance:', error);
@@ -115,12 +110,10 @@ export async function getSolanaRecentBlockhash(rpcUrl?: string): Promise<{
   lastValidBlockHeight: number;
 }> {
   try {
-    // Use RPC URL provided by SDK, or fall back to devnet
     const url = rpcUrl || 'https://api.devnet.solana.com';
     const connection = new Connection(url, 'confirmed');
     const result = await connection.getLatestBlockhash();
 
-    logger.info('Solana blockhash retrieved', result);
     return result;
   } catch (error) {
     logger.error('Failed to get Solana blockhash:', error);
