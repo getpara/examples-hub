@@ -31,7 +31,7 @@ if (!fs.existsSync(ABSOLUTE_SHARED_PATH)) {
 try {
   // Build the shared package first
   console.log('📦 Building shared package...');
-  execSync('yarn build', {
+  execSync('corepack yarn build', {
     cwd: ABSOLUTE_SHARED_PATH,
     stdio: 'inherit',
   });
