@@ -32,6 +32,7 @@ phases:
       - echo "Navigating to $REPO_DIR_PATH and building site for $ENV..."
       - cd $REPO_DIR_PATH
       - export NODE_OPTIONS="--max-old-space-size=4096"
+      - export NODE_ENV=production
       - yarn build-$ENV
       - echo "Deploying site to s3://$S3_BUCKET_NAME for $ENV..."
       - aws s3 sync $BUILD_PATH s3://$S3_BUCKET_NAME $S3_SYNC_FLAGS
