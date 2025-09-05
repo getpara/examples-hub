@@ -21,194 +21,166 @@
 🔍 Fetching latest alpha versions for discovered packages...
 Fetching latest alpha versions for 16 @getpara packages...
 ============================================================
-Latest alpha version for @getpara/server-sdk: 2.0.0-alpha.51
-Latest alpha version for @getpara/react-sdk: 2.0.0-alpha.51
-Latest alpha version for @getpara/cosmos-wallet-connectors: 2.0.0-alpha.51
-Latest alpha version for @getpara/react-native-wallet: 2.0.0-alpha.51
-Latest alpha version for @getpara/solana-wallet-connectors: 2.0.0-alpha.51
-Latest alpha version for @getpara/solana-web3.js-v1-integration: 2.0.0-alpha.51
-Latest alpha version for @getpara/user-management-client: 2.0.0-alpha.51
-Latest alpha version for @getpara/wagmi-v2-integration: 2.0.0-alpha.51
-Latest alpha version for @getpara/solana-signers-v2-integration: 2.0.0-alpha.51
+Latest alpha version for @getpara/server-sdk: 2.0.0-alpha.53
+Latest alpha version for @getpara/ethers-v5-integration: 2.0.0-alpha.53
+Latest alpha version for @getpara/react-sdk: 2.0.0-alpha.53
+Latest alpha version for @getpara/solana-web3.js-v1-integration: 2.0.0-alpha.53
+Latest alpha version for @getpara/viem-v2-integration: 2.0.0-alpha.53
+Latest alpha version for @getpara/wagmi-v2-integration: 2.0.0-alpha.53
+Latest alpha version for @getpara/solana-signers-v2-integration: 2.0.0-alpha.53
+Latest alpha version for @getpara/evm-wallet-connectors: 2.0.0-alpha.53
+Latest alpha version for @getpara/web-sdk: 2.0.0-alpha.53
 Latest alpha version for @getpara/graz: 2.0.0-alpha.15
-Latest alpha version for @getpara/web-sdk: 2.0.0-alpha.51
-Latest alpha version for @getpara/cosmjs-v0-integration: 2.0.0-alpha.51
-Latest alpha version for @getpara/ethers-v6-integration: 2.0.0-alpha.51
-Latest alpha version for @getpara/evm-wallet-connectors: 2.0.0-alpha.51
-Latest alpha version for @getpara/viem-v2-integration: 2.0.0-alpha.51
-Latest alpha version for @getpara/ethers-v5-integration: 2.0.0-alpha.51
+Latest alpha version for @getpara/cosmos-wallet-connectors: 2.0.0-alpha.53
+Latest alpha version for @getpara/ethers-v6-integration: 2.0.0-alpha.53
+Latest alpha version for @getpara/solana-wallet-connectors: 2.0.0-alpha.53
+Latest alpha version for @getpara/react-native-wallet: 2.0.0-alpha.53
+Latest alpha version for @getpara/user-management-client: 2.0.0-alpha.53
+Latest alpha version for @getpara/cosmjs-v0-integration: 2.0.0-alpha.53
 ============================================================
 Summary:
-  @getpara/server-sdk: 2.0.0-alpha.51
-  @getpara/react-sdk: 2.0.0-alpha.51
-  @getpara/cosmos-wallet-connectors: 2.0.0-alpha.51
-  @getpara/react-native-wallet: 2.0.0-alpha.51
-  @getpara/solana-wallet-connectors: 2.0.0-alpha.51
-  @getpara/solana-web3.js-v1-integration: 2.0.0-alpha.51
-  @getpara/user-management-client: 2.0.0-alpha.51
-  @getpara/wagmi-v2-integration: 2.0.0-alpha.51
-  @getpara/solana-signers-v2-integration: 2.0.0-alpha.51
+  @getpara/server-sdk: 2.0.0-alpha.53
+  @getpara/ethers-v5-integration: 2.0.0-alpha.53
+  @getpara/react-sdk: 2.0.0-alpha.53
+  @getpara/solana-web3.js-v1-integration: 2.0.0-alpha.53
+  @getpara/viem-v2-integration: 2.0.0-alpha.53
+  @getpara/wagmi-v2-integration: 2.0.0-alpha.53
+  @getpara/solana-signers-v2-integration: 2.0.0-alpha.53
+  @getpara/evm-wallet-connectors: 2.0.0-alpha.53
+  @getpara/web-sdk: 2.0.0-alpha.53
   @getpara/graz: 2.0.0-alpha.15
-  @getpara/web-sdk: 2.0.0-alpha.51
-  @getpara/cosmjs-v0-integration: 2.0.0-alpha.51
-  @getpara/ethers-v6-integration: 2.0.0-alpha.51
-  @getpara/evm-wallet-connectors: 2.0.0-alpha.51
-  @getpara/viem-v2-integration: 2.0.0-alpha.51
-  @getpara/ethers-v5-integration: 2.0.0-alpha.51
+  @getpara/cosmos-wallet-connectors: 2.0.0-alpha.53
+  @getpara/ethers-v6-integration: 2.0.0-alpha.53
+  @getpara/solana-wallet-connectors: 2.0.0-alpha.53
+  @getpara/react-native-wallet: 2.0.0-alpha.53
+  @getpara/user-management-client: 2.0.0-alpha.53
+  @getpara/cosmjs-v0-integration: 2.0.0-alpha.53
 
 📦 Found alpha versions for 16 packages
 🔄 Scanning for package.json files to update...
 ---------------------------------------------------
-  Updated @getpara/react-native-wallet: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+  Updated @getpara/react-native-wallet: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 ✅ Updated ./mobile/with-expo/package.json
-  Updated @getpara/react-native-wallet: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+  Updated @getpara/react-native-wallet: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 ✅ Updated ./mobile/with-react-native/package.json
-  Updated @getpara/cosmjs-v0-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-  Updated @getpara/ethers-v6-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-  Updated @getpara/server-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-  Updated @getpara/solana-web3.js-v1-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-  Updated @getpara/viem-v2-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+  Updated @getpara/cosmjs-v0-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+  Updated @getpara/ethers-v6-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+  Updated @getpara/server-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+  Updated @getpara/solana-web3.js-v1-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+  Updated @getpara/viem-v2-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 ✅ Updated ./server/with-bun/package.json
-  Updated @getpara/cosmjs-v0-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-  Updated @getpara/ethers-v6-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-  Updated @getpara/server-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-  Updated @getpara/solana-web3.js-v1-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-  Updated @getpara/viem-v2-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+  Updated @getpara/cosmjs-v0-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+  Updated @getpara/ethers-v6-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+  Updated @getpara/server-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+  Updated @getpara/solana-web3.js-v1-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+  Updated @getpara/viem-v2-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 ✅ Updated ./server/with-node/package.json
-  Updated @getpara/ethers-v6-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-  Updated @getpara/graz: 2.0.0-alpha.8 → 2.0.0-alpha.15 (dependencies)
-  Updated @getpara/react-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-  Updated @getpara/server-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+  Updated @getpara/ethers-v6-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+  Updated @getpara/react-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+  Updated @getpara/server-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 ✅ Updated ./specialized/client-auth-server-sign/package.json
-  Updated @getpara/cosmos-wallet-connectors: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-  Updated @getpara/evm-wallet-connectors: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-  Updated @getpara/graz: 2.0.0-alpha.8 → 2.0.0-alpha.15 (dependencies)
-  Updated @getpara/react-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-  Updated @getpara/server-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-  Updated @getpara/solana-wallet-connectors: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+  Updated @getpara/cosmos-wallet-connectors: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+  Updated @getpara/evm-wallet-connectors: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+  Updated @getpara/react-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+  Updated @getpara/server-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+  Updated @getpara/solana-wallet-connectors: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 ✅ Updated ./specialized/with-bulk-pregen/package.json
-  Updated @getpara/graz: 2.0.0-alpha.8 → 2.0.0-alpha.15 (dependencies)
-  Updated @getpara/react-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+  Updated @getpara/react-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 ✅ Updated ./specialized/with-chrome-extension/package.json
-  Updated @getpara/graz: 2.0.0-alpha.8 → 2.0.0-alpha.15 (dependencies)
-  Updated @getpara/react-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-  Updated @getpara/solana-web3.js-v1-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+  Updated @getpara/react-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+  Updated @getpara/solana-web3.js-v1-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 ✅ Updated ./specialized/with-jupiter-dex-api/package.json
-  Updated @getpara/graz: 2.0.0-alpha.8 → 2.0.0-alpha.15 (dependencies)
-  Updated @getpara/react-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+  Updated @getpara/react-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 ✅ Updated ./specialized/with-pwa/package.json
-  Updated @getpara/graz: 2.0.0-alpha.8 → 2.0.0-alpha.15 (dependencies)
-  Updated @getpara/react-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-  Updated @getpara/solana-web3.js-v1-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-  Updated @getpara/viem-v2-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+  Updated @getpara/react-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+  Updated @getpara/solana-web3.js-v1-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+  Updated @getpara/viem-v2-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 ✅ Updated ./specialized/with-relay-bridge-api/package.json
-  Updated @getpara/ethers-v6-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-  Updated @getpara/graz: 2.0.0-alpha.8 → 2.0.0-alpha.15 (dependencies)
-  Updated @getpara/react-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-  Updated @getpara/solana-web3.js-v1-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+  Updated @getpara/ethers-v6-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+  Updated @getpara/react-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+  Updated @getpara/solana-web3.js-v1-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 ✅ Updated ./specialized/with-squid-router-api/package.json
-  Updated @getpara/evm-wallet-connectors: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-  Updated @getpara/graz: 2.0.0-alpha.8 → 2.0.0-alpha.15 (dependencies)
-  Updated @getpara/react-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-  Updated @getpara/solana-web3.js-v1-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-  Updated @getpara/viem-v2-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+  Updated @getpara/evm-wallet-connectors: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+  Updated @getpara/react-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+  Updated @getpara/solana-web3.js-v1-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+  Updated @getpara/viem-v2-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 ✅ Updated ./web/with-react-nextjs/aa-alchemy/package.json
-  Updated @getpara/evm-wallet-connectors: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-  Updated @getpara/graz: 2.0.0-alpha.8 → 2.0.0-alpha.15 (dependencies)
-  Updated @getpara/react-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-  Updated @getpara/solana-web3.js-v1-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-  Updated @getpara/viem-v2-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+  Updated @getpara/evm-wallet-connectors: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+  Updated @getpara/react-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+  Updated @getpara/solana-web3.js-v1-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+  Updated @getpara/viem-v2-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 ✅ Updated ./web/with-react-nextjs/aa-gelato/package.json
-  Updated @getpara/evm-wallet-connectors: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-  Updated @getpara/graz: 2.0.0-alpha.8 → 2.0.0-alpha.15 (dependencies)
-  Updated @getpara/react-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-  Updated @getpara/solana-web3.js-v1-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-  Updated @getpara/viem-v2-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+  Updated @getpara/evm-wallet-connectors: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+  Updated @getpara/react-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+  Updated @getpara/solana-web3.js-v1-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+  Updated @getpara/viem-v2-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 ✅ Updated ./web/with-react-nextjs/aa-thirdweb/package.json
-  Updated @getpara/evm-wallet-connectors: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-  Updated @getpara/graz: 2.0.0-alpha.8 → 2.0.0-alpha.15 (dependencies)
-  Updated @getpara/react-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-  Updated @getpara/solana-web3.js-v1-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-  Updated @getpara/viem-v2-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+  Updated @getpara/evm-wallet-connectors: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+  Updated @getpara/react-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+  Updated @getpara/solana-web3.js-v1-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+  Updated @getpara/viem-v2-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 ✅ Updated ./web/with-react-nextjs/aa-zerodev/package.json
-  Updated @getpara/graz: 2.0.0-alpha.8 → 2.0.0-alpha.15 (dependencies)
-  Updated @getpara/react-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-  Updated @getpara/wagmi-v2-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-  Updated @getpara/react-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (resolutions)
-  Updated @getpara/cosmjs-v0-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (resolutions)
-  Updated @getpara/user-management-client: 2.0.0-alpha.42 → 2.0.0-alpha.51 (resolutions)
+  Updated @getpara/react-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+  Updated @getpara/wagmi-v2-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+  Updated @getpara/react-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (resolutions)
+  Updated @getpara/cosmjs-v0-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (resolutions)
+  Updated @getpara/user-management-client: 2.0.0-alpha.51 → 2.0.0-alpha.53 (resolutions)
 ✅ Updated ./web/with-react-nextjs/connector-reown-appkit/package.json
-  Updated @getpara/graz: 2.0.0-alpha.8 → 2.0.0-alpha.15 (dependencies)
-  Updated @getpara/react-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-  Updated @getpara/wagmi-v2-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+  Updated @getpara/react-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+  Updated @getpara/wagmi-v2-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 ✅ Updated ./web/with-react-nextjs/connector-wagmi/package.json
-  Updated @getpara/web-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+  Updated @getpara/web-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 ✅ Updated ./web/with-react-nextjs/custom-email-auth/package.json
-  Updated @getpara/web-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+  Updated @getpara/web-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 ✅ Updated ./web/with-react-nextjs/custom-oauth-auth/package.json
-  Updated @getpara/web-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+  Updated @getpara/web-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 ✅ Updated ./web/with-react-nextjs/custom-phone-auth/package.json
-  Updated @getpara/graz: 2.0.0-alpha.8 → 2.0.0-alpha.15 (dependencies)
-  Updated @getpara/react-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+  Updated @getpara/react-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 ✅ Updated ./web/with-react-nextjs/para-modal/package.json
-  Updated @getpara/graz: 2.0.0-alpha.8 → 2.0.0-alpha.15 (dependencies)
-  Updated @getpara/react-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+  Updated @getpara/react-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 ✅ Updated ./web/with-react-nextjs/para-modal-cosmos/package.json
-  Updated @getpara/graz: 2.0.0-alpha.8 → 2.0.0-alpha.15 (dependencies)
-  Updated @getpara/react-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+  Updated @getpara/react-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 ✅ Updated ./web/with-react-nextjs/para-modal-evm/package.json
-  Updated @getpara/graz: 2.0.0-alpha.8 → 2.0.0-alpha.15 (dependencies)
-  Updated @getpara/react-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-  Updated @getpara/react-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (resolutions)
-  Updated @getpara/cosmjs-v0-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (resolutions)
-  Updated @getpara/user-management-client: 2.0.0-alpha.42 → 2.0.0-alpha.51 (resolutions)
+  Updated @getpara/react-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+  Updated @getpara/react-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (resolutions)
+  Updated @getpara/cosmjs-v0-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (resolutions)
+  Updated @getpara/user-management-client: 2.0.0-alpha.51 → 2.0.0-alpha.53 (resolutions)
 ✅ Updated ./web/with-react-nextjs/para-modal-multichain/package.json
-  Updated @getpara/graz: 2.0.0-alpha.8 → 2.0.0-alpha.15 (dependencies)
-  Updated @getpara/react-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+  Updated @getpara/react-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 ✅ Updated ./web/with-react-nextjs/para-modal-solana/package.json
-  Updated @getpara/graz: 2.0.0-alpha.8 → 2.0.0-alpha.15 (dependencies)
-  Updated @getpara/react-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-  Updated @getpara/server-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+  Updated @getpara/react-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+  Updated @getpara/server-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 ✅ Updated ./web/with-react-nextjs/para-pregen-claim/package.json
-  Updated @getpara/cosmjs-v0-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-  Updated @getpara/graz: 2.0.0-alpha.8 → 2.0.0-alpha.15 (dependencies)
-  Updated @getpara/react-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+  Updated @getpara/cosmjs-v0-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+  Updated @getpara/react-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 ✅ Updated ./web/with-react-nextjs/signer-cosmjs/package.json
-  Updated @getpara/ethers-v5-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-  Updated @getpara/graz: 2.0.0-alpha.8 → 2.0.0-alpha.15 (dependencies)
-  Updated @getpara/react-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+  Updated @getpara/ethers-v5-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+  Updated @getpara/react-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 ✅ Updated ./web/with-react-nextjs/signer-ethers-v5/package.json
-  Updated @getpara/ethers-v6-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-  Updated @getpara/graz: 2.0.0-alpha.8 → 2.0.0-alpha.15 (dependencies)
-  Updated @getpara/react-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+  Updated @getpara/ethers-v6-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+  Updated @getpara/react-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 ✅ Updated ./web/with-react-nextjs/signer-ethers-v6/package.json
-  Updated @getpara/graz: 2.0.0-alpha.8 → 2.0.0-alpha.15 (dependencies)
-  Updated @getpara/react-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-  Updated @getpara/solana-web3.js-v1-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+  Updated @getpara/react-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+  Updated @getpara/solana-web3.js-v1-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 ✅ Updated ./web/with-react-nextjs/signer-solana-anchor/package.json
-  Updated @getpara/graz: 2.0.0-alpha.8 → 2.0.0-alpha.15 (dependencies)
-  Updated @getpara/react-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-  Updated @getpara/solana-signers-v2-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-  Updated @getpara/solana-web3.js-v1-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+  Updated @getpara/react-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+  Updated @getpara/solana-signers-v2-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+  Updated @getpara/solana-web3.js-v1-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 ✅ Updated ./web/with-react-nextjs/signer-solana-signers-v2/package.json
-  Updated @getpara/graz: 2.0.0-alpha.8 → 2.0.0-alpha.15 (dependencies)
-  Updated @getpara/react-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-  Updated @getpara/solana-web3.js-v1-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+  Updated @getpara/react-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+  Updated @getpara/solana-web3.js-v1-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 ✅ Updated ./web/with-react-nextjs/signer-solana-web3/package.json
-  Updated @getpara/graz: 2.0.0-alpha.8 → 2.0.0-alpha.15 (dependencies)
-  Updated @getpara/react-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-  Updated @getpara/solana-web3.js-v1-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-  Updated @getpara/viem-v2-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+  Updated @getpara/react-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+  Updated @getpara/solana-web3.js-v1-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+  Updated @getpara/viem-v2-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 ✅ Updated ./web/with-react-nextjs/signer-viem-v2/package.json
-  Updated @getpara/graz: 2.0.0-alpha.8 → 2.0.0-alpha.15 (dependencies)
-  Updated @getpara/react-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+  Updated @getpara/react-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 ✅ Updated ./web/with-react-tanstack-start/package.json
-  Updated @getpara/graz: 2.0.0-alpha.8 → 2.0.0-alpha.15 (dependencies)
-  Updated @getpara/react-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+  Updated @getpara/react-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 ✅ Updated ./web/with-react-vite/package.json
-  Updated @getpara/web-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+  Updated @getpara/web-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 ✅ Updated ./web/with-svelte-vite/package.json
-  Updated @getpara/web-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+  Updated @getpara/web-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 ✅ Updated ./web/with-vue-vite/package.json
 
 ================================================================================
@@ -218,13 +190,13 @@ Summary:
 📦 Package Updates:
 
   @getpara/react-native-wallet:
-    2.0.0-alpha.42 → 2.0.0-alpha.51
+    2.0.0-alpha.51 → 2.0.0-alpha.53
     Updated in 2 files:
       - ./mobile/with-expo/package.json
       - ./mobile/with-react-native/package.json
 
   @getpara/cosmjs-v0-integration:
-    2.0.0-alpha.42 → 2.0.0-alpha.51
+    2.0.0-alpha.51 → 2.0.0-alpha.53
     Updated in 5 files:
       - ./server/with-bun/package.json
       - ./server/with-node/package.json
@@ -233,7 +205,7 @@ Summary:
       - ./web/with-react-nextjs/signer-cosmjs/package.json
 
   @getpara/ethers-v6-integration:
-    2.0.0-alpha.42 → 2.0.0-alpha.51
+    2.0.0-alpha.51 → 2.0.0-alpha.53
     Updated in 5 files:
       - ./server/with-bun/package.json
       - ./server/with-node/package.json
@@ -242,7 +214,7 @@ Summary:
       - ./web/with-react-nextjs/signer-ethers-v6/package.json
 
   @getpara/server-sdk:
-    2.0.0-alpha.42 → 2.0.0-alpha.51
+    2.0.0-alpha.51 → 2.0.0-alpha.53
     Updated in 5 files:
       - ./server/with-bun/package.json
       - ./server/with-node/package.json
@@ -251,7 +223,7 @@ Summary:
       - ./web/with-react-nextjs/para-pregen-claim/package.json
 
   @getpara/solana-web3.js-v1-integration:
-    2.0.0-alpha.42 → 2.0.0-alpha.51
+    2.0.0-alpha.51 → 2.0.0-alpha.53
     Updated in 13 files:
       - ./server/with-bun/package.json
       - ./server/with-node/package.json
@@ -268,7 +240,7 @@ Summary:
       - ./web/with-react-nextjs/signer-viem-v2/package.json
 
   @getpara/viem-v2-integration:
-    2.0.0-alpha.42 → 2.0.0-alpha.51
+    2.0.0-alpha.51 → 2.0.0-alpha.53
     Updated in 8 files:
       - ./server/with-bun/package.json
       - ./server/with-node/package.json
@@ -279,40 +251,8 @@ Summary:
       - ./web/with-react-nextjs/aa-zerodev/package.json
       - ./web/with-react-nextjs/signer-viem-v2/package.json
 
-  @getpara/graz:
-    2.0.0-alpha.8 → 2.0.0-alpha.15
-    Updated in 28 files:
-      - ./specialized/client-auth-server-sign/package.json
-      - ./specialized/with-bulk-pregen/package.json
-      - ./specialized/with-chrome-extension/package.json
-      - ./specialized/with-jupiter-dex-api/package.json
-      - ./specialized/with-pwa/package.json
-      - ./specialized/with-relay-bridge-api/package.json
-      - ./specialized/with-squid-router-api/package.json
-      - ./web/with-react-nextjs/aa-alchemy/package.json
-      - ./web/with-react-nextjs/aa-gelato/package.json
-      - ./web/with-react-nextjs/aa-thirdweb/package.json
-      - ./web/with-react-nextjs/aa-zerodev/package.json
-      - ./web/with-react-nextjs/connector-reown-appkit/package.json
-      - ./web/with-react-nextjs/connector-wagmi/package.json
-      - ./web/with-react-nextjs/para-modal/package.json
-      - ./web/with-react-nextjs/para-modal-cosmos/package.json
-      - ./web/with-react-nextjs/para-modal-evm/package.json
-      - ./web/with-react-nextjs/para-modal-multichain/package.json
-      - ./web/with-react-nextjs/para-modal-solana/package.json
-      - ./web/with-react-nextjs/para-pregen-claim/package.json
-      - ./web/with-react-nextjs/signer-cosmjs/package.json
-      - ./web/with-react-nextjs/signer-ethers-v5/package.json
-      - ./web/with-react-nextjs/signer-ethers-v6/package.json
-      - ./web/with-react-nextjs/signer-solana-anchor/package.json
-      - ./web/with-react-nextjs/signer-solana-signers-v2/package.json
-      - ./web/with-react-nextjs/signer-solana-web3/package.json
-      - ./web/with-react-nextjs/signer-viem-v2/package.json
-      - ./web/with-react-tanstack-start/package.json
-      - ./web/with-react-vite/package.json
-
   @getpara/react-sdk:
-    2.0.0-alpha.42 → 2.0.0-alpha.51
+    2.0.0-alpha.51 → 2.0.0-alpha.53
     Updated in 30 files:
       - ./specialized/client-auth-server-sign/package.json
       - ./specialized/with-bulk-pregen/package.json
@@ -346,12 +286,12 @@ Summary:
       - ./web/with-react-vite/package.json
 
   @getpara/cosmos-wallet-connectors:
-    2.0.0-alpha.42 → 2.0.0-alpha.51
+    2.0.0-alpha.51 → 2.0.0-alpha.53
     Updated in 1 files:
       - ./specialized/with-bulk-pregen/package.json
 
   @getpara/evm-wallet-connectors:
-    2.0.0-alpha.42 → 2.0.0-alpha.51
+    2.0.0-alpha.51 → 2.0.0-alpha.53
     Updated in 5 files:
       - ./specialized/with-bulk-pregen/package.json
       - ./web/with-react-nextjs/aa-alchemy/package.json
@@ -360,24 +300,24 @@ Summary:
       - ./web/with-react-nextjs/aa-zerodev/package.json
 
   @getpara/solana-wallet-connectors:
-    2.0.0-alpha.42 → 2.0.0-alpha.51
+    2.0.0-alpha.51 → 2.0.0-alpha.53
     Updated in 1 files:
       - ./specialized/with-bulk-pregen/package.json
 
   @getpara/wagmi-v2-integration:
-    2.0.0-alpha.42 → 2.0.0-alpha.51
+    2.0.0-alpha.51 → 2.0.0-alpha.53
     Updated in 2 files:
       - ./web/with-react-nextjs/connector-reown-appkit/package.json
       - ./web/with-react-nextjs/connector-wagmi/package.json
 
   @getpara/user-management-client:
-    2.0.0-alpha.42 → 2.0.0-alpha.51
+    2.0.0-alpha.51 → 2.0.0-alpha.53
     Updated in 2 files:
       - ./web/with-react-nextjs/connector-reown-appkit/package.json
       - ./web/with-react-nextjs/para-modal-multichain/package.json
 
   @getpara/web-sdk:
-    2.0.0-alpha.42 → 2.0.0-alpha.51
+    2.0.0-alpha.51 → 2.0.0-alpha.53
     Updated in 5 files:
       - ./web/with-react-nextjs/custom-email-auth/package.json
       - ./web/with-react-nextjs/custom-oauth-auth/package.json
@@ -386,211 +326,183 @@ Summary:
       - ./web/with-vue-vite/package.json
 
   @getpara/ethers-v5-integration:
-    2.0.0-alpha.42 → 2.0.0-alpha.51
+    2.0.0-alpha.51 → 2.0.0-alpha.53
     Updated in 1 files:
       - ./web/with-react-nextjs/signer-ethers-v5/package.json
 
   @getpara/solana-signers-v2-integration:
-    2.0.0-alpha.42 → 2.0.0-alpha.51
+    2.0.0-alpha.51 → 2.0.0-alpha.53
     Updated in 1 files:
       - ./web/with-react-nextjs/signer-solana-signers-v2/package.json
 
 📁 Files Updated:
 
   ./mobile/with-expo/package.json:
-    - @getpara/react-native-wallet: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+    - @getpara/react-native-wallet: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 
   ./mobile/with-react-native/package.json:
-    - @getpara/react-native-wallet: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+    - @getpara/react-native-wallet: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 
   ./server/with-bun/package.json:
-    - @getpara/cosmjs-v0-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-    - @getpara/ethers-v6-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-    - @getpara/server-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-    - @getpara/solana-web3.js-v1-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-    - @getpara/viem-v2-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+    - @getpara/cosmjs-v0-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+    - @getpara/ethers-v6-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+    - @getpara/server-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+    - @getpara/solana-web3.js-v1-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+    - @getpara/viem-v2-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 
   ./server/with-node/package.json:
-    - @getpara/cosmjs-v0-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-    - @getpara/ethers-v6-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-    - @getpara/server-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-    - @getpara/solana-web3.js-v1-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-    - @getpara/viem-v2-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+    - @getpara/cosmjs-v0-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+    - @getpara/ethers-v6-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+    - @getpara/server-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+    - @getpara/solana-web3.js-v1-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+    - @getpara/viem-v2-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 
   ./specialized/client-auth-server-sign/package.json:
-    - @getpara/ethers-v6-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-    - @getpara/graz: 2.0.0-alpha.8 → 2.0.0-alpha.15 (dependencies)
-    - @getpara/react-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-    - @getpara/server-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+    - @getpara/ethers-v6-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+    - @getpara/react-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+    - @getpara/server-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 
   ./specialized/with-bulk-pregen/package.json:
-    - @getpara/cosmos-wallet-connectors: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-    - @getpara/evm-wallet-connectors: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-    - @getpara/graz: 2.0.0-alpha.8 → 2.0.0-alpha.15 (dependencies)
-    - @getpara/react-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-    - @getpara/server-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-    - @getpara/solana-wallet-connectors: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+    - @getpara/cosmos-wallet-connectors: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+    - @getpara/evm-wallet-connectors: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+    - @getpara/react-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+    - @getpara/server-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+    - @getpara/solana-wallet-connectors: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 
   ./specialized/with-chrome-extension/package.json:
-    - @getpara/graz: 2.0.0-alpha.8 → 2.0.0-alpha.15 (dependencies)
-    - @getpara/react-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+    - @getpara/react-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 
   ./specialized/with-jupiter-dex-api/package.json:
-    - @getpara/graz: 2.0.0-alpha.8 → 2.0.0-alpha.15 (dependencies)
-    - @getpara/react-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-    - @getpara/solana-web3.js-v1-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+    - @getpara/react-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+    - @getpara/solana-web3.js-v1-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 
   ./specialized/with-pwa/package.json:
-    - @getpara/graz: 2.0.0-alpha.8 → 2.0.0-alpha.15 (dependencies)
-    - @getpara/react-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+    - @getpara/react-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 
   ./specialized/with-relay-bridge-api/package.json:
-    - @getpara/graz: 2.0.0-alpha.8 → 2.0.0-alpha.15 (dependencies)
-    - @getpara/react-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-    - @getpara/solana-web3.js-v1-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-    - @getpara/viem-v2-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+    - @getpara/react-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+    - @getpara/solana-web3.js-v1-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+    - @getpara/viem-v2-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 
   ./specialized/with-squid-router-api/package.json:
-    - @getpara/ethers-v6-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-    - @getpara/graz: 2.0.0-alpha.8 → 2.0.0-alpha.15 (dependencies)
-    - @getpara/react-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-    - @getpara/solana-web3.js-v1-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+    - @getpara/ethers-v6-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+    - @getpara/react-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+    - @getpara/solana-web3.js-v1-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 
   ./web/with-react-nextjs/aa-alchemy/package.json:
-    - @getpara/evm-wallet-connectors: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-    - @getpara/graz: 2.0.0-alpha.8 → 2.0.0-alpha.15 (dependencies)
-    - @getpara/react-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-    - @getpara/solana-web3.js-v1-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-    - @getpara/viem-v2-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+    - @getpara/evm-wallet-connectors: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+    - @getpara/react-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+    - @getpara/solana-web3.js-v1-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+    - @getpara/viem-v2-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 
   ./web/with-react-nextjs/aa-gelato/package.json:
-    - @getpara/evm-wallet-connectors: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-    - @getpara/graz: 2.0.0-alpha.8 → 2.0.0-alpha.15 (dependencies)
-    - @getpara/react-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-    - @getpara/solana-web3.js-v1-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-    - @getpara/viem-v2-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+    - @getpara/evm-wallet-connectors: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+    - @getpara/react-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+    - @getpara/solana-web3.js-v1-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+    - @getpara/viem-v2-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 
   ./web/with-react-nextjs/aa-thirdweb/package.json:
-    - @getpara/evm-wallet-connectors: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-    - @getpara/graz: 2.0.0-alpha.8 → 2.0.0-alpha.15 (dependencies)
-    - @getpara/react-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-    - @getpara/solana-web3.js-v1-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-    - @getpara/viem-v2-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+    - @getpara/evm-wallet-connectors: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+    - @getpara/react-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+    - @getpara/solana-web3.js-v1-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+    - @getpara/viem-v2-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 
   ./web/with-react-nextjs/aa-zerodev/package.json:
-    - @getpara/evm-wallet-connectors: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-    - @getpara/graz: 2.0.0-alpha.8 → 2.0.0-alpha.15 (dependencies)
-    - @getpara/react-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-    - @getpara/solana-web3.js-v1-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-    - @getpara/viem-v2-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+    - @getpara/evm-wallet-connectors: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+    - @getpara/react-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+    - @getpara/solana-web3.js-v1-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+    - @getpara/viem-v2-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 
   ./web/with-react-nextjs/connector-reown-appkit/package.json:
-    - @getpara/graz: 2.0.0-alpha.8 → 2.0.0-alpha.15 (dependencies)
-    - @getpara/react-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-    - @getpara/wagmi-v2-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-    - @getpara/react-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (resolutions)
-    - @getpara/cosmjs-v0-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (resolutions)
-    - @getpara/user-management-client: 2.0.0-alpha.42 → 2.0.0-alpha.51 (resolutions)
+    - @getpara/react-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+    - @getpara/wagmi-v2-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+    - @getpara/react-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (resolutions)
+    - @getpara/cosmjs-v0-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (resolutions)
+    - @getpara/user-management-client: 2.0.0-alpha.51 → 2.0.0-alpha.53 (resolutions)
 
   ./web/with-react-nextjs/connector-wagmi/package.json:
-    - @getpara/graz: 2.0.0-alpha.8 → 2.0.0-alpha.15 (dependencies)
-    - @getpara/react-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-    - @getpara/wagmi-v2-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+    - @getpara/react-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+    - @getpara/wagmi-v2-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 
   ./web/with-react-nextjs/custom-email-auth/package.json:
-    - @getpara/web-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+    - @getpara/web-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 
   ./web/with-react-nextjs/custom-oauth-auth/package.json:
-    - @getpara/web-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+    - @getpara/web-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 
   ./web/with-react-nextjs/custom-phone-auth/package.json:
-    - @getpara/web-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+    - @getpara/web-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 
   ./web/with-react-nextjs/para-modal/package.json:
-    - @getpara/graz: 2.0.0-alpha.8 → 2.0.0-alpha.15 (dependencies)
-    - @getpara/react-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+    - @getpara/react-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 
   ./web/with-react-nextjs/para-modal-cosmos/package.json:
-    - @getpara/graz: 2.0.0-alpha.8 → 2.0.0-alpha.15 (dependencies)
-    - @getpara/react-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+    - @getpara/react-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 
   ./web/with-react-nextjs/para-modal-evm/package.json:
-    - @getpara/graz: 2.0.0-alpha.8 → 2.0.0-alpha.15 (dependencies)
-    - @getpara/react-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+    - @getpara/react-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 
   ./web/with-react-nextjs/para-modal-multichain/package.json:
-    - @getpara/graz: 2.0.0-alpha.8 → 2.0.0-alpha.15 (dependencies)
-    - @getpara/react-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-    - @getpara/react-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (resolutions)
-    - @getpara/cosmjs-v0-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (resolutions)
-    - @getpara/user-management-client: 2.0.0-alpha.42 → 2.0.0-alpha.51 (resolutions)
+    - @getpara/react-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+    - @getpara/react-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (resolutions)
+    - @getpara/cosmjs-v0-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (resolutions)
+    - @getpara/user-management-client: 2.0.0-alpha.51 → 2.0.0-alpha.53 (resolutions)
 
   ./web/with-react-nextjs/para-modal-solana/package.json:
-    - @getpara/graz: 2.0.0-alpha.8 → 2.0.0-alpha.15 (dependencies)
-    - @getpara/react-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+    - @getpara/react-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 
   ./web/with-react-nextjs/para-pregen-claim/package.json:
-    - @getpara/graz: 2.0.0-alpha.8 → 2.0.0-alpha.15 (dependencies)
-    - @getpara/react-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-    - @getpara/server-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+    - @getpara/react-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+    - @getpara/server-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 
   ./web/with-react-nextjs/signer-cosmjs/package.json:
-    - @getpara/cosmjs-v0-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-    - @getpara/graz: 2.0.0-alpha.8 → 2.0.0-alpha.15 (dependencies)
-    - @getpara/react-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+    - @getpara/cosmjs-v0-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+    - @getpara/react-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 
   ./web/with-react-nextjs/signer-ethers-v5/package.json:
-    - @getpara/ethers-v5-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-    - @getpara/graz: 2.0.0-alpha.8 → 2.0.0-alpha.15 (dependencies)
-    - @getpara/react-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+    - @getpara/ethers-v5-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+    - @getpara/react-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 
   ./web/with-react-nextjs/signer-ethers-v6/package.json:
-    - @getpara/ethers-v6-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-    - @getpara/graz: 2.0.0-alpha.8 → 2.0.0-alpha.15 (dependencies)
-    - @getpara/react-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+    - @getpara/ethers-v6-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+    - @getpara/react-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 
   ./web/with-react-nextjs/signer-solana-anchor/package.json:
-    - @getpara/graz: 2.0.0-alpha.8 → 2.0.0-alpha.15 (dependencies)
-    - @getpara/react-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-    - @getpara/solana-web3.js-v1-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+    - @getpara/react-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+    - @getpara/solana-web3.js-v1-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 
   ./web/with-react-nextjs/signer-solana-signers-v2/package.json:
-    - @getpara/graz: 2.0.0-alpha.8 → 2.0.0-alpha.15 (dependencies)
-    - @getpara/react-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-    - @getpara/solana-signers-v2-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-    - @getpara/solana-web3.js-v1-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+    - @getpara/react-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+    - @getpara/solana-signers-v2-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+    - @getpara/solana-web3.js-v1-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 
   ./web/with-react-nextjs/signer-solana-web3/package.json:
-    - @getpara/graz: 2.0.0-alpha.8 → 2.0.0-alpha.15 (dependencies)
-    - @getpara/react-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-    - @getpara/solana-web3.js-v1-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+    - @getpara/react-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+    - @getpara/solana-web3.js-v1-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 
   ./web/with-react-nextjs/signer-viem-v2/package.json:
-    - @getpara/graz: 2.0.0-alpha.8 → 2.0.0-alpha.15 (dependencies)
-    - @getpara/react-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-    - @getpara/solana-web3.js-v1-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
-    - @getpara/viem-v2-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+    - @getpara/react-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+    - @getpara/solana-web3.js-v1-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
+    - @getpara/viem-v2-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 
   ./web/with-react-tanstack-start/package.json:
-    - @getpara/graz: 2.0.0-alpha.8 → 2.0.0-alpha.15 (dependencies)
-    - @getpara/react-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+    - @getpara/react-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 
   ./web/with-react-vite/package.json:
-    - @getpara/graz: 2.0.0-alpha.8 → 2.0.0-alpha.15 (dependencies)
-    - @getpara/react-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+    - @getpara/react-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 
   ./web/with-svelte-vite/package.json:
-    - @getpara/web-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+    - @getpara/web-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 
   ./web/with-vue-vite/package.json:
-    - @getpara/web-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51 (dependencies)
+    - @getpara/web-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53 (dependencies)
 
 ================================================================================
 📊 STATISTICS:
   - Package.json files checked: 38
   - Files updated: 37
-  - Dependencies updated: 114
-  - Unique packages updated: 16
+  - Dependencies updated: 86
+  - Unique packages updated: 15
 ================================================================================
 
 🔒 Updating yarn.lock files in 37 directories...
@@ -675,23 +587,22 @@ Summary:
 ---------------------------------------------------
 update @getpara/* dependencies to latest alpha versions
 
-Updated 16 @getpara packages:
-- @getpara/react-native-wallet: 2.0.0-alpha.42 → 2.0.0-alpha.51
-- @getpara/cosmjs-v0-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51
-- @getpara/ethers-v6-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51
-- @getpara/server-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51
-- @getpara/solana-web3.js-v1-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51
-- @getpara/viem-v2-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51
-- @getpara/graz: 2.0.0-alpha.8 → 2.0.0-alpha.15
-- @getpara/react-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51
-- @getpara/cosmos-wallet-connectors: 2.0.0-alpha.42 → 2.0.0-alpha.51
-- @getpara/evm-wallet-connectors: 2.0.0-alpha.42 → 2.0.0-alpha.51
-- @getpara/solana-wallet-connectors: 2.0.0-alpha.42 → 2.0.0-alpha.51
-- @getpara/wagmi-v2-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51
-- @getpara/user-management-client: 2.0.0-alpha.42 → 2.0.0-alpha.51
-- @getpara/web-sdk: 2.0.0-alpha.42 → 2.0.0-alpha.51
-- @getpara/ethers-v5-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51
-- @getpara/solana-signers-v2-integration: 2.0.0-alpha.42 → 2.0.0-alpha.51
+Updated 15 @getpara packages:
+- @getpara/react-native-wallet: 2.0.0-alpha.51 → 2.0.0-alpha.53
+- @getpara/cosmjs-v0-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53
+- @getpara/ethers-v6-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53
+- @getpara/server-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53
+- @getpara/solana-web3.js-v1-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53
+- @getpara/viem-v2-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53
+- @getpara/react-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53
+- @getpara/cosmos-wallet-connectors: 2.0.0-alpha.51 → 2.0.0-alpha.53
+- @getpara/evm-wallet-connectors: 2.0.0-alpha.51 → 2.0.0-alpha.53
+- @getpara/solana-wallet-connectors: 2.0.0-alpha.51 → 2.0.0-alpha.53
+- @getpara/wagmi-v2-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53
+- @getpara/user-management-client: 2.0.0-alpha.51 → 2.0.0-alpha.53
+- @getpara/web-sdk: 2.0.0-alpha.51 → 2.0.0-alpha.53
+- @getpara/ethers-v5-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53
+- @getpara/solana-signers-v2-integration: 2.0.0-alpha.51 → 2.0.0-alpha.53
 
 Affected 37 package.json files across the monorepo.
 Automatically updated yarn.lock files in affected directories.
