@@ -1,4 +1,4 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
 @theme {
   --color-background: var(--background);
@@ -62,4 +62,8 @@ body {
   color: var(--foreground);
   background: var(--background);
   font-family: "Inter", Arial, Helvetica, sans-serif;
+}
+
+#overlay {
+  background: green !important;
 }
