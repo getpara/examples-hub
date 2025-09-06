@@ -1,4 +1,4 @@
-import { API_KEY, ENVIRONMENT } from "@/config/constants";
+import { API_KEY } from "@/config/constants";
 import { ParaWeb } from "@getpara/react-sdk-lite";
 
-export const para = typeof window !== "undefined" ? new ParaWeb(ENVIRONMENT, API_KEY) : null;
+export const para = typeof window !== "undefined" ? new ParaWeb(API_KEY!) : null;

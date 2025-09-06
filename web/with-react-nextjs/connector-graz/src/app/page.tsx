@@ -6,7 +6,7 @@ import { TransactionHash } from "@/components/ui/TransactionHash";
 import { ConnectWalletCard } from "@/components/ui/ConnectWalletCard";
 import { TransferForm } from "@/components/ui/TransferForm";
 import { useModal } from "@/context/ModalContext";
-import { useAccount, useSendTokens, useStargateSigningClient, useActiveChains, useBalance } from "@getpara/graz";
+import { useAccount, useSendTokens, useStargateSigningClient, useActiveChains, useBalance } from "graz";
 
 export default function Home() {
   // Hardcode faucet address for demo

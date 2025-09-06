@@ -1,9 +1,9 @@
 "use client";
 
-import { useConnect, useDisconnect, useAccount, getAvailableWallets, WalletType } from "@getpara/graz";
+import { useConnect, useDisconnect, useAccount, getAvailableWallets, WalletType } from "graz";
 import { Modal } from "./ui/Modal";
 import { useEffect } from "react";
-import { cosmosicsprovidertestnet } from "@getpara/graz/chains";
+import { cosmosicsprovidertestnet } from "graz/chains";
 
 interface ConnectWalletModalProps {
   isOpen: boolean;

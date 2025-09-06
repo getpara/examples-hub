@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useAccount } from "@getpara/graz";
+import { useAccount } from "graz";
 
 interface HeaderProps {
   onConnectClick: () => void;

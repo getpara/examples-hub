@@ -761,9 +761,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@getpara/core-components@npm:2.0.0-alpha.44":
-  version: 2.0.0-alpha.44
-  resolution: "@getpara/core-components@npm:2.0.0-alpha.44"
+"@getpara/core-components@npm:2.0.0-alpha.51":
+  version: 2.0.0-alpha.51
+  resolution: "@getpara/core-components@npm:2.0.0-alpha.51"
   dependencies:
     "@stencil/core": "npm:^4.7.0"
     color-blend: "npm:^4.0.0"
@@ -771,64 +771,47 @@ __metadata:
     gsap: "npm:^3.12.5"
     inputmask: "npm:5.0.9"
     qrcode-with-logos: "npm:1.1.1"
-  checksum: 10c0/4a4c112a18a23b95abb4cd80516d0276c074c1ef42d0935efe4d563deb0a5d387e9b644b03bffa6dc24febce0c71a340510cdeaa8c8b6aa61035494c8b6ac7ae
+  checksum: 10c0/85c5961cf747d66803486c7818a47c0a4d8a00c0e5351ca04bbcba4eed05540efcb89f26f18ba2aca8e3310d5d697c9c89948f012925de2a964c62f7558f5132
   languageName: node
   linkType: hard
 
-"@getpara/core-sdk@npm:2.0.0-alpha.44":
-  version: 2.0.0-alpha.44
-  resolution: "@getpara/core-sdk@npm:2.0.0-alpha.44"
+"@getpara/core-sdk@npm:2.0.0-alpha.51":
+  version: 2.0.0-alpha.51
+  resolution: "@getpara/core-sdk@npm:2.0.0-alpha.51"
   dependencies:
     "@celo/utils": "npm:^8.0.2"
     "@cosmjs/encoding": "npm:^0.32.4"
     "@ethereumjs/util": "npm:^9.1.0"
-    "@getpara/user-management-client": "npm:2.0.0-alpha.44"
+    "@getpara/user-management-client": "npm:2.0.0-alpha.51"
     "@noble/hashes": "npm:^1.5.0"
     base64url: "npm:^3.0.1"
     libphonenumber-js: "npm:^1.11.7"
     node-forge: "npm:^1.3.1"
     uuid: "npm:^11.1.0"
-  checksum: 10c0/608deac684990c0363dad50161b480996621ec3b72a8fc9be8a914530e1c17b4be322ff63b6e6a0bcea1350ee21ba4928849928b72be798ccfde2b1112ecb09c
+  checksum: 10c0/b933c4ee1d3adde19d7e3df7b4cbdc96751cfbbe008a7e24cdfb6323059aae3f0f04e4b235e1073477e5bf48a31efe2f119ce3b4836038d81af09c3350085c5d
   languageName: node
   linkType: hard
 
-"@getpara/core-sdk@npm:2.0.0-fc.3":
-  version: 2.0.0-fc.3
-  resolution: "@getpara/core-sdk@npm:2.0.0-fc.3"
+"@getpara/cosmjs-v0-integration@npm:2.0.0-alpha.51":
+  version: 2.0.0-alpha.51
+  resolution: "@getpara/cosmjs-v0-integration@npm:2.0.0-alpha.51"
   dependencies:
-    "@celo/utils": "npm:^8.0.2"
-    "@cosmjs/encoding": "npm:^0.32.4"
-    "@ethereumjs/util": "npm:^9.1.0"
-    "@getpara/user-management-client": "npm:2.0.0-fc.3"
-    "@noble/hashes": "npm:^1.5.0"
-    base64url: "npm:^3.0.1"
-    libphonenumber-js: "npm:^1.11.7"
-    node-forge: "npm:^1.3.1"
-    uuid: "npm:^11.1.0"
-  checksum: 10c0/a3cf5e8862fd7442cda5b2d1784c80d41566cb30a4a77344db905e8fa40eb6d6bd07edf793bbca9f40dfc2c806ed32c36c9cf6ae89bf87e73b2fe0e2e618b963
-  languageName: node
-  linkType: hard
-
-"@getpara/cosmjs-v0-integration@npm:~2.0.0-alpha.44":
-  version: 2.0.0-fc.3
-  resolution: "@getpara/cosmjs-v0-integration@npm:2.0.0-fc.3"
-  dependencies:
-    "@getpara/core-sdk": "npm:2.0.0-fc.3"
+    "@getpara/core-sdk": "npm:2.0.0-alpha.51"
   peerDependencies:
     "@cosmjs/amino": ">= 0.31.3 < 1"
     "@cosmjs/encoding": ">= 0.31.3 < 1"
     "@cosmjs/proto-signing": ">= 0.31.3 < 1"
     "@cosmjs/stargate": ">= 0.31.3 < 1"
-  checksum: 10c0/801371f7947410f88db9dfa69ec6bbf3add80e826fba3b7a9776ad062169174f283d0b8ead2b1b2988105ad746ff9041d1eec03d9c473a140b2bdbdac6ad354c
+  checksum: 10c0/dcb34e3ea8f8d257169681a9bd3560f6e5a6f6704801863c1c9a758a350ef00ab17fa574214735fe4bc83062dac2e10afc7f495bdcfd9f97ddade98f54129842
   languageName: node
   linkType: hard
 
-"@getpara/graz-connector@npm:~2.0.0-dev.12":
-  version: 2.0.0-dev.12
-  resolution: "@getpara/graz-connector@npm:2.0.0-dev.12"
+"@getpara/graz-connector@npm:2.0.0-alpha.51":
+  version: 2.0.0-alpha.51
+  resolution: "@getpara/graz-connector@npm:2.0.0-alpha.51"
   dependencies:
-    "@getpara/cosmjs-v0-integration": "npm:~2.0.0-alpha.44"
-    "@getpara/web-sdk": "npm:~2.0.0-alpha.44"
+    "@getpara/cosmjs-v0-integration": "npm:2.0.0-alpha.51"
+    "@getpara/web-sdk": "npm:2.0.0-alpha.51"
   peerDependencies:
     "@cosmjs/amino": ">=0.32.4"
     "@cosmjs/encoding": ">=0.32.4"
@@ -836,73 +819,33 @@ __metadata:
     "@cosmjs/stargate": ">=0.32.4"
     "@cosmjs/tendermint-rpc": ">=0.32.4"
     "@keplr-wallet/types": ">=0.12.156"
-    cosmjs-types: ">=0.9.0"
+    cosmjs-types: ">=0.8.0"
     graz: ">=0.3.3"
-  checksum: 10c0/b818724197a3e1e2ea44926179512f8b58a9a84246551d7f42cefd2231ab02e0fa02caee336cce296c3896cd01afb51e5f027149146856e97ea538f15acbfc1a
+  checksum: 10c0/de64f9200e2dfa41fd168076b0db1d3e8ea047520462d56b546a87879da9a1a34028bdb9dd1d243ad0be3ab57766475f3b263ecd4e79cd78945af5faa738d386
   languageName: node
   linkType: hard
 
-"@getpara/graz-integration@npm:2.0.0-dev.12":
-  version: 2.0.0-dev.12
-  resolution: "@getpara/graz-integration@npm:2.0.0-dev.12"
+"@getpara/graz-integration@npm:2.0.0-alpha.51":
+  version: 2.0.0-alpha.51
+  resolution: "@getpara/graz-integration@npm:2.0.0-alpha.51"
   dependencies:
-    "@getpara/graz-connector": "npm:~2.0.0-dev.12"
+    "@getpara/graz-connector": "npm:2.0.0-alpha.51"
   peerDependencies:
-    "@getpara/react-sdk-lite": ~2.0.0-alpha.44
+    "@getpara/react-sdk-lite": 2.0.0-alpha.51
     "@tanstack/react-query": ^5.74.0
     graz: ^0.3.3
-    react: ">=18"
-    react-dom: ">=18"
-  checksum: 10c0/778c9942b00f8ae77e7d62e0fe1f9c23180e533cd5fba764189efb32ac04aecf057656399d6b680453703391227d4cdebeaa8f38345e9f714d70b25fc1947ac2
+    react: ">=18.0.0"
+    react-dom: ">=18.0.0"
+  checksum: 10c0/8e620692a4f8ed1319722f089d67e46394e2378df86b3042a0e7a27aa70375e198d661e84d3a3bbfa370bea1b770fc38264c9c0b308592498c3d3b129cf8e263
   languageName: node
   linkType: hard
 
-"@getpara/graz@npm:^0.3.3-dev.3":
-  version: 0.3.3-dev.3
-  resolution: "@getpara/graz@npm:0.3.3-dev.3"
+"@getpara/react-common@npm:2.0.0-alpha.51":
+  version: 2.0.0-alpha.51
+  resolution: "@getpara/react-common@npm:2.0.0-alpha.51"
   dependencies:
-    "@cosmsnap/snapper": "npm:0.2.7"
-    "@dao-dao/cosmiframe": "npm:1.0.0"
-    "@initia/initia-registry-types": "npm:0.0.20"
-    "@keplr-wallet/cosmos": "npm:0.12.156"
-    "@keplr-wallet/types": "npm:0.12.156"
-    "@metamask/providers": "npm:12.0.0"
-    "@vectis/extension-client": "npm:^0.7.2"
-    "@walletconnect/modal": "npm:2.7.0"
-    "@walletconnect/sign-client": "npm:2.20.2"
-    "@walletconnect/types": "npm:2.20.2"
-    "@walletconnect/utils": "npm:2.20.2"
-    cosmos-directory-client: "npm:0.0.6"
-    long: "npm:4"
-    starknet: "npm:^6"
-    zustand: "npm:5.0.4"
-  peerDependencies:
-    "@cosmjs/amino": ">=0.32.4"
-    "@cosmjs/cosmwasm-stargate": ">=0.32.4"
-    "@cosmjs/encoding": ">=0.32.4"
-    "@cosmjs/proto-signing": ">=0.32.4"
-    "@cosmjs/stargate": ">=0.32.4"
-    "@getpara/graz-connector": ~2.0.0-dev.12
-    "@getpara/graz-integration": ~2.0.0-dev.12
-    "@tanstack/react-query": ">=5.62.0"
-    react: ">=17"
-  peerDependenciesMeta:
-    "@getpara/graz-connector":
-      optional: true
-    "@getpara/graz-integration":
-      optional: true
-  bin:
-    graz: dist/cli.js
-  checksum: 10c0/e7cb6681da5c769f2ee10d7433de9c07c65bc8e1de5b138caf1b3d391862faa1797aebb2adefc45443d3d53e6a0332a2fc5fb7fd10c234e7d6d30deb63991b8b
-  languageName: node
-  linkType: hard
-
-"@getpara/react-common@npm:2.0.0-alpha.44":
-  version: 2.0.0-alpha.44
-  resolution: "@getpara/react-common@npm:2.0.0-alpha.44"
-  dependencies:
-    "@getpara/react-components": "npm:2.0.0-alpha.44"
-    "@getpara/web-sdk": "npm:2.0.0-alpha.44"
+    "@getpara/react-components": "npm:2.0.0-alpha.51"
+    "@getpara/web-sdk": "npm:2.0.0-alpha.51"
     "@moonpay/moonpay-react": "npm:^1.8.3"
     "@ramp-network/ramp-instant-sdk": "npm:^4.0.5"
     libphonenumber-js: "npm:^1.11.7"
@@ -911,26 +854,26 @@ __metadata:
   peerDependencies:
     react: "*"
     react-dom: "*"
-  checksum: 10c0/767d30bc5866043d7ea940a734a64a12622f8ac898574023d4dbccc998efb9f6f520fbaa15dc5289499c1f5ceca067f080d2e3decfd379f99f3b57c4c7e59ca1
+  checksum: 10c0/904d22ae8f78cc538466382f9419003ec066bc4616aecb3fd4fc7924e2fc2e7ad7cf934a97881425e852da8c6f731b4040cb4920a1665c02fabcdbb8be2977b1
   languageName: node
   linkType: hard
 
-"@getpara/react-components@npm:2.0.0-alpha.44":
-  version: 2.0.0-alpha.44
-  resolution: "@getpara/react-components@npm:2.0.0-alpha.44"
+"@getpara/react-components@npm:2.0.0-alpha.51":
+  version: 2.0.0-alpha.51
+  resolution: "@getpara/react-components@npm:2.0.0-alpha.51"
   dependencies:
-    "@getpara/core-components": "npm:2.0.0-alpha.44"
-  checksum: 10c0/ea0a1d42299413651ff9fefded4b4ae139102c258ef205426928b9b733b5004fc89169a0c200783e8c12b2f02a959af26a49d2350975ae7828a940ec37f1ed5f
+    "@getpara/core-components": "npm:2.0.0-alpha.51"
+  checksum: 10c0/f2992fb297a69cc65c431b7de845fd4ddd3bc53cf7c255a86d7f4cf8655be9c4bae4aa8e6c0bda484a9d5c3b93a56a4beb8221700029e70316c5298764c7a736
   languageName: node
   linkType: hard
 
-"@getpara/react-sdk-lite@npm:2.0.0-alpha.44":
-  version: 2.0.0-alpha.44
-  resolution: "@getpara/react-sdk-lite@npm:2.0.0-alpha.44"
+"@getpara/react-sdk-lite@npm:2.0.0-alpha.51":
+  version: 2.0.0-alpha.51
+  resolution: "@getpara/react-sdk-lite@npm:2.0.0-alpha.51"
   dependencies:
-    "@getpara/react-common": "npm:2.0.0-alpha.44"
-    "@getpara/react-components": "npm:2.0.0-alpha.44"
-    "@getpara/web-sdk": "npm:2.0.0-alpha.44"
+    "@getpara/react-common": "npm:2.0.0-alpha.51"
+    "@getpara/react-components": "npm:2.0.0-alpha.51"
+    "@getpara/web-sdk": "npm:2.0.0-alpha.51"
     date-fns: "npm:^3.6.0"
     framer-motion: "npm:^11.3.31"
     libphonenumber-js: "npm:^1.11.7"
@@ -943,36 +886,26 @@ __metadata:
     react-dom: "*"
   bin:
     setup-para: dist/cli/cli.mjs
-  checksum: 10c0/a58adf7aa3387fb380f613a881b8b4df5fda93026e276e5f22c3901ac6f6d066c3fe995eca3d3f7c9cb4c509549f85e563128f998906b4c5922f6e123d00e8c6
+  checksum: 10c0/960c1913faa29739ba9235f94469ab21d29e5f714c86a546d29927c96e00c37035fbe36159c0b1d2d6e3531db3b6c6366ec348dd764b8ad36b0b3ce2a7b04622
   languageName: node
   linkType: hard
 
-"@getpara/user-management-client@npm:2.0.0-alpha.44":
-  version: 2.0.0-alpha.44
-  resolution: "@getpara/user-management-client@npm:2.0.0-alpha.44"
+"@getpara/user-management-client@npm:2.0.0-alpha.51":
+  version: 2.0.0-alpha.51
+  resolution: "@getpara/user-management-client@npm:2.0.0-alpha.51"
   dependencies:
     axios: "npm:^1.8.4"
     libphonenumber-js: "npm:^1.11.7"
-  checksum: 10c0/36a8bf70a2f544e5f42662ec9df63886312ae8c08e0f826834c5367ab8896045a2963d45c7d94f0d23d10bc775e94705b500e584a2ef4d20d471e62dd7b479ce
+  checksum: 10c0/5d898f560ded18537c83c4435db2396c115b086bb6e0c365e9c62ce0a1f2b49e24c3104ad7d3bd9aea58f3afe0bba4f917b5604b42a03eda82894dbb3bfdeeeb
   languageName: node
   linkType: hard
 
-"@getpara/user-management-client@npm:2.0.0-fc.3":
-  version: 2.0.0-fc.3
-  resolution: "@getpara/user-management-client@npm:2.0.0-fc.3"
+"@getpara/web-sdk@npm:2.0.0-alpha.51":
+  version: 2.0.0-alpha.51
+  resolution: "@getpara/web-sdk@npm:2.0.0-alpha.51"
   dependencies:
-    axios: "npm:^1.8.4"
-    libphonenumber-js: "npm:^1.11.7"
-  checksum: 10c0/365cc8a0deed5c787c1cd2336778e6352d4d6d117e2bd405398964c257820ea233792c3eed64b94197b6117003827f4581d295722a0dad88206c86973b4390c0
-  languageName: node
-  linkType: hard
-
-"@getpara/web-sdk@npm:2.0.0-alpha.44":
-  version: 2.0.0-alpha.44
-  resolution: "@getpara/web-sdk@npm:2.0.0-alpha.44"
-  dependencies:
-    "@getpara/core-sdk": "npm:2.0.0-alpha.44"
-    "@getpara/user-management-client": "npm:2.0.0-alpha.44"
+    "@getpara/core-sdk": "npm:2.0.0-alpha.51"
+    "@getpara/user-management-client": "npm:2.0.0-alpha.51"
     base64url: "npm:^3.0.1"
     buffer: "npm:6.0.3"
     cbor-web: "npm:^9.0.2"
@@ -983,28 +916,7 @@ __metadata:
   peerDependenciesMeta:
     "@farcaster/miniapp-sdk":
       optional: true
-  checksum: 10c0/b90313dee5cc800d56c9176fb847afa23491bd5d447005d16670b93ec31e2d2ef2a88beeb3acc19c48469f277c084f37838922fac7daf3af0c3d45a069392e74
-  languageName: node
-  linkType: hard
-
-"@getpara/web-sdk@npm:~2.0.0-alpha.44":
-  version: 2.0.0-fc.3
-  resolution: "@getpara/web-sdk@npm:2.0.0-fc.3"
-  dependencies:
-    "@getpara/core-sdk": "npm:2.0.0-fc.3"
-    "@getpara/user-management-client": "npm:2.0.0-fc.3"
-    "@sentry/browser": "npm:^9.1.0"
-    base64url: "npm:^3.0.1"
-    buffer: "npm:6.0.3"
-    cbor-web: "npm:^9.0.2"
-    node-forge: "npm:1.3.1"
-    ua-parser-js: "npm:^2.0.2"
-  peerDependencies:
-    "@farcaster/miniapp-sdk": ^0.1.2
-  peerDependenciesMeta:
-    "@farcaster/miniapp-sdk":
-      optional: true
-  checksum: 10c0/c94c5764d328f39562b65bf28f553865d570d1e77c88f6818e6495a3cdb52f20fc9e7630f5143d02040ade617c3ee4fbffc05493e5c2f5fec2c44e4613fcd26e
+  checksum: 10c0/2ef4049161a7d50f46a1f00a20dc32a6147829a1ba25517d7a4ab4d15369eb23fdb49772a914bfa80fe7671b211b2207942b61af2fa5a40773b02ec8bbf2b386
   languageName: node
   linkType: hard
 
@@ -2176,64 +2088,6 @@ __metadata:
     "@noble/curves": "npm:~1.7.0"
     "@noble/hashes": "npm:~1.6.0"
   checksum: 10c0/26f69331f2ba18911b8747e7421057b538769be14e3c2ea87ee985a9cf15ce11a2d8c377beaf23362f6cfe933df0e7bb52bfabd13a983aa287839933f9d6c390
-  languageName: node
-  linkType: hard
-
-"@sentry-internal/browser-utils@npm:9.46.0":
-  version: 9.46.0
-  resolution: "@sentry-internal/browser-utils@npm:9.46.0"
-  dependencies:
-    "@sentry/core": "npm:9.46.0"
-  checksum: 10c0/224abccf406661089c796a1849e7c5fb5dc0ca7ddb0d5fe2b251544bbc5d819ac22d78d1b0d16acef9e8a7d65c29ff3433e5f22f929f567829b15aefc08c3ac6
-  languageName: node
-  linkType: hard
-
-"@sentry-internal/feedback@npm:9.46.0":
-  version: 9.46.0
-  resolution: "@sentry-internal/feedback@npm:9.46.0"
-  dependencies:
-    "@sentry/core": "npm:9.46.0"
-  checksum: 10c0/b24316474702f9ed86a209a7109ae39961a132de4ca477a7e830271cd3ebca55cfbae8f06929c482405098e2b723e9dfb6d0efd4880b2962d02b9374b3d2cea0
-  languageName: node
-  linkType: hard
-
-"@sentry-internal/replay-canvas@npm:9.46.0":
-  version: 9.46.0
-  resolution: "@sentry-internal/replay-canvas@npm:9.46.0"
-  dependencies:
-    "@sentry-internal/replay": "npm:9.46.0"
-    "@sentry/core": "npm:9.46.0"
-  checksum: 10c0/ffb170be22e69ad23c681827a1b2a5fef7ca1c4c77fde03293101c62bc8d3c73b3f39a18e8cdf0a71e6e23c669d9eef4ade6ece2faf3f4e3a15abc2ba7d2bff4
-  languageName: node
-  linkType: hard
-
-"@sentry-internal/replay@npm:9.46.0":
-  version: 9.46.0
-  resolution: "@sentry-internal/replay@npm:9.46.0"
-  dependencies:
-    "@sentry-internal/browser-utils": "npm:9.46.0"
-    "@sentry/core": "npm:9.46.0"
-  checksum: 10c0/83df9467c1870edb4b43e6f2d06aa4e66fe0185bbc3dc2f6003a0efe60bc067202bd02caf686729f13817c4392eb6c9a7f7223b826efb5a4d6b03a4822bfa3e8
-  languageName: node
-  linkType: hard
-
-"@sentry/browser@npm:^9.1.0":
-  version: 9.46.0
-  resolution: "@sentry/browser@npm:9.46.0"
-  dependencies:
-    "@sentry-internal/browser-utils": "npm:9.46.0"
-    "@sentry-internal/feedback": "npm:9.46.0"
-    "@sentry-internal/replay": "npm:9.46.0"
-    "@sentry-internal/replay-canvas": "npm:9.46.0"
-    "@sentry/core": "npm:9.46.0"
-  checksum: 10c0/b0202fbe72e9343be0fff2b41347efe3e7bdf4b04a526fae852a5a1f4c8161ba54f45200ad0853ed4cc732413a40742e13ffd9bd85b8bb718d0abecff64966f0
-  languageName: node
-  linkType: hard
-
-"@sentry/core@npm:9.46.0":
-  version: 9.46.0
-  resolution: "@sentry/core@npm:9.46.0"
-  checksum: 10c0/b23fabbbceadf790103da4f94c3537205a8c98a6554e8b73e62816df854299171e95ad9376ab54bb48450917b01a31f3e2b4f5d3b775a88057542fe775c46dc1
   languageName: node
   linkType: hard
 
@@ -3654,15 +3508,15 @@ __metadata:
     "@cosmjs/proto-signing": "npm:0.36.0"
     "@cosmjs/stargate": "npm:0.36.0"
     "@eslint/js": "npm:^9.29.0"
-    "@getpara/graz": "npm:^0.3.3-dev.3"
-    "@getpara/graz-integration": "npm:2.0.0-dev.12"
-    "@getpara/react-sdk-lite": "npm:2.0.0-alpha.44"
+    "@getpara/graz-integration": "npm:2.0.0-alpha.51"
+    "@getpara/react-sdk-lite": "npm:2.0.0-alpha.51"
     "@tailwindcss/postcss": "npm:^4.1.10"
     "@tanstack/react-query": "npm:5.85.3"
     "@types/node": "npm:^20"
     "@types/react": "npm:^19"
     "@types/react-dom": "npm:^19"
     eslint: "npm:^9.29.0"
+    graz: "npm:0.3.4-alpha.0"
     next: "npm:15.1.5"
     pino-pretty: "npm:13.0.0"
     postcss: "npm:^8"
@@ -4676,6 +4530,46 @@ __metadata:
   version: 1.4.0
   resolution: "graphemer@npm:1.4.0"
   checksum: 10c0/e951259d8cd2e0d196c72ec711add7115d42eb9a8146c8eeda5b8d3ac91e5dd816b9cd68920726d9fd4490368e7ed86e9c423f40db87e2d8dfafa00fa17c3a31
+  languageName: node
+  linkType: hard
+
+"graz@npm:0.3.4-alpha.0":
+  version: 0.3.4-alpha.0
+  resolution: "graz@npm:0.3.4-alpha.0"
+  dependencies:
+    "@cosmsnap/snapper": "npm:0.2.7"
+    "@dao-dao/cosmiframe": "npm:1.0.0"
+    "@initia/initia-registry-types": "npm:0.0.20"
+    "@keplr-wallet/cosmos": "npm:0.12.156"
+    "@keplr-wallet/types": "npm:0.12.156"
+    "@metamask/providers": "npm:12.0.0"
+    "@vectis/extension-client": "npm:^0.7.2"
+    "@walletconnect/modal": "npm:2.7.0"
+    "@walletconnect/sign-client": "npm:2.20.2"
+    "@walletconnect/types": "npm:2.20.2"
+    "@walletconnect/utils": "npm:2.20.2"
+    cosmos-directory-client: "npm:0.0.6"
+    long: "npm:4"
+    starknet: "npm:^6"
+    zustand: "npm:5.0.4"
+  peerDependencies:
+    "@cosmjs/amino": ">=0.32.4"
+    "@cosmjs/cosmwasm-stargate": ">=0.32.4"
+    "@cosmjs/encoding": ">=0.32.4"
+    "@cosmjs/proto-signing": ">=0.32.4"
+    "@cosmjs/stargate": ">=0.32.4"
+    "@getpara/graz-connector": ">=2.0.0-alpha.51 <2.0.0-beta"
+    "@getpara/graz-integration": ">=2.0.0-alpha.51 <2.0.0-beta"
+    "@tanstack/react-query": ">=5.62.0"
+    react: ">=17"
+  peerDependenciesMeta:
+    "@getpara/graz-connector":
+      optional: true
+    "@getpara/graz-integration":
+      optional: true
+  bin:
+    graz: dist/cli.js
+  checksum: 10c0/9fc26ec1898f62699653e487eae6aa1801d165973cdda643b9e6e6f9a217763e781fb5c551cc73640d6564b43c5985d1fee03b1d0a78f8ab001c06c3d82fb7f3
   languageName: node
   linkType: hard
 
