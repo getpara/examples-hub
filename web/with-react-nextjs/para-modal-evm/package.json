@@ -46,5 +46,8 @@
     "tailwindcss": "^4.1.10",
     "typescript": "^5",
     "typescript-eslint": "^8.29.0"
+  },
+  "resolutions": {
+    "@getpara/evm-wallet-connectors": "file:../../../../web-sdk/packages/evm-wallet-connectors"
   }
 }
