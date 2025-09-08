@@ -14,6 +14,7 @@ import { ParaInternal } from '@getpara/react-common';
 import { EXTERNAL_WALLET_TYPES } from '@getpara/web-sdk';
 import { AuthProvider } from './providers/AuthProvider.js';
 import { AccountLinkProvider } from './providers/AccountLinkProvider.js';
+import { AssetsProvider } from './providers/AssetsProvider.js';
 
 export const ParaProviderMin = forwardRef<
   ParaModalHandle,
@@ -165,12 +166,14 @@ export const ParaProviderMin = forwardRef<
         createWallets: paraModalConfig?.createWalletOverride,
       }}
     >
-      <ExternalWalletWrapper config={externalWalletConfig}>
-        <AccountLinkProvider>
-          {children}
-          {!config.disableEmbeddedModal && client.isReady && <ParaModal ref={ref} />}
-        </AccountLinkProvider>
-      </ExternalWalletWrapper>
+      <AssetsProvider>
+        <ExternalWalletWrapper config={externalWalletConfig}>
+          <AccountLinkProvider>
+            {children}
+            {!config.disableEmbeddedModal && client.isReady && <ParaModal ref={ref} />}
+          </AccountLinkProvider>
+        </ExternalWalletWrapper>
+      </AssetsProvider>
     </AuthProvider>
   );
 });

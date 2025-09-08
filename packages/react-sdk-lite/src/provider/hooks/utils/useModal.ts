@@ -8,12 +8,12 @@ import { useStore } from '../../stores/useStore.js';
 export const useModal = () => {
   const isOpen = useStore(state => state.isOpen);
   const setIsOpen = useStore(state => state.setIsOpen);
-  const openedToStep = useStore(state => state.openedToStep);
+  const refs = useStore(state => state.refs);
   const setStep = useModalStore(state => state.setStep);
 
   const openModal = ({ step }: { step?: ModalStep } = {}) => {
     if (step) {
-      openedToStep.current = step;
+      refs.openedToStep.current = step;
       setStep(step);
     }
 
@@ -23,7 +23,7 @@ export const useModal = () => {
   };
 
   const closeModal = () => {
-    openedToStep.current = null;
+    refs.openedToStep.current = null;
     setIsOpen(false);
   };
 

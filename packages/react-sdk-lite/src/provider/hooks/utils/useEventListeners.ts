@@ -1,6 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect } from 'react';
 import { useWalletState } from '../index.js';
+import { useStore } from '../../stores/useStore.js';
 import {
   AccountCreationEvent,
   AccountSetupEvent,
@@ -16,7 +17,6 @@ import {
   WalletsChangeEvent,
 } from '@getpara/web-sdk';
 import { ACCOUNT_BASE_KEY } from '../queries/useAccount.js';
-import { useStore } from '../../stores/useStore.js';
 import { WALLET_BASE_KEY } from '../queries/useWallet.js';
 import { Callbacks } from '../../types/provider.js';
 import { WALLET_BALANCE_BASE_KEY } from '../queries/useWalletBalance.js';
@@ -36,6 +36,7 @@ export const useEventListeners = ({
   onGuestWalletsCreated,
 }: Callbacks = {}) => {
   const queryClient = useQueryClient();
+  const refs = useStore(state => state.refs);
   const clearSelectedWallet = useStore(state => state.clearSelectedWallet);
   const { updateSelectedWallet } = useWalletState();
 
@@ -137,6 +138,15 @@ export const useEventListeners = ({
     [queryClient, updateSelectedWallet, onGuestWalletsCreated],
   );
 
+  const assetTransferListener = useCallback(() => {
+    // Mark invalidation time and invalidate profile balance queries
+    refs.balancesInvalidationTime.current = Date.now();
+    queryClient.invalidateQueries({
+      queryKey: ['useProfileBalance'],
+      refetchType: 'active',
+    });
+  }, [queryClient, refs.balancesInvalidationTime]);
+
   useEffect(() => {
     window.addEventListener(ParaEvent.LOGIN_EVENT, loginListener);
     window.addEventListener(ParaEvent.ACCOUNT_SETUP_EVENT, accountSetupListener);
@@ -149,6 +159,7 @@ export const useEventListeners = ({
     window.addEventListener(ParaEvent.WALLET_CREATED, walletCreatedListener);
     window.addEventListener(ParaEvent.PREGEN_WALLET_CLAIMED, pregenWalletClaimedListener);
     window.addEventListener(ParaEvent.GUEST_WALLETS_CREATED, guestWalletsCreatedListener);
+    window.addEventListener(ParaEvent.ASSET_TRANSFERRED, assetTransferListener);
 
     return () => {
       window.removeEventListener(ParaEvent.LOGIN_EVENT, loginListener);
@@ -162,6 +173,7 @@ export const useEventListeners = ({
       window.removeEventListener(ParaEvent.WALLET_CREATED, walletCreatedListener);
       window.removeEventListener(ParaEvent.PREGEN_WALLET_CLAIMED, pregenWalletClaimedListener);
       window.removeEventListener(ParaEvent.GUEST_WALLETS_CREATED, guestWalletsCreatedListener);
+      window.removeEventListener(ParaEvent.ASSET_TRANSFERRED, assetTransferListener);
     };
   }, [
     loginListener,

@@ -14,9 +14,3 @@ export const formatNetworkList = (networks: TNetwork[]) => {
 export const formatWalletCreatedDate = (date: string) => `${format(new Date(date), 'M/d/y')}`;
 
 export const camelToSnakeCase = (str: string) => str.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
-
-export const formatBalanceString = (str: string) => {
-  const numericBalance = parseFloat(str);
-
-  return `$${numericBalance.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
-};

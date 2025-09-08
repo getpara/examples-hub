@@ -18,5 +18,8 @@ export const createModalSlice: StateCreator<Store, [], [], ModalSlice> = set => 
   isOpen: false,
   setIsOpen: isOpen => set({ isOpen }),
 
-  openedToStep: createRef<ModalStep | null>(),
+  refs: {
+    openedToStep: createRef<ModalStep | null>(),
+    balancesInvalidationTime: createRef<number | null>(),
+  },
 });

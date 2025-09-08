@@ -21,6 +21,7 @@ export class ParaInternal extends ParaWeb implements InternalInterface {
   verifyFarcasterLink = super.verifyFarcasterLink;
   verifyExternalWalletLink = super.verifyExternalWalletLink;
   sendLoginCode = super.sendLoginCode;
+  getProfileBalance = super.getProfileBalance;
   setModalError = super.setModalError;
 
   get partnerLogo() {

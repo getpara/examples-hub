@@ -3,7 +3,7 @@ import { sha256 } from '@noble/hashes/sha256';
 import { ripemd160 } from '@noble/hashes/ripemd160';
 
 import elliptic from 'elliptic';
-import { TWalletType } from '@getpara/user-management-client';
+import { AssetValue, TWalletType } from '@getpara/user-management-client';
 
 const secp256k1 = new elliptic.ec('secp256k1');
 
@@ -86,4 +86,53 @@ export function truncateAddress(
   const margin = targetLength !== undefined ? (targetLength - minimum) / 2 : 4;
 
   return `${str.slice(0, minimum + margin)}...${str.slice(-1 * margin)}`;
+}
+
+export function formatCurrency(value?: AssetValue, { fallback = '' }: { fallback?: string } = {}) {
+  if (!value) {
+    return fallback;
+  }
+
+  const formatter = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: value.currency,
+  });
+
+  const zeroFormatter = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: value.currency,
+    maximumFractionDigits: 0,
+  });
+
+  return Math.abs(value.value) < 0.01 ? zeroFormatter.format(0) : formatter.format(value.value);
+}
+
+const zeroAssetFormatter = new Intl.NumberFormat('en-US', {
+  style: 'decimal',
+  maximumFractionDigits: 0,
+  minimumFractionDigits: 0,
+});
+
+export function formatAssetQuantity({
+  quantity,
+  symbol = '',
+  decimals,
+  fallback = '',
+}: {
+  quantity?: number;
+  symbol?: string;
+  decimals?: number;
+  fallback?: string;
+}) {
+  if (!quantity) {
+    return fallback;
+  }
+
+  const formatter = new Intl.NumberFormat('en-US', {
+    style: 'decimal',
+    maximumFractionDigits: decimals ?? (Math.abs(quantity) < 0.001 ? 6 : 3),
+    minimumFractionDigits: decimals ?? 3,
+  });
+
+  return `${Math.abs(quantity) < 10 ** (-1 * (decimals ?? 6)) ? zeroAssetFormatter.format(0) : formatter.format(quantity)}${symbol && symbol.length > 0 ? ` ${symbol}` : ''}`;
 }

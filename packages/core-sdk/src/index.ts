@@ -46,6 +46,13 @@ export {
   type Setup2faResponse,
   type TelegramAuthResponse,
   type VerifyExternalWalletParams,
+  type AssetMetadata,
+  type AssetMetadataIndexed,
+  type AssetValue,
+  type BalancesConfig,
+  type WalletBalance,
+  type ProfileBalance,
+  type OfframpDepositRequest,
   RecoveryStatus,
   ThemeMode,
   NON_ED25519,
@@ -82,7 +89,7 @@ export {
 export * from './types/coreApi.js';
 export * from './types/events.js';
 export * from './types/config.js';
-export { getPortalDomain, entityToWallet, constructUrl, shortenUrl } from './utils/index.js';
+export { getPortalDomain, dispatchEvent, entityToWallet, constructUrl, shortenUrl } from './utils/index.js';
 export { PREFIX as STORAGE_PREFIX, PARA_PREFIX as PARA_STORAGE_PREFIX } from './constants.js';
 export { distributeNewShare } from './shares/shareDistribution.js';
 export { KeyContainer } from './shares/KeyContainer.js';

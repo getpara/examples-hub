@@ -28,16 +28,17 @@ export function OnRampTransactionV2() {
 
   const isInitialized = useRef(false);
   const [onRampPurchase, setOnRampPurchase] = useState<OnRampPurchase | null>(null);
+  const [depositRequest, setDepositRequest] = useState<OfframpDepositRequest | null>(null);
   const [onRampConfig, setOnRampConfig] = useState<OnRampConfig | null>(null);
 
   const onUpdate = async (updates: OnRampPurchaseUpdateParams) => {
-    const { onRampPurchase } = await portalEmitter?.updateOnRampPurchase({ updates });
+    const { onRampPurchase } = await portalEmitter?.updateOnRampPurchase({ updates, depositRequest });
 
     setOnRampPurchase(onRampPurchase);
   };
 
   const onSuccess = async (updates: OnRampPurchaseUpdateParams) => {
-    await onUpdate({
+    onUpdate({
       ...updates,
       status: OnRampPurchaseStatus.FINISHED,
     });
@@ -55,6 +56,7 @@ export function OnRampTransactionV2() {
     });
 
     setOnRampPurchase(updatedOnRampPurchase);
+    setDepositRequest(depositRequest);
 
     return txHash;
   };

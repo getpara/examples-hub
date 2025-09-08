@@ -1,5 +1,4 @@
-import Para, { hexStringToBase64, OnRampPurchase, SuccessfulSignatureRes } from '@getpara/core-sdk';
-import { OfframpDepositRequest } from '../types/index.js';
+import Para, { hexStringToBase64, OfframpDepositRequest, OnRampPurchase, SuccessfulSignatureRes } from '@getpara/core-sdk';
 
 export async function offRampSend(
   para: Para,

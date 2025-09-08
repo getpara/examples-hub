@@ -3,13 +3,21 @@ import { CpslButton, CpslIcon, CpslText } from '@getpara/react-components';
 import { useAccount, useClient } from '../../../provider/index.js';
 import { useLinkedAccounts } from '../../../provider/hooks/index.js';
 import { getWalletDisplayName } from '../../utils/getWalletDisplayName.js';
-import { LinkedAccount as TLinkedAccount, TLinkedAccountType, truncateAddress } from '@getpara/web-sdk';
+import {
+  formatAssetQuantity,
+  formatCurrency,
+  LinkedAccount as TLinkedAccount,
+  TLinkedAccountType,
+  truncateAddress,
+  WalletBalance,
+} from '@getpara/web-sdk';
 import { useAccountLinking } from '../../../provider/providers/AccountLinkProvider.js';
-import { ReactNode } from 'react';
+import { ReactNode, useMemo } from 'react';
 import { ACCOUNT_TYPES, safeStyled, useCopyToClipboard } from '@getpara/react-common';
 import { useExternalWallets } from '../../../provider/providers/ExternalWalletProvider.js';
 import { useStore } from '../../../provider/stores/useStore.js';
 import { AccountHeader } from './AccountHeader.js';
+import { useAssets } from '../../../provider/providers/AssetsProvider.js';
 
 const Entry = ({
   identifier,
@@ -17,6 +25,7 @@ const Entry = ({
   name,
   address,
   addressShort,
+  balance: walletBalance,
   onUnlink,
 }: {
   identifier?: string;
@@ -24,9 +33,26 @@ const Entry = ({
   name: string;
   address?: string;
   addressShort?: string;
+  balance?: WalletBalance;
   onUnlink?: (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => void;
 }) => {
+  const balancesConfig = useStore(state => state.modalConfig?.balances);
   const [isCopied, copy] = useCopyToClipboard();
+
+  const balance = useMemo(() => {
+    switch (true) {
+      case !balancesConfig:
+      case balancesConfig?.displayType === 'AGGREGATED':
+        return formatCurrency(walletBalance?.value);
+      default:
+        return formatAssetQuantity({
+          quantity: walletBalance?.assets.find(
+            ({ metadata }) => !!metadata && metadata.symbol === balancesConfig.asset.symbol,
+          )?.quantity,
+          symbol: balancesConfig.asset.symbol,
+        });
+    }
+  }, [balancesConfig, walletBalance]);
 
   return (
     <EntryContainer key={address ?? identifier}>
@@ -54,6 +80,11 @@ const Entry = ({
           </EntryAddress>
         ) : null}
       </EntryFlex>
+      {typeof balance === 'string' && balance !== '' && (
+        <CpslText variant="bodyM" color="contrast">
+          {balance}
+        </CpslText>
+      )}
       {onUnlink && (
         <EntryUnlink href="#" onClick={onUnlink}>
           Unlink
@@ -76,6 +107,7 @@ export const AccountProfile = ({
   const { wallets } = useExternalWallets();
   const { isEnabled, linkAccount, unlinkAccount } = useAccountLinking();
   const hideWallets = useStore(state => state.modalConfig?.hideWallets);
+  const { profileBalance } = useAssets();
 
   if (!para) {
     return null;
@@ -85,21 +117,23 @@ export const AccountProfile = ({
 
   return (
     <StepContainer>
-      <AccountHeader />
-      <ParaConnect target="_blank" href="https://connect.getpara.com" rel="noreferrer noopener">
-        <ParaIcon icon="paraIconBrand" size="40px" inset="8px" background="white" />
-        <div>
-          Do even more with your wallet
-          <br />
-          at <span style={{ fontWeight: '600' }}>Para Connect</span>
-        </div>
-        <Dots>
-          {new Array(6).fill(0).map((_, index) => (
-            <DotsIcon key={index} index={index} icon="dotsSquare" size="27.5px" />
-          ))}
-          <ParaArrow icon="paraArrow" size="31px" color="white" />
-        </Dots>
-      </ParaConnect>
+      <AccountHeader withBalance />
+      {connectionType !== 'external' && (
+        <ParaConnect target="_blank" href="https://connect.getpara.com" rel="noreferrer noopener">
+          <ParaIcon icon="paraIconBrand" size="40px" inset="8px" background="white" />
+          <div>
+            Do even more with your wallet
+            <br />
+            at <span style={{ fontWeight: '600' }}>Para Connect</span>
+          </div>
+          <Dots>
+            {new Array(6).fill(0).map((_, index) => (
+              <DotsIcon key={index} index={index} icon="dotsSquare" size="27.5px" />
+            ))}
+            <ParaArrow icon="paraArrow" size="31px" color="white" />
+          </Dots>
+        </ParaConnect>
+      )}
       <Section>
         <Title variant="bodyS" color="secondary">
           Connected Wallets
@@ -130,6 +164,7 @@ export const AccountProfile = ({
                 name={getWalletDisplayName(para, wallet)}
                 address={wallet.address}
                 addressShort={truncateAddress(wallet.address!, wallet.type!)}
+                balance={profileBalance?.wallets.find(w => w.address === wallet.address)}
               />
             ))
           )}

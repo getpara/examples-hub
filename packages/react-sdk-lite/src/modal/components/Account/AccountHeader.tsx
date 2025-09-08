@@ -1,35 +1,28 @@
 import { getExternalWalletIcon, safeStyled } from '@getpara/react-common';
-import { formatBalanceString } from '../../utils/stringFormatters.js';
 import { CpslIcon, CpslText } from '@getpara/react-components';
 import { useMemo } from 'react';
 import { truncateAddress } from '@getpara/web-sdk';
 import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
-import { useAccount, useWallet, useWalletBalance } from '../../../provider/index.js';
+import { useAssets } from '../../../provider/providers/AssetsProvider.js';
+import { useAccount } from '../../../provider/index.js';
 import { WalletSelect } from '../WalletSelect/WalletSelect.js';
-
-const Balance = () => {
-  const { data: balance } = useWalletBalance();
-  return (
-    <CpslText variant="bodyM" weight="medium" style={{ visibility: !!balance ? 'visible' : 'hidden' }}>
-      {balance ? formatBalanceString(balance) : '0'}
-    </CpslText>
-  );
-};
 
 export const AccountHeader = ({ withBalance = false }: { withBalance?: boolean } = {}) => {
   const para = useInternalClient();
   const { connectionType } = useAccount();
-  const { data: activeWallet } = useWallet();
+  const { profileBalance, totalBalance } = useAssets();
+
+  const externalWallet = Object.keys(para?.externalWallets).length > 0 ? Object.values(para.externalWallets)[0] : undefined;
+
   const { name, icon, src } = useMemo(() => {
     let name, icon, src;
     switch (true) {
-      case activeWallet?.isExternal:
-        {
-          const wallet = Object.values(para.externalWallets)[0];
-          name = wallet.ensName ?? truncateAddress(wallet.address!, wallet.type!, { prefix: para.cosmosPrefix });
-          src = wallet.ensAvatar;
-          icon = getExternalWalletIcon(wallet.externalProviderId);
-        }
+      case !!externalWallet:
+        name =
+          externalWallet.ensName ??
+          truncateAddress(externalWallet.address!, externalWallet.type!, { prefix: para.cosmosPrefix });
+        src = externalWallet.ensAvatar;
+        icon = getExternalWalletIcon(externalWallet.externalProviderId);
         break;
       default:
         name = `${para.partnerName} Wallet`;
@@ -38,7 +31,7 @@ export const AccountHeader = ({ withBalance = false }: { withBalance?: boolean }
         break;
     }
     return { name, icon, src };
-  }, [activeWallet, para.partnerName, para.partnerLogo, para.externalWallets]);
+  }, [para.partnerName, para.partnerLogo, externalWallet]);
 
   return (
     <AccountContainer>
@@ -58,7 +51,11 @@ export const AccountHeader = ({ withBalance = false }: { withBalance?: boolean }
           {name}
         </CpslText>
       )}
-      {withBalance && <Balance />}
+      {withBalance && typeof totalBalance === 'string' && totalBalance !== '' && (
+        <CpslText variant="bodyM" weight="medium" style={{ visibility: profileBalance ? 'visible' : 'hidden' }}>
+          {totalBalance}
+        </CpslText>
+      )}
     </AccountContainer>
   );
 };

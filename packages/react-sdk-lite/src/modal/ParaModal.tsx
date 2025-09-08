@@ -22,9 +22,9 @@ defineCustomElements();
 
 export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref) => {
   const storedModalConfig = useStore(state => state.modalConfig);
-  const openedToStep = useStore(state => state.openedToStep);
+  const refs = useStore(state => state.refs);
   const modalContentRef = useRef<ModalContentHandle>(null);
-  const refs = useModalStore(state => state.refs);
+  const modalRefs = useModalStore(state => state.refs);
   const flow = useModalStore(state => state.flow);
   const currentStep = useModalStore(state => state.step);
   const setAuthState = useModalStore(state => state.setAuthState);
@@ -146,7 +146,7 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
         break;
       case isAccount:
         setFlow('account');
-        if (!openedToStep.current) {
+        if (!refs.openedToStep.current) {
           setStep(ModalStep.ACCOUNT_MAIN);
         }
         break;
@@ -237,7 +237,7 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
       !isAccountLoading &&
       !isConnected &&
       !['signup', 'login'].includes(flow ?? '') &&
-      refs.currentStep.current !== ModalStep.AUTH_MAIN
+      modalRefs.currentStep.current !== ModalStep.AUTH_MAIN
     ) {
       setStep(ModalStep.AUTH_MAIN);
     }
@@ -280,7 +280,7 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
   };
 
   const handleModalExited = async () => {
-    openedToStep.current = null;
+    refs.openedToStep.current = null;
     setIsModalMounted(false);
     if (RESET_TO_AUTH_STEPS.includes(currentStep)) {
       resetModalState();

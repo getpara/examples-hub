@@ -1,4 +1,4 @@
-import ParaWeb, { CurrentWalletIds, SupportedAccountLinks, TOAuthMethod } from '@getpara/web-sdk';
+import ParaWeb, { BalancesConfig, CurrentWalletIds, SupportedAccountLinks, TOAuthMethod } from '@getpara/web-sdk';
 import { Theme } from '@getpara/react-components';
 import { OnModalStepChangeValue } from '../stores/index.js';
 import { ModalStep, ModalStepProp } from '../utils/steps.js';
@@ -129,4 +129,9 @@ export interface ParaModalProps {
    * If not provided, will default to your Developer Portal configuration or to all available account types.
    */
   supportedAccountLinks?: SupportedAccountLinks;
+
+  /**
+   * Configuration for the profile balances displayed in the Para Modal.
+   */
+  balances?: BalancesConfig;
 }

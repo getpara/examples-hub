@@ -1,7 +1,8 @@
-import { CurrentWalletIds } from '@getpara/user-management-client';
+import { CurrentWalletIds, OnRampPurchase } from '@getpara/user-management-client';
 import { FullSignatureRes } from './wallet.js';
 import { Wallet } from './wallet.js';
 import { CoreMethodResponse } from './coreApi.js';
+import { AssetTransfer } from './assets.js';
 
 const EVENT_PREFIX = 'para';
 
@@ -17,6 +18,8 @@ export enum ParaEvent {
   WALLET_CREATED = `${EVENT_PREFIX}WalletCreated`,
   PREGEN_WALLET_CLAIMED = `${EVENT_PREFIX}PregenWalletClaimed`,
   GUEST_WALLETS_CREATED = `${EVENT_PREFIX}GuestWalletsCreated`,
+  ASSET_TRANSFERRED = `${EVENT_PREFIX}AssetTransferred`,
+  ONRAMP_TRANSACTION_COMPLETE = `${EVENT_PREFIX}OnRampTransactionComplete`,
 }
 
 export type BaseEvent<T> = {
@@ -49,3 +52,7 @@ export type PregenWalletClaimedResponse = { wallet: Omit<Wallet, 'signer'>; reco
 export type PregenWalletClaimedEvent = CustomEventInit<BaseEvent<WalletCreatedResponse>>;
 
 export type GuestWalletsCreatedEvent = CustomEventInit<BaseEvent<CoreMethodResponse<'createGuestWallets'>>>;
+
+export type AssetTransferredEvent = CustomEventInit<BaseEvent<AssetTransfer>>;
+
+export type OnRampTransactionCompleteResponse = CustomEventInit<BaseEvent<OnRampPurchase>>;

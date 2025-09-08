@@ -1416,6 +1416,35 @@ describe('Client', () => {
         },
       });
     });
+
+    it('getProfileBalance', async () => {
+      const config = {
+        displayType: 'AGGREGATED' as const,
+        additionalAssets: [],
+      };
+      const wallets = [
+        {
+          type: 'EVM' as const,
+          address: '0x123',
+          partnerId: 'test-partner',
+        },
+      ];
+      const refetch = false;
+
+      await client.getProfileBalance({ config, wallets, refetch });
+
+      expect(mocks.post).toBeCalledWith('/assets/balances', {
+        config,
+        wallets,
+        refetch,
+      });
+    });
+
+    it('getAssetInfo', async () => {
+      await client.getAssetInfo();
+
+      expect(mocks.get).toBeCalledWith('/assets');
+    });
   });
 
   it('should handle useFetchAdapter option', () => {

@@ -1,10 +1,5 @@
 import { OnRampConfig, OnRampPurchase, OnRampPurchaseUpdateParams } from '@getpara/user-management-client';
-
-export type OfframpDepositRequest = OnRampPurchaseUpdateParams & {
-  chainId?: string;
-  destinationAddress: string;
-  contractAddress?: string | null;
-};
+import { OfframpDepositRequest } from '@getpara/core-sdk';
 
 export type PortalMessageType =
   | 'ONRAMPS__INIT'
@@ -17,6 +12,7 @@ export type PortalMessageStatus = 'ERROR' | 'SUCCESS';
 export type PortalRequestPayload<T extends PortalMessageType> = T extends 'ONRAMPS__UPDATE_PURCHASE'
   ? {
       updates: OnRampPurchaseUpdateParams;
+      depositRequest?: OfframpDepositRequest;
     }
   : T extends 'ONRAMPS__SIGN_MOONPAY_URL'
     ? {
@@ -69,6 +65,11 @@ export type PortalResponse = { id: string; status: PortalMessageStatus; type: Po
       status: 'SUCCESS';
       type: 'ONRAMPS__INIT';
       payload: PortalResponsePayload<'ONRAMPS__INIT'>;
+    }
+  | {
+      status: 'SUCCESS';
+      type: 'ONRAMPS__UPDATE_PURCHASE';
+      payload: PortalResponsePayload<'ONRAMPS__UPDATE_PURCHASE'>;
     }
   | {
       status: 'SUCCESS';

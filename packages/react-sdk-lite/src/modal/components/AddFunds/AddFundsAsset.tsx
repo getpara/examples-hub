@@ -1,5 +1,5 @@
 import * as comp from '@getpara/react-components';
-import { getOnRampNetworks, TOnRampAsset } from '@getpara/web-sdk';
+import { formatCurrency, getOnRampNetworks, TOnRampAsset } from '@getpara/web-sdk';
 import { safeStyled } from '@getpara/react-common';
 import { getAssetCode, getAssetName, ON_RAMP_ASSETS } from '../../constants/constants.js';
 import { useModalStore } from '../../stores/index.js';
@@ -9,11 +9,13 @@ import { useWallet } from '../../../provider/hooks/queries/useWallet.js';
 import { AssetIcon, GradientScroll } from '../common.js';
 import { AnimatePresence, motion } from 'framer-motion';
 import { contentMotionProps } from './common.js';
+import { useAssets } from '../../../provider/providers/AssetsProvider.js';
 
 export function AddFundsAsset() {
   const onRampConfig = useModalStore(state => state.onRampConfig);
   const { assets, setAsset, network, setNetwork } = useAddFunds();
   const { data: activeWallet } = useWallet();
+  const { assetMetadata } = useAssets();
 
   const [searchStr, setSearchStr] = useState('');
 
@@ -76,6 +78,9 @@ export function AddFundsAsset() {
                         {ON_RAMP_ASSETS[asset].name}
                       </Name>
                     </Info>
+                    {assetMetadata?.[asset] && (
+                      <comp.CpslText variant="bodyM">{formatCurrency(assetMetadata[asset].price)}</comp.CpslText>
+                    )}
                   </AssetButton>
                 </motion.li>
               ))}

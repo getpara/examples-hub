@@ -1,6 +1,7 @@
 import { expect, describe, it, vi, beforeEach } from 'vitest';
 
 import Para, { Environment, offRampSend } from '../src/index.js';
+import { dispatchEvent } from '@getpara/core-sdk';
 
 vi.mock('../src/utils/isPasskeySupported.js', () => ({
   isPasskeySupported: vi.fn().mockResolvedValue(true),
@@ -9,6 +10,14 @@ vi.mock('../src/utils/isPasskeySupported.js', () => ({
 vi.mock('../src/utils/offrampSend.js', () => ({
   offRampSend: vi.fn(),
 }));
+
+vi.mock('@getpara/core-sdk', async () => {
+  const actual = await vi.importActual('@getpara/core-sdk');
+  return {
+    ...actual,
+    dispatchEvent: vi.fn(),
+  };
+});
 
 const mocks = vi.hoisted(() => ({
   addEventListener: vi.fn(),
@@ -23,9 +32,13 @@ const mocks = vi.hoisted(() => ({
   createOnRampPurchase: vi.fn().mockResolvedValue({ id: 'id' }),
   touchSession: vi.fn().mockResolvedValue({ partnerId: 'partnerId' }),
   getPartner: vi.fn().mockResolvedValue({ data: { partner: {} } }),
+  dispatchEvent: vi.fn(),
 }));
 
 vi.stubGlobal('window', { addEventListener: mocks.addEventListener });
+
+// Mock dispatchEvent globally
+vi.stubGlobal('dispatchEvent', mocks.dispatchEvent);
 
 describe('ParaCore', () => {
   let para: Para;
@@ -62,6 +75,18 @@ describe('ParaCore', () => {
       ...Object.getPrototypeOf(para),
       initiateOnRampTransaction: mocks.initiateOnRampTransaction,
     });
+
+    // Mock the findWallet method to return a mock wallet
+    (para as any).findWallet = vi.fn().mockReturnValue({
+      id: 'wallet-123',
+      type: 'EVM',
+      address: '0x123',
+      name: 'Test Wallet',
+      network: 'ethereum',
+    });
+
+    // Mock assertUserId to return a consistent user ID
+    (para as any).assertUserId = vi.fn().mockReturnValue('user-123');
   });
 
   describe('constructor', () => {
@@ -245,6 +270,136 @@ describe('ParaCore', () => {
         isPara: true,
         status: 'SUCCESS',
         payload: mockSignature,
+      });
+      expect(mocks.close).toHaveBeenCalled();
+    });
+
+    it('should handle ONRAMPS__UPDATE_PURCHASE event successfully', async () => {
+      const mockUpdates = { status: 'FINISHED' as const, asset: 'ETH', assetQuantity: 0.1 };
+      const mockOnRampPurchase = {
+        walletType: 'test',
+        network: 'ethereum',
+        externalWalletAddress: '0x123',
+        walletId: 'wallet-123',
+        status: 'PENDING',
+        asset: 'ETH',
+        assetQuantity: 0.1,
+        address: '0x123',
+      };
+      const mockDepositRequest = {
+        chainId: '1',
+        contractAddress: '0x123',
+        destinationAddress: '0x456',
+      };
+
+      (para as any).onRampPopup = { onRampPurchase: mockOnRampPurchase };
+
+      const event = {
+        data: {
+          isPara: true,
+          type: 'ONRAMPS__UPDATE_PURCHASE',
+          id: 'test-id',
+          payload: {
+            updates: mockUpdates,
+            depositRequest: mockDepositRequest,
+          },
+        },
+        origin: 'https://portal.example.com',
+        ports: [mockMessagePort],
+      } as unknown as MessageEvent;
+
+      await (para as any).portalEventListener(event);
+
+      // Verify the onRampPurchase was updated
+      expect((para as any).onRampPopup.onRampPurchase).toEqual({
+        ...mockOnRampPurchase,
+        ...mockUpdates,
+      });
+
+      // Verify the message was sent back
+      expect(mocks.postMessage).toHaveBeenCalledWith({
+        id: 'test-id',
+        type: 'ONRAMPS__UPDATE_PURCHASE',
+        isPara: true,
+        status: 'SUCCESS',
+        payload: {
+          onRampPurchase: {
+            ...mockOnRampPurchase,
+            ...mockUpdates,
+          },
+        },
+      });
+
+      // Verify that the wallet was found and events were dispatched
+      expect((para as any).findWallet).toHaveBeenCalledWith('0x123');
+      expect(dispatchEvent).toHaveBeenCalledWith('paraAssetTransferred', {
+        wallet: {
+          id: 'wallet-123',
+          type: 'EVM',
+          address: '0x123',
+          name: 'Test Wallet',
+          network: 'ethereum',
+        },
+        type: 'OUTBOUND',
+        asset: 'ETH',
+        network: 'ethereum',
+        quantity: 0.1,
+        chainId: '1',
+        contractAddress: '0x123',
+        sourceAddress: '0x123',
+        destinationAddress: '0x456',
+      });
+      expect(dispatchEvent).toHaveBeenCalledWith('paraOnRampTransactionComplete', {
+        ...mockOnRampPurchase,
+        ...mockUpdates,
+      });
+
+      expect(mocks.close).toHaveBeenCalled();
+    });
+
+    it('should handle ONRAMPS__UPDATE_PURCHASE event without deposit request', async () => {
+      const mockUpdates = { status: 'PENDING' as const };
+      const mockOnRampPurchase = {
+        walletType: 'test',
+        network: 'ethereum',
+        status: 'INITIATED',
+      };
+
+      (para as any).onRampPopup = { onRampPurchase: mockOnRampPurchase };
+
+      const event = {
+        data: {
+          isPara: true,
+          type: 'ONRAMPS__UPDATE_PURCHASE',
+          id: 'test-id',
+          payload: {
+            updates: mockUpdates,
+          },
+        },
+        origin: 'https://portal.example.com',
+        ports: [mockMessagePort],
+      } as unknown as MessageEvent;
+
+      await (para as any).portalEventListener(event);
+
+      // Verify the onRampPurchase was updated
+      expect((para as any).onRampPopup.onRampPurchase).toEqual({
+        ...mockOnRampPurchase,
+        ...mockUpdates,
+      });
+
+      // Verify the message was sent back
+      expect(mocks.postMessage).toHaveBeenCalledWith({
+        id: 'test-id',
+        type: 'ONRAMPS__UPDATE_PURCHASE',
+        isPara: true,
+        status: 'SUCCESS',
+        payload: {
+          onRampPurchase: {
+            ...mockOnRampPurchase,
+            ...mockUpdates,
+          },
+        },
       });
       expect(mocks.close).toHaveBeenCalled();
     });

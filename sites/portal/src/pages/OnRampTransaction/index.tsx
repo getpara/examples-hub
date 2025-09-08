@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { MoonPayEmbed, RampEmbed } from '@getpara/react-common';
+import { MoonPayEmbed, OnRampProps, RampEmbed } from '@getpara/react-common';
 import { usePara } from '../../components/ParaContext';
 import { StripeEmbed } from '../../components/StripeEmbed';
 import { authLogin, authLoginWithPassword, authUpdateKeyShares } from '../../utils/authLogin';
@@ -217,7 +217,7 @@ export function OnRampTransaction() {
       return <CpslSpinner />;
     }
 
-    const props = {
+    const props: OnRampProps = {
       onRampConfig,
       onRampPurchase: onRampPurchase as OnRampPurchase,
       isDark,

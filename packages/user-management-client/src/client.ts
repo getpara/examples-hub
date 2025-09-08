@@ -53,6 +53,9 @@ import {
   LinkAccountParams,
   LinkedAccounts,
   ResendVerificationCodeParams,
+  AssetMetadataIndexed,
+  GetProfileBalanceParams,
+  ProfileBalance,
   LegacyAuthMethod,
   PrimaryAuthInfo,
   ServerAuthStateLogin,
@@ -1268,6 +1271,24 @@ class Client {
   issueJwt = async ({ keyIndex = 0 }: IssueJwtParams = {}): Promise<IssueJwtResponse> => {
     const res = await this.baseRequest.post<IssueJwtResponse>(`/auth/jwt`, { keyIndex });
 
+    return res.data;
+  };
+
+  getProfileBalance = async ({
+    config,
+    wallets,
+    refetch,
+  }: GetProfileBalanceParams): Promise<{ balance: ProfileBalance }> => {
+    const res = await this.baseRequest.post<{ balance: ProfileBalance }>(`/assets/balances`, {
+      config,
+      wallets,
+      refetch,
+    });
+    return res.data;
+  };
+
+  getAssetInfo = async (): Promise<{ assets: AssetMetadataIndexed }> => {
+    const res = await this.baseRequest.get<{ assets: AssetMetadataIndexed }>(`/assets`);
     return res.data;
   };
 

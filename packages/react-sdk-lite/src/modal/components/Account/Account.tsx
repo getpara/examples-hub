@@ -5,9 +5,10 @@ import { OnRampStep, useModalStore } from '../../stores/index.js';
 import { useEffect } from 'react';
 import { ModalStep } from '../../utils/steps.js';
 import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
-import { useAccount, useWalletBalance } from '../../../provider/index.js';
+import { useAccount } from '../../../provider/index.js';
 import { EnabledFlow } from '@getpara/web-sdk';
 import { useAccountLinking } from '../../../provider/providers/AccountLinkProvider.js';
+import { useAssets } from '../../../provider/providers/AssetsProvider.js';
 import { AccountHeader } from './AccountHeader.js';
 
 export const Account = () => {
@@ -17,8 +18,8 @@ export const Account = () => {
   const setOnRampStep = useModalStore(state => state.setOnRampStep);
   const para = useInternalClient();
   const { embedded } = useAccount();
-  const { data: balance } = useWalletBalance();
   const { isEnabled } = useAccountLinking();
+  const { profileBalance } = useAssets();
 
   const isGuestMode = embedded.isConnected && embedded.isGuestMode;
   // Users using external wallets with connection only can't buy or withdraw
@@ -67,7 +68,7 @@ export const Account = () => {
         <LowerContainer>
           {isGuestMode && (
             <>
-              {balance && parseFloat(balance) > 0 && (
+              {profileBalance && profileBalance.value && profileBalance.value.value > 0 && (
                 <Alert>
                   <CpslIcon icon="alertTriangle" size="24px" style={{ color: 'var(--cpsl-color-utility-yellow)' }} />
                   You've funded this account - complete account setup to maintain access.

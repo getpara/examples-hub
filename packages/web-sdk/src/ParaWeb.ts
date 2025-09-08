@@ -1,8 +1,16 @@
-import ParaCore, { ConstructorOpts, Environment, getNetworkPrefix } from '@getpara/core-sdk';
+import ParaCore, {
+  ConstructorOpts,
+  dispatchEvent,
+  Environment,
+  getNetworkPrefix,
+  OnRampPurchaseStatus,
+  ParaEvent,
+} from '@getpara/core-sdk';
 import { WebUtils } from './WebUtils.js';
 import { isPasskeySupported } from './utils/isPasskeySupported.js';
 import { PortalRequest } from './types/onRamp.js';
 import { offRampSend } from './utils/offrampSend.js';
+import { AssetTransfer } from '@getpara/core-sdk/dist/types/types/assets.js';
 
 export class Para extends ParaCore {
   farcasterSdk = undefined;
@@ -71,6 +79,49 @@ export class Para extends ParaCore {
             payload = { onRampPurchase: this.onRampPopup?.onRampPurchase, onRampConfig };
           }
           break;
+        case 'ONRAMPS__UPDATE_PURCHASE':
+          {
+            const { updates, depositRequest } = event.data.payload;
+
+            if (this.onRampPopup?.onRampPurchase) {
+              this.onRampPopup.onRampPurchase = {
+                ...this.onRampPopup?.onRampPurchase,
+                ...updates,
+              };
+
+              const onRampPurchase = this.onRampPopup.onRampPurchase;
+
+              if (onRampPurchase.status === OnRampPurchaseStatus.FINISHED) {
+                const wallet = this.findWallet(onRampPurchase.externalWalletAddress ?? onRampPurchase.walletId);
+
+                if (wallet) {
+                  const { asset, assetQuantity, network, address } = onRampPurchase;
+
+                  if (depositRequest) {
+                    const { chainId, contractAddress, destinationAddress } = depositRequest;
+
+                    dispatchEvent<AssetTransfer>(ParaEvent.ASSET_TRANSFERRED, {
+                      wallet,
+                      type: 'OUTBOUND',
+                      asset,
+                      network,
+                      quantity: assetQuantity,
+                      chainId,
+                      contractAddress,
+                      sourceAddress: address,
+                      destinationAddress,
+                    });
+                  }
+
+                  dispatchEvent(ParaEvent.ONRAMP_TRANSACTION_COMPLETE, onRampPurchase);
+                }
+              }
+
+              // Set the payload to return the updated onRampPurchase
+              payload = { onRampPurchase };
+            }
+          }
+          break;
         case 'ONRAMPS__SIGN_MOONPAY_URL':
           {
             const { url } = event.data.payload;
@@ -87,18 +138,20 @@ export class Para extends ParaCore {
             payload = { signature: res.data.signature };
           }
           break;
-        case 'ONRAMPS__SIGN_DEPOSIT_TX': {
-          const { depositRequest } = event.data.payload;
-          const onRampPurchase = this.onRampPopup?.onRampPurchase;
+        case 'ONRAMPS__SIGN_DEPOSIT_TX':
+          {
+            const { depositRequest } = event.data.payload;
+            const onRampPurchase = this.onRampPopup?.onRampPurchase;
 
-          try {
-            const { txHash, updatedOnRampPurchase } = await offRampSend(this, onRampPurchase, depositRequest);
+            try {
+              const { txHash, updatedOnRampPurchase } = await offRampSend(this, onRampPurchase, depositRequest);
 
-            payload = { onRampPurchase: updatedOnRampPurchase, txHash };
-          } catch (e) {
-            throw e;
+              payload = { onRampPurchase: updatedOnRampPurchase, txHash };
+            } catch (e) {
+              throw e;
+            }
           }
-        }
+          break;
       }
     } catch (e) {
       status = 'ERROR';

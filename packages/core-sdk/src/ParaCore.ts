@@ -57,6 +57,7 @@ import {
   isPregenAuth,
   VerifiedAuthInfo,
   OnRampPurchase,
+  BalancesConfig,
   Theme,
   SignUpOrLogInResponse,
 } from '@getpara/user-management-client';
@@ -4442,6 +4443,16 @@ Need help? Visit: https://docs.getpara.com or contact support
     });
 
     return accounts;
+  }
+
+  protected async getProfileBalance({ config, refetch = false }: { config?: BalancesConfig; refetch?: boolean } = {}) {
+    const { balance } = await this.ctx.client.getProfileBalance({
+      config,
+      wallets: this.availableWallets.map(({ type, address }) => ({ type, address })),
+      refetch,
+    });
+
+    return balance;
   }
 
   protected async sendLoginCode() {

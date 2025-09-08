@@ -52,7 +52,10 @@ export interface ModalSlice {
   isOpen: boolean;
   setIsOpen: (_: boolean) => void;
 
-  openedToStep: MutableRefObject<ModalStep | null>;
+  refs: {
+    openedToStep: MutableRefObject<ModalStep | null>;
+    balancesInvalidationTime: MutableRefObject<number | null>;
+  };
 }
 
 export interface WalletSlice {
