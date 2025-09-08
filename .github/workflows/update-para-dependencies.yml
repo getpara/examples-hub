@@ -57,15 +57,13 @@ jobs:
             summary=$(grep -E "Updated \d+ files with \d+ dependency updates" update_output.txt || echo "Dependencies updated")
             echo "update_summary=$summary" >> $GITHUB_OUTPUT
             
-            # Generate commit message from the update output
-            echo "update @getpara/* dependencies to latest alpha versions" > commit_message.txt
-            echo "" >> commit_message.txt
-            grep -E "^\s+- @getpara/" update_output.txt >> commit_message.txt || true
-            echo "" >> commit_message.txt
-            echo "$summary" >> commit_message.txt
-            
+            # Generate commit message directly in GITHUB_OUTPUT
             echo "commit_message<<EOF" >> $GITHUB_OUTPUT
-            cat commit_message.txt >> $GITHUB_OUTPUT
+            echo "update @getpara/* dependencies to latest alpha versions" >> $GITHUB_OUTPUT
+            echo "" >> $GITHUB_OUTPUT
+            grep -E "^\s+- @getpara/" update_output.txt >> $GITHUB_OUTPUT || true
+            echo "" >> $GITHUB_OUTPUT
+            echo "$summary" >> $GITHUB_OUTPUT
             echo "EOF" >> $GITHUB_OUTPUT
             
             echo "✅ $summary"
@@ -91,7 +89,7 @@ jobs:
             echo "No changes to commit"
             echo "committed=false" >> $GITHUB_OUTPUT
           else
-            git commit -F commit_message.txt
+            git commit -m "${{ steps.apply_updates.outputs.commit_message }}"
             echo "committed=true" >> $GITHUB_OUTPUT
             echo "✅ Changes committed successfully to branch $BRANCH_NAME"
           fi
@@ -112,7 +110,7 @@ jobs:
           This PR updates @getpara/* packages to their latest alpha versions.
           
           ### Changes Made
-          $(cat commit_message.txt)
+          ${{ steps.apply_updates.outputs.commit_message }}
           
           ### Verification
           - [ ] All package.json files have been updated

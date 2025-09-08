@@ -1,99 +1,76 @@
 "use client";
 
-import { useState } from "react";
-import { useAccount, useModal, useWallet, useSignMessage, ModalStep } from "@getpara/react-sdk";
+import { useAccount, useModal, useWallet, useSignMessage } from "@getpara/react-sdk";
 import { StatusAlert } from "@/components/ui/StatusAlert";
 import { ConnectWalletCard } from "@/components/ui/ConnectWalletCard";
-import { SignMessageForm } from "@/components/ui/SignMessageForm";
 import { SignatureDisplay } from "@/components/ui/SignatureDisplay";
+import { PageHeader } from "@/components/PageHeader";
+import { ConnectedWallet } from "@/components/ConnectedWallet";
+
+const HELLO_WORLD_MESSAGE = "Hello World!";
 
 export default function Home() {
-  const [message, setMessage] = useState("Hello Para!");
   const { openModal } = useModal();
   const { isConnected } = useAccount();
   const { data: wallet } = useWallet();
-  const signMessageHook = useSignMessage();
+  const signMessage = useSignMessage();
 
   const address = wallet?.address;
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const handleSignHelloWorld = () => {
     if (!isConnected || !wallet?.id) {
       return;
     }
 
-    signMessageHook.signMessage({
+    signMessage.signMessage({
       walletId: wallet.id,
-      messageBase64: btoa(message),
+      messageBase64: btoa(HELLO_WORLD_MESSAGE),
     });
   };
 
-  // Reset signature when message changes
-  const handleMessageChange = (value: string) => {
-    setMessage(value);
-    if (signMessageHook.data) {
-      signMessageHook.reset();
-    }
-  };
-
-  // Derive status from signing state
-  const status = {
-    show: signMessageHook.isPending || !!signMessageHook.error || !!signMessageHook.data,
-    type: signMessageHook.isPending
-      ? ("info" as const)
-      : signMessageHook.error
-      ? ("error" as const)
-      : ("success" as const),
-    message: signMessageHook.isPending
-      ? "Signing message..."
-      : signMessageHook.error
-      ? signMessageHook.error.message || "Failed to sign message. Please try again."
-      : "Message signed successfully!",
+  const alertStatus = {
+    show: signMessage.isPending || !!signMessage.error || !!signMessage.data,
+    type: signMessage.isPending ? ("info" as const) : signMessage.error ? ("error" as const) : ("success" as const),
+    message: signMessage.isPending
+      ? "Signing 'Hello World!'..."
+      : signMessage.error
+      ? signMessage.error.message || "Failed to sign 'Hello World!'. Please try again."
+      : "'Hello World!' signed successfully!",
   };
 
   return (
     <div className="container mx-auto px-4 py-12">
-      <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold tracking-tight mb-4">Para Modal Demo</h1>
-        <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-          Sign messages with your Para wallet. This example demonstrates the simplest integration using Para&apos;s
-          built-in modal and React SDK hooks.
-        </p>
-      </div>
-      <button onClick={() => openModal({ step: ModalStep.ADD_FUNDS_BUY })}>Open Modal</button>
-
+      <PageHeader />
       {!isConnected ? (
         <ConnectWalletCard onConnect={openModal} />
       ) : (
         <div className="max-w-xl mx-auto">
-          <div className="mb-8 rounded-none border border-gray-200">
-            <div className="px-6 py-3 bg-gray-50 border-b border-gray-200">
-              <h3 className="text-sm font-medium text-gray-900">Connected Wallet</h3>
-            </div>
-            <div className="px-6 py-3">
-              <p className="text-sm text-gray-500">Address</p>
-              <p className="text-lg font-medium text-gray-900 font-mono">
-                {address?.slice(0, 6)}...{address?.slice(-4)}
-              </p>
+          <ConnectedWallet address={address} />
+
+          <StatusAlert
+            show={alertStatus.show}
+            type={alertStatus.type}
+            message={alertStatus.message}
+          />
+
+          <div className="bg-white rounded-none border border-gray-200 p-6 mb-4">
+            <h3 className="text-lg font-medium mb-4">Sign Message</h3>
+            <div className="space-y-4">
+              <div className="p-4 bg-gray-50 border border-gray-200 rounded-none">
+                <p className="text-sm text-gray-600 mb-1">Message to sign:</p>
+                <p className="text-lg font-mono font-semibold">{HELLO_WORLD_MESSAGE}</p>
+              </div>
+              <button
+                onClick={handleSignHelloWorld}
+                disabled={signMessage.isPending}
+                className="w-full px-4 py-2 bg-gray-900 text-white rounded-none hover:bg-gray-950 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed font-medium">
+                {signMessage.isPending ? "Signing..." : "Sign Hello World!"}
+              </button>
             </div>
           </div>
 
-          <StatusAlert
-            show={status.show}
-            type={status.type}
-            message={status.message}
-          />
-
-          <SignMessageForm
-            message={message}
-            isLoading={signMessageHook.isPending}
-            onMessageChange={handleMessageChange}
-            onSubmit={handleSubmit}
-          />
-
-          {signMessageHook.data && "signature" in signMessageHook.data && (
-            <SignatureDisplay signature={signMessageHook.data.signature} />
+          {signMessage.data && "signature" in signMessage.data && (
+            <SignatureDisplay signature={signMessage.data.signature} />
           )}
         </div>
       )}

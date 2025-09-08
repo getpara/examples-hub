@@ -1,4 +1,4 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
 @theme {
   --color-background: var(--background);
@@ -39,4 +39,11 @@ body {
   color: var(--foreground);
   background: var(--background);
   font-family: "Inter", Arial, Helvetica, sans-serif;
+}
+
+cpsl-auth-modal {
+  --overlay-background: rgba(255, 0, 0, 0.5) !important;
+  --backdrop-background: rgba(255, 0, 0, 0.5) !important;
+  --overlay-opacity: 0.8 !important;
+  --backdrop-opacity: 0.8 !important;
 }

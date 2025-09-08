@@ -2,15 +2,14 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "@/styles/globals.css";
 import "@getpara/react-sdk/styles.css";
-import { QueryProvider } from "@/context/QueryProvider";
-import { ParaProvider } from "@/context/ParaProvider";
+import { Providers } from "@/context/Providers";
 import { Header } from "@/components/layout/Header";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Para Modal + EVM Wallets Example",
-  description: "Example of how to use Para Modal with EVM Wallets",
+  title: "Para Modal Example",
+  description: "Simple Para Modal integration with message signing",
 };
 
 export default function RootLayout({
@@ -21,12 +20,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <QueryProvider>
-          <ParaProvider>
-            <Header />
-            {children}
-          </ParaProvider>
-        </QueryProvider>
+        <Providers>
+          <Header />
+          {children}
+        </Providers>
       </body>
     </html>
   );

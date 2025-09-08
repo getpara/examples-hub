@@ -5,18 +5,18 @@ interface SignMessageFormProps {
   onSubmit: (e: React.FormEvent) => void;
 }
 
-export function SignMessageForm({
-  message,
-  isLoading,
-  onMessageChange,
-  onSubmit,
-}: SignMessageFormProps) {
+export function SignMessageForm({ message, isLoading, onMessageChange, onSubmit }: SignMessageFormProps) {
   return (
-    <form onSubmit={onSubmit} data-testid="sign-message-form" className="bg-white rounded-none border border-gray-200 p-6 mb-4">
+    <form
+      onSubmit={onSubmit}
+      data-testid="sign-message-form"
+      className="bg-white rounded-none border border-gray-200 p-6 mb-4">
       <h3 className="text-lg font-medium mb-4">Sign Message</h3>
       <div className="space-y-4">
         <div>
-          <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
+          <label
+            htmlFor="message"
+            className="block text-sm font-medium text-gray-700 mb-2">
             Message to sign
           </label>
           <textarea
