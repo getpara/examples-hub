@@ -4,7 +4,7 @@
   <dict>
     <key>com.apple.developer.associated-domains</key>
     <array>
-      <string>webcredentials:app.beta.usecapsule.com?mode=developer</string>
+      <string>webcredentials:app.beta.usecapsule.com</string>
       <string>webcredentials:app.usecapsule.com</string>
     </array>
   </dict>

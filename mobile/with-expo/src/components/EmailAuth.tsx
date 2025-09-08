@@ -69,7 +69,11 @@ export const EmailAuth: React.FC<EmailAuthProps> = ({
           const APP_SCHEME_EMAIL = "para-sdk-demo";
           const APP_SCHEME_REDIRECT_URL = `${APP_SCHEME_EMAIL}://para`;
 
-          await openAuthSessionAsync(authStateResult.passwordUrl, APP_SCHEME_REDIRECT_URL);
+          // Append the native callback URL to the password URL for proper redirect
+          const url = new URL(authStateResult.passwordUrl);
+          url.searchParams.set('nativeCallbackUrl', APP_SCHEME_REDIRECT_URL);
+          
+          await openAuthSessionAsync(url.toString(), APP_SCHEME_REDIRECT_URL);
           await para.waitForLogin({});
           setStatus("");
           onSuccess();
@@ -160,7 +164,12 @@ export const EmailAuth: React.FC<EmailAuthProps> = ({
           setLoading(false);
           return;
         }
-        await openAuthSessionAsync(passwordUrl, APP_SCHEME_REDIRECT_URL);
+        
+        // Append the native callback URL to the password URL for proper redirect
+        const url = new URL(passwordUrl);
+        url.searchParams.set('nativeCallbackUrl', APP_SCHEME_REDIRECT_URL);
+        
+        await openAuthSessionAsync(url.toString(), APP_SCHEME_REDIRECT_URL);
         await para.waitForWalletCreation({});
         setStatus("");
         onHideSecurityChoice?.();

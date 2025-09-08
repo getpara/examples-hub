@@ -49,7 +49,11 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess, onShowSecurityC
               const APP_SCHEME_OAUTH = "para-sdk-demo";
               const APP_SCHEME_REDIRECT_URL = `${APP_SCHEME_OAUTH}://para`;
 
-              await openAuthSessionAsync(verifiedAuthState.passwordUrl, APP_SCHEME_REDIRECT_URL);
+              // Append the native callback URL to the password URL for proper redirect
+              const url = new URL(verifiedAuthState.passwordUrl);
+              url.searchParams.set('nativeCallbackUrl', APP_SCHEME_REDIRECT_URL);
+              
+              await openAuthSessionAsync(url.toString(), APP_SCHEME_REDIRECT_URL);
               await para.waitForLogin({});
               setStatus("");
               onSuccess();
@@ -152,7 +156,11 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess, onShowSecurityC
           if (!passwordUrl) {
             throw new Error("Password URL is undefined");
           }
-          await openAuthSessionAsync(passwordUrl, APP_SCHEME_REDIRECT_URL);
+          // Append the native callback URL to the password URL for proper redirect
+          const url = new URL(passwordUrl);
+          url.searchParams.set('nativeCallbackUrl', APP_SCHEME_REDIRECT_URL);
+          
+          await openAuthSessionAsync(url.toString(), APP_SCHEME_REDIRECT_URL);
           await para.waitForWalletCreation({});
           setStatus("");
           onHideSecurityChoice?.();
