@@ -5,6 +5,8 @@ import { Button } from "./common/Button";
 import { StatusDisplay } from "./common/StatusDisplay";
 import { Input } from "./common/Input";
 import { Wallet } from "@getpara/react-native-wallet";
+import { ethers } from "ethers";
+import { ParaEthersSigner } from "@getpara/ethers-v6-integration";
 
 interface WalletSectionProps {
   onLogout: () => void;
@@ -14,11 +16,13 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
   const [wallet, setWallet] = useState<Wallet | null>(null);
   const [_loadingWallet, setLoadingWallet] = useState(false);
   const [signingMessage, setSigningMessage] = useState(false);
+  const [signingTransaction, setSigningTransaction] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
   const [messageToSign, setMessageToSign] = useState("Hello from Para SDK Demo!");
   const [signature, setSignature] = useState("");
+  const [txSignature, setTxSignature] = useState("");
 
   useEffect(() => {
     // Fetch user's wallet on component mount
@@ -110,6 +114,49 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
     }
   };
 
+  const signTransaction = async () => {
+    if (!wallet) {
+      setError("No wallet available");
+      return;
+    }
+
+    setSigningTransaction(true);
+    setError("");
+    setStatus("");
+    setTxSignature("");
+
+    try {
+      // Create provider for Sepolia testnet
+      const provider = new ethers.JsonRpcProvider("https://ethereum-sepolia-rpc.publicnode.com");
+      
+      // Create Para-enabled signer as per documentation
+      // @ts-expect-error - ParaMobile extends ParaCore but types aren't compatible
+      const signer = new ParaEthersSigner(para, provider);
+
+      // Create transaction object
+      const tx = {
+        to: "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
+        value: ethers.parseEther("0.001"), // 0.001 ETH
+        gasLimit: 21000, // Standard ETH transfer gas
+      };
+
+      // Populate the transaction with necessary fields (nonce, gas prices, etc)
+      const populatedTx = await signer.populateTransaction(tx);
+      
+      // Sign the transaction without broadcasting
+      const signedTx = await signer.signTransaction(populatedTx);
+      
+      // Display the signed transaction
+      setTxSignature(signedTx);
+      setStatus("");
+      
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to sign transaction");
+    } finally {
+      setSigningTransaction(false);
+    }
+  };
+
   const handleLogout = async () => {
     setLoggingOut(true);
     setError("");
@@ -159,6 +206,26 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
             <View style={styles.signatureContainer}>
               <Text style={styles.resultLabel}>Signature Result</Text>
               <Text style={styles.signature}>{signature}</Text>
+            </View>
+          )}
+        </View>
+      )}
+
+      {wallet && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Sign Transaction</Text>
+          <Text style={styles.info}>Sign a transaction to send 0.001 ETH (Sepolia)</Text>
+          <View style={{ height: 16 }} />
+          <Button
+            title="Sign Transaction"
+            onPress={signTransaction}
+            loading={signingTransaction}
+          />
+
+          {txSignature && (
+            <View style={styles.signatureContainer}>
+              <Text style={styles.resultLabel}>Signed Transaction</Text>
+              <Text style={styles.signature}>{txSignature}</Text>
             </View>
           )}
         </View>
