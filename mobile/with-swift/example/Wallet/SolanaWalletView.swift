@@ -145,8 +145,8 @@ struct SolanaWalletView: View {
                 } else if let sig = signature {
                     result = ("Pre-Serialized Transaction Signed", 
                              "This demonstrates signing a pre-serialized base64 transaction\n\n" +
-                             "Real serialized tx (first 50 chars):\n\(String(realSerializedTx.prefix(50)))...\n\n" +
-                             "Signature:\n\(sig.signedTransaction)\n\n" +
+                             "Input transaction (\(realSerializedTx.count) characters):\n\(String(realSerializedTx.prefix(50)))...\n\n" +
+                             "Signed transaction (\(sig.signedTransaction.count) characters):\n\(sig.signedTransaction)\n\n" +
                              "Duration: \(String(format: "%.3f", duration))s\n\n" +
                              "Note: In production, the base64 transaction would come from:\n" +
                              "• A dApp that constructs transactions\n" +
