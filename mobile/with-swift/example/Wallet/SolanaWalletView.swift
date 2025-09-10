@@ -107,22 +107,28 @@ struct SolanaWalletView: View {
             do {
                 // In a real scenario, a customer would have a pre-serialized Solana transaction
                 // from an external source (e.g., a dApp, another SDK, or a backend service).
-                // 
-                // This is a REAL base64-encoded Solana transaction message, exactly as produced
-                // by transaction.serializeMessage() from @solana/web3.js
+                
+                // Two formats are commonly used:
+                // 1. Serialized MESSAGE (200 chars) - from transaction.serializeMessage()
+                //    This is just the message to be signed, without signature slots
+                // 2. Serialized TRANSACTION (288 chars) - from transaction.serialize()
+                //    This includes the message plus empty signature slots
+                
+                // Option 1: MESSAGE format (what dApps often send)
+                // let serializedMessage = "AQABA8GlkLb8bd/L6i5/YftGpxyig/iBvof2eNEF9WPF2o0ZfowIh2C/3h3dzzLBfyCbgkLuUqrxMfrNiNDqLG0LBvIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOMy2vkvq+zotj/3pEAF5f39mvoVh1a2HFqV+QSzuNCBAQICAAEMAgAAAEBCDwAAAAAA"
+                
+                // Option 2: FULL TRANSACTION format (includes 64-byte signature slot)
+                // IMPORTANT: This transaction must match the wallet address being used for signing
+                let serializedTransaction = "AQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAEDKZZYdO3db0HJMOZpAPf5DNoezDVaku4SxVDIsRkGHXN+jAiHYL/eHd3PMsF/IJuCQu5SqvEx+s2I0OosbQsG8gAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA4zLa+S+r7Oi2P/ekQAXl/f2a+hWHVrYcWpX5BLO40IEBAgIAAQwCAAAAQEIPAAAAAAA="
+                
+                // Using full transaction format for testing (288 characters)
+                let realSerializedTx = serializedTransaction
                 
                 // This transaction represents:
                 // - Transfer: 1,000,000 lamports (0.001 SOL)
+                // - From: 3oLgZ7jpmDuKJ5w42dXUEN6Mg6UCXiGC2AewmPQjYQDg (matches the actual wallet)
                 // - To: 9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM
-                // - Recent blockhash: DWJ5ey2uFfQQvTkKVzpmDbZqWPNPtJ1ZPo7F8NMBhWTu
-                // 
-                // In production, this would come from:
-                // - A dApp that constructs transactions
-                // - A backend service that prepares transactions
-                // - Another SDK that has already formatted the transaction
-                
-                // Real serialized Solana transaction (200 characters)
-                let realSerializedTx = "AQABA8GlkLb8bd/L6i5/YftGpxyig/iBvof2eNEF9WPF2o0ZfowIh2C/3h3dzzLBfyCbgkLuUqrxMfrNiNDqLG0LBvIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOMy2vkvq+zotj/3pEAF5f39mvoVh1a2HFqV+QSzuNCBAQICAAEMAgAAAEBCDwAAAAAA"
+                // - Recent blockhash: GHtXQBsoZHVnNFa9YevAzFr17DJjgHXk3ycTKD5xD3Zi
                 
                 // Now test signing the pre-serialized transaction using the new extension
                 var signature: SignatureResult?
