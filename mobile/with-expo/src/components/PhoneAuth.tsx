@@ -69,7 +69,11 @@ export const PhoneAuth: React.FC<PhoneAuthProps> = ({
           const APP_SCHEME_PHONE = "para-sdk-demo";
           const APP_SCHEME_REDIRECT_URL = `${APP_SCHEME_PHONE}://para`;
 
-          await openAuthSessionAsync(authStateResult.passwordUrl, APP_SCHEME_REDIRECT_URL);
+          // Append the native callback URL to the password URL for proper redirect
+          const url = new URL(authStateResult.passwordUrl);
+          url.searchParams.set('nativeCallbackUrl', APP_SCHEME_REDIRECT_URL);
+          
+          await openAuthSessionAsync(url.toString(), APP_SCHEME_REDIRECT_URL);
           await para.waitForLogin({});
           setStatus("");
           onSuccess();
@@ -151,7 +155,11 @@ export const PhoneAuth: React.FC<PhoneAuthProps> = ({
 
         // Narrow type to AuthStateSignup to access passwordUrl
         if (authState && "passwordUrl" in authState && typeof authState.passwordUrl === "string") {
-          await openAuthSessionAsync(authState.passwordUrl, APP_SCHEME_REDIRECT_URL);
+          // Append the native callback URL to the password URL for proper redirect
+          const url = new URL(authState.passwordUrl);
+          url.searchParams.set('nativeCallbackUrl', APP_SCHEME_REDIRECT_URL);
+          
+          await openAuthSessionAsync(url.toString(), APP_SCHEME_REDIRECT_URL);
           await para.waitForWalletCreation({});
           setStatus("");
           onHideSecurityChoice?.();
