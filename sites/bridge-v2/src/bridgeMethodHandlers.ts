@@ -530,24 +530,90 @@ export const bridgeMethodHandlers: Record<string, (para: ParaWeb, args: any) => 
         try {
           // Check if this is a pre-serialized transaction
           if ('type' in args.transaction && args.transaction.type === 'serialized' && 'data' in args.transaction) {
-            // For pre-serialized, we can't reconstruct the full transaction
-            // Just sign and return the signature (caller has the full tx)
-            logger.info('Signing pre-serialized Solana transaction');
-            const result = await para.signMessage({
-              walletId: args.walletId,
-              messageBase64: args.transaction.data,
-            });
+            const { Transaction, Message, PublicKey } = await import('@solana/web3.js');
 
-            // Check if signing was denied
-            if ('pendingTransactionId' in result) {
-              return result;
+            try {
+              // Decode the base64 input
+              const buffer = Buffer.from(args.transaction.data, 'base64');
+
+              let transaction;
+              let messageToSign: Buffer;
+
+              // Try to deserialize as a full Transaction first
+              try {
+                transaction = Transaction.from(buffer);
+                // Extract the message to sign
+                messageToSign = transaction.serializeMessage();
+              } catch (txError) {
+                // If that fails, try as a Message
+                const message = Message.from(buffer);
+                transaction = Transaction.populate(message);
+                // The buffer itself is the message to sign
+                messageToSign = buffer;
+              }
+
+              // Convert message to base64 for signing
+              const messageBase64 = messageToSign.toString('base64');
+
+              // Sign the message
+              const result = await para.signMessage({
+                walletId: args.walletId,
+                messageBase64: messageBase64,
+              });
+
+              // Check if signing was denied
+              if ('pendingTransactionId' in result) {
+                return result;
+              }
+
+              // Add the signature to the transaction
+              const signatureBuffer = Buffer.from(result.signature, 'base64');
+              const publicKey = new PublicKey(wallet.address);
+
+              // Try to add signature - this will fail if wallet doesn't match transaction
+              try {
+                transaction.addSignature(publicKey, signatureBuffer);
+              } catch (addSigError: any) {
+                logger.error('Failed to add signature to transaction', {
+                  error: addSigError.message,
+                  walletAddress: wallet.address,
+                  transactionFeePayer: transaction.feePayer?.toBase58(),
+                });
+
+                // Return just the signature as fallback
+                return {
+                  signedTransaction: result.signature,
+                };
+              }
+
+              // Serialize the complete signed transaction
+              const signedTransactionBuffer = transaction.serialize({
+                requireAllSignatures: false,
+                verifySignatures: false,
+              });
+              const signedTransactionBase64 = signedTransactionBuffer.toString('base64');
+
+              // Return the full signed transaction (ready to submit to Solana)
+              return {
+                signedTransaction: signedTransactionBase64,
+              };
+            } catch (error) {
+              logger.error('Failed to process pre-serialized Solana transaction:', error);
+              // Fallback to returning just the signature if deserialization fails
+              // This maintains backward compatibility for non-standard cases
+              const result = await para.signMessage({
+                walletId: args.walletId,
+                messageBase64: args.transaction.data,
+              });
+
+              if ('pendingTransactionId' in result) {
+                return result;
+              }
+
+              return {
+                signedTransaction: result.signature,
+              };
             }
-
-            // For pre-serialized transactions, we can only return the signature
-            // The caller already has the full transaction and must combine them
-            return {
-              signature: result.signature,
-            };
           }
 
           // Use Para's Solana signer for complete signed transaction

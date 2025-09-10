@@ -12,6 +12,7 @@ log.methodFactory = function (methodName, logLevel, loggerName) {
     // Convert to string to handle symbol types
     const methodStr = String(methodName);
     const loggerStr = String(loggerName);
+
     // Use the original console methods directly
     if (methodStr === 'debug' || methodStr === 'info') {
       // eslint-disable-next-line no-console
