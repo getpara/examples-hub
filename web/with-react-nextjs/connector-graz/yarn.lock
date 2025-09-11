@@ -3516,7 +3516,7 @@ __metadata:
     "@types/react": "npm:^19"
     "@types/react-dom": "npm:^19"
     eslint: "npm:^9.29.0"
-    graz: "npm:0.3.4-alpha.0"
+    graz: "npm:0.3.5"
     next: "npm:15.1.5"
     pino-pretty: "npm:13.0.0"
     postcss: "npm:^8"
@@ -4533,9 +4533,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"graz@npm:0.3.4-alpha.0":
-  version: 0.3.4-alpha.0
-  resolution: "graz@npm:0.3.4-alpha.0"
+"graz@npm:0.3.5":
+  version: 0.3.5
+  resolution: "graz@npm:0.3.5"
   dependencies:
     "@cosmsnap/snapper": "npm:0.2.7"
     "@dao-dao/cosmiframe": "npm:1.0.0"
@@ -4569,7 +4569,7 @@ __metadata:
       optional: true
   bin:
     graz: dist/cli.js
-  checksum: 10c0/9fc26ec1898f62699653e487eae6aa1801d165973cdda643b9e6e6f9a217763e781fb5c551cc73640d6564b43c5985d1fee03b1d0a78f8ab001c06c3d82fb7f3
+  checksum: 10c0/556d3ce62005c6f30100e84da7eae7857161ed72e76777ce4078808810a50d27c2c30ff9320bbdf794fc619998e13ecca038e198c53136c741b3cb4ac3e19fa2
   languageName: node
   linkType: hard
 
