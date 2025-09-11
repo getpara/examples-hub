@@ -11,19 +11,27 @@ import { useModalOutletContext } from '../../hooks/useModalOutletContext';
 import { useCloseWindow } from '../../hooks/useCloseWindow';
 import { AuthMethod, isPasskeySupported } from '@getpara/web-sdk';
 import { validateCallbackUrl } from '../../utils/validateCallbackUrl';
+import { isIFramed } from '../../utils/isIFramed';
 
-const AuthLoginBase = ({ authMethod }: { authMethod: AuthMethod }) => {
+const AuthLoginBase = ({ authMethod, step: propsStep }: { authMethod?: AuthMethod; step?: AuthLoginStep }) => {
   const para = usePara();
   const closeWindow = useCloseWindow();
   const { toggleBranding, partner } = useModalOutletContext();
   const {
-    fns: { authLogin, authLoginWithPassword, fetchWallets, authUpdateKeyShares },
+    fns: {
+      authLogin,
+      authLoginWithPassword,
+      fetchWallets,
+      authUpdateKeyShares,
+      authUpdateEnclaveKeyShares,
+      checkIsEnclaveUser,
+    },
     authInfo,
-    params: { sessionId, partnerId, encryptionKey, newDeviceSessionLookupId, skipAutoLogin, isEmbedded },
+    params: { sessionId, partnerId, encryptionKey, newDeviceSessionLookupId, skipAutoLogin },
     biometricLocationHints,
   } = useLogin();
   const [urlForNewDeviceLogin, setUrlForNewDeviceLogin] = useState<string>('');
-  const [step, setStep] = useState(AuthLoginStep.MANUAL_LOGIN);
+  const [step, setStep] = useState(propsStep ?? AuthLoginStep.MANUAL_LOGIN);
   const [loginWithPasswordError, setLoginWithPasswordError] = useState<string | undefined>();
   const [isAddingDevice, setIsAddingDevice] = useState(false);
 
@@ -34,7 +42,16 @@ const AuthLoginBase = ({ authMethod }: { authMethod: AuthMethod }) => {
   };
 
   const postLogin = async ({ fromKnownDevice, loginRes }: { fromKnownDevice?: boolean; loginRes?: LoginRes }) => {
+    const auth = await para.ctx.client.sessionAuth(sessionId);
+
+    if (auth.isNewUser) {
+      closeWindow();
+      return;
+    }
+
     await para.userSetupAfterLogin();
+
+    const isEnclaveUser = await checkIsEnclaveUser();
 
     // For native apps, we need to ensure wallet signers are persisted before redirecting
     // Check for native callback URL
@@ -43,9 +60,9 @@ const AuthLoginBase = ({ authMethod }: { authMethod: AuthMethod }) => {
 
     if (nativeCallbackUrl && validateCallbackUrl(nativeCallbackUrl)) {
       // For native apps, persist wallet signers before redirecting
-      if (loginRes) {
+      if (isEnclaveUser || loginRes) {
         try {
-          await authUpdateKeyShares(loginRes);
+          await (isEnclaveUser ? authUpdateEnclaveKeyShares() : authUpdateKeyShares(loginRes));
         } catch (error) {
           console.error('Failed to update keyshares before native redirect', error);
           return; // Avoid redirecting if we failed to persist signers
@@ -79,7 +96,7 @@ const AuthLoginBase = ({ authMethod }: { authMethod: AuthMethod }) => {
         needsWallet: isWithoutWallets,
         newDeviceSessionLookupId,
       });
-      await authUpdateKeyShares(loginRes);
+      await (isEnclaveUser ? authUpdateEnclaveKeyShares() : authUpdateKeyShares(loginRes));
 
       setStep(fromKnownDevice ? AuthLoginStep.SUCCESS_FROM_KNOWN_DEVICE : AuthLoginStep.SUCCESS);
       return;
@@ -101,7 +118,7 @@ const AuthLoginBase = ({ authMethod }: { authMethod: AuthMethod }) => {
         newDeviceSessionLookupId,
       });
       if (para.currentWalletIdsArray.length > 0) {
-        await authUpdateKeyShares(loginRes);
+        await (isEnclaveUser ? authUpdateEnclaveKeyShares() : authUpdateKeyShares(loginRes));
       }
       setStep(fromKnownDevice ? AuthLoginStep.SUCCESS_FROM_KNOWN_DEVICE : AuthLoginStep.SUCCESS);
     } else {
@@ -197,7 +214,7 @@ const AuthLoginBase = ({ authMethod }: { authMethod: AuthMethod }) => {
   }, [step]);
 
   useEffect(() => {
-    if (step === AuthLoginStep.SELECT_WALLET) {
+    if (step === AuthLoginStep.SELECT_WALLET && !isIFramed) {
       toggleBranding(false);
     } else {
       toggleBranding(true);
@@ -268,9 +285,9 @@ const AuthLoginBase = ({ authMethod }: { authMethod: AuthMethod }) => {
   return (
     <Card>
       <CardContent>
-        {step !== AuthLoginStep.LOGIN_FAILED_TROUBLESHOOTING && !isEmbedded && <ModalHeader />}
+        {step !== AuthLoginStep.LOGIN_FAILED_TROUBLESHOOTING && !isIFramed && <ModalHeader />}
         <Body
-          isEmbedded={isEmbedded}
+          isEmbedded={isIFramed}
           step={step}
           sessionLookupId={sessionId}
           addDeviceUrl={urlForNewDeviceLogin}
@@ -283,14 +300,15 @@ const AuthLoginBase = ({ authMethod }: { authMethod: AuthMethod }) => {
           loginWithPasswordError={loginWithPasswordError}
           isKnownDeviceLogin={isKnownDeviceLogin}
           isAddingDevice={isAddingDevice}
+          postLogin={() => postLogin({})}
         />
       </CardContent>
     </Card>
   );
 };
 
-export const AuthLogin = ({ authMethod }: { authMethod: AuthMethod }) => (
+export const AuthLogin = ({ authMethod, step }: { authMethod?: AuthMethod; step?: AuthLoginStep }) => (
   <LoginProvider>
-    <AuthLoginBase authMethod={authMethod} />
+    <AuthLoginBase authMethod={authMethod} step={step} />
   </LoginProvider>
 );

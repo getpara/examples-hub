@@ -1,8 +1,11 @@
 import { PropsWithChildren, createContext, useContext, useEffect, useMemo } from 'react';
-import { ConstructorOpts as ParaConstructorOpts, Environment as ParaEnvironment } from '@getpara/web-sdk';
+import { CoreAuthInfo, ConstructorOpts as ParaConstructorOpts, Environment as ParaEnvironment } from '@getpara/web-sdk';
 import { useSearchParams } from 'react-router-dom';
 import { ParaPortal } from '../classes/ParaPortal';
 import { DEFAULT_API_KEY } from '../constants';
+import { AuthLoginParams } from '../utils/authLogin';
+import { AuthExtras, AuthParams, extractAuthInfo } from '@getpara/user-management-client';
+import { useExtractedParams } from '../hooks/useExtractedParams';
 
 interface ParaProviderProps extends PropsWithChildren {
   apiKey: string;
@@ -60,6 +63,8 @@ export const ParaProvider = (props: ParaProviderProps) => {
   const { apiKey, environment, options, onMount, children, partnerId } = props;
   const paramsSupportedWalletTypes = searchParams.get('supportedWalletTypes');
 
+  const params = useExtractedParams<AuthLoginParams & AuthParams & AuthExtras>();
+
   const para = useMemo(
     () =>
       props.para ??
@@ -77,6 +82,35 @@ export const ParaProvider = (props: ParaProviderProps) => {
   useEffect(() => {
     onMount?.(para);
   }, [onMount, para]);
+
+  useEffect(() => {
+    async function setUserDetails() {
+      if (!para || !Object.keys(params).length) {
+        return;
+      }
+
+      const authInfo: CoreAuthInfo = params.authInfo ?? {
+        ...extractAuthInfo(params),
+        pfpUrl: params.pfpUrl,
+        displayName: params.displayName,
+      };
+
+      await para.setAuth(authInfo.auth, {
+        extras: {
+          displayName: authInfo.displayName ?? params.displayName,
+          pfpUrl: authInfo.pfpUrl ?? params.pfpUrl,
+          externalWallet: authInfo.externalWallet ?? params.externalWallet,
+        },
+        userId: params.userId,
+      });
+
+      if (params.pregenIds) {
+        para.pregenIds = params.pregenIds;
+      }
+    }
+
+    setUserDetails();
+  }, [para, params]);
 
   return <ParaContext.Provider value={para}>{children}</ParaContext.Provider>;
 };

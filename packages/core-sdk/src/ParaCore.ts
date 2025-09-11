@@ -60,6 +60,7 @@ import {
   BalancesConfig,
   Theme,
   SignUpOrLogInResponse,
+  ServerAuthStateDone,
 } from '@getpara/user-management-client';
 import type { pki as pkiType, jsbn as jsbnType } from 'node-forge';
 import forge from 'node-forge';
@@ -98,9 +99,10 @@ import {
   AccountLinkInProgress,
   InternalMethodParams,
   InternalMethodResponse,
-  AuthStateSignupOrLogin,
   OAuthResponse,
   AccountLinkError,
+  AuthStateSignupOrLoginOrDone,
+  AuthStateDone,
 } from './types/index.js';
 import { PlatformUtils } from './PlatformUtils.js';
 import { sendRecoveryForShare } from './shares/recovery.js';
@@ -131,6 +133,7 @@ import {
 } from './utils/index.js';
 import { TransactionReviewDenied, TransactionReviewTimeout } from './errors.js';
 import * as constants from './constants.js';
+import { EnclaveClient } from './shares/enclave.js';
 
 type WritableMethodKeys<T> = {
   [K in keyof T]-?: IfEquals<
@@ -143,6 +146,8 @@ type WritableMethodKeys<T> = {
 type IfEquals<X, Y, A = X, B = never> = X extends Y ? (Y extends X ? A : B) : B;
 
 export abstract class ParaCore implements CoreInterface {
+  popupWindow: Window | null = null;
+
   static version?: string = constants.PARA_CORE_VERSION;
 
   ctx: Ctx;
@@ -204,6 +209,10 @@ export abstract class ParaCore implements CoreInterface {
   accountLinkInProgress: AccountLinkInProgress | undefined = undefined;
 
   private sessionCookie?: string;
+
+  isEnclaveUser = false; // todo make protected
+  private enclaveJwt?: string;
+  private enclaveRefreshJwt?: string;
 
   private isAwaitingAccountCreation = false;
   private isAwaitingLogin = false;
@@ -494,6 +503,14 @@ export abstract class ParaCore implements CoreInterface {
     return this.sessionCookie;
   };
   persistSessionCookie: (cookie: string) => void;
+  retrieveEnclaveJwt = (): string => {
+    return this.enclaveJwt;
+  };
+  persistEnclaveJwt: (jwt: string) => void;
+  retrieveEnclaveRefreshJwt = (): string => {
+    return this.enclaveRefreshJwt;
+  };
+  persistEnclaveRefreshJwt: (jwt: string) => void;
 
   /**
    * Remove all local storage and prefixed session storage.
@@ -730,18 +747,27 @@ export abstract class ParaCore implements CoreInterface {
   abstract isPasskeySupported(): Promise<boolean>;
 
   protected async constructPortalUrl(type: PortalUrlType, opts: PortalUrlOptions = {}) {
-    const [isCreate, isLogin, isOnRamp] = [
+    const [isCreate, isLogin, isOnRamp, isOAuth, isOAuthCallback, isTelegramLogin, isFarcasterLogin] = [
       ['createAuth', 'createPassword', 'createPIN'].includes(type),
-      ['loginAuth', 'loginPassword', 'loginPIN'].includes(type),
+      ['loginAuth', 'loginPassword', 'loginPIN', 'loginOTP'].includes(type),
       type === 'onRamp',
+      type === 'oAuth',
+      type === 'oAuthCallback',
+      ['telegramLogin', 'telegramLoginVerify'].includes(type),
+      type === 'loginFarcaster',
     ];
 
+    if (isOAuth && !opts.oAuthMethod) {
+      throw new Error('oAuthMethod is required for oAuth portal URLs');
+    }
+
+    // for create and login URLs (except telegram and farcaster), authInfo must be set
     if (isCreate || isLogin) {
       this.assertIsAuthSet();
     }
 
     let sessionId = opts.sessionId;
-    if ((isLogin || isOnRamp) && !sessionId) {
+    if ((isLogin || isOnRamp || isTelegramLogin || isFarcasterLogin) && !sessionId) {
       const session = await this.touchSession(true);
 
       sessionId = session.sessionId;
@@ -752,9 +778,7 @@ export abstract class ParaCore implements CoreInterface {
     }
 
     const base =
-      type === 'onRamp' || type === 'telegramLogin'
-        ? getPortalBaseURL(this.ctx, type === 'telegramLogin')
-        : await this.getPortalURL();
+      type === 'onRamp' || isTelegramLogin ? getPortalBaseURL(this.ctx, isTelegramLogin) : await this.getPortalURL();
 
     let path: string;
     switch (type) {
@@ -790,8 +814,28 @@ export abstract class ParaCore implements CoreInterface {
         path = `/web/users/${this.userId}/on-ramp-transaction/v2/${opts.pathId}`;
         break;
       }
+      case 'telegramLoginVerify': {
+        path = `/auth/telegram/verify`;
+        break;
+      }
       case 'telegramLogin': {
         path = `/auth/telegram`;
+        break;
+      }
+      case 'oAuth': {
+        path = `/auth/${opts.oAuthMethod.toLowerCase()}`;
+        break;
+      }
+      case 'oAuthCallback': {
+        path = `/auth/${opts.oAuthMethod.toLowerCase()}/callback`;
+        break;
+      }
+      case 'loginOTP': {
+        path = '/auth/otp';
+        break;
+      }
+      case 'loginFarcaster': {
+        path = '/auth/farcaster';
         break;
       }
       default: {
@@ -842,7 +886,7 @@ export abstract class ParaCore implements CoreInterface {
           }
         : {}),
       ...(isOnRamp ? { origin: typeof window !== 'undefined' ? window.location.origin : undefined, email: this.email } : {}),
-      ...(isLogin
+      ...(isLogin || isOAuth || isOAuthCallback || isTelegramLogin || isFarcasterLogin
         ? {
             sessionId: thisDevice.sessionId,
             encryptionKey: thisDevice.encryptionKey,
@@ -855,7 +899,12 @@ export abstract class ParaCore implements CoreInterface {
             pregenIds: JSON.stringify(this.pregenIds),
           }
         : {}),
-      ...(type === 'telegramLogin' ? { isEmbed: 'true' } : {}),
+      ...(isOAuth || isOAuthCallback || isFarcasterLogin
+        ? {
+            appScheme: opts.appScheme,
+          }
+        : {}),
+      ...(isTelegramLogin ? { isEmbed: 'true' } : {}),
       ...(opts.params || {}),
     };
 
@@ -1023,19 +1072,43 @@ export abstract class ParaCore implements CoreInterface {
         cookie,
       );
     };
+    this.persistEnclaveJwt = (jwt: string) => {
+      this.enclaveJwt = jwt;
+      (opts.useSessionStorage ? this.sessionStorageSetItem : this.localStorageSetItem)(
+        constants.LOCAL_STORAGE_ENCLAVE_JWT,
+        jwt,
+      );
+    };
+    this.persistEnclaveRefreshJwt = (refreshJwt: string) => {
+      this.enclaveRefreshJwt = refreshJwt;
+      (opts.useSessionStorage ? this.sessionStorageSetItem : this.localStorageSetItem)(
+        constants.LOCAL_STORAGE_ENCLAVE_REFRESH_JWT,
+        refreshJwt,
+      );
+    };
+
+    const client = initClient({
+      env,
+      version: ParaCore.version,
+      apiKey,
+      partnerId: this.isPortal(env) ? opts.portalPartnerId : undefined,
+      useFetchAdapter: !!opts.disableWorkers,
+      retrieveSessionCookie: this.retrieveSessionCookie,
+      persistSessionCookie: this.persistSessionCookie,
+    });
+    const enclaveClient = new EnclaveClient({
+      userManagementClient: client,
+      retrieveJwt: this.retrieveEnclaveJwt,
+      persistJwt: this.persistEnclaveJwt,
+      retrieveRefreshJwt: this.retrieveEnclaveRefreshJwt,
+      persistRefreshJwt: this.persistEnclaveRefreshJwt,
+    });
 
     this.ctx = {
       env,
       apiKey,
-      client: initClient({
-        env,
-        version: ParaCore.version,
-        apiKey,
-        partnerId: this.isPortal(env) ? opts.portalPartnerId : undefined,
-        useFetchAdapter: !!opts.disableWorkers,
-        retrieveSessionCookie: this.retrieveSessionCookie,
-        persistSessionCookie: this.persistSessionCookie,
-      }),
+      client,
+      enclaveClient,
       disableWorkers: opts.disableWorkers,
       offloadMPCComputationURL: opts.offloadMPCComputationURL,
       useLocalFiles: opts.useLocalFiles,
@@ -1120,6 +1193,7 @@ export abstract class ParaCore implements CoreInterface {
     this.updateWalletIdsFromStorage();
     this.updateSessionCookieFromStorage();
     this.updateLoginEncryptionKeyPairFromStorage();
+    this.updateEnclaveJwtFromStorage();
   };
 
   private updateAuthInfoFromStorage = () => {
@@ -1142,6 +1216,17 @@ export abstract class ParaCore implements CoreInterface {
     }
 
     this.#authInfo = authInfo;
+  };
+
+  private updateEnclaveJwtFromStorage = () => {
+    this.enclaveJwt =
+      (this.localStorageGetItem(constants.LOCAL_STORAGE_ENCLAVE_JWT) as string) ||
+      (this.sessionStorageGetItem(constants.LOCAL_STORAGE_ENCLAVE_JWT) as string) ||
+      undefined;
+    this.enclaveRefreshJwt =
+      (this.localStorageGetItem(constants.LOCAL_STORAGE_ENCLAVE_REFRESH_JWT) as string) ||
+      (this.sessionStorageGetItem(constants.LOCAL_STORAGE_ENCLAVE_REFRESH_JWT) as string) ||
+      undefined;
   };
 
   private updateUserIdFromStorage = () => {
@@ -2164,6 +2249,7 @@ Need help? Visit: https://docs.getpara.com or contact support
     opts: InternalMethodParams<'verifyTelegramLink'> & { isLinkAccount: true },
   ): InternalMethodResponse<'verifyTelegramLink'>;
 
+  // TELEGRAM
   /**
    * Validates the response received from an attempted Telegram login for authenticity, then
    * creates or retrieves the corresponding Para user and prepares the Para instance to sign in with that user.
@@ -2171,6 +2257,7 @@ Need help? Visit: https://docs.getpara.com or contact support
    * @returns `{ isValid: boolean; telegramUserId?: string; userId?: string; isNewUser?: boolean; supportedAuthMethods?: AuthMethod[]; biometricHints?: BiometricLocationHint[] }`
    */
   protected async verifyTelegramProcess({
+    serverAuthState: optsServerAuthState,
     telegramAuthResponse,
     isLinkAccount,
     ...urlOptions
@@ -2181,11 +2268,23 @@ Need help? Visit: https://docs.getpara.com or contact support
     try {
       switch (isLinkAccount) {
         case false: {
-          const serverAuthState = await this.ctx.client.verifyTelegram(telegramAuthResponse);
+          if (!optsServerAuthState && !telegramAuthResponse) {
+            throw new Error('one of serverAuthState or telegramAuthResponse are required for verifying telegram');
+          }
 
-          return this.#prepareAuthState(serverAuthState, urlOptions);
+          // serverAuthState will be passed in after portal verification is done in the new SLO flow, we don't want to double verify here
+          const serverAuthState =
+            optsServerAuthState ?? (await this.ctx.client.verifyTelegram({ authObject: telegramAuthResponse }));
+
+          const { sessionLookupId } = await this.touchSession();
+
+          return this.#prepareAuthState(serverAuthState, { ...urlOptions, sessionLookupId });
         }
         case true: {
+          if (!telegramAuthResponse) {
+            throw new Error('telegramAuthResponse is required for verifying telegram link');
+          }
+
           const accountLinkInProgress = await this.#assertIsLinkingAccountOrStart('TELEGRAM');
 
           const accounts = await this.verifyLink({
@@ -2197,7 +2296,8 @@ Need help? Visit: https://docs.getpara.com or contact support
         }
       }
     } catch (e) {
-      throw new Error(e.message);
+      const errorMessage = e instanceof Error ? e.message : e ? String(e) : 'Unknown error occurred';
+      throw new Error(errorMessage);
     }
   }
 
@@ -2499,6 +2599,7 @@ Need help? Visit: https://docs.getpara.com or contact support
     opts: InternalMethodParams<'verifyFarcasterLink'> & { isLinkAccount: true },
   ): InternalMethodResponse<'verifyFarcasterLink'>;
 
+  // FARCASTER
   /**
    * Awaits the response from a user's attempt to log in with Farcaster.
    * If successful, this returns the user's Farcaster username and profile picture and indicates whether the user already exists.
@@ -2510,10 +2611,17 @@ Need help? Visit: https://docs.getpara.com or contact support
     onCancel,
     onPoll,
     isLinkAccount,
+    serverAuthState: optsServerAuthState,
     ...urlOptions
   }: (CoreMethodParams<'verifyFarcaster'> | InternalMethodParams<'verifyFarcasterLink'>) & {
     isLinkAccount: boolean;
   }): Promise<OAuthResponse | LinkedAccounts> {
+    if (optsServerAuthState) {
+      const authState = await this.#prepareAuthState(optsServerAuthState, urlOptions);
+
+      return authState;
+    }
+
     let accountLinkInProgress;
     if (isLinkAccount) {
       accountLinkInProgress = await this.#assertIsLinkingAccountOrStart('FARCASTER');
@@ -2591,26 +2699,48 @@ Need help? Visit: https://docs.getpara.com or contact support
    * @param {string} [opts.appScheme] the app scheme to redirect to after the OAuth flow. This is for mobile only.
    * @returns {string} the URL for the user to log in with OAuth.
    */
-  #getOAuthUrl({
+  async #getOAuthUrl({
     method,
     appScheme,
     accountLinkInProgress,
     sessionLookupId,
+    encryptionKey,
   }: CoreMethodParams<'getOAuthUrl'> & {
     accountLinkInProgress?: AccountLinkInProgress;
-  }): Awaited<CoreMethodResponse<'getOAuthUrl'>> {
+  }): CoreMethodResponse<'getOAuthUrl'> {
+    if (!accountLinkInProgress && !this.isPortal()) {
+      return await this.constructPortalUrl('oAuth', { sessionId: sessionLookupId, oAuthMethod: method, appScheme });
+    }
+
+    let portalSessionLookupId;
+    if (this.isPortal()) {
+      portalSessionLookupId = (await this.touchSession(true)).sessionLookupId;
+    }
+
     return constructUrl({
       base: getBaseOAuthUrl(this.ctx.env),
-      path: `/auth/${method}`,
+      path: `/auth/${method.toLowerCase()}`,
       params: {
         apiKey: this.ctx.apiKey,
         sessionLookupId,
+        portalSessionLookupId,
         appScheme,
         ...(accountLinkInProgress
           ? {
               linkedAccountId: this.accountLinkInProgress.id,
             }
           : {}),
+        callback:
+          !accountLinkInProgress &&
+          (await this.constructPortalUrl('oAuthCallback', {
+            sessionId: sessionLookupId,
+            oAuthMethod: method,
+            appScheme,
+            thisDevice: {
+              sessionId: sessionLookupId,
+              encryptionKey,
+            },
+          })),
       },
     });
   }
@@ -2647,12 +2777,11 @@ Need help? Visit: https://docs.getpara.com or contact support
     isLinkAccount,
     ...urlOptions
   }: { isLinkAccount: boolean } & (CoreMethodParams<'verifyOAuth'> | InternalMethodParams<'verifyOAuthLink'>)): Promise<
-    AuthStateSignupOrLogin | LinkedAccounts
+    AuthStateSignupOrLoginOrDone | LinkedAccounts
   > {
-    let popupWindow;
     if (onOAuthPopup) {
       try {
-        popupWindow = await this.platformUtils.openPopup('about:blank', { type: PopupType.OAUTH });
+        this.popupWindow = await this.platformUtils.openPopup('about:blank', { type: PopupType.OAUTH });
       } catch (error) {
         throw new Error(`Failed to open OAuth popup: ${error}`);
       }
@@ -2675,9 +2804,9 @@ Need help? Visit: https://docs.getpara.com or contact support
           onOAuthUrl(oAuthUrl);
           break;
         }
-        case !!onOAuthPopup && !!popupWindow: {
-          popupWindow.location.href = oAuthUrl;
-          onOAuthPopup(popupWindow);
+        case !!onOAuthPopup && !!this.popupWindow: {
+          this.popupWindow.location.href = oAuthUrl;
+          onOAuthPopup(this.popupWindow);
           break;
         }
       }
@@ -2705,7 +2834,6 @@ Need help? Visit: https://docs.getpara.com or contact support
 
                   if (isServerAuthState(serverAuthState)) {
                     const authState = await this.#prepareAuthState(serverAuthState, { ...urlOptions, sessionLookupId });
-
                     return resolve(authState);
                   }
                 }
@@ -2934,6 +3062,8 @@ Need help? Visit: https://docs.getpara.com or contact support
           walletId,
           userShare: userSigner,
           emailProps: this.getBackupKitEmailProps(),
+          isEnclaveUser: this.isEnclaveUser,
+          walletScheme: this.wallets[walletId].scheme,
         });
     return recoveryShare;
   }
@@ -3079,6 +3209,8 @@ Need help? Visit: https://docs.getpara.com or contact support
       emailProps: this.getBackupKitEmailProps(),
       partnerId: newPartnerId,
       protocolId,
+      isEnclaveUser: this.isEnclaveUser,
+      walletScheme: this.wallets[walletId].scheme,
     });
     return { signer, recoverySecret, protocolId };
   }
@@ -3149,6 +3281,8 @@ Need help? Visit: https://docs.getpara.com or contact support
         walletId: wallet.id,
         userShare: signer,
         emailProps: this.getBackupKitEmailProps(),
+        isEnclaveUser: this.isEnclaveUser,
+        walletScheme: wallet.scheme,
       });
     }
 
@@ -3300,6 +3434,8 @@ Need help? Visit: https://docs.getpara.com or contact support
           userShare: this.wallets[wallet.id].signer,
           emailProps: this.getBackupKitEmailProps(),
           partnerId: wallet.partnerId,
+          isEnclaveUser: this.isEnclaveUser,
+          walletScheme: wallet.scheme,
         });
 
         if (distributeRes.length > 0) {
@@ -4022,7 +4158,7 @@ Need help? Visit: https://docs.getpara.com or contact support
   }
 
   /**
-   * Returns a Para Portal URL for logging in with a WebAuth passkey, password or PIN.
+   * Returns a Para Portal URL for logging in with a WebAuth passkey, password, PIN or OTP.
    * @param {Object} opts the options object
    * @param {String} opts.auth - the user auth to sign up or log in with, in the form ` { email: string } | { phone: `+${number}` } `
    * @param {boolean} opts.useShortUrls - whether to shorten the generated portal URLs
@@ -4041,7 +4177,7 @@ Need help? Visit: https://docs.getpara.com or contact support
 
     this.assertIsAuthSet();
 
-    let urlType: 'loginAuth' | 'loginPassword' | 'loginPIN';
+    let urlType: 'loginAuth' | 'loginPassword' | 'loginPIN' | 'loginOTP';
     switch (authMethod) {
       case 'PASSKEY':
         urlType = 'loginAuth';
@@ -4051,6 +4187,9 @@ Need help? Visit: https://docs.getpara.com or contact support
         break;
       case 'PIN':
         urlType = 'loginPIN';
+        break;
+      case 'BASIC_LOGIN':
+        urlType = 'loginOTP';
         break;
       default:
         throw new Error(`invalid authentication method: '${authMethod}'`);
@@ -4062,13 +4201,16 @@ Need help? Visit: https://docs.getpara.com or contact support
     });
   }
 
-  async #prepareAuthState<T extends ServerAuthStateVerify | ServerAuthStateLogin | ServerAuthStateSignup>(
+  async #prepareAuthState<
+    T extends ServerAuthStateVerify | ServerAuthStateLogin | ServerAuthStateSignup | ServerAuthStateDone,
+  >(
     serverAuthState: T,
     opts: WithCustomTheme & WithUseShortUrls & { sessionLookupId?: string; isFromExternalWallet?: boolean } = {},
   ): Promise<
     | (T extends ServerAuthStateVerify ? AuthStateVerify : never)
     | (T extends ServerAuthStateLogin ? AuthStateLogin : never)
     | (T extends ServerAuthStateSignup ? AuthStateSignup : never)
+    | (T extends ServerAuthStateDone ? AuthStateDone : never)
   > {
     if (
       !opts.sessionLookupId &&
@@ -4107,9 +4249,17 @@ Need help? Visit: https://docs.getpara.com or contact support
     let authState;
 
     switch (serverAuthState.stage) {
-      case 'verify':
-        authState = serverAuthState;
+      case 'done': {
+        authState = await this.#prepareDoneState(serverAuthState);
         break;
+      }
+      case 'verify':
+        authState = await this.#prepareVerificationState(serverAuthState, {
+          ...opts,
+          sessionLookupId: opts.sessionLookupId!,
+        });
+        break;
+
       case 'login':
         if (externalWallet && !externalWallet?.withFullParaAuth) {
           authState = serverAuthState;
@@ -4142,6 +4292,50 @@ Need help? Visit: https://docs.getpara.com or contact support
     return sessionLookupId;
   }
 
+  async #prepareDoneState(doneState: ServerAuthStateDone): Promise<AuthStateDone> {
+    let isSLOPossible = doneState.authMethods.includes(AuthMethod.BASIC_LOGIN);
+
+    this.isEnclaveUser = isSLOPossible;
+
+    return doneState;
+  }
+
+  async #prepareVerificationState(
+    verifyState: ServerAuthStateVerify,
+    {
+      useShortUrls: shorten = false,
+      portalTheme,
+      sessionLookupId,
+    }: {
+      useShortUrls?: boolean;
+      portalTheme?: Theme;
+      sessionLookupId: string;
+    },
+  ): Promise<AuthStateVerify> {
+    let isSLOPossible = false;
+    if (verifyState.nextStage === 'login') {
+      isSLOPossible = verifyState.loginAuthMethods.includes(AuthMethod.BASIC_LOGIN);
+    } else if (verifyState.nextStage === 'signup') {
+      isSLOPossible = verifyState.signupAuthMethods.includes(AuthMethod.BASIC_LOGIN);
+    }
+
+    this.isEnclaveUser = isSLOPossible;
+
+    return {
+      ...verifyState,
+      ...(isSLOPossible
+        ? {
+            loginUrl: await this.getLoginUrl({
+              authMethod: AuthMethod.BASIC_LOGIN,
+              sessionId: sessionLookupId,
+              shorten,
+              portalTheme,
+            }),
+          }
+        : {}),
+    };
+  }
+
   async #prepareLoginState(
     loginState: ServerAuthStateLogin,
     {
@@ -4156,6 +4350,7 @@ Need help? Visit: https://docs.getpara.com or contact support
   ): Promise<AuthStateLogin> {
     const { loginAuthMethods, hasPasswordWithoutPIN, ...authState } = loginState;
 
+    // TODO: Add SLO option here
     const isPasskeySupported = await this.isPasskeySupported(),
       isPasskeyPossible = loginAuthMethods.includes(AuthMethod.PASSKEY) && !this.isNativePasskey,
       isPasswordPossible = loginAuthMethods.includes(AuthMethod.PASSWORD) && hasPasswordWithoutPIN,
@@ -4282,7 +4477,7 @@ Need help? Visit: https://docs.getpara.com or contact support
       }
     }
 
-    return this.#prepareAuthState(serverAuthState, urlOptions);
+    return this.#prepareAuthState(serverAuthState, { ...urlOptions });
   }
 
   async verifyNewAccount({
@@ -4296,7 +4491,7 @@ Need help? Visit: https://docs.getpara.com or contact support
       verificationCode,
     });
 
-    if (serverAuthState.stage === 'login') {
+    if (serverAuthState.stage === 'login' || serverAuthState.stage === 'done') {
       throw new Error('Account already exists.');
     }
 

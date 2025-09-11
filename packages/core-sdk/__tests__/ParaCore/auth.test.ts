@@ -12,7 +12,15 @@ import {
   WalletEntity,
 } from '@getpara/user-management-client';
 import ParaCore, { getPublicKeyHex, splitPhoneNumber } from '../../src/index.js';
-import { Environment, AuthStateLogin, AuthStateSignup, CoreAuthInfo, AuthState, Wallet } from '../../src/types/index.js';
+import {
+  Environment,
+  AuthStateLogin,
+  AuthStateSignup,
+  CoreAuthInfo,
+  AuthState,
+  Wallet,
+  AuthStateVerify,
+} from '../../src/types/index.js';
 import {
   API_KEY,
   PARTNER,
@@ -59,9 +67,9 @@ import {
   mockIssueJwt,
   getSignupStateWithPIN,
   getLoginStateWithPIN,
+  getDoneState,
 } from '../mocks/mockUserManagementClient';
 import { getWallet, prepareMock } from '../utils.js';
-import { getWorkerContent } from '../utils.js';
 import {
   mockEd25519Keygen,
   mockEd25519PreKeygen,
@@ -123,11 +131,13 @@ function testLoginUrl(para: MockPara, str: string, authMethod: AuthMethod, extra
 
   expect(url.origin).toEqual(PARTNER.portalUrl);
   expect(url.pathname).toEqual(
-    authMethod === AuthMethod.PASSKEY
-      ? '/web/biometrics/login'
-      : authMethod === AuthMethod.PASSWORD
-        ? '/web/passwords/login'
-        : '/web/pin/login',
+    authMethod === AuthMethod.BASIC_LOGIN
+      ? '/auth/otp'
+      : authMethod === AuthMethod.PASSKEY
+        ? '/web/biometrics/login'
+        : authMethod === AuthMethod.PASSWORD
+          ? '/web/passwords/login'
+          : '/web/pin/login',
   );
   expectSearchParams(url, {
     ...COMMON_SEARCH_PARAMS,
@@ -162,11 +172,18 @@ function testCreateUrl(para: MockPara, str: string, authMethod: AuthMethod) {
   });
 }
 
-const initiateLogin = async (para: MockPara, authInfo: PrimaryAuthInfo, isPIN?: boolean): Promise<AuthStateLogin> => {
+const initiateLogin = async (
+  para: MockPara,
+  authInfo: PrimaryAuthInfo,
+  isPIN?: boolean,
+  isSLO?: boolean,
+): Promise<AuthStateLogin | AuthStateVerify> => {
   let authState;
   switch (true) {
     case isVerifiedAuth(authInfo.auth):
-      mockSignUpOrLogIn.mockResolvedValueOnce((isPIN ? getLoginStateWithPIN : getLoginState)(authInfo.auth));
+      mockSignUpOrLogIn.mockResolvedValueOnce(
+        (isSLO ? getVerifyState : isPIN ? getLoginStateWithPIN : getLoginState)(authInfo.auth, false),
+      );
 
       authState = <AuthStateLogin>await para.signUpOrLogIn({ auth: authInfo.auth });
       break;
@@ -264,7 +281,7 @@ const completeSignup = async (para: MockPara, authInfo: PrimaryAuthInfo, cancel 
   const cancelFn = vi.fn().mockReturnValue(cancel ? true : false);
 
   if (cancel) {
-    expect(() => para.waitForWalletCreation({ isCanceled: cancelFn })).rejects.toThrow('canceled');
+    await expect(para.waitForWalletCreation({ isCanceled: cancelFn })).rejects.toThrow('canceled');
     throw new Error();
   } else {
     setAuthenticated({ evmId, solanaId });
@@ -292,7 +309,7 @@ const completeLogin = async (para: MockPara, authInfo: PrimaryAuthInfo, expectWa
   const cancelFn = vi.fn().mockReturnValue(cancel ? true : false);
 
   if (cancel) {
-    expect(async () => await para.waitForLogin({ isCanceled: cancelFn })).rejects.toThrow('canceled');
+    await expect(para.waitForLogin({ isCanceled: cancelFn })).rejects.toThrow('canceled');
     expect(cancelFn).toHaveBeenCalled();
     throw new Error();
   }
@@ -478,16 +495,35 @@ const testPregenLogin = async (
   } catch (e) {}
 };
 
-vi.mock('../../src/cryptography/utils', async importOriginal => {
-  const actual = await importOriginal();
-  return {
-    ...(actual as any),
-    decryptWithPrivateKey: vi.fn(),
+const { mockDecryptWithPrivateKey, mockGetAsymmetricKeyPair } = vi.hoisted(() => {
+  // Mock RSA key pair for tests - using simple mock objects to avoid expensive computation
+  const MOCK_KEY_PAIR = {
+    privateKey: {
+      n: { data: 'mock-private-key-n' },
+      e: { data: 'mock-private-key-e' },
+      d: { data: 'mock-private-key-d' },
+      p: { data: 'mock-private-key-p' },
+      q: { data: 'mock-private-key-q' },
+      dP: { data: 'mock-private-key-dP' },
+      dQ: { data: 'mock-private-key-dQ' },
+      qInv: { data: 'mock-private-key-qInv' },
+      encrypt: vi.fn(),
+      decrypt: vi.fn(),
+      sign: vi.fn(),
+      verify: vi.fn(),
+    },
+    publicKey: {
+      n: { data: 'mock-public-key-n' },
+      e: { data: 'mock-public-key-e' },
+      encrypt: vi.fn(),
+      verify: vi.fn(),
+    },
   };
-});
 
-const { mockDecryptWithPrivateKey } = vi.hoisted(() => {
-  return { mockDecryptWithPrivateKey: vi.fn() };
+  return {
+    mockDecryptWithPrivateKey: vi.fn(),
+    mockGetAsymmetricKeyPair: vi.fn().mockResolvedValue(MOCK_KEY_PAIR),
+  };
 });
 
 vi.mock('../../src/cryptography/utils', async importOriginal => {
@@ -495,6 +531,7 @@ vi.mock('../../src/cryptography/utils', async importOriginal => {
   return {
     ...(actual as any),
     decryptWithPrivateKey: mockDecryptWithPrivateKey,
+    getAsymmetricKeyPair: mockGetAsymmetricKeyPair,
   };
 });
 
@@ -514,13 +551,26 @@ describe('ParaCore - authentication', () => {
   let para: MockPara;
 
   beforeAll(async () => {
-    const workerFileContent = await getWorkerContent();
+    // Use a simple mock worker content instead of reading from file to avoid I/O overhead
+    const mockWorkerContent = '// Mock prime worker content for tests';
 
-    global.fetch = vi.fn(() =>
-      Promise.resolve({
-        text: () => Promise.resolve(workerFileContent),
-      } as Response),
-    );
+    // Mock fetch to return worker content when needed, but also handle other URLs
+    global.fetch = vi.fn(url => {
+      if (typeof url === 'string' && url.includes('prime.worker.min.js')) {
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          text: () => Promise.resolve(mockWorkerContent),
+        } as Response);
+      }
+      // For other URLs, return a generic successful response
+      return Promise.resolve({
+        ok: true,
+        status: 200,
+        text: () => Promise.resolve('// Mock content'),
+        json: () => Promise.resolve({}),
+      } as Response);
+    });
   });
 
   beforeEach(() => {
@@ -530,7 +580,12 @@ describe('ParaCore - authentication', () => {
   });
 
   describe('verified auth flows', () => {
-    const testAuthFlow = (authInfo: AuthInfo<'email'> | AuthInfo<'phone'>, isNativePasskey = false, isPIN = false) => {
+    const testAuthFlow = (
+      authInfo: AuthInfo<'email'> | AuthInfo<'phone'>,
+      isNativePasskey = false,
+      isPIN = false,
+      isSLO = false,
+    ) => {
       const auth = authInfo.auth;
 
       describe('sign up or log in', () => {
@@ -542,7 +597,7 @@ describe('ParaCore - authentication', () => {
         it('new user', async () => {
           if (para) (para as unknown as any).isNativePasskey = isNativePasskey;
 
-          mockSignUpOrLogIn.mockResolvedValueOnce(getVerifyState(auth));
+          mockSignUpOrLogIn.mockResolvedValueOnce(getVerifyState(auth, isSLO, true));
 
           const authState = await para.signUpOrLogIn({ auth });
 
@@ -550,18 +605,21 @@ describe('ParaCore - authentication', () => {
 
           expect(para.userId).toEqual(USER_ID);
           expect(para.authInfo).toStrictEqual(authInfo);
-          expect(authState).toStrictEqual(getVerifyState(auth));
+          expect(authState).toStrictEqual({
+            ...getVerifyState(auth, isSLO, true),
+            ...(isSLO ? { loginUrl: expect.stringMatching('') } : {}),
+          });
         });
 
         it('returning user that needs wallet selection', async () => {
           if (para) (para as unknown as any).isNativePasskey = isNativePasskey;
 
           mockSignUpOrLogIn.mockResolvedValueOnce({
-            ...(isPIN ? getLoginStateWithPIN : getLoginState)(auth),
+            ...(isSLO ? getVerifyState : isPIN ? getLoginStateWithPIN : getLoginState)(auth, isSLO, false),
             isWalletSelectionNeeded: true,
           });
 
-          const authState = await initiateLogin(para, authInfo, isPIN);
+          const authState = await initiateLogin(para, authInfo, isPIN, isSLO);
 
           expect(mockSignUpOrLogIn).toHaveBeenCalledWith(auth);
 
@@ -570,26 +628,38 @@ describe('ParaCore - authentication', () => {
           expect(para.loginEncryptionKeyPair).toBeDefined();
 
           expect(authState).toStrictEqual({
-            ..._.omit((isPIN ? getLoginStateWithPIN : getLoginState)(auth), 'loginAuthMethods', 'hasPasswordWithoutPIN'),
-            isPasskeySupported: true,
-            ...(isNativePasskey
+            ..._.omit(
+              (isSLO ? getVerifyState : isPIN ? getLoginStateWithPIN : getLoginState)(auth, isSLO, false),
+              'loginAuthMethods',
+              'hasPasswordWithoutPIN',
+            ),
+            ...(isSLO ? { loginAuthMethods: [AuthMethod.BASIC_LOGIN] } : { isPasskeySupported: true }),
+            ...(isNativePasskey || isSLO
               ? {}
               : {
                   passkeyUrl: expect.stringMatching(''),
                   passkeyKnownDeviceUrl: expect.stringMatching(''),
                 }),
-            ...(isPIN ? { pinUrl: expect.stringMatching('') } : { passwordUrl: expect.stringMatching('') }),
+            ...(isSLO
+              ? { loginUrl: expect.stringMatching('') }
+              : isPIN
+                ? { pinUrl: expect.stringMatching('') }
+                : { passwordUrl: expect.stringMatching('') }),
             isWalletSelectionNeeded: true,
           });
 
-          if (!isNativePasskey) {
-            testLoginUrl(para, authState.passkeyUrl!, AuthMethod.PASSKEY);
-          }
-
-          if (isPIN) {
-            testLoginUrl(para, authState.pinUrl!, AuthMethod.PIN, { isEmbedded: 'false' });
+          if (authState.stage === 'verify') {
+            testLoginUrl(para, authState.loginUrl!, AuthMethod.BASIC_LOGIN);
           } else {
-            testLoginUrl(para, authState.passwordUrl!, AuthMethod.PASSWORD, { isEmbedded: 'false' });
+            if (!isNativePasskey) {
+              testLoginUrl(para, authState.passkeyUrl!, AuthMethod.PASSKEY);
+            }
+
+            if (isPIN) {
+              testLoginUrl(para, authState.pinUrl!, AuthMethod.PIN, { isEmbedded: 'false' });
+            } else {
+              testLoginUrl(para, authState.passwordUrl!, AuthMethod.PASSWORD, { isEmbedded: 'false' });
+            }
           }
         });
       });
@@ -607,7 +677,7 @@ describe('ParaCore - authentication', () => {
 
           await para.setAuth({ telegramUserId: USER_TELEGRAM_USER_ID });
 
-          expect(() => para.verifyNewAccount({ verificationCode: VERIFICATION_CODE })).rejects.toThrow(
+          await expect(para.verifyNewAccount({ verificationCode: VERIFICATION_CODE })).rejects.toThrow(
             'invalid auth type, expected email, phone',
           );
         });
@@ -618,7 +688,7 @@ describe('ParaCore - authentication', () => {
 
           mockVerifyAccount.mockRejectedValueOnce('invalid');
 
-          expect(() => para.verifyNewAccount({ verificationCode: VERIFICATION_CODE })).rejects.toThrow('invalid');
+          await expect(para.verifyNewAccount({ verificationCode: VERIFICATION_CODE })).rejects.toThrow('invalid');
         });
         it('success', async () => {
           if (para) (para as unknown as any).isNativePasskey = isNativePasskey;
@@ -680,7 +750,7 @@ describe('ParaCore - authentication', () => {
           (para as unknown as any).isNativePasskey = isNativePasskey;
         });
 
-        describe('initial', async () => {
+        describe('initial', () => {
           it('cancels', async () => {
             await testInitialLogin(para, authInfo, true);
           });
@@ -690,7 +760,7 @@ describe('ParaCore - authentication', () => {
           });
         });
 
-        describe('returning', async () => {
+        describe('returning', () => {
           it('cancels', async () => {
             await testReturningLogin(para, authInfo, true);
           });
@@ -718,7 +788,7 @@ describe('ParaCore - authentication', () => {
 
         describe('setup2fa', () => {
           it('no userId', async () => {
-            expect(() => para.setup2fa()).rejects.toThrow();
+            await expect(para.setup2fa()).rejects.toThrow();
           });
 
           it('initial', async () => {
@@ -742,7 +812,7 @@ describe('ParaCore - authentication', () => {
 
         describe('enable2fa', () => {
           it('no userId', async () => {
-            expect(() => para.enable2fa({ verificationCode: VERIFICATION_CODE })).rejects.toThrow();
+            await expect(para.enable2fa({ verificationCode: VERIFICATION_CODE })).rejects.toThrow();
           });
 
           it('success', async () => {
@@ -779,11 +849,13 @@ describe('ParaCore - authentication', () => {
         describe('email', () => {
           testAuthFlow(emailAuthInfo, isNativePasskey);
           testAuthFlow(emailAuthInfo, isNativePasskey, true);
+          testAuthFlow(emailAuthInfo, false, false, true);
         });
 
         describe('phone', () => {
           testAuthFlow(phoneAuthInfo, isNativePasskey);
           testAuthFlow(emailAuthInfo, isNativePasskey, true);
+          testAuthFlow(emailAuthInfo, false, false, true);
         });
       });
     });
@@ -798,8 +870,8 @@ describe('ParaCore - authentication', () => {
 
     describe('oauth', () => {
       describe('verify', () => {
-        [0, 1, 2].forEach(strategy => {
-          describe(['with onOAuthUrl', 'with onOAuthPopup', 'neither'][strategy], () => {
+        [0, 1, 2, 3].forEach(strategy => {
+          describe(['with onOAuthUrl', 'with onOAuthPopup', 'neither', 'neither - portal'][strategy], () => {
             const prepare = async (method: Parameters<typeof para.verifyOAuth>[0]['method']): Promise<OAuthResponse> => {
               let url: URL, authState: AuthState;
               switch (strategy) {
@@ -838,14 +910,36 @@ describe('ParaCore - authentication', () => {
                     url = new URL(oAuthUrl);
                   }
                   break;
+                case 3:
+                  {
+                    vi.spyOn(window, 'location', 'get').mockReturnValue({ host: 'localhost:3003' } as Location);
+                    const oAuthUrl = await para.getOAuthUrl({ method });
+
+                    authState = await para.verifyOAuth({ method });
+
+                    url = new URL(oAuthUrl);
+                    vi.spyOn(window, 'location', 'get').mockReturnValue({ host: 'different-host.com' } as Location);
+                  }
+                  break;
               }
 
               if (url) {
-                expect(url.origin).toEqual('http://localhost:8080');
-                expect(url.pathname).toEqual(`/auth/${method}`);
+                expect(url.origin).toEqual(strategy === 3 ? 'http://localhost:8080' : 'https://test.com');
+                expect(url.pathname).toEqual(`/auth/${method.toLowerCase()}`);
                 expectSearchParams(url, {
                   apiKey: PARTNER.apiKey,
-                  sessionLookupId: SESSION_LOOKUP_ID,
+                  ...(strategy === 3
+                    ? {
+                        callback: expect.stringMatching(''),
+                        portalSessionLookupId: expect.stringMatching(''),
+                        sessionLookupId: expect.stringMatching(''),
+                      }
+                    : {
+                        encryptionKey: getPublicKeyHex(para.loginEncryptionKeyPair!),
+                        ...COMMON_SEARCH_PARAMS,
+                        sessionId: SESSION_LOOKUP_ID,
+                        pregenIds: '{}',
+                      }),
                 });
               }
 
@@ -855,7 +949,7 @@ describe('ParaCore - authentication', () => {
             };
 
             ['GOOGLE', 'APPLE', 'FACEBOOK', 'DISCORD', 'TWITTER'].forEach(method => {
-              describe(method, async () => {
+              describe(method, () => {
                 it('new user', async () => {
                   const authState = await prepare(method as any);
 
@@ -868,8 +962,17 @@ describe('ParaCore - authentication', () => {
                     passwordUrl: expect.stringMatching(''),
                   });
 
-                  testCreateUrl(para, authState.passkeyUrl!, AuthMethod.PASSKEY);
-                  testCreateUrl(para, authState.passwordUrl!, AuthMethod.PASSWORD);
+                  if (authState.stage === 'signup') {
+                    testCreateUrl(para, authState.passkeyUrl!, AuthMethod.PASSKEY);
+                    testCreateUrl(para, authState.passwordUrl!, AuthMethod.PASSWORD);
+                  }
+                });
+
+                it('new user - SLO', async () => {
+                  mockVerifyOAuth.mockResolvedValueOnce(getDoneState(emailAuthInfo.auth));
+                  const authState = await prepare(method as any);
+
+                  expect(authState).toStrictEqual(getDoneState(emailAuthInfo.auth));
                 });
 
                 it('returning user', async () => {
@@ -886,8 +989,19 @@ describe('ParaCore - authentication', () => {
                     passwordUrl: expect.stringMatching(''),
                   });
 
-                  testLoginUrl(para, authState.passkeyUrl!, AuthMethod.PASSKEY);
-                  testLoginUrl(para, authState.passwordUrl!, AuthMethod.PASSWORD, { isEmbedded: 'true' });
+                  if (authState.stage === 'login') {
+                    testLoginUrl(para, authState.passkeyUrl!, AuthMethod.PASSKEY);
+                    testLoginUrl(para, authState.passwordUrl!, AuthMethod.PASSWORD, { isEmbedded: 'true' });
+                  }
+                });
+
+                it('returning user - SLO', async () => {
+                  mockVerifyOAuth.mockResolvedValueOnce(getDoneState(emailAuthInfo.auth));
+
+                  const authState = await prepare(method as any);
+
+                  expect(para.loginEncryptionKeyPair).toBeDefined();
+                  expect(authState).toStrictEqual(getDoneState(emailAuthInfo.auth));
                 });
               });
             });
@@ -899,25 +1013,33 @@ describe('ParaCore - authentication', () => {
     [farcasterAuthInfo, telegramAuthInfo].forEach(authInfo => {
       describe(authInfo.authType, () => {
         describe('verify', () => {
-          const prepare = async <T extends AuthState>(): Promise<T> => {
+          const prepare = async <T extends AuthState>(isSLO?: boolean): Promise<T> => {
             let authState;
             switch (authInfo.authType) {
               case 'farcaster':
                 {
                   const onConnectUri = vi.fn();
 
+                  const serverStateFromLogin = getDoneState(authInfo.auth);
+
                   authState = await para.verifyFarcaster({
                     onConnectUri,
+                    serverAuthState: isSLO ? serverStateFromLogin : undefined,
                   });
 
-                  expect(onConnectUri).toHaveBeenCalledOnce();
-                  expect(onConnectUri).toHaveBeenCalledWith(FARCASTER_CONNECT_URI);
+                  if (!isSLO) {
+                    expect(onConnectUri).toHaveBeenCalledOnce();
+                    expect(onConnectUri).toHaveBeenCalledWith(FARCASTER_CONNECT_URI);
+                  }
                 }
                 break;
               case 'telegram':
                 {
+                  const serverStateFromLogin = getDoneState(authInfo.auth);
+
                   authState = await para.verifyTelegram({
-                    telegramAuthResponse: USER_TELEGRAM_AUTH_OBJECT,
+                    telegramAuthResponse: isSLO ? undefined : USER_TELEGRAM_AUTH_OBJECT,
+                    serverAuthState: isSLO ? serverStateFromLogin : undefined,
                   });
                 }
                 break;
@@ -940,6 +1062,13 @@ describe('ParaCore - authentication', () => {
 
             testCreateUrl(para, authState.passkeyUrl!, AuthMethod.PASSKEY);
             testCreateUrl(para, authState.passwordUrl!, AuthMethod.PASSWORD);
+          });
+
+          it('BASIC_LOGIN', async () => {
+            const authState = await prepare<AuthStateSignup>(true);
+
+            expect(para.userId).toStrictEqual(authState.userId);
+            expect(authState).toStrictEqual(getDoneState(authInfo.auth));
           });
 
           it('returning user', async () => {
@@ -969,7 +1098,7 @@ describe('ParaCore - authentication', () => {
         });
 
         describe('login', () => {
-          describe('initial', async () => {
+          describe('initial', () => {
             it('cancels', async () => {
               await testInitialLogin(para, authInfo, true);
             });
@@ -979,7 +1108,7 @@ describe('ParaCore - authentication', () => {
             });
           });
 
-          describe('returning', async () => {
+          describe('returning', () => {
             it('cancels', async () => {
               await testReturningLogin(para, authInfo, true);
             });

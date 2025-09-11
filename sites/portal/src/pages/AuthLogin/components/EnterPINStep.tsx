@@ -7,6 +7,9 @@ import { UserIdentifier } from '@getpara/react-common';
 import { useLogin } from './LoginProvider';
 import { AuthLoginStep } from '../../../constants';
 import { ModalLoading } from '../../../components';
+import { supportedLoginAuthMethods } from '../../../utils/supportedLoginAuthMethods';
+import { AuthMethod, TOAuthMethod } from '@getpara/user-management-client';
+import { useSearchParams } from 'react-router-dom';
 
 interface EnterPasswordStepProps {
   error: string | undefined;
@@ -18,6 +21,7 @@ interface EnterPasswordStepProps {
 export const EnterPINStep = ({ error, onLoginClick, isEmbedded, setStep }: EnterPasswordStepProps) => {
   const inputRef = useRef<HTMLCpslCodeInputElement>(null);
 
+  const [searchParams] = useSearchParams();
   const { params } = useLogin();
   const para = usePara();
   const [pin, setPin] = useState<string>('');
@@ -29,6 +33,66 @@ export const EnterPINStep = ({ error, onLoginClick, isEmbedded, setStep }: Enter
   useEffect(() => {
     const loadAuthVerified = async () => {
       setIsLoadingAuthVerified(true);
+
+      // Legacy SDKs will route here when attempting to login with SLO, handle rerouting accordingly
+      const loginAuthMethods = await supportedLoginAuthMethods(para);
+
+      if (loginAuthMethods.has(AuthMethod.BASIC_LOGIN)) {
+        if (!params.sessionId) {
+          return;
+        }
+
+        const { loginMethod } = await para.ctx.client.sessionLoginMethod(params.sessionId);
+
+        // Due to how we handle sessions on login, we may not have a loginMethod set in some cases, handle that here
+        if (!loginMethod) {
+          switch (para.authInfo.authType) {
+            case 'email':
+            case 'phone':
+              setStep(AuthLoginStep.OTP);
+              break;
+            case 'farcaster':
+              setStep(AuthLoginStep.FARCASTER);
+              break;
+            case 'telegram':
+              setStep(AuthLoginStep.TELEGRAM);
+              break;
+            case 'externalWallet':
+              break;
+          }
+          return;
+        }
+
+        // Login method will be set when using oAuth, handle that here
+        switch (loginMethod) {
+          case 'EMAIL':
+          case 'PHONE':
+            setStep(AuthLoginStep.OTP);
+            break;
+          case 'FARCASTER':
+            setStep(AuthLoginStep.FARCASTER);
+            break;
+          case 'TELEGRAM':
+            setStep(AuthLoginStep.TELEGRAM);
+            break;
+          case 'EXTERNAL_WALLET':
+          case 'PREGEN':
+            break;
+          default:
+            const oAuthUrl = await para.getOAuthUrl({
+              method: loginMethod as Exclude<TOAuthMethod, 'TELEGRAM' | 'FARCASTER'>,
+              sessionLookupId: searchParams.get('sessionId') || undefined,
+              appScheme: searchParams.get('appScheme') || undefined,
+              encryptionKey: searchParams.get('encryptionKey') || undefined,
+            });
+            if (oAuthUrl) {
+              window.location.href = oAuthUrl;
+            }
+            break;
+        }
+        return;
+      }
+
       const { authVerified } = await para.ctx.client.sessionAuthVerified(params.sessionId!);
 
       if (!authVerified) {

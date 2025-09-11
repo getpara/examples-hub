@@ -3,6 +3,7 @@ import styled from 'styled-components';
 
 import Ring0DefaultSrc from '../assets/hero-default.png';
 import Ring0LoadingSrc from '../assets/hero-loading.png';
+import { isIFramed } from '../utils/isIFramed';
 
 type State = 'default' | 'loading' | 'success';
 
@@ -128,7 +129,7 @@ export function LayoutWithHero({
 }: PropsWithChildren<{ hero?: ReactNode; state: State }>) {
   return (
     <>
-      <Hero state={state}>{hero}</Hero>
+      {!isIFramed && <Hero state={state}>{hero}</Hero>}
       <LayoutContainer>{children}</LayoutContainer>
     </>
   );

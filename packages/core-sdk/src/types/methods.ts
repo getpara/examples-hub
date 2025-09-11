@@ -11,6 +11,8 @@ import {
   TOAuthMethod,
   TWalletType,
   TelegramAuthResponse,
+  VerifyThirdPartyAuth,
+  ServerAuthStateDone,
 } from '@getpara/user-management-client';
 import { Wallet } from './wallet.js';
 
@@ -39,7 +41,12 @@ export type PortalUrlType =
   | 'onRamp'
   | 'telegramLogin'
   | 'createPIN'
-  | 'loginPIN';
+  | 'loginPIN'
+  | 'oAuth'
+  | 'oAuthCallback'
+  | 'loginOTP'
+  | 'telegramLoginVerify'
+  | 'loginFarcaster';
 
 export type PortalUrlOptions = {
   params?: Record<string, string | undefined | null>;
@@ -51,6 +58,9 @@ export type PortalUrlOptions = {
   pathId?: string;
   shorten?: boolean;
   isEmbedded?: boolean;
+  oAuthMethod?: OAuthUrlParams['method'];
+  appScheme?: string;
+  encryptionKey?: string;
 };
 
 export type WithAuthMethod = {
@@ -109,13 +119,15 @@ export type FarcasterParams = PollParams & {
    * You will need to display the URI as a QR code.
    */
   onConnectUri?: (uri: string) => void;
+  serverAuthState?: VerifyThirdPartyAuth;
 };
 
 export type TelegramParams = {
   /**
    * The response received from the Telegram login bot.
    */
-  telegramAuthResponse: TelegramAuthResponse;
+  telegramAuthResponse?: TelegramAuthResponse;
+  serverAuthState?: VerifyThirdPartyAuth;
 };
 
 export type LoginUrlParams = WithAuthMethod & WithCustomTheme & WithShorten & { sessionId?: string };
@@ -165,7 +177,9 @@ export type OAuthParams = OAuthUrlParams &
 
 export type AuthStateBaseParams = WithCustomTheme & WithUseShortUrls;
 
-export type AuthStateVerify = ServerAuthStateVerify;
+export type AuthStateVerify = ServerAuthStateVerify & {
+  loginUrl?: string;
+};
 
 export type AuthStateLogin = Omit<ServerAuthStateLogin, 'loginAuthMethods'> &
   WithIsPasskeySupported & {
@@ -215,13 +229,15 @@ export type AuthStateSignup = Omit<ServerAuthStateSignup, 'signupAuthMethods'> &
     pinId?: string;
   };
 
+export type AuthStateDone = ServerAuthStateDone;
+
 export type AuthStateVerifyOrLogin = AuthStateVerify | AuthStateLogin;
 
-export type AuthStateSignupOrLogin = AuthStateSignup | AuthStateLogin;
+export type AuthStateSignupOrLoginOrDone = AuthStateSignup | AuthStateLogin | AuthStateDone;
 
-export type OAuthResponse = AuthStateSignupOrLogin;
+export type OAuthResponse = AuthStateSignupOrLoginOrDone;
 
-export type AuthState = AuthStateVerify | AuthStateLogin | AuthStateSignup;
+export type AuthState = AuthStateVerify | AuthStateLogin | AuthStateSignup | AuthStateDone;
 
 export type Verify2faParams = {
   auth: VerifiedAuth;

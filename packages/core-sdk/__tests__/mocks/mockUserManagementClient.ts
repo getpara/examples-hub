@@ -33,6 +33,7 @@ import Client, {
   isExternalWallet,
   AuthExtras,
   LinkAccountParams,
+  ServerAuthStateDone,
 } from '@getpara/user-management-client';
 
 export const authExtras = (auth?: PrimaryAuth | undefined): AuthExtras => {
@@ -61,11 +62,28 @@ export const authExtras = (auth?: PrimaryAuth | undefined): AuthExtras => {
   return {};
 };
 
-export const getVerifyState = (auth: PrimaryAuth): ServerAuthStateVerify => ({
+export const getDoneState = (auth: PrimaryAuth): ServerAuthStateDone => ({
+  auth,
+  stage: 'done',
+  userId: USER_ID,
+  authMethods: [AuthMethod.BASIC_LOGIN],
+  isNewUser: true,
+});
+
+export const getVerifyState = (auth: PrimaryAuth, isSLO?: boolean, isNewUser?: boolean): ServerAuthStateVerify => ({
   auth,
   stage: 'verify',
   userId: USER_ID,
   ...(isExternalWallet(auth) ? { signatureVerificationMessage: SIGNATURE_VERIFICATION_MESSAGE } : {}),
+  ...(isNewUser
+    ? {
+        nextStage: 'signup',
+        signupAuthMethods: isSLO ? [AuthMethod.BASIC_LOGIN] : [AuthMethod.PASSKEY, AuthMethod.PASSWORD],
+      }
+    : {
+        nextStage: 'login',
+        loginAuthMethods: isSLO ? [AuthMethod.BASIC_LOGIN] : [AuthMethod.PASSKEY, AuthMethod.PASSWORD],
+      }),
 });
 
 export const getSignupState = (auth: PrimaryAuth): ServerAuthStateSignup => ({
@@ -216,7 +234,7 @@ export function resetClientMocks() {
   mockGetSupportedAuthMethods.mockResolvedValue({ supportedAuthMethods: ['BIOMETRIC', 'PASSWORD'] });
   mockGetBiometricLocationHints.mockResolvedValue([]);
   mockVerifyTelegramV2.mockImplementation(async obj => {
-    return Promise.resolve(getSignupState({ telegramUserId: obj.id.toString() }));
+    return Promise.resolve(getSignupState({ telegramUserId: obj.authObject.id.toString() }));
   });
   mockKeepSessionAlive.mockResolvedValue({});
   mockCreateOnRampPurchase.mockImplementation(({ params }) => ({ id: 'id', userId: USER_ID, ...params }));

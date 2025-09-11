@@ -103,7 +103,8 @@ async function executeMessage(ctx: Ctx, message: Message): Promise<any> {
     }
     case 'GET_PRIVATE_KEY': {
       const { share, walletId, userId } = params;
-      return await walletUtils.getPrivateKey(ctx, share, walletId, userId);
+      const privateKey = await walletUtils.getPrivateKey(ctx, share, walletId, userId);
+      return { privateKey };
     }
     case 'ED25519_KEYGEN': {
       const { userId } = params;

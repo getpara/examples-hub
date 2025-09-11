@@ -18,7 +18,7 @@ export const OAuth = ({ methods }: OAuthProps) => {
   const isDark = useStore(state => state.isDarkTheme);
   const setStep = useModalStore(state => state.setStep);
   const showAll = useModalStore(state => state.step === ModalStep.AUTH_MORE || state.step === ModalStep.AUTH_GUEST_SIGNUP);
-  const { verifyFarcaster, verifyOAuth } = useAuthActions();
+  const { verifyOAuth } = useAuthActions();
 
   const hasMore = methods.length > HAS_MORE_LENGTH;
 
@@ -31,7 +31,7 @@ export const OAuth = ({ methods }: OAuthProps) => {
   const handleMethodClick = (method: TOAuthMethod) => async () => {
     switch (method) {
       case 'FARCASTER':
-        verifyFarcaster();
+        setStep(ModalStep.FARCASTER_OAUTH);
         break;
       case 'TELEGRAM':
         setStep(ModalStep.TELEGRAM_OAUTH);

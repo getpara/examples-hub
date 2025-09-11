@@ -67,6 +67,8 @@ export function keygen(
           walletId: res.walletId,
           userShare: res.signer,
           emailProps,
+          isEnclaveUser: false,
+          walletScheme: 'DKLS', // since `isEnclaveUser` is false, we can use `DKLS` here as it won't be used
         });
         resolve({
           signer: res.signer,

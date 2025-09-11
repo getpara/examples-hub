@@ -274,7 +274,7 @@ describe('Client', () => {
         photo_url: 'photo_url',
       };
 
-      await client.verifyTelegram(data);
+      await client.verifyTelegram({ authObject: data });
 
       expect(mocks.post).toBeCalledWith('/users/telegram/v2', { authObject: data });
     });
@@ -290,7 +290,7 @@ describe('Client', () => {
         photo_url: 'photo_url',
       };
 
-      await client.verifyTelegram(data);
+      await client.verifyTelegram({ authObject: data });
 
       expect(mocks.post).toBeCalledWith('/users/telegram/v2', { authObject: data });
     });
@@ -882,9 +882,9 @@ describe('Client', () => {
     });
 
     it('getFarcasterAuthStatusV2', async () => {
-      await client.getFarcasterAuthStatus();
+      await client.getFarcasterAuthStatus({ sessionLookupId: 'test' });
 
-      expect(mocks.post).toBeCalledWith(`/auth/farcaster/status/v2`);
+      expect(mocks.post).toBeCalledWith(`/auth/farcaster/status/v2`, { sessionLookupId: 'test' });
     });
 
     it('initializeRecoveryForPhone', async () => {
@@ -1407,6 +1407,18 @@ describe('Client', () => {
       expect(mocks.get).toBeCalledWith('/sessions/session-lookup-id/auth-verified');
     });
 
+    it('sessionAuth', async () => {
+      await client.sessionAuth('session-lookup-id');
+
+      expect(mocks.get).toBeCalledWith('/sessions/session-lookup-id/auth');
+    });
+
+    it('sessionLoginMethod', async () => {
+      await client.sessionLoginMethod('session-lookup-id');
+
+      expect(mocks.get).toBeCalledWith('/sessions/session-lookup-id/login-method');
+    });
+
     it('getSupportedAuthMethodsV2', async () => {
       await client.getSupportedAuthMethodsV2({ email });
 
@@ -1444,6 +1456,36 @@ describe('Client', () => {
       await client.getAssetInfo();
 
       expect(mocks.get).toBeCalledWith('/assets');
+    });
+
+    it('getEnclavePublicKey', async () => {
+      await client.getEnclavePublicKey();
+
+      expect(mocks.get).toBeCalledWith('/enclave/public-key');
+    });
+
+    it('persistEnclaveShares', async () => {
+      await client.persistEnclaveShares('payload');
+
+      expect(mocks.post).toBeCalledWith('/enclave/key-shares', { encryptedPayload: 'payload' });
+    });
+
+    it('retrieveEnclaveShares', async () => {
+      await client.retrieveEnclaveShares('payload');
+
+      expect(mocks.get).toBeCalledWith(`/enclave/key-shares?encryptedPayload=${encodeURIComponent('payload')}`);
+    });
+
+    it('issueEnclaveJwt', async () => {
+      await client.issueEnclaveJwt('payload');
+
+      expect(mocks.post).toBeCalledWith('/enclave/jwt/issue', { encryptedPayload: 'payload' });
+    });
+
+    it('refreshEnclaveJwt', async () => {
+      await client.refreshEnclaveJwt('payload');
+
+      expect(mocks.post).toBeCalledWith('/enclave/jwt/refresh', { encryptedPayload: 'payload' });
     });
   });
 

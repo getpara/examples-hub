@@ -4,7 +4,7 @@ import { distributeNewShare } from '../../src/shares/shareDistribution.js';
 import { Environment } from '../../src/types/index.js';
 import { initClient } from '../../src/external/userManagementClient.js';
 import { mockGetSessionPublicKeys, mockGetPasswords } from '../mocks/mockUserManagementClient.js';
-import { EncryptorType, KeyShareType } from '@getpara/user-management-client';
+import { EncryptorType, KeyShareType, TWalletScheme } from '@getpara/user-management-client';
 import * as recovery from '../../src/shares/recovery';
 
 const TEST_CTX = {
@@ -17,6 +17,15 @@ const TEST_CTX = {
 
 const sendRecoveryForShareSpy = vi.spyOn(recovery, 'sendRecoveryForShare');
 
+const mockEnclaveClient = {
+  persistSharesWithRetry: vi.fn().mockResolvedValue(undefined),
+};
+
+const TEST_CTX_WITH_ENCLAVE = {
+  ...TEST_CTX,
+  enclaveClient: mockEnclaveClient,
+};
+
 describe('shareDistribution', () => {
   describe('distributeNewShare', () => {
     afterEach(() => {
@@ -24,7 +33,14 @@ describe('shareDistribution', () => {
     });
 
     it('base', async () => {
-      const resp = await distributeNewShare({ ctx: TEST_CTX, userId: USER_ID, walletId: WALLET.id, userShare: 'test' });
+      const resp = await distributeNewShare({
+        ctx: TEST_CTX,
+        userId: USER_ID,
+        walletId: WALLET.id,
+        userShare: 'test',
+        isEnclaveUser: false,
+        walletScheme: WALLET.scheme as TWalletScheme,
+      });
 
       expect(mockGetSessionPublicKeys).toBeCalledTimes(1);
       expect(mockGetSessionPublicKeys).toBeCalledWith(USER_ID);
@@ -56,7 +72,14 @@ describe('shareDistribution', () => {
         { id: '1', sigDerivedPublicKey: SESSION_PUBLIC_KEYS[0].sigDerivedPublicKey },
         { id: '2', status: 'PENDING' },
       ]);
-      const resp = await distributeNewShare({ ctx: TEST_CTX, userId: USER_ID, walletId: WALLET.id, userShare: 'test' });
+      const resp = await distributeNewShare({
+        ctx: TEST_CTX,
+        userId: USER_ID,
+        walletId: WALLET.id,
+        userShare: 'test',
+        isEnclaveUser: false,
+        walletScheme: WALLET.scheme as TWalletScheme,
+      });
 
       expect(mockGetSessionPublicKeys).toBeCalledTimes(1);
       expect(mockGetSessionPublicKeys).toBeCalledWith(USER_ID);
@@ -89,6 +112,62 @@ describe('shareDistribution', () => {
         ignoreRedistributingBackupEncryptedShare: false,
         emailProps: {},
       });
+      expect(resp).toBe('');
+    });
+
+    it('with isEnclaveUser true', async () => {
+      const resp = await distributeNewShare({
+        ctx: TEST_CTX_WITH_ENCLAVE,
+        userId: USER_ID,
+        walletId: WALLET.id,
+        userShare: 'test-user-share',
+        isEnclaveUser: true,
+        walletScheme: WALLET.scheme as TWalletScheme,
+        partnerId: 'test-partner',
+        protocolId: 'test-protocol',
+      });
+
+      expect(mockEnclaveClient.persistSharesWithRetry).toBeCalledTimes(1);
+      expect(mockEnclaveClient.persistSharesWithRetry).toBeCalledWith([
+        {
+          userId: USER_ID,
+          walletId: WALLET.id,
+          walletScheme: WALLET.scheme,
+          signer: 'test-user-share',
+          partnerId: 'test-partner',
+          protocolId: 'test-protocol',
+        },
+      ]);
+      expect(mockGetSessionPublicKeys).not.toBeCalled();
+      expect(mockGetPasswords).not.toBeCalled();
+      expect(sendRecoveryForShareSpy).not.toBeCalled();
+      expect(resp).toBe('');
+    });
+
+    it('with isEnclaveUser true and no optional fields', async () => {
+      const resp = await distributeNewShare({
+        ctx: TEST_CTX_WITH_ENCLAVE,
+        userId: USER_ID,
+        walletId: WALLET.id,
+        userShare: 'test-user-share',
+        isEnclaveUser: true,
+        walletScheme: WALLET.scheme as TWalletScheme,
+      });
+
+      expect(mockEnclaveClient.persistSharesWithRetry).toBeCalledTimes(1);
+      expect(mockEnclaveClient.persistSharesWithRetry).toBeCalledWith([
+        {
+          userId: USER_ID,
+          walletId: WALLET.id,
+          walletScheme: WALLET.scheme,
+          signer: 'test-user-share',
+          partnerId: undefined,
+          protocolId: undefined,
+        },
+      ]);
+      expect(mockGetSessionPublicKeys).not.toBeCalled();
+      expect(mockGetPasswords).not.toBeCalled();
+      expect(sendRecoveryForShareSpy).not.toBeCalled();
       expect(resp).toBe('');
     });
   });

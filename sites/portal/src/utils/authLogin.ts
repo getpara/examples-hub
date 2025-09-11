@@ -34,12 +34,21 @@ export type AuthLoginPasswordParams = AuthLoginParams & {
   password: string;
 };
 
+type ShareData = {
+  walletId: string;
+  walletScheme: string;
+  signer: string;
+  partnerId?: string;
+  protocolId?: string;
+};
+
 export type AuthUpdateKeySharesParams = PortalAuthParams & {
   userId: string;
   encryptionKey: string;
-  userHandle: string;
+  userHandle?: string;
   signature?: any;
   passwordId?: string;
+  enclaveShares?: ShareData[];
 };
 
 export async function authLogin(
@@ -115,121 +124,145 @@ export async function authUpdateKeyShares(
     newDeviceEncryptionKey,
     partnerId,
     passwordId,
+    enclaveShares,
   }: AuthUpdateKeySharesParams,
 ) {
-  const encryptionKeyHash = getSHA256HashHex(userHandle);
-  let encryptedShares = [];
-  if (passwordId) {
-    const encryptedSharesRes = await para.ctx.client.getPasswordKeyshares(userId, passwordId, true);
-    encryptedShares = encryptedSharesRes.data.keyShares;
-  } else if (signature) {
-    const encryptedSharesRes = await para.ctx.client.getBiometricKeyshares(userId, signature.id, true);
-    encryptedShares = encryptedSharesRes.data.keyShares;
-  }
-  const { encryptedPrivateKeys } = await para.ctx.client.getEncryptedWalletPrivateKeys(userId, encryptionKeyHash);
-  if (!encryptedShares.length) {
-    return;
-  }
-
-  if (!partnerId) {
-    const session = await para.touchSession();
-    partnerId = session.partnerId;
-  }
-
-  const walletIdToPartnerShareCount = {} as Record<string, Record<string, number>>;
-  let tooManyKeySharesForSomePartner = false;
-  for (const share of encryptedShares) {
-    if (!walletIdToPartnerShareCount[share.walletId]) {
-      walletIdToPartnerShareCount[share.walletId] = {};
-    }
-    if (!walletIdToPartnerShareCount[share.walletId][share.partnerId]) {
-      walletIdToPartnerShareCount[share.walletId][share.partnerId] = 0;
-    }
-
-    walletIdToPartnerShareCount[share.walletId][share.partnerId]++;
-    if (walletIdToPartnerShareCount[share.walletId][share.partnerId] > 1) {
-      tooManyKeySharesForSomePartner = true;
-      break;
-    }
-  }
-
-  // get all shares that are associated with this partnerId
-
+  let decryptedShares: { walletId: string; walletScheme: string; signer: string; partnerId?: string; protocolId?: string }[];
   const hasWalletSelection = para.currentWalletIds && Object.keys(para.currentWalletIds).length > 0;
-  const potentialSharesForPartnerToDecrypt = encryptedShares
-    .filter(share => !hasWalletSelection || para.currentWalletIdsUnique.includes(share.walletId))
-    .filter(share => {
-      return share.walletScheme !== 'DKLS' || share.partnerId === partnerId;
+  let walletIdsWithoutPartnerIdShare: string[] = [];
+  let encryptedPrivateKeys: { encryptedPrivateKey: string }[] = [];
+
+  if (para.isEnclaveUser) {
+    const allWalletIds = para.currentWalletIdsUnique || [...new Set([...enclaveShares.map(share => share.walletId)])];
+
+    const decryptedSharesForPartner = enclaveShares
+      .filter(share => !hasWalletSelection || para.currentWalletIdsUnique.includes(share.walletId))
+      .filter(share => share.walletScheme !== 'DKLS' || share.partnerId === partnerId);
+    // find walletIds that don't have a share for this partner yet
+    walletIdsWithoutPartnerIdShare = allWalletIds.filter(walletId => {
+      return !decryptedSharesForPartner.some(share => share.walletId === walletId);
     });
 
-  const sharesForPartnerToDecrypt = [];
-  // pick out shares for partner if there is only one share for the walletId
-  // or if there are more, ensure it has a protocolId, otherwise we will refresh to ensure the refreshed share
-  // has a protocolId
-  potentialSharesForPartnerToDecrypt.forEach(share => {
-    if (share.walletScheme === 'DKLS' && share.partnerId === partnerId && tooManyKeySharesForSomePartner) {
-      if (sharesForPartnerToDecrypt.some(s => s.walletId === share.walletId)) {
-        return;
+    const decryptedSharesStillNeededForPartner = walletIdsWithoutPartnerIdShare.map(walletId => {
+      return enclaveShares.find(share => share.walletId === walletId);
+    });
+
+    decryptedShares = [...decryptedSharesForPartner, ...decryptedSharesStillNeededForPartner];
+  } else {
+    const encryptionKeyHash = getSHA256HashHex(userHandle);
+    let encryptedShares = [];
+    if (passwordId) {
+      const encryptedSharesRes = await para.ctx.client.getPasswordKeyshares(userId, passwordId, true);
+      encryptedShares = encryptedSharesRes.data.keyShares;
+    } else if (signature) {
+      const encryptedSharesRes = await para.ctx.client.getBiometricKeyshares(userId, signature.id, true);
+      encryptedShares = encryptedSharesRes.data.keyShares;
+    }
+    encryptedPrivateKeys = (await para.ctx.client.getEncryptedWalletPrivateKeys(userId, encryptionKeyHash))
+      .encryptedPrivateKeys;
+    if (!encryptedShares.length) {
+      return;
+    }
+
+    if (!partnerId) {
+      const session = await para.touchSession();
+      partnerId = session.partnerId;
+    }
+
+    const walletIdToPartnerShareCount = {} as Record<string, Record<string, number>>;
+    let tooManyKeySharesForSomePartner = false;
+    for (const share of encryptedShares) {
+      if (!walletIdToPartnerShareCount[share.walletId]) {
+        walletIdToPartnerShareCount[share.walletId] = {};
       }
-      if (share.protocolId) {
+      if (!walletIdToPartnerShareCount[share.walletId][share.partnerId]) {
+        walletIdToPartnerShareCount[share.walletId][share.partnerId] = 0;
+      }
+
+      walletIdToPartnerShareCount[share.walletId][share.partnerId]++;
+      if (walletIdToPartnerShareCount[share.walletId][share.partnerId] > 1) {
+        tooManyKeySharesForSomePartner = true;
+        break;
+      }
+    }
+
+    // get all shares that are associated with this partnerId
+
+    const potentialSharesForPartnerToDecrypt = encryptedShares
+      .filter(share => !hasWalletSelection || para.currentWalletIdsUnique.includes(share.walletId))
+      .filter(share => {
+        return share.walletScheme !== 'DKLS' || share.partnerId === partnerId;
+      });
+
+    const sharesForPartnerToDecrypt = [];
+    // pick out shares for partner if there is only one share for the walletId
+    // or if there are more, ensure it has a protocolId, otherwise we will refresh to ensure the refreshed share
+    // has a protocolId
+    potentialSharesForPartnerToDecrypt.forEach(share => {
+      if (share.walletScheme === 'DKLS' && share.partnerId === partnerId && tooManyKeySharesForSomePartner) {
+        if (sharesForPartnerToDecrypt.some(s => s.walletId === share.walletId)) {
+          return;
+        }
+        if (share.protocolId) {
+          sharesForPartnerToDecrypt.push(share);
+        }
+      } else {
         sharesForPartnerToDecrypt.push(share);
       }
+    });
+
+    // get all walletIds that we'll need a share for
+    const allWalletIds = para.currentWalletIdsUnique || [
+      ...new Set([...sharesForPartnerToDecrypt.map(share => share.walletId)]),
+    ];
+
+    // find walletIds that don't have a share for this partner yet
+    walletIdsWithoutPartnerIdShare = allWalletIds.filter(walletId => {
+      return !sharesForPartnerToDecrypt.some(share => share.walletId === walletId);
+    });
+    // if there are some walletIds that are needed for the partner but don't have
+    // a share associated with the partner yet, we must refresh and create a share
+    // for the partner
+    const sharesStillNeededForPartnerToDecrypt = walletIdsWithoutPartnerIdShare
+      .map(
+        walletId =>
+          // find the oldest share for walletId so we can refresh it
+          encryptedShares
+            .filter(share => share.walletId === walletId)
+            .sort((s1, s2) => new Date(s1.createdAt).valueOf() - new Date(s2.createdAt).valueOf())[0],
+      )
+      .filter(share => !!share);
+
+    const allSharesToDecrypt = [...sharesForPartnerToDecrypt, ...sharesStillNeededForPartnerToDecrypt];
+
+    // This indicates that the user is using the legacy private key generation method, so we want
+    // to update the user to using the new method. There is a chance that this will fail if the
+    // passkey was generated with a different platform (flutter, swift, etc.) and if that's the case,
+    // then the user will have to login on the original platform to upgrade to the new style of
+    // passkey storage which will enable cross platform use.
+    if (encryptedPrivateKeys.length === 0) {
+      // If this is successful, we can upgrade the user to the new method of passkey schema
+      decryptedShares = await getDerivedPrivateKeyAndDecrypt(para.ctx, userHandle, allSharesToDecrypt);
+      const keyPair = await getAsymmetricKeyPair(para.ctx, userHandle);
+      const encryptedPrivateKeyHex = await encryptPrivateKey(keyPair, userHandle);
+      const { encryptedWalletPrivateKey: createdEncryptedPrivateKey } =
+        await para.ctx.client.uploadEncryptedWalletPrivateKey(
+          userId,
+          encryptedPrivateKeyHex,
+          encryptionKeyHash,
+          signature?.id,
+          passwordId,
+        );
+      // add the created encrypted private key to the list of encrypted private keys in case we need to use it
+      // later in this function
+      encryptedPrivateKeys.push(createdEncryptedPrivateKey);
     } else {
-      sharesForPartnerToDecrypt.push(share);
+      decryptedShares = await decryptPrivateKeyAndDecryptShare(
+        userHandle,
+        allSharesToDecrypt,
+        encryptedPrivateKeys[0].encryptedPrivateKey,
+      );
     }
-  });
-
-  // get all walletIds that we'll need a share for
-  const allWalletIds = para.currentWalletIdsUnique || [
-    ...new Set([...sharesForPartnerToDecrypt.map(share => share.walletId)]),
-  ];
-
-  // find walletIds that don't have a share for this partner yet
-  const walletIdsWithoutPartnerIdShare = allWalletIds.filter(walletId => {
-    return !sharesForPartnerToDecrypt.some(share => share.walletId === walletId);
-  });
-  // if there are some walletIds that are needed for the partner but don't have
-  // a share associated with the partner yet, we must refresh and create a share
-  // for the partner
-  const sharesStillNeededForPartnerToDecrypt = walletIdsWithoutPartnerIdShare
-    .map(
-      walletId =>
-        // find the oldest share for walletId so we can refresh it
-        encryptedShares
-          .filter(share => share.walletId === walletId)
-          .sort((s1, s2) => new Date(s1.createdAt).valueOf() - new Date(s2.createdAt).valueOf())[0],
-    )
-    .filter(share => !!share);
-
-  const allSharesToDecrypt = [...sharesForPartnerToDecrypt, ...sharesStillNeededForPartnerToDecrypt];
-
-  // This indicates that the user is using the legacy private key generation method, so we want
-  // to update the user to using the new method. There is a chance that this will fail if the
-  // passkey was generated with a different platform (flutter, swift, etc.) and if that's the case,
-  // then the user will have to login on the original platform to upgrade to the new style of
-  // passkey storage which will enable cross platform use.
-  let decryptedShares: { walletId: string; walletScheme: string; signer: string; partnerId?: string; protocolId?: string }[];
-  if (encryptedPrivateKeys.length === 0) {
-    // If this is successful, we can upgrade the user to the new method of passkey schema
-    decryptedShares = await getDerivedPrivateKeyAndDecrypt(para.ctx, userHandle, allSharesToDecrypt);
-    const keyPair = await getAsymmetricKeyPair(para.ctx, userHandle);
-    const encryptedPrivateKeyHex = await encryptPrivateKey(keyPair, userHandle);
-    const { encryptedWalletPrivateKey: createdEncryptedPrivateKey } = await para.ctx.client.uploadEncryptedWalletPrivateKey(
-      userId,
-      encryptedPrivateKeyHex,
-      encryptionKeyHash,
-      signature?.id,
-      passwordId,
-    );
-    // add the created encrypted private key to the list of encrypted private keys in case we need to use it
-    // later in this function
-    encryptedPrivateKeys.push(createdEncryptedPrivateKey);
-  } else {
-    decryptedShares = await decryptPrivateKeyAndDecryptShare(
-      userHandle,
-      allSharesToDecrypt,
-      encryptedPrivateKeys[0].encryptedPrivateKey,
-    );
   }
 
   // refresh needed shares so we have all associated with new partnerId

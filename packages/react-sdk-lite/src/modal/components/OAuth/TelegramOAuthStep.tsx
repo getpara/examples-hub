@@ -1,33 +1,57 @@
 import { safeStyled } from '@getpara/react-common';
-import { HeroSpinner } from '@getpara/react-common';
 import { CpslSpinner } from '@getpara/react-components';
 import { useTelegramLogin } from '../../hooks/useTelegramLogin.js';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuthActions } from '../../../provider/providers/AuthProvider.js';
-import { AccountTypeIcon } from '../common.js';
 import { useModalStore } from '../../stores/index.js';
+import { getPortalBaseURL } from '@getpara/web-sdk';
+import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
 
 export function TelegramOAuthStep() {
   const { verifyTelegramStatus, verifyTelegram } = useAuthActions();
-  const { url, status, isLoaded, setIsLoaded } = useTelegramLogin({
+  const { url, isLoaded, setIsLoaded } = useTelegramLogin({
     isActive: true,
     status: verifyTelegramStatus,
     onSubmit: verifyTelegram,
+    isLinking: false,
   });
+  const refs = useModalStore(state => state.refs);
+  const para = useInternalClient();
+  const [height, setHeight] = useState(0);
 
-  const isError = status === 'error',
-    isPending = status === 'pending';
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (!url) {
+        return; // No iFrame URL to check against
+      }
+
+      const portalBase = getPortalBaseURL(para.ctx, true);
+
+      if (!event.origin.startsWith(portalBase)) {
+        return; // Ignore messages from untrusted origins
+      }
+
+      if (event.data) {
+        if (event.data.type === 'HEIGHT') {
+          setHeight(event.data.height);
+        }
+      }
+    };
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [url]);
+
   return (
     <Container>
-      <HeroContainer>
-        <HeroSpinner
-          icon={<AccountTypeIcon accountType="TELEGRAM" size="48px" />}
-          status={isPending ? 'pending' : isError ? 'error' : 'idle'}
-          text={isPending ? 'Follow the on-screen prompts.' : isError ? 'Login Failed' : undefined}
+      {url && (
+        <IFrame
+          ref={refs.telegramIFrame}
+          style={{ display: isLoaded ? 'block' : 'none', height }}
+          src={url}
+          onLoad={() => setIsLoaded(true)}
         />
-      </HeroContainer>
-
-      <TelegramIFrame url={url} isLoaded={isLoaded} setIsLoaded={setIsLoaded} isVisible={isLoaded} />
+      )}
+      {(!url || !isLoaded) && <CpslSpinner />}
     </Container>
   );
 }
@@ -68,14 +92,6 @@ const Container = safeStyled.div`
   align-items: center;
   justify-content: center;
   width: 100%;
-`;
-
-const HeroContainer = safeStyled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-  flex: 1;
 `;
 
 const IFrame = safeStyled.iframe`

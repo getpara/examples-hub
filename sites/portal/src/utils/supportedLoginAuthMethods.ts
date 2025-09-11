@@ -20,6 +20,9 @@ export async function supportedLoginAuthMethods(para: ParaWeb): Promise<Set<Auth
       case 'PIN':
         authMethods.add(AuthMethod.PIN);
         break;
+      case 'BASIC_LOGIN':
+        authMethods.add(AuthMethod.BASIC_LOGIN);
+        break;
     }
   }
   return authMethods;

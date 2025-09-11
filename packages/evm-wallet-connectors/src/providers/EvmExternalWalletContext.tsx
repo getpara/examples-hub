@@ -200,13 +200,18 @@ export function EvmExternalWalletProvider({
   // If nothing is connected automatically connect to the Para connector if available
   // This is mainly used to ensure any race conditions are handled when chains are switched in another external wallet connector when using full Para auth
   useEffect(() => {
-    if (!isLocalConnecting && !isConnecting && !isReconnecting && !isConnected && !connectedConnector) {
-      if (Object.values(para.wallets).length === 0) {
-        return;
-      }
+    const connectPara = async () => {
+      if (!isLocalConnecting && !isConnecting && !isReconnecting && !isConnected && !connectedConnector) {
+        // Only attempt to connect if we have wallets and the user is logged in
+        if (Object.values(para.wallets).length === 0 || !(await para.isFullyLoggedIn())) {
+          return;
+        }
 
-      connectParaEmbedded();
-    }
+        connectParaEmbedded();
+      }
+    };
+
+    connectPara();
   }, [isLocalConnecting, isConnecting, isReconnecting, isConnected, connectedConnector]);
 
   const reset = async () => {

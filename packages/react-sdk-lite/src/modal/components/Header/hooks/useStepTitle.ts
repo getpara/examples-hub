@@ -46,6 +46,7 @@ export const useStepTitle = () => {
       [ModalStep.VERIFICATIONS]: 'Sign Up',
       [ModalStep.AWAITING_OAUTH]: signUpOrLogInTitle,
       [ModalStep.FARCASTER_OAUTH]: signUpOrLogInTitle,
+      [ModalStep.TELEGRAM_OAUTH]: signUpOrLogInTitle,
       [ModalStep.BIOMETRIC_CREATION]: 'Sign Up',
       [ModalStep.PASSWORD_CREATION]: 'Sign Up',
       [ModalStep.AWAITING_BIOMETRIC_CREATION]: 'Sign Up',
@@ -73,7 +74,7 @@ export const useStepTitle = () => {
       [ModalStep.ACCOUNT_PROFILE_LIST]: 'Link Account',
       [ModalStep.ACCOUNT_PROFILE_ADD]: 'Link Account',
       [ModalStep.ACCOUNT_PROFILE_REMOVE]: 'Unlink Account',
-      [ModalStep.AWAITING_IFRAME]: isLogin ? 'Login' : 'Sign Up',
+      [ModalStep.AWAITING_ACCOUNT]: isLogin ? 'Login' : 'Sign Up',
     }),
     [isLogin, chainId, hideWallets, authStepTitle],
   );

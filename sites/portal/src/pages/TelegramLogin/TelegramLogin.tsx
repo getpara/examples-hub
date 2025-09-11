@@ -1,9 +1,13 @@
 import { useEffect, useState } from 'react';
 import { usePara } from '../../components/ParaContext';
-import { CpslButton, CpslIcon } from '@getpara/react-components';
+import { CpslButton, CpslIcon, CpslSpinner, CpslText } from '@getpara/react-components';
 import styled from 'styled-components';
 import { TelegramAuthResponse } from '@getpara/user-management-client';
 import { Environment } from '@getpara/web-sdk';
+import { useSearchParams } from 'react-router-dom';
+import { FlexStartInnerContainer } from '../../components';
+import { isIFramed } from '../../utils/isIFramed';
+import { SpinnerContainer } from '@getpara/react-common';
 
 interface Options {
   bot_id: string;
@@ -23,10 +27,17 @@ declare global {
   }
 }
 
-export function TelegramLogin() {
+type TelegramLoginProps = {
+  onLogin?: () => Promise<void>;
+};
+
+export function TelegramLogin({ onLogin }: TelegramLoginProps) {
   const para = usePara();
   const [isWaiting, setIsWaiting] = useState(false);
   const [isSecondAttempt, setIsSecondAttempt] = useState(false);
+  const [searchParams] = useSearchParams();
+
+  const shouldVerify = !!onLogin;
 
   const botId = (() => {
     switch (para.ctx.env) {
@@ -50,7 +61,7 @@ export function TelegramLogin() {
     script.src = 'https://telegram.org/js/telegram-widget.js?22';
     script['data-telegram-login'] = `${botId}`;
     script.onload = () => {
-      window.Telegram?.Login.auth({ bot_id: `${botId}`, request_access: true }, data => {
+      window.Telegram?.Login.auth({ bot_id: `${botId}`, request_access: true }, async data => {
         if (!data) {
           window?.parent?.postMessage({ type: 'TELEGRAM_FAILED' }, '*');
           setIsWaiting(false);
@@ -58,7 +69,19 @@ export function TelegramLogin() {
           return;
         }
 
-        window?.parent?.postMessage({ type: 'TELEGRAM_SUCCESS', payload: data }, '*');
+        let serverAuthState;
+        if (shouldVerify) {
+          serverAuthState = await para.ctx.client.verifyTelegram({
+            authObject: data,
+            sessionLookupId: searchParams.get('sessionId') || undefined,
+          });
+
+          if (shouldVerify && serverAuthState.stage === 'done') {
+            await onLogin();
+          }
+        }
+
+        window?.parent?.postMessage({ type: 'TELEGRAM_SUCCESS', payload: shouldVerify ? serverAuthState : data }, '*');
       });
     };
 
@@ -83,10 +106,27 @@ export function TelegramLogin() {
     };
   }, []);
 
-  return (
-    <Container>
-      {isWaiting ? null : isSecondAttempt ? (
-        <CpslButton onClick={onClick} variant="secondary">
+  const Content = (
+    <>
+      {shouldVerify && (
+        <FlexStartInnerContainer>
+          <>
+            <CpslText variant="bodyL" weight="semiBold">
+              Sign in using Telegram
+            </CpslText>
+          </>
+        </FlexStartInnerContainer>
+      )}
+      {isWaiting ? (
+        <>
+          {shouldVerify ? (
+            <SpinnerContainer>
+              <CpslSpinner />
+            </SpinnerContainer>
+          ) : null}
+        </>
+      ) : isSecondAttempt ? (
+        <CpslButton fullWidth onClick={onClick} variant="secondary">
           <CpslIcon slot="start" icon="refresh" />
           Try again
         </CpslButton>
@@ -95,9 +135,31 @@ export function TelegramLogin() {
           Login with Telegram
         </CpslButton>
       )}
-    </Container>
+    </>
   );
+
+  if (shouldVerify) {
+    return <LoginContainer $isEmbedded={isIFramed}>{Content}</LoginContainer>;
+  }
+
+  return <Container>{Content}</Container>;
 }
+
+const LoginContainer = styled.form<{ $isEmbedded?: boolean }>`
+  flex: 1;
+  padding-left: ${({ $isEmbedded }) => ($isEmbedded ? '0px' : '83px')};
+  padding-right: ${({ $isEmbedded }) => ($isEmbedded ? '0px' : '83px')};
+  padding-top: ${({ $isEmbedded }) => ($isEmbedded ? '0px' : '24px')};
+  box-sizing: border-box;
+  width: 100%;
+  overflow: hidden;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: ${({ $isEmbedded }) => ($isEmbedded ? '24px' : '24px')};
+`;
 
 const Container = styled.div`
   background-color: transparent !important;

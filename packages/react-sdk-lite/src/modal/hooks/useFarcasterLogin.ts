@@ -1,45 +1,38 @@
 import { useEffect, useState } from 'react';
 import { useInternalClient } from '../../provider/hooks/utils/useInternalClient.js';
-import { TelegramAuthResponse, VerifyThirdPartyAuth } from '@getpara/user-management-client';
+import { VerifyThirdPartyAuth } from '@getpara/user-management-client';
 import { MutationStatus } from '@tanstack/react-query';
 import { useModalStore } from '../stores/index.js';
+import { useAuthActions } from '../../provider/providers/AuthProvider.js';
 
-type EventType = 'TELEGRAM_LOGIN' | 'TELEGRAM_SUCCESS' | 'TELEGRAM_FAILED';
+type EventType = 'FARCASTER_LOGIN' | 'FARCASTER_SUCCESS' | 'FARCASTER_FAILED';
 
 type Event = {
   type: EventType;
-  payload: VerifyThirdPartyAuth | TelegramAuthResponse;
+  payload: VerifyThirdPartyAuth;
 };
 
-export const useTelegramLogin = ({
+export const useFarcasterLogin = ({
   isActive = false,
-  onSubmit,
-  status: propsStatus,
-  isLinking,
 }: {
   isActive?: boolean;
-  onSubmit?: (_: VerifyThirdPartyAuth | TelegramAuthResponse) => void;
-  status?: MutationStatus;
-  isLinking?: boolean;
 } = {}) => {
   const para = useInternalClient();
   const refs = useModalStore(state => state.refs);
+  const { verifyFarcasterStatus, verifyFarcaster } = useAuthActions();
 
   const [url, setUrl] = useState<string>();
   const [isLoaded, setIsLoaded] = useState<boolean>(false);
   const [msgStatus, setMsgStatus] = useState<MutationStatus>('idle');
 
-  const status = msgStatus === 'success' ? propsStatus : msgStatus;
+  const status = msgStatus === 'success' ? verifyFarcasterStatus : msgStatus;
 
   useEffect(() => {
     const setup = async () => {
       if (!url) {
-        if (!isLinking) {
-          await para.logout();
-          await para.touchSession(true);
-        }
-
-        para.constructPortalUrl(!isLinking ? 'telegramLoginVerify' : 'telegramLogin').then(setUrl);
+        await para.logout();
+        await para.touchSession(true);
+        para.constructPortalUrl('loginFarcaster').then(setUrl);
       }
     };
 
@@ -51,21 +44,21 @@ export const useTelegramLogin = ({
   useEffect(() => {
     const updateState = async (event: MessageEvent<Event>) => {
       switch (event.data.type) {
-        case 'TELEGRAM_LOGIN':
+        case 'FARCASTER_LOGIN':
           setMsgStatus('pending');
           break;
-        case 'TELEGRAM_FAILED':
+        case 'FARCASTER_FAILED':
           setMsgStatus('error');
           break;
-        case 'TELEGRAM_SUCCESS':
+        case 'FARCASTER_SUCCESS':
           setMsgStatus('success');
           if (!!event.data.payload) {
             const authObject = event.data.payload;
 
             try {
-              await onSubmit?.(authObject);
+              await verifyFarcaster(authObject);
             } catch (e) {
-              refs.telegramIFrame.current?.contentWindow?.postMessage({ type: 'TELEGRAM_RETRY' }, '*');
+              refs.telegramIFrame.current?.contentWindow?.postMessage({ type: 'FARCASTER_RETRY' }, '*');
             }
           }
           break;
@@ -79,7 +72,7 @@ export const useTelegramLogin = ({
     return () => {
       window?.removeEventListener('message', updateState, false);
     };
-  }, [isActive, onSubmit]);
+  }, [isActive]);
 
   return {
     url,

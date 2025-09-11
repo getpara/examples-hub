@@ -27,11 +27,12 @@ import {
   AuthStateSignup,
   AuthStateLogin,
   getPortalBaseURL,
+  AuthStateVerify,
 } from '@getpara/web-sdk';
 import { useInternalClient } from '../../provider/hooks/utils/useInternalClient.js';
 import { ParaModalProps } from '../../modal/types/modalProps.js';
 import { useGoBack } from '../../modal/hooks/useGoBack.js';
-import { isExternalWallet, TelegramAuthResponse, VerifiedAuth } from '@getpara/user-management-client';
+import { isExternalWallet, VerifiedAuth, VerifyThirdPartyAuth } from '@getpara/user-management-client';
 import { routeMobileExternalWallet } from '../../modal/utils/routeMobileExternalWallet.js';
 import { useStore } from '../stores/useStore.js';
 import { useFormattedBiometricHints } from '../hooks/utils/useFormattedBiometricHints.js';
@@ -44,12 +45,14 @@ type Value = {
   verifyNewAccountStatus: MutationStatus;
   verifyNewAccountError: Error | null;
   verifyOAuth: (_: CoreMethodParams<'verifyOAuth'>['method']) => void;
-  verifyFarcaster: () => void;
-  verifyTelegram: (_: TelegramAuthResponse) => void;
+  verifyFarcaster: (_?: VerifyThirdPartyAuth) => void;
+  verifyTelegram: (_: VerifyThirdPartyAuth) => void;
   verifyTelegramStatus: MutationStatus;
+  verifyFarcasterStatus: MutationStatus;
   onNewAuthState: (_: AuthState) => void;
   presentSignupUi: (_: AuthMethod, __: AuthStateSignup) => void;
   presentLoginUi: (_: AuthMethod, __: AuthStateLogin) => void;
+  presentVerifyUi: (_: AuthMethod, __: AuthStateVerify) => void;
   isSetup2faPending: boolean;
   createGuestWallets: () => void;
   isCreateGuestWalletsPending: boolean;
@@ -76,10 +79,12 @@ export const AuthContext = createContext<Value>({
   verifyFarcaster: () => {},
   verifyTelegram: () => {},
   verifyTelegramStatus: 'idle',
+  verifyFarcasterStatus: 'idle',
   onNewAuthState: () => {},
   isSetup2faPending: false,
   presentSignupUi: () => {},
   presentLoginUi: () => {},
+  presentVerifyUi: () => {},
   createGuestWallets: () => {},
   isCreateGuestWalletsPending: false,
   logout: () => {},
@@ -122,7 +127,7 @@ export function AuthProvider({
     error: verifyNewAccountError,
   } = useVerifyNewAccount();
   const { verifyOAuth: mutateVerifyOAuth } = useVerifyOAuth();
-  const { verifyFarcaster: mutateVerifyFarcaster } = useVerifyFarcaster();
+  const { verifyFarcaster: mutateVerifyFarcaster, status: verifyFarcasterStatus } = useVerifyFarcaster();
   const { verifyTelegram: mutateVerifyTelegram, status: verifyTelegramStatus } = useVerifyTelegram();
   const { waitForLogin: mutateWaitForLogin } = useWaitForLogin();
   const { waitForSignup: mutateWaitForSignup } = useWaitForSignup();
@@ -147,8 +152,9 @@ export function AuthProvider({
   const setupListener = () => {
     window.addEventListener('message', function handleMessage(event) {
       const portalBase = getPortalBaseURL(para.ctx);
+      const portalLocalBase = getPortalBaseURL(para.ctx, true);
 
-      if (!event.origin.startsWith(portalBase)) {
+      if (!event.origin.startsWith(portalBase) && !event.origin.startsWith(portalLocalBase)) {
         return; // Ignore messages from untrusted origins
       }
 
@@ -158,7 +164,7 @@ export function AuthProvider({
           setAuthStepRoute();
           setIFrameUrl();
           setIsIFrameReady(false);
-          setStep(ModalStep.AWAITING_IFRAME);
+          setStep(ModalStep.AWAITING_ACCOUNT);
         }
         // Remove the listener after handling the matching event
         window.removeEventListener('message', handleMessage);
@@ -166,7 +172,7 @@ export function AuthProvider({
     });
   };
 
-  const signup = () => {
+  const pollSignup = () => {
     if (typeof window !== 'undefined') {
       refs.poll.current = {
         action: 'signup',
@@ -178,10 +184,11 @@ export function AuthProvider({
                   ModalStep.BIOMETRIC_CREATION,
                   ModalStep.AWAITING_BIOMETRIC_CREATION,
                   ModalStep.PASSWORD_CREATION,
-                  ModalStep.AWAITING_IFRAME,
+                  ModalStep.AWAITING_ACCOUNT,
                   ModalStep.VERIFICATIONS,
                   ModalStep.AWAITING_OAUTH,
                   ModalStep.EXTERNAL_WALLET_VERIFICATION,
+                  ModalStep.OTP,
                 ]),
               onPoll: () => {
                 goBackIfPopupClosedOnSteps([ModalStep.AWAITING_BIOMETRIC_CREATION]);
@@ -201,7 +208,7 @@ export function AuthProvider({
               onError: () => {
                 if (
                   refs.currentStep.current &&
-                  [ModalStep.AWAITING_BIOMETRIC_CREATION, ModalStep.PASSWORD_CREATION, ModalStep.AWAITING_IFRAME].includes(
+                  [ModalStep.AWAITING_BIOMETRIC_CREATION, ModalStep.PASSWORD_CREATION, ModalStep.AWAITING_ACCOUNT].includes(
                     refs.currentStep.current,
                   )
                 ) {
@@ -262,6 +269,25 @@ export function AuthProvider({
     [isIFrameReady],
   );
 
+  const presentVerifyUi = useCallback(
+    (method: AuthMethod, authState: AuthStateVerify) => {
+      switch (method) {
+        case AuthMethod.BASIC_LOGIN:
+          setupListener();
+
+          if (isIFrameReady) {
+            setStep(ModalStep.OTP);
+          } else {
+            setIFrameUrl(authState.loginUrl);
+            setIsIFrameReady(false);
+            setAuthStepRoute(ModalStep.OTP);
+          }
+          break;
+      }
+    },
+    [isIFrameReady],
+  );
+
   const login = (authState: AuthStateLogin) => {
     if (authState.isWalletSelectionNeeded || authState.passkeyUrl) {
       setStep(ModalStep.BIOMETRIC_LOGIN);
@@ -273,47 +299,57 @@ export function AuthProvider({
       setStep(ModalStep.EMBEDDED_PASSWORD_LOGIN);
     }
 
-    refs.poll.current = {
-      action: 'login',
-      timeout: window?.setTimeout(async () => {
-        mutateWaitForLogin(
-          {
-            isCanceled: () =>
-              cancelIfExitedSteps([
-                ModalStep.BIOMETRIC_LOGIN,
-                ModalStep.EMBEDDED_PASSWORD_LOGIN,
-                ModalStep.AWAITING_BIOMETRIC_LOGIN,
-                ModalStep.AWAITING_PASSWORD_LOGIN,
-                ModalStep.AWAITING_IFRAME,
-              ]),
-            onPoll: () => {
-              goBackIfPopupClosedOnSteps([
-                ModalStep.AWAITING_BIOMETRIC_LOGIN,
-                ModalStep.AWAITING_PASSWORD_LOGIN,
-                ModalStep.EMBEDDED_PASSWORD_LOGIN,
-              ]);
+    pollLogin();
+  };
+
+  const pollLogin = () => {
+    if (typeof window !== 'undefined') {
+      refs.poll.current = {
+        action: 'login',
+        timeout: window?.setTimeout(async () => {
+          mutateWaitForLogin(
+            {
+              isCanceled: () =>
+                cancelIfExitedSteps([
+                  ModalStep.BIOMETRIC_LOGIN,
+                  ModalStep.EMBEDDED_PASSWORD_LOGIN,
+                  ModalStep.AWAITING_BIOMETRIC_LOGIN,
+                  ModalStep.AWAITING_PASSWORD_LOGIN,
+                  ModalStep.AWAITING_ACCOUNT,
+                  ModalStep.OTP,
+                  ModalStep.FARCASTER_OAUTH,
+                  ModalStep.TELEGRAM_OAUTH,
+                ]),
+              onPoll: () => {
+                goBackIfPopupClosedOnSteps([
+                  ModalStep.AWAITING_BIOMETRIC_LOGIN,
+                  ModalStep.AWAITING_PASSWORD_LOGIN,
+                  ModalStep.EMBEDDED_PASSWORD_LOGIN,
+                  ModalStep.OTP,
+                ]);
+              },
             },
-          },
-          {
-            onSuccess: ({ needsWallet }) => {
-              if (needsWallet && !para.isNoWalletConfig) {
-                createWallets();
-              } else {
-                onLoginComplete({
-                  on2faSetupOrError: () => setStep(ModalStep.LOGIN_DONE),
-                  on2faNotSetup: () => setStep(ModalStep.SETUP_2FA),
-                });
-              }
+            {
+              onSuccess: ({ needsWallet }) => {
+                if (needsWallet && !para.isNoWalletConfig) {
+                  createWallets();
+                } else {
+                  onLoginComplete({
+                    on2faSetupOrError: () => setStep(ModalStep.LOGIN_DONE),
+                    on2faNotSetup: () => setStep(ModalStep.SETUP_2FA),
+                  });
+                }
+              },
+              onSettled: () => {
+                window?.clearTimeout(refs.poll.current?.timeout);
+                refs.poll.current = null;
+                refs.popupWindow.current = null;
+              },
             },
-            onSettled: () => {
-              window?.clearTimeout(refs.poll.current?.timeout);
-              refs.poll.current = null;
-              refs.popupWindow.current = null;
-            },
-          },
-        );
-      }, DEFAULTS.LOGGIN_POLLING_DELAY_MS),
-    };
+          );
+        }, DEFAULTS.LOGGIN_POLLING_DELAY_MS),
+      };
+    }
   };
 
   const presentLoginUi = useCallback(
@@ -354,7 +390,22 @@ export function AuthProvider({
         if (isExternalWallet(authState.auth) && authState.signatureVerificationMessage) {
           setStep(ModalStep.EXTERNAL_WALLET_VERIFICATION);
         } else {
-          setStep(ModalStep.VERIFICATIONS);
+          if (authState.nextStage === 'login') {
+            setFlow('login');
+            pollLogin();
+          } else {
+            setFlow('signup');
+            pollSignup();
+          }
+
+          // if loginUrl is present it is SLO so use the OTP flow
+          if (authState.loginUrl) {
+            setIFrameUrl(authState.loginUrl);
+            setIsIFrameReady(false);
+            presentVerifyUi(AuthMethod.BASIC_LOGIN, authState);
+          } else {
+            setStep(ModalStep.VERIFICATIONS);
+          }
         }
         break;
       case 'login':
@@ -379,7 +430,7 @@ export function AuthProvider({
             setIsIFrameReady(false);
           }
 
-          signup();
+          pollSignup();
 
           if (isPasswordOrPINOnly) {
             presentSignupUi(isPassword ? AuthMethod.PASSWORD : AuthMethod.PIN, authState);
@@ -387,6 +438,20 @@ export function AuthProvider({
             setStep(ModalStep.BIOMETRIC_CREATION);
           }
         }
+        break;
+      case 'done':
+        if (authState.isNewUser) {
+          pollSignup();
+          setFlow('signup');
+        } else {
+          pollLogin();
+          setFlow('login');
+        }
+
+        if (!authState.isWalletSelectionNeeded) {
+          setStep(ModalStep.AWAITING_ACCOUNT);
+        }
+
         break;
     }
   };
@@ -433,8 +498,12 @@ export function AuthProvider({
     );
   };
 
-  const verifyFarcaster = async () => {
-    setStep(ModalStep.FARCASTER_OAUTH);
+  const verifyFarcaster = async (serverAuthState?: VerifyThirdPartyAuth) => {
+    if (!serverAuthState) {
+      setStep(ModalStep.FARCASTER_OAUTH);
+    } else {
+      setupListener();
+    }
 
     mutateVerifyFarcaster(
       {
@@ -444,6 +513,7 @@ export function AuthProvider({
           routeMobileExternalWallet(connectUri);
         },
         useShortUrls: true,
+        serverAuthState,
       },
       {
         onSuccess: onNewAuthState,
@@ -456,10 +526,14 @@ export function AuthProvider({
     );
   };
 
-  const verifyTelegram = async (telegramAuthResponse: TelegramAuthResponse) => {
+  const verifyTelegram = async (serverAuthState: VerifyThirdPartyAuth) => {
+    if (serverAuthState) {
+      setupListener();
+    }
+
     mutateVerifyTelegram(
       {
-        telegramAuthResponse,
+        serverAuthState,
         useShortUrls: true,
       },
       {
@@ -567,6 +641,7 @@ export function AuthProvider({
     () => ({
       presentSignupUi,
       presentLoginUi,
+      presentVerifyUi,
       signUpOrLogIn,
       isSignUpOrLogInPending,
       verifyNewAccount,
@@ -582,10 +657,12 @@ export function AuthProvider({
       isCreateGuestWalletsPending,
       logout,
       biometricHints: biometricHints || undefined,
+      verifyFarcasterStatus,
     }),
     [
       presentSignupUi,
       presentLoginUi,
+      presentVerifyUi,
       signUpOrLogIn,
       isSignUpOrLogInPending,
       verifyNewAccount,
@@ -602,6 +679,7 @@ export function AuthProvider({
       isCreateGuestWalletsPending,
       logout,
       biometricHints,
+      verifyFarcasterStatus,
     ],
   );
 

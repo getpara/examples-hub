@@ -1,46 +1,56 @@
-import { CpslButton, CpslIcon, CpslQrCode, CpslSpinner, CpslText } from '@getpara/react-components';
-import { CenteredText, Heading, InnerStepContainer, QRContainer, StepContainer } from '../common.js';
-import { useModalStore } from '../../stores/index.js';
-import { isMobile } from '@getpara/web-sdk';
+import { CpslSpinner } from '@getpara/react-components';
+import { useFarcasterLogin } from '../../hooks/useFarcasterLogin.js';
+import { safeStyled } from '@getpara/react-common';
+import { useEffect, useState } from 'react';
+import { getPortalBaseURL } from '@getpara/web-sdk';
+import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
 
-export function FarcasterConnectQR() {
-  const farcasterConnectUri = useModalStore(state => state.farcasterConnectUri);
+export function FarcasterOAuthStep() {
+  const { url, isLoaded, setIsLoaded } = useFarcasterLogin({
+    isActive: true,
+  });
+  const para = useInternalClient();
+  const [height, setHeight] = useState(0);
+
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (!url) {
+        return; // No iFrame URL to check against
+      }
+
+      const portalBase = getPortalBaseURL(para.ctx);
+
+      if (!event.origin.startsWith(portalBase)) {
+        return; // Ignore messages from untrusted origins
+      }
+
+      if (event.data) {
+        if (event.data.type === 'HEIGHT') {
+          setHeight(event.data.height);
+        }
+      }
+    };
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [url]);
 
   return (
-    <>
-      {isMobile() ? (
-        <InnerStepContainer>
-          <CpslText weight="medium" color="secondary">
-            {`Don’t have Farcaster`}
-          </CpslText>
-          <CpslButton as="a" href={'https://link.warpcast.com/download-qr'} target="_blank" variant="secondary">
-            <CpslIcon slot="start" icon="linkExternal" />
-            {`Get Farcaster`}
-          </CpslButton>
-        </InnerStepContainer>
-      ) : (
-        <>
-          <Heading>Sign in using Farcaster</Heading>
-          <InnerStepContainer>
-            <CenteredText variant="bodyS" color="secondary" weight="medium">
-              Scan the QR code with your phone's camera to proceed.
-            </CenteredText>
-            <QRContainer>
-              {!farcasterConnectUri ? <CpslSpinner size={100} /> : <CpslQrCode url={farcasterConnectUri} />}
-            </QRContainer>
-          </InnerStepContainer>
-        </>
-      )}
-    </>
+    <Container>
+      {url && <IFrame style={{ display: isLoaded ? 'block' : 'none', height }} src={url} onLoad={() => setIsLoaded(true)} />}
+      {(!url || !isLoaded) && <CpslSpinner />}
+    </Container>
   );
 }
 
-const FarcasterOAuthStep = () => {
-  return (
-    <StepContainer $wide>
-      <FarcasterConnectQR />
-    </StepContainer>
-  );
-};
+const Container = safeStyled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+`;
 
-export default FarcasterOAuthStep;
+const IFrame = safeStyled.iframe`
+  width: 100%;
+  border: none;
+`;

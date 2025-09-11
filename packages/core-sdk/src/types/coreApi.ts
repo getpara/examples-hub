@@ -258,7 +258,7 @@ export type CoreMethods = Record<CoreMethodName, { params?: unknown; response?: 
     };
   };
   getOAuthUrl: {
-    params: OAuthUrlParams & { sessionLookupId?: string };
+    params: OAuthUrlParams & { sessionLookupId?: string; encryptionKey?: string };
     response: string;
   };
   verifyOAuth: {

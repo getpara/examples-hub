@@ -63,6 +63,8 @@ const RecoveryWalletModal: React.FC<RecoveryWalletModalProps> = ({ isOpen, onClo
               userShare: userShare.decryptedShare,
               ignoreRedistributingBackupEncryptedShare: true,
               emailProps: {},
+              isEnclaveUser: false,
+              walletScheme: 'DKLS', // since `isEnclaveUser` is false, we can use `DKLS` here as it won't be used
             }),
           ),
         );

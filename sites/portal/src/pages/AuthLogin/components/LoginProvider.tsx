@@ -2,10 +2,17 @@ import { PropsWithChildren, createContext, useCallback, useContext, useEffect, u
 import * as utils from '../../../utils/authLogin';
 import { AuthLoginParams } from '../../../utils/authLogin';
 import { usePara } from '../../../components/ParaContext';
-import { CoreAuthInfo, entityToWallet, isWalletSupported, WalletEntity, TWalletType } from '@getpara/core-sdk';
+import { CoreAuthInfo, entityToWallet, isWalletSupported, WalletEntity, TWalletType, ShareData } from '@getpara/core-sdk';
 import { formatISO } from 'date-fns';
 import { useCloseWindow } from '../../../hooks/useCloseWindow';
-import { AuthExtras, AuthInfo, AuthParams, BiometricLocationHint, extractAuthInfo } from '@getpara/user-management-client';
+import {
+  AuthExtras,
+  AuthInfo,
+  AuthMethod,
+  AuthParams,
+  BiometricLocationHint,
+  extractAuthInfo,
+} from '@getpara/user-management-client';
 import { useExtractedParams } from '../../../hooks/useExtractedParams';
 
 const NOOP = () => {
@@ -26,6 +33,8 @@ type Login = {
     authUpdateKeyShares: (_?: LoginRes) => Promise<void>;
     fetchWallets: () => Promise<Wallets>;
     finishLogin: (_?: boolean) => Promise<void>;
+    authUpdateEnclaveKeyShares: (_?: ShareData[]) => Promise<void>;
+    checkIsEnclaveUser: () => Promise<boolean>;
   };
   authInfo?: AuthInfo | undefined;
   params: AuthLoginParams;
@@ -34,10 +43,18 @@ type Login = {
   sessionOrigin?: string;
 };
 
-const NO_DATE = formatISO(new Date(-8640000000000000));
+export const NO_DATE = formatISO(new Date(-8640000000000000));
 
 export const LoginContext = createContext<Login>({
-  fns: { authLogin: NOOP, authLoginWithPassword: NOOP, authUpdateKeyShares: NOOP, fetchWallets: NOOP, finishLogin: NOOP },
+  fns: {
+    authLogin: NOOP,
+    authLoginWithPassword: NOOP,
+    authUpdateKeyShares: NOOP,
+    fetchWallets: NOOP,
+    finishLogin: NOOP,
+    authUpdateEnclaveKeyShares: NOOP,
+    checkIsEnclaveUser: NOOP,
+  },
   params: {} as unknown as utils.AuthLoginParams,
 });
 
@@ -56,6 +73,13 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
   const [wallets, setWallets] = useState<Wallets>();
   const [biometricLocationHints, setBiometricLocationHints] = useState<BiometricLocationHint[]>([]);
   const [sessionOrigin, setSessionOrigin] = useState<string>();
+
+  const checkIsEnclaveUser = useCallback(async () => {
+    const auth = await para.ctx.client.sessionAuth(params.sessionId);
+    const isSLOUser = auth.loginAuthMethods?.methods.includes(AuthMethod.BASIC_LOGIN);
+    para.isEnclaveUser = isSLOUser;
+    return isSLOUser;
+  }, [para, params.sessionId]);
 
   const authLogin = useCallback(async (): ReturnType<typeof utils.authLogin> => {
     const loginRes = await utils.authLogin(para.ctx, { ...params, auth: authInfo.auth });
@@ -162,15 +186,28 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
     [para, params, loginRes],
   );
 
+  const authUpdateEnclaveKeyShares = useCallback(async () => {
+    const shares = await para.ctx.enclaveClient.retrieveSharesWithRetry([{ userId: para.userId }]);
+
+    await utils.authUpdateKeyShares(para, {
+      ...params,
+      encryptionKey: params.encryptionKey,
+      enclaveShares: shares,
+      userId: para.userId,
+    });
+  }, [para, params]);
+
   const finishLogin = useCallback(
     async (shouldClose = false) => {
-      await authUpdateKeyShares();
+      const isEnclaveUser = await checkIsEnclaveUser();
+
+      await (isEnclaveUser ? authUpdateEnclaveKeyShares() : authUpdateKeyShares());
 
       if (shouldClose) {
         closeWindow(true);
       }
     },
-    [closeWindow, authUpdateKeyShares],
+    [closeWindow, authUpdateKeyShares, params.sessionId],
   );
 
   useEffect(() => {
@@ -211,7 +248,15 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
   return (
     <LoginContext.Provider
       value={{
-        fns: { authLogin, authLoginWithPassword, authUpdateKeyShares, fetchWallets, finishLogin },
+        fns: {
+          authLogin,
+          authLoginWithPassword,
+          authUpdateKeyShares,
+          fetchWallets,
+          finishLogin,
+          authUpdateEnclaveKeyShares,
+          checkIsEnclaveUser,
+        },
         authInfo,
         params,
         wallets,

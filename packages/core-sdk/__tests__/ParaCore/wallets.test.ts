@@ -288,6 +288,8 @@ describe('wallets', () => {
         ignoreRedistributingBackupEncryptedShare: false,
         partnerId: 'newPartnerId',
         protocolId,
+        isEnclaveUser: false,
+        walletScheme: 'DKLS',
       });
       expect(signer).toEqual('test-refresh-signer');
       expect(protocolId).toEqual('protocolId');
@@ -434,6 +436,8 @@ describe('wallets', () => {
         userShare: pregenWallet.signer,
         emailProps: (para as unknown as any).getBackupKitEmailProps(),
         partnerId: pregenWallet.partnerId,
+        isEnclaveUser: false,
+        walletScheme: 'ED25519',
       });
 
       expect(para.wallets[solanaPregenId].userId).toBe(USER_ID);

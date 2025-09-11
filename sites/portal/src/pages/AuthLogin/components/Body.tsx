@@ -13,6 +13,10 @@ import { SuccessFromKnownDeviceStep } from './SuccessFromKnownDeviceStep';
 import { EnterPINStep } from './EnterPINStep';
 import { AuthVerificationStep } from './AuthVerificationStep';
 import { isIFramed } from '../../../utils/isIFramed';
+import { OAuthCallback } from './OAuthCallback';
+import { OTP } from './OTP';
+import { Farcaster } from './Farcaster';
+import { TelegramLogin } from '../../TelegramLogin/TelegramLogin';
 
 interface BodyProps {
   addDeviceUrl?: string;
@@ -28,6 +32,7 @@ interface BodyProps {
   isKnownDeviceLogin: boolean;
   isAddingDevice: boolean;
   isEmbedded?: boolean;
+  postLogin: () => Promise<void>;
 }
 
 export const Body = ({
@@ -43,6 +48,7 @@ export const Body = ({
   isKnownDeviceLogin,
   isAddingDevice,
   isEmbedded,
+  postLogin,
 }: BodyProps) => {
   const { partner } = useModalOutletContext();
 
@@ -105,6 +111,18 @@ export const Body = ({
       }
       case AuthLoginStep.AUTH_VERIFICATION: {
         return <AuthVerificationStep isEmbedded={isEmbedded} setStep={setStep} />;
+      }
+      case AuthLoginStep.OAUTH_CALLBACK: {
+        return <OAuthCallback onLogin={postLogin} />;
+      }
+      case AuthLoginStep.OTP: {
+        return <OTP onLogin={postLogin} />;
+      }
+      case AuthLoginStep.FARCASTER: {
+        return <Farcaster onLogin={postLogin} />;
+      }
+      case AuthLoginStep.TELEGRAM: {
+        return <TelegramLogin onLogin={postLogin} />;
       }
     }
   };

@@ -1,4 +1,4 @@
-import { BackupKitEmailProps, EncryptorType, KeyShareType } from '@getpara/user-management-client';
+import { BackupKitEmailProps, EncryptorType, KeyShareType, TWalletScheme } from '@getpara/user-management-client';
 
 import { encryptWithDerivedPublicKey } from '../cryptography/utils.js';
 import { sendRecoveryForShare } from './recovery.js';
@@ -14,6 +14,8 @@ export async function distributeNewShare({
   emailProps = {},
   partnerId,
   protocolId,
+  isEnclaveUser,
+  walletScheme,
 }: {
   ctx: Ctx;
   userId: string;
@@ -23,7 +25,23 @@ export async function distributeNewShare({
   emailProps?: BackupKitEmailProps;
   partnerId?: string;
   protocolId?: string;
+  isEnclaveUser: boolean;
+  walletScheme: TWalletScheme;
 }): Promise<string> {
+  if (isEnclaveUser) {
+    await ctx.enclaveClient.persistSharesWithRetry([
+      {
+        userId,
+        walletId,
+        walletScheme,
+        signer: userShare,
+        partnerId,
+        protocolId,
+      },
+    ]);
+    return '';
+  }
+
   const publicKeysRes = await ctx.client.getSessionPublicKeys(userId);
   const biometricEncryptedShares = publicKeysRes.data.keys
     .map(key => {

@@ -59,6 +59,7 @@ import {
   LegacyAuthMethod,
   PrimaryAuthInfo,
   ServerAuthStateLogin,
+  ServerAuthStateDone,
 } from '@getpara/shared';
 import { extractWalletRef, fromAccountMetadata, fromLinkedAccounts } from './utils.js';
 import { SESSION_COOKIE_HEADER_NAME, VERSION_HEADER_NAME, PARTNER_ID_HEADER_NAME, API_KEY_HEADER_NAME } from './consts.js';
@@ -375,10 +376,17 @@ class Client {
     return res.data;
   };
 
-  verifyTelegram = async (authObject: TelegramAuthResponse): Promise<VerifyTelegramResponse> => {
+  verifyTelegram = async ({
+    authObject,
+    sessionLookupId,
+  }: {
+    authObject: TelegramAuthResponse;
+    sessionLookupId?: string;
+  }): Promise<VerifyTelegramResponse> => {
     return (
       await this.baseRequest.post<VerifyTelegramResponse>('/users/telegram/v2', {
         authObject,
+        sessionLookupId,
       })
     ).data;
   };
@@ -403,8 +411,14 @@ class Client {
     return res.data;
   };
 
-  verifyAccount = async (userId: string, body: verifyBody): Promise<ServerAuthStateSignup | ServerAuthStateLogin> => {
-    const res = await this.baseRequest.post<ServerAuthStateSignup | ServerAuthStateLogin>(`/users/${userId}/verify`, body);
+  verifyAccount = async (
+    userId: string,
+    body: verifyBody,
+  ): Promise<ServerAuthStateSignup | ServerAuthStateLogin | ServerAuthStateDone> => {
+    const res = await this.baseRequest.post<ServerAuthStateSignup | ServerAuthStateLogin | ServerAuthStateDone>(
+      `/users/${userId}/verify`,
+      body,
+    );
     return res.data;
   };
 
@@ -563,9 +577,35 @@ class Client {
     return res.data;
   };
 
+  // GET /sessions/:sessionLookupId/login-method
+  sessionLoginMethod = async (sessionLookupId: string): Promise<{ loginMethod?: string }> => {
+    const res = await this.baseRequest.get<{ loginMethod?: string }>(`/sessions/${sessionLookupId}/login-method`);
+    return res.data;
+  };
+
   // GET /sessions/:sessionLookupId/auth-verified
   sessionAuthVerified = async (sessionLookupId: string): Promise<{ authVerified?: boolean }> => {
     const res = await this.baseRequest.get<{ authVerified?: boolean }>(`/sessions/${sessionLookupId}/auth-verified`);
+    return res.data;
+  };
+
+  // GET /sessions/:sessionLookupId/auth
+  sessionAuth = async (
+    sessionLookupId: string,
+  ): Promise<{
+    userId: string;
+    authVerified?: boolean;
+    loginAuthMethods: { methods: AuthMethod[] };
+    auth: PrimaryAuth;
+    isNewUser: boolean;
+  }> => {
+    const res = await this.baseRequest.get<{
+      userId: string;
+      authVerified?: boolean;
+      loginAuthMethods: { methods: AuthMethod[] };
+      auth: PrimaryAuth;
+      isNewUser: boolean;
+    }>(`/sessions/${sessionLookupId}/auth`);
     return res.data;
   };
 
@@ -854,8 +894,8 @@ class Client {
     return res.data;
   }
 
-  async getFarcasterAuthStatus() {
-    const res = await this.baseRequest.post<VerifyFarcasterResponse>(`/auth/farcaster/status/v2`);
+  async getFarcasterAuthStatus({ sessionLookupId }: { sessionLookupId?: string } = {}) {
+    const res = await this.baseRequest.post<VerifyFarcasterResponse>(`/auth/farcaster/status/v2`, { sessionLookupId });
     return res.data;
   }
 
@@ -1303,6 +1343,49 @@ class Client {
 
   trackReactSdkAnalytics = async (opts: { props: object; reactSdkVersion: string }) => {
     await this.baseRequest.post<{ success: boolean }>('/partners/analytics/react-sdk', opts);
+  };
+
+  // ENCLAVE METHODS
+
+  /**
+   * Get the enclave's public key for encryption
+   */
+  getEnclavePublicKey = async (): Promise<{ publicKey: string; keyFingerprint: string; generatedAt: string }> => {
+    const res = await this.baseRequest.get<{ publicKey: string; keyFingerprint: string; generatedAt: string }>(
+      '/enclave/public-key',
+    );
+    return res.data;
+  };
+
+  /**
+   * Persist encrypted key shares to the enclave
+   * @param encryptedPayload JSON string containing the encrypted ECIES payload
+   */
+  persistEnclaveShares = async (encryptedPayload: string): Promise<{ payload: any }> => {
+    const body = { encryptedPayload };
+    const res = await this.baseRequest.post<{ payload: any }>('/enclave/key-shares', body);
+    return res.data;
+  };
+
+  /**
+   * Retrieve encrypted key shares from the enclave
+   * @param encryptedPayload JSON string containing the encrypted ECIES query
+   */
+  retrieveEnclaveShares = async (encryptedPayload: string): Promise<{ payload: any }> => {
+    const res = await this.baseRequest.get<{ payload: any }>(
+      `/enclave/key-shares?encryptedPayload=${encodeURIComponent(encryptedPayload)}`,
+    );
+    return res.data;
+  };
+
+  issueEnclaveJwt = async (encryptedPayload: string): Promise<{ payload: string }> => {
+    const res = await this.baseRequest.post<{ payload: string }>(`/enclave/jwt/issue`, { encryptedPayload });
+    return res.data;
+  };
+
+  refreshEnclaveJwt = async (encryptedPayload: string): Promise<{ payload: string }> => {
+    const res = await this.baseRequest.post<{ payload: string }>(`/enclave/jwt/refresh`, { encryptedPayload });
+    return res.data;
   };
 }
 

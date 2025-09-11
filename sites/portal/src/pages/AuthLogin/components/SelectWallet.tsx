@@ -11,6 +11,8 @@ import { useLogin } from './LoginProvider';
 import { ConnectDiagram, ParaIcon, HERO_HEIGHT, LayoutWithHero, PartnerIcon as PartnerIconRoot } from '../../../components';
 import { motion } from 'framer-motion';
 import { CenteredText } from '@getpara/react-common';
+import { useCloseWindow } from '../../../hooks/useCloseWindow';
+import { isIFramed } from '../../../utils/isIFramed';
 
 const GRADIENT = `linear-gradient(to right, #fe5330, #9400db)`;
 
@@ -137,12 +139,13 @@ export const SelectWallet = ({
   const para = usePara();
   const {
     authInfo,
-    fns: { finishLogin, authUpdateKeyShares },
+    fns: { finishLogin, authUpdateKeyShares, authUpdateEnclaveKeyShares, checkIsEnclaveUser },
     params: { newDeviceSessionLookupId },
     wallets,
     sessionOrigin,
   } = useLogin();
   const { partner } = useModalOutletContext();
+  const closeWindow = useCloseWindow();
 
   const [isAtBottom, setIsAtBottom] = useState(false);
   const [isSettingUp, setIsSettingUp] = useState(true);
@@ -233,8 +236,9 @@ export const SelectWallet = ({
 
         setIsCreatingWallets(false);
       } else {
+        const isEnclaveUser = await checkIsEnclaveUser();
         await para.setCurrentWalletIds(walletIds, { sessionLookupId, newDeviceSessionLookupId });
-        await authUpdateKeyShares();
+        await (isEnclaveUser ? authUpdateEnclaveKeyShares() : authUpdateKeyShares());
         onSuccess();
       }
     },
@@ -288,7 +292,7 @@ export const SelectWallet = ({
               You can close this window and return to your other device.
             </CenteredText>
           ) : (
-            <CpslButton fullWidth disabled={!!recoverySecret && !isRecoverySecretSaved} onClick={() => window.close()}>
+            <CpslButton fullWidth disabled={!!recoverySecret && !isRecoverySecretSaved} onClick={closeWindow}>
               Done
             </CpslButton>
           )}
@@ -414,8 +418,14 @@ export const SelectWallet = ({
         <LayoutWithHero hero={header} state={!!newWallets && Object.keys(newWallets).length > 0 ? 'success' : 'loading'}>
           <FlexColumn key={key} {...contentMotionProps}>
             <PageHeading>
-              <Heading>{heading}</Heading>
-              {subheading && <Subheading>{subheading}</Subheading>}
+              <CpslText variant="bodyL" weight="semiBold">
+                {heading}
+              </CpslText>
+              {subheading && (
+                <CpslText variant="bodyS" color="secondary">
+                  {subheading}
+                </CpslText>
+              )}
             </PageHeading>
             <FlexColumn>{content}</FlexColumn>
           </FlexColumn>
@@ -458,9 +468,10 @@ const BOTTOM_SHEET_HEIGHT = 156;
 
 const Root = styled.div`
   height: 100vh;
+  min-height: 500px;
   width: 456px;
   max-width: 100vw;
-  background-color: white;
+  background-color: var(--cpsl-color-background-0);
 `;
 
 const FlexColumn = styled(motion.div)`
@@ -482,7 +493,8 @@ const Wallets = styled(FlexColumn)<{ isAtBottom?: boolean }>`
   margin-top: 8px;
   position: relative;
   overflow-y: auto;
-  max-height: calc(100vh - ${BOTTOM_SHEET_HEIGHT}px - ${HERO_HEIGHT}px - ${PAGE_HEADING_HEIGHT}px - 32px);
+  /* max-height: calc(100vh - ${BOTTOM_SHEET_HEIGHT}px - ${HERO_HEIGHT}px - ${PAGE_HEADING_HEIGHT}px - 32px); */
+  max-height: calc(100vh - ${BOTTOM_SHEET_HEIGHT}px - ${isIFramed ? 0 : HERO_HEIGHT}px - ${PAGE_HEADING_HEIGHT}px - 32px);
   width: 100%;
   gap: 32px;
   mask-image: ${({ isAtBottom }) =>
@@ -499,17 +511,6 @@ const PageHeading = styled(FlexColumn)`
   min-height: 72px;
   justify-content: flex-start;
   flex: 0;
-`;
-
-const Heading = styled.div`
-  text-align: center;
-  font-size: 18px;
-  font-weight: 600;
-  line-height: 1;
-  width: 100%;
-  overflow-x: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
 `;
 
 const WalletGroupHeading = styled.div`
@@ -533,14 +534,6 @@ const WalletGroupHeading = styled.div`
   --icon-height: 20px;
 `;
 
-const Subheading = styled(CpslText)<{ isDark?: boolean }>`
-  text-align: center;
-  &::part(text-element) {
-    line-height: auto;
-    color: #868686;
-  }
-`;
-
 const BottomSheet = styled.div`
   width: 100vw;
   padding: 32px calc(50vw - 218px);
@@ -553,44 +546,44 @@ const BottomSheet = styled.div`
   right: 0;
   height: ${BOTTOM_SHEET_HEIGHT}px;
   border-radius: 24px 24px 0px 0px;
-  border: 1px solid #d6d6d6;
-  background: white;
+  background: var(--cpsl-color-background-0);
   box-shadow: 0px -8px 6px 0px rgba(0, 0, 0, 0.04);
 `;
 
 const Notice = styled.div`
   font-size: 12px;
   text-align: center;
+  color: var(--cpsl-color-text-primary);
 `;
 
 const ButtonRoot = styled.button<Pick<WalletButtonProps, 'isSelected'>>`
   padding: 24px;
-  background-color: white;
+  background-color: var(--cpsl-color-background-0);
   border-radius: 16px;
   border: 1px solid;
   display: flex;
   align-items: center;
   width: 100%;
-  border-color: ${({ isSelected }) => (isSelected ? 'black' : '#f0f0f0')};
+  border-color: ${({ isSelected }) => (isSelected ? 'var(--cpsl-color-foreground-0)' : 'var(--cpsl-color-background-32)')};
   cursor: pointer;
   font-family: 'Inter', sans-serif;
   box-shadow: 0px 2px 8px 0px rgba(0, 0, 0, 0.04);
 
   &:hover {
-    background-color: #fafafa;
+    background-color: var(--cpsl-color-background-4);
   }
 
   &:active {
-    background-color: #f0f0f0;
+    background-color: var(--cpsl-color-background-4);
   }
 
   &:disabled {
     cursor: default;
-    background-color: white;
-    border-color: #cdcdcd;
+    background-color: var(--cpsl-color-background-0);
+    border-color: var(--cpsl-color-background-4);
 
     &:hover {
-      background-color: white;
+      background-color: var(--cpsl-color-background-0);
     }
   }
 `;
@@ -640,7 +633,7 @@ const WalletInfo = styled.div`
 `;
 
 const WalletName = styled.div`
-  color: black;
+  color: var(--cpsl-color-text-primary);
   text-align: left;
   font-size: 20px;
   font-weight: 600;
@@ -652,12 +645,12 @@ const WalletName = styled.div`
 
 const WalletAddress = styled.div`
   font-size: 12px;
-  color: #858585;
+  color: var(--cpsl-color-text-secondary);
 `;
 
 const WalletTag = styled.div`
   border-radius: 4px;
-  color: #141414;
+  color: var(--cpsl-color-text-tertiary);
   padding: 2px 4px;
   font-weight: 500;
   font-size: 10px;
@@ -669,7 +662,7 @@ const WalletTag = styled.div`
 `;
 
 const WalletClaimable = styled(WalletTag)`
-  color: white;
+  color: var(--cpsl-color-text-primary);
   background: ${GRADIENT};
 `;
 
@@ -680,7 +673,7 @@ const WalletButtonLower = styled(WalletButtonUpper)`
   & > div {
     display: flex;
     align-items: center;
-    color: #858585;
+    color: var(--cpsl-color-text-secondary);
     text-align: left;
     white-space: nowrap;
 
@@ -736,6 +729,7 @@ const CreateWalletText = styled.div`
   font-size: 20px;
   font-weight: 500;
   text-align: left;
+  color: var(--cpsl-color-text-primary);
 `;
 
 const Success = styled.div`
@@ -750,13 +744,13 @@ const RecoverySecretContainer = styled.div`
   flex-direction: column;
   gap: 16px;
   padding: 12px 8px;
-  border: 1px solid #d6d6d6;
+  border: 1px solid var(--cpsl-color-background-8);
   border-radius: 16px;
 `;
 
 const RecoverySecretInstructions = styled.div`
   font-size: 14px;
-  color: #858585;
+  color: var(--cpsl-color-text-secondary);
   text-align: center;
 
   & span {

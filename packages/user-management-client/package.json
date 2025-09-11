@@ -2,7 +2,7 @@
   "name": "@getpara/user-management-client",
   "version": "2.0.0-alpha.53",
   "dependencies": {
-    "@getpara/shared": "1.0.2",
+    "@getpara/shared": "1.1.0",
     "axios": "^1.8.4",
     "libphonenumber-js": "^1.11.7"
   },

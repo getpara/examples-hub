@@ -40,7 +40,8 @@ export enum ModalStep {
   ACCOUNT_PROFILE_ADD = 'ACCOUNT_PROFILE_ADD',
   ACCOUNT_PROFILE_LIST = 'ACCOUNT_PROFILE_LIST',
   ACCOUNT_PROFILE_REMOVE = 'ACCOUNT_PROFILE_REMOVE',
-  AWAITING_IFRAME = 'AWAITING_IFRAME',
+  AWAITING_ACCOUNT = 'AWAITING_ACCOUNT',
+  OTP = 'OTP',
 }
 
 export type ModalStepPropU = keyof typeof ModalStep | ModalStep;
@@ -78,7 +79,7 @@ export const RESET_TO_AUTH_STEPS = [
   ModalStep.AWAITING_BIOMETRIC_CREATION,
   ModalStep.PASSWORD_CREATION,
   ModalStep.AWAITING_PASSWORD_CREATION,
-  ModalStep.AWAITING_IFRAME,
+  ModalStep.AWAITING_ACCOUNT,
   ModalStep.BIOMETRIC_LOGIN,
   ModalStep.EMBEDDED_PASSWORD_LOGIN,
   ModalStep.AWAITING_BIOMETRIC_LOGIN,
@@ -90,6 +91,7 @@ export const RESET_TO_AUTH_STEPS = [
   ModalStep.VERIFY_2FA,
   ModalStep.TWO_FACTOR_DONE,
   ModalStep.LOGIN_DONE,
+  ModalStep.OTP,
 ];
 
 export const RESET_TO_ACCOUNT_STEPS = [
@@ -152,7 +154,8 @@ enum SignUpModalStep {
   ADD_FUNDS_AWAITING = 'ADD_FUNDS_AWAITING',
   ADD_FUNDS_SUCCESS = 'ADD_FUNDS_SUCCESS',
   ADD_FUNDS_FAILURE = 'ADD_FUNDS_FAILURE',
-  AWAITING_IFRAME = 'AWAITING_IFRAME',
+  AWAITING_ACCOUNT = 'AWAITING_ACCOUNT',
+  OTP = 'OTP',
 }
 
 export const SignUpPreviousStep: {
@@ -184,7 +187,8 @@ export const SignUpPreviousStep: {
   [SignUpModalStep.ADD_FUNDS_AWAITING]: ModalStep.ADD_FUNDS_BUY,
   [SignUpModalStep.ADD_FUNDS_SUCCESS]: undefined,
   [SignUpModalStep.ADD_FUNDS_FAILURE]: undefined,
-  [SignUpModalStep.AWAITING_IFRAME]: ModalStep.AUTH_MAIN,
+  [SignUpModalStep.AWAITING_ACCOUNT]: ModalStep.AUTH_MAIN,
+  [SignUpModalStep.OTP]: ModalStep.AUTH_MAIN,
 };
 
 export const GuestPreviousStep: {
@@ -225,7 +229,8 @@ enum LoginModalStep {
   ADD_FUNDS_AWAITING = 'ADD_FUNDS_AWAITING',
   ADD_FUNDS_SUCCESS = 'ADD_FUNDS_SUCCESS',
   ADD_FUNDS_FAILURE = 'ADD_FUNDS_FAILURE',
-  AWAITING_IFRAME = 'AWAITING_IFRAME',
+  AWAITING_ACCOUNT = 'AWAITING_ACCOUNT',
+  OTP = 'OTP',
 }
 
 export const LoginPreviousStep: {
@@ -256,7 +261,8 @@ export const LoginPreviousStep: {
   [LoginModalStep.ADD_FUNDS_AWAITING]: ModalStep.ADD_FUNDS_BUY,
   [LoginModalStep.ADD_FUNDS_SUCCESS]: undefined,
   [LoginModalStep.ADD_FUNDS_FAILURE]: undefined,
-  [LoginModalStep.AWAITING_IFRAME]: ModalStep.AUTH_MAIN,
+  [LoginModalStep.AWAITING_ACCOUNT]: ModalStep.AUTH_MAIN,
+  [LoginModalStep.OTP]: ModalStep.AUTH_MAIN,
 };
 
 export const getStepHasFooter = (step: ModalStep): boolean => {
@@ -286,4 +292,4 @@ export function getAddFundsStep(currentTab: EnabledFlow): ModalStep {
   }
 }
 
-export const IFrameSteps: ModalStep[] = [ModalStep.PASSWORD_CREATION, ModalStep.EMBEDDED_PASSWORD_LOGIN];
+export const IFrameSteps: ModalStep[] = [ModalStep.PASSWORD_CREATION, ModalStep.EMBEDDED_PASSWORD_LOGIN, ModalStep.OTP];

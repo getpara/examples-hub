@@ -15,7 +15,7 @@ import { TwoFactorDoneStep } from '../TwoFactorDoneStep/TwoFactorDoneStep.js';
 import { BiometricCreationStep } from '../BiometricCreationStep/BiometricCreationStep.js';
 import { AwaitingOAuthStep } from '../AwaitingOAuthStep/AwaitingOAuthStep.js';
 import { AddFundsAwaiting, AddFundsDone, AddFunds } from '../AddFunds/index.js';
-import FarcasterOAuthStep from '../OAuth/FarcasterOAuthStep.js';
+import { FarcasterOAuthStep } from '../OAuth/FarcasterOAuthStep.js';
 import { Header } from '../Header/Header.js';
 import { AuthMainStep } from '../AuthMainStep/AuthMainStep.js';
 import { BODY_MOTION_VARIANTS, BODY_TRANSITION, MOBILE_SIZE } from '../../constants/constants.js';
@@ -39,7 +39,7 @@ import { AccountProfileLinkOptions } from '../Account/AccountProfileLinkOptions.
 import { AccountProfileLink } from '../Account/AccountProfileLink.js';
 import { AccountProfileUnlink } from '../Account/AccountProfileUnlink.js';
 import { ExternalWalletNetworkSelectStep } from '../ExternalWalletNetworkSelectStep/ExternalWalletNetworkSelectStep.js';
-import { AwaitingIFrameStep } from '../AwaitingIFrameStep/AwaitingIFrameStep.js';
+import { AwaitingAccountStep } from '../AwaitingAccountStep/AwaitingAccountStep.js';
 import { Footer } from '../Footer/Footer.js';
 import { renderTextWithLinks } from '../../utils/renderTextWithLinks.js';
 
@@ -200,8 +200,8 @@ export const Body = ({
       case ModalStep.EX_WALLET_NETWORK_SELECT: {
         return <ExternalWalletNetworkSelectStep />;
       }
-      case ModalStep.AWAITING_IFRAME: {
-        return <AwaitingIFrameStep />;
+      case ModalStep.AWAITING_ACCOUNT: {
+        return <AwaitingAccountStep />;
       }
       default: {
         if (IFrameSteps.includes(currentStep)) {

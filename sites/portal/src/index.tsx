@@ -6,7 +6,7 @@ import './portal.css';
 import { ModalLayout } from './components/ModalLayout';
 import { defineCustomElements } from '@getpara/react-components';
 import { ParaProvider } from './components/ParaContext';
-import { ENV } from './constants';
+import { AuthLoginStep, ENV } from './constants';
 import { AuthMethod } from '@getpara/web-sdk';
 import { lazy } from 'react';
 import './clients/sentry';
@@ -29,7 +29,10 @@ const OnRampTransaction = lazy(() =>
 const OnRampTransactionV2 = lazy(() =>
   import('./pages/OnRampTransactionV2').then(module => ({ default: module.OnRampTransactionV2 })),
 );
-const TelegramLogin = lazy(() => import('./pages/TelegramLogin').then(module => ({ default: module.TelegramLogin })));
+const TelegramLogin = lazy(() =>
+  import('./pages/TelegramLogin/TelegramLogin').then(module => ({ default: module.TelegramLogin })),
+);
+const OAuthLogin = lazy(() => import('./pages/OAuth/OAuthLogin').then(module => ({ default: module.OAuthLogin })));
 const ShortUrl = lazy(() => import('./pages/ShortUrl/ShortUrl'));
 
 export const App = () => {
@@ -61,6 +64,11 @@ export const App = () => {
         </Route>
         <Route element={<ModalLayout />} path="/auth">
           <Route element={<TelegramLogin />} path="telegram" />
+          <Route element={<AuthLogin step={AuthLoginStep.TELEGRAM} />} path="telegram/verify" />
+          <Route element={<AuthLogin step={AuthLoginStep.FARCASTER} />} path="farcaster" />
+          <Route element={<AuthLogin step={AuthLoginStep.OTP} />} path="otp" />
+          <Route element={<AuthLogin step={AuthLoginStep.OAUTH_CALLBACK} />} path=":method/callback" />
+          <Route element={<OAuthLogin />} path=":method" />
         </Route>
         <Route element={<ShortUrl />} path="/short/:shortenedUrl" />
       </Routes>

@@ -9,6 +9,7 @@ import Client, {
   TWalletType,
   Theme,
 } from '@getpara/user-management-client';
+import { EnclaveClient } from '../shares/enclave.js';
 
 export enum Environment {
   // Internal Environments
@@ -26,6 +27,7 @@ export interface Ctx {
   env: Environment;
   apiKey: string;
   client: Client;
+  enclaveClient?: EnclaveClient;
   disableWorkers?: boolean;
   offloadMPCComputationURL?: string;
   mpcComputationClient?: AxiosInstance;

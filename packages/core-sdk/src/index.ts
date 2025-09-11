@@ -124,6 +124,7 @@ export { isWalletSupported } from './utils/wallet.js';
 export { getNetworkPrefix, getOnRampAssets, getOnRampNetworks, toAssetInfoArray } from './utils/onRamps.js';
 export { getPortalBaseURL } from './utils/url.js';
 export { retrieve as transmissionUtilsRetrieve } from './transmission/transmissionUtils.js';
+export type { ShareData } from './shares/enclave.js';
 
 export const paraVersion = ParaCore.version;
 export default ParaCore;

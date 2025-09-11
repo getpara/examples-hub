@@ -4,7 +4,7 @@ import { ReactNode, useEffect, useMemo } from 'react';
 import { HeroAccountTypeIcon, HeroSuccessIcon } from '../common.js';
 import { VerificationCode } from '../VerificationCodeStep/VerificationCodeStep.js';
 import { AuthInfo, extractAuthInfo } from '@getpara/user-management-client';
-import { FarcasterConnectQR } from '../OAuth/FarcasterOAuthStep.js';
+import { FarcasterLink } from '../OAuth/FarcasterLink.js';
 import { useTelegramLogin } from '../../hooks/useTelegramLogin.js';
 import { TelegramIFrame } from '../OAuth/TelegramOAuthStep.js';
 import { AuthInput } from '../AuthInput/AuthInput.js';
@@ -39,7 +39,9 @@ export function AccountProfileLink() {
       isLoaded,
       setIsLoaded,
     } = useTelegramLogin(
-      isTelegram ? { isActive: isTelegram, status: linkAccountStatus, onSubmit: verifyTelegramLink } : { isActive: false },
+      isTelegram
+        ? { isActive: isTelegram, status: linkAccountStatus, onSubmit: verifyTelegramLink, isLinking: true }
+        : { isActive: false, isLinking: true },
     ),
     status = accountLinkInProgress?.isComplete ? 'success' : isTelegram ? telegramStatus : linkAccountStatus,
     commonWallet = useMemo(() => {
@@ -173,7 +175,7 @@ export function AccountProfileLink() {
 
       // Farcaster Connect QR
       case accountLinkType === 'FARCASTER' && status !== 'success':
-        lower = <FarcasterConnectQR />;
+        lower = <FarcasterLink />;
         break;
 
       // OAuth, External Wallet, Telegram
