@@ -252,7 +252,7 @@ describe('formattingUtils', () => {
         decimals: 3,
         fallback: '0.000 ETH',
       });
-      expect(result).toBe('0.000 ETH');
+      expect(result).toBe('0 ETH');
     });
 
     it('should handle negative quantities correctly', () => {

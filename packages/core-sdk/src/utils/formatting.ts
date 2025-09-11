@@ -124,7 +124,7 @@ export function formatAssetQuantity({
   decimals?: number;
   fallback?: string;
 }) {
-  if (!quantity) {
+  if (quantity == null) {
     return fallback;
   }
 
@@ -134,5 +134,11 @@ export function formatAssetQuantity({
     minimumFractionDigits: decimals ?? 3,
   });
 
-  return `${Math.abs(quantity) < 10 ** (-1 * (decimals ?? 6)) ? zeroAssetFormatter.format(0) : formatter.format(quantity)}${symbol && symbol.length > 0 ? ` ${symbol}` : ''}`;
+  const formattedQuantity =
+    quantity === 0
+      ? '0'
+      : Math.abs(quantity) < 10 ** (-1 * (decimals ?? 6))
+        ? zeroAssetFormatter.format(0)
+        : formatter.format(quantity);
+  return `${formattedQuantity}${symbol && symbol.length > 0 ? ` ${symbol}` : ''}`;
 }

@@ -367,7 +367,7 @@ const createPregens = async (para: MockPara, auth: PregenAuth): Promise<Wallet[]
       case 1:
         return { ...wallet, signer: solanaSigner };
     }
-  }) as Wallet[];
+  }) as unknown as Wallet[];
 };
 
 const testInitialLogin = async (para: MockPara, authInfo: PrimaryAuthInfo, cancel = false) => {

@@ -5,31 +5,72 @@ import { ExternalWallets } from './ExternalWallets';
 import { AuthLayouts } from './AuthLayouts';
 import { Theme } from './Theme';
 import { AccountLinking } from './AccountLinking';
+import { Balances } from './Balances';
 import { useAccount } from '@getpara/react-sdk';
+import { memo } from 'react';
 
-export const ModalConfig = () => {
-  const { data: account } = useAccount();
+export const ModalConfig = memo(() => {
+  const { embedded } = useAccount();
   return (
     <CpslCard>
       <CpslText variant="headingXS" weight="semiBold">
         Modal Configuration
       </CpslText>
       <InnerContainer>
-        <Theme />
-        <OAuthMethods />
-        <ExternalWallets />
-        <AuthLayouts />
-        {account?.isConnected && !account?.isGuestMode && <AccountLinking />}
+        <TopComponentsGrid>
+          <Theme />
+          <VerticalStack>
+            <AuthLayouts />
+            <OAuthMethods />
+          </VerticalStack>
+          <ExternalWallets />
+        </TopComponentsGrid>
+        <Balances />
+        {embedded?.isConnected && !embedded?.isGuestMode && <AccountLinking />}
       </InnerContainer>
     </CpslCard>
   );
-};
+});
 
 const InnerContainer = styled.div`
-  flex-wrap: wrap;
   margin-top: 8px;
   display: flex;
-  gap: 24px;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+
+  @media (max-width: 640px) {
+    gap: 16px;
+    margin-top: 4px;
+  }
+`;
+
+const TopComponentsGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  width: 100%;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+`;
+
+const VerticalStack = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+
+  @media (max-width: 640px) {
+    gap: 8px;
+  }
 `;
 
 export const LabelContainer = styled.div`
@@ -40,6 +81,7 @@ export const LabelContainer = styled.div`
 
 export const FlexRow = styled.div`
   display: flex;
+  justify-content: flex-start;
   gap: 4px;
 `;
 

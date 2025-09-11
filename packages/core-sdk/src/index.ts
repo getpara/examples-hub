@@ -120,6 +120,7 @@ export * from './errors.js';
 export * from './utils/formatting.js';
 export * from './utils/polling.js';
 export * from './utils/phone.js';
+export * from './utils/config.js';
 export { isWalletSupported } from './utils/wallet.js';
 export { getNetworkPrefix, getOnRampAssets, getOnRampNetworks, toAssetInfoArray } from './utils/onRamps.js';
 export { getPortalBaseURL } from './utils/url.js';

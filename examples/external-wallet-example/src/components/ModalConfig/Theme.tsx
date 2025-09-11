@@ -1,101 +1,158 @@
 import { useModalStateStore } from '../../stores/modalStateStore/useModalStateStore';
-import { CpslCheckbox, CpslInput, CpslSelect, CpslSelectItem, CpslText } from '@getpara/react-components';
+import { CpslCard, CpslCheckbox, CpslInput, CpslSelect, CpslSelectItem, CpslText } from '@getpara/react-components';
 import { LabelContainer } from './ModalConfig';
+import React, { memo, useCallback, useRef } from 'react';
 
-export const Theme = () => {
+// Create optimized selectors to prevent unnecessary re-renders
+const useThemeState = () => {
+  return useModalStateStore(state => ({
+    logo: state.logo,
+    backgroundColor: state.backgroundColor,
+    foregroundColor: state.foregroundColor,
+    accentColor: state.accentColor,
+    mode: state.mode,
+  }));
+};
+
+const useConnectionState = () => {
+  return useModalStateStore(state => ({
+    externalWalletConnectionOnly: state.externalWalletConnectionOnly,
+    externalWalletIncludeVerification: state.externalWalletIncludeVerification,
+    farcasterDisableAutoConnect: state.farcasterDisableAutoConnect,
+    isFullAuth: state.isFullAuth,
+  }));
+};
+
+export const Theme = memo(() => {
+  const themeState = useThemeState();
+  const connectionState = useConnectionState();
   const updateState = useModalStateStore(state => state.updateState);
-  const logo = useModalStateStore(state => state.logo);
-  const backgroundColor = useModalStateStore(state => state.backgroundColor);
-  const foregroundColor = useModalStateStore(state => state.foregroundColor);
-  const accentColor = useModalStateStore(state => state.accentColor);
-  const mode = useModalStateStore(state => state.mode);
-  const externalWalletConnectionOnly = useModalStateStore(state => state.externalWalletConnectionOnly);
-  const externalWalletIncludeVerification = useModalStateStore(state => state.externalWalletIncludeVerification);
-  const farcasterDisableAutoConnect = useModalStateStore(state => state.farcasterDisableAutoConnect);
-  const isFullAuth = useModalStateStore(state => state.isFullAuth);
+
+  // Debounced update mechanism for text inputs
+  const debounceTimerRef = useRef<NodeJS.Timeout>();
+  const pendingUpdateRef = useRef<Partial<typeof themeState>>({});
+
+  const debouncedUpdateState = useCallback(
+    (updates: Partial<typeof themeState>) => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+
+      pendingUpdateRef.current = { ...pendingUpdateRef.current, ...updates };
+
+      debounceTimerRef.current = setTimeout(() => {
+        updateState(pendingUpdateRef.current);
+        pendingUpdateRef.current = {};
+      }, 300);
+    },
+    [updateState],
+  );
+
+  const immediateUpdateState = useCallback(
+    (updates: Partial<typeof themeState | typeof connectionState>) => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+        pendingUpdateRef.current = {};
+      }
+      updateState(updates);
+    },
+    [updateState],
+  );
+
+  // Cleanup effect to clear debounce timer on unmount
+  React.useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, []);
 
   return (
-    <>
+    <CpslCard style={{ height: 'fit-content' }}>
+      <CpslText variant="headingXS" weight="semiBold">
+        Theme & Connection
+      </CpslText>
       <LabelContainer>
         <CpslText variant="bodyL" weight="semiBold">
           Connection Only
         </CpslText>
         <CpslCheckbox
-          checked={externalWalletConnectionOnly}
+          checked={connectionState.externalWalletConnectionOnly}
           onCpslCheckboxChanged={(e: any) => {
-            updateState({ externalWalletConnectionOnly: e.detail ?? false });
+            immediateUpdateState({ externalWalletConnectionOnly: e.detail ?? false });
           }}
         />
         <CpslText variant="bodyL" weight="semiBold">
           With Verification
         </CpslText>
         <CpslCheckbox
-          checked={externalWalletIncludeVerification}
+          checked={connectionState.externalWalletIncludeVerification}
           onCpslCheckboxChanged={(e: any) => {
-            updateState({ externalWalletIncludeVerification: e.detail ?? false });
+            immediateUpdateState({ externalWalletIncludeVerification: e.detail ?? false });
           }}
         />
         <CpslText variant="bodyL" weight="semiBold">
           With Full Auth
         </CpslText>
         <CpslCheckbox
-          checked={isFullAuth}
+          checked={connectionState.isFullAuth}
           onCpslCheckboxChanged={(e: any) => {
-            updateState({ isFullAuth: e.detail ?? false });
+            immediateUpdateState({ isFullAuth: e.detail ?? false });
           }}
         />
         <CpslText variant="bodyL" weight="semiBold">
           Enable Farcaster Autoconnect
         </CpslText>
         <CpslCheckbox
-          checked={!farcasterDisableAutoConnect}
+          checked={!connectionState.farcasterDisableAutoConnect}
           onCpslCheckboxChanged={(e: any) => {
-            updateState({ farcasterDisableAutoConnect: !e.detail });
+            immediateUpdateState({ farcasterDisableAutoConnect: !e.detail });
           }}
         />
         <CpslText variant="bodyL" weight="semiBold">
           Logo
         </CpslText>
         <CpslInput
-          value={logo}
+          value={themeState.logo}
           onCpslInput={e => {
-            updateState({ logo: e.detail.value ?? '' });
+            debouncedUpdateState({ logo: e.detail.value ?? '' });
           }}
         />
         <CpslText variant="bodyL" weight="semiBold">
           Background Color
         </CpslText>
         <CpslInput
-          value={backgroundColor}
+          value={themeState.backgroundColor}
           onCpslInput={e => {
-            updateState({ backgroundColor: e.detail.value ?? '' });
+            debouncedUpdateState({ backgroundColor: e.detail.value ?? '' });
           }}
         />
         <CpslText variant="bodyL" weight="semiBold">
           Foreground Color
         </CpslText>
         <CpslInput
-          value={foregroundColor}
+          value={themeState.foregroundColor}
           onCpslInput={e => {
-            updateState({ foregroundColor: e.detail.value ?? '' });
+            debouncedUpdateState({ foregroundColor: e.detail.value ?? '' });
           }}
         />
         <CpslText variant="bodyL" weight="semiBold">
           Accent Color
         </CpslText>
         <CpslInput
-          value={accentColor}
+          value={themeState.accentColor}
           onCpslInput={e => {
-            updateState({ accentColor: e.detail.value ?? '' });
+            debouncedUpdateState({ accentColor: e.detail.value ?? '' });
           }}
         />
         <CpslText variant="bodyL" weight="semiBold">
           Mode
         </CpslText>
         <CpslSelect
-          selectedValue={mode ?? ''}
+          selectedValue={themeState.mode ?? ''}
           onCpslSelectValueChange={e => {
-            updateState({ mode: e.detail as 'light' | 'dark' });
+            immediateUpdateState({ mode: e.detail as 'light' | 'dark' });
           }}
           formatValue={v => v.toUpperCase()}
         >
@@ -107,6 +164,6 @@ export const Theme = () => {
           </CpslSelectItem>
         </CpslSelect>
       </LabelContainer>
-    </>
+    </CpslCard>
   );
-};
+});

@@ -6,6 +6,7 @@ import {
   OAUTH_METHODS,
   EXTERNAL_WALLET_TYPES,
 } from '@getpara/react-sdk';
+import { CustomAsset } from '@getpara/user-management-client';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
@@ -23,6 +24,10 @@ interface ModalStateState {
   linkAccountArgs: Parameters<ReturnType<typeof useLinkAccount>['linkAccount']>[0];
   farcasterDisableAutoConnect: boolean;
   isFullAuth: boolean;
+  balancesDisplayType?: 'AGGREGATED' | 'CUSTOM_ASSET';
+  balancesExcludeStandardAssets?: boolean;
+  balancesAdditionalAssets?: CustomAsset[];
+  balancesAsset?: CustomAsset;
 }
 
 export interface ModalStateActions {
@@ -45,13 +50,15 @@ const DEFAULT_STATE: ModalStateState = {
   linkAccountArgs: undefined,
   farcasterDisableAutoConnect: false,
   isFullAuth: false,
+  balancesDisplayType: 'AGGREGATED',
+  balancesExcludeStandardAssets: false,
 };
 
 export const useModalStateStore = create<ModalStateStore>()(
   persist(
     set => ({
       ...DEFAULT_STATE,
-      updateState: state => set(state),
+      updateState: updates => set(state => ({ ...state, ...updates })),
     }),
     {
       version: 2,
@@ -70,6 +77,10 @@ export const useModalStateStore = create<ModalStateStore>()(
         externalWalletIncludeVerification: state.externalWalletIncludeVerification,
         farcasterDisableAutoConnect: state.farcasterDisableAutoConnect,
         isFullAuth: state.isFullAuth,
+        balancesDisplayType: state.balancesDisplayType,
+        balancesExcludeStandardAssets: state.balancesExcludeStandardAssets,
+        balancesAdditionalAssets: state.balancesAdditionalAssets,
+        balancesAsset: state.balancesAsset,
       }),
     },
   ),

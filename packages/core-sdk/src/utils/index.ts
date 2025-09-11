@@ -1,4 +1,5 @@
 export * from './autobind.js';
+export * from './config.js';
 export * from './events.js';
 export * from './formatting.js';
 export * from './json.js';
