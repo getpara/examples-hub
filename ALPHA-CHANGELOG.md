@@ -1,3 +1,39 @@
+# Release (Wed Sep 10 2025)
+
+## Package Versions
+- @getpara/web-sdk@2.0.0-alpha.54
+- @getpara/wagmi-v2-integration@2.0.0-alpha.54
+- @getpara/wagmi-v2-connector@2.0.0-alpha.54
+- @getpara/viem-v2-integration@2.0.0-alpha.54
+- @getpara/viem-v1-integration@2.0.0-alpha.54
+- @getpara/user-management-client@2.0.0-alpha.54
+- @getpara/solana-web3.js-v1-integration@2.0.0-alpha.54
+- @getpara/solana-wallet-connectors@2.0.0-alpha.54
+- @getpara/solana-signers-v2-integration@2.0.0-alpha.54
+- @getpara/server-sdk@2.0.0-alpha.54
+- @getpara/react-sdk-lite@2.0.0-alpha.54
+- @getpara/react-sdk@2.0.0-alpha.54
+- @getpara/react-native-wallet@2.0.0-alpha.54
+- @getpara/react-components@2.0.0-alpha.54
+- @getpara/react-component-library@1.0.0-alpha.49
+- @getpara/react-common@2.0.0-alpha.54
+- @getpara/evm-wallet-connectors@2.0.0-alpha.54
+- @getpara/ethers-v6-integration@2.0.0-alpha.54
+- @getpara/ethers-v5-integration@2.0.0-alpha.54
+- @getpara/cosmos-wallet-connectors@2.0.0-alpha.54
+- @getpara/cosmjs-v0-integration@2.0.0-alpha.54
+- @getpara/core-sdk@2.0.0-alpha.54
+- @getpara/core-components@2.0.0-alpha.54
+
+### Features
+- Add SLO Functionality to sdks and web portal (#1198) - e64870618
+- Display aggregate wallet balances https
+
+### Fixes
+- return full signed transaction for pre-serialized Solana transactions (#1212) - bd5afcfb5
+- set NODE_ENV for site deploy builds (#1208) - 2b9361f5f
+- use corepack yarn build for @getpara/shared link job (#1207) - ad18fa268
+
 # Release (Thu Sep 04 2025)
 
 ## Package Versions

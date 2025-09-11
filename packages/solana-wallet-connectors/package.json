@@ -1,9 +1,9 @@
 {
   "name": "@getpara/solana-wallet-connectors",
-  "version": "2.0.0-alpha.53",
+  "version": "2.0.0-alpha.54",
   "dependencies": {
-    "@getpara/react-common": "2.0.0-alpha.53",
-    "@getpara/web-sdk": "2.0.0-alpha.53",
+    "@getpara/react-common": "2.0.0-alpha.54",
+    "@getpara/web-sdk": "2.0.0-alpha.54",
     "bs58": "6.0.0"
   },
   "devDependencies": {
