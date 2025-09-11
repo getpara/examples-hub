@@ -66,7 +66,15 @@ function getNextVersion(currentVersion) {
   return `${baseVersion}-alpha.${nextAlphaNumber}`;
 }
 
-function runCommand(command, description, exitOnError = true, dryRun = false, readOnly = false, commandSummary = null) {
+function runCommand(
+  command,
+  description,
+  exitOnError = true,
+  dryRun = false,
+  readOnly = false,
+  commandSummary = null,
+  timeout = 30000,
+) {
   console.log(`\n📋 ${description}`);
 
   if (dryRun && !readOnly) {
@@ -93,11 +101,18 @@ function runCommand(command, description, exitOnError = true, dryRun = false, re
     if (!dryRun || readOnly) {
       console.log(`Running: ${command}`);
     }
-    const result = execSync(command, {
+    const execOptions = {
       cwd: projectRoot,
       stdio: dryRun && readOnly ? 'pipe' : 'inherit', // Use pipe for read-only commands in dry run to avoid output spam
       encoding: 'utf8',
-    });
+    };
+
+    // Only add timeout if it's greater than 0 (0 = no timeout)
+    if (timeout > 0) {
+      execOptions.timeout = timeout;
+    }
+
+    const result = execSync(command, execOptions);
 
     if (dryRun && readOnly) {
       console.log(`📊 Result: ${result.trim() || '(no output)'}`);
@@ -121,6 +136,7 @@ function isCommandAvailable(command) {
     execSync(`${command} --version`, {
       cwd: projectRoot,
       stdio: 'pipe', // Don't inherit stdio to avoid output
+      timeout: 10000, // 10 second timeout for command availability check
     });
     return true;
   } catch (error) {
@@ -214,10 +230,13 @@ function branchExists(branchName) {
 
 function remoteBranchExists(branchName) {
   try {
-    execSync(`git ls-remote --heads origin ${branchName}`, {
+    const result = execSync(`git ls-remote --heads origin ${branchName}`, {
       cwd: projectRoot,
-    });
-    return true;
+      encoding: 'utf8',
+    }).trim();
+
+    // Check if the command returned any output (indicating branch exists)
+    return result.length > 0;
   } catch (error) {
     return false;
   }
@@ -233,6 +252,7 @@ function prExists(branchName) {
       cwd: projectRoot,
       encoding: 'utf8',
       stdio: 'pipe',
+      timeout: 30000, // 30 second timeout
     }).trim();
 
     return parseInt(result) > 0;
@@ -359,21 +379,22 @@ async function main() {
 
   // Step 5: Prepare for version increment
   if (!skipNpm) {
-    console.log('🔧 Preparing for version increment...');
-
-    // Reset Nx cache to ensure clean state
-    runCommand('yarn nx reset', 'Resetting Nx cache for clean build state', true, dryRun, false, commandSummary);
-
-    // Build all packages to ensure they're up-to-date
-    runCommand('yarn build', 'Building all packages before version increment', true, dryRun, false, commandSummary);
-
     // Check if the LOCAL version is already at the next version (increment already done)
     if (localVersion === nextVersion) {
       console.log(`⚠️  Local version is already ${nextVersion}, skipping yarn alpha-version`);
       console.log(`📁 Local: ${localVersion} | 📦 Published: ${publishedAlphaVersion} | 🎯 Next: ${nextVersion}`);
-      console.log('ℹ️  Version increment has already been completed');
+      console.log('ℹ️  Version increment has already been completed - skipping Nx reset and build');
     } else {
       console.log(`🔄 Will increment version: ${localVersion} → ${nextVersion}`);
+      console.log('🔧 Preparing for version increment...');
+
+      // Reset Nx cache to ensure clean state (only if we need to increment)
+      runCommand('yarn nx reset', 'Resetting Nx cache for clean build state', true, dryRun, false, commandSummary);
+
+      // Build all packages to ensure they're up-to-date (only if we need to increment)
+      runCommand('yarn build', 'Building all packages before version increment', true, dryRun, false, commandSummary);
+
+      // Now do the version increment
       runCommand(
         'yarn alpha-version',
         'Running yarn alpha-version to increment version',
@@ -422,40 +443,26 @@ async function main() {
     }
   }
 
-  // Step 7: Push the branch (check if there are commits to push)
+  // Step 7: Push the branch (ALWAYS push after commit, don't skip based on commit count)
+  console.log(`\n📋 Step 7: Pushing branch to remote...`);
+
+  if (dryRun) {
+    console.log(`🔍 DRYRUN: Would check commits to push and push branch ${branchName}`);
+  }
+
   try {
-    // Check if there are commits to push (read-only operation, execute even in dry run)
-    const aheadCount = execSync(`git rev-list HEAD...origin/${branchName} --count 2>/dev/null || echo "0"`, {
-      cwd: projectRoot,
-      encoding: 'utf8',
-    }).trim();
-
-    if (dryRun) {
-      console.log(`📊 Commits to push: ${aheadCount}`);
-    }
-
-    if (aheadCount === '0') {
-      console.log(`⚠️  No commits to push on branch ${branchName}`);
-    } else {
-      runCommand(`git push origin ${branchName}`, `Pushing branch ${branchName}`, true, dryRun, false, commandSummary);
-    }
-  } catch (error) {
-    if (dryRun) {
-      console.log('📊 Could not check commits to push (remote branch may not exist)');
-    }
-    // If the remote branch doesn't exist yet, try to push and set upstream
-    try {
-      runCommand(
-        `git push -u origin ${branchName}`,
-        `Pushing branch ${branchName} and setting upstream`,
-        true,
-        dryRun,
-        false,
-        commandSummary,
-      );
-    } catch (pushError) {
-      console.log(`⚠️  Could not push branch ${branchName}:`, pushError.message);
-    }
+    // Always attempt to push after committing - GitHub needs the branch to exist
+    runCommand(
+      `git push -u origin ${branchName}`,
+      `Pushing branch ${branchName} to remote and setting upstream`,
+      true,
+      dryRun,
+      false,
+      commandSummary,
+    );
+  } catch (pushError) {
+    console.log(`⚠️  Could not push branch ${branchName}:`, pushError.message);
+    console.log(`⚠️  This will cause PR creation to fail since GitHub won't know about the branch`);
   }
 
   // Step 8: Create PR (using GitHub CLI if available)
@@ -477,14 +484,28 @@ NO EXAMPLES NEEDED`;
   const prBodyTruncated = prBody.length > 100 ? prBody.substring(0, 100) + '...' : prBody;
 
   if (isCommandAvailable('gh') && !skipGh) {
+    // Pre-check: Ensure GitHub CLI is authenticated
+    try {
+      execSync('gh auth status', { cwd: projectRoot, stdio: 'pipe', timeout: 10000 });
+      console.log('✅ GitHub CLI authentication verified');
+    } catch (error) {
+      console.log('❌ GitHub CLI authentication failed or not configured');
+      console.log('ℹ️  Please run: gh auth login');
+      console.log(`📝 Manual PR creation required:`);
+      console.log(`   Title: chore: Publish`);
+      console.log(`   Base: 2.0.0-alpha`);
+      console.log(`   Head: ${branchName}`);
+      return; // Exit early if not authenticated
+    }
+
     // Check if PR already exists
     if (prExists(branchName)) {
       console.log(`⚠️  PR already exists for branch ${branchName}, skipping PR creation`);
     } else {
       try {
         // For command summary, show truncated version but use full body in actual command
-        const summaryCommand = `gh pr create --title "chore: Publish" --body "${prBodyTruncated.replace(/"/g, '\\"')}..." --base 2.0.0-alpha`;
-        const actualCommand = `gh pr create --title "chore: Publish" --body "${prBody.replace(/"/g, '\\"')}" --base 2.0.0-alpha`;
+        const summaryCommand = `gh pr create --title "chore: Publish" --body "${prBodyTruncated.replace(/"/g, '\\"')}..." --base 2.0.0-alpha --yes --head ${branchName}`;
+        const actualCommand = `gh pr create --title "chore: Publish" --body "${prBody.replace(/"/g, '\\"')}" --base 2.0.0-alpha --yes --head ${branchName} --assignee @me --label "automated,alpha-publish"`;
 
         runCommand(
           actualCommand,
@@ -493,6 +514,7 @@ NO EXAMPLES NEEDED`;
           dryRun,
           false,
           commandSummary,
+          60000, // 60 second timeout for GitHub API calls
         );
 
         // Override the command in summary to show truncated version
@@ -504,7 +526,17 @@ NO EXAMPLES NEEDED`;
         }
       } catch (error) {
         console.log('\n⚠️  GitHub CLI failed to create PR automatically.');
-        console.log(`Please create a PR manually:`);
+        console.log(`Error: ${error.message}`);
+        console.log('\n📝 To create PR manually, run:');
+        console.log(
+          `gh pr create --title "chore: Publish" --body "Automated alpha publish" --base 2.0.0-alpha --head ${branchName} --yes`,
+        );
+        console.log('\nOr open GitHub web interface:');
+        console.log(
+          `gh pr create --title "chore: Publish" --body "Automated alpha publish" --base 2.0.0-alpha --head ${branchName} --web`,
+        );
+        console.log('\nManual setup:');
+        console.log(`- Repository: capsule-org/user-management`);
         console.log(`- Title: chore: Publish`);
         console.log(`- Base branch: 2.0.0-alpha`);
         console.log(`- Head branch: ${branchName}`);
@@ -524,7 +556,15 @@ NO EXAMPLES NEEDED`;
 
   // Step 9: Run yarn alpha-publish
   if (!skipNpm) {
-    runCommand('yarn alpha-publish', 'Running yarn alpha-publish to publish packages', true, dryRun, false, commandSummary);
+    runCommand(
+      'yarn alpha-publish',
+      'Running yarn alpha-publish to publish packages',
+      true,
+      dryRun,
+      false,
+      commandSummary,
+      0,
+    );
   } else {
     console.log('\n⚠️  Skipping yarn alpha-publish (SKIP_NPM_COMMANDS=true)');
   }

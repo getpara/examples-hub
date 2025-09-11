@@ -1,6 +1,38 @@
 # Release (Wed Sep 10 2025)
 
 ## Package Versions
+- @getpara/web-sdk@2.0.0-alpha.55
+- @getpara/wagmi-v2-integration@2.0.0-alpha.55
+- @getpara/wagmi-v2-connector@2.0.0-alpha.55
+- @getpara/viem-v2-integration@2.0.0-alpha.55
+- @getpara/viem-v1-integration@2.0.0-alpha.55
+- @getpara/user-management-client@2.0.0-alpha.55
+- @getpara/solana-web3.js-v1-integration@2.0.0-alpha.55
+- @getpara/solana-wallet-connectors@2.0.0-alpha.55
+- @getpara/solana-signers-v2-integration@2.0.0-alpha.55
+- @getpara/server-sdk@2.0.0-alpha.55
+- @getpara/react-sdk-lite@2.0.0-alpha.55
+- @getpara/react-sdk@2.0.0-alpha.55
+- @getpara/react-native-wallet@2.0.0-alpha.55
+- @getpara/react-components@2.0.0-alpha.55
+- @getpara/react-component-library@1.0.0-alpha.50
+- @getpara/react-common@2.0.0-alpha.55
+- @getpara/evm-wallet-connectors@2.0.0-alpha.55
+- @getpara/ethers-v6-integration@2.0.0-alpha.55
+- @getpara/ethers-v5-integration@2.0.0-alpha.55
+- @getpara/cosmos-wallet-connectors@2.0.0-alpha.55
+- @getpara/cosmjs-v0-integration@2.0.0-alpha.55
+- @getpara/core-sdk@2.0.0-alpha.55
+- @getpara/core-components@2.0.0-alpha.55
+
+
+
+### Chores
+- Balance configuration ui (#1209) - 889a3f449
+
+# Release (Wed Sep 10 2025)
+
+## Package Versions
 - @getpara/web-sdk@2.0.0-alpha.54
 - @getpara/wagmi-v2-integration@2.0.0-alpha.54
 - @getpara/wagmi-v2-connector@2.0.0-alpha.54
