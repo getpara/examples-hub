@@ -12,7 +12,8 @@ import {
 } from './types';
 import { ParaBridge } from './classes/ParaBridge';
 
-logger.info('Bridge script loaded at', new Date().toISOString());
+declare const __BRIDGE_COMMIT__: string;
+logger.info(`Bridge loaded - commit: ${__BRIDGE_COMMIT__} at ${new Date().toISOString()}`);
 
 let platform: Platform;
 let version: string | undefined;
