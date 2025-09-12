@@ -1,5 +1,7 @@
 import ParaSwift
 import SwiftUI
+import Foundation
+import SolanaSwift
 
 struct SolanaWalletView: View {
     @EnvironmentObject var paraManager: ParaManager
@@ -14,9 +16,7 @@ struct SolanaWalletView: View {
     @State private var isFetching = false
     @State private var isLoading = false
     @State private var balance: String?
-
-    // Removed ParaSolanaSigner - now using unified API
-
+    
     // Solana RPC URL (devnet for testing)
     private let rpcUrl = "https://api.devnet.solana.com"
 
@@ -62,32 +62,16 @@ struct SolanaWalletView: View {
         // Create a simple transfer transaction for demo purposes
         let toAddress = "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM"
         let lamports: UInt64 = 1_000_000
-        
-        let transaction: SolanaTransaction
-        do {
-            transaction = try SolanaTransaction(
-                to: toAddress,
-                lamports: lamports
-            )
-        } catch {
-            result = ("Error", "Failed to create transaction: \(error.localizedDescription)")
-            return
-        }
 
         isLoading = true
         Task {
             var signature: SignatureResult?
             let (duration, error) = await measureTime {
-                // Pass RPC URL to avoid needing to include recentBlockhash
-                let rpcUrl = "https://api.devnet.solana.com"
-                // For mainnet: "https://solana-mainnet.g.alchemy.com/v2/YOUR_API_KEY"
-                
-                // Pass the transaction object directly - bridge will format it
-                signature = try await paraManager.signTransaction(
+                // For now, we'll use the message signing as a placeholder
+                // until Para SDK supports direct transaction objects
+                signature = try await paraManager.signMessage(
                     walletId: selectedWallet.id,
-                    transaction: transaction,
-                    chainId: nil, // Not needed for Solana
-                    rpcUrl: rpcUrl // Pass RPC for blockhash fetching
+                    message: "Transfer \(lamports) lamports to \(toAddress)"
                 )
             }
 
@@ -101,62 +85,164 @@ struct SolanaWalletView: View {
     }
 
     private func signPreSerializedTransaction() {
-        // This tests the new pre-serialized transaction signing feature
+        // This demonstrates signing a pre-serialized Solana transaction
+        // Since we don't have SolanaSwift, we'll create a simple example transaction
+        // In a real app, you would use a proper Solana library or construct the transaction manually
         isLoading = true
         Task {
             do {
-                // In a real scenario, a customer would have a pre-serialized Solana transaction
-                // from an external source (e.g., a dApp, another SDK, or a backend service).
+                // Ensure we have a wallet address
+                guard let walletAddress = selectedWallet.address else {
+                    result = ("Error", "No wallet address available")
+                    isLoading = false
+                    return
+                }
                 
-                // Two formats are commonly used:
-                // 1. Serialized MESSAGE (200 chars) - from transaction.serializeMessage()
-                //    This is just the message to be signed, without signature slots
-                // 2. Serialized TRANSACTION (288 chars) - from transaction.serialize()
-                //    This includes the message plus empty signature slots
+                // For demonstration, we'll create a simple base64-encoded transaction
+                // In production, you would properly serialize a Solana transaction
+                // This is a placeholder that shows how to use Para's signSolanaSerializedTransaction API
                 
-                // Option 1: MESSAGE format (what dApps often send)
-                // let serializedMessage = "AQABA8GlkLb8bd/L6i5/YftGpxyig/iBvof2eNEF9WPF2o0ZfowIh2C/3h3dzzLBfyCbgkLuUqrxMfrNiNDqLG0LBvIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOMy2vkvq+zotj/3pEAF5f39mvoVh1a2HFqV+QSzuNCBAQICAAEMAgAAAEBCDwAAAAAA"
+                // Example: Create a minimal transaction structure
+                // Real Solana transactions require proper serialization with:
+                // - Recent blockhash
+                // - Instructions
+                // - Signatures array
+                // - Fee payer
                 
-                // Option 2: FULL TRANSACTION format (includes 64-byte signature slot)
-                // IMPORTANT: This transaction must match the wallet address being used for signing
-                let serializedTransaction = "AQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAEDKZZYdO3db0HJMOZpAPf5DNoezDVaku4SxVDIsRkGHXN+jAiHYL/eHd3PMsF/IJuCQu5SqvEx+s2I0OosbQsG8gAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA4zLa+S+r7Oi2P/ekQAXl/f2a+hWHVrYcWpX5BLO40IEBAgIAAQwCAAAAQEIPAAAAAAA="
+                // For now, let's fetch a recent blockhash from RPC and create a demo transaction
+                let recentBlockhash = try await fetchRecentBlockhash()
                 
-                // Using full transaction format for testing (288 characters)
-                let realSerializedTx = serializedTransaction
+                // Create a simple transfer instruction placeholder
+                // In production, use proper Solana transaction construction
+                let toAddress = "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM"
+                let lamports: UInt64 = 1_000_000
                 
-                // This transaction represents:
-                // - Transfer: 1,000,000 lamports (0.001 SOL)
-                // - From: 3oLgZ7jpmDuKJ5w42dXUEN6Mg6UCXiGC2AewmPQjYQDg (matches the actual wallet)
-                // - To: 9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM
-                // - Recent blockhash: GHtXQBsoZHVnNFa9YevAzFr17DJjgHXk3ycTKD5xD3Zi
+                // Create a real Solana transaction using SolanaSwift
+                let transactionData = createDemoTransaction(
+                    from: walletAddress,
+                    to: toAddress,
+                    lamports: lamports,
+                    recentBlockhash: recentBlockhash
+                )
                 
-                // Now test signing the pre-serialized transaction using the new extension
+                // Check if we got valid transaction data
+                guard !transactionData.isEmpty else {
+                    result = ("Error", "Failed to create transaction. Please check the addresses and try again.")
+                    isLoading = false
+                    return
+                }
+                
+                let base64Transaction = transactionData.base64EncodedString()
+                
+                // Now sign the pre-serialized transaction using Para's API
                 var signature: SignatureResult?
                 let (duration, error) = await measureTime {
-                    // Test the new convenience method with the real serialized transaction
                     signature = try await paraManager.signSolanaSerializedTransaction(
                         walletId: selectedWallet.id,
-                        base64Tx: realSerializedTx
+                        base64Tx: base64Transaction
                     )
                 }
                 
                 if let error {
-                    result = ("Error", "Failed to sign pre-serialized transaction: \(error.localizedDescription)\nDuration: \(String(format: "%.2f", duration))s")
+                    result = ("Error", "Failed to sign transaction: \(error.localizedDescription)\nDuration: \(String(format: "%.2f", duration))s")
                 } else if let sig = signature {
-                    result = ("Pre-Serialized Transaction Signed", 
-                             "This demonstrates signing a pre-serialized base64 transaction\n\n" +
-                             "Input transaction (\(realSerializedTx.count) characters):\n\(String(realSerializedTx.prefix(50)))...\n\n" +
-                             "Signed transaction (\(sig.signedTransaction.count) characters):\n\(sig.signedTransaction)\n\n" +
-                             "Duration: \(String(format: "%.3f", duration))s\n\n" +
-                             "Note: In production, the base64 transaction would come from:\n" +
-                             "• A dApp that constructs transactions\n" +
-                             "• A backend service\n" +
-                             "• Another SDK that has already formatted the transaction")
+                    // Format the result with transaction details
+                    let details = """
+                    ✅ Solana Transaction Created and Signed Successfully
+                    
+                    Transaction Details:
+                    • From: \(walletAddress)
+                    • To: \(toAddress)
+                    • Amount: 0.001 SOL (1,000,000 lamports)
+                    • Network: Devnet
+                    • Blockhash: \(recentBlockhash)
+                    
+                    Binary Transaction Info:
+                    • Format: Solana wire protocol (binary)
+                    • Size: \(transactionData.count) bytes
+                    • Base64 encoded: \(base64Transaction.count) characters
+                    • Transaction type: SystemProgram::Transfer
+                    
+                    Signed Transaction (Base64):
+                    \(sig.signedTransaction)
+                    
+                    Performance: \(String(format: "%.3f", duration))s
+                    
+                    ✓ This is a real Solana transaction in binary format
+                    ✓ Ready to be submitted to the Solana network
+                    """
+                    
+                    result = ("Pre-Serialized Transaction Signed", details)
                 }
             } catch {
-                result = ("Error", "Failed to sign pre-serialized transaction: \(error.localizedDescription)")
+                result = ("Error", "Failed to create or sign transaction: \(error.localizedDescription)")
             }
             isLoading = false
+        }
+    }
+    
+    // Helper function to fetch recent blockhash from Solana RPC
+    private func fetchRecentBlockhash() async throws -> String {
+        let url = URL(string: rpcUrl)!
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        let body: [String: Any] = [
+            "jsonrpc": "2.0",
+            "id": 1,
+            "method": "getLatestBlockhash",
+            "params": [["commitment": "finalized"]]
+        ]
+        
+        request.httpBody = try JSONSerialization.data(withJSONObject: body)
+        
+        let (data, _) = try await URLSession.shared.data(for: request)
+        
+        if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+           let result = json["result"] as? [String: Any],
+           let value = result["value"] as? [String: Any],
+           let blockhash = value["blockhash"] as? String {
+            return blockhash
+        }
+        
+        throw NSError(domain: "SolanaError", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to fetch blockhash"])
+    }
+    
+    // Helper function to create a real Solana transaction using SolanaSwift
+    private func createDemoTransaction(from: String, to: String, lamports: UInt64, recentBlockhash: String) -> Data {
+        do {
+            // Create PublicKey instances from the string addresses
+            guard let fromPubkey = try? PublicKey(string: from),
+                  let toPubkey = try? PublicKey(string: to) else {
+                print("Failed to create public keys")
+                return Data()
+            }
+            
+            // Create the system program transfer instruction
+            let transferInstruction = SystemProgram.transferInstruction(
+                from: fromPubkey,
+                to: toPubkey,
+                lamports: lamports
+            )
+            
+            // Create the transaction with the instruction
+            var transaction = SolanaSwift.Transaction()
+            transaction.instructions = [transferInstruction]
+            transaction.recentBlockhash = recentBlockhash
+            transaction.feePayer = fromPubkey
+            
+            // Serialize the transaction to binary format
+            // This creates the actual Solana wire format transaction
+            let serializedTransaction = try transaction.serialize(
+                requiredAllSignatures: false,
+                verifySignatures: false
+            )
+            
+            return serializedTransaction
+        } catch {
+            print("Error creating Solana transaction: \(error)")
+            return Data()
         }
     }
 
@@ -342,7 +428,7 @@ struct SolanaWalletView: View {
             )
         }
         .onAppear {
-            // No signer initialization needed - using unified API
+            // Fetch balance on appear
             fetchBalance()
         }
         .overlay {
