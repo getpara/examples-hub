@@ -65,20 +65,47 @@ struct SolanaWalletView: View {
 
         isLoading = true
         Task {
-            var signature: SignatureResult?
-            let (duration, error) = await measureTime {
-                // For now, we'll use the message signing as a placeholder
-                // until Para SDK supports direct transaction objects
-                signature = try await paraManager.signMessage(
-                    walletId: selectedWallet.id,
-                    message: "Transfer \(lamports) lamports to \(toAddress)"
+            do {
+                // Create a proper Solana transaction using Para SDK's SolanaTransaction
+                let transaction = try ParaSwift.SolanaTransaction(
+                    to: toAddress,
+                    lamports: lamports
                 )
-            }
+                
+                var signature: SignatureResult?
+                let (duration, error) = await measureTime {
+                    // Use the actual signTransaction API with the transaction object
+                    signature = try await paraManager.signTransaction(
+                        walletId: selectedWallet.id,
+                        transaction: transaction,
+                        rpcUrl: rpcUrl  // Pass RPC URL for fetching recent blockhash if needed
+                    )
+                }
 
-            if let error {
-                result = ("Error", "Failed to sign transaction: \(error.localizedDescription)\nDuration: \(String(format: "%.2f", duration))s")
-            } else if let sig = signature {
-                result = ("Transaction Signed", "To: 9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM\nAmount: 0.001 SOL (1,000,000 lamports)\nNetwork: Devnet\n\nSignature:\n\(sig.signedTransaction)\n\nDuration: \(String(format: "%.3f", duration))s")
+                if let error {
+                    result = ("Error", "Failed to sign transaction: \(error.localizedDescription)\nDuration: \(String(format: "%.2f", duration))s")
+                } else if let sig = signature {
+                    let details = """
+                    ✅ Solana Transaction Signed Successfully
+                    
+                    Transaction Details:
+                    • To: \(toAddress)
+                    • Amount: 0.001 SOL (1,000,000 lamports)
+                    • Network: Devnet
+                    • Wallet Type: \(sig.type)
+                    
+                    Signed Transaction:
+                    \(sig.signedTransaction)
+                    
+                    Performance: \(String(format: "%.3f", duration))s
+                    
+                    ✓ This transaction is ready to be broadcast to the Solana network
+                    """
+                    
+                    result = ("Transaction Signed", details)
+                }
+            } catch {
+                result = ("Error", "Failed to create or sign transaction: \(error.localizedDescription)")
             }
             isLoading = false
         }
