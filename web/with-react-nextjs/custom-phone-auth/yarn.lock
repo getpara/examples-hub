@@ -490,47 +490,47 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@getpara/core-sdk@npm:2.0.0-alpha.53":
-  version: 2.0.0-alpha.53
-  resolution: "@getpara/core-sdk@npm:2.0.0-alpha.53"
+"@getpara/core-sdk@npm:2.0.0-alpha.55":
+  version: 2.0.0-alpha.55
+  resolution: "@getpara/core-sdk@npm:2.0.0-alpha.55"
   dependencies:
     "@celo/utils": "npm:^8.0.2"
     "@cosmjs/encoding": "npm:^0.32.4"
     "@ethereumjs/util": "npm:^9.1.0"
-    "@getpara/user-management-client": "npm:2.0.0-alpha.53"
+    "@getpara/user-management-client": "npm:2.0.0-alpha.55"
     "@noble/hashes": "npm:^1.5.0"
     base64url: "npm:^3.0.1"
     libphonenumber-js: "npm:^1.11.7"
     node-forge: "npm:^1.3.1"
     uuid: "npm:^11.1.0"
-  checksum: 10c0/5951b9dfb3faac0b1651f5508071e42d5122f797e12922dfa510801a58807eeb8dc969ae319133425e3299ad907bb2421e15a3b2ad86574daa7532b8f145a19c
+  checksum: 10c0/b0f71601db5c44f4c45462dfa743d53c8ae33143d77a274ac46d304bb8d18da65e56e771cf3ade45296726efeb9c9de72809f37694788534d7a70595d90644f4
   languageName: node
   linkType: hard
 
-"@getpara/shared@npm:1.0.2":
-  version: 1.0.2
-  resolution: "@getpara/shared@npm:1.0.2"
-  checksum: 10c0/59940edf19de967a7c2b1f1b5e46788ae6d88c29c5aa524ca9707853e0731ff0774c9caf83c8219e3081f6aeffea28794be0bdce15bbf4067173ca7f5ef96f4d
+"@getpara/shared@npm:1.1.0":
+  version: 1.1.0
+  resolution: "@getpara/shared@npm:1.1.0"
+  checksum: 10c0/a44a739a79860d1feaae8e8e03cf1de3c45fffa7cecb9cc4465ac1b28128c90c239186b1718f114555ea7b674dac05e5a15771783d3e30223a966a917b7d6183
   languageName: node
   linkType: hard
 
-"@getpara/user-management-client@npm:2.0.0-alpha.53":
-  version: 2.0.0-alpha.53
-  resolution: "@getpara/user-management-client@npm:2.0.0-alpha.53"
+"@getpara/user-management-client@npm:2.0.0-alpha.55":
+  version: 2.0.0-alpha.55
+  resolution: "@getpara/user-management-client@npm:2.0.0-alpha.55"
   dependencies:
-    "@getpara/shared": "npm:1.0.2"
+    "@getpara/shared": "npm:1.1.0"
     axios: "npm:^1.8.4"
     libphonenumber-js: "npm:^1.11.7"
-  checksum: 10c0/c91196570ed2cc6452b7631410bb0857f5640a0e2ab7a96cedf9b4bf2e3679b74c8eeff05f78ed808cf7bc8941eed557ae9627fbbeedd96e8a5d0fe214a72b76
+  checksum: 10c0/5b1d5489c04a4d4e4077e54bcf5038af2a6a2bca527dd783c4d5fb6ff0039922fd798a1a39b22fa32a7951df30602211a6b32806764f2614fcb4b276412da52e
   languageName: node
   linkType: hard
 
-"@getpara/web-sdk@npm:2.0.0-alpha.53":
-  version: 2.0.0-alpha.53
-  resolution: "@getpara/web-sdk@npm:2.0.0-alpha.53"
+"@getpara/web-sdk@npm:2.0.0-alpha.55":
+  version: 2.0.0-alpha.55
+  resolution: "@getpara/web-sdk@npm:2.0.0-alpha.55"
   dependencies:
-    "@getpara/core-sdk": "npm:2.0.0-alpha.53"
-    "@getpara/user-management-client": "npm:2.0.0-alpha.53"
+    "@getpara/core-sdk": "npm:2.0.0-alpha.55"
+    "@getpara/user-management-client": "npm:2.0.0-alpha.55"
     base64url: "npm:^3.0.1"
     buffer: "npm:6.0.3"
     cbor-web: "npm:^9.0.2"
@@ -541,7 +541,7 @@ __metadata:
   peerDependenciesMeta:
     "@farcaster/miniapp-sdk":
       optional: true
-  checksum: 10c0/fbf8a6d0896b775f83aaec87331c93a206f5cadf634b8706343f684bac5567166b07d4a22259b97a9d8ac98b5756341f6e7ef2b6bbf9b017527d09e2c486243e
+  checksum: 10c0/c153e68c8f6c0ec4f7beb33b18b040f1979c6a084494726a6e702b625e01f8e2cf9ff773727a354fed09bc2936c16023d966c97279b2a88e63fe47c27706672e
   languageName: node
   linkType: hard
 
@@ -1758,7 +1758,7 @@ __metadata:
   resolution: "custom-phone-auth-nextjs@workspace:."
   dependencies:
     "@eslint/js": "npm:^9.29.0"
-    "@getpara/web-sdk": "npm:2.0.0-alpha.53"
+    "@getpara/web-sdk": "npm:2.0.0-alpha.55"
     "@tailwindcss/postcss": "npm:^4.1.10"
     "@tanstack/react-query": "npm:5.81.2"
     "@types/node": "npm:^20"
