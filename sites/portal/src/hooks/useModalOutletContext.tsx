@@ -1,8 +1,8 @@
+import { PartnerEntity } from '@getpara/web-sdk';
 import { useOutletContext } from 'react-router-dom';
-import { Partner } from '../types';
 
 type ModalOutletContextType = {
-  partner: Partner;
+  partner: PartnerEntity;
   homepageUrl: string;
   isDark: boolean;
   toggleBranding: (_?: boolean) => void;

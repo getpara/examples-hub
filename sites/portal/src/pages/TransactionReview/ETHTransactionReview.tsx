@@ -5,8 +5,7 @@ import { FeeMarketEIP1559Transaction } from '@ethereumjs/tx';
 import web3 from 'web3';
 import { usePara } from '../../components/ParaContext';
 
-import { Partner } from '../../types';
-import { Wallet } from '@getpara/web-sdk';
+import { PartnerEntity, Wallet } from '@getpara/web-sdk';
 import { iconForChainId, iconForCurrency, TransactionReviewContainer, TransactionType } from './TransactionReview';
 import { fetchChainData } from '../../utils/transactionReview';
 import { CpslSpinner } from '@getpara/react-components';
@@ -50,7 +49,7 @@ function formatEstimatedTime(estimatedTimeInSeconds: number) {
 }
 
 export interface ETHTransactionReviewProps {
-  partner: Partner;
+  partner: PartnerEntity;
   wallet: Wallet;
   decodedTx: any;
   txData: any;

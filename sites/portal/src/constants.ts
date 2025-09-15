@@ -1,5 +1,4 @@
-import { Environment } from '@getpara/web-sdk';
-import { Partner } from './types';
+import { Environment, PartnerEntity } from '@getpara/web-sdk';
 
 export const ENV = import.meta.env.VITE_ENVIRONMENT
   ? (import.meta.env.VITE_ENVIRONMENT.toUpperCase() as Environment)
@@ -11,11 +10,11 @@ export const PARA_PORTAL_ID = import.meta.env.VITE_PARA_PORTAL_ID
   ? (import.meta.env.VITE_PARA_PORTAL_ID as string)
   : '4bdd84d3-7606-406f-8321-19721cac17a1';
 
-export const DEFAULT_PARTNER: Partner = {
+export const DEFAULT_PARTNER: PartnerEntity = {
   id: 'id',
   displayName: 'Para',
   policiesEnabled: false,
-};
+} as PartnerEntity;
 
 // TODO: move this to partner config
 export const DEFAULT_HOMEPAGE_URL = 'https://www.getpara.com';

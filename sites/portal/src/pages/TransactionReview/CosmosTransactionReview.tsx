@@ -5,8 +5,7 @@ import { usePara } from '../../components/ParaContext';
 import { AuthInfo, Fee, SignDoc, TxBody } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 import { MsgSend } from 'cosmjs-types/cosmos/bank/v1beta1/tx';
 
-import { Wallet } from '@getpara/web-sdk';
-import { Partner } from '../../types';
+import { PartnerEntity, Wallet } from '@getpara/web-sdk';
 import { iconForChainId, iconForCurrency, TransactionReviewContainer, TransactionType } from './TransactionReview';
 import { TransactionCoin } from './components/TransactionReviewBody';
 import { fetchConversionRate } from '../../utils/transactionReview';
@@ -39,7 +38,7 @@ async function transactionCoinFromCosmosCoin(coin: Coin, conversionRate?: number
 }
 
 export interface CosmosTransactionReviewProps {
-  partner: Partner;
+  partner: PartnerEntity;
   wallet: Wallet;
   message: string;
   cosmosSignDocBase64: string;

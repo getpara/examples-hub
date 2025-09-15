@@ -1,14 +1,14 @@
 import { Box, Flex } from '@chakra-ui/react';
 import { CpslButton, CpslIcon } from '@getpara/react-components';
-import { Partner } from '../../../types';
 import TransactionReviewBody, { TransactionCoin } from './TransactionReviewBody';
 import TransactionReviewFee from './TransactionReviewFee';
 import { CpslHero, CpslIdenticon } from '@getpara/react-components';
 import { PartnerIcon } from '../../../components/PartnerIcon';
 import { TransactionType } from '../TransactionReview';
+import { PartnerEntity } from '@getpara/web-sdk';
 
 export interface TransactionReviewAwaitingApprovalProps {
-  partner: Partner;
+  partner: PartnerEntity;
   coins: TransactionCoin[];
   fromWalletName: string;
   fromWalletAddress: string;

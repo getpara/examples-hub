@@ -437,7 +437,7 @@ export abstract class ParaCore implements CoreInterface {
 
   /**
    * Theme to use for the portal
-   * @deprecated configure theming through the developer portal
+   * WARNING: This theme will override portal options set within the developer portal.
    */
   portalTheme?: Theme;
 
@@ -862,17 +862,17 @@ export abstract class ParaCore implements CoreInterface {
     const params: Record<string, string | undefined | null> = {
       apiKey: this.ctx.apiKey,
       partnerId: partner?.id,
-      portalFont: opts.portalTheme?.font || partner?.font || this.portalTheme?.font,
+      portalFont: opts.portalTheme?.font || this.portalTheme?.font || partner?.font,
       portalBorderRadius: opts.portalTheme?.borderRadius || this.portalTheme?.borderRadius,
-      portalThemeMode: opts.portalTheme?.mode || partner?.themeMode || this.portalTheme?.mode,
-      portalAccentColor: opts.portalTheme?.accentColor || partner?.accentColor || this.portalTheme?.accentColor,
+      portalThemeMode: opts.portalTheme?.mode || this.portalTheme?.mode || partner?.themeMode,
+      portalAccentColor: opts.portalTheme?.accentColor || this.portalTheme?.accentColor || partner?.accentColor,
       portalForegroundColor:
-        opts.portalTheme?.foregroundColor || partner?.foregroundColor || this.portalTheme?.foregroundColor,
+        opts.portalTheme?.foregroundColor || this.portalTheme?.foregroundColor || partner?.foregroundColor,
       portalBackgroundColor:
         opts.portalTheme?.backgroundColor ||
+        this.portalTheme?.backgroundColor ||
         partner?.backgroundColor ||
-        this.portalBackgroundColor ||
-        this.portalTheme?.backgroundColor,
+        this.portalBackgroundColor,
       portalPrimaryButtonColor: this.portalPrimaryButtonColor,
       portalTextColor: this.portalTextColor,
       portalPrimaryButtonTextColor: this.portalPrimaryButtonTextColor,

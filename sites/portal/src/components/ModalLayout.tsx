@@ -3,12 +3,11 @@ global.Buffer = Buffer;
 import { Suspense, useEffect, useRef, useState } from 'react';
 import { Outlet, useSearchParams } from 'react-router-dom';
 import { styled } from 'styled-components';
-import { Partner } from '../types';
 import { DEFAULT_HOMEPAGE_URL, DEFAULT_PARTNER } from '../constants';
 import { validateColorInput } from '../utils/validateColorInput';
 import { BorderRadius, generateTheme } from '@getpara/react-components';
 import { BetaBannerNoChakra } from './BetaBannerNoChakra';
-import { Theme } from '@getpara/web-sdk';
+import { PartnerEntity, Theme } from '@getpara/web-sdk';
 import { usePara } from './ParaContext';
 import { ModalLoading } from './ModalLoading';
 import { NetworkSpeedBanner } from '@getpara/react-common';
@@ -62,7 +61,7 @@ export const ModalLayout = () => {
   const portalFont = searchParams.get('portalFont');
   const portalThemeMode = searchParams.get('portalThemeMode');
 
-  const [partner, setPartner] = useState<Partner | undefined>();
+  const [partner, setPartner] = useState<PartnerEntity | undefined>();
   const [isDark, setIsDark] = useState<boolean>(false);
   const [isBranded, setIsBranded] = useState(true);
   const [, setTheme] = useState<Theme | undefined>({
@@ -75,14 +74,24 @@ export const ModalLayout = () => {
   };
 
   useEffect(() => {
+    if (!partner) return;
+
     const isLegacy = portalBackgroundColor && !portalForegroundColor;
 
-    para.portalBackgroundColor = portalBackgroundColor;
+    const { backgroundColor, foregroundColor, accentColor, themeMode } = partner;
+
+    // If not an iframe and the partner has theming set via dev portal use that, else use the url params
+    const _backgroundColor = !isIFramed && backgroundColor ? backgroundColor : portalBackgroundColor;
+    const _foregroundColor = !isIFramed && foregroundColor ? foregroundColor : portalForegroundColor;
+    const _accentColor = !isIFramed && accentColor ? accentColor : portalAccentColor;
+    const _mode = !isIFramed && themeMode ? themeMode : portalThemeMode;
+
+    para.portalBackgroundColor = _backgroundColor;
     para.portalPrimaryButtonColor = portalPrimaryButtonColor;
     para.portalTextColor = portalTextColor;
     para.portalTheme = {
-      backgroundColor: portalBackgroundColor,
-      foregroundColor: portalForegroundColor,
+      backgroundColor: _backgroundColor,
+      foregroundColor: _foregroundColor,
       borderRadius: portalBorderRadius as unknown as any,
     };
 
@@ -90,13 +99,13 @@ export const ModalLayout = () => {
       borderRadius: portalBorderRadius as BorderRadius,
       ...(isBranded
         ? {
-            foregroundColor: portalForegroundColor ?? DEFAULT_THEME.foregroundColor,
-            backgroundColor: portalBackgroundColor ?? DEFAULT_THEME.backgroundColor,
+            foregroundColor: _foregroundColor ?? DEFAULT_THEME.foregroundColor,
+            backgroundColor: _backgroundColor ?? DEFAULT_THEME.backgroundColor,
             mode:
-              portalThemeMode?.toLowerCase() === 'dark' || portalThemeMode?.toLowerCase() === 'light'
-                ? (portalThemeMode?.toLowerCase() as 'light' | 'dark')
+              _mode?.toLowerCase() === 'dark' || _mode?.toLowerCase() === 'light'
+                ? (_mode?.toLowerCase() as 'light' | 'dark')
                 : undefined,
-            accentColor: portalAccentColor,
+            accentColor: _accentColor,
           }
         : {
             foregroundColor: DEFAULT_THEME.foregroundColor,
@@ -121,8 +130,9 @@ export const ModalLayout = () => {
           }
         : newTheme),
     });
-    setIsDark(portalThemeMode?.toLowerCase() === 'dark');
+    setIsDark(_mode?.toLowerCase() === 'dark');
   }, [
+    partner,
     isBranded,
     portalForegroundColor,
     portalBackgroundColor,

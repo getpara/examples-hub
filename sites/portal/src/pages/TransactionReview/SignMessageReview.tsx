@@ -1,11 +1,11 @@
 import { Box, Flex, Spacer } from '@chakra-ui/react';
 import { CpslButton, CpslHero, CpslIcon, CpslIdenticon } from '@getpara/react-components';
-import { Partner } from '../../types';
 import { PartnerIcon } from '../../components/PartnerIcon';
 import styled from 'styled-components';
+import { PartnerEntity } from '@getpara/web-sdk';
 
 export interface SignMessageReviewProps {
-  partner: Partner;
+  partner: PartnerEntity;
   fromWalletAddress: string;
   message: string;
   confirmSignMessage();

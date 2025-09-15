@@ -130,6 +130,8 @@ export const ParaProviderMin = forwardRef<
     // Set the setModalError function on pre-instantiated ParaInternal instances
     (newClient as ParaInternal).setModalError = setModalError;
 
+    newClient.portalTheme = paraModalConfig?.theme;
+
     if (newClient.isReady) {
       setIsClientReady(true);
     } else {

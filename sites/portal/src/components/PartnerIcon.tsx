@@ -1,6 +1,6 @@
 import { Avatar, Tooltip } from '@chakra-ui/react';
 import { getPseudoRandomBackground } from '@getpara/core-components';
-import { Partner } from '../types';
+import { PartnerEntity } from '@getpara/web-sdk';
 
 export const PartnerIcon = ({
   partner,
@@ -8,7 +8,7 @@ export const PartnerIcon = ({
   fontSize,
   margin,
 }: {
-  partner: Partner;
+  partner: PartnerEntity;
   size?: string;
   fontSize?: string;
   margin?: string;
