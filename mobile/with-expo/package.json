@@ -12,8 +12,10 @@
   },
   "dependencies": {
     "@craftzdog/react-native-buffer": "^6.1.0",
+    "@getpara/ethers-v6-integration": "^1.18.1",
     "@getpara/react-native-wallet": "2.0.0-alpha.55",
     "@react-native-async-storage/async-storage": "^2.2.0",
+    "ethers": "^6.15.0",
     "expo": "~53.0.12",
     "expo-linking": "^7.1.5",
     "expo-status-bar": "~2.2.3",
