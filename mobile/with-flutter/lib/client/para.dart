@@ -29,6 +29,18 @@ final para = Para.fromConfig(
 );
 
 // External wallet connectors
-final phantomConnector = ParaPhantomConnector(para: para, appUrl: "https://usecapsule.com", appScheme: "paraflutter");
+final phantomConnector = ParaPhantomConnector(
+  para: para,
+  appUrl: "https://com.usecapsule.example.flutter",
+  appScheme: "paraflutter",
+);
 
-final metamaskConnector = ParaMetaMaskConnector(para: para, appUrl: "https://usecapsule.com", appScheme: "paraflutter");
+final metamaskConnector = ParaMetaMaskConnector(
+  para: para,
+  appUrl: "https://com.usecapsule.example.flutter",
+  appScheme: "paraflutter",
+  config: const MetaMaskConfig(
+    appName: "ParaFlutter",
+    appId: "com.usecapsule.example.flutter",
+  ),
+);
