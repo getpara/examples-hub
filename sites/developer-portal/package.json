@@ -36,7 +36,6 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
-    "@getpara/graz-integration": "2.0.0-alpha.55",
     "@tailwindcss/vite": "^4.0.9",
     "@tanstack/eslint-plugin-query": "^5.35.6",
     "@types/react": "^18.2.66",

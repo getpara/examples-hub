@@ -12,9 +12,9 @@
     "@dnd-kit/sortable": "8.0.0",
     "@dnd-kit/utilities": "3.2.2",
     "@floating-ui/react": "0.26.24",
-    "graz": "^0.3.5",
     "@getpara/cosmos-wallet-connectors": "2.0.0-alpha.55",
     "@getpara/evm-wallet-connectors": "2.0.0-alpha.55",
+    "@getpara/graz": "2.0.0-alpha.5",
     "@getpara/react-components": "2.0.0-alpha.55",
     "@getpara/react-sdk": "2.0.0-alpha.55",
     "@getpara/solana-wallet-connectors": "2.0.0-alpha.55",
@@ -43,7 +43,6 @@
     "wagmi": "^2.14.16"
   },
   "devDependencies": {
-    "@getpara/graz-integration": "2.0.0-alpha.55",
     "@delphi-labs/shuttle": "4.1.0",
     "@eslint/js": "^9.21.0",
     "@types/lodash.debounce": "4.0.9",

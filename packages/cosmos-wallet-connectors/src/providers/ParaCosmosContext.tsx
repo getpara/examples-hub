@@ -2,8 +2,7 @@ import { PropsWithChildren, useMemo } from 'react';
 import { WalletList, WalletWithType } from '../types/Wallet.js';
 import { CosmosExternalWalletProvider, CosmosExternalWalletProviderConfig } from './CosmosExternalWalletContext.js';
 import { ChainInfo } from '@keplr-wallet/types';
-import { ParaGrazConfig } from '@getpara/graz-connector';
-import { ConfigureGrazArgs, GrazProvider } from 'graz';
+import { ConfigureGrazArgs, GrazProvider } from '@getpara/graz';
 
 export type ParaCosmosProviderConfig = {
   wallets: WalletList;
@@ -63,25 +62,10 @@ export function ParaCosmosProvider({
     [walletsWithType, config, internalConfig],
   );
 
-  const paraConfig: ParaGrazConfig = useMemo(
-    () => ({
-      paraWeb: para!,
-      noModal: true,
-    }),
-    [para],
-  );
-
   return (
     // Casting Para as any here to avoid ts errors due to the graz version being behind.
     // TODO: update graz para sdk to current version
-    <GrazProvider
-      grazOptions={{
-        chains,
-        autoReconnect: true,
-        paraConfig,
-        ...grazProviderProps,
-      }}
-    >
+    <GrazProvider grazOptions={{ chains, autoReconnect: true, para: para as any, ...grazProviderProps }}>
       <CosmosExternalWalletProvider {...cosmosExternalWalletProviderProps}>{children}</CosmosExternalWalletProvider>
     </GrazProvider>
   );

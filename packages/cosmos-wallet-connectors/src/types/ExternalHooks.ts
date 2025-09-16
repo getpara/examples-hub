@@ -1,4 +1,4 @@
-import { UseAccountArgs } from 'graz';
+import { UseAccountArgs } from '@getpara/graz';
 
 type ChainId$1 = string | string[];
 export interface MultiChainHookArgs {

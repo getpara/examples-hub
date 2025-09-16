@@ -1,4 +1,4 @@
-import { WalletType } from 'graz';
+import { WalletType } from '@getpara/graz';
 import { type WalletMetadata } from '@getpara/react-common';
 
 export type WalletList = (() => WalletWithType)[];

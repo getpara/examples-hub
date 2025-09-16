@@ -1,4 +1,4 @@
-import { cosmoshub } from 'graz/chains';
+import { cosmoshub } from '@getpara/graz/chains';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 

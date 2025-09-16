@@ -1,4 +1,4 @@
-import { useAccount } from 'graz';
+import { useAccount } from '@getpara/graz';
 import { MultiChainHookArgs } from '../types/ExternalHooks.js';
 
 export type TExternalHooks = {

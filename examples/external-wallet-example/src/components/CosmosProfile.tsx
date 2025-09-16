@@ -1,7 +1,7 @@
 import { CpslButton, CpslInput, CpslText } from '@getpara/react-components';
 import { ProfileInnerContainer, Card, OverflowText } from './common';
 import { useState } from 'react';
-import { getWallet, useAccount, useActiveWalletType } from 'graz';
+import { getWallet, useAccount, useActiveWalletType } from '@getpara/graz';
 import { useCosmosStore } from '../stores/cosmosStore/useCosmosStore';
 
 export const CosmosProfile = () => {

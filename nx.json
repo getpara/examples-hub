@@ -23,7 +23,10 @@
     "build": {
       "cache": true,
       "dependsOn": ["^build"],
-      "inputs": ["default", { "dependentTasksOutputFiles": "**/*.d.ts", "transitive": true }],
+      "inputs": [
+        "default",
+        { "dependentTasksOutputFiles": "**/*.d.ts", "transitive": true }
+      ],
       "outputs": ["{projectRoot}/dist"]
     },
     "start": {

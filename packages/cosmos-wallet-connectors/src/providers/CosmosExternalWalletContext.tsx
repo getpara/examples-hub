@@ -11,7 +11,7 @@ import {
   getChainInfo,
   getWallet as grazGetWallet,
   WALLET_TYPES,
-} from 'graz';
+} from '@getpara/graz';
 import { useExternalWalletStore } from '../stores/useStore.js';
 import { WalletWithType } from '../types/Wallet.js';
 import { AuthState, ExternalWalletInfo, rawSecp256k1PubkeyToRawAddress, TExternalWallet } from '@getpara/web-sdk';
