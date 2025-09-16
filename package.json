@@ -43,6 +43,7 @@
     "build": "lerna run build --parallel --concurrency 2",
     "build:dev": "yarn link-shared-symlink && lerna run build --scope=@getpara/* --scope=capsule-mpc-worker --scope=capsule-mpc-worker-server --concurrency 4",
     "check-bundle-size": "node scripts/check-bundle-size.js",
+    "clean": "find . \\( -name \"node_modules\" -o -name \"dist\" -o -name \"build\" \\) -type d -prune -exec rm -rf {} +",
     "dev": "yarn build:dev; concurrently \"yarn start\" \"yarn dev:external-wallet-example\" \"yarn watch:affected\"",
     "dev:external-wallet-example": "cd examples/external-wallet-example && yarn dev",
     "e2e": "playwright test --headed --config=e2e/configs/sdk.playwright.config.ts",

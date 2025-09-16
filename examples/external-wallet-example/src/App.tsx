@@ -2,7 +2,7 @@ import { sepolia, celo, mainnet, polygon, fluentTestnet } from 'wagmi/chains';
 import { Content } from './components/Content';
 import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
 import { clusterApiUrl } from '@solana/web3.js';
-import { axelar, cosmoshub, osmosis, sommelier, stargaze } from '@getpara/graz/chains';
+import { axelar, cosmoshub, osmosis, sommelier, stargaze } from 'graz/chains';
 import { ParaProvider } from '@getpara/react-sdk';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useModalStateStore } from './stores/modalStateStore/useModalStateStore';
