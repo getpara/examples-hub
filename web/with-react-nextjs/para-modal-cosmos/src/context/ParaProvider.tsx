@@ -2,7 +2,7 @@
 
 import { ParaProvider as Provider } from "@getpara/react-sdk";
 import { API_KEY, ENVIRONMENT } from "@/config/constants";
-import { cosmoshub, osmosis, noble } from "@getpara/graz/chains";
+import { cosmoshub, osmosis, noble } from "graz/chains";
 
 const cosmosChains = [cosmoshub, osmosis, noble];
 
