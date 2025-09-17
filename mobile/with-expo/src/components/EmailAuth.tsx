@@ -16,6 +16,9 @@ interface EmailAuthProps {
   onHideSecurityChoice?: () => void;
 }
 
+// App scheme configuration
+const APP_SCHEME = "para-sdk-demo://para";
+
 export const EmailAuth: React.FC<EmailAuthProps> = ({
   onSuccess,
   onShowVerification,
@@ -31,6 +34,49 @@ export const EmailAuth: React.FC<EmailAuthProps> = ({
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
+
+  // Helper to open auth URLs in browser with proper redirect and logging
+  const openAuthUrl = async (url: string, context: string) => {
+    const authUrl = new URL(url);
+    authUrl.searchParams.set("nativeCallbackUrl", APP_SCHEME);
+    console.log(`[EmailAuth] Opening ${context} URL`, authUrl.toString());
+    const result = await openAuthSessionAsync(authUrl.toString(), APP_SCHEME);
+    console.log(`[EmailAuth] ${context} session result`, result);
+    if (result.type !== "success") {
+      throw new Error(`${context} cancelled`);
+    }
+    return result;
+  };
+
+  const touchSession = async (context: string) => {
+    setStatus("Restoring session...");
+    const session = await para.touchSession();
+    console.log(`[EmailAuth] Session after ${context}`, session);
+    setStatus("");
+  };
+
+  const waitForLoginAndFinish = async (context: string) => {
+    setStatus("Finishing login...");
+    const loginResult = await para
+      .waitForLogin({ onPoll: () => console.log(`[EmailAuth] waitForLogin polling (${context})`) })
+      .catch(err => {
+        console.error(`[EmailAuth] waitForLogin error (${context})`, err);
+        throw err;
+      });
+    console.log(`[EmailAuth] waitForLogin resolved (${context})`, loginResult);
+    await touchSession(context);
+    onSuccess();
+  };
+
+  const waitForSignupAndFinish = async () => {
+    setStatus("Finalizing account...");
+    const signupResult = await para.waitForSignup({
+      onPoll: () => console.log("[EmailAuth] waitForSignup polling"),
+    });
+    console.log("[EmailAuth] waitForSignup resolved", signupResult);
+    await touchSession("signup");
+    onSuccess();
+  };
 
   useEffect(() => {
     // Call onHideVerification when component unmounts or verification is hidden
@@ -54,38 +100,72 @@ export const EmailAuth: React.FC<EmailAuthProps> = ({
     try {
       // Para automatically detects if email is new or existing user
       const authStateResult = await para.signUpOrLogIn({ auth: { email } });
+      console.log("[EmailAuth] signUpOrLogIn state", authStateResult);
       setAuthState(authStateResult);
 
+      const nextStage = (authStateResult as any)?.nextStage;
+
       if (authStateResult?.stage === "verify") {
-        // New user flow - requires email verification
+        console.log("[EmailAuth] Stage VERIFY", {
+          loginUrl: authStateResult.loginUrl,
+          passwordUrl: (authStateResult as AuthStateSignup)?.passwordUrl,
+          nextStage,
+        });
+
+        if (authStateResult.loginUrl) {
+          const isSloLogin = nextStage === "login";
+
+          setShowVerification(false);
+          onHideVerification?.();
+          setStatus(isSloLogin ? "Complete login in the browser..." : "Complete verification in the browser...");
+
+          await openAuthUrl(
+            authStateResult.loginUrl,
+            isSloLogin ? "SLO login" : "SLO signup"
+          );
+
+          if (isSloLogin) {
+            await waitForLoginAndFinish("SLO login");
+            return;
+          }
+
+          await waitForSignupAndFinish();
+          return;
+        }
+
+        // New user flow - requires email verification via native UI
         setShowVerification(true);
         onShowVerification?.();
         setStatus("Verification code sent to your email");
       } else if (authStateResult?.stage === "login") {
         // Existing user - check if they use password or passkey
-        if (authStateResult.passwordUrl) {
+        console.log("[EmailAuth] Stage LOGIN", {
+          loginUrl: authStateResult.loginUrl,
+          passwordUrl: authStateResult.passwordUrl,
+          nextStage,
+        });
+        if (authStateResult.loginUrl) {
+          setStatus("Complete login in the browser...");
+          await openAuthUrl(authStateResult.loginUrl, "SLO login");
+          await waitForLoginAndFinish("SLO login");
+          return;
+        } else if (authStateResult.passwordUrl) {
           // User has password-based security
           setStatus("Redirecting to password login...");
-          const APP_SCHEME_EMAIL = "para-sdk-demo";
-          const APP_SCHEME_REDIRECT_URL = `${APP_SCHEME_EMAIL}://para`;
-
-          // Append the native callback URL to the password URL for proper redirect
-          const url = new URL(authStateResult.passwordUrl);
-          url.searchParams.set('nativeCallbackUrl', APP_SCHEME_REDIRECT_URL);
-          
-          await openAuthSessionAsync(url.toString(), APP_SCHEME_REDIRECT_URL);
-          await para.waitForLogin({});
-          setStatus("");
-          onSuccess();
+          await openAuthUrl(authStateResult.passwordUrl, "password login");
+          await waitForLoginAndFinish("password");
         } else {
           // User has passkey-based security
           setStatus("Logging in with passkey...");
           await para.loginWithPasskey();
-          setStatus("");
+          console.log("[EmailAuth] loginWithPasskey completed");
+          await touchSession("passkey login");
           onSuccess();
         }
       }
     } catch (err) {
+      console.error("[EmailAuth] Authentication flow error", err);
+      setStatus("");
       setError(err instanceof Error ? err.message : "Authentication failed");
     } finally {
       setLoading(false);
@@ -150,32 +230,30 @@ export const EmailAuth: React.FC<EmailAuthProps> = ({
           return;
         }
         await para.registerPasskey(authState as AuthStateSignup);
+        console.log("[EmailAuth] registerPasskey completed");
         setStatus("");
         onHideSecurityChoice?.();
         onSuccess();
       } else {
         setStatus("Redirecting to password creation...");
-        const APP_SCHEME_EMAIL = "para-sdk-demo";
-        const APP_SCHEME_REDIRECT_URL = `${APP_SCHEME_EMAIL}://para`;
-
         const passwordUrl = (authState as AuthStateSignup)?.passwordUrl;
         if (!passwordUrl) {
           setError("Password URL is missing for password creation");
           setLoading(false);
           return;
         }
-        
-        // Append the native callback URL to the password URL for proper redirect
-        const url = new URL(passwordUrl);
-        url.searchParams.set('nativeCallbackUrl', APP_SCHEME_REDIRECT_URL);
-        
-        await openAuthSessionAsync(url.toString(), APP_SCHEME_REDIRECT_URL);
-        await para.waitForWalletCreation({});
+
+        await openAuthUrl(passwordUrl, "password creation");
+        const walletCreation = await para.waitForWalletCreation({
+          onPoll: () => console.log("[EmailAuth] waitForWalletCreation polling"),
+        });
+        console.log("[EmailAuth] waitForWalletCreation resolved", walletCreation);
         setStatus("");
         onHideSecurityChoice?.();
         onSuccess();
       }
     } catch (err) {
+      console.error("[EmailAuth] Security setup error", err);
       setError(err instanceof Error ? err.message : "Security setup failed");
     } finally {
       setLoading(false);

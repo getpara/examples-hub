@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { para } from "../para";
+import { ensureParaCrypto } from "@getpara/react-native-wallet/shim";
 import { Button } from "./common/Button";
 import { StatusDisplay } from "./common/StatusDisplay";
 import { Input } from "./common/Input";
@@ -25,50 +26,65 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
   const [txSignature, setTxSignature] = useState("");
 
   useEffect(() => {
+    // The crypto polyfill may be stomped by other libraries; reapply before touching wallets.
+    ensureParaCrypto();
     // Fetch user's wallet on component mount
     loadWalletInfo();
   }, []);
 
   const loadWalletInfo = async () => {
+    ensureParaCrypto();
     setLoadingWallet(true);
     setError("");
     setStatus("Loading wallet information...");
 
     try {
-      // Para manages multiple wallet types - here we fetch EVM wallets
+      console.log("[WalletSection] Loading wallet info");
+      let sessionNeedsWallet: boolean | null = null;
+
+      try {
+        const session = await para.touchSession();
+        console.log("[WalletSection] touchSession result", session);
+        if (session && typeof session.needsWallet === "boolean") {
+          sessionNeedsWallet = session.needsWallet;
+        }
+      } catch (_sessionErr) {
+        // touchSession may fail if the local session cache is already current. Safe to continue.
+        console.log("[WalletSection] touchSession unavailable", _sessionErr);
+      }
+
       const evmWallets = await para.getWalletsByType("EVM");
+      console.log("[WalletSection] getWalletsByType result", evmWallets);
 
       if (evmWallets && evmWallets.length > 0) {
-        // Use first wallet if exists
         setWallet(evmWallets[0]);
         setStatus("");
+        console.log("[WalletSection] Using existing wallet", evmWallets[0]);
+        return;
+      }
+
+      if (sessionNeedsWallet === false) {
+        setStatus("No wallets returned for this account.");
+        console.log("[WalletSection] Session reports no wallet needed");
+        return;
+      }
+
+      setStatus("No wallet found. Creating new EVM wallet...");
+      console.log("[WalletSection] Creating EVM wallet");
+      await para.createWallet({ type: "EVM" });
+
+      const newWallets = await para.getWalletsByType("EVM");
+      console.log("[WalletSection] Wallets after creation", newWallets);
+      if (newWallets && newWallets.length > 0) {
+        setWallet(newWallets[0]);
+        setStatus("");
+        console.log("[WalletSection] Created wallet", newWallets[0]);
       } else {
-        // Auto-create wallet for new users
-        setStatus("No wallet found. Creating new EVM wallet...");
-        await para.createWallet({ type: "EVM" });
-
-        // Get the newly created wallet
-        const newWallets = await para.getWalletsByType("EVM");
-        if (newWallets && newWallets.length > 0) {
-          setWallet(newWallets[0]);
-          setStatus("");
-        }
+        setError("Wallet creation completed but no wallet was returned yet. Try again in a moment.");
       }
-    } catch (_err) {
-      // If getWalletsByType throws an error (no wallet), create one
-      try {
-        setStatus("Creating new EVM wallet...");
-        await para.createWallet({ type: "EVM" });
-
-        // Get the newly created wallet
-        const newWallets = await para.getWalletsByType("EVM");
-        if (newWallets && newWallets.length > 0) {
-          setWallet(newWallets[0]);
-          setStatus("");
-        }
-      } catch (createErr) {
-        setError(createErr instanceof Error ? createErr.message : "Failed to create wallet");
-      }
+    } catch (err) {
+      console.error("[WalletSection] Failed to load wallet info", err);
+      setError(err instanceof Error ? err.message : "Failed to load wallet");
     } finally {
       setLoadingWallet(false);
     }

@@ -18,6 +18,8 @@ interface OAuthAuthProps {
 
 // Must match scheme in app.json for deep linking
 const APP_SCHEME = "para-sdk-demo";
+const APP_CALLBACK_URL = `${APP_SCHEME}://para`;
+const APP_CALLBACK_LOGIN_URL = `${APP_CALLBACK_URL}?method=login`;
 
 export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess, onShowSecurityChoice, onHideSecurityChoice }) => {
   const [loading, setLoading] = useState(false);
@@ -27,41 +29,78 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess, onShowSecurityC
   const [showSecurityChoice, setShowSecurityChoice] = useState(false);
   const [authState, setAuthState] = useState<AuthState | null>(null);
 
+  const touchSession = async (context: string) => {
+    setStatus("Restoring session...");
+    const session = await para.touchSession();
+    console.log(`[OAuthAuth] Session after ${context}`, session);
+    setStatus("");
+  };
+
+  const openAuthUrl = async (url: string, context: string) => {
+    const authUrl = new URL(url);
+    authUrl.searchParams.set("nativeCallbackUrl", APP_CALLBACK_URL);
+    console.log(`[OAuthAuth] Opening ${context} URL`, authUrl.toString());
+    const result = await openAuthSessionAsync(authUrl.toString(), APP_CALLBACK_URL);
+    console.log(`[OAuthAuth] ${context} session result`, result);
+    if (result.type !== "success") {
+      throw new Error(`${context} cancelled`);
+    }
+    return result;
+  };
+
+  const waitForLoginAndFinish = async (context: string) => {
+    setStatus("Finishing login...");
+    const loginResult = await para
+      .waitForLogin({ onPoll: () => console.log(`[OAuthAuth] waitForLogin polling (${context})`) })
+      .catch(err => {
+        console.error(`[OAuthAuth] waitForLogin error (${context})`, err);
+        throw err;
+      });
+    console.log(`[OAuthAuth] waitForLogin resolved (${context})`, loginResult);
+    await touchSession(context);
+    onSuccess();
+  };
+
+  const waitForSignupAndFinish = async () => {
+    setStatus("Finalizing account...");
+    const signupResult = await para.waitForSignup({
+      onPoll: () => console.log("[OAuthAuth] waitForSignup polling"),
+    });
+    console.log("[OAuthAuth] waitForSignup resolved", signupResult);
+    await touchSession("signup");
+    onSuccess();
+  };
+
   // Handle OAuth redirect back to app
   useEffect(() => {
     const handleDeeplink = async (url: string) => {
       // Para redirects to {scheme}://para?method=login after OAuth
       if (url.includes("://para?method=login") && pendingOAuthProvider) {
         try {
+          console.log("[OAuthAuth] Received deeplink", { url, pendingOAuthProvider });
           setStatus("Verifying authentication...");
 
           // Complete OAuth flow with Para backend
+          console.log("[OAuthAuth] Calling verifyOAuth", { provider: pendingOAuthProvider });
           const verifiedAuthState = await para.verifyOAuth({
             method: pendingOAuthProvider,
           });
           setAuthState(verifiedAuthState);
+          console.log("[OAuthAuth] verifyOAuth state", verifiedAuthState);
 
           if (verifiedAuthState.stage === "login") {
             // Existing user - check if they use password or passkey
             if (verifiedAuthState.passwordUrl) {
               // User has password-based security
               setStatus("Redirecting to password login...");
-              const APP_SCHEME_OAUTH = "para-sdk-demo";
-              const APP_SCHEME_REDIRECT_URL = `${APP_SCHEME_OAUTH}://para`;
-
-              // Append the native callback URL to the password URL for proper redirect
-              const url = new URL(verifiedAuthState.passwordUrl);
-              url.searchParams.set('nativeCallbackUrl', APP_SCHEME_REDIRECT_URL);
-              
-              await openAuthSessionAsync(url.toString(), APP_SCHEME_REDIRECT_URL);
-              await para.waitForLogin({});
-              setStatus("");
-              onSuccess();
+              await openAuthUrl(verifiedAuthState.passwordUrl, "password login");
+              await waitForLoginAndFinish("password");
             } else {
               // User has passkey-based security
               setStatus("Logging in with passkey...");
               await para.loginWithPasskey();
-              setStatus("");
+              console.log("[OAuthAuth] loginWithPasskey completed");
+              await touchSession("passkey login");
               onSuccess();
             }
           } else if (verifiedAuthState.stage === "signup") {
@@ -69,10 +108,18 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess, onShowSecurityC
             setShowSecurityChoice(true);
             onShowSecurityChoice?.();
             setStatus("");
+          } else if (verifiedAuthState.stage === "verify" && verifiedAuthState.loginUrl) {
+            console.log("[OAuthAuth] Stage VERIFY after OAuth", {
+              loginUrl: verifiedAuthState.loginUrl,
+              passwordUrl: (verifiedAuthState as AuthStateSignup)?.passwordUrl,
+            });
+            await openAuthUrl(verifiedAuthState.loginUrl, "SLO signup");
+            await waitForSignupAndFinish();
           } else {
             throw new Error("Unexpected authentication state");
           }
         } catch (err) {
+          console.error("[OAuthAuth] Error handling deeplink", err);
           setError(err instanceof Error ? err.message : "OAuth verification failed");
         } finally {
           setPendingOAuthProvider(null);
@@ -83,12 +130,16 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess, onShowSecurityC
 
     // Listen for incoming links
     const subscription = Linking.addEventListener("url", (event) => {
+      console.log("[OAuthAuth] Linking event", event.url);
       handleDeeplink(event.url);
     });
 
     // Check if app was opened with a link
     Linking.getInitialURL().then((url) => {
-      if (url) handleDeeplink(url);
+      if (url) {
+        console.log("[OAuthAuth] Initial URL", url);
+        handleDeeplink(url);
+      }
     });
 
     return () => {
@@ -97,6 +148,7 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess, onShowSecurityC
   }, [pendingOAuthProvider, onSuccess, onShowSecurityChoice]);
 
   const handleOAuthLogin = async (provider: SupportedOAuthMethod) => {
+    console.log("[OAuthAuth] handleOAuthLogin", { provider });
     setLoading(true);
     setError("");
     setStatus(`Authenticating with ${provider}...`);
@@ -104,6 +156,7 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess, onShowSecurityC
     try {
       await handleStandardOAuth(provider);
     } catch (err) {
+      console.error("[OAuthAuth] OAuth launch error", err);
       setError(err instanceof Error ? err.message : "OAuth authentication failed");
       setLoading(false);
       setPendingOAuthProvider(null);
@@ -115,15 +168,18 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess, onShowSecurityC
     setPendingOAuthProvider(provider);
 
     // Get provider-specific OAuth URL from Para
+    console.log("[OAuthAuth] Requesting OAuth URL", { provider });
     const oauthUrl = await para.getOAuthUrl({
       method: provider,
-      appScheme: `${APP_SCHEME}://para?method=login`, // Redirect URI: {scheme}://para?method=login
+      appScheme: APP_CALLBACK_LOGIN_URL,
     });
+    console.log("[OAuthAuth] Received OAuth URL", oauthUrl);
 
     // Launch in-app browser for OAuth consent
-    const result = await openAuthSessionAsync(oauthUrl, APP_SCHEME, {
+    const result = await openAuthSessionAsync(oauthUrl, APP_CALLBACK_URL, {
       preferEphemeralSession: false, // Allow saved sessions
     });
+    console.log("[OAuthAuth] openAuthSessionAsync result", result);
 
     // Handle browser dismissal (success handled by deeplink)
     if (result.type === "cancel" || result.type === "dismiss") {
@@ -142,26 +198,24 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess, onShowSecurityC
         // Register passkey for future logins
         setStatus("Creating passkey...");
         await para.registerPasskey(authState as AuthStateSignup);
+        console.log("[OAuthAuth] registerPasskey completed");
         setStatus("");
         onHideSecurityChoice?.();
         onSuccess();
       } else {
         // Redirect to password creation
         setStatus("Redirecting to password creation...");
-        const APP_SCHEME_OAUTH = "para-sdk-demo";
-        const APP_SCHEME_REDIRECT_URL = `${APP_SCHEME_OAUTH}://para`;
 
         if (authState && (authState as AuthStateSignup).passwordUrl) {
           const passwordUrl = (authState as AuthStateSignup).passwordUrl;
           if (!passwordUrl) {
             throw new Error("Password URL is undefined");
           }
-          // Append the native callback URL to the password URL for proper redirect
-          const url = new URL(passwordUrl);
-          url.searchParams.set('nativeCallbackUrl', APP_SCHEME_REDIRECT_URL);
-          
-          await openAuthSessionAsync(url.toString(), APP_SCHEME_REDIRECT_URL);
-          await para.waitForWalletCreation({});
+          await openAuthUrl(passwordUrl, "password creation");
+          const walletCreation = await para.waitForWalletCreation({
+            onPoll: () => console.log("[OAuthAuth] waitForWalletCreation polling"),
+          });
+          console.log("[OAuthAuth] waitForWalletCreation resolved", walletCreation);
           setStatus("");
           onHideSecurityChoice?.();
           onSuccess();
@@ -170,6 +224,7 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess, onShowSecurityC
         }
       }
     } catch (err) {
+      console.error("[OAuthAuth] Security setup error", err);
       setError(err instanceof Error ? err.message : "Security setup failed");
     } finally {
       setLoading(false);

@@ -16,6 +16,8 @@ interface PhoneAuthProps {
   onHideSecurityChoice?: () => void;
 }
 
+const APP_SCHEME = "para-sdk-demo://para";
+
 export const PhoneAuth: React.FC<PhoneAuthProps> = ({
   onSuccess,
   onShowVerification,
@@ -31,6 +33,48 @@ export const PhoneAuth: React.FC<PhoneAuthProps> = ({
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
+
+  const openAuthUrl = async (url: string, context: string) => {
+    const authUrl = new URL(url);
+    authUrl.searchParams.set("nativeCallbackUrl", APP_SCHEME);
+    console.log(`[PhoneAuth] Opening ${context} URL`, authUrl.toString());
+    const result = await openAuthSessionAsync(authUrl.toString(), APP_SCHEME);
+    console.log(`[PhoneAuth] ${context} session result`, result);
+    if (result.type !== "success") {
+      throw new Error(`${context} cancelled`);
+    }
+    return result;
+  };
+
+  const touchSession = async (context: string) => {
+    setStatus("Restoring session...");
+    const session = await para.touchSession();
+    console.log(`[PhoneAuth] Session after ${context}`, session);
+    setStatus("");
+  };
+
+  const waitForLoginAndFinish = async (context: string) => {
+    setStatus("Finishing login...");
+    const loginResult = await para
+      .waitForLogin({ onPoll: () => console.log(`[PhoneAuth] waitForLogin polling (${context})`) })
+      .catch(err => {
+        console.error(`[PhoneAuth] waitForLogin error (${context})`, err);
+        throw err;
+      });
+    console.log(`[PhoneAuth] waitForLogin resolved (${context})`, loginResult);
+    await touchSession(context);
+    onSuccess();
+  };
+
+  const waitForSignupAndFinish = async () => {
+    setStatus("Finalizing account...");
+    const signupResult = await para.waitForSignup({
+      onPoll: () => console.log("[PhoneAuth] waitForSignup polling"),
+    });
+    console.log("[PhoneAuth] waitForSignup resolved", signupResult);
+    await touchSession("signup");
+    onSuccess();
+  };
 
   useEffect(() => {
     // Call onHideVerification when component unmounts or verification is hidden
@@ -54,38 +98,72 @@ export const PhoneAuth: React.FC<PhoneAuthProps> = ({
     try {
       // Phone must include country code (e.g., +1 for US)
       const authStateResult = await para.signUpOrLogIn({ auth: { phone: phone as `+${number}` } });
+      console.log("[PhoneAuth] signUpOrLogIn state", authStateResult);
       setAuthState(authStateResult);
 
+      const nextStage = (authStateResult as any)?.nextStage;
+
       if (authStateResult?.stage === "verify") {
+        console.log("[PhoneAuth] Stage VERIFY", {
+          loginUrl: authStateResult.loginUrl,
+          passwordUrl: (authStateResult as AuthStateSignup)?.passwordUrl,
+          nextStage,
+        });
+
+        if (authStateResult.loginUrl) {
+          const isSloLogin = nextStage === "login";
+
+          setShowVerification(false);
+          onHideVerification?.();
+          setStatus(isSloLogin ? "Complete login in the browser..." : "Complete verification in the browser...");
+
+          await openAuthUrl(
+            authStateResult.loginUrl,
+            isSloLogin ? "SLO login" : "SLO signup"
+          );
+
+          if (isSloLogin) {
+            await waitForLoginAndFinish("SLO login");
+            return;
+          }
+
+          await waitForSignupAndFinish();
+          return;
+        }
+
         // New phone number - SMS verification required
         setShowVerification(true);
         onShowVerification?.();
         setStatus("Verification code sent via SMS");
       } else if (authStateResult?.stage === "login") {
         // Existing user - check if they use password or passkey
-        if (authStateResult.passwordUrl) {
+        console.log("[PhoneAuth] Stage LOGIN", {
+          loginUrl: authStateResult.loginUrl,
+          passwordUrl: authStateResult.passwordUrl,
+          nextStage,
+        });
+        if (authStateResult.loginUrl) {
+          setStatus("Complete login in the browser...");
+          await openAuthUrl(authStateResult.loginUrl, "SLO login");
+          await waitForLoginAndFinish("SLO login");
+          return;
+        } else if (authStateResult.passwordUrl) {
           // User has password-based security
           setStatus("Redirecting to password login...");
-          const APP_SCHEME_PHONE = "para-sdk-demo";
-          const APP_SCHEME_REDIRECT_URL = `${APP_SCHEME_PHONE}://para`;
-
-          // Append the native callback URL to the password URL for proper redirect
-          const url = new URL(authStateResult.passwordUrl);
-          url.searchParams.set('nativeCallbackUrl', APP_SCHEME_REDIRECT_URL);
-          
-          await openAuthSessionAsync(url.toString(), APP_SCHEME_REDIRECT_URL);
-          await para.waitForLogin({});
-          setStatus("");
-          onSuccess();
+          await openAuthUrl(authStateResult.passwordUrl, "password login");
+          await waitForLoginAndFinish("password");
         } else {
           // User has passkey-based security
           setStatus("Logging in with passkey...");
           await para.loginWithPasskey();
-          setStatus("");
+          console.log("[PhoneAuth] loginWithPasskey completed");
+          await touchSession("passkey login");
           onSuccess();
         }
       }
     } catch (err) {
+      console.error("[PhoneAuth] Authentication flow error", err);
+      setStatus("");
       setError(err instanceof Error ? err.message : "Authentication failed");
     } finally {
       setLoading(false);
@@ -144,23 +222,20 @@ export const PhoneAuth: React.FC<PhoneAuthProps> = ({
         // Register passkey for future logins
         setStatus("Creating passkey...");
         await para.registerPasskey(authState as AuthStateSignup);
+        console.log("[PhoneAuth] registerPasskey completed");
         setStatus("");
         onHideSecurityChoice?.();
         onSuccess();
       } else {
         // Redirect to password creation
         setStatus("Redirecting to password creation...");
-        const APP_SCHEME_PHONE = "para-sdk-demo";
-        const APP_SCHEME_REDIRECT_URL = `${APP_SCHEME_PHONE}://para`;
 
-        // Narrow type to AuthStateSignup to access passwordUrl
         if (authState && "passwordUrl" in authState && typeof authState.passwordUrl === "string") {
-          // Append the native callback URL to the password URL for proper redirect
-          const url = new URL(authState.passwordUrl);
-          url.searchParams.set('nativeCallbackUrl', APP_SCHEME_REDIRECT_URL);
-          
-          await openAuthSessionAsync(url.toString(), APP_SCHEME_REDIRECT_URL);
-          await para.waitForWalletCreation({});
+          await openAuthUrl(authState.passwordUrl, "password creation");
+          const walletCreation = await para.waitForWalletCreation({
+            onPoll: () => console.log("[PhoneAuth] waitForWalletCreation polling"),
+          });
+          console.log("[PhoneAuth] waitForWalletCreation resolved", walletCreation);
           setStatus("");
           onHideSecurityChoice?.();
           onSuccess();
@@ -169,6 +244,7 @@ export const PhoneAuth: React.FC<PhoneAuthProps> = ({
         }
       }
     } catch (err) {
+      console.error("[PhoneAuth] Security setup error", err);
       setError(err instanceof Error ? err.message : "Security setup failed");
     } finally {
       setLoading(false);
