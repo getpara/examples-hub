@@ -196,6 +196,12 @@ struct AuthView: View {
                 // Start authentication flow with Para SDK
                 let state = try await paraManager.initiateAuthFlow(auth: auth)
 
+                print("[EmailAuth] signUpOrLogIn state", state)
+
+                if await handleSloFlowIfNeeded(authState: state) {
+                    return
+                }
+
                 switch state.stage {
                 case .verify:
                     // New user - navigate to verification
@@ -215,6 +221,9 @@ struct AuthView: View {
                     // This shouldn't happen directly
                     errorMessage = "Unexpected authentication state"
                     showErrorAlert = true
+                case .done:
+                    // Portal-based flow already handled
+                    appRootManager.setAuthenticated(true)
                 }
             } catch {
                 // Handle any errors
@@ -229,4 +238,72 @@ struct AuthView: View {
 
 #Preview {
     AuthView()
+}
+
+// MARK: - Private Helpers
+
+private extension AuthView {
+    @MainActor
+    func handleSloFlowIfNeeded(authState: AuthState) async -> Bool {
+        var sloUrl: String? = authState.loginUrl
+        let nextStage = authState.nextStage ?? authState.stage
+        let isSloLogin = authState.stage == .login || nextStage == .login
+
+        if sloUrl == nil {
+            let methods = (isSloLogin ? authState.loginAuthMethods : authState.signupAuthMethods) ?? []
+            if methods.contains("BASIC_LOGIN") {
+                do {
+                    sloUrl = try await paraManager.getLoginUrl(authMethod: "BASIC_LOGIN")
+                    print("[EmailAuth] Generated SLO login URL via getLoginUrl")
+                } catch {
+                    print("[EmailAuth] Failed to fetch login URL via getLoginUrl", error.localizedDescription)
+                }
+            }
+        }
+
+        guard let loginUrl = sloUrl else {
+            return false
+        }
+
+        let context = isSloLogin ? "SLO login" : "SLO signup"
+
+        print("[EmailAuth] Stage \(authState.stage.rawValue.uppercased())", [
+            "loginUrl": loginUrl,
+            "nextStage": nextStage.rawValue,
+        ])
+
+        showOTP = false
+
+        do {
+            let callbackURL = try await paraManager.presentAuthUrl(
+                loginUrl,
+                context: context,
+                webAuthenticationSession: webAuthenticationSession
+            )
+            if let callbackURL {
+                print("[EmailAuth] \(context) session callback", callbackURL.absoluteString)
+            } else {
+                print("[EmailAuth] \(context) session completed without callback URL")
+            }
+
+            if isSloLogin {
+                let loginResult = try await paraManager.waitForLogin()
+                print("[EmailAuth] waitForLogin resolved (\(context))", loginResult ?? [:])
+            } else {
+                let signupResult = try await paraManager.waitForSignup()
+                print("[EmailAuth] waitForSignup resolved", signupResult)
+            }
+
+            if let session = try await paraManager.touchSession() {
+                print("[EmailAuth] Session after \(context)", session)
+            }
+
+            appRootManager.setAuthenticated(true)
+        } catch {
+            errorMessage = error.localizedDescription
+            showErrorAlert = true
+        }
+
+        return true
+    }
 }
