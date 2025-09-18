@@ -1,3 +1,40 @@
+# Release (Thu Sep 18 2025)
+
+## Package Versions
+- @getpara/web-sdk@2.0.0-alpha.56
+- @getpara/wagmi-v2-integration@2.0.0-alpha.56
+- @getpara/wagmi-v2-connector@2.0.0-alpha.56
+- @getpara/viem-v2-integration@2.0.0-alpha.56
+- @getpara/viem-v1-integration@2.0.0-alpha.56
+- @getpara/user-management-client@2.0.0-alpha.56
+- @getpara/solana-web3.js-v1-integration@2.0.0-alpha.56
+- @getpara/solana-wallet-connectors@2.0.0-alpha.56
+- @getpara/solana-signers-v2-integration@2.0.0-alpha.56
+- @getpara/server-sdk@2.0.0-alpha.56
+- @getpara/react-sdk-lite@2.0.0-alpha.56
+- @getpara/react-sdk@2.0.0-alpha.56
+- @getpara/react-native-wallet@2.0.0-alpha.56
+- @getpara/react-components@2.0.0-alpha.56
+- @getpara/react-component-library@1.0.0-alpha.51
+- @getpara/react-common@2.0.0-alpha.56
+- @getpara/evm-wallet-connectors@2.0.0-alpha.56
+- @getpara/ethers-v6-integration@2.0.0-alpha.56
+- @getpara/ethers-v5-integration@2.0.0-alpha.56
+- @getpara/cosmos-wallet-connectors@2.0.0-alpha.56
+- @getpara/cosmjs-v0-integration@2.0.0-alpha.56
+- @getpara/core-sdk@2.0.0-alpha.56
+- @getpara/core-components@2.0.0-alpha.56
+
+### Features
+- add graz connector and integration package and remove all @getpara/graz (#1213) - e2a6885e4
+
+
+### Chores
+- Remove hang on box on wallet creation (#1223) - e2e1d3e06
+- revert "feat
+- Override portal theming based on modal theme (#1217) - c6ddde7cf
+- Add git commit hash logging to bridge for version visibility (#1216) - 01cbb4b4c
+
 # Release (Wed Sep 10 2025)
 
 ## Package Versions
