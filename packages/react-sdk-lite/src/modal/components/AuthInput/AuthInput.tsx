@@ -298,6 +298,7 @@ const CountryCodeSelect = safeStyled(CpslSelect)<{ $width: number }>`
   --container-gap: 4px;
   --container-background-color: transparent;
   --container-box-shadow: none;
+  --dropdown-background-color: var(--cpsl-color-background-4);
 
   &::part(dropdown) {
     width: ${({ $width }) => `${$width - 2}px`};

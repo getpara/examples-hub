@@ -1,7 +1,7 @@
 import { styled } from 'styled-components';
 import { Text, Link } from '../../../components/common';
 import { CpslButton, CpslIcon, CpslInput, CpslText } from '@getpara/react-components';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { usePara } from '../../../components/ParaContext';
 import { CpslInputCustomEvent, InputInputEventDetail } from '@getpara/core-components';
 import { UserIdentifier } from '@getpara/react-common';
@@ -17,6 +17,7 @@ interface EnterPasswordStepProps {
 }
 
 export const EnterPasswordStep = ({ error, onLoginClick, isEmbedded }: EnterPasswordStepProps) => {
+  const inputRef = useRef<HTMLCpslInputElement>(null);
   const navigate = useNavigate();
   const location = useLocation();
   const params = useParams();
@@ -81,6 +82,13 @@ export const EnterPasswordStep = ({ error, onLoginClick, isEmbedded }: EnterPass
     }
   }, [error]);
 
+  useEffect(() => {
+    // Using a small timeout here to ensure the input is mounted before attempting focus
+    setTimeout(() => {
+      inputRef.current?.shadowRoot?.querySelectorAll('input')?.[0]?.focus();
+    }, 60);
+  }, [isLoadingAuthMethods]);
+
   if (isLoadingAuthMethods) {
     return <ModalLoading noText />;
   }
@@ -105,6 +113,7 @@ export const EnterPasswordStep = ({ error, onLoginClick, isEmbedded }: EnterPass
           onKeyDown={async e => e.key === 'Enter' && onSubmit()}
           value={password}
           style={{ width: '100%', paddingTop: isEmbedded ? '24px' : '0px' }}
+          ref={inputRef}
         >
           <ClickableIcon
             onClick={() => setPasswordVisible(!passwordVisible)}

@@ -75,4 +75,5 @@ const CloseButton = safeStyled(HeaderButton)<{ bareModal?: boolean }>`
 
 const BackButton = safeStyled(HeaderButton)`
   transform: rotate(180deg);
+  flex-basis: auto;
 `;

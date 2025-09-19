@@ -4494,6 +4494,7 @@ Need help? Visit: https://docs.getpara.com or contact support
     if (serverAuthState.stage === 'login' || serverAuthState.stage === 'done') {
       throw new Error('Account already exists.');
     }
+    await this.touchSession(true);
 
     return this.#prepareAuthState(serverAuthState, urlOptions);
   }

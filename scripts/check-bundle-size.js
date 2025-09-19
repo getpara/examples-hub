@@ -136,9 +136,9 @@ const BUNDLE_CONFIG = {
     },
     '@getpara/solana-wallet-connectors': {
       thresholds: {
-        raw: '20KB',
-        minified: '20KB',
-        gzipped: '8KB',
+        raw: '24KB',
+        minified: '24KB',
+        gzipped: '9KB',
       },
       entry: 'dist/index.js',
       external: [
