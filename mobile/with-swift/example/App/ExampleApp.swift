@@ -15,7 +15,7 @@ struct ExampleApp: App {
         )
 
         // Para app scheme for deep linking
-        let appScheme = "paraswift://para"
+        let appScheme = "paraswift"
 
         // Initialize Para manager
         let paraManager = ParaManager(

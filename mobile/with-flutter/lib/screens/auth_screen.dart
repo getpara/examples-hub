@@ -240,7 +240,7 @@ class _AuthScreenState extends State<AuthScreen> {
 
       if (isSloLogin) {
         final loginResult = await para.waitForLogin();
-        debugPrint('[EmailAuth] waitForLogin resolved ($contextLabel) ${loginResult ?? {}}');
+        debugPrint('[EmailAuth] waitForLogin resolved ($contextLabel) $loginResult');
       } else {
         final signupResult = await para.waitForSignup();
         debugPrint('[EmailAuth] waitForSignup resolved $signupResult');
