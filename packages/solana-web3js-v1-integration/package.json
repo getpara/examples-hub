@@ -1,8 +1,8 @@
 {
   "name": "@getpara/solana-web3.js-v1-integration",
-  "version": "2.0.0-alpha.56",
+  "version": "2.0.0-alpha.57",
   "dependencies": {
-    "@getpara/core-sdk": "2.0.0-alpha.56"
+    "@getpara/core-sdk": "2.0.0-alpha.57"
   },
   "devDependencies": {
     "@solana/web3.js": "^1.98.0",

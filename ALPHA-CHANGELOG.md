@@ -1,3 +1,35 @@
+# Release (Fri Sep 19 2025)
+
+## Package Versions
+- @getpara/web-sdk@2.0.0-alpha.57
+- @getpara/wagmi-v2-integration@2.0.0-alpha.57
+- @getpara/wagmi-v2-connector@2.0.0-alpha.57
+- @getpara/viem-v2-integration@2.0.0-alpha.57
+- @getpara/viem-v1-integration@2.0.0-alpha.57
+- @getpara/user-management-client@2.0.0-alpha.57
+- @getpara/solana-web3.js-v1-integration@2.0.0-alpha.57
+- @getpara/solana-wallet-connectors@2.0.0-alpha.57
+- @getpara/solana-signers-v2-integration@2.0.0-alpha.57
+- @getpara/server-sdk@2.0.0-alpha.57
+- @getpara/react-sdk-lite@2.0.0-alpha.57
+- @getpara/react-sdk@2.0.0-alpha.57
+- @getpara/react-native-wallet@2.0.0-alpha.57
+- @getpara/react-components@2.0.0-alpha.57
+- @getpara/react-component-library@1.0.0-alpha.52
+- @getpara/react-common@2.0.0-alpha.57
+- @getpara/evm-wallet-connectors@2.0.0-alpha.57
+- @getpara/ethers-v6-integration@2.0.0-alpha.57
+- @getpara/ethers-v5-integration@2.0.0-alpha.57
+- @getpara/cosmos-wallet-connectors@2.0.0-alpha.57
+- @getpara/cosmjs-v0-integration@2.0.0-alpha.57
+- @getpara/core-sdk@2.0.0-alpha.57
+- @getpara/core-components@2.0.0-alpha.57
+
+
+
+### Chores
+- Add Solana Metamask & fix some modal styling (#1225) - ac3d20797
+
 # Release (Thu Sep 18 2025)
 
 ## Package Versions

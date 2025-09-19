@@ -1,11 +1,11 @@
 {
   "name": "developer-portal",
-  "version": "2.0.0-alpha.56",
+  "version": "2.0.0-alpha.57",
   "dependencies": {
-    "@getpara/react-common": "2.0.0-alpha.56",
-    "@getpara/react-component-library": "1.0.0-alpha.51",
-    "@getpara/react-sdk": "2.0.0-alpha.56",
-    "@getpara/user-management-client": "2.0.0-alpha.56",
+    "@getpara/react-common": "2.0.0-alpha.57",
+    "@getpara/react-component-library": "1.0.0-alpha.52",
+    "@getpara/react-sdk": "2.0.0-alpha.57",
+    "@getpara/user-management-client": "2.0.0-alpha.57",
     "@hookform/resolvers": "5.0.1",
     "@sentry/react": "^9.12.0",
     "@tanstack/react-query": "^5.74.0",

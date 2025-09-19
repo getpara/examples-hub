@@ -1,9 +1,9 @@
 {
   "name": "@getpara/web-sdk",
-  "version": "2.0.0-alpha.56",
+  "version": "2.0.0-alpha.57",
   "dependencies": {
-    "@getpara/core-sdk": "2.0.0-alpha.56",
-    "@getpara/user-management-client": "2.0.0-alpha.56",
+    "@getpara/core-sdk": "2.0.0-alpha.57",
+    "@getpara/user-management-client": "2.0.0-alpha.57",
     "base64url": "^3.0.1",
     "buffer": "6.0.3",
     "cbor-web": "^9.0.2",
