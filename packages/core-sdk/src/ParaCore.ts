@@ -1374,7 +1374,8 @@ export abstract class ParaCore implements CoreInterface {
       !supportedWalletTypesEq(this.partner?.supportedWalletTypes || [], session.supportedWalletTypes) ||
       (this.partner?.cosmosPrefix || 'cosmos') !== session.cosmosPrefix
     ) {
-      if (!session.partnerId) {
+      // no api key required for recovery portal
+      if (!session.partnerId && !this.isPortal()) {
         this.displayModalError(
           `Invalid API Key. Please ensure you have a valid API key for the current environment: ${this.ctx.env?.toUpperCase()}.`,
         );

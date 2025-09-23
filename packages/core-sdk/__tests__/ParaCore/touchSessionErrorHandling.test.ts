@@ -1,7 +1,8 @@
 import { describe, vi, afterEach, expect, it, beforeEach } from 'vitest';
 import { MockPara } from '../mocks/mockParaCore';
 import { Environment } from '../../src/types';
-import { API_KEY } from '../constants';
+import { API_KEY, PARTNER } from '../constants';
+import { mockTouchSession } from '../mocks/mockUserManagementClient';
 
 describe('TouchSession Error Handling', () => {
   let para: MockPara;
@@ -136,6 +137,95 @@ describe('TouchSession Error Handling', () => {
       (para as any).displayModalError(undefined);
 
       expect(mockSetModalError).toHaveBeenCalledWith(undefined);
+    });
+  });
+
+  describe('API key validation in touchSession', () => {
+    beforeEach(() => {
+      vi.clearAllMocks();
+    });
+
+    it('should not display error when running on portal URL without partnerId', async () => {
+      // Mock window.location to simulate portal URL
+      const originalLocation = window.location;
+      delete (window as any).location;
+      (window as any).location = { host: 'localhost:3003' };
+
+      // Mock touchSession to return session without partnerId (recovery portal scenario)
+      mockTouchSession.mockResolvedValueOnce({
+        sessionId: 'test-session-id',
+        partnerId: null,
+        sessionLookupId: 'test-lookup-id',
+        userId: null,
+        isAuthenticated: false,
+        supportedWalletTypes: [],
+        cosmosPrefix: 'cosmos',
+        needsWallet: false,
+      });
+
+      const portalPara = new MockPara(Environment.DEV, 'fake-api-key');
+      (portalPara as any).setModalError = mockSetModalError;
+
+      await portalPara.touchSession();
+
+      // Should not display error for portal without partnerId
+      expect(mockSetModalError).not.toHaveBeenCalled();
+
+      // Restore original location
+      (window as any).location = originalLocation;
+    });
+
+    it('should display error and throw when not on portal URL without partnerId', async () => {
+      // Mock window.location to simulate non-portal URL
+      const originalLocation = window.location;
+      delete (window as any).location;
+      (window as any).location = { host: 'example.com' };
+
+      // Mock touchSession to return session without partnerId
+      mockTouchSession.mockResolvedValueOnce({
+        sessionId: 'test-session-id',
+        partnerId: null,
+        sessionLookupId: 'test-lookup-id',
+        userId: 'test-user-id',
+        isAuthenticated: true,
+        supportedWalletTypes: [],
+        cosmosPrefix: 'cosmos',
+        needsWallet: false,
+      });
+
+      const nonPortalPara = new MockPara(Environment.DEV, 'fake-api-key');
+      (nonPortalPara as any).setModalError = mockSetModalError;
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+      // Should throw error for non-portal without partnerId
+      await expect(nonPortalPara.touchSession()).rejects.toThrow('Invalid API Key');
+
+      // Should display error for non-portal without partnerId
+      expect(mockSetModalError).toHaveBeenCalledWith(expect.stringContaining('Invalid API Key'));
+      expect(consoleErrorSpy).toHaveBeenCalled();
+
+      consoleErrorSpy.mockRestore();
+      // Restore original location
+      (window as any).location = originalLocation;
+    });
+
+    it('should not display error when partnerId is present regardless of portal status', async () => {
+      // Mock touchSession to return session with partnerId
+      mockTouchSession.mockResolvedValueOnce({
+        sessionId: 'test-session-id',
+        partnerId: PARTNER.id,
+        sessionLookupId: 'test-lookup-id',
+        userId: 'test-user-id',
+        isAuthenticated: true,
+        supportedWalletTypes: PARTNER.supportedWalletTypes || [],
+        cosmosPrefix: PARTNER.cosmosPrefix,
+        needsWallet: false,
+      });
+
+      await para.touchSession();
+
+      // Should not display error when partnerId is present
+      expect(mockSetModalError).not.toHaveBeenCalled();
     });
   });
 });

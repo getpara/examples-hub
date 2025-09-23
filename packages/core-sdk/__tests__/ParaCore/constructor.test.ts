@@ -118,4 +118,18 @@ describe('ParaCore - constructor', () => {
       expect((para as unknown as any).partnerName).toBe(PARTNER.displayName);
     });
   });
+
+  it('should allow initialization on portal URL without throwing API key error', () => {
+    // Mock window.location to simulate running on portal URL
+    const originalLocation = window.location;
+    delete (window as any).location;
+    (window as any).location = { host: 'localhost:3003' };
+
+    const para = new MockPara(Environment.DEV, 'fake-api-key');
+    expect(para).toBeInstanceOf(ParaCore);
+    expect((para as any).isPortal()).toBe(true);
+
+    // Restore original location
+    (window as any).location = originalLocation;
+  });
 });
