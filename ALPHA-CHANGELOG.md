@@ -1,3 +1,36 @@
+# Release (Tue Sep 23 2025)
+
+## Package Versions
+- @getpara/web-sdk@2.0.0-alpha.58
+- @getpara/wagmi-v2-integration@2.0.0-alpha.58
+- @getpara/wagmi-v2-connector@2.0.0-alpha.58
+- @getpara/viem-v2-integration@2.0.0-alpha.58
+- @getpara/viem-v1-integration@2.0.0-alpha.58
+- @getpara/user-management-client@2.0.0-alpha.58
+- @getpara/solana-web3.js-v1-integration@2.0.0-alpha.58
+- @getpara/solana-wallet-connectors@2.0.0-alpha.58
+- @getpara/solana-signers-v2-integration@2.0.0-alpha.58
+- @getpara/server-sdk@2.0.0-alpha.58
+- @getpara/react-sdk-lite@2.0.0-alpha.58
+- @getpara/react-sdk@2.0.0-alpha.58
+- @getpara/react-native-wallet@2.0.0-alpha.58
+- @getpara/react-components@2.0.0-alpha.58
+- @getpara/react-component-library@1.0.0-alpha.53
+- @getpara/react-common@2.0.0-alpha.58
+- @getpara/evm-wallet-connectors@2.0.0-alpha.58
+- @getpara/ethers-v6-integration@2.0.0-alpha.58
+- @getpara/ethers-v5-integration@2.0.0-alpha.58
+- @getpara/cosmos-wallet-connectors@2.0.0-alpha.58
+- @getpara/cosmjs-v0-integration@2.0.0-alpha.58
+- @getpara/core-sdk@2.0.0-alpha.58
+- @getpara/core-components@2.0.0-alpha.58
+
+### Features
+- Mobile SLO support (bridge, portal) (#1227) - 2937d5cb6
+
+### Fixes
+- do not require api key for recovery portal (#1230) - 40bb92863
+
 # Release (Fri Sep 19 2025)
 
 ## Package Versions
