@@ -43,26 +43,67 @@ const AuthLoginBase = ({ authMethod, step: propsStep }: { authMethod?: AuthMetho
 
   const postLogin = async ({ fromKnownDevice, loginRes }: { fromKnownDevice?: boolean; loginRes?: LoginRes }) => {
     const auth = await para.ctx.client.sessionAuth(sessionId);
-
-    if (auth.isNewUser) {
-      closeWindow();
-      return;
-    }
-
-    await para.userSetupAfterLogin();
-
-    const isEnclaveUser = await checkIsEnclaveUser();
-
-    // For native apps, we need to ensure wallet signers are persisted before redirecting
-    // Check for native callback URL
     const urlParams = new URLSearchParams(window.location.search);
     const nativeCallbackUrl = urlParams.get('nativeCallbackUrl');
 
+    // Handle native apps first - they always redirect, even for new users
     if (nativeCallbackUrl && validateCallbackUrl(nativeCallbackUrl)) {
+      await para.userSetupAfterLogin();
+      const isEnclaveUser = await checkIsEnclaveUser();
+      // Native apps need wallet selection before redirecting
+      const wallets = await fetchWallets();
+      const isWithoutWallets = Object.values(wallets).every(arr => arr.length === 0);
+      const selectionParams = {
+        sessionLookupId: sessionId,
+        needsWallet: isWithoutWallets,
+        newDeviceSessionLookupId,
+      };
+
+      let selectionApplied = false;
+
+      if (partner.id === PARA_PORTAL_ID) {
+        const allWalletIds = para.supportedWalletTypes.reduce(
+          (acc, { type }) => ({
+            ...acc,
+            [type]: (wallets[type] ?? []).map(({ id }) => id),
+          }),
+          {},
+        );
+
+        if (Object.keys(allWalletIds).length > 0 || isWithoutWallets) {
+          await para.setCurrentWalletIds(allWalletIds, selectionParams);
+          selectionApplied = true;
+        }
+      } else {
+        const isOnlyOwnedPartnerWallets = para.supportedWalletTypes.every(({ type }) => {
+          const typeWallets = wallets[type] ?? [];
+          return typeWallets.length === 1 && typeWallets[0].partnerId === partnerId && !typeWallets[0].pregenIdentifier;
+        });
+
+        const defaultWalletIds = isOnlyOwnedPartnerWallets
+          ? para.supportedWalletTypes.reduce(
+              (acc, { type }) => ({
+                ...acc,
+                [type]: (wallets[type] ?? []).map(({ id }) => id),
+              }),
+              {},
+            )
+          : undefined;
+
+        if (para.isNoWalletConfig || defaultWalletIds || (isWithoutWallets && !para.ctx.apiKey)) {
+          await para.setCurrentWalletIds(defaultWalletIds ?? {}, selectionParams);
+          selectionApplied = true;
+        }
+      }
+
       // For native apps, persist wallet signers before redirecting
-      if (isEnclaveUser || loginRes) {
+      if (isEnclaveUser || loginRes || selectionApplied) {
         try {
-          await (isEnclaveUser ? authUpdateEnclaveKeyShares() : authUpdateKeyShares(loginRes));
+          if (!selectionApplied && para.currentWalletIdsArray.length === 0) {
+            console.warn('No wallet selection applied before native redirect; skipping keyshare update');
+          } else {
+            await (isEnclaveUser ? authUpdateEnclaveKeyShares() : authUpdateKeyShares(loginRes));
+          }
         } catch (error) {
           console.error('Failed to update keyshares before native redirect', error);
           return; // Avoid redirecting if we failed to persist signers
@@ -72,6 +113,14 @@ const AuthLoginBase = ({ authMethod, step: propsStep }: { authMethod?: AuthMetho
       window.location.href = nativeCallbackUrl;
       return; // Exit early after redirect
     }
+
+    if (auth.isNewUser) {
+      closeWindow();
+      return;
+    }
+
+    await para.userSetupAfterLogin();
+    const isEnclaveUser = await checkIsEnclaveUser();
 
     if (fromKnownDevice) {
       if (!(await isPasskeySupported())) {

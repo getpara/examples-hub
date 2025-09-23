@@ -4348,7 +4348,7 @@ Need help? Visit: https://docs.getpara.com or contact support
       sessionLookupId: string;
     },
   ): Promise<AuthStateLogin> {
-    const { loginAuthMethods, hasPasswordWithoutPIN, ...authState } = loginState;
+    const { loginAuthMethods = [], hasPasswordWithoutPIN, ...authState } = loginState;
 
     // TODO: Add SLO option here
     const isPasskeySupported = await this.isPasskeySupported(),
@@ -4359,6 +4359,7 @@ Need help? Visit: https://docs.getpara.com or contact support
     return {
       ...authState,
       isPasskeySupported,
+      loginAuthMethods,
       ...(isPasskeyPossible
         ? {
             passkeyUrl: await this.getLoginUrl({ sessionId: sessionLookupId, shorten, portalTheme }),
@@ -4400,7 +4401,7 @@ Need help? Visit: https://docs.getpara.com or contact support
     serverSignupState: ServerAuthStateSignup,
     { useShortUrls: shorten = false, portalTheme }: WithCustomTheme & WithUseShortUrls,
   ): Promise<AuthStateSignup> {
-    const { signupAuthMethods, ...authState } = serverSignupState;
+    const { signupAuthMethods = [], ...authState } = serverSignupState;
 
     const isPasskeySupported = await this.isPasskeySupported();
 
@@ -4416,7 +4417,11 @@ Need help? Visit: https://docs.getpara.com or contact support
       );
     }
 
-    const signupState: Partial<AuthStateSignup> = { ...authState, isPasskeySupported };
+    const signupState: Partial<AuthStateSignup> = {
+      ...authState,
+      isPasskeySupported,
+      signupAuthMethods,
+    };
 
     if (isPasskey) {
       const { url: passkeyUrl, credentialId: passkeyId } = await this.getNewCredentialAndUrl({

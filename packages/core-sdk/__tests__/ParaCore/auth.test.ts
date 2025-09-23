@@ -630,10 +630,14 @@ describe('ParaCore - authentication', () => {
           expect(authState).toStrictEqual({
             ..._.omit(
               (isSLO ? getVerifyState : isPIN ? getLoginStateWithPIN : getLoginState)(auth, isSLO, false),
-              'loginAuthMethods',
               'hasPasswordWithoutPIN',
             ),
-            ...(isSLO ? { loginAuthMethods: [AuthMethod.BASIC_LOGIN] } : { isPasskeySupported: true }),
+            ...(isSLO
+              ? { loginAuthMethods: [AuthMethod.BASIC_LOGIN] }
+              : {
+                  isPasskeySupported: true,
+                  loginAuthMethods: isPIN ? [AuthMethod.PASSKEY, AuthMethod.PIN] : [AuthMethod.PASSKEY, AuthMethod.PASSWORD],
+                }),
             ...(isNativePasskey || isSLO
               ? {}
               : {
@@ -699,7 +703,7 @@ describe('ParaCore - authentication', () => {
           const signupState = await para.verifyNewAccount({ verificationCode: VERIFICATION_CODE });
 
           expect(signupState).toStrictEqual({
-            ..._.omit(getSignupState(auth), ['signupAuthMethods']),
+            ...getSignupState(auth),
             isPasskeySupported: true,
             passkeyId: expect.any(String),
             ...(isNativePasskey
@@ -725,7 +729,7 @@ describe('ParaCore - authentication', () => {
           const signupState = await para.verifyNewAccount({ verificationCode: VERIFICATION_CODE });
 
           expect(signupState).toStrictEqual({
-            ..._.omit(getSignupStateWithPIN(auth), ['signupAuthMethods']),
+            ...getSignupStateWithPIN(auth),
             isPasskeySupported: true,
             passkeyId: expect.any(String),
             ...(isNativePasskey
@@ -954,7 +958,7 @@ describe('ParaCore - authentication', () => {
                   const authState = await prepare(method as any);
 
                   expect(authState).toStrictEqual({
-                    ..._.omit(getSignupState(emailAuthInfo.auth), 'signupAuthMethods'),
+                    ...getSignupState(emailAuthInfo.auth),
                     isPasskeySupported: true,
                     passkeyId: expect.any(String),
                     passkeyUrl: expect.stringMatching(''),
@@ -982,7 +986,8 @@ describe('ParaCore - authentication', () => {
 
                   expect(para.loginEncryptionKeyPair).toBeDefined();
                   expect(authState).toStrictEqual({
-                    ..._.omit(getLoginState(emailAuthInfo.auth), 'loginAuthMethods', 'hasPasswordWithoutPIN'),
+                    ..._.omit(getLoginState(emailAuthInfo.auth), 'hasPasswordWithoutPIN'),
+                    loginAuthMethods: [AuthMethod.PASSKEY, AuthMethod.PASSWORD],
                     isPasskeySupported: true,
                     passkeyUrl: expect.stringMatching(''),
                     passkeyKnownDeviceUrl: expect.stringMatching(''),
@@ -1052,7 +1057,7 @@ describe('ParaCore - authentication', () => {
             const authState = await prepare<AuthStateSignup>();
 
             expect(authState).toStrictEqual({
-              ..._.omit(getSignupState(authInfo.auth), 'signupAuthMethods'),
+              ...getSignupState(authInfo.auth),
               isPasskeySupported: true,
               passkeyId: expect.stringMatching(''),
               passkeyUrl: expect.stringMatching(''),
@@ -1085,7 +1090,8 @@ describe('ParaCore - authentication', () => {
 
             expect(para.loginEncryptionKeyPair).toBeDefined();
             expect(authState).toStrictEqual({
-              ..._.omit(getLoginState(authInfo.auth), 'loginAuthMethods', 'hasPasswordWithoutPIN'),
+              ..._.omit(getLoginState(authInfo.auth), 'hasPasswordWithoutPIN'),
+              loginAuthMethods: [AuthMethod.PASSKEY, AuthMethod.PASSWORD],
               isPasskeySupported: true,
               passkeyUrl: expect.stringMatching(''),
               passkeyKnownDeviceUrl: expect.stringMatching(''),

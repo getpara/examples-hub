@@ -118,6 +118,12 @@ export const bridgeMethodHandlers: Record<string, (para: ParaWeb, args: any) => 
     logger.info('Web challenge verified:', verifyWebChallengeResult);
     return verifyWebChallengeResult;
   },
+  touchSession: async (para, args: { regenerate?: boolean } = {}) => {
+    logger.info('touchSession invoked', args);
+    const session = await para.touchSession(args?.regenerate ?? false);
+    logger.info('touchSession returned:', session ? 'session refreshed' : 'no session');
+    return session;
+  },
   loadTransmissionKeyshares: async (para, _) => {
     logger.info('Loading transmission keyshares...');
     try {

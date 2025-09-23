@@ -199,6 +199,10 @@ export type AuthStateLogin = Omit<ServerAuthStateLogin, 'loginAuthMethods'> &
      * A Para Portal URL for logging in via a PIN.
      */
     pinUrl?: string;
+    /**
+     * Supported login auth methods for this session.
+     */
+    loginAuthMethods?: AuthMethod[];
   };
 
 export type AuthStateSignup = Omit<ServerAuthStateSignup, 'signupAuthMethods'> &
@@ -227,9 +231,15 @@ export type AuthStateSignup = Omit<ServerAuthStateSignup, 'signupAuthMethods'> &
      * The Para system ID for the newly generated PIN.
      */
     pinId?: string;
+    /**
+     * Supported signup auth methods for this session.
+     */
+    signupAuthMethods?: AuthMethod[];
   };
 
-export type AuthStateDone = ServerAuthStateDone;
+export type AuthStateDone = Omit<ServerAuthStateDone, 'authMethods'> & {
+  authMethods: AuthMethod[];
+};
 
 export type AuthStateVerifyOrLogin = AuthStateVerify | AuthStateLogin;
 
