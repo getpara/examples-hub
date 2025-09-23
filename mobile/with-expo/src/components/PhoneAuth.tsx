@@ -37,9 +37,7 @@ export const PhoneAuth: React.FC<PhoneAuthProps> = ({
   const openAuthUrl = async (url: string, context: string) => {
     const authUrl = new URL(url);
     authUrl.searchParams.set("nativeCallbackUrl", APP_SCHEME);
-    console.log(`[PhoneAuth] Opening ${context} URL`, authUrl.toString());
     const result = await openAuthSessionAsync(authUrl.toString(), APP_SCHEME);
-    console.log(`[PhoneAuth] ${context} session result`, result);
     if (result.type !== "success") {
       throw new Error(`${context} cancelled`);
     }
@@ -48,30 +46,20 @@ export const PhoneAuth: React.FC<PhoneAuthProps> = ({
 
   const touchSession = async (context: string) => {
     setStatus("Restoring session...");
-    const session = await para.touchSession();
-    console.log(`[PhoneAuth] Session after ${context}`, session);
+    await para.touchSession();
     setStatus("");
   };
 
   const waitForLoginAndFinish = async (context: string) => {
     setStatus("Finishing login...");
-    const loginResult = await para
-      .waitForLogin({ onPoll: () => console.log(`[PhoneAuth] waitForLogin polling (${context})`) })
-      .catch(err => {
-        console.error(`[PhoneAuth] waitForLogin error (${context})`, err);
-        throw err;
-      });
-    console.log(`[PhoneAuth] waitForLogin resolved (${context})`, loginResult);
+    await para.waitForLogin({});
     await touchSession(context);
     onSuccess();
   };
 
   const waitForSignupAndFinish = async () => {
     setStatus("Finalizing account...");
-    const signupResult = await para.waitForSignup({
-      onPoll: () => console.log("[PhoneAuth] waitForSignup polling"),
-    });
-    console.log("[PhoneAuth] waitForSignup resolved", signupResult);
+    await para.waitForSignup({});
     await touchSession("signup");
     onSuccess();
   };
@@ -98,32 +86,25 @@ export const PhoneAuth: React.FC<PhoneAuthProps> = ({
     try {
       // Phone must include country code (e.g., +1 for US)
       const authStateResult = await para.signUpOrLogIn({ auth: { phone: phone as `+${number}` } });
-      console.log("[PhoneAuth] signUpOrLogIn state", authStateResult);
       setAuthState(authStateResult);
 
       const nextStage = (authStateResult as any)?.nextStage;
 
       if (authStateResult?.stage === "verify") {
-        console.log("[PhoneAuth] Stage VERIFY", {
-          loginUrl: authStateResult.loginUrl,
-          passwordUrl: (authStateResult as AuthStateSignup)?.passwordUrl,
-          nextStage,
-        });
-
         if (authStateResult.loginUrl) {
-          const isSloLogin = nextStage === "login";
+          const isOneClickLogin = nextStage === "login";
 
           setShowVerification(false);
           onHideVerification?.();
-          setStatus(isSloLogin ? "Complete login in the browser..." : "Complete verification in the browser...");
+          setStatus(isOneClickLogin ? "Complete login in the browser..." : "Complete verification in the browser...");
 
           await openAuthUrl(
             authStateResult.loginUrl,
-            isSloLogin ? "SLO login" : "SLO signup"
+            isOneClickLogin ? "one-click login" : "one-click signup"
           );
 
-          if (isSloLogin) {
-            await waitForLoginAndFinish("SLO login");
+          if (isOneClickLogin) {
+            await waitForLoginAndFinish("one-click login");
             return;
           }
 
@@ -137,15 +118,10 @@ export const PhoneAuth: React.FC<PhoneAuthProps> = ({
         setStatus("Verification code sent via SMS");
       } else if (authStateResult?.stage === "login") {
         // Existing user - check if they use password or passkey
-        console.log("[PhoneAuth] Stage LOGIN", {
-          loginUrl: authStateResult.loginUrl,
-          passwordUrl: authStateResult.passwordUrl,
-          nextStage,
-        });
         if (authStateResult.loginUrl) {
           setStatus("Complete login in the browser...");
-          await openAuthUrl(authStateResult.loginUrl, "SLO login");
-          await waitForLoginAndFinish("SLO login");
+          await openAuthUrl(authStateResult.loginUrl, "one-click login");
+          await waitForLoginAndFinish("one-click login");
           return;
         } else if (authStateResult.passwordUrl) {
           // User has password-based security
@@ -156,7 +132,6 @@ export const PhoneAuth: React.FC<PhoneAuthProps> = ({
           // User has passkey-based security
           setStatus("Logging in with passkey...");
           await para.loginWithPasskey();
-          console.log("[PhoneAuth] loginWithPasskey completed");
           await touchSession("passkey login");
           onSuccess();
         }
@@ -222,7 +197,6 @@ export const PhoneAuth: React.FC<PhoneAuthProps> = ({
         // Register passkey for future logins
         setStatus("Creating passkey...");
         await para.registerPasskey(authState as AuthStateSignup);
-        console.log("[PhoneAuth] registerPasskey completed");
         setStatus("");
         onHideSecurityChoice?.();
         onSuccess();
@@ -232,10 +206,7 @@ export const PhoneAuth: React.FC<PhoneAuthProps> = ({
 
         if (authState && "passwordUrl" in authState && typeof authState.passwordUrl === "string") {
           await openAuthUrl(authState.passwordUrl, "password creation");
-          const walletCreation = await para.waitForWalletCreation({
-            onPoll: () => console.log("[PhoneAuth] waitForWalletCreation polling"),
-          });
-          console.log("[PhoneAuth] waitForWalletCreation resolved", walletCreation);
+          await para.waitForWalletCreation({});
           setStatus("");
           onHideSecurityChoice?.();
           onSuccess();

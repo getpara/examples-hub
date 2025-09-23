@@ -8,6 +8,13 @@ import { StatusDisplay } from "./common/StatusDisplay";
 import { SecurityChoice } from "./SecurityChoice";
 import { AuthState, AuthStateSignup } from "@getpara/react-native-wallet";
 
+/**
+ * Email Authentication with One-Click Login Support
+ *
+ * One-Click Login allows users to complete authentication in the browser
+ * when `authState.loginUrl` is provided.
+ */
+
 interface EmailAuthProps {
   onSuccess: () => void;
   onShowVerification?: () => void;
@@ -35,13 +42,11 @@ export const EmailAuth: React.FC<EmailAuthProps> = ({
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
 
-  // Helper to open auth URLs in browser with proper redirect and logging
+  // Helper to open auth URLs in browser with proper redirect
   const openAuthUrl = async (url: string, context: string) => {
     const authUrl = new URL(url);
     authUrl.searchParams.set("nativeCallbackUrl", APP_SCHEME);
-    console.log(`[EmailAuth] Opening ${context} URL`, authUrl.toString());
     const result = await openAuthSessionAsync(authUrl.toString(), APP_SCHEME);
-    console.log(`[EmailAuth] ${context} session result`, result);
     if (result.type !== "success") {
       throw new Error(`${context} cancelled`);
     }
@@ -50,30 +55,20 @@ export const EmailAuth: React.FC<EmailAuthProps> = ({
 
   const touchSession = async (context: string) => {
     setStatus("Restoring session...");
-    const session = await para.touchSession();
-    console.log(`[EmailAuth] Session after ${context}`, session);
+    await para.touchSession();
     setStatus("");
   };
 
   const waitForLoginAndFinish = async (context: string) => {
     setStatus("Finishing login...");
-    const loginResult = await para
-      .waitForLogin({ onPoll: () => console.log(`[EmailAuth] waitForLogin polling (${context})`) })
-      .catch(err => {
-        console.error(`[EmailAuth] waitForLogin error (${context})`, err);
-        throw err;
-      });
-    console.log(`[EmailAuth] waitForLogin resolved (${context})`, loginResult);
+    await para.waitForLogin({});
     await touchSession(context);
     onSuccess();
   };
 
   const waitForSignupAndFinish = async () => {
     setStatus("Finalizing account...");
-    const signupResult = await para.waitForSignup({
-      onPoll: () => console.log("[EmailAuth] waitForSignup polling"),
-    });
-    console.log("[EmailAuth] waitForSignup resolved", signupResult);
+    await para.waitForSignup({});
     await touchSession("signup");
     onSuccess();
   };
@@ -100,32 +95,26 @@ export const EmailAuth: React.FC<EmailAuthProps> = ({
     try {
       // Para automatically detects if email is new or existing user
       const authStateResult = await para.signUpOrLogIn({ auth: { email } });
-      console.log("[EmailAuth] signUpOrLogIn state", authStateResult);
       setAuthState(authStateResult);
 
       const nextStage = (authStateResult as any)?.nextStage;
 
       if (authStateResult?.stage === "verify") {
-        console.log("[EmailAuth] Stage VERIFY", {
-          loginUrl: authStateResult.loginUrl,
-          passwordUrl: (authStateResult as AuthStateSignup)?.passwordUrl,
-          nextStage,
-        });
-
+        // One-Click Login: When loginUrl is provided, complete auth in browser
         if (authStateResult.loginUrl) {
-          const isSloLogin = nextStage === "login";
+          const isOneClickLogin = nextStage === "login";
 
           setShowVerification(false);
           onHideVerification?.();
-          setStatus(isSloLogin ? "Complete login in the browser..." : "Complete verification in the browser...");
+          setStatus(isOneClickLogin ? "Complete login in the browser..." : "Complete verification in the browser...");
 
           await openAuthUrl(
             authStateResult.loginUrl,
-            isSloLogin ? "SLO login" : "SLO signup"
+            isOneClickLogin ? "one-click login" : "one-click signup"
           );
 
-          if (isSloLogin) {
-            await waitForLoginAndFinish("SLO login");
+          if (isOneClickLogin) {
+            await waitForLoginAndFinish("one-click login");
             return;
           }
 
@@ -139,15 +128,11 @@ export const EmailAuth: React.FC<EmailAuthProps> = ({
         setStatus("Verification code sent to your email");
       } else if (authStateResult?.stage === "login") {
         // Existing user - check if they use password or passkey
-        console.log("[EmailAuth] Stage LOGIN", {
-          loginUrl: authStateResult.loginUrl,
-          passwordUrl: authStateResult.passwordUrl,
-          nextStage,
-        });
+        // One-Click Login for existing users
         if (authStateResult.loginUrl) {
           setStatus("Complete login in the browser...");
-          await openAuthUrl(authStateResult.loginUrl, "SLO login");
-          await waitForLoginAndFinish("SLO login");
+          await openAuthUrl(authStateResult.loginUrl, "one-click login");
+          await waitForLoginAndFinish("one-click login");
           return;
         } else if (authStateResult.passwordUrl) {
           // User has password-based security
@@ -158,15 +143,16 @@ export const EmailAuth: React.FC<EmailAuthProps> = ({
           // User has passkey-based security
           setStatus("Logging in with passkey...");
           await para.loginWithPasskey();
-          console.log("[EmailAuth] loginWithPasskey completed");
           await touchSession("passkey login");
           onSuccess();
         }
       }
     } catch (err) {
-      console.error("[EmailAuth] Authentication flow error", err);
+      // Don't log the full error object as it may have problematic getters
+      const errorMessage = err instanceof Error ? err.message : "Authentication failed";
+      console.error("[EmailAuth] Authentication flow error:", errorMessage);
       setStatus("");
-      setError(err instanceof Error ? err.message : "Authentication failed");
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -230,7 +216,6 @@ export const EmailAuth: React.FC<EmailAuthProps> = ({
           return;
         }
         await para.registerPasskey(authState as AuthStateSignup);
-        console.log("[EmailAuth] registerPasskey completed");
         setStatus("");
         onHideSecurityChoice?.();
         onSuccess();
@@ -244,10 +229,7 @@ export const EmailAuth: React.FC<EmailAuthProps> = ({
         }
 
         await openAuthUrl(passwordUrl, "password creation");
-        const walletCreation = await para.waitForWalletCreation({
-          onPoll: () => console.log("[EmailAuth] waitForWalletCreation polling"),
-        });
-        console.log("[EmailAuth] waitForWalletCreation resolved", walletCreation);
+        await para.waitForWalletCreation({});
         setStatus("");
         onHideSecurityChoice?.();
         onSuccess();
