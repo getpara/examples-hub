@@ -3710,20 +3710,21 @@ Need help? Visit: https://docs.getpara.com or contact support
 
       await new Promise(resolve => setTimeout(resolve, constants.POLLING_INTERVAL_MS));
 
+      let pendingTransaction;
       try {
-        await this.ctx.client.getPendingTransaction(this.userId, signRes.pendingTransactionId);
+        pendingTransaction = (await this.ctx.client.getPendingTransaction(this.userId, signRes.pendingTransactionId)).data
+          ?.pendingTransaction;
       } catch (err) {
         const error = new TransactionReviewDenied();
         dispatchEvent(ParaEvent.SIGN_MESSAGE_EVENT, signRes, error.message);
         throw error;
       }
 
-      signRes = await this.signMessageInner({ wallet, signerId, messageBase64, cosmosSignDocBase64 });
-
-      if ((signRes as DeniedSignatureRes).pendingTransactionId) {
+      if (!pendingTransaction?.approvedAt) {
         onPoll?.();
         continue;
       } else {
+        signRes = await this.signMessageInner({ wallet, signerId, messageBase64, cosmosSignDocBase64 });
         break;
       }
     }
@@ -3836,29 +3837,31 @@ Need help? Visit: https://docs.getpara.com or contact support
 
       await new Promise(resolve => setTimeout(resolve, constants.POLLING_INTERVAL_MS));
 
+      let pendingTransaction;
       try {
-        await this.ctx.client.getPendingTransaction(this.userId, (signRes as DeniedSignatureRes).pendingTransactionId);
+        pendingTransaction = (
+          await this.ctx.client.getPendingTransaction(this.userId, (signRes as DeniedSignatureRes).pendingTransactionId)
+        ).data?.pendingTransaction;
       } catch (err) {
         const error = new TransactionReviewDenied();
         dispatchEvent(ParaEvent.SIGN_TRANSACTION_EVENT, signRes, error.message);
         throw error;
       }
 
-      signRes = await this.platformUtils.signTransaction(
-        this.ctx,
-        signerId,
-        walletId,
-        this.wallets[walletId].signer,
-        rlpEncodedTxBase64,
-        chainId,
-        this.retrieveSessionCookie(),
-        wallet.scheme === 'DKLS',
-      );
-
-      if ((signRes as DeniedSignatureRes).pendingTransactionId) {
+      if (!pendingTransaction?.approvedAt) {
         onPoll?.();
         continue;
       } else {
+        signRes = await this.platformUtils.signTransaction(
+          this.ctx,
+          signerId,
+          walletId,
+          this.wallets[walletId].signer,
+          rlpEncodedTxBase64,
+          chainId,
+          this.retrieveSessionCookie(),
+          wallet.scheme === 'DKLS',
+        );
         break;
       }
     }
