@@ -568,6 +568,12 @@ export abstract class ParaCore implements CoreInterface {
     );
   }
 
+  protected isRecoveryPortal(envOverride?: Environment): boolean {
+    if (typeof window === 'undefined') return false;
+    const normalizedUrl = window.location?.host?.replace('getpara', 'usecapsule');
+    return !!normalizedUrl && getPortalBaseURL(envOverride ? { env: envOverride } : this.ctx).includes(normalizedUrl);
+  }
+
   private isParaConnect(): boolean {
     if (typeof window === 'undefined') return false;
     return !!window.location?.host && getParaConnectBaseUrl(this.ctx).includes(window.location.host);
@@ -1375,7 +1381,7 @@ export abstract class ParaCore implements CoreInterface {
       (this.partner?.cosmosPrefix || 'cosmos') !== session.cosmosPrefix
     ) {
       // no api key required for recovery portal
-      if (!session.partnerId && !this.isPortal()) {
+      if (!session.partnerId && !this.isRecoveryPortal()) {
         this.displayModalError(
           `Invalid API Key. Please ensure you have a valid API key for the current environment: ${this.ctx.env?.toUpperCase()}.`,
         );
