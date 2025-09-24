@@ -6,3 +6,4 @@ export * from './KnownDevices.js';
 export * from './QRCode.js';
 export * from './UserIdentifier.js';
 export * from './NetworkSpeedBanner.js';
+export * from './WarningBanner.js';

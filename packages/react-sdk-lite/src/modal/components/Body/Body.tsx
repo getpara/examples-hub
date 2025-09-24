@@ -1,4 +1,4 @@
-import { safeStyled } from '@getpara/react-common';
+import { safeStyled, WarningBanner } from '@getpara/react-common';
 import { IFrameSteps, ModalStep } from '../../utils/steps.js';
 import { CpslAlert, CpslIcon } from '@getpara/react-components';
 import { VerificationCodeStep } from '../VerificationCodeStep/VerificationCodeStep.js';
@@ -290,14 +290,7 @@ export const Body = ({
                 )}
             </InnerContainer>
             {modalError && (
-              <ModalErrorAlert>
-                <ErrorContent>
-                  <ErrorCloseButton onClick={() => setModalError(undefined)}>
-                    <ErrorCloseIcon icon="x" />
-                  </ErrorCloseButton>
-                  <ErrorText>{renderTextWithLinks(modalError)}</ErrorText>
-                </ErrorContent>
-              </ModalErrorAlert>
+              <WarningBanner onClose={() => setModalError(undefined)}>{renderTextWithLinks(modalError)}</WarningBanner>
             )}
           </BodyContainer>
         </AnimatePresence>
@@ -355,48 +348,6 @@ const TestModeAlert = safeStyled(CpslAlert)`
   left: 16px;
   right: 16px;
   z-index: 1000;
-`;
-
-const ModalErrorAlert = safeStyled.div`
-  background: #fffcec;
-  border: 2px solid var(--cpsl-color-utility-yellow);
-  border-radius: 4px;
-  padding: 8px 8px;
-`;
-
-const ErrorContent = safeStyled.div`
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  position: relative;
-`;
-
-const ErrorText = safeStyled.div`
-  flex: 1;
-  font-size: 14px;
-  line-height: 1.4;
-  color: var(--cpsl-color-black);
-  font-weight: 400;
-`;
-
-const ErrorCloseButton = safeStyled.button`
-  background-color: transparent;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  margin-top: 1px;
-`;
-
-const ErrorCloseIcon = safeStyled(CpslIcon)`
-  --icon-color: var(--cpsl-color-utility-yellow);
-  --height: 20px;
-  --width: 20px;
 `;
 
 const CloseButton = safeStyled.button`
