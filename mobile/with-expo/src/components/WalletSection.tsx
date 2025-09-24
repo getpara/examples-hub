@@ -5,7 +5,7 @@ import { ensureParaCrypto } from "@getpara/react-native-wallet/shim";
 import { Button } from "./common/Button";
 import { StatusDisplay } from "./common/StatusDisplay";
 import { Input } from "./common/Input";
-import { Wallet } from "@getpara/react-native-wallet";
+import { Wallet, entityToWallet } from "@getpara/react-native-wallet";
 import { ethers } from "ethers";
 import { ParaEthersSigner } from "@getpara/ethers-v6-integration";
 
@@ -53,10 +53,25 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
         console.log("[WalletSection] touchSession unavailable", _sessionErr);
       }
 
-      const evmWallets = await para.getWalletsByType("EVM");
-      console.log("[WalletSection] getWalletsByType result", evmWallets);
+      const fetchedWallets = await para.fetchWallets();
 
-      if (evmWallets && evmWallets.length > 0) {
+      const normalizedWallets = fetchedWallets
+        .filter(wallet => wallet.address)
+        .map(entity => ({
+          ...entityToWallet(entity),
+          signer: para.wallets[entity.id]?.signer,
+        })) as Wallet[];
+
+      const evmWallets = normalizedWallets.filter(wallet => wallet.type === "EVM");
+
+      if (evmWallets.length > 0) {
+        await para.setWallets(
+          normalizedWallets.reduce<Record<string, Wallet>>((acc, wallet) => {
+            acc[wallet.id] = wallet;
+            return acc;
+          }, {}),
+        );
+
         setWallet(evmWallets[0]);
         setStatus("");
         console.log("[WalletSection] Using existing wallet", evmWallets[0]);
