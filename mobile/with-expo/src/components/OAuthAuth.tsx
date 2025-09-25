@@ -7,7 +7,7 @@ import { StatusDisplay } from "./common/StatusDisplay";
 import { SecurityChoice } from "./SecurityChoice";
 import { AuthState, AuthStateSignup } from "@getpara/react-native-wallet";
 
-// OAuth providers supported by Para SDK
+// OAuth providers
 type SupportedOAuthMethod = "GOOGLE" | "FARCASTER";
 
 interface OAuthAuthProps {
@@ -22,18 +22,26 @@ const APP_CALLBACK_URL = `${APP_SCHEME}://para`;
 const FARCASTER_CALLBACK_URL = `${APP_CALLBACK_URL}?method=login`;
 
 type ParaWithInternals = typeof para & {
-  constructPortalUrl?: (type: string, opts?: Record<string, unknown>) => Promise<string>;
+  constructPortalUrl?: (
+    type: string,
+    opts?: Record<string, unknown>
+  ) => Promise<string>;
 };
 
-export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess, onShowSecurityChoice, onHideSecurityChoice }) => {
+export const OAuthAuth: React.FC<OAuthAuthProps> = ({
+  onSuccess,
+  onShowSecurityChoice,
+  onHideSecurityChoice,
+}) => {
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
-  const [pendingOAuthProvider, setPendingOAuthProvider] = useState<SupportedOAuthMethod | null>(null);
+  const [pendingOAuthProvider, setPendingOAuthProvider] =
+    useState<SupportedOAuthMethod | null>(null);
   const [authState, setAuthState] = useState<AuthState | null>(null);
   const [showSecurityChoice, setShowSecurityChoice] = useState(false);
 
-  const touchSession = async (_context: string) => {
+  const touchSession = async () => {
     setStatus("Restoring session...");
     const session = await para.touchSession();
     if (session?.userId) {
@@ -54,19 +62,17 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess, onShowSecurityC
     return result;
   };
 
-  const waitForLoginAndFinish = async (context: string) => {
+  const waitForLoginAndFinish = async () => {
     setStatus("Finishing login...");
     await para.waitForLogin({});
-    await touchSession(context);
+    await touchSession();
     onSuccess();
   };
 
   const waitForSignupAndFinish = async () => {
     setStatus("Finalizing account...");
     await para.waitForSignup({});
-    await touchSession("signup");
-    // @ts-expect-error: userSetupAfterLogin is protected on ParaCore but required to hydrate session after portal signup
-    await para.userSetupAfterLogin();
+    await touchSession();
     setShowSecurityChoice(false);
     onSuccess();
   };
@@ -96,19 +102,29 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess, onShowSecurityC
             const waitForLoginResult = await para.waitForLogin();
             const needsWallet =
               waitForLoginResult?.needsWallet ||
-              (Array.isArray(para.currentWalletIdsArray) ? para.currentWalletIdsArray.length === 0 : false);
+              (Array.isArray(para.currentWalletIdsArray)
+                ? para.currentWalletIdsArray.length === 0
+                : false);
 
-            if (needsWallet && typeof para.waitForWalletCreation === "function") {
+            if (
+              needsWallet &&
+              typeof para.waitForWalletCreation === "function"
+            ) {
               setStatus("Creating your Para wallet...");
               await para.waitForWalletCreation({});
             }
 
-            await touchSession("oauth final");
+            await touchSession();
             setStatus("");
             onSuccess();
           } catch (err) {
-            console.error("[OAuthAuth] Error completing login after portal callback", err);
-            setError(err instanceof Error ? err.message : "Failed to finish login");
+            console.error(
+              "[OAuthAuth] Error completing login after portal callback",
+              err
+            );
+            setError(
+              err instanceof Error ? err.message : "Failed to finish login"
+            );
             setStatus("");
           }
         } else if (status === "new_user") {
@@ -117,8 +133,15 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess, onShowSecurityC
             setStatus("Creating your Para account...");
             await waitForSignupAndFinish();
           } catch (finishError) {
-            console.error("[OAuthAuth] Error finishing signup after portal callback", finishError);
-            setError(finishError instanceof Error ? finishError.message : "Failed to finish signup");
+            console.error(
+              "[OAuthAuth] Error finishing signup after portal callback",
+              finishError
+            );
+            setError(
+              finishError instanceof Error
+                ? finishError.message
+                : "Failed to finish signup"
+            );
           }
         }
         setPendingOAuthProvider(null);
@@ -127,7 +150,11 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess, onShowSecurityC
       }
 
       // Original Para redirect handling (fallback for non-portal flow)
-      if (url.includes(FARCASTER_CALLBACK_URL) && pendingOAuthProvider && pendingOAuthProvider !== "FARCASTER") {
+      if (
+        url.includes(FARCASTER_CALLBACK_URL) &&
+        pendingOAuthProvider &&
+        pendingOAuthProvider !== "FARCASTER"
+      ) {
         try {
           setStatus("Verifying authentication...");
 
@@ -139,19 +166,25 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess, onShowSecurityC
           if (verifiedAuthState.stage === "login") {
             if (verifiedAuthState.passwordUrl) {
               setStatus("Redirecting to password login...");
-              await openAuthUrl(verifiedAuthState.passwordUrl, "password login");
+              await openAuthUrl(
+                verifiedAuthState.passwordUrl,
+                "password login"
+              );
               await waitForLoginAndFinish("password");
             } else {
               setStatus("Logging in with passkey...");
               await para.loginWithPasskey();
-              await touchSession("passkey login");
+              await touchSession();
               onSuccess();
             }
           } else if (verifiedAuthState.stage === "signup") {
             setShowSecurityChoice(true);
             onShowSecurityChoice?.();
             setStatus("");
-          } else if (verifiedAuthState.stage === "verify" && verifiedAuthState.loginUrl) {
+          } else if (
+            verifiedAuthState.stage === "verify" &&
+            verifiedAuthState.loginUrl
+          ) {
             await openAuthUrl(verifiedAuthState.loginUrl, "one-click signup");
             await waitForSignupAndFinish();
           } else {
@@ -159,7 +192,9 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess, onShowSecurityC
           }
         } catch (err) {
           console.error("[OAuthAuth] Error handling deeplink", err);
-          setError(err instanceof Error ? err.message : "OAuth verification failed");
+          setError(
+            err instanceof Error ? err.message : "OAuth verification failed"
+          );
         } finally {
           setPendingOAuthProvider(null);
           setLoading(false);
@@ -181,7 +216,7 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess, onShowSecurityC
       waitForLoginAndFinish,
       setAuthState,
       setError,
-    ],
+    ]
   );
 
   useEffect(() => {
@@ -213,7 +248,9 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess, onShowSecurityC
       }
     } catch (err) {
       console.error("[OAuthAuth] OAuth launch error", err);
-      setError(err instanceof Error ? err.message : "OAuth authentication failed");
+      setError(
+        err instanceof Error ? err.message : "OAuth authentication failed"
+      );
       setLoading(false);
       setPendingOAuthProvider(null);
     }
@@ -228,7 +265,9 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess, onShowSecurityC
       const paraWithInternals = para as ParaWithInternals;
 
       if (!paraWithInternals.constructPortalUrl) {
-        throw new Error("Farcaster portal login is not supported in this SDK version.");
+        throw new Error(
+          "Farcaster portal login is not supported in this SDK version."
+        );
       }
 
       const touchSessionResult = await para.touchSession(true);
@@ -236,10 +275,13 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess, onShowSecurityC
         sessionLookupId: touchSessionResult.sessionLookupId,
       });
 
-      const portalUrl = await paraWithInternals.constructPortalUrl("loginFarcaster", {
-        appScheme: FARCASTER_CALLBACK_URL,
-        params: { nativeCallbackUrl: APP_CALLBACK_URL },
-      });
+      const portalUrl = await paraWithInternals.constructPortalUrl(
+        "loginFarcaster",
+        {
+          appScheme: FARCASTER_CALLBACK_URL,
+          params: { nativeCallbackUrl: APP_CALLBACK_URL },
+        }
+      );
 
       setStatus("Complete authentication in Farcaster portal...");
       const result = await openAuthUrl(portalUrl, "farcaster authentication");
@@ -257,7 +299,9 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess, onShowSecurityC
       }
     } catch (err) {
       console.error("[OAuthAuth] Farcaster portal flow failed", err);
-      setError(err instanceof Error ? err.message : "Farcaster authentication failed");
+      setError(
+        err instanceof Error ? err.message : "Farcaster authentication failed"
+      );
       setPendingOAuthProvider(null);
       setLoading(false);
     }
@@ -268,7 +312,9 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess, onShowSecurityC
 
     setPendingOAuthProvider(provider);
 
-    console.info("[OAuthAuth] Getting OAuth URL without appScheme to force portal callback");
+    console.info(
+      "[OAuthAuth] Getting OAuth URL without appScheme to force portal callback"
+    );
     const oauthUrl = await para.getOAuthUrl({
       method: provider,
     });
@@ -276,7 +322,10 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess, onShowSecurityC
     console.info("[OAuthAuth] OAuth URL received:", oauthUrl);
     console.info("[OAuthAuth] Expected callback URL:", APP_CALLBACK_URL);
 
-    const result = await openAuthUrl(oauthUrl, `${provider.toLowerCase()} authentication`);
+    const result = await openAuthUrl(
+      oauthUrl,
+      `${provider.toLowerCase()} authentication`
+    );
 
     console.info("[OAuthAuth] Auth session result:", result);
 
@@ -348,22 +397,17 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess, onShowSecurityC
               key={provider.method}
               style={[styles.providerButton, loading && styles.disabledButton]}
               onPress={() => handleOAuthLogin(provider.method)}
-              disabled={loading}>
+              disabled={loading}
+            >
               <Text style={styles.providerButtonText}>{provider.name}</Text>
             </TouchableOpacity>
           ))}
         </View>
       ) : (
-        <SecurityChoice
-          onChoice={handleSecurityChoice}
-          loading={loading}
-        />
+        <SecurityChoice onChoice={handleSecurityChoice} loading={loading} />
       )}
 
-      <StatusDisplay
-        status={status}
-        error={error}
-      />
+      <StatusDisplay status={status} error={error} />
     </View>
   );
 };
