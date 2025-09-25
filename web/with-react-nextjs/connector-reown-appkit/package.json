@@ -19,8 +19,8 @@
     "@cosmjs/stargate": "^0.34.0",
     "@cosmjs/tendermint-rpc": "^0.34.0",
     "@getpara/graz": "2.0.0-alpha.18",
-    "@getpara/react-sdk": "2.0.0-alpha.57",
-    "@getpara/wagmi-v2-integration": "2.0.0-alpha.57",
+    "@getpara/react-sdk": "2.0.0-alpha.58",
+    "@getpara/wagmi-v2-integration": "2.0.0-alpha.58",
     "@leapwallet/cosmos-social-login-capsule-provider": "^0.0.44",
     "@reown/appkit": "^1.7.16",
     "@reown/appkit-adapter-wagmi": "^1.7.16",
@@ -52,8 +52,8 @@
     "typescript-eslint": "^8.29.0"
   },
   "resolutions": {
-    "@getpara/react-sdk": "2.0.0-alpha.57",
-    "@getpara/cosmjs-v0-integration": "2.0.0-alpha.57",
-    "@getpara/user-management-client": "2.0.0-alpha.57"
+    "@getpara/react-sdk": "2.0.0-alpha.58",
+    "@getpara/cosmjs-v0-integration": "2.0.0-alpha.58",
+    "@getpara/user-management-client": "2.0.0-alpha.58"
   }
 }
