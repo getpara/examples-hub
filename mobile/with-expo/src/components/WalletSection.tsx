@@ -39,21 +39,25 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
     setStatus("Loading wallet information...");
 
     try {
-      console.log("[WalletSection] Loading wallet info");
+      console.info("[WalletSection] Loading wallet info");
       let sessionNeedsWallet: boolean | null = null;
 
       try {
         const session = await para.touchSession();
-        console.log("[WalletSection] touchSession result", session);
+        console.info("[WalletSection] touchSession result", session);
         if (session && typeof session.needsWallet === "boolean") {
           sessionNeedsWallet = session.needsWallet;
         }
       } catch (_sessionErr) {
         // touchSession may fail if the local session cache is already current. Safe to continue.
-        console.log("[WalletSection] touchSession unavailable", _sessionErr);
+        console.info("[WalletSection] touchSession unavailable", _sessionErr);
       }
 
       const fetchedWallets = await para.fetchWallets();
+      console.info("[WalletSection] fetchWallets returned", {
+        total: fetchedWallets.length,
+        hasAddresses: fetchedWallets.filter(wallet => wallet.address).length,
+      });
 
       const normalizedWallets = fetchedWallets
         .filter(wallet => wallet.address)
@@ -62,9 +66,23 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
           signer: para.wallets[entity.id]?.signer,
         })) as Wallet[];
 
+      console.info("[WalletSection] Normalized wallet candidates", {
+        total: normalizedWallets.length,
+        evmCount: normalizedWallets.filter(wallet => wallet.type === "EVM").length,
+      });
+
       const evmWallets = normalizedWallets.filter(wallet => wallet.type === "EVM");
 
       if (evmWallets.length > 0) {
+        const existingCurrentIds = para.currentWalletIds || {};
+        const updatedCurrentIds = {
+          ...existingCurrentIds,
+          EVM: [evmWallets[0].id],
+        };
+
+        await para.setCurrentWalletIds(updatedCurrentIds);
+        console.info("[WalletSection] setCurrentWalletIds for existing wallet", updatedCurrentIds);
+
         await para.setWallets(
           normalizedWallets.reduce<Record<string, Wallet>>((acc, wallet) => {
             acc[wallet.id] = wallet;
@@ -74,26 +92,44 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
 
         setWallet(evmWallets[0]);
         setStatus("");
-        console.log("[WalletSection] Using existing wallet", evmWallets[0]);
+        console.info("[WalletSection] Using existing wallet", {
+          walletId: evmWallets[0].id,
+          address: evmWallets[0].address,
+        });
         return;
       }
 
       if (sessionNeedsWallet === false) {
         setStatus("No wallets returned for this account.");
-        console.log("[WalletSection] Session reports no wallet needed");
+        console.info("[WalletSection] Session reports no wallet needed");
         return;
       }
 
       setStatus("No wallet found. Creating new EVM wallet...");
-      console.log("[WalletSection] Creating EVM wallet");
+      console.info("[WalletSection] Creating EVM wallet");
       await para.createWallet({ type: "EVM" });
 
       const newWallets = await para.getWalletsByType("EVM");
-      console.log("[WalletSection] Wallets after creation", newWallets);
+      console.info("[WalletSection] Wallets after creation", {
+        count: newWallets?.length ?? 0,
+        firstWallet: newWallets?.[0]?.id,
+      });
       if (newWallets && newWallets.length > 0) {
+        const existingCurrentIds = para.currentWalletIds || {};
+        const updatedCurrentIds = {
+          ...existingCurrentIds,
+          EVM: [newWallets[0].id],
+        };
+
+        await para.setCurrentWalletIds(updatedCurrentIds);
+        console.info("[WalletSection] setCurrentWalletIds for newly created wallet", updatedCurrentIds);
+
         setWallet(newWallets[0]);
         setStatus("");
-        console.log("[WalletSection] Created wallet", newWallets[0]);
+        console.info("[WalletSection] Created wallet", {
+          walletId: newWallets[0].id,
+          address: newWallets[0].address,
+        });
       } else {
         setError("Wallet creation completed but no wallet was returned yet. Try again in a moment.");
       }
@@ -122,6 +158,10 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
     setSignature("");
 
     try {
+      console.info("[WalletSection] signMessage start", {
+        walletId: wallet.id,
+        messagePreview: messageToSign.slice(0, 64),
+      });
       // Para requires base64 encoded messages
       const messageBase64 = btoa(messageToSign);
 
@@ -135,11 +175,17 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
       if ("signature" in sig) {
         setSignature(sig.signature);
         setStatus("");
+        console.info("[WalletSection] signMessage success", {
+          walletId: wallet.id,
+          signatureLength: sig.signature.length,
+        });
       } else {
         setError("Failed to get signature");
+        console.warn("[WalletSection] signMessage missing signature property", sig);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to sign message");
+      console.error("[WalletSection] signMessage error", err);
     } finally {
       setSigningMessage(false);
     }
@@ -157,6 +203,9 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
     setTxSignature("");
 
     try {
+      console.info("[WalletSection] signTransaction start", {
+        walletId: wallet.id,
+      });
       // Create provider for Sepolia testnet
       const provider = new ethers.JsonRpcProvider("https://ethereum-sepolia-rpc.publicnode.com");
       
@@ -173,6 +222,11 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
 
       // Populate the transaction with necessary fields (nonce, gas prices, etc)
       const populatedTx = await signer.populateTransaction(tx);
+      console.info("[WalletSection] signTransaction populated", {
+        gasLimit: populatedTx.gasLimit?.toString(),
+        to: populatedTx.to,
+        value: populatedTx.value?.toString(),
+      });
       
       // Sign the transaction without broadcasting
       const signedTx = await signer.signTransaction(populatedTx);
@@ -180,9 +234,14 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
       // Display the signed transaction
       setTxSignature(signedTx);
       setStatus("");
+      console.info("[WalletSection] signTransaction success", {
+        walletId: wallet.id,
+        signatureLength: signedTx.length,
+      });
       
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to sign transaction");
+      console.error("[WalletSection] signTransaction error", err);
     } finally {
       setSigningTransaction(false);
     }

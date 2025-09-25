@@ -87,9 +87,37 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess, onShowSecurityC
 
         if (status === "complete") {
           para.isEnclaveUser = true;
+          setStatus("Finishing login...");
+
           // @ts-expect-error: userSetupAfterLogin is protected on ParaCore but required for portal-based auth flows
-          await para.userSetupAfterLogin();
-          await touchSession("oauth");
+          const initialSession = await para.userSetupAfterLogin();
+          let waitForLoginResult: { needsWallet?: boolean; partnerId?: string } | undefined;
+
+          try {
+            waitForLoginResult = await para.waitForLogin({ skipSessionRefresh: true });
+            console.info("[OAuthAuth] waitForLogin result after portal callback", waitForLoginResult);
+          } catch (waitError) {
+            console.warn("[OAuthAuth] waitForLogin after portal callback failed", waitError);
+          }
+
+          const session = await touchSession("oauth");
+
+          const needsWallet =
+            waitForLoginResult?.needsWallet ??
+            (typeof session?.needsWallet === "boolean" ? session.needsWallet : undefined) ??
+            (typeof initialSession?.needsWallet === "boolean" ? initialSession.needsWallet : false);
+
+          if (needsWallet && typeof para.waitForWalletCreation === "function") {
+            try {
+              setStatus("Creating your Para wallet...");
+              await para.waitForWalletCreation({});
+              await touchSession("oauth wallet creation");
+            } catch (walletCreationError) {
+              console.warn("[OAuthAuth] waitForWalletCreation failed after portal callback", walletCreationError);
+            }
+          }
+
+          setStatus("");
           onSuccess();
         } else if (status === "new_user") {
           para.isEnclaveUser = true;
