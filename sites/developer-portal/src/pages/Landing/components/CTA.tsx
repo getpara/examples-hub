@@ -2,7 +2,10 @@ import { ON_RAMP_DOCS_LINK } from '../../../utils/constants';
 import { Button, StarsFilled, Typography } from '@getpara/react-component-library';
 import { ChevronRight } from 'lucide-react';
 
+// Leaving this component here for now in case we want to re-enable it later
 export const CTA = () => {
+  return null;
+
   return (
     <a className="para:w-full" href={ON_RAMP_DOCS_LINK} target="_blank">
       <Button className="para:w-full para:h-[50px] para:rounded-[12px]">

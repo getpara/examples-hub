@@ -65,6 +65,10 @@ export const MODAL_DESIGNER_LINK = 'https://demo.getpara.com';
 export const EXAMPLES_HUB_LINK = 'https://github.com/getpara/examples-hub';
 export const CALENDLY_LINK = 'https://calendly.com/d/ynr-2s7-g5f/capsule-partner-call';
 
+export const SLACK_COMMUNITY_LINK =
+  'https://join.slack.com/t/para-community/shared_invite/zt-304keeulc-Oqs4eusCUAJEpE9DBwAqrg';
+export const TELEGRAM_SUPPORT_LINK = 'https://t.me/para_ai_bot';
+
 export const FRAMEWORK_OPTIONS: Framework[] = [
   Framework.REACT,
   Framework.NEXT,

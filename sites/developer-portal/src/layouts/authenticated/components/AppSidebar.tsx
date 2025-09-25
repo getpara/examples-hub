@@ -10,6 +10,8 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
+  Slack,
+  Telegram,
 } from '@getpara/react-component-library';
 import {
   ArrowUpDown,
@@ -24,7 +26,7 @@ import {
   Users,
 } from 'lucide-react';
 import { Link, useLocation, useParams } from 'react-router-dom';
-import { MODAL_DESIGNER_LINK } from '../../../utils/constants';
+import { MODAL_DESIGNER_LINK, SLACK_COMMUNITY_LINK, TELEGRAM_SUPPORT_LINK } from '../../../utils/constants';
 import { OrganizationDropdown } from '../../../components/NavComponents/OrganizationDropdown';
 import { useEffect } from 'react';
 
@@ -88,9 +90,25 @@ const CONFIG_ITEMS: SidebarItem[] = [
   },
 ];
 
+const SUPPORT_ITEMS: SidebarItem[] = [
+  {
+    text: 'Para Community',
+    path: SLACK_COMMUNITY_LINK,
+    Icon: Slack as LucideIcon,
+    external: true,
+  },
+  {
+    text: 'Telegram Support',
+    path: TELEGRAM_SUPPORT_LINK,
+    Icon: Telegram as LucideIcon,
+    external: true,
+  },
+];
+
 const GROUPS: TSidebarGroup[] = [
   { title: 'Project', items: PROJECT_ITEMS },
   { title: 'Configuration', items: CONFIG_ITEMS },
+  { title: 'Support', items: SUPPORT_ITEMS },
 ];
 
 export const AppSidebar = () => {
