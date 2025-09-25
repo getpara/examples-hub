@@ -8,7 +8,7 @@ import { SecurityChoice } from "./SecurityChoice";
 import { AuthState, AuthStateSignup } from "@getpara/react-native-wallet";
 
 // OAuth providers supported by Para SDK
-type SupportedOAuthMethod = "GOOGLE" | "DISCORD" | "TWITTER" | "APPLE" | "FACEBOOK" | "FARCASTER";
+type SupportedOAuthMethod = "GOOGLE" | "FARCASTER";
 
 interface OAuthAuthProps {
   onSuccess: () => void;
@@ -19,6 +19,11 @@ interface OAuthAuthProps {
 // Must match scheme in app.json for deep linking
 const APP_SCHEME = "para-sdk-demo";
 const APP_CALLBACK_URL = `${APP_SCHEME}://para`;
+const FARCASTER_CALLBACK_URL = `${APP_CALLBACK_URL}?method=login`;
+
+type ParaWithInternals = typeof para & {
+  constructPortalUrl?: (type: string, opts?: Record<string, unknown>) => Promise<string>;
+};
 
 export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess, onShowSecurityChoice, onHideSecurityChoice }) => {
   const [loading, setLoading] = useState(false);
@@ -28,7 +33,7 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess, onShowSecurityC
   const [authState, setAuthState] = useState<AuthState | null>(null);
   const [showSecurityChoice, setShowSecurityChoice] = useState(false);
 
-  const touchSession = async (context: string) => {
+  const touchSession = async (_context: string) => {
     setStatus("Restoring session...");
     const session = await para.touchSession();
     if (session?.userId) {
@@ -68,26 +73,32 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess, onShowSecurityC
 
   const handleDeeplink = useCallback(
     async (url: string) => {
-      // Check for portal OAuth callback with status
-      if (url.includes(APP_CALLBACK_URL) && url.includes("status=")) {
+      // Check for portal OAuth callback (status param is optional)
+      if (url.startsWith(APP_CALLBACK_URL)) {
         const urlObj = new URL(url);
-        const status = urlObj.searchParams.get('status');
+        const methodParam = urlObj.searchParams.get("method");
 
-        if (status === 'complete') {
-          // OAuth completed successfully via portal
+        if (methodParam === "login" && pendingOAuthProvider === "FARCASTER") {
+          console.info("[OAuthAuth] Received Farcaster deeplink:", url);
+          return;
+        }
+
+        const status = urlObj.searchParams.get("status") ?? "complete";
+
+        if (status === "complete") {
           para.isEnclaveUser = true;
           // @ts-expect-error: userSetupAfterLogin is protected on ParaCore but required for portal-based auth flows
           await para.userSetupAfterLogin();
           await touchSession("oauth");
           onSuccess();
-        } else if (status === 'new_user') {
+        } else if (status === "new_user") {
           para.isEnclaveUser = true;
           try {
             setStatus("Creating your Para account...");
             await waitForSignupAndFinish();
-          } catch (error) {
-            console.error("[OAuthAuth] Error finishing signup after portal callback", error);
-            setError(error instanceof Error ? error.message : "Failed to finish signup");
+          } catch (finishError) {
+            console.error("[OAuthAuth] Error finishing signup after portal callback", finishError);
+            setError(finishError instanceof Error ? finishError.message : "Failed to finish signup");
           }
         }
         setPendingOAuthProvider(null);
@@ -95,70 +106,28 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess, onShowSecurityC
         return;
       }
 
-      // Handle Farcaster callback specifically
-      if (url.includes("://para?method=login") && pendingOAuthProvider === "FARCASTER") {
-        try {
-          setStatus("Verifying Farcaster authentication...");
-
-          // Verify Farcaster authentication
-          const verifiedAuthState = await para.verifyFarcaster({});
-          setAuthState(verifiedAuthState);
-
-          if (verifiedAuthState.stage === "login") {
-            // Existing user - use single-click login
-            setStatus("Completing login...");
-            await para.waitForLogin({});
-            await touchSession("farcaster login");
-            onSuccess();
-          } else if (verifiedAuthState.stage === "signup") {
-            // New user - complete signup with single-click
-            setStatus("Creating account...");
-            await para.waitForSignup({});
-            await touchSession("farcaster signup");
-            onSuccess();
-          } else if (verifiedAuthState.stage === "verify" && verifiedAuthState.loginUrl) {
-            // One-click signup flow
-            setStatus("Completing one-click signup...");
-            await openAuthUrl(verifiedAuthState.loginUrl, "one-click signup");
-            await waitForSignupAndFinish();
-          }
-        } catch (err) {
-          console.error("[OAuthAuth] Error handling Farcaster callback", err);
-          setError(err instanceof Error ? err.message : "Farcaster authentication failed");
-        } finally {
-          setPendingOAuthProvider(null);
-          setLoading(false);
-        }
-        return;
-      }
-
       // Original Para redirect handling (fallback for non-portal flow)
-      if (url.includes("://para?method=login") && pendingOAuthProvider && pendingOAuthProvider !== "FARCASTER") {
+      if (url.includes(FARCASTER_CALLBACK_URL) && pendingOAuthProvider && pendingOAuthProvider !== "FARCASTER") {
         try {
           setStatus("Verifying authentication...");
 
-          // Complete OAuth flow with Para backend
           const verifiedAuthState = await para.verifyOAuth({
             method: pendingOAuthProvider,
           });
           setAuthState(verifiedAuthState);
 
           if (verifiedAuthState.stage === "login") {
-            // Existing user - check if they use password or passkey
             if (verifiedAuthState.passwordUrl) {
-              // User has password-based security
               setStatus("Redirecting to password login...");
               await openAuthUrl(verifiedAuthState.passwordUrl, "password login");
               await waitForLoginAndFinish("password");
             } else {
-              // User has passkey-based security
               setStatus("Logging in with passkey...");
               await para.loginWithPasskey();
               await touchSession("passkey login");
               onSuccess();
             }
           } else if (verifiedAuthState.stage === "signup") {
-            // New user - show security choice
             setShowSecurityChoice(true);
             onShowSecurityChoice?.();
             setStatus("");
@@ -195,7 +164,6 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess, onShowSecurityC
     ],
   );
 
-  // Handle OAuth redirect back to app
   useEffect(() => {
     const subscription = Linking.addEventListener("url", (event) => {
       handleDeeplink(event.url);
@@ -232,57 +200,73 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess, onShowSecurityC
   };
 
   const handleFarcasterAuth = async () => {
-    console.log("[OAuthAuth] Starting Farcaster authentication flow");
+    console.info("[OAuthAuth] Starting Farcaster authentication flow");
 
-    // Track that we're authenticating with Farcaster
     setPendingOAuthProvider("FARCASTER");
 
-    // Get Farcaster connect URI
-    console.log("[OAuthAuth] Getting Farcaster connect URI");
-    const connectUri = await para.getFarcasterConnectUri({ appScheme: APP_SCHEME });
+    try {
+      const paraWithInternals = para as ParaWithInternals;
 
-    console.log("[OAuthAuth] Farcaster connect URI received:", connectUri);
+      if (!paraWithInternals.constructPortalUrl) {
+        throw new Error("Farcaster portal login is not supported in this SDK version.");
+      }
 
-    // Open Farcaster app or browser
-    console.log("[OAuthAuth] Opening Farcaster connect URI");
-    await Linking.openURL(connectUri);
+      const touchSessionResult = await para.touchSession(true);
+      console.info("[OAuthAuth] Prepared Farcaster session lookup", {
+        sessionLookupId: touchSessionResult.sessionLookupId,
+      });
 
-    // Wait for the user to complete authentication in Farcaster app
-    // The deeplink handler will process the callback
-    setStatus("Complete authentication in Farcaster app...");
+      const portalUrl = await paraWithInternals.constructPortalUrl("loginFarcaster", {
+        appScheme: FARCASTER_CALLBACK_URL,
+        params: { nativeCallbackUrl: APP_CALLBACK_URL },
+      });
+
+      setStatus("Complete authentication in Farcaster portal...");
+      const result = await openAuthUrl(portalUrl, "farcaster authentication");
+
+      if (result.type === "success" && result.url) {
+        await handleDeeplink(result.url);
+        return;
+      }
+
+      if (result.type === "cancel" || result.type === "dismiss") {
+        console.info("[OAuthAuth] Farcaster authentication cancelled by user");
+        setPendingOAuthProvider(null);
+        setLoading(false);
+        setError("Authentication cancelled");
+      }
+    } catch (err) {
+      console.error("[OAuthAuth] Farcaster portal flow failed", err);
+      setError(err instanceof Error ? err.message : "Farcaster authentication failed");
+      setPendingOAuthProvider(null);
+      setLoading(false);
+    }
   };
 
   const handleStandardOAuth = async (provider: SupportedOAuthMethod) => {
-    console.log("[OAuthAuth] Starting OAuth flow for provider:", provider);
+    console.info("[OAuthAuth] Starting OAuth flow for provider:", provider);
 
-    // Track which provider we're authenticating with
     setPendingOAuthProvider(provider);
 
-    // Get provider-specific OAuth URL from Para
-    // Don't pass appScheme to force API to use portal callback
-    console.log("[OAuthAuth] Getting OAuth URL without appScheme to force portal callback");
+    console.info("[OAuthAuth] Getting OAuth URL without appScheme to force portal callback");
     const oauthUrl = await para.getOAuthUrl({
       method: provider,
     });
 
-    console.log("[OAuthAuth] OAuth URL received:", oauthUrl);
-    console.log("[OAuthAuth] Expected callback URL:", APP_CALLBACK_URL);
+    console.info("[OAuthAuth] OAuth URL received:", oauthUrl);
+    console.info("[OAuthAuth] Expected callback URL:", APP_CALLBACK_URL);
 
-    // Launch in-app browser for OAuth consent
-    // Use openAuthUrl to add nativeCallbackUrl parameter
     const result = await openAuthUrl(oauthUrl, `${provider.toLowerCase()} authentication`);
 
-    console.log("[OAuthAuth] Auth session result:", result);
+    console.info("[OAuthAuth] Auth session result:", result);
 
     if (result.type === "success" && result.url) {
       await handleDeeplink(result.url);
       return;
     }
 
-    // Handle browser dismissal (success handled by deeplink)
-    // Note: openAuthUrl throws on cancel, so this code may not be reached
     if (result.type === "cancel" || result.type === "dismiss") {
-      console.log("[OAuthAuth] Authentication cancelled by user");
+      console.info("[OAuthAuth] Authentication cancelled by user");
       setPendingOAuthProvider(null);
       setLoading(false);
       setError("Authentication cancelled");
@@ -295,14 +279,12 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess, onShowSecurityC
 
     try {
       if (choice === "passkey") {
-        // Register passkey for future logins
         setStatus("Creating passkey...");
         await para.registerPasskey(authState as AuthStateSignup);
         setStatus("");
         onHideSecurityChoice?.();
         onSuccess();
       } else {
-        // Redirect to password creation
         setStatus("Redirecting to password creation...");
 
         if (authState && (authState as AuthStateSignup).passwordUrl) {
@@ -334,7 +316,6 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess, onShowSecurityC
     name: string;
   }[] = [
     { method: "GOOGLE", name: "Continue with Google" },
-    { method: "DISCORD", name: "Continue with Discord" },
     { method: "FARCASTER", name: "Continue with Farcaster" },
   ];
 
