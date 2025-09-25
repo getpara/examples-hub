@@ -84,41 +84,33 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess, onShowSecurityC
         }
 
         const status = urlObj.searchParams.get("status") ?? "complete";
+        console.info("[OAuthAuth] Portal callback status", { status, url });
 
         if (status === "complete") {
           para.isEnclaveUser = true;
           setStatus("Finishing login...");
-
-          // @ts-expect-error: userSetupAfterLogin is protected on ParaCore but required for portal-based auth flows
-          const initialSession = await para.userSetupAfterLogin();
-          let waitForLoginResult: { needsWallet?: boolean; partnerId?: string } | undefined;
-
           try {
-            waitForLoginResult = await para.waitForLogin({ skipSessionRefresh: true });
-            console.info("[OAuthAuth] waitForLogin result after portal callback", waitForLoginResult);
-          } catch (waitError) {
-            console.warn("[OAuthAuth] waitForLogin after portal callback failed", waitError);
-          }
+            // @ts-expect-error: userSetupAfterLogin is protected on ParaCore but required for portal-based auth flows
+            await para.userSetupAfterLogin();
 
-          const session = await touchSession("oauth");
+            const waitForLoginResult = await para.waitForLogin();
+            const needsWallet =
+              waitForLoginResult?.needsWallet ||
+              (Array.isArray(para.currentWalletIdsArray) ? para.currentWalletIdsArray.length === 0 : false);
 
-          const needsWallet =
-            waitForLoginResult?.needsWallet ??
-            (typeof session?.needsWallet === "boolean" ? session.needsWallet : undefined) ??
-            (typeof initialSession?.needsWallet === "boolean" ? initialSession.needsWallet : false);
-
-          if (needsWallet && typeof para.waitForWalletCreation === "function") {
-            try {
+            if (needsWallet && typeof para.waitForWalletCreation === "function") {
               setStatus("Creating your Para wallet...");
               await para.waitForWalletCreation({});
-              await touchSession("oauth wallet creation");
-            } catch (walletCreationError) {
-              console.warn("[OAuthAuth] waitForWalletCreation failed after portal callback", walletCreationError);
             }
-          }
 
-          setStatus("");
-          onSuccess();
+            await touchSession("oauth final");
+            setStatus("");
+            onSuccess();
+          } catch (err) {
+            console.error("[OAuthAuth] Error completing login after portal callback", err);
+            setError(err instanceof Error ? err.message : "Failed to finish login");
+            setStatus("");
+          }
         } else if (status === "new_user") {
           para.isEnclaveUser = true;
           try {
