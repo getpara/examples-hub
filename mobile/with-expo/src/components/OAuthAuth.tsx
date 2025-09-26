@@ -65,14 +65,14 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({
   const waitForLoginAndFinish = async () => {
     setStatus("Finishing login...");
     await para.waitForLogin({});
-    await touchSession();
     onSuccess();
   };
 
   const waitForSignupAndFinish = async () => {
     setStatus("Finalizing account...");
     await para.waitForSignup({});
-    await touchSession();
+    // @ts-expect-error: userSetupAfterLogin is protected on ParaCore but required to hydrate session after signup
+    await para.userSetupAfterLogin();
     setShowSecurityChoice(false);
     onSuccess();
   };
@@ -96,9 +96,6 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({
           para.isEnclaveUser = true;
           setStatus("Finishing login...");
           try {
-            // @ts-expect-error: userSetupAfterLogin is protected on ParaCore but required for portal-based auth flows
-            await para.userSetupAfterLogin();
-
             const waitForLoginResult = await para.waitForLogin();
             const needsWallet =
               waitForLoginResult?.needsWallet ||
@@ -114,7 +111,6 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({
               await para.waitForWalletCreation({});
             }
 
-            await touchSession();
             setStatus("");
             onSuccess();
           } catch (err) {
@@ -170,7 +166,7 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({
                 verifiedAuthState.passwordUrl,
                 "password login"
               );
-              await waitForLoginAndFinish("password");
+              await waitForLoginAndFinish();
             } else {
               setStatus("Logging in with passkey...");
               await para.loginWithPasskey();
