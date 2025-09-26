@@ -41,17 +41,7 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({
   const [authState, setAuthState] = useState<AuthState | null>(null);
   const [showSecurityChoice, setShowSecurityChoice] = useState(false);
 
-  const touchSession = async () => {
-    setStatus("Restoring session...");
-    const session = await para.touchSession();
-    if (session?.userId) {
-      await para.setUserId(session.userId);
-    }
-    setStatus("");
-    return session;
-  };
-
-  const openAuthUrl = async (url: string, context: string) => {
+  const openAuthUrl = useCallback(async (url: string, context: string) => {
     const authUrl = new URL(url);
     authUrl.searchParams.set("nativeCallbackUrl", APP_CALLBACK_URL);
     const finalUrl = authUrl.toString();
@@ -60,159 +50,163 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({
       throw new Error(`${context} cancelled`);
     }
     return result;
-  };
+  }, []);
 
-  const waitForLoginAndFinish = async () => {
+  const resetOAuthState = useCallback(() => {
+    setPendingOAuthProvider(null);
+    setLoading(false);
+  }, []);
+
+  const finalizeLogin = useCallback(async () => {
     setStatus("Finishing login...");
-    await para.waitForLogin({});
-    onSuccess();
-  };
+    const waitForLoginResult = await para.waitForLogin();
 
-  const waitForSignupAndFinish = async () => {
+    if (waitForLoginResult?.needsWallet && typeof para.waitForWalletCreation === "function") {
+      setStatus("Creating your Para wallet...");
+      await para.waitForWalletCreation({});
+    }
+
+    onSuccess();
+  }, [onSuccess]);
+
+  const finalizeSignup = useCallback(async () => {
     setStatus("Finalizing account...");
     await para.waitForSignup({});
     // @ts-expect-error: userSetupAfterLogin is protected on ParaCore but required to hydrate session after signup
     await para.userSetupAfterLogin();
     setShowSecurityChoice(false);
     onSuccess();
-  };
+  }, [onSuccess]);
 
-  const handleDeeplink = useCallback(
-    async (url: string) => {
-      // Check for portal OAuth callback (status param is optional)
-      if (url.startsWith(APP_CALLBACK_URL)) {
-        const urlObj = new URL(url);
-        const methodParam = urlObj.searchParams.get("method");
-
-        if (methodParam === "login" && pendingOAuthProvider === "FARCASTER") {
-          console.info("[OAuthAuth] Received Farcaster deeplink:", url);
-          return;
-        }
-
-        const status = urlObj.searchParams.get("status") ?? "complete";
-        console.info("[OAuthAuth] Portal callback status", { status, url });
-
-        if (status === "complete") {
-          para.isEnclaveUser = true;
-          setStatus("Finishing login...");
-          try {
-            const waitForLoginResult = await para.waitForLogin();
-            const needsWallet =
-              waitForLoginResult?.needsWallet ||
-              (Array.isArray(para.currentWalletIdsArray)
-                ? para.currentWalletIdsArray.length === 0
-                : false);
-
-            if (
-              needsWallet &&
-              typeof para.waitForWalletCreation === "function"
-            ) {
-              setStatus("Creating your Para wallet...");
-              await para.waitForWalletCreation({});
-            }
-
-            setStatus("");
-            onSuccess();
-          } catch (err) {
-            console.error(
-              "[OAuthAuth] Error completing login after portal callback",
-              err
-            );
-            setError(
-              err instanceof Error ? err.message : "Failed to finish login"
-            );
-            setStatus("");
-          }
-        } else if (status === "new_user") {
-          para.isEnclaveUser = true;
-          try {
-            setStatus("Creating your Para account...");
-            await waitForSignupAndFinish();
-          } catch (finishError) {
-            console.error(
-              "[OAuthAuth] Error finishing signup after portal callback",
-              finishError
-            );
-            setError(
-              finishError instanceof Error
-                ? finishError.message
-                : "Failed to finish signup"
-            );
-          }
-        }
-        setPendingOAuthProvider(null);
-        setLoading(false);
+  const handleLegacyLogin = useCallback(
+    async (state: AuthState) => {
+      if (state.stage !== "login") {
         return;
       }
 
-      // Original Para redirect handling (fallback for non-portal flow)
-      if (
-        url.includes(FARCASTER_CALLBACK_URL) &&
-        pendingOAuthProvider &&
-        pendingOAuthProvider !== "FARCASTER"
-      ) {
-        try {
-          setStatus("Verifying authentication...");
+      if (state.passwordUrl) {
+        setStatus("Redirecting to password login...");
+        await openAuthUrl(state.passwordUrl, "password login");
+        await finalizeLogin();
+        return;
+      }
 
-          const verifiedAuthState = await para.verifyOAuth({
-            method: pendingOAuthProvider,
-          });
-          setAuthState(verifiedAuthState);
+      setStatus("Logging in with passkey...");
+      await para.loginWithPasskey();
+      await finalizeLogin();
+    },
+    [openAuthUrl, finalizeLogin],
+  );
 
-          if (verifiedAuthState.stage === "login") {
-            if (verifiedAuthState.passwordUrl) {
-              setStatus("Redirecting to password login...");
-              await openAuthUrl(
-                verifiedAuthState.passwordUrl,
-                "password login"
-              );
-              await waitForLoginAndFinish();
-            } else {
-              setStatus("Logging in with passkey...");
-              await para.loginWithPasskey();
-              await touchSession();
-              onSuccess();
-            }
-          } else if (verifiedAuthState.stage === "signup") {
-            setShowSecurityChoice(true);
-            onShowSecurityChoice?.();
-            setStatus("");
-          } else if (
-            verifiedAuthState.stage === "verify" &&
-            verifiedAuthState.loginUrl
-          ) {
-            await openAuthUrl(verifiedAuthState.loginUrl, "one-click signup");
-            await waitForSignupAndFinish();
-          } else {
-            throw new Error("Unexpected authentication state");
-          }
-        } catch (err) {
-          console.error("[OAuthAuth] Error handling deeplink", err);
-          setError(
-            err instanceof Error ? err.message : "OAuth verification failed"
-          );
-        } finally {
-          setPendingOAuthProvider(null);
-          setLoading(false);
+  const handleLegacyVerify = useCallback(
+    async (state: AuthState) => {
+      if (state.stage !== "verify" || !state.loginUrl) {
+        throw new Error("Unexpected authentication state");
+      }
+
+      await openAuthUrl(state.loginUrl, "one-click signup");
+      await finalizeSignup();
+    },
+    [openAuthUrl, finalizeSignup],
+  );
+
+  const handleLegacyOAuthCallback = useCallback(async () => {
+    if (!pendingOAuthProvider || pendingOAuthProvider === "FARCASTER") {
+      return;
+    }
+
+    try {
+      console.info("[OAuthAuth] Handling legacy OAuth callback", {
+        provider: pendingOAuthProvider,
+      });
+      setStatus("Verifying authentication...");
+
+      const verifiedAuthState = await para.verifyOAuth({
+        method: pendingOAuthProvider,
+      });
+      setAuthState(verifiedAuthState);
+
+      switch (verifiedAuthState.stage) {
+        case "login":
+          await handleLegacyLogin(verifiedAuthState);
+          break;
+        case "signup":
+          setShowSecurityChoice(true);
+          onShowSecurityChoice?.();
+          setStatus("");
+          break;
+        case "verify":
+          await handleLegacyVerify(verifiedAuthState);
+          break;
+        default:
+          throw new Error("Unexpected authentication state");
+      }
+    } catch (err) {
+      console.error("[OAuthAuth] Error handling OAuth callback", err);
+      setError(err instanceof Error ? err.message : "OAuth verification failed");
+    } finally {
+      resetOAuthState();
+    }
+  }, [
+    pendingOAuthProvider,
+    handleLegacyLogin,
+    handleLegacyVerify,
+    onShowSecurityChoice,
+    resetOAuthState,
+  ]);
+
+  const handlePortalCallback = useCallback(
+    async (url: string) => {
+      const urlObj = new URL(url);
+      const methodParam = urlObj.searchParams.get("method");
+
+      console.info("[OAuthAuth] Portal callback received", { url });
+
+      if (methodParam === "login" && pendingOAuthProvider === "FARCASTER") {
+        console.info("[OAuthAuth] Received Farcaster deeplink:", url);
+        return;
+      }
+
+      const statusParam = urlObj.searchParams.get("status") ?? "complete";
+
+      try {
+        para.isEnclaveUser = true;
+
+        if (statusParam === "complete") {
+          await finalizeLogin();
+        } else if (statusParam === "new_user") {
+          await finalizeSignup();
+        } else {
+          console.warn("[OAuthAuth] Unknown portal status", statusParam);
         }
+      } catch (err) {
+        console.error("[OAuthAuth] Error completing portal callback", err);
+        const fallbackMessage = statusParam === "new_user" ? "Failed to finish signup" : "Failed to finish login";
+        setError(err instanceof Error ? err.message : fallbackMessage);
+      } finally {
+        resetOAuthState();
       }
     },
-    [
-      pendingOAuthProvider,
-      para,
-      touchSession,
-      onSuccess,
-      setStatus,
-      setShowSecurityChoice,
-      onShowSecurityChoice,
-      setPendingOAuthProvider,
-      setLoading,
-      openAuthUrl,
-      waitForSignupAndFinish,
-      waitForLoginAndFinish,
-      setAuthState,
-      setError,
-    ]
+    [pendingOAuthProvider, finalizeLogin, finalizeSignup, resetOAuthState],
+  );
+
+  const handleDeeplink = useCallback(
+    async (url: string) => {
+      if (url.startsWith(FARCASTER_CALLBACK_URL)) {
+        if (pendingOAuthProvider === "FARCASTER") {
+          console.info("[OAuthAuth] Ignoring intermediate Farcaster callback", { url });
+          return;
+        }
+
+        await handleLegacyOAuthCallback();
+        return;
+      }
+
+      if (url.startsWith(APP_CALLBACK_URL)) {
+        await handlePortalCallback(url);
+      }
+    },
+    [pendingOAuthProvider, handleLegacyOAuthCallback, handlePortalCallback],
   );
 
   useEffect(() => {
