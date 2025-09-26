@@ -41,110 +41,26 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
     setStatus("Loading wallet information...");
 
     try {
-      console.info("[WalletSection] Loading wallet info");
-      let sessionNeedsWallet: boolean | null = null;
+      await para.touchSession();
+      let fetchedWallets = await para.fetchWallets();
 
-      try {
-        const session = await para.touchSession();
-        console.info("[WalletSection] touchSession result", session);
-        if (session && typeof session.needsWallet === "boolean") {
-          sessionNeedsWallet = session.needsWallet;
-        }
-      } catch (_sessionErr) {
-        // touchSession may fail if the local session cache is already current. Safe to continue.
-        console.info("[WalletSection] touchSession unavailable", _sessionErr);
+      if (!fetchedWallets.some(wallet => wallet.type === "EVM")) {
+        console.info("[WalletSection] No wallets found, creating EVM wallet");
+        await para.createWallet({ type: "EVM" });
+        fetchedWallets = await para.fetchWallets();
       }
-
-      const fetchedWallets = await para.fetchWallets();
-      console.info("[WalletSection] fetchWallets returned", {
-        total: fetchedWallets.length,
-        hasAddresses: fetchedWallets.filter((wallet) => wallet.address).length,
-      });
 
       const normalizedWallets = fetchedWallets
-        .filter((wallet) => wallet.address)
-        .map((entity) => ({
-          ...entityToWallet(entity),
-          signer: para.wallets[entity.id]?.signer,
-        })) as Wallet[];
+        .filter(wallet => wallet.address)
+        .map(entity => entityToWallet(entity)) as Wallet[];
 
-      console.info("[WalletSection] Normalized wallet candidates", {
-        total: normalizedWallets.length,
-        evmCount: normalizedWallets.filter((wallet) => wallet.type === "EVM")
-          .length,
-      });
+      const evmWallet = normalizedWallets.find(candidate => candidate.type === "EVM");
 
-      const evmWallets = normalizedWallets.filter(
-        (wallet) => wallet.type === "EVM"
-      );
-
-      if (evmWallets.length > 0) {
-        const existingCurrentIds = para.currentWalletIds || {};
-        const updatedCurrentIds = {
-          ...existingCurrentIds,
-          EVM: [evmWallets[0].id],
-        };
-
-        await para.setCurrentWalletIds(updatedCurrentIds);
-        console.info(
-          "[WalletSection] setCurrentWalletIds for existing wallet",
-          updatedCurrentIds
-        );
-
-        await para.setWallets(
-          normalizedWallets.reduce<Record<string, Wallet>>((acc, wallet) => {
-            acc[wallet.id] = wallet;
-            return acc;
-          }, {})
-        );
-
-        setWallet(evmWallets[0]);
+      if (evmWallet) {
+        setWallet(evmWallet);
         setStatus("");
-        console.info("[WalletSection] Using existing wallet", {
-          walletId: evmWallets[0].id,
-          address: evmWallets[0].address,
-        });
-        return;
-      }
-
-      if (sessionNeedsWallet === false) {
-        setStatus("No wallets returned for this account.");
-        console.info("[WalletSection] Session reports no wallet needed");
-        return;
-      }
-
-      setStatus("No wallet found. Creating new EVM wallet...");
-      console.info("[WalletSection] Creating EVM wallet");
-      await para.createWallet({ type: "EVM" });
-
-      const newWallets = await para.getWalletsByType("EVM");
-      console.info("[WalletSection] Wallets after creation", {
-        count: newWallets?.length ?? 0,
-        firstWallet: newWallets?.[0]?.id,
-      });
-      if (newWallets && newWallets.length > 0) {
-        const existingCurrentIds = para.currentWalletIds || {};
-        const updatedCurrentIds = {
-          ...existingCurrentIds,
-          EVM: [newWallets[0].id],
-        };
-
-        await para.setCurrentWalletIds(updatedCurrentIds);
-        console.info(
-          "[WalletSection] setCurrentWalletIds for newly created wallet",
-          updatedCurrentIds
-        );
-
-        setWallet(newWallets[0]);
-        setStatus("");
-        console.info("[WalletSection] Created wallet", {
-          walletId: newWallets[0].id,
-          address: newWallets[0].address,
-        });
       } else {
-        setError(
-          "Wallet creation completed but no wallet was returned yet. Try again in a moment."
-        );
+        setStatus("No wallets available for this account.");
       }
     } catch (err) {
       console.error("[WalletSection] Failed to load wallet info", err);

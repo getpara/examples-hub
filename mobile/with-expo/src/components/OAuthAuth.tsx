@@ -74,9 +74,12 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({
 
   const finalizeSignup = useCallback(async () => {
     setStatus("Finalizing account...");
+
     await para.waitForSignup({});
     // @ts-expect-error: userSetupAfterLogin is protected on ParaCore but required to hydrate session after signup
     await para.userSetupAfterLogin();
+
+    setStatus("");
     setShowSecurityChoice(false);
     onSuccess();
   }, [onSuccess]);
