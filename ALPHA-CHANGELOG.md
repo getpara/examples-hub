@@ -1,3 +1,37 @@
+# Release (Fri Sep 26 2025)
+
+## Package Versions
+- @getpara/web-sdk@2.0.0-alpha.60
+- @getpara/wagmi-v2-integration@2.0.0-alpha.60
+- @getpara/wagmi-v2-connector@2.0.0-alpha.60
+- @getpara/viem-v2-integration@2.0.0-alpha.60
+- @getpara/viem-v1-integration@2.0.0-alpha.60
+- @getpara/user-management-client@2.0.0-alpha.60
+- @getpara/solana-web3.js-v1-integration@2.0.0-alpha.60
+- @getpara/solana-wallet-connectors@2.0.0-alpha.60
+- @getpara/solana-signers-v2-integration@2.0.0-alpha.60
+- @getpara/server-sdk@2.0.0-alpha.60
+- @getpara/react-sdk-lite@2.0.0-alpha.60
+- @getpara/react-sdk@2.0.0-alpha.60
+- @getpara/react-native-wallet@2.0.0-alpha.60
+- @getpara/react-components@2.0.0-alpha.60
+- @getpara/react-component-library@1.0.0-alpha.55
+- @getpara/react-common@2.0.0-alpha.60
+- @getpara/evm-wallet-connectors@2.0.0-alpha.60
+- @getpara/ethers-v6-integration@2.0.0-alpha.60
+- @getpara/ethers-v5-integration@2.0.0-alpha.60
+- @getpara/cosmos-wallet-connectors@2.0.0-alpha.60
+- @getpara/cosmjs-v0-integration@2.0.0-alpha.60
+- @getpara/core-sdk@2.0.0-alpha.60
+- @getpara/core-components@2.0.0-alpha.60
+
+### Features
+- Add external wallet to session (#1233) - e190da2f7
+
+
+### Chores
+- Dev portal - Add support links and remove CTA (#1234) - 7af321319
+
 # Release (Thu Sep 25 2025)
 
 ## Package Versions

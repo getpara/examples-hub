@@ -388,12 +388,6 @@ async function main() {
       console.log(`🔄 Will increment version: ${localVersion} → ${nextVersion}`);
       console.log('🔧 Preparing for version increment...');
 
-      // Reset Nx cache to ensure clean state (only if we need to increment)
-      runCommand('yarn nx reset', 'Resetting Nx cache for clean build state', true, dryRun, false, commandSummary);
-
-      // Build all packages to ensure they're up-to-date (only if we need to increment)
-      runCommand('yarn build', 'Building all packages before version increment', true, dryRun, false, commandSummary);
-
       // Now do the version increment
       runCommand(
         'yarn alpha-version',
