@@ -6,7 +6,7 @@ import { ParaWagmiProviderProps } from '@getpara/evm-wallet-connectors';
 import { useInternalClient } from '../hooks/utils/useInternalClient.js';
 import { useStore } from '../stores/useStore.js';
 import { EVM_WALLETS } from '@getpara/web-sdk';
-import { useWallet } from '../hooks/index.js';
+import { useWalletState } from '../hooks/index.js';
 
 export const EvmWalletWrapper = <
   chains extends readonly [Chain, ...Chain[]],
@@ -22,7 +22,7 @@ export const EvmWalletWrapper = <
   onSwitchWallet: ({ address, error }: { address?: string; error?: string }) => void;
 } & PropsWithChildren) => {
   const para = useInternalClient();
-  const { data: wallet } = useWallet();
+  const { selectedWallet } = useWalletState();
   const externalWalletsWithFullAuth = useStore(state => state.externalWalletsWithFullAuth);
   const wallets = useStore(state => state.externalWallets);
   const connectionOnly = useStore(state => state.connectionOnly);
@@ -37,7 +37,7 @@ export const EvmWalletWrapper = <
         onSwitchWallet,
         para,
         walletsWithFullAuth: externalWalletsWithFullAuth,
-        connectedWallet: wallet,
+        connectedWallet: selectedWallet?.id ? { id: selectedWallet.id, type: selectedWallet.type } : null,
         connectionOnly,
         includeWalletVerification,
       }}

@@ -3,6 +3,7 @@ import { AccountTypeIcon, GradientScroll, StepContainer } from '../common.js';
 import { CpslButton, CpslDivider, CpslText } from '@getpara/react-components';
 import { useExternalWallets } from '../../../provider/providers/ExternalWalletProvider.js';
 import { useAccountLinking } from '../../../provider/providers/AccountLinkProvider.js';
+import { useLinkedAccounts } from '../../../provider/hooks/index.js';
 import { useEffect, useMemo } from 'react';
 import { TLinkedAccountType } from '@getpara/web-sdk';
 import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
@@ -14,7 +15,8 @@ export function AccountProfileLinkOptions() {
   const para = useInternalClient();
   const { accountLinkOptions, linkAccount, isLinkAccountPending, linkAccountError, setLinkAccountError, resetMutations } =
     useAccountLinking();
-  const { wallet: connectedWallet, wallets } = useExternalWallets();
+  const { wallets } = useExternalWallets();
+  const { data: linkedAccounts } = useLinkedAccounts();
 
   const [isEmail, isPhone, externalWalletIndex, isOptions] = [
     accountLinkOptions.includes('EMAIL'),
@@ -38,10 +40,22 @@ export function AccountProfileLinkOptions() {
         baseOptions.filter(option => {
           if (
             !wallets.some(wallet => wallet.id === option) ||
-            (connectedWallet?.id !== option &&
-              wallets.some(({ type, id, installed, isMobile }) => {
-                return (installed || isMobile) && para?.supportedWalletTypes.some(obj => obj.type === type) && id === option;
-              }))
+            wallets.some(({ type, id, installed, isMobile }) => {
+              // Check if this wallet is installed/mobile and supported
+              if (!(installed || isMobile) || !para?.supportedWalletTypes.some(obj => obj.type === type) || id !== option) {
+                return false;
+              }
+
+              // Check if this specific wallet type is already linked
+              const isAlreadyLinked = [...(linkedAccounts?.primary || []), ...(linkedAccounts?.linked || [])].some(
+                linkedAccount => {
+                  return linkedAccount.externalWallet?.providerId === id && linkedAccount.externalWallet?.type === type;
+                },
+              );
+
+              // Only show if not already linked
+              return !isAlreadyLinked;
+            })
           ) {
             return true;
           }
@@ -49,7 +63,7 @@ export function AccountProfileLinkOptions() {
         }),
       ),
     );
-  }, [accountLinkOptions, externalWalletIndex, wallets]);
+  }, [accountLinkOptions, externalWalletIndex, wallets, linkedAccounts, para?.supportedWalletTypes]);
 
   useEffect(() => {
     resetMutations();

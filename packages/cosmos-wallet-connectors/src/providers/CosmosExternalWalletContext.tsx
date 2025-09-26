@@ -61,7 +61,7 @@ export function CosmosExternalWalletProvider({
   onSwitchChain,
   para,
   walletsWithFullAuth,
-  connectedWallet,
+  connectedWallet: connectedWalletProp,
   includeWalletVerification,
   connectionOnly,
 }: CosmosExternalWalletProviderConfigFull & PropsWithChildren) {
@@ -80,6 +80,9 @@ export function CosmosExternalWalletProvider({
   const { walletType } = useActiveWalletType();
   const isLocalConnecting = useExternalWalletStore(state => state.isConnecting);
   const updateExternalWalletState = useExternalWalletStore(state => state.updateState);
+  const isConnectError = useRef(false);
+
+  const connectedWallet = connectedWalletProp ? para.findWallet(connectedWalletProp.id, connectedWalletProp.type) : null;
 
   const ethAddress = multiChain
     ? account?.[selectedChainId]?.ethereumHexAddress?.toLowerCase()
@@ -202,20 +205,28 @@ export function CosmosExternalWalletProvider({
         connectedWallet &&
         connectedWallet.type === 'COSMOS' &&
         (connectedWallet.isExternal ? walletType !== connectedWallet.name?.toLowerCase() : walletType !== 'para') &&
-        !isLinkingAccount.current
+        !isLinkingAccount.current &&
+        !isConnectError.current
       ) {
         const isLoggedIn = await para.isFullyLoggedIn();
+
         if (!isLoggedIn) {
           return;
         }
 
         const chainId = multiChain ? chains.map(c => c.chainId) : selectedChainId;
-        await connectAsync({
-          walletType: connectedWallet.isExternal
-            ? (connectedWallet.name.toLowerCase() as GrazWalletType)
-            : GrazWalletType.PARA,
-          chainId,
-        });
+        const targetWalletType = connectedWallet.isExternal
+          ? (connectedWallet.name.toLowerCase() as GrazWalletType)
+          : GrazWalletType.PARA;
+
+        try {
+          await connectAsync({
+            walletType: targetWalletType,
+            chainId,
+          });
+        } catch (e) {
+          isConnectError.current = true;
+        }
       }
     };
 

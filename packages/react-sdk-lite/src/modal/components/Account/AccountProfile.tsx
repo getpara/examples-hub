@@ -1,6 +1,6 @@
 import { AccountTypeIcon, GradientScroll, StepContainer, WalletTypeIcon } from '../common.js';
 import { CpslButton, CpslIcon, CpslText } from '@getpara/react-components';
-import { useAccount, useClient } from '../../../provider/index.js';
+import { useAccount } from '../../../provider/index.js';
 import { useLinkedAccounts } from '../../../provider/hooks/index.js';
 import { getWalletDisplayName } from '../../utils/getWalletDisplayName.js';
 import {
@@ -16,8 +16,10 @@ import { ReactNode, useMemo } from 'react';
 import { ACCOUNT_TYPES, safeStyled, useCopyToClipboard } from '@getpara/react-common';
 import { useExternalWallets } from '../../../provider/providers/ExternalWalletProvider.js';
 import { useStore } from '../../../provider/stores/useStore.js';
-import { AccountHeader } from './AccountHeader.js';
 import { useAssets } from '../../../provider/providers/AssetsProvider.js';
+import { useModalStore } from '../../stores/index.js';
+import { ModalStep } from '../../utils/steps.js';
+import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
 
 const Entry = ({
   identifier,
@@ -101,63 +103,31 @@ export const AccountProfile = ({
   isDisconnecting: boolean;
   onDisconnect: () => void;
 }) => {
-  const para = useClient();
-  const { connectionType, embedded } = useAccount();
+  const para = useInternalClient();
+  const { embedded } = useAccount();
   const { data: linkedAccounts } = useLinkedAccounts();
   const { wallets } = useExternalWallets();
   const { isEnabled, linkAccount, unlinkAccount } = useAccountLinking();
   const hideWallets = useStore(state => state.modalConfig?.hideWallets);
   const { profileBalance } = useAssets();
+  const setStep = useModalStore(state => state.setStep);
 
   if (!para) {
     return null;
   }
 
-  const externalWallet = para.authInfo?.externalWallet;
+  const embeddedWallets = para?.availableWallets?.filter(wallet => !wallet.isExternal);
 
   return (
     <StepContainer>
-      <AccountHeader withBalance />
-      {connectionType !== 'external' && (
-        <ParaConnect target="_blank" href="https://connect.getpara.com" rel="noreferrer noopener">
-          <ParaIcon icon="paraIconBrand" size="40px" inset="8px" background="white" />
-          <div>
-            Do even more with your wallet
-            <br />
-            at <span style={{ fontWeight: '600' }}>Para Connect</span>
-          </div>
-          <Dots>
-            {new Array(6).fill(0).map((_, index) => (
-              <DotsIcon key={index} index={index} icon="dotsSquare" size="27.5px" />
-            ))}
-            <ParaArrow icon="paraArrow" size="31px" color="white" />
-          </Dots>
-        </ParaConnect>
-      )}
-      <Section>
-        <Title variant="bodyS" color="secondary">
-          Connected Wallets
-        </Title>
-        <Content>
-          {externalWallet && connectionType === 'external' ? (
-            <Entry
-              key={externalWallet.address}
-              icon={
-                <WalletTypeIcon
-                  walletType={externalWallet.type!}
-                  externalWallet={externalWallet.providerId}
-                  size="24px"
-                  inset="0"
-                />
-              }
-              name={externalWallet.ensName ?? externalWallet.provider ?? ''}
-              address={externalWallet.addressBech32 ?? externalWallet.address}
-              addressShort={truncateAddress(externalWallet.addressBech32 ?? externalWallet.address, externalWallet.type, {
-                prefix: para.cosmosPrefix,
-              })}
-            />
-          ) : (
-            para?.availableWallets?.map(wallet => (
+      {/* Embedded Wallets Section - only show if there are embedded wallets */}
+      {embeddedWallets.length > 0 && (
+        <Section>
+          <Title variant="bodyS" color="secondary">
+            {para.partnerName} Wallets
+          </Title>
+          <Content>
+            {embeddedWallets.map(wallet => (
               <Entry
                 key={wallet.address}
                 icon={<WalletTypeIcon walletType={wallet.type!} externalWallet={wallet.externalProviderId} size="24px" />}
@@ -166,8 +136,54 @@ export const AccountProfile = ({
                 addressShort={truncateAddress(wallet.address!, wallet.type!)}
                 balance={profileBalance?.wallets.find(w => w.address === wallet.address)}
               />
-            ))
-          )}
+            ))}
+          </Content>
+        </Section>
+      )}
+
+      {/* External Wallets Section */}
+      <Section>
+        <Title variant="bodyS" color="secondary">
+          External Wallets
+        </Title>
+        <Content>
+          {Object.values(para?.externalWallets || {}).map(wallet => {
+            const externalWallet = wallets.find(w => w.name === wallet.name);
+
+            return (
+              <Entry
+                key={wallet.address}
+                icon={
+                  <WalletTypeIcon
+                    walletType={wallet.type!}
+                    externalWallet={externalWallet ?? wallet.externalProviderId}
+                    size="24px"
+                    inset="0"
+                  />
+                }
+                name={wallet.ensName ?? wallet.name ?? ''}
+                address={wallet.address}
+                addressShort={
+                  wallet.address
+                    ? truncateAddress(wallet.address, wallet.type!, {
+                        prefix: para.cosmosPrefix,
+                      })
+                    : ''
+                }
+                balance={profileBalance?.wallets.find(w => w.address === wallet.address)}
+              />
+            );
+          })}
+          <CpslButton
+            fullWidth
+            variant="tertiary"
+            onClick={() => {
+              setStep(ModalStep.ADD_EX_WALLET_MORE);
+            }}
+          >
+            <CpslIcon icon="plus" slot="start" />
+            Add Wallet
+          </CpslButton>
         </Content>
       </Section>
 
@@ -185,7 +201,13 @@ export const AccountProfile = ({
                 .map((linkedAccount: TLinkedAccount & { isPrimary?: boolean }) => {
                   const { identifier, displayName, type, isPrimary = false, externalWallet } = linkedAccount;
 
-                  const externalWalletConnector = wallets.find(wallet => wallet.id === externalWallet?.providerId);
+                  const externalWalletConnector = wallets.find(
+                    wallet =>
+                      wallet.id === externalWallet?.providerId ||
+                      wallet.id.toLowerCase() === externalWallet?.providerId?.toLowerCase() ||
+                      wallet.name.toLowerCase() === externalWallet?.providerId?.toLowerCase(),
+                  );
+
                   let accountType: TLinkedAccountType | string | undefined = type;
                   let src: string | undefined = undefined;
 
@@ -313,54 +335,4 @@ const DisconnectButton = safeStyled(CpslButton)`
   --button-destructive-hover-background-color: rgba(255, 0, 0, 0.2);
   --button-destructive-active-background-color: rgba(255, 0, 0, 0.1);
 
-`;
-
-const ParaConnect = safeStyled.a`
-  position: relative;
-  box-sizing: border-box;
-  width: 100%;
-  text-decoration: none;
-  color: white !important;
-  font-family: 'PP Mori', sans-serif;
-  font-weight: 500;
-  font-size: 15px;
-  padding: 16px;
-  height: 69px;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 8px;
-  border-radius: 8px;
-  border: 1px solid #FF4E00;
-  background: #FF4E00;
-  box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.05), 0 0 20px 8px rgba(251, 188, 4, 0.20) inset;
-
-  &:hover, &:active {
-    background: #FF6A2B;
-    border: 1px solid #FF6A2B;
-  }
-
-`;
-
-const ParaIcon = safeStyled(CpslIcon)`
-  --icon-border-radius: 4px;
-`;
-
-const Dots = safeStyled.div`
-  width: 75px;
-  position: absolute;
-  right: 14px;
-  top: 7px;
-`;
-
-const DotsIcon = safeStyled(CpslIcon)<{ index: number }>`
-  position: absolute;
-  left: ${({ index }) => `${(index % 3) * 27.5}px`};
-  top: ${({ index }) => `${Math.floor(index / 3) * 27.5}px`};
-`;
-
-const ParaArrow = safeStyled(CpslIcon)`
-  position: absolute;
-  top: 12px;
-  right: 4px;
 `;

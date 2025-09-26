@@ -13,7 +13,7 @@ import {
   ExternalWalletContextType,
   TExternalWallet,
 } from '@getpara/react-common';
-import { ExternalWalletInfo, VerifyExternalWalletParams } from '@getpara/web-sdk';
+import { ExternalWalletInfo, VerifyExternalWalletParams, ParaEvent, dispatchEvent } from '@getpara/web-sdk';
 import { useAuthActions } from './AuthProvider.js';
 import { CosmosSignResult } from '@getpara/cosmos-wallet-connectors';
 import { IS_FULLY_LOGGED_IN_BASE_KEY } from '../hooks/queries/useIsFullyLoggedIn.js';
@@ -45,6 +45,7 @@ export const defaultExternalWallet = {
   username: undefined,
   avatar: undefined,
   connectExternalWallet: () => Promise.resolve(),
+  addAdditionalExternalWallet: () => Promise.resolve(),
   disconnectExternalWallet: () => Promise.resolve(),
   switchChain: () => Promise.resolve(),
   setChainIdSwitchingTo: () => {},
@@ -76,6 +77,7 @@ type Value = Omit<
     username?: string;
     avatar?: string;
     connectExternalWallet: (wallet: CommonWallet, isMobile?: boolean, isManualWalletConnect?: boolean) => Promise<void>;
+    addAdditionalExternalWallet: (wallet: CommonWallet) => Promise<void>;
     disconnectExternalWallet: () => Promise<void>;
     setChainIdSwitchingTo: (chainId?: string) => void;
     connectEmbeddedToExternalConnectors: () => Promise<void>;
@@ -488,6 +490,94 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
     [cosmosSignMessage, evmSignMessage, solanaSignMessage],
   );
 
+  const addAdditionalExternalWallet = useCallback(
+    async (wallet: CommonWallet) => {
+      try {
+        // Use the walletInfo passed from connectExternalWallet, or get it if not provided
+        const walletInfo = await requestInfo(wallet.id as TExternalWallet, wallet.type as TWalletType);
+
+        // Use the wallet address as the key for consistent lookup
+        const walletAddress =
+          wallet.type === 'COSMOS' && walletInfo.addressBech32 ? walletInfo.addressBech32 : walletInfo.address;
+        const walletKey = walletInfo.address; // Use the EVM-style address as the key
+
+        const newWallet = {
+          ...walletInfo,
+          id: walletKey, // Use EVM-style address as the key/ID
+          address: walletAddress, // Use bech32 address for Cosmos, regular for others
+          name: wallet.name, // Ensure the name is set from the wallet object
+          isExternal: true,
+          isExternalWithParaAuth: false,
+          externalProviderId: (walletInfo.provider || wallet.name) as TExternalWallet,
+          signer: '',
+          isExternalConnectionOnly: true,
+          isExternalWithVerification: includeWalletVerification,
+        };
+
+        // Add the new wallet to existing external wallets using function approach
+        await para.setExternalWallets(currentWallets => {
+          const updatedWallets = {
+            ...currentWallets,
+            [walletKey]: newWallet,
+          };
+          return updatedWallets;
+        });
+
+        // Dispatch the change event to notify other components
+        dispatchEvent(ParaEvent.EXTERNAL_WALLET_CHANGE_EVENT, null);
+
+        try {
+          // Create external wallet info for account linking
+          const externalWalletInfo = {
+            partnerId: para.partnerId!,
+            address: walletInfo.address, // Use EVM-style address as the key
+            ...(wallet.type === 'COSMOS' &&
+              walletInfo.addressBech32 && {
+                addressBech32: walletInfo.addressBech32, // Include bech32 address for Cosmos
+              }),
+            type: wallet.type as TWalletType,
+            provider: walletInfo.provider,
+            providerId: walletInfo.providerId, // Use the providerId from requestInfo
+          };
+
+          // Start account linking process
+          const linkResult = await para.linkAccount({ externalWallet: externalWalletInfo });
+
+          // Check if we got a signature verification message
+          if (linkResult && linkResult.externalWallet && 'signatureVerificationMessage' in linkResult.externalWallet) {
+            const verificationMessage = linkResult.externalWallet.signatureVerificationMessage as string;
+
+            const signResult = await signMessage({
+              message: verificationMessage,
+              externalWallet: externalWalletInfo,
+            });
+
+            if (!signResult || !signResult.signature) {
+              throw new Error(`Failed to sign ${wallet.type} message: No signature returned`);
+            }
+
+            const { signature: signedMessage, cosmosPublicKeyHex, cosmosSigner } = signResult;
+
+            await para.verifyExternalWalletLink({ signedMessage, cosmosPublicKeyHex, cosmosSigner });
+          } else {
+            throw new Error('Unknown error linking external wallet');
+          }
+        } catch (linkError) {
+          // Don't fail the whole process if account linking fails - the wallet is still added as external
+        }
+
+        // Update wagmi connectors if needed - we'll call this after the function is defined
+        await connectEmbeddedToExternalConnectors();
+
+        // Return to account profile to show the newly added wallet
+        setStep(ModalStep.ACCOUNT_PROFILE);
+      } catch (error) {
+        setExternalWalletError(['Failed to add wallet. Please try again.']);
+      }
+    },
+    [para, connectionOnly, includeWalletVerification, setStep, setExternalWalletError],
+  );
+
   const connectExternalWallet = useCallback(
     async (
       wallet: CommonWallet,
@@ -607,6 +697,10 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
         const externalWallet = await cosmosRequestInfo(providerId);
 
         return externalWallet;
+      }
+
+      default: {
+        throw new Error(`Unsupported wallet type: ${type}`);
       }
     }
   };
@@ -753,6 +847,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
           username,
           avatar,
           connectExternalWallet,
+          addAdditionalExternalWallet,
           disconnectExternalWallet,
           switchChain,
           setChainIdSwitchingTo,
@@ -778,6 +873,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
           avatar,
           disconnectExternalWallet,
           connectExternalWallet,
+          addAdditionalExternalWallet,
           switchChain,
           setChainIdSwitchingTo,
           connectEmbeddedToExternalConnectors,

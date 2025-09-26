@@ -30,6 +30,9 @@ export const getActions = (set: StoreApi<ModalStore>['setState'], get: StoreApi<
 
     set({ step });
 
+    // Update the ref to match the current step
+    refs.currentStep.current = step;
+
     onModalStepChange?.({ previousStep, currentStep: step, canGoBack: get().hasPreviousStep() });
 
     if (step === ModalStep.ACCOUNT_MAIN) {
@@ -74,6 +77,9 @@ export const getActions = (set: StoreApi<ModalStore>['setState'], get: StoreApi<
         ...(prevStep === ModalStep.AUTH_MAIN && { flow: undefined }),
       });
 
+      // Update the ref to match the current step
+      refs.currentStep.current = prevStep;
+
       onModalStepChange?.({ previousStep: currentStep, currentStep: prevStep, canGoBack: get().hasPreviousStep() });
     }
 
@@ -91,7 +97,9 @@ export const getActions = (set: StoreApi<ModalStore>['setState'], get: StoreApi<
 
     return !!getPreviousStep(flow, currentStep);
   },
-  setFlow: flow => set({ flow }),
+  setFlow: flow => {
+    set({ flow });
+  },
   isLogin: () => get().flow === 'login',
   isAccount: () => get().flow === 'account',
   setAuthState: authState => {

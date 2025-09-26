@@ -198,7 +198,22 @@ export const Body = ({
         return <ChainSwitch />;
       }
       case ModalStep.EX_WALLET_NETWORK_SELECT: {
-        return <ExternalWalletNetworkSelectStep />;
+        return <ExternalWalletNetworkSelectStep type="CONNECT" />;
+      }
+      case ModalStep.ADD_EX_WALLET_NETWORK_SELECT: {
+        return <ExternalWalletNetworkSelectStep type="ADD_EXTERNAL" />;
+      }
+      case ModalStep.LINK_EX_WALLET_NETWORK_SELECT: {
+        return <ExternalWalletNetworkSelectStep type="ACCOUNT_LINKING" />;
+      }
+      case ModalStep.ADD_EX_WALLET_MORE: {
+        return <ExternalWallets isAddingWallets={true} />;
+      }
+      case ModalStep.ADD_EX_WALLET_SELECTED: {
+        return <ExternalWalletStep isAddingWallets={true} />;
+      }
+      case ModalStep.ADD_EX_WALLET_NETWORK_SELECT: {
+        return <ExternalWalletNetworkSelectStep type="ADD_EXTERNAL" />;
       }
       case ModalStep.AWAITING_ACCOUNT: {
         return <AwaitingAccountStep />;

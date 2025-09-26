@@ -111,7 +111,6 @@ export const AccountLinkProvider = ({ children }: PropsWithChildren) => {
   const account = useAccount();
   const { data: coreAccountLinkInProgress } = useAccountLinkInProgress();
   const {
-    wallet: connectedWallet,
     wallets,
     signMessage,
     isSigningMessage,
@@ -212,10 +211,6 @@ export const AccountLinkProvider = ({ children }: PropsWithChildren) => {
           const providerId = supportedWalletId ?? args.externalWallet.provider;
           const type = args.externalWallet.type;
 
-          if (providerId === connectedWallet?.id) {
-            throw new Error(`Cannot link the currently connected external wallet: ${providerId}`);
-          }
-
           setAccountLinkInProgress({
             type: 'EXTERNAL_WALLET',
             pendingWalletProvider: providerId,
@@ -228,7 +223,7 @@ export const AccountLinkProvider = ({ children }: PropsWithChildren) => {
             throw new Error(`wallet not installed: ${providerId}`);
           }
 
-          openModal({ step: !type ? ModalStep.EX_WALLET_NETWORK_SELECT : ModalStep.ACCOUNT_PROFILE_ADD });
+          openModal({ step: !type ? ModalStep.LINK_EX_WALLET_NETWORK_SELECT : ModalStep.ACCOUNT_PROFILE_ADD });
 
           if (!type) {
             return;
@@ -403,17 +398,31 @@ export const AccountLinkProvider = ({ children }: PropsWithChildren) => {
     }
   };
 
-  const onAccountLinkVerified = (updatedAccounts: LinkedAccounts) => {
+  const onAccountLinkVerified = async (updatedAccounts: LinkedAccounts) => {
     queryClient.invalidateQueries({ queryKey: [LINKED_ACCOUNTS_BASE_KEY] });
     queryClient.setQueryData<LinkedAccounts>(['getLinkedAccounts'], () => updatedAccounts);
 
+    // If this was an account link (not addAdditionalExternalWallet), disconnect the external wallet
+    if (accountLinkInProgress?.type === 'EXTERNAL_WALLET' && accountLinkInProgress.externalWallet) {
+      try {
+        await disconnectBase(
+          accountLinkInProgress.externalWallet.providerId as TExternalWallet,
+          accountLinkInProgress.externalWallet.type as TWalletType,
+        );
+      } catch (error) {}
+    }
+
     setTimeout(() => {
       setStep(ModalStep.ACCOUNT_PROFILE);
+
+      setAccountLinkInProgress(undefined);
     }, 2000);
   };
 
   const onAccountLinkError = (e: Error | string) => {
     setLinkAccountError(e instanceof Error ? e.message : e);
+    // Clear the account link in progress state on error
+    setAccountLinkInProgress(undefined);
   };
 
   const unlinkAccount = (linkedAccount?: LinkedAccount) => {

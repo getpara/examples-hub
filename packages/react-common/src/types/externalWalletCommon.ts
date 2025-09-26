@@ -110,7 +110,7 @@ export type ExternalWalletProviderConfigBase = {
   walletsWithFullAuth: TExternalWallet[] | 'ALL';
   includeWalletVerification?: boolean;
   connectionOnly?: boolean;
-  connectedWallet?: Omit<Wallet, 'signer'> | null;
+  connectedWallet?: Pick<Wallet, 'id' | 'type'> | null;
 };
 
 export type ExternalWalletProviderConfig<W, P = {}> = ExternalWalletProviderConfigBase & {

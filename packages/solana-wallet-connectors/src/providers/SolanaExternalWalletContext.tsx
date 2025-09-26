@@ -306,6 +306,10 @@ export function SolanaExternalWalletProvider({
   const disconnectBase = async (providerId: TExternalWallet) => {
     const wallet = wallets.find(w => w.id === providerId);
 
+    if (!wallet) {
+      return;
+    }
+
     const adapter = getAdapter(wallet.name ?? '');
 
     if (!adapter?.connected) {
@@ -317,8 +321,11 @@ export function SolanaExternalWalletProvider({
     try {
       await adapter.disconnect();
     } catch (e) {
-      console.error('Error disconnecting wallet:', e);
-      throw new Error(e?.message ?? e);
+      console.error('Error disconnecting Solana wallet:', e);
+      // Don't throw the error - just log it since this is for account linking cleanup
+      // The wallet might not be properly connected or available
+    } finally {
+      isLinkingAccount.current = false;
     }
   };
 

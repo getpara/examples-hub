@@ -196,8 +196,17 @@ export abstract class ParaCore implements CoreInterface {
     } else if (this.isExternalWalletWithVerification) {
       return 'VERIFICATION';
     } else if (!!Object.keys(this.externalWallets).length) {
-      // CONNECTION_ONLY applies for both externalWalletConnectionOnly and standard external wallet connection with Para tracking
-      return 'CONNECTION_ONLY';
+      // Check if we have embedded Para wallets in addition to external wallets
+      const hasEmbeddedWallets = Object.keys(this.wallets).some(id => !this.wallets[id].isExternal);
+
+      if (hasEmbeddedWallets) {
+        // If we have both embedded and external wallets, we're not in CONNECTION_ONLY mode
+        // We should still load partner data via touchSession
+        return 'NONE';
+      } else {
+        // CONNECTION_ONLY applies when we only have external wallets
+        return 'CONNECTION_ONLY';
+      }
     }
 
     return 'NONE';
@@ -1788,11 +1797,17 @@ Need help? Visit: https://docs.getpara.com or contact support
 
   /**
    * Sets the external wallets associated with the `ParaCore` instance.
-   * @param externalWallets - External wallets to set.
+   * @param externalWallets - External wallets to set, or a function that modifies the current wallets.
    */
-  async setExternalWallets(externalWallets: Record<string, Wallet>): Promise<void> {
-    this.externalWallets = externalWallets;
-    await this.localStorageSetItem(constants.LOCAL_STORAGE_EXTERNAL_WALLETS, JSON.stringify(externalWallets));
+  async setExternalWallets(
+    externalWallets: Record<string, Wallet> | ((current: Record<string, Wallet>) => Record<string, Wallet>),
+  ): Promise<void> {
+    if (typeof externalWallets === 'function') {
+      this.externalWallets = externalWallets(this.externalWallets);
+    } else {
+      this.externalWallets = externalWallets;
+    }
+    await this.localStorageSetItem(constants.LOCAL_STORAGE_EXTERNAL_WALLETS, JSON.stringify(this.externalWallets));
   }
 
   /**
@@ -4565,7 +4580,7 @@ Need help? Visit: https://docs.getpara.com or contact support
         break;
 
       default:
-        throw new Error('Invalid parameters for linking account, must pass `auth` or `type` or `externalWallet');
+        throw new Error('Invalid parameters for linking account, must pass `auth` or `type` or `externalWallet`');
     }
 
     if (!isPermitted) {

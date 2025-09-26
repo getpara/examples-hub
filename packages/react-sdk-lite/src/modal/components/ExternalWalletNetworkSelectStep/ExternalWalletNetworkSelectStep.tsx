@@ -6,44 +6,83 @@ import { CpslButton, CpslIcon, CpslText } from '@getpara/react-components';
 import { WALLET_TYPE_CONFIG } from '../../constants/walletTypeConfig.js';
 import { useAccountLinking } from '../../../provider/providers/AccountLinkProvider.js';
 
-export const ExternalWalletNetworkSelectStep = () => {
+type ExternalWalletNetworkSelectStepType = 'CONNECT' | 'ADD_EXTERNAL' | 'ACCOUNT_LINKING';
+
+export const ExternalWalletNetworkSelectStep = ({ type = 'CONNECT' }: { type?: ExternalWalletNetworkSelectStepType }) => {
   const setStep = useModalStore(state => state.setStep);
   const selectedExternalWallet = useModalStore(state => state.selectedExternalWallet);
   const setSelectedExternalWallet = useModalStore(state => state.setSelectedExternalWallet);
-  const { wallets, connectExternalWallet } = useExternalWallets();
+  const { wallets, connectExternalWallet, addAdditionalExternalWallet } = useExternalWallets();
   const { accountLinkInProgress, linkAccount } = useAccountLinking();
 
   const externalWalletProvider =
-    accountLinkInProgress?.pendingWalletProvider ?? accountLinkInProgress?.externalWallet?.providerId;
+    accountLinkInProgress?.pendingWalletProvider ??
+    accountLinkInProgress?.externalWallet?.providerId ??
+    selectedExternalWallet?.id;
 
-  if (!accountLinkInProgress && !selectedExternalWallet) {
-    setStep(ModalStep.ACCOUNT_MAIN);
+  if (!externalWalletProvider) {
     return null;
   }
 
-  const availableWallets = wallets.filter(w => w.id === (externalWalletProvider ?? selectedExternalWallet?.id));
+  const availableWallets = wallets.filter(w => w.id === externalWalletProvider);
 
   const firstWallet = availableWallets[0];
 
-  const handleWalletClick = (wallet: CommonWallet) => () => {
-    if (accountLinkInProgress) {
-      linkAccount({ externalWallet: { provider: wallet.id, type: wallet.type } });
-      return;
+  const handleWalletClick = (wallet: CommonWallet) => async () => {
+    switch (type) {
+      case 'ACCOUNT_LINKING':
+        // For account linking, use the linkAccount function
+        linkAccount({ externalWallet: { provider: wallet.id, type: wallet.type } });
+        break;
+
+      case 'ADD_EXTERNAL':
+        // For adding external wallets, use addAdditionalExternalWallet directly
+        setSelectedExternalWallet({ id: wallet.id, type: wallet.type });
+        setStep(ModalStep.ADD_EX_WALLET_SELECTED);
+        try {
+          await addAdditionalExternalWallet(wallet);
+        } catch (error) {
+          console.error('Failed to add additional wallet:', error);
+        }
+        break;
+
+      case 'CONNECT':
+      default:
+        // For initial connection, use connectExternalWallet
+        setSelectedExternalWallet({ id: wallet.id, type: wallet.type });
+        setStep(ModalStep.EX_WALLET_SELECTED);
+        if (wallet.installed || wallet.internalId === 'FARCASTER') {
+          connectExternalWallet(wallet);
+        } else if (wallet.isMobile) {
+          connectExternalWallet(wallet, true);
+        }
+        break;
     }
+  };
 
-    setSelectedExternalWallet({ id: wallet.id, type: wallet.type });
-    setStep(ModalStep.EX_WALLET_SELECTED);
-
-    if (wallet.installed || wallet.internalId === 'FARCASTER') {
-      connectExternalWallet(wallet);
-    } else if (wallet.isMobile) {
-      connectExternalWallet(wallet, true);
+  // Determine the icon source based on the type
+  const getIconSource = () => {
+    switch (type) {
+      case 'ACCOUNT_LINKING':
+        // For account linking, use the account link in progress wallet icon
+        return accountLinkInProgress?.externalWallet?.providerId
+          ? wallets.find(w => w.id === accountLinkInProgress.externalWallet?.providerId)?.iconUrl
+          : firstWallet?.iconUrl;
+      case 'ADD_EXTERNAL':
+        // For adding external wallets, use the selected wallet icon
+        return selectedExternalWallet?.id
+          ? wallets.find(w => w.id === selectedExternalWallet.id)?.iconUrl
+          : firstWallet?.iconUrl;
+      case 'CONNECT':
+      default:
+        // For initial connection, use the first available wallet icon
+        return firstWallet?.iconUrl;
     }
   };
 
   return (
     <Container>
-      <Avatar slot="image" src={firstWallet?.iconUrl} />
+      <Avatar slot="image" src={getIconSource()} />
       <ButtonContainer>
         {availableWallets.map(wallet => {
           const config = WALLET_TYPE_CONFIG[wallet.type];

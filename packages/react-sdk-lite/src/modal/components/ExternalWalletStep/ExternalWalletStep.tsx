@@ -1,6 +1,6 @@
 import { CpslButton, CpslIcon, CpslQrCode, CpslSpinner, CpslText } from '@getpara/react-components';
 import { CenteredText, HeroAccountTypeIcon, InnerStepContainer, QRContainer, StepContainer } from '../common.js';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useModalStore } from '../../stores/index.js';
 import { CommonWallet, HeroSpinner, safeStyled } from '@getpara/react-common';
 import { useCopyToClipboard } from '@getpara/react-common';
@@ -128,10 +128,22 @@ export const ExternalWalletMobileConnect = ({
   );
 };
 
-export const ExternalWalletStep = () => {
+export const ExternalWalletStep = ({ isAddingWallets = false }: { isAddingWallets?: boolean }) => {
   const externalWalletError = useModalStore(state => state.externalWalletError);
+  const step = useModalStore(state => state.step);
   const setStep = useModalStore(state => state.setStep);
-  const { connectExternalWallet, wallet, qrUri, walletDisplayHelpers } = useExternalWallets();
+  const { connectExternalWallet, addAdditionalExternalWallet, wallet, qrUri, walletDisplayHelpers } = useExternalWallets();
+
+  const handleConnect = useCallback(
+    async (wallet: CommonWallet, isWc = false) => {
+      if (isAddingWallets) {
+        await addAdditionalExternalWallet(wallet);
+      } else {
+        await (isWc ? connectExternalWallet(wallet, true, true) : connectExternalWallet(wallet));
+      }
+    },
+    [isAddingWallets, addAdditionalExternalWallet, connectExternalWallet],
+  );
 
   useEffect(() => {
     routeMobileExternalWallet(qrUri);
@@ -139,7 +151,7 @@ export const ExternalWalletStep = () => {
 
   const handleTryAgainClick = async () => {
     if (wallet) {
-      await connectExternalWallet(wallet);
+      await handleConnect(wallet);
     }
   };
 
@@ -205,18 +217,30 @@ export const ExternalWalletStep = () => {
           wallet={wallet}
           qrUri={qrUri}
           onConnectWc={async (w: CommonWallet) => {
-            await connectExternalWallet(w, true, true);
+            await handleConnect(w, true);
           }}
         />
       );
     }
-  }, [wallet, walletDisplayHelpers, externalWalletError, qrUri]);
+  }, [
+    wallet,
+    walletDisplayHelpers,
+    externalWalletError,
+    qrUri,
+    isAddingWallets,
+    addAdditionalExternalWallet,
+    connectExternalWallet,
+  ]);
 
   useEffect(() => {
     if (!wallet) {
-      setStep(ModalStep.AUTH_MAIN);
+      if (step === ModalStep.ADD_EX_WALLET_SELECTED) {
+        setStep(ModalStep.ADD_EX_WALLET_MORE);
+      } else {
+        setStep(ModalStep.AUTH_MAIN);
+      }
     }
-  }, [wallet]);
+  }, [wallet, step]);
 
   if (!wallet) {
     return null;

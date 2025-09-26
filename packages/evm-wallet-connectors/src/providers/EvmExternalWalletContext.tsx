@@ -58,7 +58,7 @@ export function EvmExternalWalletProvider({
   onSwitchWallet,
   para,
   walletsWithFullAuth,
-  connectedWallet,
+  connectedWallet: connectedWalletProp,
   includeWalletVerification,
   connectionOnly,
 }: EvmExternalWalletProviderConfig & PropsWithChildren) {
@@ -80,6 +80,8 @@ export function EvmExternalWalletProvider({
     name: normalize(ensName),
   });
   const { signMessageAsync } = useSignMessage();
+
+  const connectedWallet = connectedWalletProp ? para.findWallet(connectedWalletProp.id, connectedWalletProp.type) : null;
 
   const isLinkingAccount = useRef(false);
   const verificationMessage = useRef<string>();
@@ -145,6 +147,10 @@ export function EvmExternalWalletProvider({
 
   useEffect(() => {
     const storedExternalWallet = getStoredExternalWallets()[wagmiAddress ?? ''];
+    // Don't reset if user is connected via Para (embedded session)
+    if (connectedConnector?.id === 'para') {
+      return;
+    }
 
     if (
       !isConnecting &&
@@ -152,7 +158,6 @@ export function EvmExternalWalletProvider({
       !isLocalConnecting &&
       !!wagmiAddress &&
       !storedExternalWallet &&
-      connectedConnector?.id !== 'para' &&
       !isLinkingAccount.current &&
       para.isReady &&
       !para.isFarcasterMiniApp
@@ -487,7 +492,14 @@ export function EvmExternalWalletProvider({
 
     isLinkingAccount.current = true;
     try {
-      const address = await connectBase(connector);
+      let address: string | undefined;
+
+      // Check if connector is already connected
+      if (connector.connected && connector.accounts?.[0]) {
+        address = connector.accounts[0];
+      } else {
+        address = await connectBase(connector);
+      }
 
       const providerId = wallets.find(w => w?.name === (connector?.paraDetails?.name ?? ''))?.name ?? connector?.name;
 

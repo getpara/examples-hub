@@ -4,25 +4,24 @@ import { useMemo } from 'react';
 import { truncateAddress } from '@getpara/web-sdk';
 import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
 import { useAssets } from '../../../provider/providers/AssetsProvider.js';
-import { useAccount } from '../../../provider/index.js';
+import { useAccount, useWallet } from '../../../provider/index.js';
 import { WalletSelect } from '../WalletSelect/WalletSelect.js';
 
 export const AccountHeader = ({ withBalance = false }: { withBalance?: boolean } = {}) => {
   const para = useInternalClient();
   const { connectionType } = useAccount();
   const { profileBalance, totalBalance } = useAssets();
-
-  const externalWallet = Object.keys(para?.externalWallets).length > 0 ? Object.values(para.externalWallets)[0] : undefined;
+  const { data: activeWallet } = useWallet();
 
   const { name, icon, src } = useMemo(() => {
     let name, icon, src;
     switch (true) {
-      case !!externalWallet:
+      case activeWallet?.isExternal:
         name =
-          externalWallet.ensName ??
-          truncateAddress(externalWallet.address!, externalWallet.type!, { prefix: para.cosmosPrefix });
-        src = externalWallet.ensAvatar;
-        icon = getExternalWalletIcon(externalWallet.externalProviderId);
+          activeWallet.ensName ?? truncateAddress(activeWallet.address!, activeWallet.type!, { prefix: para.cosmosPrefix });
+        src = activeWallet.ensAvatar;
+        icon = getExternalWalletIcon(activeWallet.externalProviderId);
+
         break;
       default:
         name = `${para.partnerName} Wallet`;
@@ -31,7 +30,7 @@ export const AccountHeader = ({ withBalance = false }: { withBalance?: boolean }
         break;
     }
     return { name, icon, src };
-  }, [para.partnerName, para.partnerLogo, externalWallet]);
+  }, [para.partnerName, para.partnerLogo, activeWallet]);
 
   return (
     <AccountContainer>

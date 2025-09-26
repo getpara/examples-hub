@@ -5,7 +5,7 @@ import { ParaGrazProviderProps } from '@getpara/cosmos-wallet-connectors';
 import { useInternalClient } from '../hooks/utils/useInternalClient.js';
 import { useStore } from '../stores/useStore.js';
 import { COSMOS_WALLETS } from '@getpara/web-sdk';
-import { useWallet } from '../hooks/index.js';
+import { useWalletState } from '../hooks/index.js';
 
 export const CosmosWalletWrapper = ({
   children,
@@ -18,7 +18,7 @@ export const CosmosWalletWrapper = ({
   onSwitchWallet: ({ address, error }: { address?: string; error?: string }) => void;
 } & PropsWithChildren) => {
   const para = useInternalClient();
-  const { data: wallet } = useWallet();
+  const { selectedWallet } = useWalletState();
   const externalWalletsWithFullAuth = useStore(state => state.externalWalletsWithFullAuth);
   const wallets = useStore(state => state.externalWallets);
   const isUsing = wallets.some(w => w in COSMOS_WALLETS);
@@ -32,7 +32,7 @@ export const CosmosWalletWrapper = ({
         onSwitchWallet,
         para,
         walletsWithFullAuth: externalWalletsWithFullAuth,
-        connectedWallet: wallet,
+        connectedWallet: selectedWallet?.id ? { id: selectedWallet.id, type: selectedWallet.type } : null,
         connectionOnly,
         includeWalletVerification,
       }}

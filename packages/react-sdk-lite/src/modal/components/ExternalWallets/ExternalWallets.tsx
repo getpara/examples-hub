@@ -10,11 +10,13 @@ import { type CommonWallet } from '@getpara/react-common';
 
 const HAS_MORE_LENGTH = 3;
 
-export const ExternalWallets = () => {
-  const { wallets: allWallets, connectExternalWallet } = useExternalWallets();
+export const ExternalWallets = ({ isAddingWallets = false }: { isAddingWallets?: boolean }) => {
+  const { wallets: allWallets, connectExternalWallet, addAdditionalExternalWallet } = useExternalWallets();
   const setSelectedExternalWallet = useModalStore(state => state.setSelectedExternalWallet);
   const setStep = useModalStore(state => state.setStep);
-  const showAll = useModalStore(state => state.step === ModalStep.EX_WALLET_MORE);
+  const showAll = useModalStore(
+    state => state.step === ModalStep.EX_WALLET_MORE || state.step === ModalStep.ADD_EX_WALLET_MORE,
+  );
   const authLayout = useModalStore(state => state.authLayout);
 
   const [search, setSearch] = useState('');
@@ -43,22 +45,32 @@ export const ExternalWallets = () => {
     setStep(ModalStep.AUTH_MORE);
   };
 
-  const handleWalletClick = (wallet: CommonWallet) => () => {
+  const handleWalletClick = (wallet: CommonWallet) => async () => {
     const shouldShowNetworkSelection = allWallets.filter(w => w.id === wallet.id).length > 1;
 
     if (shouldShowNetworkSelection) {
       setSelectedExternalWallet({ id: wallet.id, type: wallet.type });
-      setStep(ModalStep.EX_WALLET_NETWORK_SELECT);
+      setStep(isAddingWallets ? ModalStep.ADD_EX_WALLET_NETWORK_SELECT : ModalStep.EX_WALLET_NETWORK_SELECT);
       return;
     }
 
     setSelectedExternalWallet({ id: wallet.id, type: wallet.type });
-    setStep(ModalStep.EX_WALLET_SELECTED);
+    setStep(isAddingWallets ? ModalStep.ADD_EX_WALLET_SELECTED : ModalStep.EX_WALLET_SELECTED);
 
-    if (wallet.installed) {
-      connectExternalWallet(wallet);
-    } else if (wallet.isMobile) {
-      connectExternalWallet(wallet, true);
+    if (isAddingWallets) {
+      // For adding wallets, use addAdditionalExternalWallet directly
+      try {
+        await addAdditionalExternalWallet(wallet);
+      } catch (error) {
+        console.error('Failed to add additional wallet:', error);
+      }
+    } else {
+      // For initial connection, use connectExternalWallet
+      if (wallet.installed) {
+        connectExternalWallet(wallet);
+      } else if (wallet.isMobile) {
+        connectExternalWallet(wallet, true);
+      }
     }
   };
 
@@ -78,7 +90,7 @@ export const ExternalWallets = () => {
               <SearchIcon slot="start" icon="search" />
             </SearchInput>
           </SearchInputWrapper>
-          {hasEmbeddedAuth(authLayout ?? []) && (
+          {hasEmbeddedAuth(authLayout ?? []) && !isAddingWallets && (
             <CpslButton fullWidth variant="tertiary" onClick={handleParaClick}>
               <WalletButtonOuterContainer>
                 <WalletButtonInnerContainer>
