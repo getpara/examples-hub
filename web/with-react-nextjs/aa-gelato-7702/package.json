@@ -19,7 +19,7 @@
     "@cosmjs/tendermint-rpc": "^0.34.0",
     "@gelatonetwork/smartwallet": "0.0.25",
     "@getpara/graz": "2.0.0-alpha.18",
-    "@getpara/react-sdk": "2.0.0-alpha.57",
+    "@getpara/react-sdk": "2.0.0-alpha.59",
     "@leapwallet/cosmos-social-login-capsule-provider": "^0.0.44",
     "@solana-mobile/wallet-adapter-mobile": "^2.2.2",
     "@solana/wallet-adapter-base": "^0.9.27",

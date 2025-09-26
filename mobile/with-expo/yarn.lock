@@ -1854,41 +1854,41 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@getpara/core-sdk@npm:2.0.0-alpha.57":
-  version: 2.0.0-alpha.57
-  resolution: "@getpara/core-sdk@npm:2.0.0-alpha.57"
+"@getpara/core-sdk@npm:2.0.0-alpha.59":
+  version: 2.0.0-alpha.59
+  resolution: "@getpara/core-sdk@npm:2.0.0-alpha.59"
   dependencies:
     "@celo/utils": "npm:^8.0.2"
     "@cosmjs/encoding": "npm:^0.32.4"
     "@ethereumjs/util": "npm:^9.1.0"
-    "@getpara/user-management-client": "npm:2.0.0-alpha.57"
+    "@getpara/user-management-client": "npm:2.0.0-alpha.59"
     "@noble/hashes": "npm:^1.5.0"
     base64url: "npm:^3.0.1"
     libphonenumber-js: "npm:^1.11.7"
     node-forge: "npm:^1.3.1"
     uuid: "npm:^11.1.0"
-  checksum: 10c0/bc7d2abc5ace1bd17405e434561289e127f443cbaaaf98b1f01d949b98cfcc80f2cbaed8bc22a0c8bb15c4057e3ce16d4b6d81ccb6b457031e2ba3ac238deae6
+  checksum: 10c0/79dddc8235da4014142d29d49c22edfa93e41e8e574edb699aeb55b6cdaf9f1f56bae3cca8db3c0c6a8c91145126a9b8901e08d201f03b690a5101c0b2f1c3f5
   languageName: node
   linkType: hard
 
-"@getpara/ethers-v6-integration@npm:2.0.0-alpha.57":
-  version: 2.0.0-alpha.57
-  resolution: "@getpara/ethers-v6-integration@npm:2.0.0-alpha.57"
+"@getpara/ethers-v6-integration@npm:2.0.0-alpha.59":
+  version: 2.0.0-alpha.59
+  resolution: "@getpara/ethers-v6-integration@npm:2.0.0-alpha.59"
   dependencies:
-    "@getpara/core-sdk": "npm:2.0.0-alpha.57"
+    "@getpara/core-sdk": "npm:2.0.0-alpha.59"
   peerDependencies:
     ethers: 6.x
-  checksum: 10c0/44c93fe5730dc25f82666795c9d786f9d9f934251eb9047466c25c080c73b84d75905204c2e298c2fa90f258da4b47b439224978b31355f95930bb5b3191fa1f
+  checksum: 10c0/3714a6146e6cb74ebb5d325563265c04b83d659dcaa9c81abe25ef036cbb4759c3c5e47297a6ea2fd1532007567e8b70db8f926c5a46673a9bf13aa9cef6386b
   languageName: node
   linkType: hard
 
-"@getpara/react-native-wallet@npm:2.0.0-alpha.57":
-  version: 2.0.0-alpha.57
-  resolution: "@getpara/react-native-wallet@npm:2.0.0-alpha.57"
+"@getpara/react-native-wallet@npm:2.0.0-alpha.59":
+  version: 2.0.0-alpha.59
+  resolution: "@getpara/react-native-wallet@npm:2.0.0-alpha.59"
   dependencies:
-    "@getpara/core-sdk": "npm:2.0.0-alpha.57"
-    "@getpara/user-management-client": "npm:2.0.0-alpha.57"
-    "@getpara/web-sdk": "npm:2.0.0-alpha.57"
+    "@getpara/core-sdk": "npm:2.0.0-alpha.59"
+    "@getpara/user-management-client": "npm:2.0.0-alpha.59"
+    "@getpara/web-sdk": "npm:2.0.0-alpha.59"
     "@peculiar/webcrypto": "npm:^1.5.0"
     "@ungap/structured-clone": "npm:1.3.0"
     node-forge: "npm:1.3.1"
@@ -1905,7 +1905,7 @@ __metadata:
     react-native-quick-base64: "*"
     react-native-quick-crypto: "*"
     readable-stream: "*"
-  checksum: 10c0/0a4fc26a072e5d4f0c99a63e0cbad02347aecf8cac90945718e029bf222542d5e44584b950d7ed4a0b0dbbbe65c23117c0bb3ef253d30fcb9a784051d55f8ea5
+  checksum: 10c0/6609bd45c220ccc7e20df1bf0ff447d64871c128afd92c7e510facace3f8b7a69c0a08717843df7999b9bd969ae0ab40a5f5f6c275aed04dd45bd00b54161b0d
   languageName: node
   linkType: hard
 
@@ -1916,23 +1916,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@getpara/user-management-client@npm:2.0.0-alpha.57":
-  version: 2.0.0-alpha.57
-  resolution: "@getpara/user-management-client@npm:2.0.0-alpha.57"
+"@getpara/user-management-client@npm:2.0.0-alpha.59":
+  version: 2.0.0-alpha.59
+  resolution: "@getpara/user-management-client@npm:2.0.0-alpha.59"
   dependencies:
     "@getpara/shared": "npm:1.1.0"
     axios: "npm:^1.8.4"
     libphonenumber-js: "npm:^1.11.7"
-  checksum: 10c0/26f1acedcd86bfaa0eb42289168e49ddaf389416f0b4b5642197eb156deee7c172192aa2b1674734ec2c0d02e95e13f21f641062685090a7aa0eca2982cf8498
+  checksum: 10c0/ff5159a120e4de279959ccc5f77bc783a830646f6a7fd8818a79ac32ec9e8f5ab8248701c94e2d6bf153e56b2a7993aad16f2bcc6888afecd3a02da807391eb8
   languageName: node
   linkType: hard
 
-"@getpara/web-sdk@npm:2.0.0-alpha.57":
-  version: 2.0.0-alpha.57
-  resolution: "@getpara/web-sdk@npm:2.0.0-alpha.57"
+"@getpara/web-sdk@npm:2.0.0-alpha.59":
+  version: 2.0.0-alpha.59
+  resolution: "@getpara/web-sdk@npm:2.0.0-alpha.59"
   dependencies:
-    "@getpara/core-sdk": "npm:2.0.0-alpha.57"
-    "@getpara/user-management-client": "npm:2.0.0-alpha.57"
+    "@getpara/core-sdk": "npm:2.0.0-alpha.59"
+    "@getpara/user-management-client": "npm:2.0.0-alpha.59"
     base64url: "npm:^3.0.1"
     buffer: "npm:6.0.3"
     cbor-web: "npm:^9.0.2"
@@ -1943,7 +1943,7 @@ __metadata:
   peerDependenciesMeta:
     "@farcaster/miniapp-sdk":
       optional: true
-  checksum: 10c0/3af5f9f2c46bc0e867c9615d2ae6753d87981c6fe04d4f43c3207a50c8a4f123be9e70aad22434e6796dcf09fcf0a3952914bf3518c11d80379f986150ce9033
+  checksum: 10c0/5a672262df37bb6a98ccbdd4bba0080061104579c6646e40db0620afa80c761615ccbbe12804427baa7adcd7566694cabbc5d7d3daf5a841d31fe06cd543cc9e
   languageName: node
   linkType: hard
 
@@ -8742,8 +8742,8 @@ __metadata:
     "@babel/core": "npm:^7.20.0"
     "@craftzdog/react-native-buffer": "npm:^6.1.0"
     "@eslint/js": "npm:^9.29.0"
-    "@getpara/ethers-v6-integration": "npm:2.0.0-alpha.57"
-    "@getpara/react-native-wallet": "npm:2.0.0-alpha.57"
+    "@getpara/ethers-v6-integration": "npm:2.0.0-alpha.59"
+    "@getpara/react-native-wallet": "npm:2.0.0-alpha.59"
     "@react-native-async-storage/async-storage": "npm:^2.2.0"
     "@types/react": "npm:^19.1.8"
     "@types/react-native": "npm:^0.73.0"
