@@ -61,7 +61,10 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({
     setStatus("Finishing login...");
     const waitForLoginResult = await para.waitForLogin();
 
-    if (waitForLoginResult?.needsWallet && typeof para.waitForWalletCreation === "function") {
+    if (
+      waitForLoginResult?.needsWallet &&
+      typeof para.waitForWalletCreation === "function"
+    ) {
       setStatus("Creating your Para wallet...");
       await para.waitForWalletCreation({});
     }
@@ -95,7 +98,7 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({
       await para.loginWithPasskey();
       await finalizeLogin();
     },
-    [openAuthUrl, finalizeLogin],
+    [openAuthUrl, finalizeLogin]
   );
 
   const handleLegacyVerify = useCallback(
@@ -107,7 +110,7 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({
       await openAuthUrl(state.loginUrl, "one-click signup");
       await finalizeSignup();
     },
-    [openAuthUrl, finalizeSignup],
+    [openAuthUrl, finalizeSignup]
   );
 
   const handleLegacyOAuthCallback = useCallback(async () => {
@@ -143,7 +146,9 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({
       }
     } catch (err) {
       console.error("[OAuthAuth] Error handling OAuth callback", err);
-      setError(err instanceof Error ? err.message : "OAuth verification failed");
+      setError(
+        err instanceof Error ? err.message : "OAuth verification failed"
+      );
     } finally {
       resetOAuthState();
     }
@@ -181,20 +186,25 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({
         }
       } catch (err) {
         console.error("[OAuthAuth] Error completing portal callback", err);
-        const fallbackMessage = statusParam === "new_user" ? "Failed to finish signup" : "Failed to finish login";
+        const fallbackMessage =
+          statusParam === "new_user"
+            ? "Failed to finish signup"
+            : "Failed to finish login";
         setError(err instanceof Error ? err.message : fallbackMessage);
       } finally {
         resetOAuthState();
       }
     },
-    [pendingOAuthProvider, finalizeLogin, finalizeSignup, resetOAuthState],
+    [pendingOAuthProvider, finalizeLogin, finalizeSignup, resetOAuthState]
   );
 
   const handleDeeplink = useCallback(
     async (url: string) => {
       if (url.startsWith(FARCASTER_CALLBACK_URL)) {
         if (pendingOAuthProvider === "FARCASTER") {
-          console.info("[OAuthAuth] Ignoring intermediate Farcaster callback", { url });
+          console.info("[OAuthAuth] Ignoring intermediate Farcaster callback", {
+            url,
+          });
           return;
         }
 
@@ -206,7 +216,7 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({
         await handlePortalCallback(url);
       }
     },
-    [pendingOAuthProvider, handleLegacyOAuthCallback, handlePortalCallback],
+    [pendingOAuthProvider, handleLegacyOAuthCallback, handlePortalCallback]
   );
 
   useEffect(() => {
@@ -276,16 +286,25 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({
       setStatus("Complete authentication in Farcaster portal...");
       const result = await openAuthUrl(portalUrl, "farcaster authentication");
 
-      if (result.type === "success" && result.url) {
-        await handleDeeplink(result.url);
-        return;
-      }
-
-      if (result.type === "cancel" || result.type === "dismiss") {
-        console.info("[OAuthAuth] Farcaster authentication cancelled by user");
-        setPendingOAuthProvider(null);
-        setLoading(false);
-        setError("Authentication cancelled");
+      switch (result.type) {
+        case "success": {
+          if (result.url) {
+            await handleDeeplink(result.url);
+          }
+          return;
+        }
+        case "cancel":
+        case "dismiss": {
+          console.info(
+            "[OAuthAuth] Farcaster authentication cancelled by user"
+          );
+          setPendingOAuthProvider(null);
+          setLoading(false);
+          setError("Authentication cancelled");
+          return;
+        }
+        default:
+          return;
       }
     } catch (err) {
       console.error("[OAuthAuth] Farcaster portal flow failed", err);

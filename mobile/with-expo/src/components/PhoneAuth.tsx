@@ -85,7 +85,9 @@ export const PhoneAuth: React.FC<PhoneAuthProps> = ({
 
     try {
       // Phone must include country code (e.g., +1 for US)
-      const authStateResult = await para.signUpOrLogIn({ auth: { phone: phone as `+${number}` } });
+      const authStateResult = await para.signUpOrLogIn({
+        auth: { phone: phone as `+${number}` },
+      });
       setAuthState(authStateResult);
 
       const nextStage = (authStateResult as any)?.nextStage;
@@ -96,7 +98,11 @@ export const PhoneAuth: React.FC<PhoneAuthProps> = ({
 
           setShowVerification(false);
           onHideVerification?.();
-          setStatus(isOneClickLogin ? "Complete login in the browser..." : "Complete verification in the browser...");
+          setStatus(
+            isOneClickLogin
+              ? "Complete login in the browser..."
+              : "Complete verification in the browser..."
+          );
 
           await openAuthUrl(
             authStateResult.loginUrl,
@@ -157,7 +163,9 @@ export const PhoneAuth: React.FC<PhoneAuthProps> = ({
 
     try {
       // Verify SMS code ownership
-      const verifiedAuthState = await para.verifyNewAccount({ verificationCode });
+      const verifiedAuthState = await para.verifyNewAccount({
+        verificationCode,
+      });
       setAuthState(verifiedAuthState);
 
       // Show security choice instead of auto-creating passkey
@@ -204,7 +212,11 @@ export const PhoneAuth: React.FC<PhoneAuthProps> = ({
         // Redirect to password creation
         setStatus("Redirecting to password creation...");
 
-        if (authState && "passwordUrl" in authState && typeof authState.passwordUrl === "string") {
+        if (
+          authState &&
+          "passwordUrl" in authState &&
+          typeof authState.passwordUrl === "string"
+        ) {
           await openAuthUrl(authState.passwordUrl, "password creation");
           await para.waitForWalletCreation({});
           setStatus("");
@@ -233,16 +245,16 @@ export const PhoneAuth: React.FC<PhoneAuthProps> = ({
             placeholder="+1234567890"
             keyboardType="phone-pad"
           />
-          <Text style={styles.hint}>Include country code (e.g., +1 for US)</Text>
-          <Button
-            title="Continue"
-            onPress={handleContinue}
-            loading={loading}
-          />
+          <Text style={styles.hint}>
+            Include country code (e.g., +1 for US)
+          </Text>
+          <Button title="Continue" onPress={handleContinue} loading={loading} />
         </>
       ) : showVerification ? (
         <>
-          <Text style={styles.subtitle}>Enter verification code sent to {phone}</Text>
+          <Text style={styles.subtitle}>
+            Enter verification code sent to {phone}
+          </Text>
           <Input
             label="Verification Code"
             value={verificationCode}
@@ -255,7 +267,8 @@ export const PhoneAuth: React.FC<PhoneAuthProps> = ({
           {phone.includes("555") && (
             <View style={styles.betaReminder}>
               <Text style={styles.betaReminderText}>
-                <Text style={styles.betaBold}>Beta Testing:</Text> Any random OTP will work
+                <Text style={styles.betaBold}>Beta Testing:</Text> Any random
+                OTP will work
               </Text>
             </View>
           )}
@@ -274,16 +287,10 @@ export const PhoneAuth: React.FC<PhoneAuthProps> = ({
           />
         </>
       ) : (
-        <SecurityChoice
-          onChoice={handleSecurityChoice}
-          loading={loading}
-        />
+        <SecurityChoice onChoice={handleSecurityChoice} loading={loading} />
       )}
 
-      <StatusDisplay
-        status={status}
-        error={error}
-      />
+      <StatusDisplay status={status} error={error} />
     </View>
   );
 };

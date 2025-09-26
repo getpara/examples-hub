@@ -21,7 +21,9 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
   const [loggingOut, setLoggingOut] = useState(false);
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
-  const [messageToSign, setMessageToSign] = useState("Hello from Para SDK Demo!");
+  const [messageToSign, setMessageToSign] = useState(
+    "Hello from Para SDK Demo!"
+  );
   const [signature, setSignature] = useState("");
   const [txSignature, setTxSignature] = useState("");
 
@@ -56,22 +58,25 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
       const fetchedWallets = await para.fetchWallets();
       console.info("[WalletSection] fetchWallets returned", {
         total: fetchedWallets.length,
-        hasAddresses: fetchedWallets.filter(wallet => wallet.address).length,
+        hasAddresses: fetchedWallets.filter((wallet) => wallet.address).length,
       });
 
       const normalizedWallets = fetchedWallets
-        .filter(wallet => wallet.address)
-        .map(entity => ({
+        .filter((wallet) => wallet.address)
+        .map((entity) => ({
           ...entityToWallet(entity),
           signer: para.wallets[entity.id]?.signer,
         })) as Wallet[];
 
       console.info("[WalletSection] Normalized wallet candidates", {
         total: normalizedWallets.length,
-        evmCount: normalizedWallets.filter(wallet => wallet.type === "EVM").length,
+        evmCount: normalizedWallets.filter((wallet) => wallet.type === "EVM")
+          .length,
       });
 
-      const evmWallets = normalizedWallets.filter(wallet => wallet.type === "EVM");
+      const evmWallets = normalizedWallets.filter(
+        (wallet) => wallet.type === "EVM"
+      );
 
       if (evmWallets.length > 0) {
         const existingCurrentIds = para.currentWalletIds || {};
@@ -81,13 +86,16 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
         };
 
         await para.setCurrentWalletIds(updatedCurrentIds);
-        console.info("[WalletSection] setCurrentWalletIds for existing wallet", updatedCurrentIds);
+        console.info(
+          "[WalletSection] setCurrentWalletIds for existing wallet",
+          updatedCurrentIds
+        );
 
         await para.setWallets(
           normalizedWallets.reduce<Record<string, Wallet>>((acc, wallet) => {
             acc[wallet.id] = wallet;
             return acc;
-          }, {}),
+          }, {})
         );
 
         setWallet(evmWallets[0]);
@@ -122,7 +130,10 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
         };
 
         await para.setCurrentWalletIds(updatedCurrentIds);
-        console.info("[WalletSection] setCurrentWalletIds for newly created wallet", updatedCurrentIds);
+        console.info(
+          "[WalletSection] setCurrentWalletIds for newly created wallet",
+          updatedCurrentIds
+        );
 
         setWallet(newWallets[0]);
         setStatus("");
@@ -131,7 +142,9 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
           address: newWallets[0].address,
         });
       } else {
-        setError("Wallet creation completed but no wallet was returned yet. Try again in a moment.");
+        setError(
+          "Wallet creation completed but no wallet was returned yet. Try again in a moment."
+        );
       }
     } catch (err) {
       console.error("[WalletSection] Failed to load wallet info", err);
@@ -181,7 +194,10 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
         });
       } else {
         setError("Failed to get signature");
-        console.warn("[WalletSection] signMessage missing signature property", sig);
+        console.warn(
+          "[WalletSection] signMessage missing signature property",
+          sig
+        );
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to sign message");
@@ -207,8 +223,10 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
         walletId: wallet.id,
       });
       // Create provider for Sepolia testnet
-      const provider = new ethers.JsonRpcProvider("https://ethereum-sepolia-rpc.publicnode.com");
-      
+      const provider = new ethers.JsonRpcProvider(
+        "https://ethereum-sepolia-rpc.publicnode.com"
+      );
+
       // Create Para-enabled signer as per documentation
       // @ts-expect-error - ParaMobile extends ParaCore but types aren't compatible
       const signer = new ParaEthersSigner(para, provider);
@@ -227,10 +245,10 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
         to: populatedTx.to,
         value: populatedTx.value?.toString(),
       });
-      
+
       // Sign the transaction without broadcasting
       const signedTx = await signer.signTransaction(populatedTx);
-      
+
       // Display the signed transaction
       setTxSignature(signedTx);
       setStatus("");
@@ -238,9 +256,10 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
         walletId: wallet.id,
         signatureLength: signedTx.length,
       });
-      
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to sign transaction");
+      setError(
+        err instanceof Error ? err.message : "Failed to sign transaction"
+      );
       console.error("[WalletSection] signTransaction error", err);
     } finally {
       setSigningTransaction(false);
@@ -304,7 +323,9 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
       {wallet && (
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Sign Transaction</Text>
-          <Text style={styles.info}>Sign a transaction to send 0.001 ETH (Sepolia)</Text>
+          <Text style={styles.info}>
+            Sign a transaction to send 0.001 ETH (Sepolia)
+          </Text>
           <View style={{ height: 16 }} />
           <Button
             title="Sign Transaction"
@@ -330,10 +351,7 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
         />
       </View>
 
-      <StatusDisplay
-        status={status}
-        error={error}
-      />
+      <StatusDisplay status={status} error={error} />
     </ScrollView>
   );
 };

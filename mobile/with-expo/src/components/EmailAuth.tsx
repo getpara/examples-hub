@@ -106,7 +106,11 @@ export const EmailAuth: React.FC<EmailAuthProps> = ({
 
           setShowVerification(false);
           onHideVerification?.();
-          setStatus(isOneClickLogin ? "Complete login in the browser..." : "Complete verification in the browser...");
+          setStatus(
+            isOneClickLogin
+              ? "Complete login in the browser..."
+              : "Complete verification in the browser..."
+          );
 
           await openAuthUrl(
             authStateResult.loginUrl,
@@ -149,7 +153,8 @@ export const EmailAuth: React.FC<EmailAuthProps> = ({
       }
     } catch (err) {
       // Don't log the full error object as it may have problematic getters
-      const errorMessage = err instanceof Error ? err.message : "Authentication failed";
+      const errorMessage =
+        err instanceof Error ? err.message : "Authentication failed";
       console.error("[EmailAuth] Authentication flow error:", errorMessage);
       setStatus("");
       setError(errorMessage);
@@ -170,7 +175,9 @@ export const EmailAuth: React.FC<EmailAuthProps> = ({
 
     try {
       // Verify OTP to confirm email ownership
-      const verifiedAuthState = await para.verifyNewAccount({ verificationCode });
+      const verifiedAuthState = await para.verifyNewAccount({
+        verificationCode,
+      });
       setAuthState(verifiedAuthState);
 
       // Show security choice instead of auto-creating passkey
@@ -254,15 +261,13 @@ export const EmailAuth: React.FC<EmailAuthProps> = ({
             keyboardType="email-address"
             autoCapitalize="none"
           />
-          <Button
-            title="Continue"
-            onPress={handleContinue}
-            loading={loading}
-          />
+          <Button title="Continue" onPress={handleContinue} loading={loading} />
         </>
       ) : showVerification ? (
         <>
-          <Text style={styles.subtitle}>Enter verification code sent to {email}</Text>
+          <Text style={styles.subtitle}>
+            Enter verification code sent to {email}
+          </Text>
           <Input
             label="Verification Code"
             value={verificationCode}
@@ -272,10 +277,12 @@ export const EmailAuth: React.FC<EmailAuthProps> = ({
             maxLength={6}
           />
 
-          {(email.endsWith("@usecapsule.com") || email.endsWith("@getpara.com")) && (
+          {(email.endsWith("@usecapsule.com") ||
+            email.endsWith("@getpara.com")) && (
             <View style={styles.betaReminder}>
               <Text style={styles.betaReminderText}>
-                <Text style={styles.betaBold}>Beta Testing:</Text> Any random OTP will work
+                <Text style={styles.betaBold}>Beta Testing:</Text> Any random
+                OTP will work
               </Text>
             </View>
           )}
@@ -294,16 +301,10 @@ export const EmailAuth: React.FC<EmailAuthProps> = ({
           />
         </>
       ) : (
-        <SecurityChoice
-          onChoice={handleSecurityChoice}
-          loading={loading}
-        />
+        <SecurityChoice onChoice={handleSecurityChoice} loading={loading} />
       )}
 
-      <StatusDisplay
-        status={status}
-        error={error}
-      />
+      <StatusDisplay status={status} error={error} />
     </View>
   );
 };
