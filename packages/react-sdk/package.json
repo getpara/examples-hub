@@ -1,17 +1,17 @@
 {
   "name": "@getpara/react-sdk",
-  "version": "2.0.0-alpha.60",
+  "version": "2.0.0-alpha.61",
   "bin": {
     "setup-para": "dist/cli/cli.mjs"
   },
   "dependencies": {
-    "@getpara/cosmjs-v0-integration": "2.0.0-alpha.60",
-    "@getpara/cosmos-wallet-connectors": "2.0.0-alpha.60",
-    "@getpara/evm-wallet-connectors": "2.0.0-alpha.60",
-    "@getpara/react-sdk-lite": "2.0.0-alpha.60",
-    "@getpara/solana-signers-v2-integration": "2.0.0-alpha.60",
-    "@getpara/solana-wallet-connectors": "2.0.0-alpha.60",
-    "@getpara/viem-v2-integration": "2.0.0-alpha.60"
+    "@getpara/cosmjs-v0-integration": "2.0.0-alpha.61",
+    "@getpara/cosmos-wallet-connectors": "2.0.0-alpha.61",
+    "@getpara/evm-wallet-connectors": "2.0.0-alpha.61",
+    "@getpara/react-sdk-lite": "2.0.0-alpha.61",
+    "@getpara/solana-signers-v2-integration": "2.0.0-alpha.61",
+    "@getpara/solana-wallet-connectors": "2.0.0-alpha.61",
+    "@getpara/viem-v2-integration": "2.0.0-alpha.61"
   },
   "devDependencies": {
     "@types/react": "^18.0.31",
