@@ -67,6 +67,5 @@
     "dev:setup": "yarn clean && yarn install:all && yarn build:all",
     "ci:local": "yarn install:all && yarn lint:all && yarn typecheck:all && yarn build:all && yarn test:all:parallel",
     "quality": "yarn lint:all && yarn typecheck:all"
-  },
-  "packageManager": "yarn@4.9.2"
+  }
 }
