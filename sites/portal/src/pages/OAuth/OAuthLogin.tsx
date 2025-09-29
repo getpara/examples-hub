@@ -21,8 +21,18 @@ export const OAuthLogin = () => {
         appScheme: searchParams.get('appScheme') || undefined,
         encryptionKey: searchParams.get('encryptionKey') || undefined,
       });
-      if (oAuthUrl) {
-        window.location.href = oAuthUrl;
+
+      // Add nativeCallbackUrl as a query parameter if it exists
+      const nativeCallbackUrl = searchParams.get('nativeCallbackUrl');
+      let finalUrl = oAuthUrl;
+      if (oAuthUrl && nativeCallbackUrl) {
+        const url = new URL(oAuthUrl);
+        url.searchParams.set('nativeCallbackUrl', nativeCallbackUrl);
+        finalUrl = url.toString();
+      }
+
+      if (finalUrl) {
+        window.location.href = finalUrl;
       } else {
         setIsWaiting(false);
       }

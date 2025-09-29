@@ -11,6 +11,7 @@ import { useModalOutletContext } from '../../hooks/useModalOutletContext';
 import { useCloseWindow } from '../../hooks/useCloseWindow';
 import { AuthMethod, isPasskeySupported } from '@getpara/web-sdk';
 import { validateCallbackUrl } from '../../utils/validateCallbackUrl';
+import { NativeCallbackStatus } from '../../constants/nativeCallback';
 import { isIFramed } from '../../utils/isIFramed';
 
 const AuthLoginBase = ({ authMethod, step: propsStep }: { authMethod?: AuthMethod; step?: AuthLoginStep }) => {
@@ -110,7 +111,12 @@ const AuthLoginBase = ({ authMethod, step: propsStep }: { authMethod?: AuthMetho
         }
       }
       // Redirect to the native callback URL
-      window.location.href = nativeCallbackUrl;
+      const statusParam = auth.isNewUser ? NativeCallbackStatus.NEW_USER : NativeCallbackStatus.COMPLETE;
+      const url = new URL(nativeCallbackUrl);
+      if (!url.searchParams.has('status')) {
+        url.searchParams.set('status', statusParam);
+      }
+      window.location.href = url.toString();
       return; // Exit early after redirect
     }
 

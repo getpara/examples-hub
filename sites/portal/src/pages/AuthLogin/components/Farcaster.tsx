@@ -20,14 +20,10 @@ export const Farcaster = ({ onLogin }: FarcasterStepProps) => {
 
   useEffect(() => {
     const setup = async () => {
-      if (isMobileDevice) {
-        return;
-      }
-
       const uri = await para.getFarcasterConnectUri({ appScheme: searchParams.get('appScheme') || undefined });
       setFarcasterConnectUri(uri);
 
-      return new Promise((resolve, reject) => {
+      return new Promise(resolve => {
         (async () => {
           while (true) {
             try {
@@ -46,8 +42,8 @@ export const Farcaster = ({ onLogin }: FarcasterStepProps) => {
                 return resolve(serverAuthState);
               }
             } catch (err) {
-              window?.parent?.postMessage({ type: 'FARCASTER_FAILED' }, '*');
-              return reject(err.message);
+              console.error('[Portal:Farcaster] polling failed, retrying', err);
+              await new Promise(_resolve => setTimeout(_resolve, 2000));
             }
           }
         })();
@@ -61,13 +57,23 @@ export const Farcaster = ({ onLogin }: FarcasterStepProps) => {
     <Container $isEmbedded={isIFramed}>
       {isMobileDevice ? (
         <FlexStartInnerContainer>
-          <CpslText weight="medium" color="secondary">
-            {`Don’t have Farcaster`}
+          <CpslText variant="bodyL" weight="semiBold" style={{ textAlign: 'center' }}>
+            Continue in Farcaster
           </CpslText>
+          <CpslButton
+            as="a"
+            href={farcasterConnectUri}
+            variant="primary"
+            disabled={!farcasterConnectUri}
+            style={{ width: '100%' }}
+          >
+            {`Open Farcaster`}
+          </CpslButton>
           <CpslButton as="a" href={'https://link.warpcast.com/download-qr'} target="_blank" variant="secondary">
             <CpslIcon slot="start" icon="linkExternal" />
-            {`Get Farcaster`}
+            {`Don’t have Farcaster?`}
           </CpslButton>
+          <CpslSpinner size={40} />
         </FlexStartInnerContainer>
       ) : (
         <FlexStartInnerContainer>
