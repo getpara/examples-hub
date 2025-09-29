@@ -175,14 +175,14 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({
         return;
       }
 
-      const statusParam = urlObj.searchParams.get("status") ?? "complete";
+      const statusParam = urlObj.searchParams.get("status") ?? "COMPLETE";
 
       try {
         para.isEnclaveUser = true;
 
-        if (statusParam === "complete") {
+        if (statusParam === "COMPLETE") {
           await finalizeLogin();
-        } else if (statusParam === "new_user") {
+        } else if (statusParam === "NEW_USER") {
           await finalizeSignup();
         } else {
           console.warn("[OAuthAuth] Unknown portal status", statusParam);
@@ -190,7 +190,7 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({
       } catch (err) {
         console.error("[OAuthAuth] Error completing portal callback", err);
         const fallbackMessage =
-          statusParam === "new_user"
+          statusParam === "NEW_USER"
             ? "Failed to finish signup"
             : "Failed to finish login";
         setError(err instanceof Error ? err.message : fallbackMessage);
