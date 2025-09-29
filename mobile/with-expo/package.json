@@ -2,6 +2,13 @@
   "name": "with-expo",
   "version": "1.0.0",
   "main": "index.js",
+  "resolutions": {
+    "metro": "0.82.0",
+    "metro-config": "0.82.0",
+    "metro-core": "0.82.0",
+    "metro-resolver": "0.82.0",
+    "metro-runtime": "0.82.0"
+  },
   "scripts": {
     "start": "expo start",
     "android": "expo run:android",
@@ -14,7 +21,9 @@
     "@craftzdog/react-native-buffer": "^6.1.0",
     "@getpara/ethers-v6-integration": "2.0.0-alpha.61",
     "@getpara/react-native-wallet": "2.0.0-alpha.61",
+    "@peculiar/webcrypto": "^1.5.0",
     "@react-native-async-storage/async-storage": "^2.2.0",
+    "elliptic": "^6.6.1",
     "ethers": "^6.15.0",
     "expo": "~53.0.12",
     "expo-linking": "^7.1.5",

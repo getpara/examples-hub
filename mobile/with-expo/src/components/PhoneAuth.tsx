@@ -16,6 +16,8 @@ interface PhoneAuthProps {
   onHideSecurityChoice?: () => void;
 }
 
+const APP_SCHEME = "para-sdk-demo://para";
+
 export const PhoneAuth: React.FC<PhoneAuthProps> = ({
   onSuccess,
   onShowVerification,
@@ -31,6 +33,36 @@ export const PhoneAuth: React.FC<PhoneAuthProps> = ({
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
+
+  const openAuthUrl = async (url: string, context: string) => {
+    const authUrl = new URL(url);
+    authUrl.searchParams.set("nativeCallbackUrl", APP_SCHEME);
+    const result = await openAuthSessionAsync(authUrl.toString(), APP_SCHEME);
+    if (result.type !== "success") {
+      throw new Error(`${context} cancelled`);
+    }
+    return result;
+  };
+
+  const touchSession = async (context: string) => {
+    setStatus("Restoring session...");
+    await para.touchSession();
+    setStatus("");
+  };
+
+  const waitForLoginAndFinish = async (context: string) => {
+    setStatus("Finishing login...");
+    await para.waitForLogin({});
+    await touchSession(context);
+    onSuccess();
+  };
+
+  const waitForSignupAndFinish = async () => {
+    setStatus("Finalizing account...");
+    await para.waitForSignup({});
+    await touchSession("signup");
+    onSuccess();
+  };
 
   useEffect(() => {
     // Call onHideVerification when component unmounts or verification is hidden
@@ -53,39 +85,66 @@ export const PhoneAuth: React.FC<PhoneAuthProps> = ({
 
     try {
       // Phone must include country code (e.g., +1 for US)
-      const authStateResult = await para.signUpOrLogIn({ auth: { phone: phone as `+${number}` } });
+      const authStateResult = await para.signUpOrLogIn({
+        auth: { phone: phone as `+${number}` },
+      });
       setAuthState(authStateResult);
 
+      const nextStage = (authStateResult as any)?.nextStage;
+
       if (authStateResult?.stage === "verify") {
+        if (authStateResult.loginUrl) {
+          const isOneClickLogin = nextStage === "login";
+
+          setShowVerification(false);
+          onHideVerification?.();
+          setStatus(
+            isOneClickLogin
+              ? "Complete login in the browser..."
+              : "Complete verification in the browser..."
+          );
+
+          await openAuthUrl(
+            authStateResult.loginUrl,
+            isOneClickLogin ? "one-click login" : "one-click signup"
+          );
+
+          if (isOneClickLogin) {
+            await waitForLoginAndFinish("one-click login");
+            return;
+          }
+
+          await waitForSignupAndFinish();
+          return;
+        }
+
         // New phone number - SMS verification required
         setShowVerification(true);
         onShowVerification?.();
         setStatus("Verification code sent via SMS");
       } else if (authStateResult?.stage === "login") {
         // Existing user - check if they use password or passkey
-        if (authStateResult.passwordUrl) {
+        if (authStateResult.loginUrl) {
+          setStatus("Complete login in the browser...");
+          await openAuthUrl(authStateResult.loginUrl, "one-click login");
+          await waitForLoginAndFinish("one-click login");
+          return;
+        } else if (authStateResult.passwordUrl) {
           // User has password-based security
           setStatus("Redirecting to password login...");
-          const APP_SCHEME_PHONE = "para-sdk-demo";
-          const APP_SCHEME_REDIRECT_URL = `${APP_SCHEME_PHONE}://para`;
-
-          // Append the native callback URL to the password URL for proper redirect
-          const url = new URL(authStateResult.passwordUrl);
-          url.searchParams.set('nativeCallbackUrl', APP_SCHEME_REDIRECT_URL);
-          
-          await openAuthSessionAsync(url.toString(), APP_SCHEME_REDIRECT_URL);
-          await para.waitForLogin({});
-          setStatus("");
-          onSuccess();
+          await openAuthUrl(authStateResult.passwordUrl, "password login");
+          await waitForLoginAndFinish("password");
         } else {
           // User has passkey-based security
           setStatus("Logging in with passkey...");
           await para.loginWithPasskey();
-          setStatus("");
+          await touchSession("passkey login");
           onSuccess();
         }
       }
     } catch (err) {
+      console.error("[PhoneAuth] Authentication flow error", err);
+      setStatus("");
       setError(err instanceof Error ? err.message : "Authentication failed");
     } finally {
       setLoading(false);
@@ -104,7 +163,9 @@ export const PhoneAuth: React.FC<PhoneAuthProps> = ({
 
     try {
       // Verify SMS code ownership
-      const verifiedAuthState = await para.verifyNewAccount({ verificationCode });
+      const verifiedAuthState = await para.verifyNewAccount({
+        verificationCode,
+      });
       setAuthState(verifiedAuthState);
 
       // Show security choice instead of auto-creating passkey
@@ -150,16 +211,13 @@ export const PhoneAuth: React.FC<PhoneAuthProps> = ({
       } else {
         // Redirect to password creation
         setStatus("Redirecting to password creation...");
-        const APP_SCHEME_PHONE = "para-sdk-demo";
-        const APP_SCHEME_REDIRECT_URL = `${APP_SCHEME_PHONE}://para`;
 
-        // Narrow type to AuthStateSignup to access passwordUrl
-        if (authState && "passwordUrl" in authState && typeof authState.passwordUrl === "string") {
-          // Append the native callback URL to the password URL for proper redirect
-          const url = new URL(authState.passwordUrl);
-          url.searchParams.set('nativeCallbackUrl', APP_SCHEME_REDIRECT_URL);
-          
-          await openAuthSessionAsync(url.toString(), APP_SCHEME_REDIRECT_URL);
+        if (
+          authState &&
+          "passwordUrl" in authState &&
+          typeof authState.passwordUrl === "string"
+        ) {
+          await openAuthUrl(authState.passwordUrl, "password creation");
           await para.waitForWalletCreation({});
           setStatus("");
           onHideSecurityChoice?.();
@@ -169,6 +227,7 @@ export const PhoneAuth: React.FC<PhoneAuthProps> = ({
         }
       }
     } catch (err) {
+      console.error("[PhoneAuth] Security setup error", err);
       setError(err instanceof Error ? err.message : "Security setup failed");
     } finally {
       setLoading(false);
@@ -186,16 +245,16 @@ export const PhoneAuth: React.FC<PhoneAuthProps> = ({
             placeholder="+1234567890"
             keyboardType="phone-pad"
           />
-          <Text style={styles.hint}>Include country code (e.g., +1 for US)</Text>
-          <Button
-            title="Continue"
-            onPress={handleContinue}
-            loading={loading}
-          />
+          <Text style={styles.hint}>
+            Include country code (e.g., +1 for US)
+          </Text>
+          <Button title="Continue" onPress={handleContinue} loading={loading} />
         </>
       ) : showVerification ? (
         <>
-          <Text style={styles.subtitle}>Enter verification code sent to {phone}</Text>
+          <Text style={styles.subtitle}>
+            Enter verification code sent to {phone}
+          </Text>
           <Input
             label="Verification Code"
             value={verificationCode}
@@ -208,7 +267,8 @@ export const PhoneAuth: React.FC<PhoneAuthProps> = ({
           {phone.includes("555") && (
             <View style={styles.betaReminder}>
               <Text style={styles.betaReminderText}>
-                <Text style={styles.betaBold}>Beta Testing:</Text> Any random OTP will work
+                <Text style={styles.betaBold}>Beta Testing:</Text> Any random
+                OTP will work
               </Text>
             </View>
           )}
@@ -227,16 +287,10 @@ export const PhoneAuth: React.FC<PhoneAuthProps> = ({
           />
         </>
       ) : (
-        <SecurityChoice
-          onChoice={handleSecurityChoice}
-          loading={loading}
-        />
+        <SecurityChoice onChoice={handleSecurityChoice} loading={loading} />
       )}
 
-      <StatusDisplay
-        status={status}
-        error={error}
-      />
+      <StatusDisplay status={status} error={error} />
     </View>
   );
 };
