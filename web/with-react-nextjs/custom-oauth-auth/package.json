@@ -11,11 +11,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-<<<<<<< Updated upstream
-    "@getpara/web-sdk": "2.0.0-alpha.57",
-=======
     "@getpara/web-sdk": "2.0.0-alpha.61",
->>>>>>> Stashed changes
     "@tanstack/react-query": "5.81.2",
     "next": "15.1.5",
     "react": "^19.0.0",

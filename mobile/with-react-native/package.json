@@ -12,11 +12,7 @@
   },
   "dependencies": {
     "@craftzdog/react-native-buffer": "^6.1.0",
-<<<<<<< Updated upstream
-    "@getpara/react-native-wallet": "2.0.0-alpha.57",
-=======
     "@getpara/react-native-wallet": "2.0.0-alpha.61",
->>>>>>> Stashed changes
     "@react-native-async-storage/async-storage": "^2.2.0",
     "@react-native/new-app-screen": "0.80.0",
     "react": "19.1.0",

@@ -167,3 +167,10 @@ Claude.md
 # act (GitHub Actions local runner)
 .github/workflows/event.json
 .act/
+
+# Yarn install state (machine-specific cache)
+**/.yarn/install-state.gz
+
+# Yarn directories (local cache and configs)
+.yarn/
+**/.yarn/
