@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "postinstall": "yarn graz --generate && npx setup-para",
+    "postinstall": "yarn graz --generate",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "lint": "eslint . --max-warnings 0"
@@ -17,6 +17,7 @@
     "@cosmjs/proto-signing": "^0.34.0",
     "@cosmjs/stargate": "^0.34.0",
     "@cosmjs/tendermint-rpc": "^0.34.0",
+    "@getpara/graz": "2.0.0-alpha.18",
     "@getpara/react-sdk": "2.0.0-alpha.61",
     "@leapwallet/cosmos-social-login-capsule-provider": "^0.0.44",
     "@solana-mobile/wallet-adapter-mobile": "^2.2.2",
