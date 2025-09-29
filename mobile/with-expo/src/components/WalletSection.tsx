@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { para } from "../para";
+import { ensureParaCrypto } from "@getpara/react-native-wallet/shim";
 import { Button } from "./common/Button";
 import { StatusDisplay } from "./common/StatusDisplay";
 import { Input } from "./common/Input";
-import { Wallet } from "@getpara/react-native-wallet";
+import { Wallet, entityToWallet } from "@getpara/react-native-wallet";
 import { ethers } from "ethers";
 import { ParaEthersSigner } from "@getpara/ethers-v6-integration";
 
@@ -20,55 +21,50 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
   const [loggingOut, setLoggingOut] = useState(false);
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
-  const [messageToSign, setMessageToSign] = useState("Hello from Para SDK Demo!");
+  const [messageToSign, setMessageToSign] = useState(
+    "Hello from Para SDK Demo!"
+  );
   const [signature, setSignature] = useState("");
   const [txSignature, setTxSignature] = useState("");
 
   useEffect(() => {
+    // The crypto polyfill may be stomped by other libraries; reapply before touching wallets.
+    ensureParaCrypto();
     // Fetch user's wallet on component mount
     loadWalletInfo();
   }, []);
 
   const loadWalletInfo = async () => {
+    ensureParaCrypto();
     setLoadingWallet(true);
     setError("");
     setStatus("Loading wallet information...");
 
     try {
-      // Para manages multiple wallet types - here we fetch EVM wallets
-      const evmWallets = await para.getWalletsByType("EVM");
+      await para.touchSession();
+      let fetchedWallets = await para.fetchWallets();
 
-      if (evmWallets && evmWallets.length > 0) {
-        // Use first wallet if exists
-        setWallet(evmWallets[0]);
+      if (!fetchedWallets.some(wallet => wallet.type === "EVM")) {
+        console.info("[WalletSection] No wallets found, creating EVM wallet");
+        await para.createWallet({ type: "EVM" });
+        fetchedWallets = await para.fetchWallets();
+      }
+
+      const normalizedWallets = fetchedWallets
+        .filter(wallet => wallet.address)
+        .map(entity => entityToWallet(entity)) as Wallet[];
+
+      const evmWallet = normalizedWallets.find(candidate => candidate.type === "EVM");
+
+      if (evmWallet) {
+        setWallet(evmWallet);
         setStatus("");
       } else {
-        // Auto-create wallet for new users
-        setStatus("No wallet found. Creating new EVM wallet...");
-        await para.createWallet({ type: "EVM" });
-
-        // Get the newly created wallet
-        const newWallets = await para.getWalletsByType("EVM");
-        if (newWallets && newWallets.length > 0) {
-          setWallet(newWallets[0]);
-          setStatus("");
-        }
+        setStatus("No wallets available for this account.");
       }
-    } catch (_err) {
-      // If getWalletsByType throws an error (no wallet), create one
-      try {
-        setStatus("Creating new EVM wallet...");
-        await para.createWallet({ type: "EVM" });
-
-        // Get the newly created wallet
-        const newWallets = await para.getWalletsByType("EVM");
-        if (newWallets && newWallets.length > 0) {
-          setWallet(newWallets[0]);
-          setStatus("");
-        }
-      } catch (createErr) {
-        setError(createErr instanceof Error ? createErr.message : "Failed to create wallet");
-      }
+    } catch (err) {
+      console.error("[WalletSection] Failed to load wallet info", err);
+      setError(err instanceof Error ? err.message : "Failed to load wallet");
     } finally {
       setLoadingWallet(false);
     }
@@ -91,6 +87,10 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
     setSignature("");
 
     try {
+      console.info("[WalletSection] signMessage start", {
+        walletId: wallet.id,
+        messagePreview: messageToSign.slice(0, 64),
+      });
       // Para requires base64 encoded messages
       const messageBase64 = btoa(messageToSign);
 
@@ -104,11 +104,20 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
       if ("signature" in sig) {
         setSignature(sig.signature);
         setStatus("");
+        console.info("[WalletSection] signMessage success", {
+          walletId: wallet.id,
+          signatureLength: sig.signature.length,
+        });
       } else {
         setError("Failed to get signature");
+        console.warn(
+          "[WalletSection] signMessage missing signature property",
+          sig
+        );
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to sign message");
+      console.error("[WalletSection] signMessage error", err);
     } finally {
       setSigningMessage(false);
     }
@@ -126,9 +135,14 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
     setTxSignature("");
 
     try {
+      console.info("[WalletSection] signTransaction start", {
+        walletId: wallet.id,
+      });
       // Create provider for Sepolia testnet
-      const provider = new ethers.JsonRpcProvider("https://ethereum-sepolia-rpc.publicnode.com");
-      
+      const provider = new ethers.JsonRpcProvider(
+        "https://ethereum-sepolia-rpc.publicnode.com"
+      );
+
       // Create Para-enabled signer as per documentation
       // @ts-expect-error - ParaMobile extends ParaCore but types aren't compatible
       const signer = new ParaEthersSigner(para, provider);
@@ -142,16 +156,27 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
 
       // Populate the transaction with necessary fields (nonce, gas prices, etc)
       const populatedTx = await signer.populateTransaction(tx);
-      
+      console.info("[WalletSection] signTransaction populated", {
+        gasLimit: populatedTx.gasLimit?.toString(),
+        to: populatedTx.to,
+        value: populatedTx.value?.toString(),
+      });
+
       // Sign the transaction without broadcasting
       const signedTx = await signer.signTransaction(populatedTx);
-      
+
       // Display the signed transaction
       setTxSignature(signedTx);
       setStatus("");
-      
+      console.info("[WalletSection] signTransaction success", {
+        walletId: wallet.id,
+        signatureLength: signedTx.length,
+      });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to sign transaction");
+      setError(
+        err instanceof Error ? err.message : "Failed to sign transaction"
+      );
+      console.error("[WalletSection] signTransaction error", err);
     } finally {
       setSigningTransaction(false);
     }
@@ -214,7 +239,9 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
       {wallet && (
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Sign Transaction</Text>
-          <Text style={styles.info}>Sign a transaction to send 0.001 ETH (Sepolia)</Text>
+          <Text style={styles.info}>
+            Sign a transaction to send 0.001 ETH (Sepolia)
+          </Text>
           <View style={{ height: 16 }} />
           <Button
             title="Sign Transaction"
@@ -240,10 +267,7 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
         />
       </View>
 
-      <StatusDisplay
-        status={status}
-        error={error}
-      />
+      <StatusDisplay status={status} error={error} />
     </ScrollView>
   );
 };

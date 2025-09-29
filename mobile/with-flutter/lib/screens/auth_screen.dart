@@ -76,6 +76,10 @@ class _AuthScreenState extends State<AuthScreen> {
       final auth = isPhone ? Auth.phone(value) : Auth.email(value);
       final authState = await para.initiateAuthFlow(auth: auth);
 
+      if (await _handleSloFlowIfNeeded(authState)) {
+        return;
+      }
+
       if (authState.stage == AuthStage.verify && mounted) {
         // Show OTP verification and await result
         final result = await showOTPVerificationSheet(
@@ -148,6 +152,10 @@ class _AuthScreenState extends State<AuthScreen> {
         otp: otp,
       );
       
+      if (await _handleSloFlowIfNeeded(verifiedState)) {
+        return null;
+      }
+      
       if (verifiedState.stage == AuthStage.signup && mounted) {
         // Return the verified state so AuthScreen can handle navigation
         return verifiedState;
@@ -191,6 +199,76 @@ class _AuthScreenState extends State<AuthScreen> {
     }
   }
 
+  Future<bool> _handleSloFlowIfNeeded(AuthState authState) async {
+    String? sloUrl = authState.loginUrl;
+    final nextStage = authState.effectiveNextStage;
+    final isSloLogin =
+        authState.stage == AuthStage.login || nextStage == AuthStage.login;
+
+    if (sloUrl == null || sloUrl.isEmpty) {
+      final methods =
+          isSloLogin ? authState.loginMethods : authState.signupMethods;
+      if (methods.contains('BASIC_LOGIN')) {
+        try {
+          sloUrl = await para.getLoginUrl(authMethod: 'BASIC_LOGIN');
+          debugPrint('[EmailAuth] Generated SLO login URL via getLoginUrl');
+        } catch (e) {
+          debugPrint('[EmailAuth] Failed to fetch login URL via getLoginUrl: $e');
+        }
+      }
+    }
+
+    if (sloUrl == null || sloUrl.isEmpty) {
+      return false;
+    }
+
+    final contextLabel = isSloLogin ? 'SLO login' : 'SLO signup';
+
+    try {
+      final callbackURL = await para.presentAuthUrl(
+        url: sloUrl,
+        webAuthenticationSession: _webAuthSession,
+        context: contextLabel,
+        loadTransmissionKeyshares: true,
+      );
+
+      if (callbackURL != null) {
+        debugPrint('[EmailAuth] $contextLabel session callback ${callbackURL.toString()}');
+      } else {
+        debugPrint('[EmailAuth] $contextLabel session completed without callback URL');
+      }
+
+      if (isSloLogin) {
+        final loginResult = await para.waitForLogin();
+        debugPrint('[EmailAuth] waitForLogin resolved ($contextLabel) $loginResult');
+      } else {
+        final signupResult = await para.waitForSignup();
+        debugPrint('[EmailAuth] waitForSignup resolved $signupResult');
+      }
+
+      try {
+        final session = await para.touchSession();
+        debugPrint('[EmailAuth] Session after $contextLabel ${session ?? {}}');
+      } catch (touchError) {
+        debugPrint('[EmailAuth] touchSession failed: $touchError');
+      }
+
+      await para.fetchWallets();
+
+      if (mounted) {
+        widget.onSuccess();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Authentication failed: ${e.toString()}')),
+        );
+      }
+    }
+
+    return true;
+  }
+
   Future<SignupMethod?> _chooseSignupMethod() async {
     return showDialog<SignupMethod>(
       context: context,
@@ -216,6 +294,9 @@ class _AuthScreenState extends State<AuthScreen> {
 
   Future<void> _handleLogin(AuthState authState) async {
     try {
+      if (await _handleSloFlowIfNeeded(authState)) {
+        return;
+      }
       // Use handleLogin for existing users
       await para.handleLogin(
         authState: authState,

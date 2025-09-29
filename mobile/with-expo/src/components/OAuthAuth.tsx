@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { para } from "../para";
 import { openAuthSessionAsync } from "expo-web-browser";
@@ -6,9 +6,10 @@ import * as Linking from "expo-linking";
 import { StatusDisplay } from "./common/StatusDisplay";
 import { SecurityChoice } from "./SecurityChoice";
 import { AuthState, AuthStateSignup } from "@getpara/react-native-wallet";
+import { NativeCallbackStatus } from "../constants/nativeCallback";
 
-// OAuth providers supported by Para SDK
-type SupportedOAuthMethod = "GOOGLE" | "DISCORD" | "TWITTER" | "APPLE" | "FACEBOOK";
+// OAuth providers
+type SupportedOAuthMethod = "GOOGLE" | "FARCASTER";
 
 interface OAuthAuthProps {
   onSuccess: () => void;
@@ -18,83 +19,227 @@ interface OAuthAuthProps {
 
 // Must match scheme in app.json for deep linking
 const APP_SCHEME = "para-sdk-demo";
+const APP_CALLBACK_URL = `${APP_SCHEME}://para`;
+const FARCASTER_CALLBACK_URL = `${APP_CALLBACK_URL}?method=login`;
 
-export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess, onShowSecurityChoice, onHideSecurityChoice }) => {
+type ParaWithInternals = typeof para & {
+  constructPortalUrl?: (
+    type: string,
+    opts?: Record<string, unknown>
+  ) => Promise<string>;
+};
+
+export const OAuthAuth: React.FC<OAuthAuthProps> = ({
+  onSuccess,
+  onShowSecurityChoice,
+  onHideSecurityChoice,
+}) => {
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
-  const [pendingOAuthProvider, setPendingOAuthProvider] = useState<SupportedOAuthMethod | null>(null);
-  const [showSecurityChoice, setShowSecurityChoice] = useState(false);
+  const [pendingOAuthProvider, setPendingOAuthProvider] =
+    useState<SupportedOAuthMethod | null>(null);
   const [authState, setAuthState] = useState<AuthState | null>(null);
+  const [showSecurityChoice, setShowSecurityChoice] = useState(false);
 
-  // Handle OAuth redirect back to app
-  useEffect(() => {
-    const handleDeeplink = async (url: string) => {
-      // Para redirects to {scheme}://para?method=login after OAuth
-      if (url.includes("://para?method=login") && pendingOAuthProvider) {
-        try {
-          setStatus("Verifying authentication...");
+  const openAuthUrl = useCallback(async (url: string, context: string) => {
+    const authUrl = new URL(url);
+    authUrl.searchParams.set("nativeCallbackUrl", APP_CALLBACK_URL);
+    const finalUrl = authUrl.toString();
+    const result = await openAuthSessionAsync(finalUrl, APP_CALLBACK_URL);
+    if (result.type !== "success") {
+      throw new Error(`${context} cancelled`);
+    }
+    return result;
+  }, []);
 
-          // Complete OAuth flow with Para backend
-          const verifiedAuthState = await para.verifyOAuth({
-            method: pendingOAuthProvider,
-          });
-          setAuthState(verifiedAuthState);
+  const resetOAuthState = useCallback(() => {
+    setPendingOAuthProvider(null);
+    setLoading(false);
+  }, []);
 
-          if (verifiedAuthState.stage === "login") {
-            // Existing user - check if they use password or passkey
-            if (verifiedAuthState.passwordUrl) {
-              // User has password-based security
-              setStatus("Redirecting to password login...");
-              const APP_SCHEME_OAUTH = "para-sdk-demo";
-              const APP_SCHEME_REDIRECT_URL = `${APP_SCHEME_OAUTH}://para`;
+  const finalizeLogin = useCallback(async () => {
+    setStatus("Finishing login...");
+    const waitForLoginResult = await para.waitForLogin();
 
-              // Append the native callback URL to the password URL for proper redirect
-              const url = new URL(verifiedAuthState.passwordUrl);
-              url.searchParams.set('nativeCallbackUrl', APP_SCHEME_REDIRECT_URL);
-              
-              await openAuthSessionAsync(url.toString(), APP_SCHEME_REDIRECT_URL);
-              await para.waitForLogin({});
-              setStatus("");
-              onSuccess();
-            } else {
-              // User has passkey-based security
-              setStatus("Logging in with passkey...");
-              await para.loginWithPasskey();
-              setStatus("");
-              onSuccess();
-            }
-          } else if (verifiedAuthState.stage === "signup") {
-            // New user - show security choice
-            setShowSecurityChoice(true);
-            onShowSecurityChoice?.();
-            setStatus("");
-          } else {
-            throw new Error("Unexpected authentication state");
-          }
-        } catch (err) {
-          setError(err instanceof Error ? err.message : "OAuth verification failed");
-        } finally {
-          setPendingOAuthProvider(null);
-          setLoading(false);
-        }
+    if (
+      waitForLoginResult?.needsWallet &&
+      typeof para.waitForWalletCreation === "function"
+    ) {
+      setStatus("Creating your Para wallet...");
+      await para.waitForWalletCreation({});
+    }
+
+    onSuccess();
+  }, [onSuccess]);
+
+  const finalizeSignup = useCallback(async () => {
+    setStatus("Finalizing account...");
+
+    await para.waitForSignup({});
+    // @ts-expect-error: userSetupAfterLogin is protected on ParaCore but required to hydrate session after signup
+    await para.userSetupAfterLogin();
+
+    setStatus("");
+    setShowSecurityChoice(false);
+    onSuccess();
+  }, [onSuccess]);
+
+  const handleLegacyLogin = useCallback(
+    async (state: AuthState) => {
+      if (state.stage !== "login") {
+        return;
       }
-    };
 
-    // Listen for incoming links
+      if (state.passwordUrl) {
+        setStatus("Redirecting to password login...");
+        await openAuthUrl(state.passwordUrl, "password login");
+        await finalizeLogin();
+        return;
+      }
+
+      setStatus("Logging in with passkey...");
+      await para.loginWithPasskey();
+      await finalizeLogin();
+    },
+    [openAuthUrl, finalizeLogin]
+  );
+
+  const handleLegacyVerify = useCallback(
+    async (state: AuthState) => {
+      if (state.stage !== "verify" || !state.loginUrl) {
+        throw new Error("Unexpected authentication state");
+      }
+
+      await openAuthUrl(state.loginUrl, "one-click signup");
+      await finalizeSignup();
+    },
+    [openAuthUrl, finalizeSignup]
+  );
+
+  const handleLegacyOAuthCallback = useCallback(async () => {
+    if (!pendingOAuthProvider || pendingOAuthProvider === "FARCASTER") {
+      return;
+    }
+
+    try {
+      console.info("[OAuthAuth] Handling legacy OAuth callback", {
+        provider: pendingOAuthProvider,
+      });
+      setStatus("Verifying authentication...");
+
+      const verifiedAuthState = await para.verifyOAuth({
+        method: pendingOAuthProvider,
+      });
+      setAuthState(verifiedAuthState);
+
+      switch (verifiedAuthState.stage) {
+        case "login":
+          await handleLegacyLogin(verifiedAuthState);
+          break;
+        case "signup":
+          setShowSecurityChoice(true);
+          onShowSecurityChoice?.();
+          setStatus("");
+          break;
+        case "verify":
+          await handleLegacyVerify(verifiedAuthState);
+          break;
+        default:
+          throw new Error("Unexpected authentication state");
+      }
+    } catch (err) {
+      console.error("[OAuthAuth] Error handling OAuth callback", err);
+      setError(
+        err instanceof Error ? err.message : "OAuth verification failed"
+      );
+    } finally {
+      resetOAuthState();
+    }
+  }, [
+    pendingOAuthProvider,
+    handleLegacyLogin,
+    handleLegacyVerify,
+    onShowSecurityChoice,
+    resetOAuthState,
+  ]);
+
+  const handlePortalCallback = useCallback(
+    async (url: string) => {
+      const urlObj = new URL(url);
+      const methodParam = urlObj.searchParams.get("method");
+
+      console.info("[OAuthAuth] Portal callback received", { url });
+
+      if (methodParam === "login" && pendingOAuthProvider === "FARCASTER") {
+        console.info("[OAuthAuth] Received Farcaster deeplink:", url);
+        return;
+      }
+
+      const statusParam =
+        (urlObj.searchParams.get("status") as NativeCallbackStatus | null) ??
+        NativeCallbackStatus.COMPLETE;
+
+      try {
+        para.isEnclaveUser = true;
+
+        if (statusParam === NativeCallbackStatus.COMPLETE) {
+          await finalizeLogin();
+        } else if (statusParam === NativeCallbackStatus.NEW_USER) {
+          await finalizeSignup();
+        } else {
+          console.warn("[OAuthAuth] Unknown portal status", statusParam);
+        }
+      } catch (err) {
+        console.error("[OAuthAuth] Error completing portal callback", err);
+        const fallbackMessage =
+          statusParam === NativeCallbackStatus.NEW_USER
+            ? "Failed to finish signup"
+            : "Failed to finish login";
+        setError(err instanceof Error ? err.message : fallbackMessage);
+      } finally {
+        resetOAuthState();
+      }
+    },
+    [pendingOAuthProvider, finalizeLogin, finalizeSignup, resetOAuthState]
+  );
+
+  const handleDeeplink = useCallback(
+    async (url: string) => {
+      if (url.startsWith(FARCASTER_CALLBACK_URL)) {
+        if (pendingOAuthProvider === "FARCASTER") {
+          console.info("[OAuthAuth] Ignoring intermediate Farcaster callback", {
+            url,
+          });
+          return;
+        }
+
+        await handleLegacyOAuthCallback();
+        return;
+      }
+
+      if (url.startsWith(APP_CALLBACK_URL)) {
+        await handlePortalCallback(url);
+      }
+    },
+    [pendingOAuthProvider, handleLegacyOAuthCallback, handlePortalCallback]
+  );
+
+  useEffect(() => {
     const subscription = Linking.addEventListener("url", (event) => {
       handleDeeplink(event.url);
     });
 
-    // Check if app was opened with a link
     Linking.getInitialURL().then((url) => {
-      if (url) handleDeeplink(url);
+      if (url) {
+        handleDeeplink(url);
+      }
     });
 
     return () => {
       subscription.remove();
     };
-  }, [pendingOAuthProvider, onSuccess, onShowSecurityChoice]);
+  }, [handleDeeplink]);
 
   const handleOAuthLogin = async (provider: SupportedOAuthMethod) => {
     setLoading(true);
@@ -102,31 +247,110 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess, onShowSecurityC
     setStatus(`Authenticating with ${provider}...`);
 
     try {
-      await handleStandardOAuth(provider);
+      if (provider === "FARCASTER") {
+        await handleFarcasterAuth();
+      } else {
+        await handleStandardOAuth(provider);
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "OAuth authentication failed");
+      console.error("[OAuthAuth] OAuth launch error", err);
+      setError(
+        err instanceof Error ? err.message : "OAuth authentication failed"
+      );
       setLoading(false);
       setPendingOAuthProvider(null);
     }
   };
 
+  const handleFarcasterAuth = async () => {
+    console.info("[OAuthAuth] Starting Farcaster authentication flow");
+
+    setPendingOAuthProvider("FARCASTER");
+
+    try {
+      const paraWithInternals = para as ParaWithInternals;
+
+      if (!paraWithInternals.constructPortalUrl) {
+        throw new Error(
+          "Farcaster portal login is not supported in this SDK version."
+        );
+      }
+
+      const touchSessionResult = await para.touchSession(true);
+      console.info("[OAuthAuth] Prepared Farcaster session lookup", {
+        sessionLookupId: touchSessionResult.sessionLookupId,
+      });
+
+      const portalUrl = await paraWithInternals.constructPortalUrl(
+        "loginFarcaster",
+        {
+          appScheme: FARCASTER_CALLBACK_URL,
+          params: { nativeCallbackUrl: APP_CALLBACK_URL },
+        }
+      );
+
+      setStatus("Complete authentication in Farcaster portal...");
+      const result = await openAuthUrl(portalUrl, "farcaster authentication");
+
+      switch (result.type) {
+        case "success": {
+          if (result.url) {
+            await handleDeeplink(result.url);
+          }
+          return;
+        }
+        case "cancel":
+        case "dismiss": {
+          console.info(
+            "[OAuthAuth] Farcaster authentication cancelled by user"
+          );
+          setPendingOAuthProvider(null);
+          setLoading(false);
+          setError("Authentication cancelled");
+          return;
+        }
+        default:
+          return;
+      }
+    } catch (err) {
+      console.error("[OAuthAuth] Farcaster portal flow failed", err);
+      setError(
+        err instanceof Error ? err.message : "Farcaster authentication failed"
+      );
+      setPendingOAuthProvider(null);
+      setLoading(false);
+    }
+  };
+
   const handleStandardOAuth = async (provider: SupportedOAuthMethod) => {
-    // Track which provider we're authenticating with
+    console.info("[OAuthAuth] Starting OAuth flow for provider:", provider);
+
     setPendingOAuthProvider(provider);
 
-    // Get provider-specific OAuth URL from Para
+    console.info(
+      "[OAuthAuth] Getting OAuth URL without appScheme to force portal callback"
+    );
     const oauthUrl = await para.getOAuthUrl({
       method: provider,
-      appScheme: `${APP_SCHEME}://para?method=login`, // Redirect URI: {scheme}://para?method=login
     });
 
-    // Launch in-app browser for OAuth consent
-    const result = await openAuthSessionAsync(oauthUrl, APP_SCHEME, {
-      preferEphemeralSession: false, // Allow saved sessions
-    });
+    console.info("[OAuthAuth] OAuth URL received:", oauthUrl);
+    console.info("[OAuthAuth] Expected callback URL:", APP_CALLBACK_URL);
 
-    // Handle browser dismissal (success handled by deeplink)
+    const result = await openAuthUrl(
+      oauthUrl,
+      `${provider.toLowerCase()} authentication`
+    );
+
+    console.info("[OAuthAuth] Auth session result:", result);
+
+    if (result.type === "success" && result.url) {
+      await handleDeeplink(result.url);
+      return;
+    }
+
     if (result.type === "cancel" || result.type === "dismiss") {
+      console.info("[OAuthAuth] Authentication cancelled by user");
       setPendingOAuthProvider(null);
       setLoading(false);
       setError("Authentication cancelled");
@@ -139,28 +363,20 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess, onShowSecurityC
 
     try {
       if (choice === "passkey") {
-        // Register passkey for future logins
         setStatus("Creating passkey...");
         await para.registerPasskey(authState as AuthStateSignup);
         setStatus("");
         onHideSecurityChoice?.();
         onSuccess();
       } else {
-        // Redirect to password creation
         setStatus("Redirecting to password creation...");
-        const APP_SCHEME_OAUTH = "para-sdk-demo";
-        const APP_SCHEME_REDIRECT_URL = `${APP_SCHEME_OAUTH}://para`;
 
         if (authState && (authState as AuthStateSignup).passwordUrl) {
           const passwordUrl = (authState as AuthStateSignup).passwordUrl;
           if (!passwordUrl) {
             throw new Error("Password URL is undefined");
           }
-          // Append the native callback URL to the password URL for proper redirect
-          const url = new URL(passwordUrl);
-          url.searchParams.set('nativeCallbackUrl', APP_SCHEME_REDIRECT_URL);
-          
-          await openAuthSessionAsync(url.toString(), APP_SCHEME_REDIRECT_URL);
+          await openAuthUrl(passwordUrl, "password creation");
           await para.waitForWalletCreation({});
           setStatus("");
           onHideSecurityChoice?.();
@@ -170,6 +386,7 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess, onShowSecurityC
         }
       }
     } catch (err) {
+      console.error("[OAuthAuth] Security setup error", err);
       setError(err instanceof Error ? err.message : "Security setup failed");
     } finally {
       setLoading(false);
@@ -183,36 +400,29 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({ onSuccess, onShowSecurityC
     name: string;
   }[] = [
     { method: "GOOGLE", name: "Continue with Google" },
-    { method: "DISCORD", name: "Continue with Discord" },
+    { method: "FARCASTER", name: "Continue with Farcaster" },
   ];
 
   return (
     <View style={styles.container}>
       {!showSecurityChoice ? (
-        <>
-          <View style={styles.providersContainer}>
-            {oauthProviders.map((provider) => (
-              <TouchableOpacity
-                key={provider.method}
-                style={[styles.providerButton, loading && styles.disabledButton]}
-                onPress={() => handleOAuthLogin(provider.method)}
-                disabled={loading}>
-                <Text style={styles.providerButtonText}>{provider.name}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </>
+        <View style={styles.providersContainer}>
+          {oauthProviders.map((provider) => (
+            <TouchableOpacity
+              key={provider.method}
+              style={[styles.providerButton, loading && styles.disabledButton]}
+              onPress={() => handleOAuthLogin(provider.method)}
+              disabled={loading}
+            >
+              <Text style={styles.providerButtonText}>{provider.name}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
       ) : (
-        <SecurityChoice
-          onChoice={handleSecurityChoice}
-          loading={loading}
-        />
+        <SecurityChoice onChoice={handleSecurityChoice} loading={loading} />
       )}
 
-      <StatusDisplay
-        status={status}
-        error={error}
-      />
+      <StatusDisplay status={status} error={error} />
     </View>
   );
 };

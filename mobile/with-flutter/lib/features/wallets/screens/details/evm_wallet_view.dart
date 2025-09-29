@@ -203,12 +203,15 @@ class _EVMWalletViewState extends State<EVMWalletView> {
       final duration = DateTime.now().difference(startTime).inMilliseconds / 1000;
       
       if (result is para_sdk.SuccessfulSignatureResult) {
-        // Check if we have the new signedTransaction field
-        final hasSignedTx = result.signedTransaction != null;
-        final signedTxInfo = hasSignedTx 
+        final signedTx = result.signedTransaction;
+        final hasSignedTx = signedTx.isNotEmpty;
+        final preview = hasSignedTx
+            ? (signedTx.length > 50 ? '${signedTx.substring(0, 50)}...' : signedTx)
+            : '';
+        final signedTxInfo = hasSignedTx
             ? '✅ Full signed transaction available!\n'
-              'Length: ${result.signedTransaction!.length} chars\n'
-              'Preview: ${result.signedTransaction!.substring(0, 50)}...\n\n'
+              'Length: ${signedTx.length} chars\n'
+              'Preview: $preview\n\n'
             : '⚠️ Only signature available (bridge update needed)\n\n';
         
         _showResult(
@@ -220,7 +223,7 @@ class _EVMWalletViewState extends State<EVMWalletView> {
           'Max Fee: 3 gwei\n'
           'Chain: Sepolia (11155111)\n\n'
           '$signedTxInfo'
-          'Signature:\n${result.signedTransaction}\n\n'
+          'Signature:\n$signedTx\n\n'
           'TransactionData getter:\n${result.transactionData.substring(0, 50)}...\n\n'
           'Duration: ${duration.toStringAsFixed(3)}s',
         );
@@ -289,7 +292,11 @@ class _EVMWalletViewState extends State<EVMWalletView> {
       final duration = DateTime.now().difference(startTime).inMilliseconds / 1000;
       
       if (result is para_sdk.SuccessfulSignatureResult) {
-        final hasSignedTx = result.signedTransaction != null;
+        final signedTx = result.signedTransaction;
+        final hasSignedTx = signedTx.isNotEmpty;
+        final signedTxPreview = hasSignedTx
+            ? (signedTx.length > 100 ? '${signedTx.substring(0, 100)}...' : signedTx)
+            : null;
         _showResult(
           'ERC20 Transfer Signed',
           'Token: USDC (Sepolia)\n'
@@ -298,7 +305,7 @@ class _EVMWalletViewState extends State<EVMWalletView> {
           'Amount: 0.1 USDC\n'
           'Gas Limit: 100000\n\n'
           '${hasSignedTx ? "✅ Signed transaction with encoded function call" : "⚠️ Only signature available"}\n\n'
-          'Transaction Data:\n${result.signedTransaction?.substring(0, 100)}...\n\n'
+          '${signedTxPreview != null ? "Transaction Data:\n$signedTxPreview\n\n" : ""}'
           'Duration: ${duration.toStringAsFixed(3)}s\n\n'
           'Note: This is a test signature. To broadcast, you would need USDC tokens.',
         );
