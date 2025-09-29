@@ -12,7 +12,11 @@
     "lint": "eslint ."
   },
   "dependencies": {
+<<<<<<< Updated upstream
     "@getpara/web-sdk": "2.0.0-alpha.57"
+=======
+    "@getpara/web-sdk": "2.0.0-alpha.61"
+>>>>>>> Stashed changes
   },
   "devDependencies": {
     "@eslint/js": "^9.29.0",
