@@ -7,7 +7,6 @@ import * as web3 from "@solana/web3.js";
 import * as anchor from "@coral-xyz/anchor";
 import { useSolana } from "./useSolana";
 
-type AnchorTransaction = Parameters<anchor.AnchorProvider['sendAndConfirm']>[0];
 type AnchorConnection = ConstructorParameters<typeof anchor.AnchorProvider>[0];
 
 export function useParaSigner() {

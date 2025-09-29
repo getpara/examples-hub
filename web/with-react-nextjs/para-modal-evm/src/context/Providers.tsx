@@ -3,7 +3,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ParaProvider as ParaSDKProvider } from "@getpara/react-sdk";
 import { API_KEY, ENVIRONMENT } from "@/config/constants";
-import { sepolia, celo, mainnet, polygon } from "wagmi/chains";
+import { sepolia } from "wagmi/chains";
 
 const queryClient = new QueryClient();
 
