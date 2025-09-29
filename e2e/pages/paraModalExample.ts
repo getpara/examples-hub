@@ -379,32 +379,44 @@ export class ParaModalExamplePage {
     this.logger.logInfo('Logout completed - connect button visible');
   }
 
-  async signMessage(message: string): Promise<string> {
-    this.logger.logInfo(`Signing message: ${message}`);
-    
-    // Find and fill the message input
-    const messageInput = await this.page.getByTestId('sign-message-input');
-    await messageInput.click();
-    await messageInput.clear();
-    await messageInput.fill(message);
-    this.logger.logInfo('Filled message input');
-    
-    // Click the sign button
-    const signButton = await this.page.getByTestId('sign-submit-button');
-    await signButton.click();
-    this.logger.logInfo('Clicked sign button');
-    
+  async signMessage(message?: string): Promise<string> {
+    // Check if we have the input-based implementation (React Vite) or hardcoded implementation (Next.js para-modal)
+    const messageInput = this.page.getByTestId('sign-message-input');
+    const hasInput = await messageInput.isVisible().catch(() => false);
+
+    if (hasInput && message) {
+      // Input-based implementation (React Vite and others)
+      this.logger.logInfo(`Signing message: ${message}`);
+
+      await messageInput.click();
+      await messageInput.clear();
+      await messageInput.fill(message);
+      this.logger.logInfo('Filled message input');
+
+      // Click the sign button
+      const signButton = this.page.getByTestId('sign-submit-button');
+      await signButton.click();
+      this.logger.logInfo('Clicked sign button');
+    } else {
+      // Hardcoded "Hello World!" implementation (Next.js para-modal)
+      this.logger.logInfo('Signing hardcoded "Hello World!" message');
+
+      const signButton = this.page.getByText('Sign Hello World!');
+      await signButton.click();
+      this.logger.logInfo('Clicked sign button');
+    }
+
     // Wait for signature to appear
     const signatureDisplay = await this.page.waitForSelector('[data-testid="sign-signature-display"]', {
       state: 'visible',
       timeout: 10000
     });
     this.logger.logInfo('Signature appeared');
-    
+
     // Get the signature text
     const signature = await signatureDisplay.textContent();
     this.logger.logInfo(`Got signature: ${signature}`);
-    
+
     return signature || '';
   }
 }
