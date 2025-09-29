@@ -6,6 +6,7 @@ import * as Linking from "expo-linking";
 import { StatusDisplay } from "./common/StatusDisplay";
 import { SecurityChoice } from "./SecurityChoice";
 import { AuthState, AuthStateSignup } from "@getpara/react-native-wallet";
+import { NativeCallbackStatus } from "../constants/nativeCallback";
 
 // OAuth providers
 type SupportedOAuthMethod = "GOOGLE" | "FARCASTER";
@@ -175,14 +176,16 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({
         return;
       }
 
-      const statusParam = urlObj.searchParams.get("status") ?? "COMPLETE";
+      const statusParam =
+        (urlObj.searchParams.get("status") as NativeCallbackStatus | null) ??
+        NativeCallbackStatus.COMPLETE;
 
       try {
         para.isEnclaveUser = true;
 
-        if (statusParam === "COMPLETE") {
+        if (statusParam === NativeCallbackStatus.COMPLETE) {
           await finalizeLogin();
-        } else if (statusParam === "NEW_USER") {
+        } else if (statusParam === NativeCallbackStatus.NEW_USER) {
           await finalizeSignup();
         } else {
           console.warn("[OAuthAuth] Unknown portal status", statusParam);
@@ -190,7 +193,7 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({
       } catch (err) {
         console.error("[OAuthAuth] Error completing portal callback", err);
         const fallbackMessage =
-          statusParam === "NEW_USER"
+          statusParam === NativeCallbackStatus.NEW_USER
             ? "Failed to finish signup"
             : "Failed to finish login";
         setError(err instanceof Error ? err.message : fallbackMessage);
