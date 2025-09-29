@@ -128,9 +128,8 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
     try {
       // Create provider for Sepolia testnet
       const provider = new ethers.JsonRpcProvider("https://ethereum-sepolia-rpc.publicnode.com");
-      
+
       // Create Para-enabled signer as per documentation
-      // @ts-expect-error - ParaMobile extends ParaCore but types aren't compatible
       const signer = new ParaEthersSigner(para, provider);
 
       // Create transaction object
@@ -142,14 +141,13 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
 
       // Populate the transaction with necessary fields (nonce, gas prices, etc)
       const populatedTx = await signer.populateTransaction(tx);
-      
+
       // Sign the transaction without broadcasting
       const signedTx = await signer.signTransaction(populatedTx);
-      
+
       // Display the signed transaction
       setTxSignature(signedTx);
       setStatus("");
-      
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to sign transaction");
     } finally {

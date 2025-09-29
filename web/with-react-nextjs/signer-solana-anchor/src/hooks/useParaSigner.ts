@@ -3,9 +3,12 @@
 import { useState, useCallback, useEffect } from "react";
 import { useAccount, useClient } from "@getpara/react-sdk";
 import { ParaSolanaWeb3Signer } from "@getpara/solana-web3.js-v1-integration";
-import { SystemProgram, Transaction, VersionedTransaction } from "@solana/web3.js";
+import * as web3 from "@solana/web3.js";
 import * as anchor from "@coral-xyz/anchor";
 import { useSolana } from "./useSolana";
+
+type AnchorTransaction = Parameters<anchor.AnchorProvider['sendAndConfirm']>[0];
+type AnchorConnection = ConstructorParameters<typeof anchor.AnchorProvider>[0];
 
 export function useParaSigner() {
   const { isConnected } = useAccount();
@@ -19,10 +22,10 @@ export function useParaSigner() {
     if (signer && signer.sender) {
       return {
         publicKey: signer.sender,
-        signTransaction: async <T extends Transaction | VersionedTransaction>(tx: T): Promise<T> => {
+        signTransaction: async <T extends web3.Transaction | web3.VersionedTransaction>(tx: T): Promise<T> => {
           return await signer.signTransaction(tx);
         },
-        signAllTransactions: async <T extends Transaction | VersionedTransaction>(txs: T[]): Promise<T[]> => {
+        signAllTransactions: async <T extends web3.Transaction | web3.VersionedTransaction>(txs: T[]): Promise<T[]> => {
           return await Promise.all(txs.map((tx) => signer.signTransaction(tx)));
         },
         signMessage: async (message: Uint8Array): Promise<Uint8Array> => {
@@ -31,11 +34,11 @@ export function useParaSigner() {
       };
     } else {
       return {
-        publicKey: SystemProgram.programId,
-        signTransaction: async <T extends Transaction | VersionedTransaction>(_: T): Promise<T> => {
+        publicKey: web3.SystemProgram.programId,
+        signTransaction: async <T extends web3.Transaction | web3.VersionedTransaction>(_: T): Promise<T> => {
           throw new Error("Read-only provider: Authenticate to sign transactions.");
         },
-        signAllTransactions: async <T extends Transaction | VersionedTransaction>(_: T[]): Promise<T[]> => {
+        signAllTransactions: async <T extends web3.Transaction | web3.VersionedTransaction>(_: T[]): Promise<T[]> => {
           throw new Error("Read-only provider: Authenticate to sign transactions.");
         },
         signMessage: async (_: Uint8Array): Promise<Uint8Array> => {
@@ -53,8 +56,8 @@ export function useParaSigner() {
 
         const wallet = createWalletAdapter(newSigner);
         const provider = new anchor.AnchorProvider(
-          connection, 
-          wallet, 
+          connection as unknown as AnchorConnection,
+          wallet,
           { commitment: connection.commitment || "confirmed" }
         );
 

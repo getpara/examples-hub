@@ -147,7 +147,7 @@ export default function SolTransferPage() {
       if (!anchorProvider.sendAndConfirm) {
         throw new Error("sendAndConfirm method not available on anchor provider");
       }
-      const txResponse = await anchorProvider.sendAndConfirm(tx);
+      const txResponse = await anchorProvider.sendAndConfirm(tx as unknown as Parameters<typeof anchorProvider.sendAndConfirm>[0]);
       console.log("Transaction submitted:", txResponse);
 
       setTxSignature(txResponse);

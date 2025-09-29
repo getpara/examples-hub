@@ -25,6 +25,15 @@ export async function POST(request: NextRequest) {
 
     const PARA_API_KEY = process.env.NEXT_PUBLIC_PARA_API_KEY;
 
+    if (!PARA_API_KEY) {
+      return NextResponse.json(
+        {
+          error: "NEXT_PUBLIC_PARA_API_KEY is not configured",
+        },
+        { status: 500 }
+      );
+    }
+
     const txParsed = JSON.parse(transaction);
 
     const tx = ethers.Transaction.from(txParsed);

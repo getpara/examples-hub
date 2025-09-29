@@ -220,25 +220,14 @@ export function useSquidBridge() {
               console.warn("Chainflip transaction detected. Status tracking may be limited.");
             }
 
-            interface StatusParams {
-              transactionId: string;
-              requestId: string;
-              integratorId?: string;
-              quoteId?: string;
-            }
+            const quoteId = (quote.route as { quoteId?: string }).quoteId || (quote as { quoteId?: string }).quoteId || "";
 
-            const statusParams: StatusParams = {
+            const status = await squid.getStatus({
               transactionId: txHashResult.hash,
               requestId: quote.requestId!,
               integratorId: quote.integratorId,
-            };
-
-            const quoteId = (quote.route as { quoteId?: string }).quoteId || (quote as { quoteId?: string }).quoteId;
-            if (quoteId) {
-              statusParams.quoteId = quoteId;
-            }
-
-            const status = await squid.getStatus(statusParams);
+              quoteId,
+            });
             const squidStatus = status.squidTransactionStatus;
 
             if (squidStatus === "success") {
