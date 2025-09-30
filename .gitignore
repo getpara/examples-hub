@@ -171,6 +171,10 @@ Claude.md
 # Yarn install state (machine-specific cache)
 **/.yarn/install-state.gz
 
-# Yarn directories (local cache and configs)
-.yarn/
-**/.yarn/
+# Yarn cache (not needed in git) - all subdirectories
+**/.yarn/cache
+**/.yarn/unplugged
+**/.yarn/build-state.yml
+
+# Keep yarn releases directory for the binary in all subdirectories
+!**/.yarn/releases
