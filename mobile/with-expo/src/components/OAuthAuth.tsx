@@ -10,6 +10,7 @@ import { NativeCallbackStatus } from "../constants/nativeCallback";
 
 // OAuth providers
 type SupportedOAuthMethod = "GOOGLE" | "FARCASTER";
+type StandardOAuthMethod = "GOOGLE";
 
 interface OAuthAuthProps {
   onSuccess: () => void;
@@ -91,9 +92,25 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({
         return;
       }
 
+      const passkeyPortalUrl = state.passkeyUrl ?? state.passkeyKnownDeviceUrl;
+
+      if (passkeyPortalUrl) {
+        setStatus("Complete login in the browser...");
+        await openAuthUrl(passkeyPortalUrl, "passkey login");
+        await finalizeLogin();
+        return;
+      }
+
       if (state.passwordUrl) {
         setStatus("Redirecting to password login...");
         await openAuthUrl(state.passwordUrl, "password login");
+        await finalizeLogin();
+        return;
+      }
+
+      if (state.pinUrl) {
+        setStatus("Redirecting to PIN login...");
+        await openAuthUrl(state.pinUrl, "pin login");
         await finalizeLogin();
         return;
       }
@@ -128,25 +145,23 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({
       });
       setStatus("Verifying authentication...");
 
-      const verifiedAuthState = await para.verifyOAuth({
+      const verifiedAuthState = (await para.verifyOAuth({
         method: pendingOAuthProvider,
-      });
+      })) as AuthState;
       setAuthState(verifiedAuthState);
 
-      switch (verifiedAuthState.stage) {
-        case "login":
-          await handleLegacyLogin(verifiedAuthState);
-          break;
-        case "signup":
-          setShowSecurityChoice(true);
-          onShowSecurityChoice?.();
-          setStatus("");
-          break;
-        case "verify":
-          await handleLegacyVerify(verifiedAuthState);
-          break;
-        default:
-          throw new Error("Unexpected authentication state");
+      if (verifiedAuthState.stage === "login") {
+        await handleLegacyLogin(verifiedAuthState);
+      } else if (verifiedAuthState.stage === "signup") {
+        setShowSecurityChoice(true);
+        onShowSecurityChoice?.();
+        setStatus("");
+      } else if (verifiedAuthState.stage === "done") {
+        await finalizeLogin();
+      } else if (verifiedAuthState.stage === "verify") {
+        await handleLegacyVerify(verifiedAuthState);
+      } else {
+        throw new Error("Unexpected authentication state");
       }
     } catch (err) {
       console.error("[OAuthAuth] Error handling OAuth callback", err);
@@ -160,6 +175,7 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({
     pendingOAuthProvider,
     handleLegacyLogin,
     handleLegacyVerify,
+    finalizeLogin,
     onShowSecurityChoice,
     resetOAuthState,
   ]);
@@ -292,25 +308,8 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({
       setStatus("Complete authentication in Farcaster portal...");
       const result = await openAuthUrl(portalUrl, "farcaster authentication");
 
-      switch (result.type) {
-        case "success": {
-          if (result.url) {
-            await handleDeeplink(result.url);
-          }
-          return;
-        }
-        case "cancel":
-        case "dismiss": {
-          console.info(
-            "[OAuthAuth] Farcaster authentication cancelled by user"
-          );
-          setPendingOAuthProvider(null);
-          setLoading(false);
-          setError("Authentication cancelled");
-          return;
-        }
-        default:
-          return;
+      if (result.url) {
+        await handleDeeplink(result.url);
       }
     } catch (err) {
       console.error("[OAuthAuth] Farcaster portal flow failed", err);
@@ -322,7 +321,7 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({
     }
   };
 
-  const handleStandardOAuth = async (provider: SupportedOAuthMethod) => {
+  const handleStandardOAuth = async (provider: StandardOAuthMethod) => {
     console.info("[OAuthAuth] Starting OAuth flow for provider:", provider);
 
     setPendingOAuthProvider(provider);
@@ -342,18 +341,8 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({
       `${provider.toLowerCase()} authentication`
     );
 
-    console.info("[OAuthAuth] Auth session result:", result);
-
-    if (result.type === "success" && result.url) {
+    if (result.url) {
       await handleDeeplink(result.url);
-      return;
-    }
-
-    if (result.type === "cancel" || result.type === "dismiss") {
-      console.info("[OAuthAuth] Authentication cancelled by user");
-      setPendingOAuthProvider(null);
-      setLoading(false);
-      setError("Authentication cancelled");
     }
   };
 

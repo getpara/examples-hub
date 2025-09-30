@@ -97,27 +97,8 @@ export const EmailAuth: React.FC<EmailAuthProps> = ({
       const authStateResult = await para.signUpOrLogIn({ auth: { email } });
       setAuthState(authStateResult);
 
-      console.info("[EmailAuth] Received auth state", {
-        stage: authStateResult?.stage,
-        nextStage: (authStateResult as any)?.nextStage,
-        hasVerifyLoginUrl:
-          typeof (authStateResult as { loginUrl?: string }).loginUrl === "string",
-        hasPasskeyUrl: Boolean(
-          (authStateResult as { passkeyUrl?: string }).passkeyUrl
-        ),
-        hasPasskeyKnownDeviceUrl: Boolean(
-          (authStateResult as { passkeyKnownDeviceUrl?: string })
-            .passkeyKnownDeviceUrl
-        ),
-        hasPasswordUrl: Boolean(
-          (authStateResult as { passwordUrl?: string }).passwordUrl
-        ),
-        hasPinUrl: Boolean((authStateResult as { pinUrl?: string }).pinUrl),
-      });
-
-      const nextStage = (authStateResult as any)?.nextStage;
-
       if (authStateResult?.stage === "verify") {
+        const nextStage = authStateResult.nextStage;
         // One-Click Login: When loginUrl is provided, complete auth in browser
         if (authStateResult.loginUrl) {
           const isOneClickLogin = nextStage === "login";
@@ -149,25 +130,37 @@ export const EmailAuth: React.FC<EmailAuthProps> = ({
         onShowVerification?.();
         setStatus("Verification code sent to your email");
       } else if (authStateResult?.stage === "login") {
-        // Existing user - check if they use password or passkey
-        // One-Click Login for existing users
-        if (authStateResult.loginUrl) {
+        // Existing user - prefer portal URLs when provided
+        const passkeyPortalUrl =
+          authStateResult.passkeyUrl ?? authStateResult.passkeyKnownDeviceUrl;
+
+        if (passkeyPortalUrl) {
           setStatus("Complete login in the browser...");
-          await openAuthUrl(authStateResult.loginUrl, "one-click login");
+          await openAuthUrl(passkeyPortalUrl, "passkey login");
           await waitForLoginAndFinish();
           return;
-        } else if (authStateResult.passwordUrl) {
+        }
+
+        if (authStateResult.passwordUrl) {
           // User has password-based security
           setStatus("Redirecting to password login...");
           await openAuthUrl(authStateResult.passwordUrl, "password login");
           await waitForLoginAndFinish();
-        } else {
-          // User has passkey-based security
-          setStatus("Logging in with passkey...");
-          await para.loginWithPasskey();
-          await touchSession();
-          onSuccess();
+          return;
         }
+
+        if (authStateResult.pinUrl) {
+          setStatus("Redirecting to PIN login...");
+          await openAuthUrl(authStateResult.pinUrl, "pin login");
+          await waitForLoginAndFinish();
+          return;
+        }
+
+        // User has passkey-based security handled natively
+        setStatus("Logging in with passkey...");
+        await para.loginWithPasskey();
+        await touchSession();
+        onSuccess();
       }
     } catch (err) {
       // Don't log the full error object as it may have problematic getters

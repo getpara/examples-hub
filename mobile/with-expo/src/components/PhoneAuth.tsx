@@ -90,9 +90,8 @@ export const PhoneAuth: React.FC<PhoneAuthProps> = ({
       });
       setAuthState(authStateResult);
 
-      const nextStage = (authStateResult as any)?.nextStage;
-
       if (authStateResult?.stage === "verify") {
+        const nextStage = authStateResult.nextStage;
         if (authStateResult.loginUrl) {
           const isOneClickLogin = nextStage === "login";
 
@@ -123,24 +122,37 @@ export const PhoneAuth: React.FC<PhoneAuthProps> = ({
         onShowVerification?.();
         setStatus("Verification code sent via SMS");
       } else if (authStateResult?.stage === "login") {
-        // Existing user - check if they use password or passkey
-        if (authStateResult.loginUrl) {
+        // Existing user - prefer portal URLs when provided
+        const passkeyPortalUrl =
+          authStateResult.passkeyUrl ?? authStateResult.passkeyKnownDeviceUrl;
+
+        if (passkeyPortalUrl) {
           setStatus("Complete login in the browser...");
-          await openAuthUrl(authStateResult.loginUrl, "one-click login");
+          await openAuthUrl(passkeyPortalUrl, "passkey login");
           await waitForLoginAndFinish();
           return;
-        } else if (authStateResult.passwordUrl) {
+        }
+
+        if (authStateResult.passwordUrl) {
           // User has password-based security
           setStatus("Redirecting to password login...");
           await openAuthUrl(authStateResult.passwordUrl, "password login");
           await waitForLoginAndFinish();
-        } else {
-          // User has passkey-based security
-          setStatus("Logging in with passkey...");
-          await para.loginWithPasskey();
-          await touchSession();
-          onSuccess();
+          return;
         }
+
+        if (authStateResult.pinUrl) {
+          setStatus("Redirecting to PIN login...");
+          await openAuthUrl(authStateResult.pinUrl, "pin login");
+          await waitForLoginAndFinish();
+          return;
+        }
+
+        // User has passkey-based security handled natively
+        setStatus("Logging in with passkey...");
+        await para.loginWithPasskey();
+        await touchSession();
+        onSuccess();
       }
     } catch (err) {
       console.error("[PhoneAuth] Authentication flow error", err);
