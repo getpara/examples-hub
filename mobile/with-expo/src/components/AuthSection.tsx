@@ -1,5 +1,13 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
 import { EmailAuth } from "./EmailAuth";
 import { PhoneAuth } from "./PhoneAuth";
 import { OAuthAuth } from "./OAuthAuth";
@@ -32,15 +40,16 @@ export const AuthSection: React.FC<AuthSectionProps> = ({ onSuccess }) => {
 
   return (
     // KeyboardAvoidingView ensures inputs remain visible when keyboard opens
-    <KeyboardAvoidingView 
+    <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}>
-      <ScrollView 
+      keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
+    >
+      <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={true}
-        keyboardShouldPersistTaps="handled">
-        
+        keyboardShouldPersistTaps="handled"
+      >
         {!showSecurityChoice && (
           <>
             <Text style={styles.title}>Para SDK Demo</Text>
@@ -52,35 +61,52 @@ export const AuthSection: React.FC<AuthSectionProps> = ({ onSuccess }) => {
           <View style={styles.tabs}>
             <TouchableOpacity
               style={[styles.tab, authMethod === "email" && styles.activeTab]}
-              onPress={() => setAuthMethod("email")}>
-              <Text style={[styles.tabText, authMethod === "email" && styles.activeTabText]}>Email</Text>
+              onPress={() => setAuthMethod("email")}
+            >
+              <Text
+                style={[
+                  styles.tabText,
+                  authMethod === "email" && styles.activeTabText,
+                ]}
+              >
+                Email
+              </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={[styles.tab, authMethod === "phone" && styles.activeTab]}
-              onPress={() => setAuthMethod("phone")}>
-              <Text style={[styles.tabText, authMethod === "phone" && styles.activeTabText]}>Phone</Text>
+              onPress={() => setAuthMethod("phone")}
+            >
+              <Text
+                style={[
+                  styles.tabText,
+                  authMethod === "phone" && styles.activeTabText,
+                ]}
+              >
+                Phone
+              </Text>
             </TouchableOpacity>
           </View>
         )}
 
         {/* Render auth component based on selected method */}
-        {authMethod === "email" ? 
-          <EmailAuth 
-            onSuccess={onSuccess} 
-            onShowVerification={handleShowVerification} 
-            onHideVerification={handleHideVerification}
-            onShowSecurityChoice={handleShowSecurityChoice}
-            onHideSecurityChoice={handleHideSecurityChoice}
-          /> : 
-          <PhoneAuth 
-            onSuccess={onSuccess} 
-            onShowVerification={handleShowVerification} 
+        {authMethod === "email" ? (
+          <EmailAuth
+            onSuccess={onSuccess}
+            onShowVerification={handleShowVerification}
             onHideVerification={handleHideVerification}
             onShowSecurityChoice={handleShowSecurityChoice}
             onHideSecurityChoice={handleHideSecurityChoice}
           />
-        }
+        ) : (
+          <PhoneAuth
+            onSuccess={onSuccess}
+            onShowVerification={handleShowVerification}
+            onHideVerification={handleHideVerification}
+            onShowSecurityChoice={handleShowSecurityChoice}
+            onHideSecurityChoice={handleHideSecurityChoice}
+          />
+        )}
 
         {!showVerification && !showSecurityChoice && (
           <>
@@ -92,8 +118,8 @@ export const AuthSection: React.FC<AuthSectionProps> = ({ onSuccess }) => {
 
             {/* OAuth providers - Para supports Google, Apple, Twitter, Discord */}
             <View style={styles.oauthSection}>
-              <OAuthAuth 
-                onSuccess={onSuccess} 
+              <OAuthAuth
+                onSuccess={onSuccess}
                 onShowSecurityChoice={handleShowSecurityChoice}
                 onHideSecurityChoice={handleHideSecurityChoice}
               />
@@ -103,21 +129,30 @@ export const AuthSection: React.FC<AuthSectionProps> = ({ onSuccess }) => {
               <Text style={styles.testTitle}>Beta Testing Instructions</Text>
               <Text style={styles.testSubtitle}>Email Testing</Text>
               <Text style={styles.testText}>
-                • Use any <Text style={styles.bold}>@usecapsule.com</Text> or <Text style={styles.bold}>@getpara.com</Text> email
+                • Use any <Text style={styles.bold}>@usecapsule.com</Text> or{" "}
+                <Text style={styles.bold}>@getpara.com</Text> email
               </Text>
-              <Text style={styles.testText}>• Example: test@usecapsule.com</Text>
               <Text style={styles.testText}>
-                • <Text style={styles.bold}>Any random OTP will work</Text> (no email sent)
+                • Example: test@usecapsule.com
               </Text>
-              
-              <Text style={[styles.testSubtitle, { marginTop: 16 }]}>Phone Testing</Text>
+              <Text style={styles.testText}>
+                • <Text style={styles.bold}>Any random OTP will work</Text> (no
+                email sent)
+              </Text>
+
+              <Text style={[styles.testSubtitle, { marginTop: 16 }]}>
+                Phone Testing
+              </Text>
               <Text style={styles.testText}>
                 • Use format: <Text style={styles.bold}>+1 (XXX) 555-XXXX</Text>
               </Text>
-              <Text style={styles.testText}>• Area code: Any valid US area code</Text>
+              <Text style={styles.testText}>
+                • Area code: Any valid US area code
+              </Text>
               <Text style={styles.testText}>• Example: +1 (425) 555-1234</Text>
               <Text style={styles.testText}>
-                • <Text style={styles.bold}>Any random OTP will work</Text> (no SMS sent)
+                • <Text style={styles.bold}>Any random OTP will work</Text> (no
+                SMS sent)
               </Text>
             </View>
           </>

@@ -44,23 +44,23 @@ export const PhoneAuth: React.FC<PhoneAuthProps> = ({
     return result;
   };
 
-  const touchSession = async (context: string) => {
+  const touchSession = async () => {
     setStatus("Restoring session...");
     await para.touchSession();
     setStatus("");
   };
 
-  const waitForLoginAndFinish = async (context: string) => {
+  const waitForLoginAndFinish = async () => {
     setStatus("Finishing login...");
     await para.waitForLogin({});
-    await touchSession(context);
+    await touchSession();
     onSuccess();
   };
 
   const waitForSignupAndFinish = async () => {
     setStatus("Finalizing account...");
     await para.waitForSignup({});
-    await touchSession("signup");
+    await touchSession();
     onSuccess();
   };
 
@@ -110,7 +110,7 @@ export const PhoneAuth: React.FC<PhoneAuthProps> = ({
           );
 
           if (isOneClickLogin) {
-            await waitForLoginAndFinish("one-click login");
+            await waitForLoginAndFinish();
             return;
           }
 
@@ -127,18 +127,18 @@ export const PhoneAuth: React.FC<PhoneAuthProps> = ({
         if (authStateResult.loginUrl) {
           setStatus("Complete login in the browser...");
           await openAuthUrl(authStateResult.loginUrl, "one-click login");
-          await waitForLoginAndFinish("one-click login");
+          await waitForLoginAndFinish();
           return;
         } else if (authStateResult.passwordUrl) {
           // User has password-based security
           setStatus("Redirecting to password login...");
           await openAuthUrl(authStateResult.passwordUrl, "password login");
-          await waitForLoginAndFinish("password");
+          await waitForLoginAndFinish();
         } else {
           // User has passkey-based security
           setStatus("Logging in with passkey...");
           await para.loginWithPasskey();
-          await touchSession("passkey login");
+          await touchSession();
           onSuccess();
         }
       }

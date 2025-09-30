@@ -20,7 +20,9 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
   const [loggingOut, setLoggingOut] = useState(false);
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
-  const [messageToSign, setMessageToSign] = useState("Hello from Para SDK Demo!");
+  const [messageToSign, setMessageToSign] = useState(
+    "Hello from Para SDK Demo!"
+  );
   const [signature, setSignature] = useState("");
   const [txSignature, setTxSignature] = useState("");
 
@@ -67,7 +69,11 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
           setStatus("");
         }
       } catch (createErr) {
-        setError(createErr instanceof Error ? createErr.message : "Failed to create wallet");
+        setError(
+          createErr instanceof Error
+            ? createErr.message
+            : "Failed to create wallet"
+        );
       }
     } finally {
       setLoadingWallet(false);
@@ -127,7 +133,9 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
 
     try {
       // Create provider for Sepolia testnet
-      const provider = new ethers.JsonRpcProvider("https://ethereum-sepolia-rpc.publicnode.com");
+      const provider = new ethers.JsonRpcProvider(
+        "https://ethereum-sepolia-rpc.publicnode.com"
+      );
 
       // Create Para-enabled signer as per documentation
       const signer = new ParaEthersSigner(para, provider);
@@ -149,7 +157,9 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
       setTxSignature(signedTx);
       setStatus("");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to sign transaction");
+      setError(
+        err instanceof Error ? err.message : "Failed to sign transaction"
+      );
     } finally {
       setSigningTransaction(false);
     }
@@ -212,7 +222,9 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
       {wallet && (
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Sign Transaction</Text>
-          <Text style={styles.info}>Sign a transaction to send 0.001 ETH (Sepolia)</Text>
+          <Text style={styles.info}>
+            Sign a transaction to send 0.001 ETH (Sepolia)
+          </Text>
           <View style={{ height: 16 }} />
           <Button
             title="Sign Transaction"
@@ -238,10 +250,7 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
         />
       </View>
 
-      <StatusDisplay
-        status={status}
-        error={error}
-      />
+      <StatusDisplay status={status} error={error} />
     </ScrollView>
   );
 };
