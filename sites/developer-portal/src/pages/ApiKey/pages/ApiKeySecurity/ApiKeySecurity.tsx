@@ -1,5 +1,6 @@
 import { ContentWrapper } from '../../components/ContentWrapper';
 import { useSecurityForm } from './hooks/useSecurityForm';
+// import { AllowedIpAddresses } from './components/AllowedIpAddresses'; // Hidden until REST API launch
 import { Origins } from './components/Origins';
 import { AuthMethods } from './components/AuthMethods';
 import { TransactionPopups } from './components/TransactionPopups';
@@ -14,6 +15,7 @@ export const ApiKeySecurity = () => {
       <ContentWrapper
         columnOne={
           <>
+            {/* <AllowedIpAddresses /> -- Hidden until REST API launch */}
             <Origins />
             <AuthMethods />
             <TransactionPopups />
