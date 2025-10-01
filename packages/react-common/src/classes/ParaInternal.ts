@@ -23,6 +23,7 @@ export class ParaInternal extends ParaWeb implements InternalInterface {
   sendLoginCode = super.sendLoginCode;
   getProfileBalance = super.getProfileBalance;
   setModalError = super.setModalError;
+  displayModalError = super.displayModalError;
 
   get partnerLogo() {
     return super.partnerLogo;

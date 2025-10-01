@@ -14,6 +14,7 @@ import { SolanaWalletWrapper } from './SolanaWalletWrapper.js';
 import { useStore } from '../stores/useStore.js';
 import { ParaGrazProviderProps } from '@getpara/cosmos-wallet-connectors';
 import { useInternalClient } from '../hooks/utils/useInternalClient.js';
+import { EVM_WALLETS } from '@getpara/web-sdk';
 
 interface ExternalWalletWrapperProps<
   chains extends readonly [Chain, ...Chain[]],
@@ -37,8 +38,12 @@ export const ExternalWalletWrapper = <
   const para = useInternalClient();
 
   useEffect(() => {
-    if (!!wallets.length && !walletConnect?.projectId) {
-      para.setModalError(
+    if (
+      !!wallets.length &&
+      !walletConnect?.projectId &&
+      wallets.some(wallet => EVM_WALLETS.includes(wallet as (typeof EVM_WALLETS)[number]))
+    ) {
+      para.displayModalError(
         'It is recommended to provide a WalletConnect project id to ensure wallet connection works as expected. Refer to our docs at [https://docs.getpara.com/v2/react/guides/external-wallets/evm#configure-the-providers](https://docs.getpara.com/v2/react/guides/external-wallets/evm#configure-the-providers) for configuration details and sign up for your free key at [https://cloud.walletconnect.com/sign-in](https://cloud.walletconnect.com/sign-in)',
       );
       console.warn(

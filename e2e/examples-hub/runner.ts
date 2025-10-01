@@ -521,9 +521,9 @@ class TestRunner {
     this.startStep('Installing examples-hub dependencies', '📦');
 
     try {
-      // Use examples-hub's local Yarn 4.9.2 binary directly to avoid version conflicts
+      // Use examples-hub's local Yarn 4.10.3 binary directly to avoid version conflicts
       // This bypasses the global yarn command which might be Yarn 1.x or a Corepack shim
-      const yarnBinaryPath = path.join(this.tempDir, '.yarn/releases/yarn-4.9.2.cjs');
+      const yarnBinaryPath = path.join(this.tempDir, '.yarn/releases/yarn-4.10.3-git.20250923.hash-8ff18d7.cjs');
 
       // Verify the Yarn binary exists
       if (!(await fs.pathExists(yarnBinaryPath))) {
@@ -532,7 +532,7 @@ class TestRunner {
         );
       }
 
-      this.log(`  Using examples-hub's local Yarn 4.9.2 binary`, { verbose: true });
+      this.log(`  Using examples-hub's local Yarn 4.10.3 binary`, { verbose: true });
 
       let currentStep = '';
       let packagesInstalled = 0;
@@ -624,7 +624,7 @@ class TestRunner {
 
     try {
       // Use examples-hub's local Yarn binary for consistency
-      const yarnBinaryPath = path.join(this.tempDir, '.yarn/releases/yarn-4.9.2.cjs');
+      const yarnBinaryPath = path.join(this.tempDir, '.yarn/releases/yarn-4.10.3-git.20250923.hash-8ff18d7.cjs');
       const yarnCommand = `node "${yarnBinaryPath}"`;
       // Debug: List the directory structure to help diagnose path issues
       this.log(`\n📂 Directory structure in ${this.tempDir}:`, { verbose: true });
