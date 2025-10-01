@@ -924,20 +924,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@getpara/core-sdk@npm:2.0.0-alpha.61":
-  version: 2.0.0-alpha.61
-  resolution: "@getpara/core-sdk@npm:2.0.0-alpha.61"
+"@getpara/core-sdk@npm:2.0.0-alpha.62":
+  version: 2.0.0-alpha.62
+  resolution: "@getpara/core-sdk@npm:2.0.0-alpha.62"
   dependencies:
     "@celo/utils": "npm:^8.0.2"
     "@cosmjs/encoding": "npm:^0.32.4"
     "@ethereumjs/util": "npm:^9.1.0"
-    "@getpara/user-management-client": "npm:2.0.0-alpha.61"
+    "@getpara/user-management-client": "npm:2.0.0-alpha.62"
     "@noble/hashes": "npm:^1.5.0"
     base64url: "npm:^3.0.1"
     libphonenumber-js: "npm:^1.11.7"
     node-forge: "npm:^1.3.1"
     uuid: "npm:^11.1.0"
-  checksum: 10/d3b0d6a44f3975281040928fedb94e2adaf4d395ea3b28b0c4a4536699263914b5c6a6d81810bc8289ceb36934ad2253742d573c8f33d0348474d2c976045836
+  checksum: 10/4b7640f0955684dd2653f5f4d28bb9cfc1e155e63d1a68c759c22c5b3a5200d0ac6ce4d39583f035933c4ea27323975c56ea32951af1ac0c54ae1c7919bdcab8
   languageName: node
   linkType: hard
 
@@ -1160,14 +1160,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@getpara/user-management-client@npm:2.0.0-alpha.61":
-  version: 2.0.0-alpha.61
-  resolution: "@getpara/user-management-client@npm:2.0.0-alpha.61"
+"@getpara/user-management-client@npm:2.0.0-alpha.62":
+  version: 2.0.0-alpha.62
+  resolution: "@getpara/user-management-client@npm:2.0.0-alpha.62"
   dependencies:
     "@getpara/shared": "npm:1.1.0"
     axios: "npm:^1.8.4"
     libphonenumber-js: "npm:^1.11.7"
-  checksum: 10/9f129caff00db08294b74fbd509da8292878882918e6042df2fb26aef1a45ad2ecf8d1ceb5f5a79056e5f6da6d341b3a824493d2100966e034191904c5b5f929
+  checksum: 10/54bb9aee1bad5e44e70b155cb599482419ac9228db034690157c59543dd6ffe58320ee3ab91eb86169a273b9fdfe3bf24b5c891e6151c105f9b49018ce98df8a
   languageName: node
   linkType: hard
 
@@ -1217,12 +1217,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@getpara/web-sdk@npm:2.0.0-alpha.61":
-  version: 2.0.0-alpha.61
-  resolution: "@getpara/web-sdk@npm:2.0.0-alpha.61"
+"@getpara/web-sdk@npm:2.0.0-alpha.62":
+  version: 2.0.0-alpha.62
+  resolution: "@getpara/web-sdk@npm:2.0.0-alpha.62"
   dependencies:
-    "@getpara/core-sdk": "npm:2.0.0-alpha.61"
-    "@getpara/user-management-client": "npm:2.0.0-alpha.61"
+    "@getpara/core-sdk": "npm:2.0.0-alpha.62"
+    "@getpara/user-management-client": "npm:2.0.0-alpha.62"
     base64url: "npm:^3.0.1"
     buffer: "npm:6.0.3"
     cbor-web: "npm:^9.0.2"
@@ -1233,7 +1233,7 @@ __metadata:
   peerDependenciesMeta:
     "@farcaster/miniapp-sdk":
       optional: true
-  checksum: 10/9e2abfe3751f65d17aeda2f966ae9beebc9dd92b6a62bf5289404c46d1e93aa56749102b2b6bb717bbabe0a91b4f906f680bb98945d79abef8584593fecb60b6
+  checksum: 10/98db2141253f66bd9d9663791d06f143c2703982b6f113807c7232a1067403782541953b0086b6d0c6fc7585f6bcf7c28e7e069b999786e1643748f0c0ba0c6f
   languageName: node
   linkType: hard
 
@@ -6794,7 +6794,7 @@ __metadata:
   dependencies:
     "@eslint/js": "npm:^9.29.0"
     "@getpara/graz": "npm:2.0.0-alpha.18"
-    "@getpara/web-sdk": "npm:2.0.0-alpha.61"
+    "@getpara/web-sdk": "npm:2.0.0-alpha.62"
     "@sveltejs/vite-plugin-svelte": "npm:^5.0.3"
     "@tailwindcss/vite": "npm:4.1.11"
     "@tsconfig/svelte": "npm:^5.0.4"
