@@ -319,6 +319,7 @@ export function AuthProvider({
                   ModalStep.OTP,
                   ModalStep.FARCASTER_OAUTH,
                   ModalStep.TELEGRAM_OAUTH,
+                  ModalStep.AWAITING_OAUTH,
                 ]),
               onPoll: () => {
                 goBackIfPopupClosedOnSteps([

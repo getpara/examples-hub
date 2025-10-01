@@ -53,6 +53,7 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
   const externalWallets = useStore(state => state.externalWallets);
   const providerProps = useStore(state => state.providerProps);
   const setAccountLinkOptions = useModalStore(state => state.setAccountLinkOptions);
+  const selectedExternalWallet = useModalStore(state => state.selectedExternalWallet);
 
   const isInitialized = useRef(false);
 
@@ -234,6 +235,7 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
   useEffect(() => {
     if (
       bareModal &&
+      !selectedExternalWallet &&
       !isAccountLoading &&
       !isConnected &&
       !['signup', 'login'].includes(flow ?? '') &&
@@ -241,7 +243,7 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
     ) {
       setStep(ModalStep.AUTH_MAIN);
     }
-  }, [bareModal, flow, isConnected, isAccountLoading]);
+  }, [bareModal, flow, isConnected, isAccountLoading, selectedExternalWallet]);
 
   useEffect(() => {
     setAccountLinkOptions(propsSupportedAccountLinks ?? para?.supportedAccountLinks);

@@ -108,7 +108,7 @@ const useVerifyExternalWalletLink = generateInternalMutation('verifyExternalWall
 export const AccountLinkProvider = ({ children }: PropsWithChildren) => {
   const para = useInternalClient();
   const queryClient = useQueryClient();
-  const account = useAccount();
+  const { embedded } = useAccount();
   const { data: coreAccountLinkInProgress } = useAccountLinkInProgress();
   const {
     wallets,
@@ -151,8 +151,6 @@ export const AccountLinkProvider = ({ children }: PropsWithChildren) => {
     status: statusVerifyExternalWalletLink,
     reset: resetVerifyExternalWalletLink,
   } = useVerifyExternalWalletLink();
-
-  const { embedded } = account;
 
   const isEnabled =
     embedded?.isConnected ||

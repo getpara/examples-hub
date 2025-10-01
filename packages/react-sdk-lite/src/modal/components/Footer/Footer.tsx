@@ -3,14 +3,14 @@ import { CpslIcon, CpslText } from '@getpara/react-components';
 import { PARA_TERMS_AND_CONDITIONS } from '../../constants/constants.js';
 import { useModalStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
-import { useAccount } from '../../../provider/index.js';
+import { useAccountLinking } from '../../../provider/providers/AccountLinkProvider.js';
 
 export const Footer = () => {
-  const { isConnected } = useAccount();
   const currentStep = useModalStore(state => state.step);
+  const { accountLinkInProgress } = useAccountLinking();
 
   const showFooter =
-    !isConnected &&
+    !accountLinkInProgress &&
     [
       ModalStep.AUTH_MAIN,
       ModalStep.AUTH_MORE,

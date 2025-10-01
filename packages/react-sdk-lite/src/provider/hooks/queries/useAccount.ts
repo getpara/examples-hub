@@ -184,7 +184,7 @@ export const useAccount = ({ cosmos }: UseAccountParameters = {}): UseAccountRet
       }
 
       // If the account is connected without a userId and not in guest mode, it is connected using an external wallet with connection only so technically it is not a Para connection.
-      const isEmbeddedConnected = paraAccount.isConnected && (!!paraAccount.userId || paraAccount.isGuestMode);
+      const isEmbeddedConnected = connectionType === 'embedded' || connectionType === 'both';
 
       const connectedNetworks: ExternalNetwork[] = [];
 
