@@ -13,12 +13,7 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    exclude: ["@getpara/graz", "@getpara/graz-integration"],
-  },
-  build: {
-    rollupOptions: {
-      external: ["@getpara/graz", "@getpara/graz-integration"],
-    },
+    exclude: ["graz", "@getpara/graz-integration", "@getpara/graz-connector"],
   },
   esbuild: {
     ignoreAnnotations: true, // Respects /* @vite-ignore */ more strictly
