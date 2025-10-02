@@ -1892,54 +1892,30 @@ __metadata:
   languageName: node
   linkType: hard
 
-<<<<<<< Updated upstream
-"@getpara/core-sdk@npm:2.0.0-alpha.57":
-  version: 2.0.0-alpha.57
-  resolution: "@getpara/core-sdk@npm:2.0.0-alpha.57"
-=======
-"@getpara/core-sdk@npm:2.0.0-alpha.61":
-  version: 2.0.0-alpha.61
-  resolution: "@getpara/core-sdk@npm:2.0.0-alpha.61"
->>>>>>> Stashed changes
+"@getpara/core-sdk@npm:2.0.0-alpha.63":
+  version: 2.0.0-alpha.63
+  resolution: "@getpara/core-sdk@npm:2.0.0-alpha.63"
   dependencies:
     "@celo/utils": "npm:^8.0.2"
     "@cosmjs/encoding": "npm:^0.32.4"
     "@ethereumjs/util": "npm:^9.1.0"
-<<<<<<< Updated upstream
-    "@getpara/user-management-client": "npm:2.0.0-alpha.57"
-=======
-    "@getpara/user-management-client": "npm:2.0.0-alpha.61"
->>>>>>> Stashed changes
+    "@getpara/user-management-client": "npm:2.0.0-alpha.63"
     "@noble/hashes": "npm:^1.5.0"
     base64url: "npm:^3.0.1"
     libphonenumber-js: "npm:^1.11.7"
     node-forge: "npm:^1.3.1"
     uuid: "npm:^11.1.0"
-<<<<<<< Updated upstream
-  checksum: 10c0/bc7d2abc5ace1bd17405e434561289e127f443cbaaaf98b1f01d949b98cfcc80f2cbaed8bc22a0c8bb15c4057e3ce16d4b6d81ccb6b457031e2ba3ac238deae6
+  checksum: 10/f575cf5cbd02e7e7b0d0604191015b554afb3d0fdf7f74a45e644a5c314226c56e5d532408f29c9fba25b537ec2e75144818543fbc4eb9976e75bd29b6c65bca
   languageName: node
   linkType: hard
 
-"@getpara/react-native-wallet@npm:2.0.0-alpha.57":
-  version: 2.0.0-alpha.57
-  resolution: "@getpara/react-native-wallet@npm:2.0.0-alpha.57"
+"@getpara/react-native-wallet@npm:2.0.0-alpha.63":
+  version: 2.0.0-alpha.63
+  resolution: "@getpara/react-native-wallet@npm:2.0.0-alpha.63"
   dependencies:
-    "@getpara/core-sdk": "npm:2.0.0-alpha.57"
-    "@getpara/user-management-client": "npm:2.0.0-alpha.57"
-    "@getpara/web-sdk": "npm:2.0.0-alpha.57"
-=======
-  checksum: 10c0/36df368d6275fa91221e8681a61275f743b10254029334d255589e05a543c21a9f964f2469548198f78a0c306b73294866c38ec4559d4f6292c89b423b0b926f
-  languageName: node
-  linkType: hard
-
-"@getpara/react-native-wallet@npm:2.0.0-alpha.61":
-  version: 2.0.0-alpha.61
-  resolution: "@getpara/react-native-wallet@npm:2.0.0-alpha.61"
-  dependencies:
-    "@getpara/core-sdk": "npm:2.0.0-alpha.61"
-    "@getpara/user-management-client": "npm:2.0.0-alpha.61"
-    "@getpara/web-sdk": "npm:2.0.0-alpha.61"
->>>>>>> Stashed changes
+    "@getpara/core-sdk": "npm:2.0.0-alpha.63"
+    "@getpara/user-management-client": "npm:2.0.0-alpha.63"
+    "@getpara/web-sdk": "npm:2.0.0-alpha.63"
     "@peculiar/webcrypto": "npm:^1.5.0"
     "@ungap/structured-clone": "npm:1.3.0"
     node-forge: "npm:1.3.1"
@@ -1956,11 +1932,7 @@ __metadata:
     react-native-quick-base64: "*"
     react-native-quick-crypto: "*"
     readable-stream: "*"
-<<<<<<< Updated upstream
-  checksum: 10c0/0a4fc26a072e5d4f0c99a63e0cbad02347aecf8cac90945718e029bf222542d5e44584b950d7ed4a0b0dbbbe65c23117c0bb3ef253d30fcb9a784051d55f8ea5
-=======
-  checksum: 10c0/90d93de6268ba6aae8dd0f6c297253efd7d8a28f788e09374ab822cf5d51fc215135d017b47cbacaf202861e1d5850e243409d8cdbf8e9540ef0a7cff91e9ef1
->>>>>>> Stashed changes
+  checksum: 10/74369aa46e6c6b226455523bba87dd621a615a46d893bee2f32f1360a0e8260def8561a3a3cfc34e4a38d1750a297c74b15fb10a82be3340716c4d9d47734dcb
   languageName: node
   linkType: hard
 
@@ -1971,42 +1943,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-<<<<<<< Updated upstream
-"@getpara/user-management-client@npm:2.0.0-alpha.57":
-  version: 2.0.0-alpha.57
-  resolution: "@getpara/user-management-client@npm:2.0.0-alpha.57"
-=======
-"@getpara/user-management-client@npm:2.0.0-alpha.61":
-  version: 2.0.0-alpha.61
-  resolution: "@getpara/user-management-client@npm:2.0.0-alpha.61"
->>>>>>> Stashed changes
+"@getpara/user-management-client@npm:2.0.0-alpha.63":
+  version: 2.0.0-alpha.63
+  resolution: "@getpara/user-management-client@npm:2.0.0-alpha.63"
   dependencies:
     "@getpara/shared": "npm:1.1.0"
     axios: "npm:^1.8.4"
     libphonenumber-js: "npm:^1.11.7"
-<<<<<<< Updated upstream
-  checksum: 10c0/26f1acedcd86bfaa0eb42289168e49ddaf389416f0b4b5642197eb156deee7c172192aa2b1674734ec2c0d02e95e13f21f641062685090a7aa0eca2982cf8498
+  checksum: 10/2cafffed5a8dd3e41a5870ada14508ecbf21ddf60cd7ba658ffc042d27823d91c151871703bd03db08ccd2f05d5423340c657a95583edd53066951fa173a2712
   languageName: node
   linkType: hard
 
-"@getpara/web-sdk@npm:2.0.0-alpha.57":
-  version: 2.0.0-alpha.57
-  resolution: "@getpara/web-sdk@npm:2.0.0-alpha.57"
+"@getpara/web-sdk@npm:2.0.0-alpha.63":
+  version: 2.0.0-alpha.63
+  resolution: "@getpara/web-sdk@npm:2.0.0-alpha.63"
   dependencies:
-    "@getpara/core-sdk": "npm:2.0.0-alpha.57"
-    "@getpara/user-management-client": "npm:2.0.0-alpha.57"
-=======
-  checksum: 10c0/8eebcbde576b8aa406345d3f92892c18dac38b72d7b4a83c7384a2db247f7336bed7a69f725a762c15e1e120dbe691116cc678fa1e734cd73b1ee5cf81d07858
-  languageName: node
-  linkType: hard
-
-"@getpara/web-sdk@npm:2.0.0-alpha.61":
-  version: 2.0.0-alpha.61
-  resolution: "@getpara/web-sdk@npm:2.0.0-alpha.61"
-  dependencies:
-    "@getpara/core-sdk": "npm:2.0.0-alpha.61"
-    "@getpara/user-management-client": "npm:2.0.0-alpha.61"
->>>>>>> Stashed changes
+    "@getpara/core-sdk": "npm:2.0.0-alpha.63"
+    "@getpara/user-management-client": "npm:2.0.0-alpha.63"
     base64url: "npm:^3.0.1"
     buffer: "npm:6.0.3"
     cbor-web: "npm:^9.0.2"
@@ -2017,11 +1970,7 @@ __metadata:
   peerDependenciesMeta:
     "@farcaster/miniapp-sdk":
       optional: true
-<<<<<<< Updated upstream
-  checksum: 10c0/3af5f9f2c46bc0e867c9615d2ae6753d87981c6fe04d4f43c3207a50c8a4f123be9e70aad22434e6796dcf09fcf0a3952914bf3518c11d80379f986150ce9033
-=======
-  checksum: 10c0/24a89df36ec17e5580e6983e550cefc13a5c16d518656b42086dc8dff76eefa23b0885d761a29ca1f7b9ecbedd14a7ea442cf83bdf1aedf0b55dac4828d73d11
->>>>>>> Stashed changes
+  checksum: 10/6e10f78839f4819644d2286def67a70634bb8d4937cc6eb1c4726331f7648dfe0a612a908f6943fec510665bdc910c471041d66890aa0485ea17cb64fdfbe0ab
   languageName: node
   linkType: hard
 
@@ -3198,20 +3147,20 @@ __metadata:
   linkType: hard
 
 "@types/node@npm:*":
-  version: 24.6.0
-  resolution: "@types/node@npm:24.6.0"
+  version: 24.6.2
+  resolution: "@types/node@npm:24.6.2"
   dependencies:
     undici-types: "npm:~7.13.0"
-  checksum: 10/7a030019c8aca6acb49a1a8dd5069a95eb313bf06a12ec9a50bb66069a6b506cf04ca89594f8e935bfded38e23e45f61a8918134abf64594213a70a87abdaa1b
+  checksum: 10/8d1e64b37abdafd3da295394235ad5357509ac0b47e6991d36b1eecacd7ad830ada60ca71b7b3598b6c8b519361fb70aab691888c378ff25e69dba5690afcc22
   languageName: node
   linkType: hard
 
 "@types/node@npm:^18.7.16":
-  version: 18.19.127
-  resolution: "@types/node@npm:18.19.127"
+  version: 18.19.129
+  resolution: "@types/node@npm:18.19.129"
   dependencies:
     undici-types: "npm:~5.26.4"
-  checksum: 10/b652ffb3ace8c6bdfc7e1daee6d9e2cedd360acbb3f5583d4f81c3f3971077d0ac1678d042dc7ea5998e12fdad739bea7d6886dfc0a23f33bb105f907d7e9471
+  checksum: 10/0db4cb246d6012b1b523661a59c2e8e0b24527f1c02cfa3deb8e0b884492a07f2547c5353f56272b70037408e3dbe690ae923b8073fd7b0814e389148245e59f
   languageName: node
   linkType: hard
 
@@ -3225,11 +3174,11 @@ __metadata:
   linkType: hard
 
 "@types/react@npm:*, @types/react@npm:^19.1.0":
-  version: 19.1.15
-  resolution: "@types/react@npm:19.1.15"
+  version: 19.2.0
+  resolution: "@types/react@npm:19.2.0"
   dependencies:
     csstype: "npm:^3.0.2"
-  checksum: 10/9acff968d35e02152a817a11f8572cbcc985d9ea93616898b34e75ab193af20f9ab46274217abd12cd1ff4e4150081143b13ba20e0bb503efd64fe6601cb8bd8
+  checksum: 10/c00a8552d54282caeb608d09664a250e6bd00b1f51e32bb73a0569d844ddbf58d25ffadffec85cc5df08e6c00e6c232a06a8efcfa5edd0bea2ce234519707b34
   languageName: node
   linkType: hard
 
@@ -3617,6 +3566,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"async-function@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "async-function@npm:1.0.0"
+  checksum: 10/1a09379937d846f0ce7614e75071c12826945d4e417db634156bf0e4673c495989302f52186dfa9767a1d9181794554717badd193ca2bbab046ef1da741d8efd
+  languageName: node
+  linkType: hard
+
+"async-generator-function@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "async-generator-function@npm:1.0.0"
+  checksum: 10/3d49e7acbeee9e84537f4cb0e0f91893df8eba976759875ae8ee9e3d3c82f6ecdebdb347c2fad9926b92596d93cdfc78ecc988bcdf407e40433e8e8e6fe5d78e
+  languageName: node
+  linkType: hard
+
 "async-limiter@npm:~1.0.0":
   version: 1.0.1
   resolution: "async-limiter@npm:1.0.1"
@@ -3805,12 +3768,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"baseline-browser-mapping@npm:^2.8.3":
-  version: 2.8.9
-  resolution: "baseline-browser-mapping@npm:2.8.9"
+"baseline-browser-mapping@npm:^2.8.9":
+  version: 2.8.10
+  resolution: "baseline-browser-mapping@npm:2.8.10"
   bin:
     baseline-browser-mapping: dist/cli.js
-  checksum: 10/ae10470dc5c49fa085b0f52daf00124ded0a1695bb712ea9ebd87e41245764ba6a73ef035c10e624879755d45d4441f79f4ade93ccf20a146e7b01fd3a58ce51
+  checksum: 10/969bdc7a54b94dd25e544268feb54380cb34dd7a61112d27bb12f8a79099d9c6cb5aa862d784d6e096da400f7a0099249ef64e2b4b3b110ee30870802e1453e9
   languageName: node
   linkType: hard
 
@@ -3916,17 +3879,17 @@ __metadata:
   linkType: hard
 
 "browserslist@npm:^4.24.0, browserslist@npm:^4.25.3":
-  version: 4.26.2
-  resolution: "browserslist@npm:4.26.2"
+  version: 4.26.3
+  resolution: "browserslist@npm:4.26.3"
   dependencies:
-    baseline-browser-mapping: "npm:^2.8.3"
-    caniuse-lite: "npm:^1.0.30001741"
-    electron-to-chromium: "npm:^1.5.218"
+    baseline-browser-mapping: "npm:^2.8.9"
+    caniuse-lite: "npm:^1.0.30001746"
+    electron-to-chromium: "npm:^1.5.227"
     node-releases: "npm:^2.0.21"
     update-browserslist-db: "npm:^1.1.3"
   bin:
     browserslist: cli.js
-  checksum: 10/7f732f1a9c18c510aa146270d704b7b1acab52c9922147d453eecd70c926f21d97c7ac10f5303668d444fa60bd3b8778a63a797be249b0d348af4c3a644fa530
+  checksum: 10/49add06fd753a2514d84c75a7de8d9fb3d70be675e53b72981d87f0c0ff40d8a8cd0bd92f77400381704be0bf1c9c5c65aef95d03843d69475ff55188aa12124
   languageName: node
   linkType: hard
 
@@ -4015,7 +3978,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"call-bound@npm:^1.0.2, call-bound@npm:^1.0.3, call-bound@npm:^1.0.4":
+"call-bound@npm:^1.0.2, call-bound@npm:^1.0.4":
   version: 1.0.4
   resolution: "call-bound@npm:1.0.4"
   dependencies:
@@ -4071,10 +4034,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"caniuse-lite@npm:^1.0.30001741":
-  version: 1.0.30001745
-  resolution: "caniuse-lite@npm:1.0.30001745"
-  checksum: 10/1b83fcce50ba1548046610683b12810357156baf7878edc538652290ea2eaff3fbca81f33985180040a06f4964db4233117e39efc4d0a11b21ebab57b78fcfc2
+"caniuse-lite@npm:^1.0.30001746":
+  version: 1.0.30001746
+  resolution: "caniuse-lite@npm:1.0.30001746"
+  checksum: 10/bb9238b08a947baf318c385d43f7ae771c80b265d21821333efc894306e6da60e47656015a1a23e5998133cad9ad022942ec0c2ba04e89e936f4a8343875b84c
   languageName: node
   linkType: hard
 
@@ -4272,11 +4235,7 @@ __metadata:
     "@babel/runtime": "npm:^7.25.0"
     "@craftzdog/react-native-buffer": "npm:^6.1.0"
     "@eslint/js": "npm:^9.29.0"
-<<<<<<< Updated upstream
-    "@getpara/react-native-wallet": "npm:2.0.0-alpha.57"
-=======
-    "@getpara/react-native-wallet": "npm:2.0.0-alpha.61"
->>>>>>> Stashed changes
+    "@getpara/react-native-wallet": "npm:2.0.0-alpha.63"
     "@react-native-async-storage/async-storage": "npm:^2.2.0"
     "@react-native-community/cli": "npm:19.0.0"
     "@react-native-community/cli-platform-android": "npm:19.0.0"
@@ -4621,10 +4580,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"electron-to-chromium@npm:^1.5.218":
-  version: 1.5.227
-  resolution: "electron-to-chromium@npm:1.5.227"
-  checksum: 10/984f27f6571aaebe236b4c0837bccc933dc9211cefd6857c68de5ecfd83c32a25512da255fabea1db0d14374e1890fc941af88dc533c3dc2cb82c0cc50527f24
+"electron-to-chromium@npm:^1.5.227":
+  version: 1.5.229
+  resolution: "electron-to-chromium@npm:1.5.229"
+  checksum: 10/871665ffee2fcf48fd5027652a681909f7657895daa0ebb1c0c6aff829457dffa0c16aaca98bd892b77a213d17da896deeb6c919492e308c9eb6d0e46b3c1ea7
   languageName: node
   linkType: hard
 
@@ -5298,9 +5257,9 @@ __metadata:
   linkType: hard
 
 "generator-function@npm:^2.0.0":
-  version: 2.0.0
-  resolution: "generator-function@npm:2.0.0"
-  checksum: 10/06dace63935356209b94e153df8b655a6f35cd9b3b151df23bcb57a303ec290f8beb9afbbce7c4af212f918844c67fc617f0ebcc5eb56e4062b833e943ebe3da
+  version: 2.0.1
+  resolution: "generator-function@npm:2.0.1"
+  checksum: 10/eb7e7eb896c5433f3d40982b2ccacdb3dd990dd3499f14040e002b5d54572476513be8a2e6f9609f6e41ab29f2c4469307611ddbfc37ff4e46b765c326663805
   languageName: node
   linkType: hard
 
@@ -5319,20 +5278,23 @@ __metadata:
   linkType: hard
 
 "get-intrinsic@npm:^1.2.4, get-intrinsic@npm:^1.2.5, get-intrinsic@npm:^1.2.6, get-intrinsic@npm:^1.3.0":
-  version: 1.3.0
-  resolution: "get-intrinsic@npm:1.3.0"
+  version: 1.3.1
+  resolution: "get-intrinsic@npm:1.3.1"
   dependencies:
+    async-function: "npm:^1.0.0"
+    async-generator-function: "npm:^1.0.0"
     call-bind-apply-helpers: "npm:^1.0.2"
     es-define-property: "npm:^1.0.1"
     es-errors: "npm:^1.3.0"
     es-object-atoms: "npm:^1.1.1"
     function-bind: "npm:^1.1.2"
+    generator-function: "npm:^2.0.0"
     get-proto: "npm:^1.0.1"
     gopd: "npm:^1.2.0"
     has-symbols: "npm:^1.1.0"
     hasown: "npm:^2.0.2"
     math-intrinsics: "npm:^1.1.0"
-  checksum: 10/6e9dd920ff054147b6f44cb98104330e87caafae051b6d37b13384a45ba15e71af33c3baeac7cb630a0aaa23142718dcf25b45cfdd86c184c5dcb4e56d953a10
+  checksum: 10/bb579dda84caa4a3a41611bdd483dade7f00f246f2a7992eb143c5861155290df3fdb48a8406efa3dfb0b434e2c8fafa4eebd469e409d0439247f85fc3fa2cc1
   languageName: node
   linkType: hard
 
@@ -5343,7 +5305,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"get-proto@npm:^1.0.0, get-proto@npm:^1.0.1":
+"get-proto@npm:^1.0.1":
   version: 1.0.1
   resolution: "get-proto@npm:1.0.1"
   dependencies:
@@ -5793,15 +5755,15 @@ __metadata:
   linkType: hard
 
 "is-generator-function@npm:^1.0.7":
-  version: 1.1.1
-  resolution: "is-generator-function@npm:1.1.1"
+  version: 1.1.2
+  resolution: "is-generator-function@npm:1.1.2"
   dependencies:
-    call-bound: "npm:^1.0.3"
+    call-bound: "npm:^1.0.4"
     generator-function: "npm:^2.0.0"
-    get-proto: "npm:^1.0.0"
+    get-proto: "npm:^1.0.1"
     has-tostringtag: "npm:^1.0.2"
     safe-regex-test: "npm:^1.1.0"
-  checksum: 10/5c1c19b8e4b0d2f4b0fb289dba8404eb624ef862e39636cb0cec69bf75a27ed3b0751ac68f8f3decc4cdd79840fc399b6d4ae4e4b7105e03b6af0f6a17bd44ec
+  checksum: 10/cc50fa01034356bdfda26983c5457103240f201f4663c0de1257802714e40d36bcff7aee21091d37bbba4be962fa5c6475ce7ddbc0abfa86d6bef466e41e50a5
   languageName: node
   linkType: hard
 
@@ -7837,9 +7799,9 @@ __metadata:
   linkType: hard
 
 "react-is@npm:^19.1.0":
-  version: 19.1.1
-  resolution: "react-is@npm:19.1.1"
-  checksum: 10/44e0937da1f0da1d5dbd4f01972870768ef207f8a49717f4491f5022454f34c956cb66be560aee5286387169853b0283a81e1f419b51dc62654c8710dc98065a
+  version: 19.2.0
+  resolution: "react-is@npm:19.2.0"
+  checksum: 10/5cf0230571da0b446c64c0ff7b0e6992b7a8b12b39542db4003de1611e3f108e26f30b93a85ded5cd89c5bcce97f57639524ae40e57bb2f4f1ebd0935b624abf
   languageName: node
   linkType: hard
 
@@ -7890,12 +7852,12 @@ __metadata:
   linkType: hard
 
 "react-native-passkey@npm:^3.1.0":
-  version: 3.1.0
-  resolution: "react-native-passkey@npm:3.1.0"
+  version: 3.2.0
+  resolution: "react-native-passkey@npm:3.2.0"
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: 10/63c7ac3450c4fb283eecf8942db15acfd0d66c7c26c361a666b4aa08a2dad781d5249094214cc72fa53b0910af1bb05f25b7041f85e315a32cbb7c66ca6061a3
+  checksum: 10/0cf30f565e3167e592e7a07535f82776d43ed82b00b80cf2591e1726dc8981fe4d85348b7b279ecb76080c8788f4c527415e72899d7d3f7a6cc8c4332b1fb61d
   languageName: node
   linkType: hard
 
