@@ -12,10 +12,4 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  optimizeDeps: {
-    exclude: ["graz", "@getpara/graz-integration", "@getpara/graz-connector"],
-  },
-  esbuild: {
-    ignoreAnnotations: true, // Respects /* @vite-ignore */ more strictly
-  },
 });
