@@ -1,3 +1,36 @@
+# Release (Wed Oct 01 2025)
+
+## Package Versions
+- @getpara/web-sdk@2.0.0-alpha.63
+- @getpara/wagmi-v2-integration@2.0.0-alpha.63
+- @getpara/wagmi-v2-connector@2.0.0-alpha.63
+- @getpara/viem-v2-integration@2.0.0-alpha.63
+- @getpara/viem-v1-integration@2.0.0-alpha.63
+- @getpara/user-management-client@2.0.0-alpha.63
+- @getpara/solana-web3.js-v1-integration@2.0.0-alpha.63
+- @getpara/solana-wallet-connectors@2.0.0-alpha.63
+- @getpara/solana-signers-v2-integration@2.0.0-alpha.63
+- @getpara/server-sdk@2.0.0-alpha.63
+- @getpara/react-sdk-lite@2.0.0-alpha.63
+- @getpara/react-sdk@2.0.0-alpha.63
+- @getpara/react-native-wallet@2.0.0-alpha.63
+- @getpara/react-components@2.0.0-alpha.63
+- @getpara/react-component-library@1.0.0-alpha.58
+- @getpara/react-common@2.0.0-alpha.63
+- @getpara/evm-wallet-connectors@2.0.0-alpha.63
+- @getpara/ethers-v6-integration@2.0.0-alpha.63
+- @getpara/ethers-v5-integration@2.0.0-alpha.63
+- @getpara/cosmos-wallet-connectors@2.0.0-alpha.63
+- @getpara/cosmjs-v0-integration@2.0.0-alpha.63
+- @getpara/core-sdk@2.0.0-alpha.63
+- @getpara/core-components@2.0.0-alpha.63
+
+### Features
+- Add IP whitelisting UI to developer portal (ENG-5869) (#1210) - b3b5fdcf6
+
+### Fixes
+- External wallet reset logic in bare modal & useAccount embedded connected logic (#1242) - bb553eaf6
+
 # Release (Tue Sep 30 2025)
 
 ## Package Versions
