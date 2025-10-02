@@ -9,11 +9,11 @@ import { PropsWithChildren } from "react";
 
 const queryClient = new QueryClient();
 
-const paraConfig: ParaGrazConfig = {
-  paraWeb: para!,
+const paraConfig = {
+  paraWeb: para! as unknown as ParaGrazConfig["paraWeb"],
   modalProps: { appName: "MyApp" },
   queryClient: queryClient,
-};
+} satisfies ParaGrazConfig;
 
 export const Provider: React.FC<PropsWithChildren> = ({ children }) => {
   return (

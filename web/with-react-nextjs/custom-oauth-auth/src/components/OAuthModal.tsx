@@ -117,11 +117,13 @@ export function OAuthModal() {
         });
       }
 
-      await handleAuthStateAsync({ 
-        authState, 
-        openPopup,
-        popupWindow 
-      });
+      if (authState.stage !== "done") {
+        await handleAuthStateAsync({
+          authState,
+          openPopup,
+          popupWindow
+        });
+      }
 
       // Force immediate query refresh
       await queryClient.invalidateQueries({ queryKey: ["paraAccount"] });

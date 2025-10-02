@@ -1,4 +1,5 @@
 import "@getpara/react-native-wallet/shim";
+
 import { registerRootComponent } from "expo";
 
 import App from "./App";
