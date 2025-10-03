@@ -35,7 +35,8 @@ phases:
       - export NODE_ENV=production
       - yarn build-$ENV
       - echo "Deploying site to s3://$S3_BUCKET_NAME for $ENV..."
-      - aws s3 sync $BUILD_PATH s3://$S3_BUCKET_NAME $S3_SYNC_FLAGS
+      - echo "Skipping WASM files (deployed manually)..."
+      - aws s3 sync $BUILD_PATH s3://$S3_BUCKET_NAME $S3_SYNC_FLAGS --exclude "*.wasm" --exclude "*.wasm.br" --exclude "*.wasm.gz"
       - |
         echo "CloudFront cache check for $ENV..."
         if [ "$ENV" != "sandbox" ]; then

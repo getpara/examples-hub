@@ -31,6 +31,18 @@ export interface Message {
 
 let wasmLoaded = false;
 
+async function tryFetchWasm(url: string): Promise<ArrayBuffer> {
+  const response = await fetch(url, { mode: 'cors' });
+  const buffer = await response.arrayBuffer();
+
+  // WASM files start with magic bytes: 0x00 0x61 0x73 0x6D (\\0asm)
+  const view = new Uint8Array(buffer);
+  if (view.length >= 4 && view[0] === 0x00 && view[1] === 0x61 && view[2] === 0x73 && view[3] === 0x6d) {
+    return buffer;
+  }
+  throw new Error('invalid WASM magic bytes - possibly compressed data without proper Content-Encoding');
+}
+
 async function loadWasm(ctx: Ctx, wasmOverride?: ArrayBuffer) {
   if (typeof self === 'undefined') {
     return;
@@ -45,8 +57,12 @@ async function loadWasm(ctx: Ctx, wasmOverride?: ArrayBuffer) {
       throw new Error('fetching wasm file is disabled');
     }
 
-    const fetchedWasm = await fetch(`${getPortalBaseURL(ctx)}/static/js/main.wasm`, { mode: 'cors' });
-    wasmArrayBuffer = await fetchedWasm.arrayBuffer();
+    const wasmUrl = `${getPortalBaseURL(ctx)}/static/js/main.wasm`;
+
+    // Try Brotli, then Gzip, then uncompressed
+    wasmArrayBuffer = await tryFetchWasm(`${wasmUrl}.br`)
+      .catch(() => tryFetchWasm(`${wasmUrl}.gz`))
+      .catch(() => tryFetchWasm(wasmUrl));
   }
 
   const newRes = await WebAssembly.instantiate(wasmArrayBuffer, goWasm.importObject);

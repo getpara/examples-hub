@@ -13,5 +13,28 @@ export default defineConfig({
     fs: {
       allow: [path.resolve(__dirname, '../../packages'), path.resolve(__dirname, './src')],
     },
+    headers: {
+      '*.wasm.br': {
+        'Content-Type': 'application/wasm',
+        'Content-Encoding': 'br',
+      },
+      '*.wasm.gz': {
+        'Content-Type': 'application/wasm',
+        'Content-Encoding': 'gzip',
+      },
+    },
+    // Configure middleware to set headers for compressed WASM files
+    configure: server => {
+      server.middlewares.use((req, res, next) => {
+        if (req.url?.endsWith('.wasm.br')) {
+          res.setHeader('Content-Type', 'application/wasm');
+          res.setHeader('Content-Encoding', 'br');
+        } else if (req.url?.endsWith('.wasm.gz')) {
+          res.setHeader('Content-Type', 'application/wasm');
+          res.setHeader('Content-Encoding', 'gzip');
+        }
+        next();
+      });
+    },
   },
 });

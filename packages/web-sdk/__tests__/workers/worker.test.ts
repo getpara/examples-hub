@@ -103,6 +103,45 @@ async function runBeforeWasmLoad() {
   ).rejects.toThrow(mockError);
   global.initWasm = originalInitWasm;
 
+  const originalFetch = global.fetch;
+  global.fetch = vi.fn(() =>
+    Promise.resolve({
+      arrayBuffer: () => {
+        const buffer = new ArrayBuffer(8);
+        const view = new Uint8Array(buffer);
+        // Invalid magic bytes (should be 0x00 0x61 0x73 0x6d)
+        view[0] = 0xff;
+        view[1] = 0xff;
+        view[2] = 0xff;
+        view[3] = 0xff;
+        view[4] = 0x01;
+        view[5] = 0x00;
+        view[6] = 0x00;
+        view[7] = 0x00;
+        return Promise.resolve(buffer);
+      },
+    } as Response),
+  );
+
+  await expect(
+    handleMessage(
+      {
+        data: {
+          env: Environment.SANDBOX,
+          functionType: 'KEYGEN',
+          params: {
+            userId: USER.id,
+            type: 'EVM',
+          },
+        },
+      },
+      vi.fn(),
+      false,
+    ),
+  ).rejects.toThrowError('invalid WASM magic bytes - possibly compressed data without proper Content-Encoding');
+
+  global.fetch = originalFetch;
+
   // Load WASM before any tests run
   await handleMessage(
     {
@@ -125,7 +164,22 @@ describe('worker', () => {
   beforeAll(async () => {
     global.fetch = vi.fn(() =>
       Promise.resolve({
-        arrayBuffer: () => Promise.resolve(new ArrayBuffer()),
+        // WASM files start with magic bytes: 0x00 0x61 0x73 0x6D (\\0asm)
+        arrayBuffer: () => {
+          const buffer = new ArrayBuffer(8);
+          const view = new Uint8Array(buffer);
+          // WASM magic bytes: \0asm (0x00 0x61 0x73 0x6D)
+          view[0] = 0x00;
+          view[1] = 0x61;
+          view[2] = 0x73;
+          view[3] = 0x6d;
+          // WASM version: 1 (0x01 0x00 0x00 0x00 in little-endian)
+          view[4] = 0x01;
+          view[5] = 0x00;
+          view[6] = 0x00;
+          view[7] = 0x00;
+          return Promise.resolve(buffer);
+        },
       } as Response),
     );
     await runBeforeWasmLoad();

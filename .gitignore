@@ -1,5 +1,7 @@
 **/node_modules
 main.wasm
+main.wasm.br
+main.wasm.gz
 yarn-error.log
 **/dist
 build

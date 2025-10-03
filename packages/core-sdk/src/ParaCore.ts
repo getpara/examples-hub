@@ -571,14 +571,6 @@ export abstract class ParaCore implements CoreInterface {
 
   protected isPortal(envOverride?: Environment): boolean {
     if (typeof window === 'undefined') return false;
-    return (
-      !!window.location?.host &&
-      getPortalBaseURL(envOverride ? { env: envOverride } : this.ctx).includes(window.location.host)
-    );
-  }
-
-  protected isRecoveryPortal(envOverride?: Environment): boolean {
-    if (typeof window === 'undefined') return false;
     const normalizedUrl = window.location?.host?.replace('getpara', 'usecapsule');
     return !!normalizedUrl && getPortalBaseURL(envOverride ? { env: envOverride } : this.ctx).includes(normalizedUrl);
   }
@@ -1354,7 +1346,7 @@ export abstract class ParaCore implements CoreInterface {
   };
 
   protected initializeWorker = async () => {
-    if (!this.isWorkerInitialized && !this.ctx.disableWebSockets && !this.ctx.disableWorkers) {
+    if (!this.isWorkerInitialized && !this.ctx.disableWebSockets && !this.ctx.disableWorkers && !this.isPortal()) {
       try {
         // we only want to try to initialize the worker once, it will automatically be initialized when needed if this fails
         this.isWorkerInitialized = true;
@@ -1390,7 +1382,7 @@ export abstract class ParaCore implements CoreInterface {
       (this.partner?.cosmosPrefix || 'cosmos') !== session.cosmosPrefix
     ) {
       // no api key required for recovery portal
-      if (!session.partnerId && !this.isRecoveryPortal()) {
+      if (!session.partnerId && !this.isPortal()) {
         this.displayModalError(
           `Invalid API Key. Please ensure you have a valid API key for the current environment: ${this.ctx.env?.toUpperCase()}.`,
         );
