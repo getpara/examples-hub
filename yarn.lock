@@ -4271,10 +4271,10 @@
     long "4"
     zustand "4.5.2"
 
-"@getpara/shared@1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@getpara/shared/-/shared-1.1.0.tgz#e8d3d1a8edea1957974bcdba923a643e12193871"
-  integrity sha512-AeHpbsIW7zGl4QI0fnWmFXbvUAtotNth0+ohBjdbWh0eF6ocCRsPyXEHYX8Wsb0I40A0I0DOI6iSNTXiddie4Q==
+"@getpara/shared@1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@getpara/shared/-/shared-1.2.0.tgz#637d01bdcffba4a261f81336d303d5341db7e427"
+  integrity sha512-Cq47mI0erlZwzXkTjb5VeuXbWaufXlsNLQl6wT/idpglUODBhBvAyTV75YusdQl/n0WcuFSYBa5ijpB5zVxz7g==
 
 "@getpara/solana-web3.js-v1-integration@1.12.0":
   version "1.12.0"

@@ -2,7 +2,7 @@ import {
   PrimaryAuthInfo,
   ServerAuthStateLogin,
   ServerAuthStateSignup,
-  AuthMethod,
+  TAuthMethod,
   ServerAuthStateVerify,
   VerifiedAuth,
   AuthExtras,
@@ -67,7 +67,7 @@ export type WithAuthMethod = {
   /**
    * Which authorization method to use for the URL, either `'passkey'` or `'password'`.
    */
-  authMethod?: Uppercase<AuthMethod>;
+  authMethod?: Uppercase<TAuthMethod>;
 };
 
 export type WithCustomTheme = {
@@ -202,7 +202,7 @@ export type AuthStateLogin = Omit<ServerAuthStateLogin, 'loginAuthMethods'> &
     /**
      * Supported login auth methods for this session.
      */
-    loginAuthMethods?: AuthMethod[];
+    loginAuthMethods?: TAuthMethod[];
   };
 
 export type AuthStateSignup = Omit<ServerAuthStateSignup, 'signupAuthMethods'> &
@@ -234,11 +234,11 @@ export type AuthStateSignup = Omit<ServerAuthStateSignup, 'signupAuthMethods'> &
     /**
      * Supported signup auth methods for this session.
      */
-    signupAuthMethods?: AuthMethod[];
+    signupAuthMethods?: TAuthMethod[];
   };
 
 export type AuthStateDone = Omit<ServerAuthStateDone, 'authMethods'> & {
-  authMethods: AuthMethod[];
+  authMethods: TAuthMethod[];
 };
 
 export type AuthStateVerifyOrLogin = AuthStateVerify | AuthStateLogin;
