@@ -161,6 +161,10 @@ export const ZAPIER_WEBHOOK_URL = IS_PROD
 
 export const AUTH_METHODS = [
   {
+    label: 'Basic Login',
+    value: 'BASIC_LOGIN',
+  },
+  {
     label: 'Passkeys',
     value: 'PASSKEY',
   },
