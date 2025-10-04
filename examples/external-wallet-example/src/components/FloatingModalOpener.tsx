@@ -1,4 +1,4 @@
-import { useModal, useAccount, ModalStep } from '@getpara/react-sdk';
+import { useModal, useAccount, ModalStep, useClient } from '@getpara/react-sdk';
 import { CpslButton, CpslIcon, CpslSelect, CpslSelectItem, CpslCard, CpslText } from '@getpara/react-components';
 import styled from 'styled-components';
 import { useState, useEffect } from 'react';
@@ -8,6 +8,7 @@ type StepOption = ModalStep | 'default';
 export const FloatingModalOpener = () => {
   const { openModal } = useModal();
   const { isConnected } = useAccount();
+  const para = useClient();
   const [selectedStep, setSelectedStep] = useState<StepOption>('default');
 
   const handleOpenModal = () => {
@@ -16,6 +17,17 @@ export const FloatingModalOpener = () => {
       openModal();
     } else {
       openModal({ step: selectedStep });
+    }
+  };
+
+  const handleResetStorage = async () => {
+    try {
+      await para?.clearStorage();
+      console.log('✅ Para storage cleared successfully');
+      // Optionally reload the page to reset the entire state
+      window.location.reload();
+    } catch (error) {
+      console.error('❌ Failed to clear Para storage:', error);
     }
   };
 
@@ -50,7 +62,7 @@ export const FloatingModalOpener = () => {
           <DropdownContainer>
             <CpslSelect
               selectedValue={selectedStep}
-              onCpslSelectValueChange={e => setSelectedStep(e.detail as StepOption)}
+              onCpslSelectValueChange={(e: CustomEvent<string>) => setSelectedStep(e.detail as StepOption)}
               placeholder="Select step"
               style={{ minWidth: '180px' }}
             >
@@ -62,21 +74,45 @@ export const FloatingModalOpener = () => {
             </CpslSelect>
           </DropdownContainer>
 
-          <CpslButton
-            variant="primary"
-            onClick={handleOpenModal}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '12px 20px',
-              borderRadius: '8px',
-              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-            }}
-          >
-            <CpslIcon icon="menu" />
-            <span>Open Modal</span>
-          </CpslButton>
+          <ButtonGroup>
+            <CpslButton
+              variant="primary"
+              onClick={handleOpenModal}
+              size="small"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                padding: '8px 12px',
+                borderRadius: '6px',
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+                whiteSpace: 'nowrap',
+                fontSize: '14px',
+              }}
+            >
+              <CpslIcon icon="menu" size="small" />
+              <span>Open Modal</span>
+            </CpslButton>
+
+            <CpslButton
+              variant="secondary"
+              onClick={handleResetStorage}
+              size="small"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                padding: '8px 12px',
+                borderRadius: '6px',
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+                whiteSpace: 'nowrap',
+                fontSize: '14px',
+              }}
+            >
+              <CpslIcon icon="refreshCw" size="small" />
+              <span>Reset Storage</span>
+            </CpslButton>
+          </ButtonGroup>
         </FloatingBar>
       </CpslCard>
     </CardContainer>
@@ -106,19 +142,19 @@ const CardContainer = styled.div`
 const FloatingBar = styled.div`
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 12px;
   margin-top: 16px;
+  min-width: 0; /* Allow shrinking */
+  flex-wrap: wrap;
 
   @media (max-width: 640px) {
     gap: 8px;
-    flex-wrap: wrap;
   }
 
   @media (max-width: 480px) {
     flex-direction: column;
     align-items: stretch;
-    gap: 8px;
+    gap: 12px;
   }
 `;
 
@@ -127,5 +163,23 @@ const DropdownContainer = styled.div`
 
   @media (max-width: 480px) {
     width: 100%;
+  }
+`;
+
+const ButtonGroup = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 1; /* Allow shrinking when needed */
+  min-width: 0; /* Allow content to shrink if needed */
+  max-width: 100%; /* Prevent overflow */
+
+  @media (max-width: 640px) {
+    gap: 8px;
+  }
+
+  @media (max-width: 480px) {
+    width: 100%;
+    justify-content: stretch;
   }
 `;

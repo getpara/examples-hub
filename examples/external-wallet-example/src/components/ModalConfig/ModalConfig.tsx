@@ -6,6 +6,7 @@ import { AuthLayouts } from './AuthLayouts';
 import { Theme } from './Theme';
 import { AccountLinking } from './AccountLinking';
 import { Balances } from './Balances';
+import { EnvironmentSettings } from './EnvironmentSettings';
 import { useAccount } from '@getpara/react-sdk';
 import { memo } from 'react';
 
@@ -17,6 +18,7 @@ export const ModalConfig = memo(() => {
         Modal Configuration
       </CpslText>
       <InnerContainer>
+        <EnvironmentSettings />
         <TopComponentsGrid>
           <Theme />
           <VerticalStack>

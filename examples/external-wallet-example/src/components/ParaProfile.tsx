@@ -9,6 +9,7 @@ import { sepolia } from 'viem/chains';
 import { http } from 'viem';
 import { createSolanaRpc, getUtf8Encoder } from '@solana/kit';
 import bs58 from 'bs58';
+import { WalletSelector } from './WalletSelector';
 
 const paraRpc = createSolanaRpc('https://api.testnet.solana.com');
 
@@ -124,16 +125,9 @@ export const ParaProfile = () => {
         <CpslText variant="bodyL" weight="semiBold">
           Solana: {solanaConnected ? 'Connected' : 'Not Connected'}
         </CpslText>
-        <CpslText>
-          Selected Wallet:{' '}
-          {isConnected
-            ? wallet
-              ? paraClient?.getDisplayAddress(wallet.id, { truncate: true, addressType: wallet.type })
-              : 'No Wallet Selected'
-            : 'Not Connected'}
-        </CpslText>
         {isConnected && (
           <>
+            <WalletSelector />
             <CpslInput
               placeholder="Message to sign"
               onCpslInput={e => {

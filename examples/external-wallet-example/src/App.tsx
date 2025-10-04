@@ -10,8 +10,10 @@ import { useCosmosStore } from './stores/cosmosStore/useCosmosStore';
 import { useEffect, memo, useMemo, useState } from 'react';
 import { sdk } from '@farcaster/miniapp-sdk';
 import { ModalConfig } from './components/ModalConfig/ModalConfig';
-import { validateBalancesConfig } from '@getpara/core-sdk';
+import { validateBalancesConfig, Environment } from '@getpara/core-sdk';
 import styled from 'styled-components';
+import { useLocalStorage } from 'usehooks-ts';
+import { EnvironmentProvider } from './contexts/EnvironmentContext';
 
 const queryClient = new QueryClient();
 
@@ -199,10 +201,22 @@ export const App = memo(() => {
   const selectedCosmosChainId = useCosmosStore(state => state.selectedChainId);
   const updateCosmosState = useCosmosStore(state => state.updateState);
 
+  // Environment and API key selection
+  const [selectedEnv, setSelectedEnv] = useLocalStorage('@EXAMPLE-PARA/selectedEnv', Environment.SANDBOX);
+  const [selectedApiKey, setSelectedApiKey] = useLocalStorage('@EXAMPLE-PARA/selectedApiKey', '');
+  const [isLoadingApiKey, setIsLoadingApiKey] = useState(!selectedApiKey);
+
   // Track the last configuration that caused a reload to prevent infinite loops
   const [lastReloadedConfig, setLastReloadedConfig] = useState<string | null>(() => {
     return sessionStorage.getItem('lastReloadedBalancesConfig');
   });
+
+  // Mark loading as complete when we have an API key
+  useEffect(() => {
+    if (selectedApiKey && isLoadingApiKey) {
+      setIsLoadingApiKey(false);
+    }
+  }, [selectedApiKey, isLoadingApiKey]);
 
   useEffect(() => {
     sdk.actions.ready();
@@ -249,90 +263,122 @@ export const App = memo(() => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AppContainer>
-        <ParaProvider
-          paraClientConfig={{
-            env: import.meta.env.VITE_ENVIRONMENT,
-            apiKey: import.meta.env.VITE_PARA_API_KEY,
-          }}
-          config={{
-            appName: 'Para External Wallet Example',
-            rpcUrl: 'https://sepolia.drpc.org',
-            farcasterMiniAppConfig: farcasterDisableAutoConnect
-              ? {
-                  disableAutoConnect: true,
-                }
-              : undefined,
-          }}
-          paraModalConfig={{
-            oAuthMethods: modalConfig.oAuthMethods,
-            authLayout: modalConfig.authLayout,
-            theme: modalConfig.theme,
-            logo: modalConfig.logo,
-            onRampTestMode: true,
-            isGuestModeEnabled: true,
-            balances: validatedBalancesConfig,
-          }}
-          callbacks={{
-            onLogout: event => {
-              console.log('Logout:', event.detail);
-            },
-            onLogin: event => {
-              console.log('Login:', event.detail);
-            },
-            onSignMessage: event => {
-              console.log('messageSigned:', event.detail);
-            },
-          }}
-          externalWalletConfig={{
-            connectionOnly: externalWalletConfig.externalWalletConnectionOnly,
-            includeWalletVerification: externalWalletConfig.externalWalletIncludeVerification,
-            wallets: externalWalletConfig.externalWallets,
-            createLinkedEmbeddedForExternalWallets: externalWalletConfig.isFullAuth ? 'ALL' : undefined,
-            // appDescription
-            // appIcon
-            // appUrl
-            evmConnector: {
-              config: {
-                chains: [mainnet, polygon, sepolia, celo, fluentTestnet],
-              },
-              // wagmiProviderProps={}
-            },
-            cosmosConnector: {
-              config: {
-                selectedChainId: selectedCosmosChainId,
-                multiChain: true,
-                onSwitchChain: chainId => {
-                  updateCosmosState({ selectedChainId: chainId });
+      <EnvironmentProvider
+        value={{
+          selectedEnv,
+          selectedApiKey,
+          setSelectedEnv,
+          setSelectedApiKey,
+        }}
+      >
+        <AppContainer>
+          {!isLoadingApiKey && selectedApiKey ? (
+            <ParaProvider
+              paraClientConfig={{
+                env: selectedEnv,
+                apiKey: selectedApiKey,
+              }}
+              config={{
+                appName: 'Para External Wallet Example',
+                rpcUrl: 'https://sepolia.drpc.org',
+                farcasterMiniAppConfig: farcasterDisableAutoConnect
+                  ? {
+                      disableAutoConnect: true,
+                    }
+                  : undefined,
+              }}
+              paraModalConfig={{
+                oAuthMethods: modalConfig.oAuthMethods,
+                authLayout: modalConfig.authLayout,
+                theme: modalConfig.theme,
+                logo: modalConfig.logo,
+                onRampTestMode: true,
+                isGuestModeEnabled: true,
+                balances: validatedBalancesConfig,
+              }}
+              callbacks={{
+                onLogout: event => {
+                  console.log('Logout:', event.detail);
                 },
-                chains: cosmosChains,
-              },
-              // grazProviderProps={}
-            },
-            solanaConnector: {
-              config: {
-                endpoint: endpoint,
-                chain: solanaNetwork,
-              },
-            },
-            walletConnect: {
-              projectId: 'dc87c564a371d823d3795ae407391656',
-            },
-          }}
-        >
-          {/* Desktop Layout */}
-          <RightPanel>
-            <Content />
-          </RightPanel>
+                onLogin: event => {
+                  console.log('Login:', event.detail);
+                },
+                onSignMessage: event => {
+                  console.log('messageSigned:', event.detail);
+                },
+              }}
+              externalWalletConfig={{
+                connectionOnly: externalWalletConfig.externalWalletConnectionOnly,
+                includeWalletVerification: externalWalletConfig.externalWalletIncludeVerification,
+                wallets: externalWalletConfig.externalWallets,
+                createLinkedEmbeddedForExternalWallets: externalWalletConfig.isFullAuth ? 'ALL' : undefined,
+                // appDescription
+                // appIcon
+                // appUrl
+                evmConnector: {
+                  config: {
+                    chains: [mainnet, polygon, sepolia, celo, fluentTestnet],
+                  },
+                  // wagmiProviderProps={}
+                },
+                cosmosConnector: {
+                  config: {
+                    selectedChainId: selectedCosmosChainId,
+                    multiChain: true,
+                    onSwitchChain: chainId => {
+                      updateCosmosState({ selectedChainId: chainId });
+                    },
+                    chains: cosmosChains,
+                  },
+                  // grazProviderProps={}
+                },
+                solanaConnector: {
+                  config: {
+                    endpoint: endpoint,
+                    chain: solanaNetwork,
+                  },
+                },
+                walletConnect: {
+                  projectId: 'dc87c564a371d823d3795ae407391656',
+                },
+              }}
+            >
+              {/* Desktop Layout */}
+              <RightPanel>
+                <Content />
+              </RightPanel>
 
-          {/* Modal Config - always last */}
-          <LeftPanel>
-            <ModalConfigContainer>
-              <ModalConfig />
-            </ModalConfigContainer>
-          </LeftPanel>
-        </ParaProvider>
-      </AppContainer>
+              {/* Modal Config - always last */}
+              <LeftPanel>
+                <ModalConfigContainer>
+                  <ModalConfig />
+                </ModalConfigContainer>
+              </LeftPanel>
+            </ParaProvider>
+          ) : (
+            <>
+              <RightPanel>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    height: '100%',
+                    padding: '20px',
+                  }}
+                >
+                  <p>Loading API key...</p>
+                </div>
+              </RightPanel>
+              <LeftPanel>
+                <ModalConfigContainer>
+                  <ModalConfig />
+                </ModalConfigContainer>
+              </LeftPanel>
+            </>
+          )}
+        </AppContainer>
+      </EnvironmentProvider>
     </QueryClientProvider>
   );
 });
