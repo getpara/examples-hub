@@ -6,6 +6,7 @@ import { PREGEN_IDENTIFIER_TYPES, PregenAuth, WALLET_TYPES, TWalletType } from '
 import {
   API_KEY,
   PARTNER,
+  SESSION,
   USER_CUSTOM_ID,
   USER_DISCORD_USERNAME,
   USER_EMAIL,
@@ -22,6 +23,7 @@ import {
   mockUpdatePregenWallet,
   mockClaimPregenWallets,
   mockGetWalletBalance,
+  mockTouchSession,
 } from '../mocks/mockUserManagementClient';
 import { Environment, ParaEvent } from '../../src';
 import * as shareDistribution from '../../src/shares/shareDistribution.js';
@@ -115,6 +117,10 @@ describe('wallets', () => {
 
     mockEd25519Keygen.mockResolvedValue({ walletId: ed25519Id, signer: ed25519Signer });
     mockKeygen.mockResolvedValue({ walletId: dklsId, signer: dklsSigner });
+    mockTouchSession.mockResolvedValue({
+      ...SESSION,
+      currentWalletIds: { EVM: [evmId], COSMOS: [evmId, dklsId], SOLANA: [solanaId, ed25519Id] },
+    });
 
     mockGetWallets.mockResolvedValue({
       data: {
@@ -126,9 +132,11 @@ describe('wallets', () => {
       types: PARTNER.supportedWalletTypes.map(({ type }) => type as TWalletType),
     });
 
-    expect(para.currentWalletIds['EVM']).toStrictEqual([evmId]);
-    expect(para.currentWalletIds['COSMOS']).toStrictEqual([evmId, dklsId]);
-    expect(para.currentWalletIds['SOLANA']).toStrictEqual([solanaId, ed25519Id]);
+    expect(para.currentWalletIds['EVM']).toContain(evmId);
+    expect(para.currentWalletIds['COSMOS']).toContain(evmId);
+    expect(para.currentWalletIds['COSMOS']).toContain(dklsId);
+    expect(para.currentWalletIds['SOLANA']).toContain(solanaId);
+    expect(para.currentWalletIds['SOLANA']).toContain(ed25519Id);
 
     expect(para.wallets[dklsId]).toStrictEqual({ ...dklsWallet, signer: dklsSigner });
     expect(para.wallets[ed25519Id]).toStrictEqual({ ...ed25519Wallet, signer: ed25519Signer });

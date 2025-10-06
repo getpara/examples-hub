@@ -113,3 +113,19 @@ export function mergeCurrentWalletIds(original: CurrentWalletIds, additional: Cu
 export function newUuid(): string {
   return uuid.v4();
 }
+
+export function currentWalletIdsEq(a: CurrentWalletIds | undefined, b: CurrentWalletIds | undefined): boolean {
+  if (!a && !b) return true;
+  if (!a || !b) return false;
+
+  const aKeys = Object.keys(a);
+  const bKeys = Object.keys(b);
+
+  if (aKeys.length !== bKeys.length) return false;
+
+  return aKeys.every(key => {
+    const aIds = a[key]?.sort() || [];
+    const bIds = b[key]?.sort() || [];
+    return aIds.length === bIds.length && aIds.every((id, index) => id === bIds[index]);
+  });
+}

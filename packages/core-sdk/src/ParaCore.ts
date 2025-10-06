@@ -130,6 +130,7 @@ import {
   shortenUrl,
   isServerAuthState,
   splitPhoneNumber,
+  currentWalletIdsEq,
 } from './utils/index.js';
 import { TransactionReviewDenied, TransactionReviewTimeout } from './errors.js';
 import * as constants from './constants.js';
@@ -1412,6 +1413,10 @@ Need help? Visit: https://docs.getpara.com or contact support
       } else {
         await this.#getPartner(session.partnerId);
       }
+    }
+
+    if (session.currentWalletIds && !currentWalletIdsEq(session.currentWalletIds, this.currentWalletIds)) {
+      await this.setCurrentWalletIds(session.currentWalletIds);
     }
 
     return session;
