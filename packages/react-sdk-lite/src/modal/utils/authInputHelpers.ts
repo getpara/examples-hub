@@ -19,7 +19,6 @@ export function validateAuth(auth: Auth<'email' | 'phone'>): Auth<'email' | 'pho
       {
         if (!/^\+1\d{3}555\d{4}$/.test(auth.phone)) {
           const formatted = formatPhoneNumber(auth.phone);
-
           if (!formatted) {
             throw new Error('Please enter a valid phone number!');
           }
