@@ -131,7 +131,7 @@ const RecoverWalletWithSecretStep: React.FC<RecoverWalletWithSecretStepProps> = 
 
             await para.setAuth(auth, { userId });
 
-            const { url } = await para.getNewCredentialAndUrl();
+            const { url } = await para.getNewCredentialAndUrl({ authMethod: 'PASSKEY' });
 
             setWebAuthURLForCreate(url);
             setCurrentRecoveryStep(ModalStep.BIOMETRIC);

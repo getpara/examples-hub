@@ -5,7 +5,6 @@ import styled from 'styled-components';
 import { TelegramAuthResponse } from '@getpara/user-management-client';
 import { Environment } from '@getpara/web-sdk';
 import { useSearchParams } from 'react-router-dom';
-import { FlexStartInnerContainer } from '../../components';
 import { isIFramed } from '../../utils/isIFramed';
 import { SpinnerContainer } from '@getpara/react-common';
 
@@ -76,7 +75,10 @@ export function TelegramLogin({ onLogin }: TelegramLoginProps) {
             sessionLookupId: searchParams.get('sessionId') || undefined,
           });
 
-          if (shouldVerify && serverAuthState.stage === 'done') {
+          const loginCallbackRoute = searchParams.get('loginCallbackRoute');
+
+          // If we have a loginCallbackRoute we always want to call onLogin to handle the redirect
+          if (shouldVerify && (loginCallbackRoute || serverAuthState.stage === 'done')) {
             await onLogin();
           }
         }
@@ -109,13 +111,11 @@ export function TelegramLogin({ onLogin }: TelegramLoginProps) {
   const Content = (
     <>
       {shouldVerify && (
-        <FlexStartInnerContainer>
-          <>
-            <CpslText variant="bodyL" weight="semiBold">
-              Sign in using Telegram
-            </CpslText>
-          </>
-        </FlexStartInnerContainer>
+        <>
+          <CpslText variant="bodyL" weight="semiBold">
+            Sign in using Telegram
+          </CpslText>
+        </>
       )}
       {isWaiting ? (
         <>

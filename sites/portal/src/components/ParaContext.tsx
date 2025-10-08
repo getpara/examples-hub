@@ -1,4 +1,4 @@
-import { PropsWithChildren, createContext, useContext, useEffect, useMemo } from 'react';
+import { PropsWithChildren, createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { CoreAuthInfo, ConstructorOpts as ParaConstructorOpts, Environment as ParaEnvironment } from '@getpara/web-sdk';
 import { useSearchParams } from 'react-router-dom';
 import { ParaPortal } from '../classes/ParaPortal';
@@ -62,8 +62,13 @@ export const ParaProvider = (props: ParaProviderProps) => {
   const [searchParams] = useSearchParams();
   const { apiKey, environment, options, onMount, children, partnerId } = props;
   const paramsSupportedWalletTypes = searchParams.get('supportedWalletTypes');
+  const [isReady, setIsReady] = useState(false);
+  const hasInitialized = useRef(false);
 
   const params = useExtractedParams<AuthLoginParams & AuthParams & AuthExtras>();
+
+  // Check if current path is a callback route
+  const isCallbackRoute = location.pathname.includes('/callback');
 
   const para = useMemo(
     () =>
@@ -80,12 +85,28 @@ export const ParaProvider = (props: ParaProviderProps) => {
   para.ctx.isE2E = import.meta.env.VITE_IS_E2E === 'true';
 
   useEffect(() => {
-    onMount?.(para);
-  }, [onMount, para]);
+    const setup = async () => {
+      if (!para || hasInitialized.current || isCallbackRoute) {
+        if (isCallbackRoute) {
+          hasInitialized.current = true;
+          setIsReady(true);
+        }
+
+        return;
+      }
+
+      await para.logout();
+      onMount?.(para);
+      hasInitialized.current = true;
+      setIsReady(true);
+    };
+
+    setup();
+  }, [para, onMount, isCallbackRoute]);
 
   useEffect(() => {
     async function setUserDetails() {
-      if (!para || !Object.keys(params).length) {
+      if (!isReady || !para || !Object.keys(params).length) {
         return;
       }
 
@@ -110,7 +131,11 @@ export const ParaProvider = (props: ParaProviderProps) => {
     }
 
     setUserDetails();
-  }, [para, params]);
+  }, [isReady, params]);
+
+  if (!isReady) {
+    return null;
+  }
 
   return <ParaContext.Provider value={para}>{children}</ParaContext.Provider>;
 };

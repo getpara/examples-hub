@@ -8,6 +8,7 @@ import {
   getSHA256HashHex,
   decryptPrivateKeyWithPassword,
   Ctx,
+  getPublicKeyHex,
 } from '@getpara/web-sdk';
 import { ParaPortal } from '../classes/ParaPortal';
 import { ENV } from '../constants';
@@ -307,28 +308,25 @@ export async function authUpdateKeyShares(
   });
 
   if (newDeviceSessionLookupId) {
-    // need to fetch and decrypt all shares for the new device
-    // can't use response above as a refreshed share may have been added here so we must fetch again
-    const newEncryptedSharesRes = await para.ctx.client.getBiometricKeyshares(userId, signature.id, true);
-    const allDecryptedShares = await decryptPrivateKeyAndDecryptShare(
-      userHandle,
-      newEncryptedSharesRes.data.keyShares,
-      encryptedPrivateKeys[0].encryptedPrivateKey,
-    );
-    allDecryptedShares.forEach(share => {
-      const { encryptedMessageHex: newMessageHex, encryptedKeyHex: newKeyHex } = encryptWithDerivedPublicKey(
-        newDeviceEncryptionKey,
-        share.signer,
-      );
-      tempShareOpts.push({
-        walletId: share.walletId,
-        encryptedShare: newMessageHex,
-        encryptedKey: newKeyHex,
-        sessionLookupId: `${newDeviceSessionLookupId}-new-device`,
-        partnerId: share.partnerId,
-        protocolId: share.protocolId,
-      });
+    const shares = await authUpdateAllKeyShares({
+      para,
+      userId,
+      skipUpload: true,
+      sessionLookupId: newDeviceSessionLookupId,
+      encryptionKey: newDeviceEncryptionKey,
+      ...((signature?.id || passwordId) && {
+        biometricData: {
+          signatureId: signature?.id,
+          passwordId,
+          userHandle,
+        },
+      }),
+      ...(para.isEnclaveUser && { enclaveData: { shares: enclaveShares } }),
     });
+
+    if (shares) {
+      tempShareOpts.push(...shares);
+    }
   }
 
   if (tempShareOpts.length > 0) {
@@ -337,3 +335,84 @@ export async function authUpdateKeyShares(
 
   return userId;
 }
+
+export const authUpdateAllKeyShares = async ({
+  para,
+  userId,
+  biometricData,
+  sessionLookupId,
+  skipUpload,
+  enclaveData,
+  encryptionKey,
+}: {
+  para: ParaPortal;
+  userId: string;
+  biometricData?: { signatureId?: string; passwordId?: string; userHandle: string };
+  enclaveData?: { shares: ShareData[] };
+  sessionLookupId?: string;
+  encryptionKey?: string;
+  skipUpload?: boolean;
+}) => {
+  if (!encryptionKey) {
+    await para.setLoginEncryptionKeyPair();
+  }
+  if (!sessionLookupId) {
+    throw new Error('Encryption key and session lookup ID are required to update all key shares');
+  }
+
+  let decryptedShares: { walletId: string; walletScheme: string; signer: string; partnerId?: string; protocolId?: string }[];
+
+  if (biometricData) {
+    const { signatureId, passwordId, userHandle } = biometricData;
+    let encryptedPrivateKeys: { encryptedPrivateKey: string }[] = [];
+
+    const encryptionKeyHash = getSHA256HashHex(userHandle);
+    let encryptedShares = [];
+
+    if (passwordId) {
+      const encryptedSharesRes = await para.ctx.client.getPasswordKeyshares(userId, passwordId, true);
+      encryptedShares = encryptedSharesRes.data.keyShares;
+    } else if (signatureId) {
+      const encryptedSharesRes = await para.ctx.client.getBiometricKeyshares(userId, signatureId, true);
+      encryptedShares = encryptedSharesRes.data.keyShares;
+    }
+
+    encryptedPrivateKeys = (await para.ctx.client.getEncryptedWalletPrivateKeys(userId, encryptionKeyHash))
+      .encryptedPrivateKeys;
+
+    if (!encryptedShares.length) {
+      return;
+    }
+
+    decryptedShares = await decryptPrivateKeyAndDecryptShare(
+      userHandle,
+      encryptedShares,
+      encryptedPrivateKeys[0].encryptedPrivateKey,
+    );
+  } else if (enclaveData) {
+    decryptedShares = enclaveData.shares;
+  } else {
+    return;
+  }
+
+  const tempShareOpts = decryptedShares.map(share => {
+    const { encryptedMessageHex, encryptedKeyHex } = encryptWithDerivedPublicKey(
+      encryptionKey ?? getPublicKeyHex(para.loginEncryptionKeyPair),
+      share.signer,
+    );
+    return {
+      walletId: share.walletId,
+      encryptedShare: encryptedMessageHex,
+      encryptedKey: encryptedKeyHex,
+      sessionLookupId: `${sessionLookupId}-new-device`,
+      partnerId: share.partnerId,
+      protocolId: share.protocolId,
+    };
+  });
+
+  if (!skipUpload && tempShareOpts.length > 0) {
+    await para.ctx.client.uploadTransmissionKeyshares(userId, tempShareOpts);
+  }
+
+  return tempShareOpts;
+};

@@ -170,14 +170,10 @@ export const OTP = ({ onLogin }: OTPStepProps) => {
     try {
       const sessionId = searchParams.get('sessionId') || undefined;
 
-      const serverAuthState = await para.ctx.client.verifyAccount(para.userId, {
+      await para.ctx.client.verifyAccount(para.userId, {
         verificationCode,
         sessionLookupId: sessionId,
       });
-
-      if (serverAuthState.stage !== 'done') {
-        throw new Error('Invalid auth stage.');
-      }
     } catch (e) {
       setError(e);
       setIsPending(false);

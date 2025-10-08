@@ -1,6 +1,6 @@
 import { CpslButton, CpslInput, CpslText } from '@getpara/react-components';
 import { Card, OverflowText, ProfileInnerContainer } from './common';
-import { ParaCore, useAccount, useClient, useWallet } from '@getpara/react-sdk';
+import { ParaCore, useAccount, useAddAuthMethod, useClient, useWallet } from '@getpara/react-sdk';
 import { useEffect, useState } from 'react';
 import { useViemClient } from '@getpara/react-sdk/evm';
 import { useCosmjsProtoSigner } from '@getpara/react-sdk/cosmos';
@@ -25,6 +25,7 @@ export const ParaProfile = () => {
   const { protoSigner } = useCosmjsProtoSigner();
   const { solanaSigner } = useSolanaSigner({ rpc: paraRpc });
   const paraClient = useClient();
+  const { addAuthMethod } = useAddAuthMethod();
 
   const [message, setMessage] = useState<string>('');
   const [messageSignature, setMessageSignature] = useState<string>();
@@ -99,6 +100,10 @@ export const ParaProfile = () => {
     }
   };
 
+  const handleAddAuthMethod = () => {
+    addAuthMethod(undefined, { onError: e => console.error('Error adding auth method:', e) });
+  };
+
   const embeddedConnected = isConnected && embedded?.isConnected && embedded?.wallets?.some(w => !w.isExternal);
   const evmConnected = isConnected && external?.evm?.isConnected;
   const cosmosConnected = isConnected && external?.cosmos?.isConnected;
@@ -140,6 +145,9 @@ export const ParaProfile = () => {
             </CpslButton>
           </>
         )}
+        <CpslButton disabled={!isConnected} onClick={handleAddAuthMethod}>
+          Add Auth Method
+        </CpslButton>
         <CpslButton
           disabled={!isConnected}
           onClick={async () => {
@@ -163,8 +171,9 @@ export const ParaProfile = () => {
           Export Session
         </CpslButton>
         <CpslButton
+          disabled={!isConnected}
           onClick={async () => {
-            await paraClient?.ctx.client.deleteSelf((paraClient as ParaCore).getUserId());
+            await paraClient?.ctx.client.deleteSelf((paraClient as ParaCore).getUserId()!);
 
             await paraClient?.logout();
           }}

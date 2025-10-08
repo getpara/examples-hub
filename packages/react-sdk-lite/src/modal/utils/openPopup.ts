@@ -6,7 +6,14 @@ export function openPopup({
 }: {
   url: string;
   target: string;
-  type: 'OAUTH' | 'LOGIN_PASSKEY' | 'CREATE_PASSKEY' | 'TRANSACTION_REVIEW' | 'CREATE_PASSWORD' | 'LOGIN_PASSWORD';
+  type:
+    | 'OAUTH'
+    | 'LOGIN_PASSKEY'
+    | 'CREATE_PASSKEY'
+    | 'TRANSACTION_REVIEW'
+    | 'CREATE_PASSWORD'
+    | 'LOGIN_PASSWORD'
+    | 'ADD_CREDENTIAL';
   current?: Window | null;
 }): Window | null {
   if (typeof window === 'undefined') {
@@ -40,6 +47,7 @@ export function openPopup({
       break;
     }
     case 'OAUTH':
+    case 'ADD_CREDENTIAL':
     default: {
       popUpHeight = 768;
       break;

@@ -15,6 +15,7 @@ import {
   IssueJwtResponse,
   TLinkedAccountType,
   LinkedAccounts,
+  AuthMethod,
 } from '@getpara/user-management-client';
 import {
   AuthStateLogin,
@@ -35,6 +36,7 @@ import {
   FarcasterParams,
   TelegramParams,
   OAuthParams,
+  NewCredentialUrlParams,
 } from './methods.js';
 import { ParaCore } from '../ParaCore.js';
 import { FullSignatureRes, Wallet } from './wallet.js';
@@ -90,6 +92,7 @@ export const PARA_CORE_METHODS = [
   'issueJwt',
   'getLinkedAccounts',
   'accountLinkInProgress',
+  'addCredential',
 ] as const;
 
 export const PARA_INTERNAL_METHODS = [
@@ -103,6 +106,7 @@ export const PARA_INTERNAL_METHODS = [
   'accountLinkInProgress',
   'prepareLogin',
   'sendLoginCode',
+  'supportedUserAuthMethods',
 ] as const;
 
 export type CoreMethodName = (typeof PARA_CORE_METHODS)[number];
@@ -258,7 +262,11 @@ export type CoreMethods = Record<CoreMethodName, { params?: unknown; response?: 
     };
   };
   getOAuthUrl: {
-    params: OAuthUrlParams & { sessionLookupId?: string; encryptionKey?: string };
+    params: OAuthUrlParams & {
+      sessionLookupId?: string;
+      encryptionKey?: string;
+      portalCallbackParams?: Record<string, string>;
+    };
     response: string;
   };
   verifyOAuth: {
@@ -619,6 +627,10 @@ export type CoreMethods = Record<CoreMethodName, { params?: unknown; response?: 
     };
     response: LinkedAccounts & { userId: string };
   };
+  addCredential: {
+    params: Pick<NewCredentialUrlParams, 'authMethod'>;
+    response: Promise<string>;
+  };
 };
 
 export type InternalMethods = {
@@ -668,6 +680,10 @@ export type InternalMethods = {
   sendLoginCode: {
     params: void;
     response: void;
+  };
+  supportedUserAuthMethods: {
+    params: void;
+    response: Promise<Set<AuthMethod>>;
   };
 };
 

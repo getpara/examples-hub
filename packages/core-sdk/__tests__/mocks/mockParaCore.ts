@@ -19,6 +19,7 @@ export class MockPara extends ParaCore {
   getPortalURL = super.getPortalURL;
   isProviderModalDisabled = super.isProviderModalDisabled;
   supportedAuthMethods = super.supportedAuthMethods;
+  supportedUserAuthMethods = super.supportedUserAuthMethods;
   getUserBiometricLocationHints = super.getUserBiometricLocationHints;
 
   linkAccount = super.linkAccount;

@@ -38,7 +38,8 @@ export const BiometricLoginStep = () => {
       <MainContainer>
         {(isPassword || isPIN) && (
           <CpslButton fullWidth onClick={() => presentLoginUi(isPIN ? AuthMethod.PIN : AuthMethod.PASSWORD, loginState)}>
-            Login
+            <CpslIcon slot="start" icon="passcode" />
+            {isPIN && isPassword ? 'Login' : isPIN ? 'Login with PIN' : 'Login with Password'}
           </CpslButton>
         )}
         {isPasskey && (
@@ -55,7 +56,7 @@ export const BiometricLoginStep = () => {
               ) : (
                 <>
                   <CpslIcon slot="start" icon="key" />
-                  Login with passkey
+                  Login with Passkey
                 </>
               )}
             </CpslButton>

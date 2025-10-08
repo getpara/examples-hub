@@ -121,6 +121,10 @@ const testSuites: TestSuites = {
     action: actions.createGuestWallets,
     args: undefined,
   },
+  addCredential: {
+    action: actions.addCredential,
+    args: undefined,
+  },
 };
 
 describe('actions', () => {

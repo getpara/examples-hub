@@ -10,6 +10,8 @@ import { usePara } from '../../components';
 import { useExtractedParams } from '../../hooks/useExtractedParams';
 import { validateCallbackUrl } from '../../utils/validateCallbackUrl';
 import { useCloseWindow } from '../../hooks/useCloseWindow';
+import { useSearchParams } from 'react-router-dom';
+import { isIFramed } from '../../utils/isIFramed';
 
 export const PINCreation = () => {
   const inputRef = useRef<HTMLCpslCodeInputElement>(null);
@@ -20,6 +22,7 @@ export const PINCreation = () => {
     passwordId: string;
   }>();
   const closeWindow = useCloseWindow();
+  const [searchParams] = useSearchParams();
 
   const [pin, setPin] = useState<string>();
   const [pinVerification, setPinVerification] = useState<string>();
@@ -96,6 +99,7 @@ export const PINCreation = () => {
         password: pin,
         passwordId,
         isPIN: true,
+        isForNewDevice: searchParams.get('isForNewDevice') === 'true',
       });
 
       setPinCreated(true);
@@ -177,6 +181,9 @@ const StyledCard = styled(Card)`
 `;
 
 const Container = styled.div`
+  padding-left: ${isIFramed ? '0px' : '83px'};
+  padding-right: ${isIFramed ? '0px' : '83px'};
+  padding-top: ${isIFramed ? '0px' : '24px'};
   flex: 1;
   display: flex;
   align-items: center;

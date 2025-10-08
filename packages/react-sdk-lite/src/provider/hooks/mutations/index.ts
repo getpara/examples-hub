@@ -28,5 +28,6 @@ export { useCreateGuestWallets } from './useCreateGuestWallets.js';
 export { useSignMessage } from './useSignMessage.js';
 export { useSignTransaction } from './useSignTransaction.js';
 export { useIssueJwt } from './useIssueJwt.js';
+export { useAddAuthMethod } from './useAddAuthMethod.js';
 
 export const useCreateGuestWalletsState = generateStateHook('createGuestWallets');

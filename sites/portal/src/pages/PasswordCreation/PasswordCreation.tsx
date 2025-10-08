@@ -10,11 +10,14 @@ import { usePara } from '../../components';
 import { useExtractedParams } from '../../hooks/useExtractedParams';
 import { validateCallbackUrl } from '../../utils/validateCallbackUrl';
 import { useCloseWindow } from '../../hooks/useCloseWindow';
+import { useSearchParams } from 'react-router-dom';
+import { isIFramed } from '../../utils/isIFramed';
 
 export const PasswordCreation = () => {
   const para = usePara();
   const { partnerId, userId, passwordId } = useExtractedParams<{ userId: string; partnerId: string; passwordId: string }>();
   const closeWindow = useCloseWindow();
+  const [searchParams] = useSearchParams();
 
   const [password, setPassword] = useState<string>();
   const [passwordVerification, setPasswordVerification] = useState<string>();
@@ -70,6 +73,7 @@ export const PasswordCreation = () => {
         userId,
         password,
         passwordId,
+        isForNewDevice: searchParams.get('isForNewDevice') === 'true',
       });
 
       setPasswordCreated(true);
@@ -168,6 +172,9 @@ export const PasswordCreation = () => {
 };
 
 const Container = styled.div`
+  padding-left: ${isIFramed ? '0px' : '83px'};
+  padding-right: ${isIFramed ? '0px' : '83px'};
+  padding-top: ${isIFramed ? '0px' : '24px'};
   flex: 1;
   display: flex;
   align-items: center;

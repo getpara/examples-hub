@@ -34,7 +34,10 @@ export const Farcaster = ({ onLogin }: FarcasterStepProps) => {
               });
 
               if (Object.keys(serverAuthState).length !== 0) {
-                if (serverAuthState.stage === 'done') {
+                const loginCallbackRoute = searchParams.get('loginCallbackRoute');
+
+                // If we have a loginCallbackRoute we always want to call onLogin to handle the redirect
+                if (loginCallbackRoute || serverAuthState.stage === 'done') {
                   await onLogin();
                 }
                 window?.parent?.postMessage({ type: 'FARCASTER_SUCCESS', payload: serverAuthState }, '*');

@@ -13,6 +13,8 @@ import { AuthMethod, isPasskeySupported } from '@getpara/web-sdk';
 import { validateCallbackUrl } from '../../utils/validateCallbackUrl';
 import { NativeCallbackStatus } from '../../constants/nativeCallback';
 import { isIFramed } from '../../utils/isIFramed';
+import { useSearchParams } from 'react-router-dom';
+import { useNavigateWithCurrentParams } from '../../hooks/useNavigateWithCurrentParams';
 
 const AuthLoginBase = ({ authMethod, step: propsStep }: { authMethod?: AuthMethod; step?: AuthLoginStep }) => {
   const para = usePara();
@@ -26,6 +28,8 @@ const AuthLoginBase = ({ authMethod, step: propsStep }: { authMethod?: AuthMetho
       authUpdateKeyShares,
       authUpdateEnclaveKeyShares,
       checkIsEnclaveUser,
+      addAllEnclaveSharesForNewCredential,
+      addAllSharesForNewCredential,
     },
     authInfo,
     params: { sessionId, partnerId, encryptionKey, newDeviceSessionLookupId, skipAutoLogin },
@@ -35,6 +39,8 @@ const AuthLoginBase = ({ authMethod, step: propsStep }: { authMethod?: AuthMetho
   const [step, setStep] = useState(propsStep ?? AuthLoginStep.MANUAL_LOGIN);
   const [loginWithPasswordError, setLoginWithPasswordError] = useState<string | undefined>();
   const [isAddingDevice, setIsAddingDevice] = useState(false);
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigateWithCurrentParams();
 
   const isKnownDeviceLogin = !!newDeviceSessionLookupId;
 
@@ -44,8 +50,8 @@ const AuthLoginBase = ({ authMethod, step: propsStep }: { authMethod?: AuthMetho
 
   const postLogin = async ({ fromKnownDevice, loginRes }: { fromKnownDevice?: boolean; loginRes?: LoginRes }) => {
     const auth = await para.ctx.client.sessionAuth(sessionId);
-    const urlParams = new URLSearchParams(window.location.search);
-    const nativeCallbackUrl = urlParams.get('nativeCallbackUrl');
+    const nativeCallbackUrl = searchParams.get('nativeCallbackUrl');
+    const loginCallbackRoute = searchParams.get('loginCallbackRoute');
 
     // Handle native apps first - they always redirect, even for new users
     if (nativeCallbackUrl && validateCallbackUrl(nativeCallbackUrl)) {
@@ -120,13 +126,31 @@ const AuthLoginBase = ({ authMethod, step: propsStep }: { authMethod?: AuthMetho
       return; // Exit early after redirect
     }
 
-    if (auth.isNewUser) {
+    // isNewUser will still be true on the initial login after signup, if adding a credential on that session we want to ensure we don't close the window
+    if (!loginCallbackRoute && auth.isNewUser) {
       closeWindow();
       return;
     }
 
     await para.userSetupAfterLogin();
     const isEnclaveUser = await checkIsEnclaveUser();
+
+    if (loginCallbackRoute) {
+      let callbackAdditionalParams: { sessionId?: string } = {};
+
+      switch (loginCallbackRoute) {
+        case '/auth/add-new-credential':
+          const { sessionLookupId } = await para.touchSession(true);
+          await (isEnclaveUser
+            ? addAllEnclaveSharesForNewCredential(sessionLookupId)
+            : addAllSharesForNewCredential({ loginRes, sessionLookupId }));
+          callbackAdditionalParams = { sessionId: sessionLookupId };
+          break;
+      }
+
+      navigate(loginCallbackRoute, callbackAdditionalParams);
+      return;
+    }
 
     if (fromKnownDevice) {
       if (!(await isPasskeySupported())) {
@@ -314,7 +338,7 @@ const AuthLoginBase = ({ authMethod, step: propsStep }: { authMethod?: AuthMetho
       const temporaryShares = (await para.getTransmissionKeyShares({ isForNewDevice: true })).data.temporaryShares;
 
       if (temporaryShares.length >= fetchedWallets.length) {
-        const { url } = await para.getNewCredentialAndUrl({ isForNewDevice: true });
+        const { url } = await para.getNewCredentialAndUrl({ authMethod: 'PASSKEY', isForNewDevice: true });
         window.location.href = url;
       } else {
         reset();

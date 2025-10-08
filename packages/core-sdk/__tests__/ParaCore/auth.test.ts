@@ -68,6 +68,7 @@ import {
   getSignupStateWithPIN,
   getLoginStateWithPIN,
   getDoneState,
+  mockGetSupportedAuthMethodsV2,
 } from '../mocks/mockUserManagementClient';
 import { getWallet, prepareMock } from '../utils.js';
 import {
@@ -700,6 +701,10 @@ describe('ParaCore - authentication', () => {
           mockVerifyAccount.mockResolvedValueOnce(getSignupState(auth));
           await para.signUpOrLogIn({ auth });
 
+          mockGetSupportedAuthMethodsV2.mockResolvedValue({
+            supportedAuthMethods: [],
+            hasPasswordWithoutPIN: false,
+          });
           const signupState = await para.verifyNewAccount({ verificationCode: VERIFICATION_CODE });
 
           expect(signupState).toStrictEqual({
@@ -719,6 +724,11 @@ describe('ParaCore - authentication', () => {
             testCreateUrl(para, signupState.passkeyUrl!, AuthMethod.PASSKEY);
           }
           testCreateUrl(para, signupState.passwordUrl!, AuthMethod.PASSWORD);
+
+          mockGetSupportedAuthMethodsV2.mockResolvedValue({
+            supportedAuthMethods: ['PASSKEY', 'PASSWORD'],
+            hasPasswordWithoutPIN: true,
+          });
         });
         it('success - PIN', async () => {
           if (para) (para as unknown as any).isNativePasskey = isNativePasskey;
@@ -726,6 +736,10 @@ describe('ParaCore - authentication', () => {
           mockVerifyAccount.mockResolvedValueOnce(getSignupStateWithPIN(auth));
           await para.signUpOrLogIn({ auth });
 
+          mockGetSupportedAuthMethodsV2.mockResolvedValue({
+            supportedAuthMethods: [],
+            hasPasswordWithoutPIN: false,
+          });
           const signupState = await para.verifyNewAccount({ verificationCode: VERIFICATION_CODE });
 
           expect(signupState).toStrictEqual({
@@ -745,6 +759,11 @@ describe('ParaCore - authentication', () => {
             testCreateUrl(para, signupState.passkeyUrl!, AuthMethod.PASSKEY);
           }
           testCreateUrl(para, signupState.pinUrl!, AuthMethod.PIN);
+
+          mockGetSupportedAuthMethodsV2.mockResolvedValue({
+            supportedAuthMethods: ['PASSKEY', 'PASSWORD'],
+            hasPasswordWithoutPIN: true,
+          });
         });
       });
 
@@ -877,6 +896,10 @@ describe('ParaCore - authentication', () => {
         [0, 1, 2, 3].forEach(strategy => {
           describe(['with onOAuthUrl', 'with onOAuthPopup', 'neither', 'neither - portal'][strategy], () => {
             const prepare = async (method: Parameters<typeof para.verifyOAuth>[0]['method']): Promise<OAuthResponse> => {
+              mockGetSupportedAuthMethodsV2.mockResolvedValue({
+                supportedAuthMethods: [],
+                hasPasswordWithoutPIN: false,
+              });
               let url: URL, authState: AuthState;
               switch (strategy) {
                 case 0:
@@ -949,6 +972,10 @@ describe('ParaCore - authentication', () => {
 
               testAuthInfo(para, emailAuthInfo);
 
+              mockGetSupportedAuthMethodsV2.mockResolvedValue({
+                supportedAuthMethods: ['PASSKEY', 'PASSWORD'],
+                hasPasswordWithoutPIN: true,
+              });
               return authState as OAuthResponse;
             };
 
@@ -1019,6 +1046,10 @@ describe('ParaCore - authentication', () => {
       describe(authInfo.authType, () => {
         describe('verify', () => {
           const prepare = async <T extends AuthState>(isSLO?: boolean): Promise<T> => {
+            mockGetSupportedAuthMethodsV2.mockResolvedValue({
+              supportedAuthMethods: [],
+              hasPasswordWithoutPIN: false,
+            });
             let authState;
             switch (authInfo.authType) {
               case 'farcaster':
@@ -1050,6 +1081,10 @@ describe('ParaCore - authentication', () => {
                 break;
             }
 
+            mockGetSupportedAuthMethodsV2.mockResolvedValue({
+              supportedAuthMethods: ['PASSKEY', 'PASSWORD'],
+              hasPasswordWithoutPIN: true,
+            });
             return authState as T;
           };
 
@@ -1186,6 +1221,10 @@ describe('ParaCore - authentication', () => {
     });
 
     it('verify', async () => {
+      mockGetSupportedAuthMethodsV2.mockResolvedValue({
+        supportedAuthMethods: [],
+        hasPasswordWithoutPIN: false,
+      });
       mockVerifyExternalWallet.mockResolvedValueOnce(getSignupState({ externalWalletAddress: EXTERNAL_WALLET.address }));
 
       const authState = await para.verifyExternalWallet({
@@ -1195,6 +1234,10 @@ describe('ParaCore - authentication', () => {
         cosmosSigner: 'cosmosSigner',
       });
 
+      mockGetSupportedAuthMethodsV2.mockResolvedValue({
+        supportedAuthMethods: ['PASSKEY', 'PASSWORD'],
+        hasPasswordWithoutPIN: true,
+      });
       expect(authState).toStrictEqual(getSignupState({ externalWalletAddress: EXTERNAL_WALLET.address }));
     });
 

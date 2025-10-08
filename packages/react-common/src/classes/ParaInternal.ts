@@ -12,6 +12,7 @@ export class ParaInternal extends ParaWeb implements InternalInterface {
   constructPortalUrl = super.constructPortalUrl;
   getNewCredentialAndUrl = super.getNewCredentialAndUrl;
   prepareLogin = super.prepareLogin;
+  supportedUserAuthMethods = super.supportedUserAuthMethods;
 
   linkAccount = super.linkAccount;
   unlinkAccount = super.unlinkAccount;

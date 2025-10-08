@@ -44,6 +44,7 @@ describe('getEmbeddedAccount', () => {
         ...auth,
         wallets: [TEST_WALLET],
         userId: TEST_USER_ID,
+        authMethods: undefined,
       });
     });
   });

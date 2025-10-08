@@ -2,9 +2,13 @@ import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { MockPara } from '../mocks/mockParaCore';
 import { getWorkerContent, prepareMock } from '../utils';
 import { API_KEY, USER_EMAIL, USER_ID } from '../constants';
-import { Environment, Wallet } from '../../src';
+import { AuthMethod, Environment, Wallet } from '../../src';
 import { faker } from '@faker-js/faker';
-import { mockSendLoginVerificationCode } from '../mocks/mockUserManagementClient';
+import {
+  mockGetSupportedAuthMethods,
+  mockGetSupportedAuthMethodsV2,
+  mockSendLoginVerificationCode,
+} from '../mocks/mockUserManagementClient';
 
 describe('ParaCore - utils', () => {
   let para: MockPara;
@@ -321,6 +325,56 @@ describe('ParaCore - utils', () => {
       await para.sendLoginCode();
 
       expect(mockSendLoginVerificationCode).toHaveBeenCalledWith(para.authInfo);
+    });
+  });
+
+  describe('supportedUserAuthMethods', () => {
+    beforeEach(() => {
+      para = new MockPara(Environment.DEV, API_KEY);
+    });
+
+    it('legacy methods', async () => {
+      mockGetSupportedAuthMethodsV2.mockResolvedValueOnce({
+        supportedAuthMethods: [AuthMethod.PASSKEY, AuthMethod.PASSWORD, AuthMethod.PIN],
+        hasPasswordWithoutPIN: true,
+      });
+      para.setAuth({ email: USER_EMAIL });
+
+      const resp = await para.supportedUserAuthMethods();
+
+      expect(mockGetSupportedAuthMethodsV2).toHaveBeenCalledWith(para.authInfo.auth);
+      expect(resp.size).toBe(3);
+      expect(resp instanceof Set).toBe(true);
+    });
+
+    it('basic login', async () => {
+      mockGetSupportedAuthMethodsV2.mockResolvedValueOnce({
+        supportedAuthMethods: [AuthMethod.BASIC_LOGIN],
+        hasPasswordWithoutPIN: false,
+      });
+      para.setAuth({ email: USER_EMAIL });
+
+      const resp = await para.supportedUserAuthMethods();
+
+      expect(mockGetSupportedAuthMethodsV2).toHaveBeenCalledWith(para.authInfo.auth);
+      expect(resp.size).toBe(1);
+      expect(resp instanceof Set).toBe(true);
+    });
+  });
+
+  describe('supportedAuthMethods', () => {
+    beforeEach(() => {
+      para = new MockPara(Environment.DEV, API_KEY);
+    });
+
+    it('all methods', async () => {
+      para.setAuth({ email: USER_EMAIL });
+
+      const resp = await para.supportedAuthMethods(para.authInfo.auth);
+
+      expect(mockGetSupportedAuthMethods).toHaveBeenCalledWith(para.authInfo.auth);
+      expect(resp.size).toBe(2);
+      expect(resp instanceof Set).toBe(true);
     });
   });
 });

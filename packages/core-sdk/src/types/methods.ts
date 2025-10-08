@@ -46,7 +46,8 @@ export type PortalUrlType =
   | 'oAuthCallback'
   | 'loginOTP'
   | 'telegramLoginVerify'
-  | 'loginFarcaster';
+  | 'loginFarcaster'
+  | 'addNewCredential';
 
 export type PortalUrlOptions = {
   params?: Record<string, string | undefined | null>;
@@ -61,11 +62,14 @@ export type PortalUrlOptions = {
   oAuthMethod?: OAuthUrlParams['method'];
   appScheme?: string;
   encryptionKey?: string;
+  addNewCredentialType?: Omit<TAuthMethod, 'BASIC_LOGIN'>;
+  addNewCredentialPasswordId?: string;
+  addNewCredentialPasskeyId?: string;
 };
 
 export type WithAuthMethod = {
   /**
-   * Which authorization method to use for the URL, either `'passkey'` or `'password'`.
+   * Which authorization method to use for the URL, either `'PASSKEY'`, `'PASSWORD'` or `'PIN'`.
    */
   authMethod?: Uppercase<TAuthMethod>;
 };

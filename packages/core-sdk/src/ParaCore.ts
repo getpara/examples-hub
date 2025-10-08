@@ -755,7 +755,7 @@ export abstract class ParaCore implements CoreInterface {
   abstract isPasskeySupported(): Promise<boolean>;
 
   protected async constructPortalUrl(type: PortalUrlType, opts: PortalUrlOptions = {}) {
-    const [isCreate, isLogin, isOnRamp, isOAuth, isOAuthCallback, isTelegramLogin, isFarcasterLogin] = [
+    const [isCreate, isLogin, isOnRamp, isOAuth, isOAuthCallback, isTelegramLogin, isFarcasterLogin, isAddNewCredential] = [
       ['createAuth', 'createPassword', 'createPIN'].includes(type),
       ['loginAuth', 'loginPassword', 'loginPIN', 'loginOTP'].includes(type),
       type === 'onRamp',
@@ -763,6 +763,7 @@ export abstract class ParaCore implements CoreInterface {
       type === 'oAuthCallback',
       ['telegramLogin', 'telegramLoginVerify'].includes(type),
       type === 'loginFarcaster',
+      type === 'addNewCredential',
     ];
 
     if (isOAuth && !opts.oAuthMethod) {
@@ -846,6 +847,10 @@ export abstract class ParaCore implements CoreInterface {
         path = '/auth/farcaster';
         break;
       }
+      case 'addNewCredential': {
+        path = '/auth/add-new-credential';
+        break;
+      }
       default: {
         throw new Error(`invalid URL type ${type}`);
       }
@@ -885,7 +890,7 @@ export abstract class ParaCore implements CoreInterface {
       portalTextColor: this.portalTextColor,
       portalPrimaryButtonTextColor: this.portalPrimaryButtonTextColor,
       isForNewDevice: opts.isForNewDevice ? opts.isForNewDevice.toString() : undefined,
-      ...(isCreate || isLogin
+      ...(this.authInfo && (isCreate || isLogin || isAddNewCredential || isOAuthCallback)
         ? {
             authInfo: JSON.stringify(this.authInfo),
             ...(isPhone(this.authInfo.auth) ? splitPhoneNumber(this.authInfo.auth.phone) : this.authInfo.auth),
@@ -894,7 +899,7 @@ export abstract class ParaCore implements CoreInterface {
           }
         : {}),
       ...(isOnRamp ? { origin: typeof window !== 'undefined' ? window.location.origin : undefined, email: this.email } : {}),
-      ...(isLogin || isOAuth || isOAuthCallback || isTelegramLogin || isFarcasterLogin
+      ...(isLogin || isOAuth || isOAuthCallback || isTelegramLogin || isFarcasterLogin || isAddNewCredential
         ? {
             sessionId: thisDevice.sessionId,
             encryptionKey: thisDevice.encryptionKey,
@@ -914,6 +919,13 @@ export abstract class ParaCore implements CoreInterface {
         : {}),
       ...(isTelegramLogin ? { isEmbed: 'true' } : {}),
       ...(opts.params || {}),
+      ...(isAddNewCredential
+        ? {
+            ...(opts.addNewCredentialType && { addNewCredentialType: opts.addNewCredentialType.toString() }),
+            addNewCredentialPasskeyId: opts.addNewCredentialPasskeyId,
+            addNewCredentialPasswordId: opts.addNewCredentialPasswordId,
+          }
+        : {}),
     };
 
     const url = constructUrl({ base, path, params });
@@ -2494,6 +2506,7 @@ Need help? Visit: https://docs.getpara.com or contact support
 
   /**
    * Get the auth methods available to an existing user
+   * @deprecated Use supportedUserAuthMethods instead
    */
   protected async supportedAuthMethods(auth: Auth<PrimaryAuthType | 'userId'>): Promise<Set<AuthMethod>> {
     const { supportedAuthMethods } = await this.ctx.client.getSupportedAuthMethods(auth);
@@ -2506,6 +2519,38 @@ Need help? Visit: https://docs.getpara.com or contact support
           break;
         case 'BIOMETRIC':
           authMethods.add(AuthMethod.PASSKEY);
+          break;
+      }
+    }
+    return authMethods;
+  }
+
+  /**
+   * Get the auth methods available to an existing user
+   */
+  protected async supportedUserAuthMethods(): Promise<Set<AuthMethod>> {
+    await this.assertIsAuthSet();
+
+    const { supportedAuthMethods, hasPasswordWithoutPIN } = await this.ctx.client.getSupportedAuthMethodsV2(
+      this.authInfo.auth,
+    );
+
+    const authMethods = new Set<AuthMethod>();
+    for (const type of supportedAuthMethods) {
+      switch (type) {
+        case 'PASSWORD':
+          if (hasPasswordWithoutPIN) {
+            authMethods.add(AuthMethod.PASSWORD);
+          }
+          break;
+        case 'PASSKEY':
+          authMethods.add(AuthMethod.PASSKEY);
+          break;
+        case 'PIN':
+          authMethods.add(AuthMethod.PIN);
+          break;
+        case 'BASIC_LOGIN':
+          authMethods.add(AuthMethod.BASIC_LOGIN);
           break;
       }
     }
@@ -2724,6 +2769,7 @@ Need help? Visit: https://docs.getpara.com or contact support
     accountLinkInProgress,
     sessionLookupId,
     encryptionKey,
+    portalCallbackParams,
   }: CoreMethodParams<'getOAuthUrl'> & {
     accountLinkInProgress?: AccountLinkInProgress;
   }): CoreMethodResponse<'getOAuthUrl'> {
@@ -2759,6 +2805,8 @@ Need help? Visit: https://docs.getpara.com or contact support
               sessionId: sessionLookupId,
               encryptionKey,
             },
+            // Add custom params if from portal
+            ...(this.isPortal() && { params: portalCallbackParams }),
           })),
       },
     });
@@ -4130,53 +4178,96 @@ Need help? Visit: https://docs.getpara.com or contact support
   }
 
   protected async getNewCredentialAndUrl({
-    authMethod = 'PASSKEY',
+    authMethod: optsAuthMethod,
     isForNewDevice = false,
     portalTheme,
     shorten = false,
   }: NewCredentialUrlParams = {}): Promise<{ credentialId: string; url?: string }> {
+    const userAuthMethods = await this.supportedUserAuthMethods();
+    const isEnclaveUser = userAuthMethods.has(AuthMethod.BASIC_LOGIN);
+
+    if (isEnclaveUser) {
+      isForNewDevice = true;
+    }
+
+    // Defaulting to PASSKEY & PASSWORD for current enclave users to generate a public key for both methods so the user can have to option of choosing which type to create
+    // Defaulting to PASSKEY for non-enclave users`
+    const authMethods = optsAuthMethod ? [optsAuthMethod] : isForNewDevice ? ['PASSKEY', 'PIN', 'PASSWORD'] : ['PASSKEY'];
+
     this.assertIsAuthSet();
 
-    let credentialId: string, urlType: Extract<PortalUrlType, 'createAuth' | 'createPassword' | 'createPIN'>;
-    switch (authMethod) {
-      case 'PASSKEY':
+    const canAddPasswordOrPIN = !userAuthMethods.has(AuthMethod.PASSWORD) && !userAuthMethods.has(AuthMethod.PIN);
+
+    let passkeyId: string | undefined,
+      passwordId: string | undefined,
+      urlType: Extract<PortalUrlType, 'createAuth' | 'createPassword' | 'createPIN'>;
+
+    if (authMethods.includes('PASSKEY') && (await this.isPasskeySupported())) {
+      ({
+        data: { id: passkeyId },
+      } = await this.ctx.client.addSessionPublicKey(this.userId, {
+        status: AuthMethodStatus.PENDING,
+        type: PublicKeyType.WEB,
+      }));
+      urlType = 'createAuth';
+    }
+
+    if (authMethods.includes('PASSWORD')) {
+      if (!canAddPasswordOrPIN) {
+        if (optsAuthMethod === 'PASSWORD') throw new Error('A user cannot have more than one password or PIN.');
+      } else {
         ({
-          data: { id: credentialId },
-        } = await this.ctx.client.addSessionPublicKey(this.userId, {
-          status: AuthMethodStatus.PENDING,
-          type: PublicKeyType.WEB,
-        }));
-        urlType = 'createAuth';
-        break;
-      case 'PASSWORD':
-        ({
-          data: { id: credentialId },
+          data: { id: passwordId },
         } = await this.ctx.client.addSessionPasswordPublicKey(this.userId, {
           status: AuthMethodStatus.PENDING,
         }));
         urlType = 'createPassword';
-        break;
-      case 'PIN':
+      }
+    }
+
+    if (authMethods.includes('PIN')) {
+      if (!canAddPasswordOrPIN) {
+        if (optsAuthMethod === 'PIN') throw new Error('A user cannot have more than one password or PIN.');
+      } else {
         ({
-          data: { id: credentialId },
+          data: { id: passwordId },
         } = await this.ctx.client.addSessionPasswordPublicKey(this.userId, {
           status: AuthMethodStatus.PENDING,
         }));
         urlType = 'createPIN';
-        break;
+      }
     }
 
-    const url =
-      this.isNativePasskey && urlType === 'createAuth'
-        ? undefined
-        : await this.constructPortalUrl(urlType, {
-            isForNewDevice,
-            pathId: credentialId,
-            portalTheme,
-            shorten,
-          });
+    const credentialId = passkeyId ?? passwordId;
+
+    if (this.isNativePasskey && authMethods.includes('PASSKEY')) {
+      return { credentialId };
+    }
+
+    const { sessionId } = await this.touchSession();
+
+    const url = await this.constructPortalUrl(isForNewDevice ? 'addNewCredential' : urlType, {
+      isForNewDevice,
+      pathId: credentialId,
+      portalTheme,
+      shorten,
+      sessionId: isForNewDevice ? sessionId : undefined,
+      addNewCredentialType: optsAuthMethod,
+      addNewCredentialPasskeyId: passkeyId,
+      addNewCredentialPasswordId: passwordId,
+    });
 
     return { credentialId, ...(url ? { url } : {}) };
+  }
+
+  async addCredential({ authMethod }: Pick<NewCredentialUrlParams, 'authMethod'>) {
+    if (authMethod === 'PASSKEY' && !(await this.isPasskeySupported())) {
+      throw new Error('Passkeys are not supported.');
+    }
+
+    const { url } = await this.getNewCredentialAndUrl({ isForNewDevice: true, authMethod });
+
+    return url;
   }
 
   /**

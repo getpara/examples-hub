@@ -1,4 +1,5 @@
-import ParaWeb, { PrimaryAuthInfo } from '@getpara/web-sdk';
+import { ParaInternal } from '@getpara/react-common';
+import ParaWeb, { AuthMethod, PrimaryAuthInfo } from '@getpara/web-sdk';
 
 type AccountValue = PrimaryAuthInfo & {
   email?: string;
@@ -8,6 +9,7 @@ type AccountValue = PrimaryAuthInfo & {
   externalWalletAddress?: string;
   wallets: (typeof ParaWeb.prototype)['availableWallets'];
   userId?: string;
+  authMethods?: Set<AuthMethod>;
 };
 
 export type Account =
@@ -28,7 +30,10 @@ export type Account =
       isGuestMode: false;
     } & AccountValue);
 
-export const getEmbeddedAccount = (para: ParaWeb | undefined, isFullyLoggedIn: boolean | undefined): Account => {
+export const getEmbeddedAccount = async (
+  para: ParaWeb | undefined,
+  isFullyLoggedIn: boolean | undefined,
+): Promise<Account> => {
   switch (true) {
     case !para:
     case !para?.isReady:
@@ -52,6 +57,14 @@ export const getEmbeddedAccount = (para: ParaWeb | undefined, isFullyLoggedIn: b
 
   const authInfo = para.authInfo;
 
+  let authMethods: Set<AuthMethod>;
+  try {
+    authMethods = await (para as ParaInternal).supportedUserAuthMethods();
+  } catch (error) {
+    console.error('Error getting supported auth methods:', error);
+    authMethods = new Set<AuthMethod>();
+  }
+
   const value: Account = {
     auth: authInfo?.auth,
     authType: authInfo?.authType,
@@ -60,6 +73,7 @@ export const getEmbeddedAccount = (para: ParaWeb | undefined, isFullyLoggedIn: b
     wallets: para.availableWallets,
     isConnected: true,
     isGuestMode: false,
+    authMethods: authMethods,
   } as Account;
 
   if (authInfo) {

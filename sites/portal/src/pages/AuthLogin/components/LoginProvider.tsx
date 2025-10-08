@@ -2,7 +2,7 @@ import { PropsWithChildren, createContext, useCallback, useContext, useEffect, u
 import * as utils from '../../../utils/authLogin';
 import { AuthLoginParams } from '../../../utils/authLogin';
 import { usePara } from '../../../components/ParaContext';
-import { CoreAuthInfo, entityToWallet, isWalletSupported, WalletEntity, TWalletType, ShareData } from '@getpara/core-sdk';
+import { CoreAuthInfo, entityToWallet, isWalletSupported, WalletEntity, TWalletType } from '@getpara/core-sdk';
 import { formatISO } from 'date-fns';
 import { useCloseWindow } from '../../../hooks/useCloseWindow';
 import {
@@ -33,8 +33,16 @@ type Login = {
     authUpdateKeyShares: (_?: LoginRes) => Promise<void>;
     fetchWallets: () => Promise<Wallets>;
     finishLogin: (_?: boolean) => Promise<void>;
-    authUpdateEnclaveKeyShares: (_?: ShareData[]) => Promise<void>;
+    authUpdateEnclaveKeyShares: () => Promise<void>;
     checkIsEnclaveUser: () => Promise<boolean>;
+    addAllEnclaveSharesForNewCredential: (sessionLookupId: string) => Promise<void>;
+    addAllSharesForNewCredential: ({
+      loginRes,
+      sessionLookupId,
+    }: {
+      loginRes?: LoginRes;
+      sessionLookupId: string;
+    }) => Promise<void>;
   };
   authInfo?: AuthInfo | undefined;
   params: AuthLoginParams;
@@ -54,6 +62,8 @@ export const LoginContext = createContext<Login>({
     finishLogin: NOOP,
     authUpdateEnclaveKeyShares: NOOP,
     checkIsEnclaveUser: NOOP,
+    addAllEnclaveSharesForNewCredential: NOOP,
+    addAllSharesForNewCredential: NOOP,
   },
   params: {} as unknown as utils.AuthLoginParams,
 });
@@ -197,6 +207,46 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
     });
   }, [para, params]);
 
+  const addAllSharesForNewCredential = useCallback(
+    async ({ loginRes: loginResParam, sessionLookupId }: { loginRes?: LoginRes; sessionLookupId: string }) => {
+      const _loginRes = loginResParam ?? loginRes;
+
+      if (!_loginRes) {
+        return;
+      }
+
+      const { userId, userHandle, signature, passwordId } = _loginRes;
+
+      await utils.authUpdateAllKeyShares({
+        para,
+        userId,
+        biometricData: {
+          signatureId: signature?.id,
+          passwordId,
+          userHandle,
+        },
+        sessionLookupId,
+      });
+    },
+    [para, params, loginRes],
+  );
+
+  const addAllEnclaveSharesForNewCredential = useCallback(
+    async (sessionLookupId: string) => {
+      const shares = await para.ctx.enclaveClient.retrieveSharesWithRetry([{ userId: para.userId }]);
+
+      await utils.authUpdateAllKeyShares({
+        para,
+        userId: para.userId,
+        enclaveData: {
+          shares,
+        },
+        sessionLookupId,
+      });
+    },
+    [para, params],
+  );
+
   const finishLogin = useCallback(
     async (shouldClose = false) => {
       const isEnclaveUser = await checkIsEnclaveUser();
@@ -256,6 +306,8 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
           finishLogin,
           authUpdateEnclaveKeyShares,
           checkIsEnclaveUser,
+          addAllEnclaveSharesForNewCredential,
+          addAllSharesForNewCredential,
         },
         authInfo,
         params,

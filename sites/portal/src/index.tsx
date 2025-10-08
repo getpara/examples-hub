@@ -10,6 +10,7 @@ import { AuthLoginStep, ENV } from './constants';
 import { AuthMethod } from '@getpara/web-sdk';
 import { lazy } from 'react';
 import './clients/sentry';
+import { CheckAuth } from './components/CheckAuth';
 
 defineCustomElements();
 
@@ -34,6 +35,9 @@ const TelegramLogin = lazy(() =>
 );
 const OAuthLogin = lazy(() => import('./pages/OAuth/OAuthLogin').then(module => ({ default: module.OAuthLogin })));
 const ShortUrl = lazy(() => import('./pages/ShortUrl/ShortUrl'));
+const AddCredential = lazy(() =>
+  import('./pages/AddCredential/AddCredential').then(module => ({ default: module.AddCredential })),
+);
 
 export const App = () => {
   const [searchParams] = useSearchParams();
@@ -67,6 +71,14 @@ export const App = () => {
           <Route element={<AuthLogin step={AuthLoginStep.TELEGRAM} />} path="telegram/verify" />
           <Route element={<AuthLogin step={AuthLoginStep.FARCASTER} />} path="farcaster" />
           <Route element={<AuthLogin step={AuthLoginStep.OTP} />} path="otp" />
+          <Route
+            element={
+              <CheckAuth type="ADD_CREDENTIAL">
+                <AddCredential />
+              </CheckAuth>
+            }
+            path="add-new-credential"
+          />
           <Route element={<AuthLogin step={AuthLoginStep.OAUTH_CALLBACK} />} path=":method/callback" />
           <Route element={<OAuthLogin />} path=":method" />
         </Route>

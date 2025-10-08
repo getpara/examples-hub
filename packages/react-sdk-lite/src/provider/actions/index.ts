@@ -30,6 +30,7 @@ export const getWalletBalance = generateCoreAction('getWalletBalance');
 export const issueJwt = generateCoreAction('issueJwt');
 export const getLinkedAccounts = generateCoreAction('getLinkedAccounts');
 export const accountLinkInProgress = generateCoreAction('accountLinkInProgress');
+export const addCredential = generateCoreAction('addCredential');
 
 export const linkAccount = generateInternalAction('linkAccount');
 export const unlinkAccount = generateInternalAction('unlinkAccount');

@@ -164,8 +164,8 @@ export const useAccount = ({ cosmos }: UseAccountParameters = {}): UseAccountRet
       cosmosQueryKeys,
       solanaQueryKeys,
     ],
-    queryFn: () => {
-      const paraAccount = getEmbeddedAccount(client, isFullyLoggedIn);
+    queryFn: async () => {
+      const paraAccount = await getEmbeddedAccount(client, isFullyLoggedIn);
 
       let connectionType: ConnectionType = 'none';
 

@@ -1,26 +1,31 @@
-import Para, {
+import {
+  decryptWithPrivateKey,
   encryptPrivateKeyWithPassword,
+  encryptWithDerivedPublicKey,
   getAsymmetricKeyPair,
   getPublicKeyHex,
   getSHA256HashHex,
   hashPasswordWithSalt,
 } from '@getpara/web-sdk';
-import { AuthMethodStatus } from '@getpara/user-management-client';
+import { AuthMethodStatus, EncryptorType, KeyShareType } from '@getpara/user-management-client';
+import { ParaPortal } from '../classes/ParaPortal';
 
 export async function passwordCreation(
-  para: Para,
+  para: ParaPortal,
   {
     userId,
     partnerId,
     password,
     passwordId,
     isPIN,
+    isForNewDevice,
   }: {
     partnerId: string;
     userId: string;
     password: string;
     passwordId: string;
     isPIN?: boolean;
+    isForNewDevice?: boolean;
   },
 ): Promise<void> {
   const keyPair = await getAsymmetricKeyPair(para.ctx);
@@ -38,4 +43,32 @@ export async function passwordCreation(
     encryptionKeyHash: encryptionKeyHash,
     isPIN,
   });
+
+  // this means we are adding additional passwords to an existing account and need to encrypt
+  // shares with new password
+  // since we are redirecting to auth creation route from auth login route, the session initially
+  // setup should still be available here
+  if (isForNewDevice) {
+    const temporaryShares = (await para.getTransmissionKeyShares({ isForNewDevice: true })).data.temporaryShares;
+    const passwordEncryptedKeyshares = temporaryShares.map(share => {
+      const decryptedShare = decryptWithPrivateKey(
+        para.loginEncryptionKeyPair.privateKey,
+        share.encryptedShare,
+        share.encryptedKey,
+      );
+      const { encryptedMessageHex, encryptedKeyHex } = encryptWithDerivedPublicKey(publicKeyHex, decryptedShare);
+
+      return {
+        walletId: share.walletId,
+        encryptedShare: encryptedMessageHex,
+        encryptedKey: encryptedKeyHex,
+        type: KeyShareType.USER,
+        encryptor: EncryptorType.PASSWORD,
+        partnerId: share.partnerId,
+        passwordId,
+      };
+    });
+
+    await para.ctx.client.uploadUserKeyShares(userId, passwordEncryptedKeyshares);
+  }
 }
