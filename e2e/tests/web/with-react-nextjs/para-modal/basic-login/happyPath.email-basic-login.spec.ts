@@ -1,0 +1,133 @@
+import { test, expect } from "@playwright/test";
+
+import { ParaModalExamplePage } from "../../../../../pages/paraModalExample";
+import * as webauthn from "../../../../../helpers/webAuthn";
+import { logger } from "../../../../../helpers/logger";
+
+test.describe("Para Modal - Email + Passkey Authentication", () => {
+  let originalEnv: Record<string, string | undefined>;
+
+  test.beforeEach(() => {
+    // Store original env
+    originalEnv = { ...process.env };
+
+    // Override env vars for this test
+    process.env.VITE_PARA_API_KEY =
+      originalEnv.PARA_ENVIRONMENT === "SANDBOX"
+        ? process.env.PARA_API_KEY_BASIC_LOGIN_SANDBOX
+        : process.env.PARA_API_KEY_BASIC_LOGIN_BETA;
+  });
+
+  test.afterEach(() => {
+    // Restore original env
+    Object.keys(process.env).forEach((key) => {
+      if (originalEnv[key] !== undefined) {
+        process.env[key] = originalEnv[key];
+      } else {
+        delete process.env[key];
+      }
+    });
+  });
+
+  test("happy path - create and login with email and basic login", async ({
+    browser,
+  }) => {
+    // ===== PHASE 1: User Creation with Fresh Context =====
+    const createContext = await browser.newContext({
+      permissions: ["clipboard-write", "clipboard-read"],
+      storageState: { cookies: [], origins: [] },
+      locale: "en-US",
+      timezoneId: "America/New_York",
+      httpCredentials: undefined,
+      extraHTTPHeaders: {},
+    });
+    const createPage = await createContext.newPage();
+    await webauthn.setIsUserVerifyingPlatformAuthenticatorAvailable(createPage);
+    const createParaModalPage = new ParaModalExamplePage(createPage);
+    await createParaModalPage.visit();
+
+    const { emailOrPhone, credential, clipboardText } =
+      await createParaModalPage.createUser({
+        context: createContext,
+        isRecoverySecretEnabled: true,
+        usePhoneNumber: false, // Use email
+        isBasicLogin: true,
+        // No password parameter = passkey authentication
+      });
+
+    // Verify wallet is connected by checking for the address display (with extended timeout)
+    await expect(
+      createParaModalPage.page.getByTestId("account-address-display")
+    ).toBeVisible({ timeout: 15000 });
+    expect(clipboardText).toHaveLength(0);
+
+    expect(credential).toBeUndefined();
+
+    // Get the connected wallet address (displayed in truncated format)
+    const addressElement = await createParaModalPage.page.getByTestId(
+      "account-address-display"
+    );
+    const createAddressText = await addressElement.textContent();
+
+    // Test message signing in creation context
+    logger.logStep("Testing message signing...");
+    const testMessage = "Hello Para E2E Test with Email + Passkey!";
+    const signature = await createParaModalPage.signMessage(testMessage);
+    expect(signature).toBeTruthy();
+    expect(signature.length).toBeGreaterThan(0);
+    expect(signature).toMatch(/^[a-fA-F0-9]+$/);
+
+    // Logout in creation context
+    await createParaModalPage.logout();
+
+    // Close the creation context completely
+    logger.logStep("Closing creation context and clearing all state...");
+    await createContext.close();
+
+    // Add a pause between user creation and login to ensure complete state cleanup
+    logger.logWait(
+      "Waiting 3 seconds between user creation and login phases..."
+    );
+    await new Promise((resolve) => setTimeout(resolve, 3000));
+
+    // ===== PHASE 2: Login with Completely Fresh Context =====
+    logger.logStep("Creating fresh context for login test...");
+    const loginContext = await browser.newContext({
+      permissions: ["clipboard-write", "clipboard-read"],
+      storageState: { cookies: [], origins: [] },
+      locale: "en-US",
+      timezoneId: "America/New_York",
+      httpCredentials: undefined,
+      extraHTTPHeaders: {},
+    });
+    const loginPage = await loginContext.newPage();
+    await webauthn.setIsUserVerifyingPlatformAuthenticatorAvailable(loginPage);
+    const loginParaModalPage = new ParaModalExamplePage(loginPage);
+    await loginParaModalPage.visit();
+
+    // Test login with the same user credentials in fresh context
+    logger.logStep("Testing login with existing account in fresh context...");
+    await loginParaModalPage.login({
+      context: loginContext,
+      credential,
+      emailOrPhone,
+      isBasicLogin: true,
+      // No password = passkey login
+    });
+
+    // Verify same address after login in fresh context (with extended timeout)
+    await expect(
+      loginParaModalPage.page.getByTestId("account-address-display")
+    ).toBeVisible({ timeout: 15000 });
+    const loginAddressElement = await loginParaModalPage.page.getByTestId(
+      "account-address-display"
+    );
+    const loginAddressText = await loginAddressElement.textContent();
+    expect(loginAddressText).toBe(createAddressText);
+
+    logger.logStep("React Vite E2E test completed successfully", true);
+
+    // Cleanup: ensure login context is properly closed
+    await loginContext.close();
+  });
+});

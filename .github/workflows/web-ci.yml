@@ -111,13 +111,19 @@ jobs:
     env:
       # Base environment variables
       PARA_API_KEY_BETA: ${{ secrets.PARA_API_KEY_BETA }}
+      PARA_API_KEY_BASIC_LOGIN_BETA: ${{ secrets.PARA_API_KEY_BASIC_LOGIN_BETA }}
+      PARA_API_KEY_PIN_BETA: ${{ secrets.PARA_API_KEY_PIN_BETA }}
       PARA_API_KEY_SANDBOX: ${{ secrets.PARA_API_KEY_SANDBOX }}
       PARA_ENVIRONMENT: ${{ secrets.PARA_ENVIRONMENT }}
       # Vite-specific environment variables
       VITE_PARA_API_KEY: ${{ secrets.VITE_PARA_API_KEY }}
+      VITE_PARA_API_KEY_BASIC_LOGIN: ${{ secrets.VITE_PARA_API_KEY_BASIC_LOGIN }}
+      VITE_PARA_API_KEY_PIN: ${{ secrets.VITE_PARA_API_KEY_PIN }}
       VITE_PARA_ENVIRONMENT: ${{ secrets.VITE_PARA_ENVIRONMENT }}
       # Next.js-specific environment variables
       NEXT_PUBLIC_PARA_API_KEY: ${{ secrets.NEXT_PUBLIC_PARA_API_KEY }}
+      NEXT_PUBLIC_PARA_API_KEY_BASIC_LOGIN: ${{ secrets.NEXT_PUBLIC_PARA_API_KEY_BASIC_LOGIN }}
+      NEXT_PUBLIC_PARA_API_KEY_PIN: ${{ secrets.NEXT_PUBLIC_PARA_API_KEY_PIN }}
       NEXT_PUBLIC_PARA_ENVIRONMENT: ${{ secrets.NEXT_PUBLIC_PARA_ENVIRONMENT }}
       # WalletConnect project IDs (if needed)
       VITE_WALLET_CONNECT_PROJECT_ID: ${{ secrets.VITE_WALLET_CONNECT_PROJECT_ID }}
