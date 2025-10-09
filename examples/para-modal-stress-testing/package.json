@@ -1,0 +1,53 @@
+{
+  "name": "para-modal-stress-test",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "NEXT_PUBLIC_PARA_API_KEY=beta_c61c45aec46dee3fe50d98125e9560cc next build",
+    "dev": "next dev -p ${PORT:-3003}",
+    "lint": "eslint .",
+    "start": "next start -p ${PORT:-3003}",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@cosmjs/cosmwasm-stargate": "^0.31.3",
+    "@cosmjs/launchpad": "^0.27.1",
+    "@cosmjs/proto-signing": "^0.31.3",
+    "@cosmjs/stargate": "^0.31.3",
+    "@cosmjs/tendermint-rpc": "^0.31.3",
+    "@getpara/graz": "2.0.0-alpha.19",
+    "@getpara/cosmos-wallet-connectors": "2.0.0-alpha.63",
+    "@getpara/evm-wallet-connectors": "2.0.0-alpha.63",
+    "@getpara/react-components": "2.0.0-alpha.63",
+    "@getpara/react-sdk": "2.0.0-alpha.63",
+    "@getpara/solana-wallet-connectors": "2.0.0-alpha.63",
+    "@leapwallet/cosmos-social-login-capsule-provider": "^0.0.44",
+    "@solana-mobile/wallet-adapter-mobile": "^2.2.0",
+    "@solana/kit": "2.3.0",
+    "@solana/wallet-adapter-base": "^0.9.27",
+    "@solana/wallet-adapter-react": "^0.15.39",
+    "@solana/wallet-adapter-walletconnect": "^0.1.21",
+    "@solana/web3.js": "^1.98.0",
+    "@noble/curves": "1.5.0",
+    "@tanstack/react-query": "^5.74.0",
+    "next": "15.1.5",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "viem": "^2.24.2",
+    "wagmi": "^2.14.16"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.29.0",
+    "@tailwindcss/postcss": "^4.1.10",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9.29.0",
+    "pino-pretty": "13.0.0",
+    "postcss": "^8",
+    "tailwindcss": "^4.1.10",
+    "typescript": "^5",
+    "typescript-eslint": "^8.22.0"
+  }
+}

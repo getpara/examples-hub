@@ -1,0 +1,109 @@
+name: Para Modal Stress Test
+
+on:
+  schedule:
+    - cron: '0 2 * * *'  # Run nightly at 2 AM UTC
+  pull_request:
+    branches:
+      - 2.0.0-alpha
+  workflow_dispatch:
+    inputs:
+      iterations:
+        description: 'Number of iterations'
+        default: '50'
+      network_profile:
+        description: 'Network profile'
+        default: 'slow-3g'
+        type: choice
+        options:
+          - none
+          - slow-3g
+          - fast-3g
+          - slow-4g
+          - cable
+      suite:
+        description: 'Test suite'
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - email-passkey
+          - email-password
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_OPTIONS: '--max_old_space_size=14336'
+  AWS_REGION: us-east-1
+
+jobs:
+  stress-test:
+    runs-on: FourCoreRunner
+    timeout-minutes: 360
+    if: github.head_ref == 'simplify-race-condition-testing' || github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
+    permissions:
+      id-token: write
+      contents: read
+      actions: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.17.0'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Build packages
+        run: yarn build
+        env:
+          NX_REJECT_UNKNOWN_LOCAL_CACHE: 0
+
+      - name: Install Playwright browsers
+        run: npx playwright install chromium --with-deps
+
+      - name: Run stress test
+        env:
+          CI: 'true'
+          STRESS_TEST_ITERATIONS: ${{ inputs.iterations || '50' }}
+          STRESS_TEST_NETWORK: ${{ inputs.network_profile || 'slow-3g' }}
+          STRESS_TEST_SUITE: ${{ inputs.suite || 'all' }}
+          STRESS_TEST_PORT: '3003'
+          HEADLESS: 'true'
+        run: yarn e2e:para-modal:stress
+
+      - name: Verify report generation
+        if: always()
+        run: |
+          echo "📊 Checking generated HTML report..."
+          ls -lh playwright-report/ || echo "⚠️  No playwright-report directory"
+
+      - name: Configure AWS credentials
+        if: always()
+        uses: aws-actions/configure-aws-credentials@67fbcbb121271f7775d2e7715933280b06314838
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/github-actions-role
+          role-session-name: github-upload-stress-test-artifacts
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Upload HTML report to S3
+        if: always()
+        env:
+          BUCKET_NAME: capsule-sandbox-artifacts-site
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          if [ -d "playwright-report" ]; then
+            aws s3 sync playwright-report "s3://${BUCKET_NAME}/stress-test-runs/${RUN_ID}"
+            echo "✅ Uploaded HTML report to S3"
+          else
+            echo "❌ No playwright-report directory to upload"
+            exit 1
+          fi
+
+      - name: Report URL
+        if: always()
+        run: echo "📊 View stress test report at https://artifacts.sandbox.usecapsule.com/stress-test-runs/${{ github.run_id }}/index.html"

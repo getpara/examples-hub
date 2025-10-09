@@ -32,6 +32,10 @@ coverage/
 
 playwright-report
 test-results
+blob-report
 .DS_Store
 sites/bridge-v2/.claude/settings.local.json
 .bundle-size-temp
+
+
+stress-results/
