@@ -19,7 +19,7 @@
     "@getpara/cosmos-wallet-connectors": "2.0.0-alpha.61",
     "@getpara/evm-wallet-connectors": "2.0.0-alpha.61",
     "@getpara/graz": "2.0.0-alpha.18",
-    "@getpara/react-sdk": "2.0.0-alpha.63",
+    "@getpara/react-sdk": "2.0.0-alpha.61",
     "@getpara/server-sdk": "2.0.0-alpha.61",
     "@getpara/solana-wallet-connectors": "2.0.0-alpha.61",
     "@hookform/resolvers": "3.9.1",
