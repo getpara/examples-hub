@@ -1,10 +1,9 @@
-import { PropsWithChildren, createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { PropsWithChildren, createContext, useCallback, useContext, useEffect, useState, useMemo } from 'react';
 import * as utils from '../../../utils/authLogin';
-import { AuthLoginParams } from '../../../utils/authLogin';
+import { AuthLoginParams, GroupedWallets, LoginRes } from '../../../types';
 import { usePara } from '../../../components/ParaContext';
-import { CoreAuthInfo, entityToWallet, isWalletSupported, WalletEntity, TWalletType } from '@getpara/core-sdk';
+import { CoreAuthInfo, entityToWallet, isWalletSupported, WalletEntity } from '@getpara/core-sdk';
 import { formatISO } from 'date-fns';
-import { useCloseWindow } from '../../../hooks/useCloseWindow';
 import {
   AuthExtras,
   AuthInfo,
@@ -12,16 +11,13 @@ import {
   AuthParams,
   BiometricLocationHint,
   extractAuthInfo,
+  TAuthMethod,
 } from '@getpara/user-management-client';
 import { useExtractedParams } from '../../../hooks/useExtractedParams';
 
 const NOOP = () => {
   throw new Error();
 };
-
-export type Wallets = Partial<Record<TWalletType, WalletEntity[]>>;
-
-export type LoginRes = Awaited<ReturnType<typeof utils.authLogin>>;
 
 type Login = {
   fns: {
@@ -31,8 +27,7 @@ type Login = {
       isPIN?: boolean,
     ) => Promise<Awaited<ReturnType<typeof utils.authLoginWithPassword>>>;
     authUpdateKeyShares: (_?: LoginRes) => Promise<void>;
-    fetchWallets: () => Promise<Wallets>;
-    finishLogin: (_?: boolean) => Promise<void>;
+    fetchWallets: () => Promise<GroupedWallets>;
     authUpdateEnclaveKeyShares: () => Promise<void>;
     checkIsEnclaveUser: () => Promise<boolean>;
     addAllEnclaveSharesForNewCredential: (sessionLookupId: string) => Promise<void>;
@@ -46,9 +41,12 @@ type Login = {
   };
   authInfo?: AuthInfo | undefined;
   params: AuthLoginParams;
-  wallets?: Wallets;
+  authMethod?: TAuthMethod;
+  isSwitchingWallets?: boolean;
+  wallets?: GroupedWallets;
   biometricLocationHints?: BiometricLocationHint[];
   sessionOrigin?: string;
+  loginRes?: LoginRes;
 };
 
 export const NO_DATE = formatISO(new Date(-8640000000000000));
@@ -59,18 +57,23 @@ export const LoginContext = createContext<Login>({
     authLoginWithPassword: NOOP,
     authUpdateKeyShares: NOOP,
     fetchWallets: NOOP,
-    finishLogin: NOOP,
     authUpdateEnclaveKeyShares: NOOP,
     checkIsEnclaveUser: NOOP,
     addAllEnclaveSharesForNewCredential: NOOP,
     addAllSharesForNewCredential: NOOP,
   },
-  params: {} as unknown as utils.AuthLoginParams,
+  params: {} as unknown as AuthLoginParams,
 });
 
-export const LoginProvider = ({ children }: PropsWithChildren) => {
+export const LoginProvider = ({
+  children,
+  authMethod: propsAuthMethod,
+  isSwitchingWallets,
+}: PropsWithChildren & {
+  authMethod?: TAuthMethod;
+  isSwitchingWallets?: boolean;
+}) => {
   const para = usePara();
-  const closeWindow = useCloseWindow();
 
   const params = useExtractedParams<AuthLoginParams & AuthParams & AuthExtras>();
   const authInfo: CoreAuthInfo = params.authInfo ?? {
@@ -79,8 +82,16 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
     displayName: params.displayName,
   };
 
+  const authMethod = useMemo(() => {
+    if (propsAuthMethod) {
+      return propsAuthMethod;
+    }
+
+    return params.authMethod ?? 'BASIC_LOGIN';
+  }, [propsAuthMethod, params.authMethod]);
+
   const [loginRes, setLoginRes] = useState<Awaited<ReturnType<typeof utils.authLogin>> | undefined>();
-  const [wallets, setWallets] = useState<Wallets>();
+  const [wallets, setWallets] = useState<GroupedWallets>();
   const [biometricLocationHints, setBiometricLocationHints] = useState<BiometricLocationHint[]>([]);
   const [sessionOrigin, setSessionOrigin] = useState<string>();
 
@@ -117,7 +128,7 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
     [para, authInfo, params],
   );
 
-  const fetchWallets = useCallback(async (): Promise<Wallets> => {
+  const fetchWallets = useCallback(async (): Promise<GroupedWallets> => {
     await para.touchSession();
     const _wallets = (await para.fetchWallets()).filter(({ pregenIdentifier }) => !pregenIdentifier);
 
@@ -247,19 +258,6 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
     [para, params],
   );
 
-  const finishLogin = useCallback(
-    async (shouldClose = false) => {
-      const isEnclaveUser = await checkIsEnclaveUser();
-
-      await (isEnclaveUser ? authUpdateEnclaveKeyShares() : authUpdateKeyShares());
-
-      if (shouldClose) {
-        closeWindow(true);
-      }
-    },
-    [closeWindow, authUpdateKeyShares, params.sessionId],
-  );
-
   useEffect(() => {
     const loadSessionOrigin = async () => {
       if (params.sessionId) {
@@ -273,14 +271,16 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
 
   useEffect(() => {
     async function setUserDetails() {
-      await para.setAuth(authInfo.auth, {
-        extras: {
-          displayName: authInfo.displayName ?? params.displayName,
-          pfpUrl: authInfo.pfpUrl ?? params.pfpUrl,
-          externalWallet: authInfo.externalWallet ?? params.externalWallet,
-        },
-        userId: params.userId,
-      });
+      if (authInfo.auth) {
+        await para.setAuth(authInfo.auth, {
+          extras: {
+            displayName: authInfo.displayName ?? params.displayName,
+            pfpUrl: authInfo.pfpUrl ?? params.pfpUrl,
+            externalWallet: authInfo.externalWallet ?? params.externalWallet,
+          },
+          userId: params.userId,
+        });
+      }
 
       if (params.pregenIds) {
         para.pregenIds = params.pregenIds;
@@ -303,7 +303,6 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
           authLoginWithPassword,
           authUpdateKeyShares,
           fetchWallets,
-          finishLogin,
           authUpdateEnclaveKeyShares,
           checkIsEnclaveUser,
           addAllEnclaveSharesForNewCredential,
@@ -311,9 +310,12 @@ export const LoginProvider = ({ children }: PropsWithChildren) => {
         },
         authInfo,
         params,
+        authMethod,
+        isSwitchingWallets,
         wallets,
         biometricLocationHints,
         sessionOrigin,
+        loginRes,
       }}
     >
       {children}

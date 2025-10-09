@@ -13,15 +13,12 @@ import { CpslSpinner } from '@getpara/react-components';
 import styled from 'styled-components';
 import { OfframpDepositRequest } from '@getpara/web-sdk';
 import { useExtractedParams } from '../../hooks/useExtractedParams';
-import { PortalEmitter } from '../../classes/index.js';
+import { usePortalEmitter } from '../../components/ParaContext.js';
 
 export function OnRampTransactionV2() {
-  const { origin, email } = useExtractedParams<{ origin: string; email: string }>();
+  const { email } = useExtractedParams<{ origin: string; email: string }>();
   const { isDark } = useModalOutletContext();
-
-  const portalEmitter = useMemo(() => {
-    return origin ? new PortalEmitter(origin) : null;
-  }, [origin]);
+  const portalEmitter = usePortalEmitter();
 
   const { toggleBranding } = useModalOutletContext();
   toggleBranding(true);

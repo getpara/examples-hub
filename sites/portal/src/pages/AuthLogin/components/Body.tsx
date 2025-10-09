@@ -33,6 +33,7 @@ interface BodyProps {
   isAddingDevice: boolean;
   isEmbedded?: boolean;
   postLogin: () => Promise<void>;
+  isSwitchingWallets?: boolean;
 }
 
 export const Body = ({
@@ -49,6 +50,7 @@ export const Body = ({
   isAddingDevice,
   isEmbedded,
   postLogin,
+  isSwitchingWallets = false,
 }: BodyProps) => {
   const { partner } = useModalOutletContext();
 
@@ -71,7 +73,13 @@ export const Body = ({
         return <ManualLoginStep onLoginClick={onLoginClick} />;
       }
       case AuthLoginStep.WAITING: {
-        return <ModalLoading heading={isAddingDevice ? 'Creating Passkey...' : 'Waiting for Passkey...'} />;
+        return (
+          <ModalLoading
+            heading={
+              isSwitchingWallets ? 'Please Wait...' : isAddingDevice ? 'Creating Passkey...' : 'Waiting for Passkey...'
+            }
+          />
+        );
       }
       case AuthLoginStep.ENTER_PASSWORD: {
         return (

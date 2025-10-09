@@ -11,9 +11,9 @@ export class PortalEmitter {
   private counterpart: Window;
   private origin: string;
 
-  constructor(origin: string) {
+  constructor(origin?: string) {
     this.counterpart = window.opener || window.parent;
-    this.origin = origin;
+    this.origin = origin ?? '*';
   }
 
   protected sendMessage<T extends PortalMessageType>(
@@ -22,6 +22,7 @@ export class PortalEmitter {
     return new Promise((resolve, reject) => {
       const messageChannel = new MessageChannel();
       const messageId = uuid();
+
       // Listen for the response on port1 of the MessageChannel
       messageChannel.port1.onmessage = (event: MessageEvent<PortalResponse>) => {
         if (event.data.id === messageId) {
@@ -66,5 +67,9 @@ export class PortalEmitter {
 
   async signWithdrawTx(payload: PortalRequestPayload<'ONRAMPS__SIGN_DEPOSIT_TX'>) {
     return await this.sendMessage<'ONRAMPS__SIGN_DEPOSIT_TX'>({ type: 'ONRAMPS__SIGN_DEPOSIT_TX', payload });
+  }
+
+  async walletSwitchCompleted(payload: PortalRequestPayload<'WALLET_SWITCH_COMPLETED'>) {
+    return await this.sendMessage({ type: 'WALLET_SWITCH_COMPLETED', payload });
   }
 }

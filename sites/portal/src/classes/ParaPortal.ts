@@ -1,9 +1,12 @@
 import { PregenIds } from '@getpara/user-management-client';
 import { ParaInternal } from '@getpara/react-common';
+import { LOCAL_STORAGE_CURRENT_WALLET_IDS, LOCAL_STORAGE_WALLETS } from '@getpara/web-sdk';
 
 export class ParaPortal extends ParaInternal {
   _pregenIds: PregenIds;
   isPartnerOptional: boolean = true;
+
+  protected nonPersistedStorageKeys: string[] = [LOCAL_STORAGE_CURRENT_WALLET_IDS, LOCAL_STORAGE_WALLETS];
 
   get pregenIds(): PregenIds {
     return Object.keys({ ...super.pregenIds, ...this._pregenIds }).reduce(

@@ -10,6 +10,7 @@ export class ParaInternal extends ParaWeb implements InternalInterface {
   setAuth = super.setAuth;
   supportedAuthMethods = super.supportedAuthMethods;
   constructPortalUrl = super.constructPortalUrl;
+  getSwitchWalletsUrl = super.getSwitchWalletsUrl;
   getNewCredentialAndUrl = super.getNewCredentialAndUrl;
   prepareLogin = super.prepareLogin;
   supportedUserAuthMethods = super.supportedUserAuthMethods;
@@ -24,6 +25,7 @@ export class ParaInternal extends ParaWeb implements InternalInterface {
   sendLoginCode = super.sendLoginCode;
   getProfileBalance = super.getProfileBalance;
   setModalError = super.setModalError;
+  waitForWalletSwitching = super.waitForWalletSwitching;
   displayModalError = super.displayModalError;
 
   get partnerLogo() {

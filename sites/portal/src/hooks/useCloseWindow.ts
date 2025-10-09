@@ -1,25 +1,36 @@
 import { useCallback } from 'react';
 import { REDIRECT_TIMEOUT } from '../constants';
+import { isPopup } from '../utils/isIFramed';
+
+const closeIFrame = () => {
+  const targetWindow = window.opener || window.parent;
+  if (targetWindow) {
+    targetWindow.postMessage({ type: 'CLOSE_WINDOW', success: true }, '*');
+  } else {
+    console.warn('No target window found for CLOSE_WINDOW message');
+  }
+};
+
+const closePopup = () => {
+  if (isPopup) {
+    window.close();
+  }
+};
 
 export function useCloseWindow() {
   return useCallback((withDelay?: boolean) => {
     const onClose = () => {
-      (window.opener || window.parent)?.postMessage({ type: 'CLOSE_WINDOW', success: true }, '*');
+      closeIFrame();
+      closePopup();
     };
-
-    // If the window is in an iframe, call onClose immediately to move the modal along
-    if (window.parent) {
-      onClose();
-    }
 
     if (withDelay) {
       setTimeout(() => {
         onClose();
-        window.close();
       }, REDIRECT_TIMEOUT);
       return;
     }
+
     onClose();
-    window.close();
   }, []);
 }

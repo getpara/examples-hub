@@ -37,9 +37,9 @@ export const IFrameStep = () => {
       }
 
       if (event.data) {
-        if (event.data.type === 'HEIGHT') {
-          setHeight(event.data.height);
-          setIsReady(true);
+        if (event.data.type === 'HEIGHT' && typeof event.data.height === 'number') {
+          setHeight(Math.max(event.data.height, 200));
+          setIsReady(event.data.height > 0 ? true : false);
         }
       }
     };

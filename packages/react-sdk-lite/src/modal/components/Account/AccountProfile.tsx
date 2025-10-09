@@ -2,7 +2,6 @@ import { AccountTypeIcon, GradientScroll, StepContainer, WalletTypeIcon } from '
 import { CpslButton, CpslIcon, CpslText } from '@getpara/react-components';
 import { useAccount } from '../../../provider/index.js';
 import { useLinkedAccounts } from '../../../provider/hooks/index.js';
-import { getWalletDisplayName } from '../../utils/getWalletDisplayName.js';
 import {
   formatAssetQuantity,
   formatCurrency,
@@ -10,16 +9,20 @@ import {
   TLinkedAccountType,
   truncateAddress,
   WalletBalance,
+  Wallet,
+  PartnerEntity,
 } from '@getpara/web-sdk';
 import { useAccountLinking } from '../../../provider/providers/AccountLinkProvider.js';
-import { ReactNode, useMemo } from 'react';
+import { ReactNode, useEffect, useMemo } from 'react';
 import { ACCOUNT_TYPES, safeStyled, useCopyToClipboard } from '@getpara/react-common';
 import { useExternalWallets } from '../../../provider/providers/ExternalWalletProvider.js';
 import { useStore } from '../../../provider/stores/useStore.js';
 import { useAssets } from '../../../provider/providers/AssetsProvider.js';
+import { useAuthActions } from '../../../provider/providers/AuthProvider.js';
 import { useModalStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
 import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
+import { Waiting } from '../Waiting/Waiting.js';
 
 const Entry = ({
   identifier,
@@ -107,87 +110,128 @@ export const AccountProfile = ({
   const { embedded } = useAccount();
   const { data: linkedAccounts } = useLinkedAccounts();
   const { wallets } = useExternalWallets();
-  const { isEnabled, linkAccount, unlinkAccount } = useAccountLinking();
+  const { isEnabled: isAccountLinkingEnabled, linkAccount, unlinkAccount } = useAccountLinking();
   const hideWallets = useStore(state => state.modalConfig?.hideWallets);
   const { profileBalance } = useAssets();
+  const { switchWallets, switchWalletsUrl, setSwitchWalletsUrl, isSwitchWalletsPending } = useAuthActions();
   const setStep = useModalStore(state => state.setStep);
 
-  if (!para) {
-    return null;
-  }
+  const partnerGroups = useMemo(() => {
+    return embedded?.wallets?.reduce((acc: { partner: Partial<PartnerEntity>; wallets: Wallet[] }[], wallet) => {
+      if (!wallet.partner || !wallet.partner.id || !wallet.partner.displayName) return acc;
 
-  const embeddedWallets = para?.availableWallets?.filter(wallet => !wallet.isExternal);
+      const partnerGroup = acc.find(group => group.partner.id === wallet.partner?.id);
+
+      return !!partnerGroup
+        ? acc.map(group =>
+            group.partner.id === wallet.partner!.id ? { ...group, wallets: [...group.wallets, wallet] } : group,
+          )
+        : [...acc, { partner: wallet.partner, wallets: [wallet] }];
+    }, []);
+  }, [embedded?.wallets]);
+
+  useEffect(() => {
+    if (para) {
+      para.getSwitchWalletsUrl().then(url => {
+        setSwitchWalletsUrl(url);
+      });
+    }
+  }, []);
+
+  if (!para || !switchWalletsUrl) {
+    return <Waiting />;
+  }
 
   return (
     <StepContainer>
       {/* Embedded Wallets Section - only show if there are embedded wallets */}
-      {embeddedWallets.length > 0 && (
+      {partnerGroups && partnerGroups.length > 0 && (
+        <Section>
+          {partnerGroups.map(({ partner, wallets }) => {
+            return (
+              <Section key={partner.id}>
+                <Title variant="bodyS" color="secondary">
+                  {partner.displayName} Wallets
+                </Title>
+                <Content>
+                  {wallets.map(wallet => (
+                    <Entry
+                      key={`${wallet.address}-${wallet.type}`}
+                      icon={
+                        <WalletTypeIcon walletType={wallet.type!} externalWallet={wallet.externalProviderId} size="24px" />
+                      }
+                      name={truncateAddress(wallet.address!, wallet.type!)}
+                      balance={profileBalance?.wallets.find(w => w.address === wallet.address)}
+                    />
+                  ))}
+                </Content>
+              </Section>
+            );
+          })}
+          {!embedded.isGuestMode && (
+            <CpslButton fullWidth variant="tertiary" onClick={switchWallets} disabled={isSwitchWalletsPending}>
+              {isSwitchWalletsPending ? (
+                'Please Wait...'
+              ) : (
+                <>
+                  <CpslIcon icon="shuffle" slot="start" size="16px" />
+                  {para.isMultiWallet ? 'Switch Wallets' : 'Switch Wallet'}
+                </>
+              )}
+            </CpslButton>
+          )}
+        </Section>
+      )}
+
+      {/* Connected Wallets Section */}
+      {!embedded.isGuestMode && (
         <Section>
           <Title variant="bodyS" color="secondary">
-            {para.partnerName} Wallets
+            Connected Wallets
           </Title>
           <Content>
-            {embeddedWallets.map(wallet => (
-              <Entry
-                key={wallet.address}
-                icon={<WalletTypeIcon walletType={wallet.type!} externalWallet={wallet.externalProviderId} size="24px" />}
-                name={getWalletDisplayName(para, wallet)}
-                address={wallet.address}
-                addressShort={truncateAddress(wallet.address!, wallet.type!)}
-                balance={profileBalance?.wallets.find(w => w.address === wallet.address)}
-              />
-            ))}
+            {Object.values(para?.externalWallets || {}).map(wallet => {
+              const externalWallet = wallets.find(w => w.name === wallet.name);
+
+              return (
+                <Entry
+                  key={wallet.address}
+                  icon={
+                    <WalletTypeIcon
+                      walletType={wallet.type!}
+                      externalWallet={externalWallet ?? wallet.externalProviderId}
+                      size="24px"
+                      inset="0"
+                    />
+                  }
+                  name={wallet.ensName ?? wallet.name ?? ''}
+                  address={wallet.address}
+                  addressShort={
+                    wallet.address
+                      ? truncateAddress(wallet.address, wallet.type!, {
+                          prefix: para.cosmosPrefix,
+                        })
+                      : ''
+                  }
+                  balance={profileBalance?.wallets.find(w => w.address === wallet.address)}
+                />
+              );
+            })}
+            <CpslButton
+              fullWidth
+              variant="tertiary"
+              onClick={() => {
+                setStep(ModalStep.ADD_EX_WALLET_MORE);
+              }}
+            >
+              <CpslIcon icon="plus" slot="start" />
+              Add Wallet
+            </CpslButton>
           </Content>
         </Section>
       )}
 
-      {/* External Wallets Section */}
-      <Section>
-        <Title variant="bodyS" color="secondary">
-          External Wallets
-        </Title>
-        <Content>
-          {Object.values(para?.externalWallets || {}).map(wallet => {
-            const externalWallet = wallets.find(w => w.name === wallet.name);
-
-            return (
-              <Entry
-                key={wallet.address}
-                icon={
-                  <WalletTypeIcon
-                    walletType={wallet.type!}
-                    externalWallet={externalWallet ?? wallet.externalProviderId}
-                    size="24px"
-                    inset="0"
-                  />
-                }
-                name={wallet.ensName ?? wallet.name ?? ''}
-                address={wallet.address}
-                addressShort={
-                  wallet.address
-                    ? truncateAddress(wallet.address, wallet.type!, {
-                        prefix: para.cosmosPrefix,
-                      })
-                    : ''
-                }
-                balance={profileBalance?.wallets.find(w => w.address === wallet.address)}
-              />
-            );
-          })}
-          <CpslButton
-            fullWidth
-            variant="tertiary"
-            onClick={() => {
-              setStep(ModalStep.ADD_EX_WALLET_MORE);
-            }}
-          >
-            <CpslIcon icon="plus" slot="start" />
-            Add Wallet
-          </CpslButton>
-        </Content>
-      </Section>
-
-      {isEnabled && (
+      {isAccountLinkingEnabled && (
         <Section>
           <Title variant="bodyS" color="secondary">
             Linked Accounts
@@ -254,7 +298,7 @@ export const AccountProfile = ({
                 })}
             </GradientScroll>
             <CpslButton fullWidth variant="tertiary" onClick={() => linkAccount(undefined)}>
-              <CpslIcon icon="userPlus" slot="start" />
+              <CpslIcon icon="userPlus" slot="start" size="16px" />
               Link an account
             </CpslButton>
           </Content>

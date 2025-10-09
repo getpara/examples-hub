@@ -1,25 +1,29 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useRef } from 'react';
 import { AuthLoginStep, PARA_PORTAL_ID } from '../../constants';
 import { Body } from './components/Body';
 import { Card, CardContent } from '../../components/common';
 import { ModalHeader } from '../../components/ModalHeader';
 import { getAsymmetricKeyPair, getPublicKeyHex } from '@getpara/web-sdk';
 import { usePara } from '../../components/ParaContext';
-import { LoginProvider, LoginRes, useLogin } from './components/LoginProvider';
+import { LoginProvider, useLogin } from './components/LoginProvider';
 import { SelectWallet } from './components/SelectWallet';
 import { useModalOutletContext } from '../../hooks/useModalOutletContext';
 import { useCloseWindow } from '../../hooks/useCloseWindow';
-import { AuthMethod, isPasskeySupported } from '@getpara/web-sdk';
+import { AuthMethod, TAuthMethod, isPasskeySupported } from '@getpara/web-sdk';
 import { validateCallbackUrl } from '../../utils/validateCallbackUrl';
 import { NativeCallbackStatus } from '../../constants/nativeCallback';
 import { isIFramed } from '../../utils/isIFramed';
+import { getDefaultWalletIds } from '../../utils/getDefaultWalletIds';
+import { LoginRes } from '../../types';
 import { useSearchParams } from 'react-router-dom';
 import { useNavigateWithCurrentParams } from '../../hooks/useNavigateWithCurrentParams';
 
-const AuthLoginBase = ({ authMethod, step: propsStep }: { authMethod?: AuthMethod; step?: AuthLoginStep }) => {
+const AuthLoginBase = ({ step: propsStep }: { step?: AuthLoginStep }) => {
   const para = usePara();
   const closeWindow = useCloseWindow();
   const { toggleBranding, partner } = useModalOutletContext();
+  const { authMethod, isSwitchingWallets } = useLogin();
+
   const {
     fns: {
       authLogin,
@@ -35,20 +39,47 @@ const AuthLoginBase = ({ authMethod, step: propsStep }: { authMethod?: AuthMetho
     params: { sessionId, partnerId, encryptionKey, newDeviceSessionLookupId, skipAutoLogin },
     biometricLocationHints,
   } = useLogin();
+
   const [urlForNewDeviceLogin, setUrlForNewDeviceLogin] = useState<string>('');
-  const [step, setStep] = useState(propsStep ?? AuthLoginStep.MANUAL_LOGIN);
+  const [step, setStep] = useState(
+    propsStep ??
+      (() => {
+        switch (true) {
+          case isSwitchingWallets:
+            return AuthLoginStep.WAITING;
+          case authMethod === AuthMethod.PASSKEY:
+            return AuthLoginStep.WAITING;
+          case authMethod === AuthMethod.PASSWORD:
+            return AuthLoginStep.ENTER_PASSWORD;
+          case authMethod === AuthMethod.PIN:
+            return AuthLoginStep.ENTER_PIN;
+          case authMethod === AuthMethod.BASIC_LOGIN:
+            return AuthLoginStep.WAITING;
+          default:
+            return AuthLoginStep.MANUAL_LOGIN;
+        }
+      })(),
+  );
+
   const [loginWithPasswordError, setLoginWithPasswordError] = useState<string | undefined>();
   const [isAddingDevice, setIsAddingDevice] = useState(false);
   const [searchParams] = useSearchParams();
   const navigate = useNavigateWithCurrentParams();
 
   const isKnownDeviceLogin = !!newDeviceSessionLookupId;
+  const isAutoLoginAttempted = useRef(false);
 
   const handleLoginFromOtherDevice = async () => {
     await postLogin({ fromKnownDevice: true });
   };
 
   const postLogin = async ({ fromKnownDevice, loginRes }: { fromKnownDevice?: boolean; loginRes?: LoginRes }) => {
+    if (isSwitchingWallets) {
+      await fetchWallets();
+      setStep(AuthLoginStep.SELECT_WALLET);
+      return;
+    }
+
     const auth = await para.ctx.client.sessionAuth(sessionId);
     const nativeCallbackUrl = searchParams.get('nativeCallbackUrl');
     const loginCallbackRoute = searchParams.get('loginCallbackRoute');
@@ -69,6 +100,7 @@ const AuthLoginBase = ({ authMethod, step: propsStep }: { authMethod?: AuthMetho
       let selectionApplied = false;
 
       if (partner.id === PARA_PORTAL_ID) {
+        // Para portal, using all wallet IDs
         const allWalletIds = para.supportedWalletTypes.reduce(
           (acc, { type }) => ({
             ...acc,
@@ -82,20 +114,11 @@ const AuthLoginBase = ({ authMethod, step: propsStep }: { authMethod?: AuthMetho
           selectionApplied = true;
         }
       } else {
-        const isOnlyOwnedPartnerWallets = para.supportedWalletTypes.every(({ type }) => {
-          const typeWallets = wallets[type] ?? [];
-          return typeWallets.length === 1 && typeWallets[0].partnerId === partnerId && !typeWallets[0].pregenIdentifier;
+        // Non-Para portal, using default wallet IDs
+        const defaultWalletIds = getDefaultWalletIds(wallets, {
+          partnerId,
+          supportedWalletTypes: para.supportedWalletTypes,
         });
-
-        const defaultWalletIds = isOnlyOwnedPartnerWallets
-          ? para.supportedWalletTypes.reduce(
-              (acc, { type }) => ({
-                ...acc,
-                [type]: (wallets[type] ?? []).map(({ id }) => id),
-              }),
-              {},
-            )
-          : undefined;
 
         if (para.isNoWalletConfig || defaultWalletIds || (isWithoutWallets && !para.ctx.apiKey)) {
           await para.setCurrentWalletIds(defaultWalletIds ?? {}, selectionParams);
@@ -126,16 +149,21 @@ const AuthLoginBase = ({ authMethod, step: propsStep }: { authMethod?: AuthMetho
       return; // Exit early after redirect
     }
 
-    // isNewUser will still be true on the initial login after signup, if adding a credential on that session we want to ensure we don't close the window
-    if (!loginCallbackRoute && auth.isNewUser) {
-      closeWindow();
-      return;
+    if (auth.isNewUser) {
+      // Issue JWT so wallet switching can work
+      if (authMethod === 'BASIC_LOGIN') {
+        await para.ctx.enclaveClient.issueEnclaveJwt();
+      }
+      if (!loginCallbackRoute) {
+        closeWindow();
+        return;
+      }
     }
 
     await para.userSetupAfterLogin();
     const isEnclaveUser = await checkIsEnclaveUser();
 
-    if (loginCallbackRoute) {
+    if (loginCallbackRoute && !isSwitchingWallets) {
       let callbackAdditionalParams: { sessionId?: string } = {};
 
       switch (loginCallbackRoute) {
@@ -181,14 +209,7 @@ const AuthLoginBase = ({ authMethod, step: propsStep }: { authMethod?: AuthMetho
       return;
     }
 
-    const isOnlyOwnedPartnerWallets = para.supportedWalletTypes.every(
-      ({ type }) =>
-        wallets[type].length === 1 && wallets[type][0].partnerId === partnerId && !wallets[type][0].pregenIdentifier,
-    );
-
-    const defaultWalletIds = isOnlyOwnedPartnerWallets
-      ? para.supportedWalletTypes.reduce((acc, { type }) => ({ ...acc, [type]: wallets[type].map(({ id }) => id) }), {})
-      : undefined;
+    const defaultWalletIds = getDefaultWalletIds(wallets, { partnerId, supportedWalletTypes: para.supportedWalletTypes });
 
     if (para.isNoWalletConfig || !!defaultWalletIds || (isWithoutWallets && !para.ctx.apiKey)) {
       await para.setCurrentWalletIds(defaultWalletIds ?? {}, {
@@ -300,9 +321,17 @@ const AuthLoginBase = ({ authMethod, step: propsStep }: { authMethod?: AuthMetho
     }
   }, [step]);
 
+  // Handle BASIC_LOGIN in wallet switching mode - automatically fetch wallets and go to SELECT_WALLET
+  useEffect(() => {
+    if (isSwitchingWallets && step === AuthLoginStep.WAITING) {
+      postLogin({});
+    }
+  }, [isSwitchingWallets, authMethod, step, postLogin]);
+
   useEffect(() => {
     (async function () {
-      if (!(await isPasskeySupported()) && authMethod === AuthMethod.PASSKEY) {
+      // Only check passkey support for regular login, not for wallet switching
+      if (!isSwitchingWallets && !(await isPasskeySupported()) && authMethod === AuthMethod.PASSKEY) {
         getWebAuthURLForKnownDeviceLogin().then(() => {
           setStep(AuthLoginStep.LOGIN_FAILED);
         });
@@ -310,10 +339,17 @@ const AuthLoginBase = ({ authMethod, step: propsStep }: { authMethod?: AuthMetho
         return;
       }
 
-      if (!!authInfo && sessionId && encryptionKey && !skipAutoLogin && step === AuthLoginStep.MANUAL_LOGIN) {
-        // In development this will trigger a 'request is already pending.' error due to duplicate renders caused by React.StrictMode.
-        // See ref: https://legacy.reactjs.org/docs/strict-mode.html#detecting-unexpected-side-effects
+      if (
+        !!authInfo &&
+        sessionId &&
+        encryptionKey &&
+        !skipAutoLogin &&
+        authMethod === AuthMethod.PASSKEY &&
+        (step === AuthLoginStep.MANUAL_LOGIN || step === AuthLoginStep.WAITING) &&
+        !isAutoLoginAttempted.current
+      ) {
         login();
+        isAutoLoginAttempted.current = true;
       }
     })();
   }, [login]);
@@ -353,10 +389,17 @@ const AuthLoginBase = ({ authMethod, step: propsStep }: { authMethod?: AuthMetho
     return (
       <SelectWallet
         sessionLookupId={sessionId}
-        onSuccess={() => {
+        onSuccess={({ withDelay }) => {
+          if (withDelay) {
+            setTimeout(() => {
+              setStep(AuthLoginStep.SUCCESS);
+            }, 1000);
+            return;
+          }
           setStep(AuthLoginStep.SUCCESS);
         }}
         isKnownDeviceLogin={isKnownDeviceLogin}
+        isSwitchingWallets={isSwitchingWallets}
       />
     );
   }
@@ -380,14 +423,23 @@ const AuthLoginBase = ({ authMethod, step: propsStep }: { authMethod?: AuthMetho
           isKnownDeviceLogin={isKnownDeviceLogin}
           isAddingDevice={isAddingDevice}
           postLogin={() => postLogin({})}
+          isSwitchingWallets={isSwitchingWallets}
         />
       </CardContent>
     </Card>
   );
 };
 
-export const AuthLogin = ({ authMethod, step }: { authMethod?: AuthMethod; step?: AuthLoginStep }) => (
-  <LoginProvider>
-    <AuthLoginBase authMethod={authMethod} step={step} />
+export const AuthLogin = ({
+  authMethod,
+  step,
+  isSwitchingWallets,
+}: {
+  authMethod?: TAuthMethod;
+  step?: AuthLoginStep;
+  isSwitchingWallets?: boolean;
+}) => (
+  <LoginProvider authMethod={authMethod} isSwitchingWallets={isSwitchingWallets}>
+    <AuthLoginBase step={step} />
   </LoginProvider>
 );

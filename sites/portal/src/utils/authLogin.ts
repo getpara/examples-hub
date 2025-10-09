@@ -12,50 +12,13 @@ import {
 } from '@getpara/web-sdk';
 import { ParaPortal } from '../classes/ParaPortal';
 import { ENV } from '../constants';
-import { Auth, PregenIds, PrimaryAuth } from '@getpara/user-management-client';
 import forge from 'node-forge';
-
-export type PortalAuthParams = {
-  encryptionKey?: string;
-  sessionId?: string;
-  newDeviceEncryptionKey?: string;
-  newDeviceSessionLookupId?: string;
-  skipAutoLogin?: boolean;
-  isForKnownDeviceLogin?: boolean;
-  partnerId?: string;
-  pregenIds?: PregenIds;
-  isEmbedded?: boolean;
-};
-
-export type AuthLoginParams = PortalAuthParams & {
-  auth: PrimaryAuth | Auth<'userId'>;
-};
-
-export type AuthLoginPasswordParams = AuthLoginParams & {
-  password: string;
-};
-
-type ShareData = {
-  walletId: string;
-  walletScheme: string;
-  signer: string;
-  partnerId?: string;
-  protocolId?: string;
-};
-
-export type AuthUpdateKeySharesParams = PortalAuthParams & {
-  userId: string;
-  encryptionKey: string;
-  userHandle?: string;
-  signature?: any;
-  passwordId?: string;
-  enclaveShares?: ShareData[];
-};
+import { AuthLoginParams, AuthLoginPasswordParams, AuthUpdateKeySharesParams, LoginRes, ShareData } from '../types';
 
 export async function authLogin(
   ctx: Ctx,
   { auth, partnerId, sessionId, newDeviceSessionLookupId }: AuthLoginParams,
-): Promise<{ userId: string; userHandle: string; signature: any; publicKey?: string; passwordId?: string }> {
+): Promise<LoginRes> {
   const data = await ctx.client.getWebChallenge(auth);
 
   const signature = await generateSignature(ENV, data.challenge, data.allowedPublicKeys, ctx.isE2E);
@@ -75,7 +38,7 @@ export async function authLoginWithPassword(
   ctx: Ctx,
   { auth, password, partnerId, sessionId, newDeviceSessionLookupId }: AuthLoginPasswordParams,
   isPIN?: boolean,
-) {
+): Promise<LoginRes> {
   const allPasswords = await ctx.client.getPasswords(auth);
   const passwordEntity = isPIN ? allPasswords.find(p => p.isPIN) : allPasswords.find(p => !p.isPIN);
 

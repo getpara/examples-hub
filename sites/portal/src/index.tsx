@@ -7,7 +7,6 @@ import { ModalLayout } from './components/ModalLayout';
 import { defineCustomElements } from '@getpara/react-components';
 import { ParaProvider } from './components/ParaContext';
 import { AuthLoginStep, ENV } from './constants';
-import { AuthMethod } from '@getpara/web-sdk';
 import { lazy } from 'react';
 import './clients/sentry';
 import { CheckAuth } from './components/CheckAuth';
@@ -57,9 +56,9 @@ export const App = () => {
         {/* Leaving this route above the /web wrapper for now to avoid dropping it in the ModalLayout. Can shift once designs for this are updated */}
         <Route element={<ModalLayout />} path="/web">
           <Route element={<AuthCreation />} path="users/:userId/biometrics/:biometricId" />
-          <Route element={<AuthLogin authMethod={AuthMethod.PASSKEY} />} path="biometrics/login" />
-          <Route element={<AuthLogin authMethod={AuthMethod.PASSWORD} />} path="passwords/login/:version?" />
-          <Route element={<AuthLogin authMethod={AuthMethod.PIN} />} path="pin/login" />
+          <Route element={<AuthLogin authMethod="PASSKEY" />} path="biometrics/login" />
+          <Route element={<AuthLogin authMethod="PASSWORD" />} path="passwords/login/:version?" />
+          <Route element={<AuthLogin authMethod="PIN" />} path="pin/login" />
           <Route element={<PasswordCreation />} path="users/:userId/passwords/:passwordId" />
           <Route element={<PINCreation />} path="users/:userId/pin/:passwordId" />
           <Route element={<TransactionReview />} path="users/:userId/transaction-review/:pendingTransactionId" />
@@ -81,6 +80,14 @@ export const App = () => {
           />
           <Route element={<AuthLogin step={AuthLoginStep.OAUTH_CALLBACK} />} path=":method/callback" />
           <Route element={<OAuthLogin />} path=":method" />
+          <Route
+            element={
+              <CheckAuth type="SWITCH_WALLETS">
+                <AuthLogin isSwitchingWallets />
+              </CheckAuth>
+            }
+            path="wallets"
+          />
         </Route>
         <Route element={<ShortUrl />} path="/short/:shortenedUrl" />
       </Routes>

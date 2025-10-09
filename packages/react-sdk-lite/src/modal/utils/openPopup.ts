@@ -13,6 +13,7 @@ export function openPopup({
     | 'TRANSACTION_REVIEW'
     | 'CREATE_PASSWORD'
     | 'LOGIN_PASSWORD'
+    | 'SWITCH_WALLETS'
     | 'ADD_CREDENTIAL';
   current?: Window | null;
 }): Window | null {
@@ -30,7 +31,8 @@ export function openPopup({
       popUpHeight = 798;
       break;
     }
-    case 'LOGIN_PASSKEY': {
+    case 'LOGIN_PASSKEY':
+    case 'SWITCH_WALLETS': {
       popUpHeight = 798;
       break;
     }

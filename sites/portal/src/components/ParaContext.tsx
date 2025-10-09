@@ -3,9 +3,10 @@ import { CoreAuthInfo, ConstructorOpts as ParaConstructorOpts, Environment as Pa
 import { useSearchParams } from 'react-router-dom';
 import { ParaPortal } from '../classes/ParaPortal';
 import { DEFAULT_API_KEY } from '../constants';
-import { AuthLoginParams } from '../utils/authLogin';
+import { AuthLoginParams } from '../types';
 import { AuthExtras, AuthParams, extractAuthInfo } from '@getpara/user-management-client';
 import { useExtractedParams } from '../hooks/useExtractedParams';
+import { PortalEmitter } from '../classes';
 
 interface ParaProviderProps extends PropsWithChildren {
   apiKey: string;
@@ -16,7 +17,9 @@ interface ParaProviderProps extends PropsWithChildren {
   onMount?: (para: ParaPortal) => void;
 }
 
-export const ParaContext = createContext<ParaPortal>(undefined as unknown as ParaPortal);
+export const ParaContext = createContext<{ para: ParaPortal; portalEmitter: PortalEmitter | null }>(
+  undefined as unknown as { para: ParaPortal; portalEmitter: PortalEmitter | null },
+);
 
 /**
  * A React Context provider that provides a `Para` instance to its children. You can either provide a `Para` instance
@@ -67,6 +70,9 @@ export const ParaProvider = (props: ParaProviderProps) => {
 
   const params = useExtractedParams<AuthLoginParams & AuthParams & AuthExtras>();
 
+  const portalEmitter = useMemo(() => {
+    return new PortalEmitter(params.origin);
+  }, [params.origin]);
   // Check if current path is a callback route
   const isCallbackRoute = location.pathname.includes('/callback');
 
@@ -137,10 +143,18 @@ export const ParaProvider = (props: ParaProviderProps) => {
     return null;
   }
 
-  return <ParaContext.Provider value={para}>{children}</ParaContext.Provider>;
+  return <ParaContext.Provider value={{ para, portalEmitter }}>{children}</ParaContext.Provider>;
 };
 
 /**
  * Returns the `Para` instance provided by the nearest `ParaProvider` in the component tree.
  */
-export const usePara = () => useContext(ParaContext);
+export const usePara = () => {
+  const { para } = useContext(ParaContext);
+  return para;
+};
+
+export const usePortalEmitter = () => {
+  const { portalEmitter } = useContext(ParaContext);
+  return portalEmitter;
+};

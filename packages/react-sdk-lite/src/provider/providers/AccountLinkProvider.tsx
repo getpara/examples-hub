@@ -153,12 +153,12 @@ export const AccountLinkProvider = ({ children }: PropsWithChildren) => {
   } = useVerifyExternalWalletLink();
 
   const isEnabled =
-    embedded?.isConnected ||
-    (!embedded?.isGuestMode &&
-      (!para.authInfo?.externalWallet ||
-        includeWalletVerification ||
-        externalWalletsWithFullAuth === 'ALL' ||
-        externalWalletsWithFullAuth.includes(para.authInfo?.externalWallet?.providerId as TExternalWallet)));
+    !embedded?.isGuestMode &&
+    embedded?.isConnected &&
+    (!para.authInfo?.externalWallet ||
+      includeWalletVerification ||
+      externalWalletsWithFullAuth === 'ALL' ||
+      externalWalletsWithFullAuth.includes(para.authInfo?.externalWallet?.providerId as TExternalWallet));
 
   const [accountLinkInProgress, setAccountLinkInProgress] = useState<AccountLinkInProgress | undefined>(
     coreAccountLinkInProgress || undefined,

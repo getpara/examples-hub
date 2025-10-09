@@ -1,5 +1,5 @@
 import { BiometricHints, useUserAgent } from '@getpara/react-common';
-import { createContext, PropsWithChildren, useCallback, useContext, useEffect, useMemo } from 'react';
+import { createContext, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useModalStore } from '../../modal/stores/index.js';
 import { ModalStep } from '../../modal/utils/steps.js';
 import {
@@ -14,7 +14,9 @@ import {
   useSetup2fa,
   useLogout,
   useCreateGuestWallets,
+  useWalletState,
 } from '../index.js';
+import { useSwitchWallets } from '../hooks/mutations/useSwitchWallets.js';
 import { DEFAULTS } from '../../modal/constants/defaults.js';
 import { openPopup } from '../../modal/utils/openPopup.js';
 import {
@@ -57,6 +59,10 @@ type Value = {
   createGuestWallets: () => void;
   isCreateGuestWalletsPending: boolean;
   logout: () => void;
+  switchWallets: (authMethod?: string) => void;
+  switchWalletsUrl: string | undefined;
+  setSwitchWalletsUrl: (_: string) => void;
+  isSwitchWalletsPending: boolean;
   biometricHints?: BiometricHints;
 };
 
@@ -88,6 +94,10 @@ export const AuthContext = createContext<Value>({
   createGuestWallets: () => {},
   isCreateGuestWalletsPending: false,
   logout: () => {},
+  switchWallets: () => {},
+  switchWalletsUrl: undefined,
+  setSwitchWalletsUrl: () => {},
+  isSwitchWalletsPending: false,
 });
 
 export function AuthProvider({
@@ -132,10 +142,14 @@ export function AuthProvider({
   const { waitForLogin: mutateWaitForLogin } = useWaitForLogin();
   const { waitForSignup: mutateWaitForSignup } = useWaitForSignup();
   const { waitForWalletCreationAsync: mutateAsyncWaitForWalletCreation } = useWaitForWalletCreation();
+  const { switchWallets: mutateSwitchWallets, isPending: mutateIsSwitchWalletsPending } = useSwitchWallets();
   const { setup2fa: mutateSetup2fa, isPending: isSetup2faPending } = useSetup2fa();
   const { createGuestWallets: mutateCreateGuestWallets, isPending: isCreateGuestWalletsPending } = useCreateGuestWallets();
   const { logout: mutateLogout } = useLogout();
+  const { updateSelectedWallet } = useWalletState();
   const { data: biometricHints } = useFormattedBiometricHints();
+  const [switchWalletsUrl, setSwitchWalletsUrl] = useState<string | undefined>(undefined);
+  const [isSwitchWalletsPending, setIsSwitchWalletsPending] = useState(mutateIsSwitchWalletsPending);
 
   const goBackIfPopupClosedOnSteps = (steps: ModalStep[]) => {
     if (refs.popupWindow.current?.closed && (!refs.currentStep.current || steps.includes(refs.currentStep.current))) {
@@ -320,6 +334,7 @@ export function AuthProvider({
                   ModalStep.FARCASTER_OAUTH,
                   ModalStep.TELEGRAM_OAUTH,
                   ModalStep.AWAITING_OAUTH,
+                  ModalStep.SWITCH_WALLETS,
                 ]),
               onPoll: () => {
                 goBackIfPopupClosedOnSteps([
@@ -327,6 +342,7 @@ export function AuthProvider({
                   ModalStep.AWAITING_PASSWORD_LOGIN,
                   ModalStep.EMBEDDED_PASSWORD_LOGIN,
                   ModalStep.OTP,
+                  ModalStep.SWITCH_WALLETS,
                 ]);
               },
             },
@@ -636,6 +652,99 @@ export function AuthProvider({
     mutateLogout();
   };
 
+  const switchWallets = () => {
+    if (!switchWalletsUrl) {
+      return;
+    }
+
+    setIsSwitchWalletsPending(true);
+
+    try {
+      // Get the switch wallets URL (authMethod is automatically included via constructPortalUrl)
+
+      setStep(ModalStep.SWITCH_WALLETS);
+
+      // Open popup for non-BASIC_LOGIN wallet switching
+      refs.popupWindow.current = openPopup({
+        url: switchWalletsUrl,
+        target: 'ParaSwitchWallets',
+        type: 'SWITCH_WALLETS',
+        current: refs.popupWindow.current,
+      });
+
+      // Start polling using the same pattern as waitForLogin
+      pollSwitchWallets();
+    } catch (error) {
+      console.error('Failed to open wallet switching popup:', error);
+    }
+  };
+
+  const pollSwitchWallets = () => {
+    if (typeof window !== 'undefined') {
+      refs.poll.current = {
+        action: 'login',
+        timeout: window?.setTimeout(async () => {
+          mutateSwitchWallets(
+            {
+              isCanceled: () => {
+                const exitedSteps = cancelIfExitedSteps([ModalStep.SWITCH_WALLETS, ModalStep.SWITCH_WALLETS_IFRAME]);
+                const popupClosed = refs.popupWindow.current?.closed ?? false;
+                const isCanceled = exitedSteps || popupClosed;
+
+                // If user manually went back or popup is closed, clear wallet switching state
+                if (isCanceled) {
+                  // If popup is closed, go back immediately (only if still on switch wallets step)
+                  if (
+                    popupClosed &&
+                    (refs.currentStep.current === ModalStep.SWITCH_WALLETS ||
+                      refs.currentStep.current === ModalStep.SWITCH_WALLETS_IFRAME)
+                  ) {
+                    goBack();
+                  }
+                }
+
+                return isCanceled;
+              },
+              onPoll: () => {
+                // Only call goBack if still on switch wallets step (prevents duplicate calls)
+                if (
+                  refs.currentStep.current === ModalStep.SWITCH_WALLETS ||
+                  refs.currentStep.current === ModalStep.SWITCH_WALLETS_IFRAME
+                ) {
+                  goBackIfPopupClosedOnSteps([ModalStep.SWITCH_WALLETS, ModalStep.SWITCH_WALLETS_IFRAME]);
+                }
+              },
+            },
+            {
+              onSuccess: () => {
+                updateSelectedWallet();
+
+                // Change step after a small delay to allow polling to complete
+                setTimeout(() => {
+                  setStep(ModalStep.ACCOUNT_PROFILE);
+                  refs.popupWindow.current = null;
+                }, 500);
+              },
+              onError: () => {
+                // Only call goBack if still on switch wallets step (prevents duplicate calls)
+                if (refs.currentStep.current === ModalStep.SWITCH_WALLETS) {
+                  goBack();
+                }
+              },
+              onSettled: () => {
+                setIsSwitchWalletsPending(false);
+                window?.clearTimeout(refs.poll.current?.timeout);
+                refs.poll.current = null;
+                refs.popupWindow.current = null;
+                // Don't reset wallet switch status here - let it be reset only on successful completion
+              },
+            },
+          );
+        }, DEFAULTS.LOGGIN_POLLING_DELAY_MS),
+      };
+    }
+  };
+
   const isPasswordIFrameLoading = !!iFrameUrl && iFrameUrl === signupState?.passwordUrl && !isIFrameReady;
 
   const value = useMemo<Value>(
@@ -657,6 +766,10 @@ export function AuthProvider({
       createGuestWallets,
       isCreateGuestWalletsPending,
       logout,
+      switchWallets,
+      switchWalletsUrl,
+      setSwitchWalletsUrl,
+      isSwitchWalletsPending,
       biometricHints: biometricHints || undefined,
       verifyFarcasterStatus,
     }),
@@ -679,6 +792,10 @@ export function AuthProvider({
       createGuestWallets,
       isCreateGuestWalletsPending,
       logout,
+      switchWallets,
+      switchWalletsUrl,
+      setSwitchWalletsUrl,
+      isSwitchWalletsPending,
       biometricHints,
       verifyFarcasterStatus,
     ],
@@ -702,6 +819,10 @@ export function AuthProvider({
       setStep(ModalStep.ACCOUNT_MAIN);
     }
   }, [isCreateGuestWalletsPending]);
+
+  useEffect(() => {
+    setIsSwitchWalletsPending(prev => (!!prev ? mutateIsSwitchWalletsPending : prev));
+  }, [mutateIsSwitchWalletsPending]);
 
   useEffect(() => {
     return () => {

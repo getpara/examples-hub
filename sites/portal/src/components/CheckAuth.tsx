@@ -1,32 +1,72 @@
 import { PropsWithChildren, useEffect, useState } from 'react';
 import { usePara } from './ParaContext';
 import { useNavigateWithCurrentParams } from '../hooks/useNavigateWithCurrentParams';
-import { AuthMethod, TOAuthMethod } from '@getpara/user-management-client';
+import { AuthMethod, TOAuthMethod, TAuthMethod, AUTH_METHODS } from '@getpara/user-management-client';
 import { useSearchParams } from 'react-router-dom';
 import { CpslButton, CpslDivider, CpslIcon, CpslText } from '@getpara/react-components';
 import { styled } from 'styled-components';
 import { Card } from './common';
 
 type BaseAdditionalAuthParams = {
-  // The current session ID for the portal session
-  sessionId: string;
-  // The original client session ID from the client application (originally passed in as the sessionId when the portal is opened)
-  clientSessionId: string;
   // The route to navigate to after login is complete
   loginCallbackRoute: string;
 };
 
 type AddCredentialParams = {
+  // The current session ID for the portal session
+  sessionId: string;
+  // The original client session ID from the client application (originally passed in as the sessionId when the portal is opened)
+  clientSessionId: string;
   addNewCredentialPasskeyId?: string | undefined;
   addNewCredentialPasswordId?: string | undefined;
   isForNewDevice?: string;
 };
 
-type AdditionalAuthParams = BaseAdditionalAuthParams & AddCredentialParams;
+type SwitchWalletsParams = {
+  userId: string | undefined;
+  authMethod?: Exclude<TAuthMethod, 'BASIC_LOGIN'>;
+  encryptionKey?: string | undefined;
+  currentWalletIds?: string | undefined;
+};
 
-type CheckAuthType = 'ADD_CREDENTIAL';
+type AdditionalAuthParams<T extends CheckAuthType> = BaseAdditionalAuthParams &
+  (T extends 'ADD_CREDENTIAL' ? AddCredentialParams : SwitchWalletsParams);
+
+type CheckAuthType = 'ADD_CREDENTIAL' | 'SWITCH_WALLETS';
 
 type CheckAuthProps = { type: CheckAuthType } & PropsWithChildren;
+
+const authRedirect = <const type extends CheckAuthType>({
+  navigate,
+  authMethod,
+  type,
+  params,
+}: {
+  navigate: ReturnType<typeof useNavigateWithCurrentParams>;
+  authMethod: Exclude<TAuthMethod, 'BASIC_LOGIN'>;
+  type: CheckAuthType;
+  params: AdditionalAuthParams<type>;
+}) => {
+  let path;
+  if (type === 'SWITCH_WALLETS') {
+    // Send to same url with authMethod set
+    path = params.loginCallbackRoute;
+    (params as SwitchWalletsParams).authMethod = authMethod;
+  } else {
+    switch (authMethod) {
+      case 'PASSKEY':
+        path = '/web/biometrics/login';
+        break;
+      case 'PIN':
+        path = '/web/pin/login';
+        break;
+      case 'PASSWORD':
+        path = '/web/passwords/login';
+        break;
+    }
+  }
+  navigate(path, params);
+};
 
 export const CheckAuth = ({ type, children }: CheckAuthProps) => {
   const para = usePara();
@@ -34,13 +74,25 @@ export const CheckAuth = ({ type, children }: CheckAuthProps) => {
   const [isSetup, setIsSetup] = useState(false);
   const [error, setError] = useState<string>();
   const [searchParams] = useSearchParams();
-  const [additionalAuthParams, setAdditionalAuthParams] = useState<AdditionalAuthParams>({} as AdditionalAuthParams);
+  const [additionalAuthParams, setAdditionalAuthParams] = useState<AdditionalAuthParams<typeof type>>(
+    {} as AdditionalAuthParams<typeof type>,
+  );
   const [authMethods, setAuthMethods] = useState<Set<AuthMethod>>();
 
   const clientSessionId = searchParams.get('clientSessionId') || searchParams.get('sessionId');
 
   useEffect(() => {
     const setup = async () => {
+      const paramsAuthMethod = searchParams.get('authMethod');
+      // No setup needed if authMethod set
+      if (
+        type === 'SWITCH_WALLETS' &&
+        typeof paramsAuthMethod === 'string' &&
+        AUTH_METHODS.includes(paramsAuthMethod as TAuthMethod)
+      ) {
+        setIsSetup(true);
+        return;
+      }
       setError(undefined);
       setAuthMethods(undefined);
       const supportedAuthMethods = await para.supportedUserAuthMethods();
@@ -48,7 +100,7 @@ export const CheckAuth = ({ type, children }: CheckAuthProps) => {
       if (!isAuthenticated) {
         // If not authed, regenerate the portal session here
         const { sessionLookupId } = await para.touchSession(true);
-        let additionalParams: AdditionalAuthParams;
+        let additionalParams: AdditionalAuthParams<typeof type>;
 
         switch (type) {
           case 'ADD_CREDENTIAL':
@@ -59,6 +111,15 @@ export const CheckAuth = ({ type, children }: CheckAuthProps) => {
               isForNewDevice: 'true',
               addNewCredentialPasskeyId: searchParams.get('addNewCredentialPasskeyId') || undefined,
               addNewCredentialPasswordId: searchParams.get('addNewCredentialPasswordId') || undefined,
+            };
+            break;
+          case 'SWITCH_WALLETS':
+            additionalParams = {
+              userId: searchParams.get('userId') || undefined,
+              sessionId: clientSessionId,
+              encryptionKey: searchParams.get('encryptionKey') || undefined,
+              loginCallbackRoute: typeof window !== 'undefined' ? window.location.pathname : '',
+              currentWalletIds: searchParams.get('currentWalletIds') || undefined,
             };
             break;
           default:
@@ -131,13 +192,13 @@ export const CheckAuth = ({ type, children }: CheckAuthProps) => {
         if (supportedAuthMethods.size === 1) {
           switch (supportedAuthMethods.values().next().value) {
             case AuthMethod.PASSKEY:
-              navigate('/web/biometrics/login', additionalAuthParams);
+              authRedirect({ navigate, authMethod: 'PASSKEY', type, params: additionalParams });
               break;
             case AuthMethod.PIN:
-              navigate('/web/pin/login', additionalAuthParams);
+              authRedirect({ navigate, authMethod: 'PIN', type, params: additionalParams });
               break;
             case AuthMethod.PASSWORD:
-              navigate('/web/passwords/login', additionalAuthParams);
+              authRedirect({ navigate, authMethod: 'PASSWORD', type, params: additionalParams });
               break;
           }
         } else {
@@ -165,15 +226,15 @@ export const CheckAuth = ({ type, children }: CheckAuthProps) => {
   }, [para]);
 
   const handlePasskeyLogin = () => {
-    navigate('/web/biometrics/login', additionalAuthParams);
+    authRedirect({ navigate, authMethod: 'PASSKEY', type, params: additionalAuthParams });
   };
 
   const handlePasswordLogin = () => {
-    navigate('/web/passwords/login', additionalAuthParams);
+    authRedirect({ navigate, authMethod: 'PASSWORD', type, params: additionalAuthParams });
   };
 
   const handlePINLogin = () => {
-    navigate('/web/pin/login', additionalAuthParams);
+    authRedirect({ navigate, authMethod: 'PIN', type, params: additionalAuthParams });
   };
 
   if (authMethods || error) {

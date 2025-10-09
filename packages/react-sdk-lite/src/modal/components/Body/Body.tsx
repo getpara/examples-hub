@@ -40,6 +40,7 @@ import { AccountProfileLink } from '../Account/AccountProfileLink.js';
 import { AccountProfileUnlink } from '../Account/AccountProfileUnlink.js';
 import { ExternalWalletNetworkSelectStep } from '../ExternalWalletNetworkSelectStep/ExternalWalletNetworkSelectStep.js';
 import { AwaitingAccountStep } from '../AwaitingAccountStep/AwaitingAccountStep.js';
+import { SwitchWalletsStep } from '../SwitchWalletsStep/SwitchWalletsStep.js';
 import { Footer } from '../Footer/Footer.js';
 import { renderTextWithLinks } from '../../utils/renderTextWithLinks.js';
 
@@ -217,6 +218,9 @@ export const Body = ({
       }
       case ModalStep.AWAITING_ACCOUNT: {
         return <AwaitingAccountStep />;
+      }
+      case ModalStep.SWITCH_WALLETS: {
+        return <SwitchWalletsStep />;
       }
       default: {
         if (IFrameSteps.includes(currentStep)) {

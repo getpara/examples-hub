@@ -6,13 +6,14 @@ import { formatDistanceToNowStrict, parseISO } from 'date-fns';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { PARA_CONNECT_DOMAINS } from '../../../constants';
 import { Wallet, TWalletType, CurrentWalletIds, WalletEntity, PartnerEntity, SupportedWalletTypes } from '@getpara/web-sdk';
-import { usePara } from '../../../components/ParaContext';
+import { usePara, usePortalEmitter } from '../../../components/ParaContext';
 import { useLogin } from './LoginProvider';
 import { ConnectDiagram, ParaIcon, HERO_HEIGHT, LayoutWithHero, PartnerIcon as PartnerIconRoot } from '../../../components';
 import { motion } from 'framer-motion';
 import { CenteredText } from '@getpara/react-common';
 import { useCloseWindow } from '../../../hooks/useCloseWindow';
 import { isIFramed } from '../../../utils/isIFramed';
+import { useExtractedParams } from '../../../hooks/useExtractedParams';
 
 const GRADIENT = `linear-gradient(to right, #fe5330, #9400db)`;
 
@@ -131,21 +132,29 @@ export const SelectWallet = ({
   onSuccess,
   sessionLookupId,
   isKnownDeviceLogin,
+  isSwitchingWallets = false,
 }: {
-  onSuccess: () => void;
+  onSuccess: (_: { withDelay?: boolean }) => void;
   sessionLookupId: string;
   isKnownDeviceLogin: boolean;
+  isSwitchingWallets?: boolean;
 }) => {
   const para = usePara();
+  const portalEmitter = usePortalEmitter();
   const {
     authInfo,
-    fns: { finishLogin, authUpdateKeyShares, authUpdateEnclaveKeyShares, checkIsEnclaveUser },
+    fns: { authUpdateKeyShares, authUpdateEnclaveKeyShares, checkIsEnclaveUser },
     params: { newDeviceSessionLookupId },
     wallets,
     sessionOrigin,
+    loginRes,
   } = useLogin();
   const { partner } = useModalOutletContext();
   const closeWindow = useCloseWindow();
+  // Extract currentWalletIds from query string for pre-selection
+  const { currentWalletIds: queryCurrentWalletIds } = useExtractedParams<{
+    currentWalletIds?: CurrentWalletIds;
+  }>();
 
   const [isAtBottom, setIsAtBottom] = useState(false);
   const [isSettingUp, setIsSettingUp] = useState(true);
@@ -170,7 +179,7 @@ export const SelectWallet = ({
     selectWalletTypes.reduce((acc, { type }) => {
       return {
         ...acc,
-        [type]: [],
+        [type]: queryCurrentWalletIds?.[type] || [],
       };
     }, {}),
   );
@@ -188,7 +197,7 @@ export const SelectWallet = ({
           return acc;
         }
 
-        return acc || !selectedWalletIds[type][0];
+        return acc || selectedWalletIds[type].length === 0;
       }, false);
 
   const walletCount = Object.values(selectedWalletIds).flat().length;
@@ -196,7 +205,13 @@ export const SelectWallet = ({
   const onSubmit = useCallback(
     async (walletIds: CurrentWalletIds) => {
       setIsConnecting(true);
-      const toCreate = Object.keys(walletIds).filter(type => walletIds[type][0] === 'CREATE_NEW') as TWalletType[];
+
+      // Ensure isEnclaveUser is set before creating wallets so key shares are distributed correctly
+      const isEnclaveUser = await checkIsEnclaveUser();
+
+      const toCreate = Object.keys(walletIds).filter(type => walletIds[type].includes('CREATE_NEW')) as TWalletType[];
+
+      let createdIds: CurrentWalletIds = {};
       if (toCreate.length > 0) {
         if (!para.ctx.apiKey) {
           return;
@@ -208,8 +223,8 @@ export const SelectWallet = ({
 
         const created = await para.createWalletPerType({ types: toCreate });
 
-        const createdIds: CurrentWalletIds = Object.entries(created.walletIds)
-          .filter(([type]) => walletIds[type][0] === 'CREATE_NEW')
+        createdIds = Object.entries(created.walletIds)
+          .filter(([type]) => walletIds[type].includes('CREATE_NEW'))
           .reduce((acc, [type, walletIds]) => ({ ...acc, [type]: walletIds }), {});
 
         setNewWallets(
@@ -217,14 +232,16 @@ export const SelectWallet = ({
             const wallets = walletIds.map(walletId => {
               const wallet = Object.values(para.wallets).find(({ id }) => id === walletId);
 
-              return { ...wallet, partner, name: `${partner?.displayName ?? 'New'} Wallet` };
+              return {
+                ...wallet,
+                partner,
+                name: `${partner?.displayName ?? 'New'} Wallet`,
+              };
             });
 
             return { ...acc, [type]: wallets };
           }, {}),
         );
-
-        await para.setCurrentWalletIds({ ...walletIds, ...createdIds }, { sessionLookupId, newDeviceSessionLookupId });
 
         if (created.recoverySecret) {
           newRecoverySecret = JSON.parse(recoverySecret || '{}').backupDecryptionKey;
@@ -232,21 +249,42 @@ export const SelectWallet = ({
           setRecoverySecret(newRecoverySecret);
         }
 
-        await finishLogin();
-
         setIsCreatingWallets(false);
-      } else {
-        const isEnclaveUser = await checkIsEnclaveUser();
-        await para.setCurrentWalletIds(walletIds, { sessionLookupId, newDeviceSessionLookupId });
-        await (isEnclaveUser ? authUpdateEnclaveKeyShares() : authUpdateKeyShares());
-        onSuccess();
       }
+
+      // Replace 'CREATE_NEW' with actual created wallet IDs
+      const finalWalletIds = Object.entries(walletIds).reduce((acc, [type, walletIds]) => {
+        const finalIds = walletIds.map(id => {
+          if (id === 'CREATE_NEW') {
+            // Find the created wallet ID for this type
+            const createdId = createdIds[type]?.[0];
+            return createdId || id; // Fallback to 'CREATE_NEW' if not found
+          }
+          return id;
+        });
+        return { ...acc, [type]: finalIds };
+      }, {} as CurrentWalletIds);
+
+      await para.setCurrentWalletIds(finalWalletIds, { sessionLookupId, newDeviceSessionLookupId });
+
+      // Update key shares for the newly selected wallets (including any newly created ones)
+      await (isEnclaveUser ? authUpdateEnclaveKeyShares() : authUpdateKeyShares(loginRes));
+
+      // Send wallet switch completion message to parent
+      if (isSwitchingWallets) {
+        portalEmitter.walletSwitchCompleted({ walletIds: finalWalletIds });
+      }
+
+      onSuccess({ withDelay: toCreate.length > 0 && isIFramed });
     },
-    [para, onSuccess],
+    [para, onSuccess, isSwitchingWallets],
   );
 
   const [key, header, heading, subheading, content] = useMemo(() => {
-    const isMany = Object.values(selectedWalletIds).filter(([id]) => id === 'CREATE_NEW').length > 1;
+    const isMany =
+      Object.values(selectedWalletIds)
+        .flat()
+        .filter(id => id === 'CREATE_NEW').length > 1;
     if (isCreatingWallets) {
       return ['creating', null, `Creating Wallet${isMany ? 's' : ''}...`, null, null];
     }
@@ -323,7 +361,7 @@ export const SelectWallet = ({
       <WalletsContainer>
         <Wallets isAtBottom={isAtBottom} ref={divRef} onScroll={onScroll}>
           {selectWalletTypes.map(({ type: walletType }) => {
-            const isCreateNew = selectedWalletIds[walletType][0] === 'CREATE_NEW';
+            const isCreateNew = selectedWalletIds[walletType]?.includes('CREATE_NEW') || false;
             return (
               <FlexColumn key={walletType}>
                 {isOnlyOneType ? null : (
@@ -340,13 +378,28 @@ export const SelectWallet = ({
                       addressType={walletType}
                       wallet={wallet}
                       onClick={() => {
-                        setSelectedWalletIds(prev => ({
-                          ...prev,
-                          [walletType]: prev[walletType][0] === wallet.id ? [] : [wallet.id],
-                        }));
+                        setSelectedWalletIds(prev => {
+                          const currentSelection = prev[walletType] || [];
+                          const isCurrentlySelected = currentSelection.includes(wallet.id);
+
+                          if (isCurrentlySelected) {
+                            // Remove wallet from selection
+                            return {
+                              ...prev,
+                              [walletType]: currentSelection.filter(id => id !== wallet.id),
+                            };
+                          } else {
+                            // Add wallet to selection, but first remove 'CREATE_NEW' if it exists
+                            const filteredSelection = currentSelection.filter(id => id !== 'CREATE_NEW');
+                            return {
+                              ...prev,
+                              [walletType]: [...filteredSelection, wallet.id],
+                            };
+                          }
+                        });
                       }}
                       isClaimable={isClaimable}
-                      isSelected={selectedWalletIds[walletType][0] === wallet.id}
+                      isSelected={selectedWalletIds[walletType]?.includes(wallet.id) || false}
                     />
                   );
                 })}
@@ -355,7 +408,11 @@ export const SelectWallet = ({
                     isSelected={isCreateNew}
                     onClick={() => {
                       if (!isCreateNew) {
+                        // When "Create New" is selected, deselect all other wallets in this type
                         setSelectedWalletIds(prev => ({ ...prev, [walletType]: ['CREATE_NEW'] }));
+                      } else {
+                        // When "Create New" is deselected, clear the selection for this type
+                        setSelectedWalletIds(prev => ({ ...prev, [walletType]: [] }));
                       }
                     }}
                   >
@@ -514,7 +571,7 @@ const PageHeading = styled(FlexColumn)`
 `;
 
 const WalletGroupHeading = styled.div`
-  color: var(--Background-96, #0a0a0a);
+  color: var(--cpsl-color-foreground-0, #0a0a0a);
   font-size: var(--Typography-Text-L, 20px);
   font-size: 20px;
   font-weight: 500;
@@ -526,7 +583,6 @@ const WalletGroupHeading = styled.div`
   gap: 8px;
   position: sticky;
   top: 0px;
-  background: white;
   z-index: 1000;
   padding: 0 0 4px 0;
 
