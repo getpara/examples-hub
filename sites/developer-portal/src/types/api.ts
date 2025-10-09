@@ -263,7 +263,7 @@ export type UpdateApiKeyBody = Nullable<
       | 'transactionPopupsEnabled'
       | 'forceTransactionPopups'
       | 'origins'
-      | 'allowedIps'
+      // | 'allowedIps'
       | 'supportedWalletTypes'
       | 'cosmosPrefix'
       | 'androidSha256CertFingerprints'

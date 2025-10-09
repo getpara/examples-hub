@@ -121,14 +121,15 @@ export const useSecurityForm = () => {
                 .filter(Boolean),
             }
           : { origins: null }),
-        ...(updateData.allowedIps
-          ? {
-              allowedIps: updateData.allowedIps
-                .split(',')
-                .map(v => v.trim())
-                .filter(Boolean),
-            }
-          : { allowedIps: null }),
+        // Will add back after REST API launch
+        // ...(updateData.allowedIps
+        //   ? {
+        //       allowedIps: updateData.allowedIps
+        //         .split(',')
+        //         .map(v => v.trim())
+        //         .filter(Boolean),
+        //     }
+        //   : { allowedIps: null }),
         ...(updateData.sessionMaxAge
           ? { sessionMaxAge: (updateData.sessionMaxAge * 60 * 1000).toString(10) } // convert minutes to ms
           : { sessionMaxAge: null }),
