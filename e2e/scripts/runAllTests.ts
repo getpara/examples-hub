@@ -126,7 +126,8 @@ const runTestsForApp = async (appName: string): Promise<TestResult> => {
     }
 
     const playwrightArgs = [
-      `e2e/tests/${config.path}`,
+      // Only running tests in the exact directory to avoid running other tests that need different env vars
+      `e2e/tests/${config.path}/*.spec.ts`,
       "--config=e2e/example-hub-playwright.config.ts",
       "--reporter=line",
       "--workers=1",
