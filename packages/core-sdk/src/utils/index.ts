@@ -10,3 +10,4 @@ export * from './polling.js';
 export * from './types.js';
 export * from './url.js';
 export * from './wallet.js';
+export * from './window.js';

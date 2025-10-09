@@ -47,6 +47,7 @@ export type PortalUrlType =
   | 'loginOTP'
   | 'telegramLoginVerify'
   | 'loginFarcaster'
+  | 'switchWallets'
   | 'addNewCredential';
 
 export type PortalUrlOptions = {
@@ -62,7 +63,7 @@ export type PortalUrlOptions = {
   oAuthMethod?: OAuthUrlParams['method'];
   appScheme?: string;
   encryptionKey?: string;
-  addNewCredentialType?: Omit<TAuthMethod, 'BASIC_LOGIN'>;
+  addNewCredentialType?: Exclude<TAuthMethod, 'BASIC_LOGIN'>;
   addNewCredentialPasswordId?: string;
   addNewCredentialPasskeyId?: string;
 };
@@ -136,13 +137,16 @@ export type TelegramParams = {
 
 export type LoginUrlParams = WithAuthMethod & WithCustomTheme & WithShorten & { sessionId?: string };
 
-export type NewCredentialUrlParams = WithAuthMethod &
-  WithCustomTheme &
+export type NewCredentialUrlParams = WithCustomTheme &
   WithShorten & {
     /**
      * Whether the URL is meant to add a passkey for a previous user on a new device. Defaults to `false`.
      */
     isForNewDevice?: boolean;
+    /**
+     * The authentication method to add.
+     */
+    authMethod?: Exclude<TAuthMethod, 'BASIC_LOGIN'>;
   };
 
 export type OAuthUrlParams = {

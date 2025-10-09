@@ -16,6 +16,7 @@ export class Para extends ParaCore {
   farcasterSdk = undefined;
   isReady = false;
   isFarcasterMiniApp = false;
+  private isFarcasterSetup = false;
 
   // Redeclare all constructor overloads from ParaCore
   constructor(env: Environment | undefined, apiKey: string, opts?: ConstructorOpts);
@@ -34,26 +35,38 @@ export class Para extends ParaCore {
 
   async ready() {
     if (!this.isReady) {
-      try {
-        // @ts-ignore
-        this.farcasterSdk = (await import('@farcaster/miniapp-sdk'))?.sdk ?? undefined;
+      if (!this.isFarcasterSetup) {
+        try {
+          // @ts-ignore
+          this.farcasterSdk = (await import('@farcaster/miniapp-sdk'))?.sdk ?? undefined;
 
-        if (!this.farcasterSdk?.isInMiniApp) {
-          throw new Error('Farcaster SDK not detected or failed to load');
+          if (!this.farcasterSdk?.isInMiniApp) {
+            throw new Error('Farcaster SDK not detected or failed to load');
+          }
+
+          this.devLog('Farcaster SDK detected and loaded successfully.', this.farcasterSdk);
+        } catch (e) {
+          this.devLog(e);
         }
 
-        this.devLog('Farcaster SDK detected and loaded successfully.', this.farcasterSdk);
-      } catch (e) {
-        this.devLog(e);
+        if (!!this.farcasterSdk?.isInMiniApp) {
+          this.devLog('Initializing Farcaster SDK...');
+          this.isFarcasterMiniApp = await this.farcasterSdk.isInMiniApp();
+
+          if (this.isFarcasterMiniApp) {
+            this.externalWalletConnectionOnly = true;
+          }
+        }
+        this.isFarcasterSetup = true;
       }
 
-      if (!!this.farcasterSdk?.isInMiniApp) {
-        this.devLog('Initializing Farcaster SDK...');
-        this.isFarcasterMiniApp = await this.farcasterSdk.isInMiniApp();
-
-        if (this.isFarcasterMiniApp) {
-          this.externalWalletConnectionOnly = true;
-        }
+      // Fetch partner data for wallets if missing
+      if (
+        !this.isPortal() &&
+        Object.values(this.wallets).length > 0 &&
+        Object.values(this.wallets).every(wallet => !wallet.partner)
+      ) {
+        await this.populateWalletAddresses();
       }
 
       this.isReady = true;
@@ -66,8 +79,6 @@ export class Para extends ParaCore {
     }
 
     const messagePort = event.ports[0];
-
-    const userId = this.assertUserId();
 
     let payload,
       status = 'SUCCESS';
@@ -124,6 +135,7 @@ export class Para extends ParaCore {
           break;
         case 'ONRAMPS__SIGN_MOONPAY_URL':
           {
+            const userId = this.assertUserId();
             const { url } = event.data.payload;
             const onRampPurchase = this.onRampPopup?.onRampPurchase;
             const res = await this.ctx.client.signMoonPayUrl(userId, {
@@ -152,20 +164,30 @@ export class Para extends ParaCore {
             }
           }
           break;
+        case 'WALLET_SWITCH_COMPLETED':
+          {
+            const { walletIds } = event.data.payload;
+            this.walletSwitchIds = walletIds;
+            payload = {};
+          }
+          break;
       }
     } catch (e) {
       status = 'ERROR';
       payload = { error: e.message };
     }
 
-    messagePort?.postMessage({
-      id: event.data.id,
-      type: event.data.type,
-      isPara: true,
-      status,
-      payload,
-    });
-    messagePort?.close();
+    // Send response back via MessageChannel (popup)
+    if (messagePort) {
+      messagePort.postMessage({
+        id: event.data.id,
+        type: event.data.type,
+        isPara: true,
+        status,
+        payload,
+      });
+      messagePort.close();
+    }
   };
 
   protected get toStringAdditions() {

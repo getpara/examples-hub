@@ -156,6 +156,7 @@ import Send from './send.svg';
 import Settings from './settings.svg';
 import Share from './share.svg';
 import Shield from './shield.svg';
+import Shuffle from './shuffle.svg';
 import SignalBrand from './signal-brand.svg';
 import Signal from './signal.svg';
 import Sliders from './sliders.svg';
@@ -588,6 +589,7 @@ export const Icons = {
   settings: Settings,
   share: Share,
   shield: Shield,
+  shuffle: Shuffle,
   signalBrand: SignalBrand,
   signal: Signal,
   sliders: Sliders,

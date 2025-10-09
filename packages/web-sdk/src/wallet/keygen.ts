@@ -1,12 +1,12 @@
 import { setupWorker, SyncWorker } from '../workers/workerWrapper.js';
-import { Ctx, distributeNewShare, waitUntilTrue, TPregenIdentifierType } from '@getpara/core-sdk';
+import { Ctx, distributeNewShare, waitUntilTrue, TPregenIdentifierType, isPortal } from '@getpara/core-sdk';
 import { BackupKitEmailProps, TWalletType } from '@getpara/user-management-client';
 import * as uuid from 'uuid';
 
 async function isKeygenComplete(ctx: Ctx, userId: string, walletId: string): Promise<boolean> {
-  const wallets = await ctx.client.getWallets(userId);
+  const wallets = await (isPortal(ctx) ? ctx.client.getAllWallets : ctx.client.getWallets)(userId);
   const wallet = wallets.data.wallets.find(w => w.id === walletId);
-  return !!wallet.address;
+  return !!wallet?.address;
 }
 
 async function isRefreshComplete(

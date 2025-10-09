@@ -30,16 +30,19 @@ vi.mock('../src/cryptography/utils', async importOriginal => {
 
 import './mocks/mockUserManagementClient.js';
 
+export const mockWindowLocation = {
+  href: 'http://localhost',
+  host: 'localhost:3000',
+  origin: 'http://localhost:3000',
+} as unknown as Location;
+
 export const testAddEventListener = vi.fn();
 export const testRemoveEventListener = vi.fn();
 
 Object.defineProperty(globalThis, 'window', {
   value: {
     crypto: crypto,
-    location: {
-      href: 'http://localhost',
-      origin: 'http://localhost:3000',
-    },
+    location: mockWindowLocation,
     addEventListener: testAddEventListener,
     removeEventListener: testRemoveEventListener,
   },

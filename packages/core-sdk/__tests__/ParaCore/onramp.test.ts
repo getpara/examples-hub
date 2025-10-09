@@ -4,6 +4,7 @@ import { MockPara } from '../mocks/mockParaCore';
 import { describe, expect, it, beforeAll, vi } from 'vitest';
 import { expectSearchParams, getWorkerContent } from '../utils';
 import { mockCreateOnRampPurchase } from '../mocks/mockUserManagementClient';
+import { mockWindowLocation } from '../setup.js';
 
 describe('on-ramp transactions', () => {
   describe('ParaCore > onramps', () => {
@@ -35,7 +36,7 @@ describe('on-ramp transactions', () => {
       expectSearchParams(url, {
         ...COMMON_SEARCH_PARAMS,
         apiKey: API_KEY,
-        origin: 'http://localhost:3000',
+        origin: mockWindowLocation.origin,
       });
     });
 

@@ -131,6 +131,7 @@ import {
   isServerAuthState,
   splitPhoneNumber,
   currentWalletIdsEq,
+  isPortal,
 } from './utils/index.js';
 import { TransactionReviewDenied, TransactionReviewTimeout } from './errors.js';
 import * as constants from './constants.js';
@@ -145,7 +146,6 @@ type WritableMethodKeys<T> = {
 }[keyof T];
 
 type IfEquals<X, Y, A = X, B = never> = X extends Y ? (Y extends X ? A : B) : B;
-
 export abstract class ParaCore implements CoreInterface {
   popupWindow: Window | null = null;
 
@@ -154,6 +154,8 @@ export abstract class ParaCore implements CoreInterface {
   ctx: Ctx;
 
   #authInfo?: CoreAuthInfo;
+
+  protected walletSwitchIds?: CurrentWalletIds; // Track expected wallet IDs during wallet switching
 
   protected isNativePasskey: boolean = false;
 
@@ -491,20 +493,30 @@ export abstract class ParaCore implements CoreInterface {
 
   protected platformUtils: PlatformUtils;
 
+  protected nonPersistedStorageKeys: string[] = [];
+
   private localStorageGetItem = (key: string): Promise<string | null> | string | null => {
-    return this.platformUtils.localStorage.get(key);
+    if (!(this.nonPersistedStorageKeys ?? []).includes(key)) {
+      return this.platformUtils.localStorage.get(key);
+    }
   };
   private localStorageSetItem = (key: string, value: string): Promise<void> | void => {
-    return this.platformUtils.localStorage.set(key, value);
+    if (!(this.nonPersistedStorageKeys ?? []).includes(key)) {
+      return this.platformUtils.localStorage.set(key, value);
+    }
   };
   private localStorageRemoveItem = (key: string): Promise<void> | void => {
     return this.platformUtils.localStorage.removeItem(key);
   };
   private sessionStorageGetItem = (key: string): Promise<string | null> | string | null => {
-    return this.platformUtils.sessionStorage.get(key);
+    if (!(this.nonPersistedStorageKeys ?? []).includes(key)) {
+      return this.platformUtils.sessionStorage.get(key);
+    }
   };
   private sessionStorageSetItem = (key: string, value: string): Promise<void> | void => {
-    return this.platformUtils.sessionStorage.set(key, value);
+    if (!(this.nonPersistedStorageKeys ?? []).includes(key)) {
+      return this.platformUtils.sessionStorage.set(key, value);
+    }
   };
   private sessionStorageRemoveItem = (key: string): Promise<void> | void => {
     return this.platformUtils.sessionStorage.removeItem(key);
@@ -571,9 +583,7 @@ export abstract class ParaCore implements CoreInterface {
   }
 
   protected isPortal(envOverride?: Environment): boolean {
-    if (typeof window === 'undefined') return false;
-    const normalizedUrl = window.location?.host?.replace('getpara', 'usecapsule');
-    return !!normalizedUrl && getPortalBaseURL(envOverride ? { env: envOverride } : this.ctx).includes(normalizedUrl);
+    return isPortal(this.ctx, envOverride);
   }
 
   private isParaConnect(): boolean {
@@ -755,15 +765,26 @@ export abstract class ParaCore implements CoreInterface {
   abstract isPasskeySupported(): Promise<boolean>;
 
   protected async constructPortalUrl(type: PortalUrlType, opts: PortalUrlOptions = {}) {
-    const [isCreate, isLogin, isOnRamp, isOAuth, isOAuthCallback, isTelegramLogin, isFarcasterLogin, isAddNewCredential] = [
+    const [
+      isCreate,
+      isLogin,
+      isOnRamp,
+      isOAuth,
+      isOAuthCallback,
+      isTelegramLogin,
+      isFarcasterLogin,
+      isAddNewCredential,
+      isSwitchWallets,
+    ] = [
       ['createAuth', 'createPassword', 'createPIN'].includes(type),
-      ['loginAuth', 'loginPassword', 'loginPIN', 'loginOTP'].includes(type),
+      ['loginAuth', 'loginPassword', 'loginPIN', 'loginOTP', 'switchWallets'].includes(type),
       type === 'onRamp',
       type === 'oAuth',
       type === 'oAuthCallback',
       ['telegramLogin', 'telegramLoginVerify'].includes(type),
       type === 'loginFarcaster',
       type === 'addNewCredential',
+      type === 'switchWallets',
     ];
 
     if (isOAuth && !opts.oAuthMethod) {
@@ -847,6 +868,10 @@ export abstract class ParaCore implements CoreInterface {
         path = '/auth/farcaster';
         break;
       }
+      case 'switchWallets': {
+        path = `/auth/wallets`;
+        break;
+      }
       case 'addNewCredential': {
         path = '/auth/add-new-credential';
         break;
@@ -874,6 +899,7 @@ export abstract class ParaCore implements CoreInterface {
 
     const params: Record<string, string | undefined | null> = {
       apiKey: this.ctx.apiKey,
+      origin: typeof window !== 'undefined' ? window.location.origin : undefined,
       partnerId: partner?.id,
       portalFont: opts.portalTheme?.font || this.portalTheme?.font || partner?.font,
       portalBorderRadius: opts.portalTheme?.borderRadius || this.portalTheme?.borderRadius,
@@ -890,7 +916,7 @@ export abstract class ParaCore implements CoreInterface {
       portalTextColor: this.portalTextColor,
       portalPrimaryButtonTextColor: this.portalPrimaryButtonTextColor,
       isForNewDevice: opts.isForNewDevice ? opts.isForNewDevice.toString() : undefined,
-      ...(this.authInfo && (isCreate || isLogin || isAddNewCredential || isOAuthCallback)
+      ...(this.authInfo && (isCreate || isLogin || isAddNewCredential || isOAuthCallback || isSwitchWallets)
         ? {
             authInfo: JSON.stringify(this.authInfo),
             ...(isPhone(this.authInfo.auth) ? splitPhoneNumber(this.authInfo.auth.phone) : this.authInfo.auth),
@@ -898,7 +924,7 @@ export abstract class ParaCore implements CoreInterface {
             displayName: this.authInfo.displayName,
           }
         : {}),
-      ...(isOnRamp ? { origin: typeof window !== 'undefined' ? window.location.origin : undefined, email: this.email } : {}),
+      ...(isOnRamp ? { email: this.email } : {}),
       ...(isLogin || isOAuth || isOAuthCallback || isTelegramLogin || isFarcasterLogin || isAddNewCredential
         ? {
             sessionId: thisDevice.sessionId,
@@ -918,6 +944,12 @@ export abstract class ParaCore implements CoreInterface {
           }
         : {}),
       ...(isTelegramLogin ? { isEmbed: 'true' } : {}),
+      ...(isSwitchWallets
+        ? {
+            ...(this.currentWalletIds ? { currentWalletIds: JSON.stringify(this.currentWalletIds) } : {}),
+            ...(this.userId ? { userId: this.userId } : {}),
+          }
+        : {}),
       ...(opts.params || {}),
       ...(isAddNewCredential
         ? {
@@ -2011,7 +2043,7 @@ Need help? Visit: https://docs.getpara.com or contact support
 
   get availableWallets(): Pick<
     Wallet,
-    'id' | 'type' | 'name' | 'address' | 'isExternal' | 'externalProviderId' | 'isExternalConnectionOnly'
+    'id' | 'type' | 'name' | 'address' | 'partner' | 'isExternal' | 'externalProviderId' | 'isExternalConnectionOnly'
   >[] {
     return [
       ...[...this.currentWalletIdsArray, ...this.#guestWalletIdsArray]
@@ -2023,6 +2055,7 @@ Need help? Visit: https://docs.getpara.com or contact support
 
           return {
             id: wallet.id,
+            partner: wallet.partner,
             type,
             address: this.getDisplayAddress(id, { addressType: type }),
             name: wallet.name,
@@ -2162,8 +2195,8 @@ Need help? Visit: https://docs.getpara.com or contact support
     );
   }
 
-  private async populateWalletAddresses(): Promise<void> {
-    const res = await this.ctx.client.getWallets(this.userId, true);
+  protected async populateWalletAddresses(): Promise<void> {
+    const res = await (this.isPortal() ? this.ctx.client.getAllWallets : this.ctx.client.getWallets)(this.userId, true);
     const wallets = res.data.wallets;
     wallets.forEach(entity => {
       if (this.wallets[entity.id]) {
@@ -2462,6 +2495,12 @@ Need help? Visit: https://docs.getpara.com or contact support
     const isSessionActive = await this.isSessionActive();
 
     if (this.externalWalletConnectionType === 'VERIFICATION') {
+      return isSessionActive;
+    }
+
+    // If wallet switching is in progress, consider the user logged in
+    // to avoid flickering during the transition
+    if (this.walletSwitchIds) {
       return isSessionActive;
     }
 
@@ -2787,6 +2826,7 @@ Need help? Visit: https://docs.getpara.com or contact support
       path: `/auth/${method.toLowerCase()}`,
       params: {
         apiKey: this.ctx.apiKey,
+        origin: typeof window !== 'undefined' ? window.location.origin : undefined,
         sessionLookupId,
         portalSessionLookupId,
         appScheme,
@@ -2882,6 +2922,7 @@ Need help? Visit: https://docs.getpara.com or contact support
     }
 
     const startedAt = Date.now();
+
     return new Promise((resolve, reject) => {
       (async () => {
         while (true) {
@@ -2933,31 +2974,28 @@ Need help? Visit: https://docs.getpara.com or contact support
     return await this.verifyOAuthProcess({ ...opts, isLinkAccount: true });
   }
 
-  /**
-   * Waits for the session to be active and sets up the user.
-   *
-   * @param {Object} opts the options object
-   * @param {Window} [opts.popupWindow] the popup window being used for login.
-   * @param {boolean} [opts.skipSessionRefresh] whether to skip refreshing the session.
-   * @returns {Object} `{ isComplete: boolean; isError: boolean; needsWallet: boolean; partnerId: string; }` the result data
-   **/
-  async waitForLogin({
+  async #waitForLoginProcess({
     isCanceled = () => false,
     onCancel,
     onPoll,
     skipSessionRefresh = false,
-  }: CoreMethodParams<'waitForLogin'> = {}): CoreMethodResponse<'waitForLogin'> {
+    isSwitchingWallets = false,
+  }: CoreMethodParams<'waitForLogin'> & { isSwitchingWallets?: boolean } = {}): CoreMethodResponse<'waitForLogin'> {
     const startedAt = Date.now();
     return new Promise((resolve, reject) => {
       (async () => {
-        if (!this.isExternalWalletAuth) {
+        if (!this.isExternalWalletAuth && !isSwitchingWallets) {
           // Remove external wallets if logging in with Capsule
           this.externalWallets = {};
         }
 
         while (true) {
           if (isCanceled() || Date.now() - startedAt > constants.POLLING_TIMEOUT_MS) {
-            dispatchEvent(ParaEvent.LOGIN_EVENT, { isComplete: false }, 'failed to setup user');
+            if (isSwitchingWallets) {
+              this.walletSwitchIds = undefined;
+            } else {
+              dispatchEvent(ParaEvent.LOGIN_EVENT, { isComplete: false }, 'failed to setup user');
+            }
             onCancel?.();
             return reject('canceled');
           }
@@ -2966,7 +3004,12 @@ Need help? Visit: https://docs.getpara.com or contact support
 
           try {
             let session = await this.touchSession();
-            if (!session.isAuthenticated) {
+
+            // Check authentication based on whether we're switching wallets or doing normal login
+            const shouldContinuePolling =
+              (!isSwitchingWallets && !session.isAuthenticated) || (isSwitchingWallets && !this.walletSwitchIds);
+
+            if (shouldContinuePolling) {
               onPoll?.();
               continue;
             }
@@ -2975,19 +3018,43 @@ Need help? Visit: https://docs.getpara.com or contact support
 
             const needsWallet = session.needsWallet ?? false;
 
-            if (!needsWallet) {
+            // For wallet switching, check if wallet selection is complete
+            if (isSwitchingWallets) {
+              // Check if we have received wallet IDs from portal and if they match the session
+              if (this.walletSwitchIds) {
+                const walletIdsMatch = currentWalletIdsEq(session.currentWalletIds, this.walletSwitchIds);
+
+                if (!walletIdsMatch) {
+                  onPoll?.();
+                  continue;
+                }
+
+                // Don't clear walletSwitchIds yet - let the login flow complete first
+              } else {
+                onPoll?.();
+                continue;
+              }
+            } else if (!needsWallet) {
               if (this.currentWalletIdsArray.length === 0) {
                 onPoll?.();
                 continue;
               }
             }
 
-            const fetchedWallets = await this.fetchWallets();
-
             const tempSharesRes = await this.getTransmissionKeyShares();
-            // need this check for the case where user has logged in but temp encrypted shares
-            // haven't been sent to the backend yet
-            if (tempSharesRes.data.temporaryShares.length === fetchedWallets.length) {
+            let hasSharesForCurrentWallets: boolean;
+            if (!isSwitchingWallets) {
+              const fetchedWallets = await this.fetchWallets();
+
+              hasSharesForCurrentWallets = tempSharesRes.data.temporaryShares.length === fetchedWallets.length;
+            } else {
+              hasSharesForCurrentWallets = this.currentWalletIdsArray.every(([walletId]) => {
+                return tempSharesRes.data.temporaryShares.some(share => share.walletId === walletId);
+              });
+            }
+
+            // Proceed if we have shares for all currently selected wallets
+            if (hasSharesForCurrentWallets) {
               await this.setupAfterLogin({ temporaryShares: tempSharesRes.data.temporaryShares, skipSessionRefresh });
 
               await this.claimPregenWallets();
@@ -2997,7 +3064,12 @@ Need help? Visit: https://docs.getpara.com or contact support
                 partnerId: session.partnerId,
               };
 
-              dispatchEvent(ParaEvent.LOGIN_EVENT, resp);
+              // Clear wallet switching state after successful login completion
+              if (isSwitchingWallets) {
+                this.walletSwitchIds = undefined;
+              } else {
+                dispatchEvent(ParaEvent.LOGIN_EVENT, resp);
+              }
               return resolve(resp);
             }
             onPoll?.();
@@ -3009,6 +3081,33 @@ Need help? Visit: https://docs.getpara.com or contact support
         }
       })();
     });
+  }
+
+  /**
+   * Waits for the session to be active and sets up the user.
+   *
+   * @param {Object} opts the options object
+   * @param {Window} [opts.popupWindow] the popup window being used for login.
+   * @param {boolean} [opts.skipSessionRefresh] whether to skip refreshing the session.
+   * @returns {Object} `{ isComplete: boolean; isError: boolean; needsWallet: boolean; partnerId: string; }` the result data
+   **/
+  async waitForLogin(args: CoreMethodParams<'waitForLogin'>): CoreMethodResponse<'waitForLogin'> {
+    return await this.#waitForLoginProcess(args);
+  }
+
+  protected async waitForWalletSwitching(args: CoreMethodParams<'waitForLogin'>): CoreMethodResponse<'waitForLogin'> {
+    return await this.#waitForLoginProcess({ ...args, isSwitchingWallets: true });
+  }
+
+  /**
+   * Gets the switch wallets URL for wallet selection.
+   * The authMethod is automatically included in the URL if available.
+   *
+   * @returns {Promise<{ url: string; authMethod: TAuthMethod }>} The switch wallets URL and authMethod
+   */
+  protected async getSwitchWalletsUrl(): Promise<string> {
+    const url = await this.constructPortalUrl('switchWallets');
+    return url;
   }
 
   /**
@@ -3144,7 +3243,7 @@ Need help? Visit: https://docs.getpara.com or contact support
           break;
         }
         ++maxPolls;
-        const res = await this.ctx.client.getWallets(this.userId);
+        const res = await (this.isPortal() ? this.ctx.client.getAllWallets : this.ctx.client.getWallets)(this.userId);
         const wallet = res.data.wallets.find(w => w.id === walletId);
         if (wallet && wallet.address) {
           return;

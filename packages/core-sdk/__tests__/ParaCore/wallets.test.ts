@@ -630,13 +630,13 @@ describe('wallets', () => {
     ]);
 
     expect(para.availableWallets).toEqual([
-      _.pick(para.wallets[evmId], ['id', 'type', 'name', 'address', 'isExternal']),
+      _.pick(para.wallets[evmId], ['id', 'type', 'name', 'address', 'isExternal', 'partner']),
       {
-        ..._.pick(para.wallets[evmId], ['id', 'name', 'isExternal']),
+        ..._.pick(para.wallets[evmId], ['id', 'name', 'isExternal', 'partner']),
         type: 'COSMOS',
         address: para.getDisplayAddress(evmId, { addressType: 'COSMOS' }),
       },
-      _.pick(para.wallets[solanaId], ['id', 'type', 'name', 'address', 'isExternal']),
+      _.pick(para.wallets[solanaId], ['id', 'type', 'name', 'address', 'isExternal', 'partner']),
     ]);
 
     expect(para.getWallets()).toBe(para.wallets);

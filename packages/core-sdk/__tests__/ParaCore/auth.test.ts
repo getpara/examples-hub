@@ -84,6 +84,7 @@ import _ from 'lodash';
 import { faker } from '@faker-js/faker';
 import { EXTERNAL_WALLET_CONNECTION_ONLY_USER_ID } from '../../src/constants.js';
 import { OAuthResponse } from '../../dist/types/index.js';
+import { mockWindowLocation } from '../setup.js';
 
 const emailAuthInfo: AuthInfo<'email'> = {
   auth: { email: USER_EMAIL },
@@ -125,7 +126,13 @@ function expectSearchParams(url: URL, expected: Record<string, string>): void {
   expect(searchParams).toEqual(expected);
 }
 
-function testLoginUrl(para: MockPara, str: string, authMethod: AuthMethod, extraParams?: Record<string, string>) {
+function testLoginUrl(
+  para: MockPara,
+  str: string,
+  authMethod: AuthMethod,
+  origin: string | null = mockWindowLocation.origin,
+  extraParams?: Record<string, string>,
+) {
   const url = new URL(str);
 
   const authInfo = para.authInfo!;
@@ -147,6 +154,7 @@ function testLoginUrl(para: MockPara, str: string, authMethod: AuthMethod, extra
     ...(authInfo.displayName ? { displayName: authInfo!.displayName } : {}),
     ...(authInfo.pfpUrl ? { pfpUrl: authInfo!.pfpUrl } : {}),
     apiKey: PARTNER.apiKey!,
+    ...(origin ? { origin } : {}),
     encryptionKey: getPublicKeyHex(para.loginEncryptionKeyPair!),
     sessionId: SESSION_LOOKUP_ID,
     pregenIds: '{}',
@@ -154,7 +162,12 @@ function testLoginUrl(para: MockPara, str: string, authMethod: AuthMethod, extra
   });
 }
 
-function testCreateUrl(para: MockPara, str: string, authMethod: AuthMethod) {
+function testCreateUrl(
+  para: MockPara,
+  str: string,
+  authMethod: AuthMethod,
+  origin: string | null = mockWindowLocation.origin,
+) {
   const url = new URL(str);
 
   const authInfo = para.authInfo!;
@@ -166,6 +179,7 @@ function testCreateUrl(para: MockPara, str: string, authMethod: AuthMethod) {
   expectSearchParams(url, {
     ...COMMON_SEARCH_PARAMS,
     authInfo: JSON.stringify(authInfo),
+    ...(origin ? { origin } : {}),
     ...(isPhone(authInfo.auth) ? splitPhoneNumber(authInfo.auth.phone) : authInfo.auth),
     ...(authInfo.displayName ? { displayName: authInfo!.displayName } : {}),
     ...(authInfo.pfpUrl ? { pfpUrl: authInfo!.pfpUrl } : {}),
@@ -661,9 +675,11 @@ describe('ParaCore - authentication', () => {
             }
 
             if (isPIN) {
-              testLoginUrl(para, authState.pinUrl!, AuthMethod.PIN, { isEmbedded: 'false' });
+              testLoginUrl(para, authState.pinUrl!, AuthMethod.PIN, mockWindowLocation.origin, { isEmbedded: 'false' });
             } else {
-              testLoginUrl(para, authState.passwordUrl!, AuthMethod.PASSWORD, { isEmbedded: 'false' });
+              testLoginUrl(para, authState.passwordUrl!, AuthMethod.PASSWORD, mockWindowLocation.origin, {
+                isEmbedded: 'false',
+              });
             }
           }
         });
@@ -895,6 +911,7 @@ describe('ParaCore - authentication', () => {
       describe('verify', () => {
         [0, 1, 2, 3].forEach(strategy => {
           describe(['with onOAuthUrl', 'with onOAuthPopup', 'neither', 'neither - portal'][strategy], () => {
+            let origin = mockWindowLocation.origin;
             const prepare = async (method: Parameters<typeof para.verifyOAuth>[0]['method']): Promise<OAuthResponse> => {
               mockGetSupportedAuthMethodsV2.mockResolvedValue({
                 supportedAuthMethods: [],
@@ -939,7 +956,11 @@ describe('ParaCore - authentication', () => {
                   break;
                 case 3:
                   {
-                    vi.spyOn(window, 'location', 'get').mockReturnValue({ host: 'localhost:3003' } as Location);
+                    origin = 'http://localhost:3003';
+                    vi.spyOn(window, 'location', 'get').mockReturnValue({
+                      host: 'localhost:3003',
+                      origin,
+                    } as Location);
                     const oAuthUrl = await para.getOAuthUrl({ method });
 
                     authState = await para.verifyOAuth({ method });
@@ -955,9 +976,11 @@ describe('ParaCore - authentication', () => {
                 expect(url.pathname).toEqual(`/auth/${method.toLowerCase()}`);
                 expectSearchParams(url, {
                   apiKey: PARTNER.apiKey,
+                  origin: mockWindowLocation.origin,
                   ...(strategy === 3
                     ? {
                         callback: expect.stringMatching(''),
+                        origin,
                         portalSessionLookupId: expect.stringMatching(''),
                         sessionLookupId: expect.stringMatching(''),
                       }
@@ -994,8 +1017,8 @@ describe('ParaCore - authentication', () => {
                   });
 
                   if (authState.stage === 'signup') {
-                    testCreateUrl(para, authState.passkeyUrl!, AuthMethod.PASSKEY);
-                    testCreateUrl(para, authState.passwordUrl!, AuthMethod.PASSWORD);
+                    testCreateUrl(para, authState.passkeyUrl!, AuthMethod.PASSKEY, origin);
+                    testCreateUrl(para, authState.passwordUrl!, AuthMethod.PASSWORD, origin);
                   }
                 });
 
@@ -1022,8 +1045,8 @@ describe('ParaCore - authentication', () => {
                   });
 
                   if (authState.stage === 'login') {
-                    testLoginUrl(para, authState.passkeyUrl!, AuthMethod.PASSKEY);
-                    testLoginUrl(para, authState.passwordUrl!, AuthMethod.PASSWORD, { isEmbedded: 'true' });
+                    testLoginUrl(para, authState.passkeyUrl!, AuthMethod.PASSKEY, origin);
+                    testLoginUrl(para, authState.passwordUrl!, AuthMethod.PASSWORD, origin, { isEmbedded: 'true' });
                   }
                 });
 
@@ -1100,8 +1123,8 @@ describe('ParaCore - authentication', () => {
               passwordUrl: expect.stringMatching(''),
             });
 
-            testCreateUrl(para, authState.passkeyUrl!, AuthMethod.PASSKEY);
-            testCreateUrl(para, authState.passwordUrl!, AuthMethod.PASSWORD);
+            testCreateUrl(para, authState.passkeyUrl!, AuthMethod.PASSKEY, null);
+            testCreateUrl(para, authState.passwordUrl!, AuthMethod.PASSWORD, null);
           });
 
           it('BASIC_LOGIN', async () => {
@@ -1133,8 +1156,8 @@ describe('ParaCore - authentication', () => {
               passwordUrl: expect.stringMatching(''),
             });
 
-            testLoginUrl(para, authState.passkeyUrl!, AuthMethod.PASSKEY);
-            testLoginUrl(para, authState.passwordUrl!, AuthMethod.PASSWORD, { isEmbedded: 'true' });
+            testLoginUrl(para, authState.passkeyUrl!, AuthMethod.PASSKEY, null);
+            testLoginUrl(para, authState.passwordUrl!, AuthMethod.PASSWORD, null, { isEmbedded: 'true' });
           });
         });
 

@@ -7,6 +7,7 @@ export {
   type VerifiedAuthInfo,
   type VerifiedAuth,
   AuthMethod,
+  type TAuthMethod,
   AuthMethodStatus,
   type AuthExtras,
   type CurrentWalletIds,
@@ -89,8 +90,13 @@ export {
 export * from './types/coreApi.js';
 export * from './types/events.js';
 export * from './types/config.js';
-export { getPortalDomain, dispatchEvent, entityToWallet, constructUrl, shortenUrl } from './utils/index.js';
-export { PREFIX as STORAGE_PREFIX, PARA_PREFIX as PARA_STORAGE_PREFIX } from './constants.js';
+export { getPortalDomain, dispatchEvent, entityToWallet, constructUrl, shortenUrl, isPortal } from './utils/index.js';
+export {
+  PREFIX as STORAGE_PREFIX,
+  PARA_PREFIX as PARA_STORAGE_PREFIX,
+  LOCAL_STORAGE_CURRENT_WALLET_IDS,
+  LOCAL_STORAGE_WALLETS,
+} from './constants.js';
 export { distributeNewShare } from './shares/shareDistribution.js';
 export { KeyContainer } from './shares/KeyContainer.js';
 export type { PlatformUtils } from './PlatformUtils.js';

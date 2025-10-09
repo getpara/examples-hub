@@ -241,6 +241,13 @@ describe('ParaCore - utils', () => {
         vi.spyOn(window, 'location', 'get').mockReturnValue({ host: 'app.sandbox.usecapsule.com' } as Location);
         expect((para as unknown as any).isPortal(Environment.SANDBOX)).toBe(true);
       });
+
+      it('should return true for direct access (copied link) when both opener and parent are undefined', () => {
+        vi.spyOn(window, 'location', 'get').mockReturnValue({ host: 'localhost:3003' } as Location);
+        Object.defineProperty(window, 'opener', { value: undefined, writable: true });
+        Object.defineProperty(window, 'parent', { value: undefined, writable: true });
+        expect((para as unknown as any).isPortal()).toBe(true);
+      });
     });
 
     describe('isParaConnect', () => {

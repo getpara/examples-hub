@@ -5,6 +5,7 @@ import { Environment } from '../../src';
 import { API_KEY, PARTNER, TIMEOUT_MS, TRANSACTION_ID, USER_EMAIL, USER_ID } from '../constants';
 import { resetPlatformMocks } from '../mocks/mockPlatformUtils';
 import { resetClientMocks } from '../mocks/mockUserManagementClient';
+import { mockWindowLocation } from '../setup';
 
 describe('ParaCore - transactions', () => {
   let para: MockPara;
@@ -137,6 +138,7 @@ describe('ParaCore - transactions', () => {
     expect(url.pathname).toEqual(`/web/users/${USER_ID}/transaction-review/${TRANSACTION_ID}`);
     expectSearchParams(url, {
       apiKey: PARTNER.apiKey,
+      origin: mockWindowLocation.origin,
       email: USER_EMAIL,
       partnerId: PARTNER.id,
       portalAccentColor: PARTNER.accentColor,

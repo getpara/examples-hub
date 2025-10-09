@@ -83,7 +83,7 @@ export class EnclaveClient {
     }
   }
 
-  private async issueEnclaveJwt(): Promise<void> {
+  async issueEnclaveJwt(): Promise<void> {
     // Generate frontend keypair to receive encrypted response
     const frontendKeyPair = await this.generateFrontendKeyPair();
     const responsePublicKeyPEM = await this.exportPublicKeyToPEM(frontendKeyPair.publicKey);
