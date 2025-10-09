@@ -1,3 +1,48 @@
+# Release (Thu Oct 09 2025)
+
+## Package Versions
+- @getpara/web-sdk@2.0.0-alpha.64
+- @getpara/wagmi-v2-integration@2.0.0-alpha.64
+- @getpara/wagmi-v2-connector@2.0.0-alpha.64
+- @getpara/viem-v2-integration@2.0.0-alpha.64
+- @getpara/viem-v1-integration@2.0.0-alpha.64
+- @getpara/user-management-client@2.0.0-alpha.64
+- @getpara/solana-web3.js-v1-integration@2.0.0-alpha.64
+- @getpara/solana-wallet-connectors@2.0.0-alpha.64
+- @getpara/solana-signers-v2-integration@2.0.0-alpha.64
+- @getpara/server-sdk@2.0.0-alpha.64
+- @getpara/react-sdk-lite@2.0.0-alpha.64
+- @getpara/react-sdk@2.0.0-alpha.64
+- @getpara/react-native-wallet@2.0.0-alpha.64
+- @getpara/react-components@2.0.0-alpha.64
+- @getpara/react-component-library@1.0.0-alpha.59
+- @getpara/react-common@2.0.0-alpha.64
+- @getpara/evm-wallet-connectors@2.0.0-alpha.64
+- @getpara/ethers-v6-integration@2.0.0-alpha.64
+- @getpara/ethers-v5-integration@2.0.0-alpha.64
+- @getpara/cosmos-wallet-connectors@2.0.0-alpha.64
+- @getpara/cosmjs-v0-integration@2.0.0-alpha.64
+- @getpara/core-sdk@2.0.0-alpha.64
+- @getpara/core-components@2.0.0-alpha.64
+
+### Features
+- Switch wallets mid-session pt 2 (#1255) - b1b660f3c
+- Switch wallets mid-session pt 1 (#1254) - b9360578d
+- Basic login downgrade hook (#1253) - 7e729c285
+- exclude countries that are blocked in twilio from the phone number country code dropdown (#1251) - 960ffcd12
+
+### Fixes
+- Dev portal - Hide allowed ips (#1256) - fbd60905d
+- correct JWT on signup (#1252) - 04fa72fac
+- type of authmethod (#1249) - 9902c75d0
+
+### Chores
+- Update vars for new e2es (#1258) - 7250983c2
+- Simplify race condition testing (#1245) - a58aa2490
+- example app improvements (#1250) - 70f364b92
+- Dev Portal - Add temp logic for basic login customers (#1248) - 2ef1016d3
+- no early wasm request for portal and compress wasm file (#1238) - 4d3a537c0
+
 # Release (Wed Oct 01 2025)
 
 ## Package Versions
