@@ -3,7 +3,13 @@
 export const TEST_ENV = {
   // Para API - Default for most tests
   PARA_API_KEY_BETA: 'beta_c61c45aec46dee3fe50d98125e9560cc',
+  PARA_API_KEY_BASIC_LOGIN_BETA: 'beta_cc2d629fda0f065ea217ac6011a79d58',
+  PARA_API_KEY_PIN_BETA: 'beta_4e394397b57fd5de9b047617cb2453b0',
+
   PARA_API_KEY_SANDBOX: 'your-actual-sandbox-api-key', // Add if you have a sandbox key
+  PARA_API_KEY_BASIC_LOGIN_SANDBOX: 'your-actual-sandbox-api-key', // Add if you have a sandbox key
+  PARA_API_KEY_PIN_SANDBOX: 'your-actual-sandbox-api-key', // Add if you have a sandbox key
+
   PARA_ENVIRONMENT: 'BETA',
 
   // Framework-specific API keys
@@ -11,10 +17,14 @@ export const TEST_ENV = {
   PARA_API_KEY_NODE_BETA: 'beta_d3ab80805be5249efce856ff416a6c28',
   PARA_API_KEY_NODE_OVERRIDE: 'beta_d3ab80805be5249efce856ff416a6c28',
 
-  // Framework-specific (using default API key)w
+  // Framework-specific (using default API keys)
   VITE_PARA_API_KEY: 'beta_c61c45aec46dee3fe50d98125e9560cc',
+  VITE_PARA_API_KEY_BASIC_LOGIN: 'beta_cc2d629fda0f065ea217ac6011a79d58',
+  VITE_PARA_API_KEY_PIN: 'beta_4e394397b57fd5de9b047617cb2453b0',
   VITE_PARA_ENVIRONMENT: 'BETA',
   NEXT_PUBLIC_PARA_API_KEY: 'beta_c61c45aec46dee3fe50d98125e9560cc',
+  NEXT_PUBLIC_PARA_API_KEY_BASIC_LOGIN: 'beta_cc2d629fda0f065ea217ac6011a79d58',
+  NEXT_PUBLIC_PARA_API_KEY_PIN: 'beta_4e394397b57fd5de9b047617cb2453b0',
   NEXT_PUBLIC_PARA_ENVIRONMENT: 'BETA',
 
   // Server examples (will be overridden for node framework)
