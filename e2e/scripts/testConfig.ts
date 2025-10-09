@@ -1,8 +1,9 @@
 import crypto from "crypto";
 import { execSync } from "child_process";
 import { logger } from "../helpers/logger";
+import * as dotenv from "dotenv";
 
-type AuthType = "BASIC_LOGIN" | "PASSKEY";
+dotenv.config();
 
 export interface TestAppConfig {
   path: string;
@@ -51,7 +52,9 @@ function getEnvVar(key: string, fallback?: string): string {
   return value || fallback || "";
 }
 
-export function getTestEnvironment(authType?: AuthType): TestEnvironment {
+export function getTestEnvironment(
+  authType?: "BASIC_LOGIN" | "PASSKEY"
+): TestEnvironment {
   const environment = getEnvVar("PARA_ENVIRONMENT", "BETA") as
     | "BETA"
     | "SANDBOX";
@@ -70,8 +73,7 @@ export function getTestEnvironment(authType?: AuthType): TestEnvironment {
 
 export function getFrameworkEnvVars(
   framework: string,
-  testEnv: TestEnvironment,
-  authType?: AuthType
+  testEnv: TestEnvironment
 ): Record<string, string> {
   const baseEnvVars: Record<string, string> = {
     PARA_ENVIRONMENT: testEnv.environment,
@@ -83,31 +85,23 @@ export function getFrameworkEnvVars(
     ""
   );
   const apiKey = frameworkApiKeyOverride || testEnv.apiKey;
-  let apiKeySuffix = "";
 
   switch (framework) {
     case "react-vite":
     case "vue":
     case "svelte":
-      apiKeySuffix = authType === "BASIC_LOGIN" ? "_BASIC_LOGIN" : "";
       return {
         ...baseEnvVars,
-        VITE_PARA_API_KEY: getEnvVar(
-          `VITE_PARA_API_KEY${apiKeySuffix}`,
-          apiKey
-        ),
+        VITE_PARA_API_KEY: getEnvVar("VITE_PARA_API_KEY", apiKey),
         VITE_PARA_ENVIRONMENT: testEnv.environment,
       };
 
     case "react-nextjs":
-      apiKeySuffix = authType === "BASIC_LOGIN" ? "_BASIC_LOGIN" : "";
       return {
         ...baseEnvVars,
-        NEXT_PUBLIC_PARA_API_KEY: getEnvVar(
-          `NEXT_PUBLIC_PARA_API_KEY${apiKeySuffix}`,
-          apiKey
-        ),
+        NEXT_PUBLIC_PARA_API_KEY: getEnvVar("NEXT_PUBLIC_PARA_API_KEY", apiKey),
         NEXT_PUBLIC_PARA_ENVIRONMENT: testEnv.environment,
+        PORT: getEnvVar("NEXTJS_PORT", "3000"),
       };
 
     case "node":
@@ -145,8 +139,22 @@ export const APP_CONFIGS: Record<string, TestAppConfig> = {
     startCommand: "rm -rf node_modules/.vite && yarn dev --force",
     envVars: {},
   },
+  "react-vite-basic-login": {
+    path: "web/with-react-vite/basic-login",
+    framework: "react-vite",
+    port: parseInt(getEnvVar("VITE_PORT", "5173")),
+    startCommand: "rm -rf node_modules/.vite && yarn dev --force",
+    envVars: {},
+  },
   "react-nextjs": {
     path: "web/with-react-nextjs/para-modal",
+    framework: "react-nextjs",
+    port: parseInt(getEnvVar("NEXTJS_PORT", "3000")),
+    startCommand: "yarn dev",
+    envVars: {},
+  },
+  "react-nextjs-basic-login": {
+    path: "web/with-react-nextjs/para-modal/basic-login",
     framework: "react-nextjs",
     port: parseInt(getEnvVar("NEXTJS_PORT", "3000")),
     startCommand: "yarn dev",
@@ -179,6 +187,8 @@ export const APP_CONFIGS: Record<string, TestAppConfig> = {
 };
 
 export const TEST_PATTERNS = {
+  "email-basic-login": "happyPath.email-basic-login.spec.ts",
+  "phone-basic-login": "happyPath.phone-basic-login.spec.ts",
   "email-password": "happyPath.email-password.spec.ts",
   "email-passkey": "happyPath.email-passkey.spec.ts",
   "phone-password": "happyPath.phone-password.spec.ts",
@@ -192,9 +202,11 @@ export function getTestConfig(appName: string): TestAppConfig {
     throw new Error(`Unknown app configuration: ${appName}`);
   }
 
+  const authType = appName.includes("basic-login") ? "BASIC_LOGIN" : "PASSKEY";
+
   // Validate all required environment variables early
   const missingVars: string[] = [];
-  const testEnv = getTestEnvironment();
+  const testEnv = getTestEnvironment(authType);
 
   // Check framework-specific required variables
   switch (config.framework) {
@@ -241,11 +253,7 @@ export function getTestConfig(appName: string): TestAppConfig {
     );
   }
 
-  const frameworkEnvVars = getFrameworkEnvVars(
-    config.framework,
-    testEnv,
-    authType
-  );
+  const frameworkEnvVars = getFrameworkEnvVars(config.framework, testEnv);
 
   return {
     ...config,
@@ -398,14 +406,14 @@ export function detectChangedFrameworks(isDiffOnly: boolean): string[] {
     }
 
     logger.logDebug(
-      "🔍 Detected changes in frameworks:",
-      matchingFrameworks.join(", ")
+      `🔍 Detected changes in frameworks: ${matchingFrameworks.join(", ")}`
     );
     return matchingFrameworks;
   } catch (error) {
     logger.logWarning(
-      "⚠️ Failed to detect changes, running all frameworks:",
-      (error as Error).message
+      `⚠️ Failed to detect changes, running all frameworks: ${
+        (error as Error).message
+      }`
     );
     return Object.keys(APP_CONFIGS);
   }
@@ -422,7 +430,10 @@ export function validateEnvironment(): void {
       );
     }
 
+    // Check for both passkey/password & basic login keys
     const testEnv = getTestEnvironment();
+    getTestEnvironment("BASIC_LOGIN");
+
     logger.logStep(
       `✓ Test environment validated: ${testEnv.environment}`,
       true
