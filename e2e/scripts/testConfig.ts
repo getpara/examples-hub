@@ -5,6 +5,8 @@ import * as dotenv from "dotenv";
 
 dotenv.config();
 
+type AuthType = "BASIC_LOGIN" | "PASSKEY";
+
 export interface TestAppConfig {
   path: string;
   envVars: Record<string, string>;
@@ -52,9 +54,7 @@ function getEnvVar(key: string, fallback?: string): string {
   return value || fallback || "";
 }
 
-export function getTestEnvironment(
-  authType?: "BASIC_LOGIN" | "PASSKEY"
-): TestEnvironment {
+export function getTestEnvironment(authType?: AuthType): TestEnvironment {
   const environment = getEnvVar("PARA_ENVIRONMENT", "BETA") as
     | "BETA"
     | "SANDBOX";
@@ -73,7 +73,8 @@ export function getTestEnvironment(
 
 export function getFrameworkEnvVars(
   framework: string,
-  testEnv: TestEnvironment
+  testEnv: TestEnvironment,
+  authType?: AuthType
 ): Record<string, string> {
   const baseEnvVars: Record<string, string> = {
     PARA_ENVIRONMENT: testEnv.environment,
@@ -86,20 +87,28 @@ export function getFrameworkEnvVars(
   );
   const apiKey = frameworkApiKeyOverride || testEnv.apiKey;
 
+  const apiKeySuffix = authType === "BASIC_LOGIN" ? "_BASIC_LOGIN" : "";
+
   switch (framework) {
     case "react-vite":
     case "vue":
     case "svelte":
       return {
         ...baseEnvVars,
-        VITE_PARA_API_KEY: getEnvVar("VITE_PARA_API_KEY", apiKey),
+        VITE_PARA_API_KEY: getEnvVar(
+          `VITE_PARA_API_KEY${apiKeySuffix}`,
+          apiKey
+        ),
         VITE_PARA_ENVIRONMENT: testEnv.environment,
       };
 
     case "react-nextjs":
       return {
         ...baseEnvVars,
-        NEXT_PUBLIC_PARA_API_KEY: getEnvVar("NEXT_PUBLIC_PARA_API_KEY", apiKey),
+        NEXT_PUBLIC_PARA_API_KEY: getEnvVar(
+          `NEXT_PUBLIC_PARA_API_KEY${apiKeySuffix}`,
+          apiKey
+        ),
         NEXT_PUBLIC_PARA_ENVIRONMENT: testEnv.environment,
         PORT: getEnvVar("NEXTJS_PORT", "3000"),
       };
@@ -253,7 +262,11 @@ export function getTestConfig(appName: string): TestAppConfig {
     );
   }
 
-  const frameworkEnvVars = getFrameworkEnvVars(config.framework, testEnv);
+  const frameworkEnvVars = getFrameworkEnvVars(
+    config.framework,
+    testEnv,
+    authType
+  );
 
   return {
     ...config,

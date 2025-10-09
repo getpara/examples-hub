@@ -90,7 +90,6 @@ async function runSingleTest(
       APP_START_COMMAND: config.startCommand,
       BASE_URL: `http://localhost:${config.port}`,
     };
-    console.log("🚀 ~ runSingleTest ~ testEnv:", testEnv);
 
     await runCommandAsync(command, EXAMPLES_REPO_PATH, testEnv);
 
@@ -104,7 +103,15 @@ async function runSingleTest(
 const runTestsForApp = async (appName: string): Promise<TestResult> => {
   try {
     const config = getTestConfig(appName);
-    const appFullPath = path.resolve(EXAMPLES_REPO_PATH, config.path);
+
+    let appPath = config.path;
+
+    // Remove "basic-login" suffix for directory path so tests run properly after env vars are setup
+    if (appPath.includes("/basic-login")) {
+      appPath = appPath.replace("/basic-login", "");
+    }
+
+    const appFullPath = path.resolve(EXAMPLES_REPO_PATH, appPath);
 
     logger.log("", "=".repeat(60));
     logger.logInfo(`Running tests for ${appName}`);
