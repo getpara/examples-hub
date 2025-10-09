@@ -735,9 +735,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@getpara/core-components@npm:2.0.0-alpha.62":
-  version: 2.0.0-alpha.62
-  resolution: "@getpara/core-components@npm:2.0.0-alpha.62"
+"@getpara/core-components@npm:2.0.0-alpha.63":
+  version: 2.0.0-alpha.63
+  resolution: "@getpara/core-components@npm:2.0.0-alpha.63"
   dependencies:
     "@stencil/core": "npm:^4.7.0"
     color-blend: "npm:^4.0.0"
@@ -745,7 +745,7 @@ __metadata:
     gsap: "npm:^3.12.5"
     inputmask: "npm:5.0.9"
     qrcode-with-logos: "npm:1.1.1"
-  checksum: 10/860888be39fe711ca78a8dd2d691d409140c087533d4588f47218d39a72768fec47cc7232171ad2d81c12199b796175340a1edfe45318a8614deaaf6d8cd5b26
+  checksum: 10/c434afcac6fa3b36a7de11bae71ecda32d70e8da2e166e607094f51c08081d373cfa54be85e18df621e79267292fc33a7ab82e098758d7bd46b9ece913a03612
   languageName: node
   linkType: hard
 
@@ -766,20 +766,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@getpara/core-sdk@npm:2.0.0-alpha.62":
-  version: 2.0.0-alpha.62
-  resolution: "@getpara/core-sdk@npm:2.0.0-alpha.62"
+"@getpara/core-sdk@npm:2.0.0-alpha.63":
+  version: 2.0.0-alpha.63
+  resolution: "@getpara/core-sdk@npm:2.0.0-alpha.63"
   dependencies:
     "@celo/utils": "npm:^8.0.2"
     "@cosmjs/encoding": "npm:^0.32.4"
     "@ethereumjs/util": "npm:^9.1.0"
-    "@getpara/user-management-client": "npm:2.0.0-alpha.62"
+    "@getpara/user-management-client": "npm:2.0.0-alpha.63"
     "@noble/hashes": "npm:^1.5.0"
     base64url: "npm:^3.0.1"
     libphonenumber-js: "npm:^1.11.7"
     node-forge: "npm:^1.3.1"
     uuid: "npm:^11.1.0"
-  checksum: 10/4b7640f0955684dd2653f5f4d28bb9cfc1e155e63d1a68c759c22c5b3a5200d0ac6ce4d39583f035933c4ea27323975c56ea32951af1ac0c54ae1c7919bdcab8
+  checksum: 10/f575cf5cbd02e7e7b0d0604191015b554afb3d0fdf7f74a45e644a5c314226c56e5d532408f29c9fba25b537ec2e75144818543fbc4eb9976e75bd29b6c65bca
   languageName: node
   linkType: hard
 
@@ -831,12 +831,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@getpara/react-common@npm:2.0.0-alpha.62":
-  version: 2.0.0-alpha.62
-  resolution: "@getpara/react-common@npm:2.0.0-alpha.62"
+"@getpara/react-common@npm:2.0.0-alpha.63":
+  version: 2.0.0-alpha.63
+  resolution: "@getpara/react-common@npm:2.0.0-alpha.63"
   dependencies:
-    "@getpara/react-components": "npm:2.0.0-alpha.62"
-    "@getpara/web-sdk": "npm:2.0.0-alpha.62"
+    "@getpara/react-components": "npm:2.0.0-alpha.63"
+    "@getpara/web-sdk": "npm:2.0.0-alpha.63"
     "@moonpay/moonpay-react": "npm:^1.8.3"
     "@ramp-network/ramp-instant-sdk": "npm:^4.0.5"
     libphonenumber-js: "npm:^1.11.7"
@@ -845,26 +845,26 @@ __metadata:
   peerDependencies:
     react: "*"
     react-dom: "*"
-  checksum: 10/42a9503563d67d6a7ecc5a5ccf020096f3ba740b1d1781e716669e045faa70215c1a0a46d4ede1b31ea43739a47e80b021344abebdb78d90b8ed94c40e7aec9e
+  checksum: 10/5192a89679c6a3c7aebdb84587b033a3197c726e4cede1210a25d4e01d9f6980b5461d81b0d633ae1af353cc7e64ad02d896ad8055da7a69fd03b626d3ab7802
   languageName: node
   linkType: hard
 
-"@getpara/react-components@npm:2.0.0-alpha.62":
-  version: 2.0.0-alpha.62
-  resolution: "@getpara/react-components@npm:2.0.0-alpha.62"
+"@getpara/react-components@npm:2.0.0-alpha.63":
+  version: 2.0.0-alpha.63
+  resolution: "@getpara/react-components@npm:2.0.0-alpha.63"
   dependencies:
-    "@getpara/core-components": "npm:2.0.0-alpha.62"
-  checksum: 10/209438a8584b31e506912f93ffa44e3714f5c7d1b694fbc539977579b5f900e005759bee9c758be743e20e49a5b90c53a7f63807999fbfc3041167e77175fbf7
+    "@getpara/core-components": "npm:2.0.0-alpha.63"
+  checksum: 10/976642103ac852e69eb6ccb5ddab202994718c931c13f241270f07245d285e917d93e8eaa836f396ed9c8f0c3fef5979120c25ea2c9647782dd45ee11864f591
   languageName: node
   linkType: hard
 
-"@getpara/react-sdk-lite@npm:2.0.0-alpha.62":
-  version: 2.0.0-alpha.62
-  resolution: "@getpara/react-sdk-lite@npm:2.0.0-alpha.62"
+"@getpara/react-sdk-lite@npm:2.0.0-alpha.63":
+  version: 2.0.0-alpha.63
+  resolution: "@getpara/react-sdk-lite@npm:2.0.0-alpha.63"
   dependencies:
-    "@getpara/react-common": "npm:2.0.0-alpha.62"
-    "@getpara/react-components": "npm:2.0.0-alpha.62"
-    "@getpara/web-sdk": "npm:2.0.0-alpha.62"
+    "@getpara/react-common": "npm:2.0.0-alpha.63"
+    "@getpara/react-components": "npm:2.0.0-alpha.63"
+    "@getpara/web-sdk": "npm:2.0.0-alpha.63"
     date-fns: "npm:^3.6.0"
     framer-motion: "npm:^11.3.31"
     libphonenumber-js: "npm:^1.11.7"
@@ -877,7 +877,7 @@ __metadata:
     react-dom: "*"
   bin:
     setup-para: dist/cli/cli.mjs
-  checksum: 10/e6c52628567c6fb29d022585f94615af9a2012f16c02e33ddf78968609fa3ab9c7cb9d3129cb246c0282bed815d098bf5d755de892d4279c2ad606abcdd581f6
+  checksum: 10/92342bfbaa6b25d7c70c1970fcecd7a4291b12add99bde4b06b58ae3fddc0bb40245cc88a351e40d4ed42b078030aef7012299d22972927691db2348b000c919
   languageName: node
   linkType: hard
 
@@ -898,14 +898,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@getpara/user-management-client@npm:2.0.0-alpha.62":
-  version: 2.0.0-alpha.62
-  resolution: "@getpara/user-management-client@npm:2.0.0-alpha.62"
+"@getpara/user-management-client@npm:2.0.0-alpha.63":
+  version: 2.0.0-alpha.63
+  resolution: "@getpara/user-management-client@npm:2.0.0-alpha.63"
   dependencies:
     "@getpara/shared": "npm:1.1.0"
     axios: "npm:^1.8.4"
     libphonenumber-js: "npm:^1.11.7"
-  checksum: 10/54bb9aee1bad5e44e70b155cb599482419ac9228db034690157c59543dd6ffe58320ee3ab91eb86169a273b9fdfe3bf24b5c891e6151c105f9b49018ce98df8a
+  checksum: 10/2cafffed5a8dd3e41a5870ada14508ecbf21ddf60cd7ba658ffc042d27823d91c151871703bd03db08ccd2f05d5423340c657a95583edd53066951fa173a2712
   languageName: node
   linkType: hard
 
@@ -929,12 +929,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@getpara/web-sdk@npm:2.0.0-alpha.62":
-  version: 2.0.0-alpha.62
-  resolution: "@getpara/web-sdk@npm:2.0.0-alpha.62"
+"@getpara/web-sdk@npm:2.0.0-alpha.63":
+  version: 2.0.0-alpha.63
+  resolution: "@getpara/web-sdk@npm:2.0.0-alpha.63"
   dependencies:
-    "@getpara/core-sdk": "npm:2.0.0-alpha.62"
-    "@getpara/user-management-client": "npm:2.0.0-alpha.62"
+    "@getpara/core-sdk": "npm:2.0.0-alpha.63"
+    "@getpara/user-management-client": "npm:2.0.0-alpha.63"
     base64url: "npm:^3.0.1"
     buffer: "npm:6.0.3"
     cbor-web: "npm:^9.0.2"
@@ -945,7 +945,7 @@ __metadata:
   peerDependenciesMeta:
     "@farcaster/miniapp-sdk":
       optional: true
-  checksum: 10/98db2141253f66bd9d9663791d06f143c2703982b6f113807c7232a1067403782541953b0086b6d0c6fc7585f6bcf7c28e7e069b999786e1643748f0c0ba0c6f
+  checksum: 10/6e10f78839f4819644d2286def67a70634bb8d4937cc6eb1c4726331f7648dfe0a612a908f6943fec510665bdc910c471041d66890aa0485ea17cb64fdfbe0ab
   languageName: node
   linkType: hard
 
@@ -3512,7 +3512,7 @@ __metadata:
     "@cosmjs/stargate": "npm:0.36.0"
     "@eslint/js": "npm:^9.29.0"
     "@getpara/graz-integration": "npm:2.0.0-alpha.51"
-    "@getpara/react-sdk-lite": "npm:2.0.0-alpha.62"
+    "@getpara/react-sdk-lite": "npm:2.0.0-alpha.63"
     "@tailwindcss/postcss": "npm:^4.1.10"
     "@tanstack/react-query": "npm:5.85.3"
     "@types/node": "npm:^20"
