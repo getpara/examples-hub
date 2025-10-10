@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@getpara/graz": "2.0.0-alpha.19",
-    "@getpara/web-sdk": "2.0.0-alpha.63"
+    "@getpara/web-sdk": "2.0.0-alpha.64"
   },
   "devDependencies": {
     "@eslint/js": "^9.29.0",
