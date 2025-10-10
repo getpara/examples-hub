@@ -73,6 +73,11 @@ async function runSingleTest(
       config.path = config.path.replace("/basic-login", "");
     }
 
+    // Remove "pin" suffix for directory path so tests run properly after env vars are setup
+    if (config.path.includes("/pin")) {
+      config.path = config.path.replace("/pin", "");
+    }
+
     const appFullPath = path.resolve(EXAMPLES_REPO_PATH, config.path);
 
     const command = `yarn playwright test ${playwrightArgs.join(" ")}`;
@@ -109,6 +114,11 @@ const runTestsForApp = async (appName: string): Promise<TestResult> => {
     // Remove "basic-login" suffix for directory path so tests run properly after env vars are setup
     if (appPath.includes("/basic-login")) {
       appPath = appPath.replace("/basic-login", "");
+    }
+
+    // Remove "pin" suffix for directory path so tests run properly after env vars are setup
+    if (appPath.includes("/pin")) {
+      appPath = appPath.replace("/pin", "");
     }
 
     const appFullPath = path.resolve(EXAMPLES_REPO_PATH, appPath);

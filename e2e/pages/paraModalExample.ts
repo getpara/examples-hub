@@ -129,6 +129,7 @@ export class ParaModalExamplePage {
     password,
     usePhoneNumber = false,
     isBasicLogin,
+    pin,
   }: {
     context: BrowserContext;
     is2FAEnabled?: boolean;
@@ -136,6 +137,7 @@ export class ParaModalExamplePage {
     password?: string;
     usePhoneNumber?: boolean;
     isBasicLogin?: boolean;
+    pin?: string;
   }) {
     // Ensure UI is stable before opening modal
     await this.waitForUIStability();
@@ -212,7 +214,48 @@ export class ParaModalExamplePage {
         await otpInput.fill((i + 1).toString());
       }
 
-      if (password) {
+      if (pin) {
+        // Use helper function to get iframe
+        const iframeLocator = await this.getParaIframe();
+
+        // Use helper function to get iframe OTP input
+        const firstPINInputLocator = await this.getIframeOTPInput();
+
+        // Get first PIN input
+        const firstCodeInput = firstPINInputLocator.locator("#code-input-0");
+        await expect(firstCodeInput).toBeVisible({ timeout: 5000 });
+
+        for (let i = 0; i < 4; i++) {
+          const otpInput = firstPINInputLocator.locator(`#code-input-${i}`);
+          await otpInput.click();
+          await otpInput.fill(pin[i].toString());
+        }
+
+        // Click Continue button - target native button in shadow DOM
+        const continueButton = iframeLocator.locator(
+          'cpsl-button:has-text("Continue") button.button-native'
+        );
+        await continueButton.click();
+
+        // Use helper function to get iframe OTP input
+        const secondPINInputLocator = await this.getIframeOTPInput();
+
+        // Get second PIN input
+        const secondCodeInput = secondPINInputLocator.locator("#code-input-1");
+        await expect(secondCodeInput).toBeVisible({ timeout: 5000 });
+
+        for (let i = 0; i < 4; i++) {
+          const otpInput = secondPINInputLocator.locator(`#code-input-${i}`);
+          await otpInput.click();
+          await otpInput.fill(pin[i].toString());
+        }
+
+        // Click Set PIN button - target native button in shadow DOM
+        const setPINButton = iframeLocator.locator(
+          'cpsl-button:has-text("Set PIN") button.button-native'
+        );
+        await setPINButton.click();
+      } else if (password) {
         // Click the "Choose Password" button - target native button in shadow DOM
         const choosePasswordButton = this.page.locator(
           'cpsl-button:has-text("Choose Password") button.button-native'
@@ -336,6 +379,7 @@ export class ParaModalExamplePage {
     is2FAEnabled,
     password,
     isBasicLogin,
+    pin,
   }: {
     context: BrowserContext;
     credential: Protocol.WebAuthn.Credential;
@@ -343,6 +387,7 @@ export class ParaModalExamplePage {
     is2FAEnabled?: boolean;
     password?: string;
     isBasicLogin?: boolean;
+    pin?: string;
   }) {
     this.logger.logInfo("Starting login flow...");
 
@@ -388,6 +433,66 @@ export class ParaModalExamplePage {
         const otpInput = iframeOTPInputLocator.locator(`#code-input-${i}`);
         await otpInput.click();
         await otpInput.fill((i + 1).toString());
+      }
+    } else if (pin) {
+      this.logger.logInfo(
+        "PIN login flow - looking for verification code input in iframe..."
+      );
+
+      try {
+        // Use helper function to get iframe
+        const iframeLocator = await this.getParaIframe();
+
+        // Use helper function to get iframe OTP input
+        const iframeVerificationInputLocator = await this.getIframeOTPInput();
+
+        // The OTP inputs are already native inputs with IDs in the shadow DOM
+        // Wait for first OTP input to be ready
+        const verificationCodeInput =
+          iframeVerificationInputLocator.locator("#code-input-0");
+        await expect(verificationCodeInput).toBeVisible({ timeout: 5000 });
+
+        for (let i = 0; i < 6; i++) {
+          const otpInput = iframeVerificationInputLocator.locator(
+            `#code-input-${i}`
+          );
+          await otpInput.click();
+          await otpInput.fill((i + 1).toString());
+        }
+
+        // Now the Login button should be visible - target native button in shadow DOM
+        const loginButton = iframeLocator.locator(
+          'cpsl-button:has-text("Login") button.button-native'
+        );
+        await expect(loginButton).toBeVisible({ timeout: 3000 });
+
+        // Use helper function to get iframe OTP input
+        const iframePINInputLocator = await this.getIframeOTPInput();
+
+        // Get first PIN input
+        const pinInput = iframePINInputLocator.locator("#code-input-0");
+        await expect(pinInput).toBeVisible({ timeout: 5000 });
+
+        for (let i = 0; i < 4; i++) {
+          const otpInput = iframePINInputLocator.locator(`#code-input-${i}`);
+          await otpInput.click();
+          await otpInput.fill(pin[i].toString());
+        }
+
+        // Now the Login button should be enabled - target native button in shadow DOM
+        await expect(loginButton).toBeEnabled({ timeout: 5000 });
+        this.logger.logInfo("Found Login button in iframe, clicking...");
+
+        // Click login button - no popup needed for password login with iframe
+        await loginButton.click();
+        this.logger.logInfo("Clicked Login button, login should complete");
+
+        // Wait for modal to close and user to be logged in
+        await this.page.waitForTimeout(2000);
+        this.logger.logInfo("Login completed");
+      } catch (error) {
+        this.logger.logError("Error in password login flow:", error);
+        throw error;
       }
     } else if (password) {
       this.logger.logInfo(

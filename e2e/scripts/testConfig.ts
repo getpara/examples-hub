@@ -5,7 +5,7 @@ import * as dotenv from "dotenv";
 
 dotenv.config();
 
-type AuthType = "BASIC_LOGIN" | "PASSKEY";
+type AuthType = "BASIC_LOGIN" | "PASSKEY" | "PIN";
 
 export interface TestAppConfig {
   path: string;
@@ -60,7 +60,12 @@ export function getTestEnvironment(authType?: AuthType): TestEnvironment {
     | "SANDBOX";
 
   const apiKeyPrefix = "PARA_API_KEY_";
-  const apiKeyModifier = authType === "BASIC_LOGIN" ? "BASIC_LOGIN_" : "";
+  const apiKeyModifier =
+    authType === "BASIC_LOGIN"
+      ? "BASIC_LOGIN_"
+      : authType === "PIN"
+      ? "PIN_"
+      : "";
   const apiKeyEnv = environment === "BETA" ? "BETA" : "SANDBOX";
 
   const apiKeyVar = `${apiKeyPrefix}${apiKeyModifier}${apiKeyEnv}`;
@@ -87,7 +92,12 @@ export function getFrameworkEnvVars(
   );
   const apiKey = frameworkApiKeyOverride || testEnv.apiKey;
 
-  const apiKeySuffix = authType === "BASIC_LOGIN" ? "_BASIC_LOGIN" : "";
+  const apiKeySuffix =
+    authType === "BASIC_LOGIN"
+      ? "_BASIC_LOGIN"
+      : authType === "PIN"
+      ? "_PIN"
+      : "";
 
   switch (framework) {
     case "react-vite":
@@ -155,6 +165,13 @@ export const APP_CONFIGS: Record<string, TestAppConfig> = {
     startCommand: "rm -rf node_modules/.vite && yarn dev --force",
     envVars: {},
   },
+  "react-vite-pin": {
+    path: "web/with-react-vite/pin",
+    framework: "react-vite",
+    port: parseInt(getEnvVar("VITE_PORT", "5173")),
+    startCommand: "rm -rf node_modules/.vite && yarn dev --force",
+    envVars: {},
+  },
   "react-nextjs": {
     path: "web/with-react-nextjs/para-modal",
     framework: "react-nextjs",
@@ -164,6 +181,13 @@ export const APP_CONFIGS: Record<string, TestAppConfig> = {
   },
   "react-nextjs-basic-login": {
     path: "web/with-react-nextjs/para-modal/basic-login",
+    framework: "react-nextjs",
+    port: parseInt(getEnvVar("NEXTJS_PORT", "3000")),
+    startCommand: "yarn dev",
+    envVars: {},
+  },
+  "react-nextjs-pin": {
+    path: "web/with-react-nextjs/para-modal/pin",
     framework: "react-nextjs",
     port: parseInt(getEnvVar("NEXTJS_PORT", "3000")),
     startCommand: "yarn dev",
@@ -198,6 +222,8 @@ export const APP_CONFIGS: Record<string, TestAppConfig> = {
 export const TEST_PATTERNS = {
   "email-basic-login": "happyPath.email-basic-login.spec.ts",
   "phone-basic-login": "happyPath.phone-basic-login.spec.ts",
+  "email-pin": "happyPath.email-pin.spec.ts",
+  "phone-pin": "happyPath.phone-pin.spec.ts",
   "email-password": "happyPath.email-password.spec.ts",
   "email-passkey": "happyPath.email-passkey.spec.ts",
   "phone-password": "happyPath.phone-password.spec.ts",
@@ -211,7 +237,11 @@ export function getTestConfig(appName: string): TestAppConfig {
     throw new Error(`Unknown app configuration: ${appName}`);
   }
 
-  const authType = appName.includes("basic-login") ? "BASIC_LOGIN" : "PASSKEY";
+  const authType = appName.includes("basic-login")
+    ? "BASIC_LOGIN"
+    : appName.includes("pin")
+    ? "PIN"
+    : "PASSKEY";
 
   // Validate all required environment variables early
   const missingVars: string[] = [];
@@ -443,9 +473,10 @@ export function validateEnvironment(): void {
       );
     }
 
-    // Check for both passkey/password & basic login keys
+    // Check for both passkey/password, PIN & basic login keys
     const testEnv = getTestEnvironment();
     getTestEnvironment("BASIC_LOGIN");
+    getTestEnvironment("PIN");
 
     logger.logStep(
       `✓ Test environment validated: ${testEnv.environment}`,
