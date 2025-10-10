@@ -193,12 +193,19 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
       isInitialized.current = true;
     }
 
+    let timerId: ReturnType<typeof setTimeout> | undefined;
     if (!bareModal && isReady && !isOpen && isInitialized.current) {
-      setTimeout(() => {
+      timerId = setTimeout(() => {
         initModal();
         isInitialized.current = false;
       }, 250);
     }
+
+    return () => {
+      if (timerId) {
+        clearTimeout(timerId);
+      }
+    };
   }, [bareModal, isReady, isOpen, isAccountLoading]);
 
   useEffect(() => {

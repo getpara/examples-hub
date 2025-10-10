@@ -802,12 +802,19 @@ export function AuthProvider({
   );
 
   useEffect(() => {
+    let timerId: ReturnType<typeof setTimeout> | undefined;
     if (!!authStepRoute && refs.currentStep.current !== authStepRoute) {
       // Using a small timeout here to fully ensure the iframe is loaded before triggering any animation
-      setTimeout(() => {
+      timerId = setTimeout(() => {
         setStep(authStepRoute);
       }, 200);
     }
+
+    return () => {
+      if (timerId) {
+        clearTimeout(timerId);
+      }
+    };
   }, [authStepRoute]);
 
   useEffect(() => {

@@ -20,6 +20,7 @@ type Props = {
 
 export const VerificationCode = ({ authInfo, onResend, onSubmit, status, error }: Props) => {
   const inputRef = useRef<HTMLCpslCodeInputElement>(null);
+  const resendTimerRef = useRef<ReturnType<typeof setTimeout>>();
 
   const [code, setCode] = useState('');
   const [isPending, setIsPending] = useState(status === 'pending');
@@ -30,9 +31,13 @@ export const VerificationCode = ({ authInfo, onResend, onSubmit, status, error }
 
   useEffect(() => {
     // Using a small timeout here to ensure the input is mounted before attempting focus
-    setTimeout(() => {
+    const timerId = setTimeout(() => {
       inputRef.current?.shadowRoot?.querySelectorAll('input')?.[0]?.focus();
     }, 10);
+
+    return () => {
+      clearTimeout(timerId);
+    };
   }, []);
 
   useEffect(() => {
@@ -56,12 +61,20 @@ export const VerificationCode = ({ authInfo, onResend, onSubmit, status, error }
       try {
         onResend();
       } finally {
-        setTimeout(() => {
+        resendTimerRef.current = setTimeout(() => {
           setResendDisabled(false);
         }, 3000);
       }
     }
   };
+
+  useEffect(() => {
+    return () => {
+      if (resendTimerRef.current) {
+        clearTimeout(resendTimerRef.current);
+      }
+    };
+  }, []);
 
   const handleCodeInput = (e: CpslCodeInputCustomEvent<CodeChangeEventDetail>) => {
     setCode(e.detail.value.trim());

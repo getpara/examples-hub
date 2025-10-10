@@ -68,9 +68,13 @@ export const Hero = () => {
 
     const delay = newStepConfig && prevStepConfig ? 0 : newStepConfig && !prevStepConfig ? 0 : 200;
 
-    setTimeout(() => {
+    const timerId = setTimeout(() => {
       setCurrentStep(step);
     }, delay);
+
+    return () => {
+      clearTimeout(timerId);
+    };
   }, [step]);
 
   const isExternalStep = currentStep === ModalStep.EX_WALLET_SELECTED;

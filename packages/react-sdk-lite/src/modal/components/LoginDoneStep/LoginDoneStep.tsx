@@ -32,7 +32,7 @@ export const LoginDoneStep = ({ onClose }: LoginDoneStep) => {
   }, [para.externalWalletConnectionType, para.externalWallets, para.wallets]);
 
   useEffect(() => {
-    setTimeout(() => {
+    const timerId = setTimeout(() => {
       if (bareModal) {
         setFlow('account');
         setStep(ModalStep.ACCOUNT_MAIN);
@@ -40,6 +40,10 @@ export const LoginDoneStep = ({ onClose }: LoginDoneStep) => {
         onClose();
       }
     }, 1600);
+
+    return () => {
+      clearTimeout(timerId);
+    };
   }, []);
 
   return (

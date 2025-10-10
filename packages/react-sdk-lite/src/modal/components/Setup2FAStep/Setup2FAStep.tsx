@@ -38,9 +38,13 @@ export const Setup2FAStep = ({ onClose }: Setup2FAStepProps) => {
 
   useEffect(() => {
     // Using a small timeout here to ensure the input is mounted before attempting focus
-    setTimeout(() => {
+    const timerId = setTimeout(() => {
       inputRef?.current?.shadowRoot?.querySelectorAll('input')?.[0]?.focus();
     }, 10);
+
+    return () => {
+      clearTimeout(timerId);
+    };
   }, [isVerifying]);
 
   useEffect(() => {
