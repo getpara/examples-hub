@@ -1,10 +1,12 @@
 import { test, expect } from "@playwright/test";
 
-import { ParaModalExamplePage } from "../../../../../pages/paraModalExample";
-import * as webauthn from "../../../../../helpers/webAuthn";
-import { logger } from "../../../../../helpers/logger";
+import { ParaModalExamplePage } from "../../../../pages/paraModalExample";
+import * as webauthn from "../../../../helpers/webAuthn";
+import { logger } from "../../../../helpers/logger";
 
-test.describe("Para Modal - Email + Basic Login Authentication", () => {
+const PIN = "1234";
+
+test.describe("Para Modal - Email + PIN Authentication", () => {
   let originalEnv: Record<string, string | undefined>;
 
   test.beforeEach(() => {
@@ -51,14 +53,15 @@ test.describe("Para Modal - Email + Basic Login Authentication", () => {
         context: createContext,
         isRecoverySecretEnabled: true,
         usePhoneNumber: false, // Use email
-        isBasicLogin: true,
+        pin: PIN,
       });
 
     // Verify wallet is connected by checking for the address display (with extended timeout)
     await expect(
       createParaModalPage.page.getByTestId("account-address-display")
     ).toBeVisible({ timeout: 15000 });
-    expect(clipboardText).toHaveLength(0);
+    expect(clipboardText).toHaveLength(64);
+    expect(/^[0-9a-f]+$/.test(clipboardText)).toBeTruthy();
 
     expect(credential).toBeUndefined();
 
@@ -110,7 +113,7 @@ test.describe("Para Modal - Email + Basic Login Authentication", () => {
       context: loginContext,
       credential,
       emailOrPhone,
-      isBasicLogin: true,
+      pin: PIN,
     });
 
     // Verify same address after login in fresh context (with extended timeout)

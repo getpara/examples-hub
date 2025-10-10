@@ -4,7 +4,7 @@ import { ParaModalExamplePage } from "../../../../pages/paraModalExample";
 import * as webauthn from "../../../../helpers/webAuthn";
 
 test.describe("Para Modal - Phone + Basic Login Authentication", () => {
-  test("happy path - create and login with phone and passkey", async ({
+  test("happy path - create and login with phone and basic login", async ({
     browser,
   }) => {
     const context = await browser.newContext({
@@ -21,7 +21,6 @@ test.describe("Para Modal - Phone + Basic Login Authentication", () => {
         isRecoverySecretEnabled: true,
         usePhoneNumber: true, // Use phone number
         isBasicLogin: true,
-        // No password parameter = passkey authentication
       });
 
     // Verify wallet is connected by checking for the address display
@@ -42,7 +41,6 @@ test.describe("Para Modal - Phone + Basic Login Authentication", () => {
       credential,
       emailOrPhone,
       isBasicLogin: true,
-      // No password = passkey login
     });
 
     // Verify same address after login

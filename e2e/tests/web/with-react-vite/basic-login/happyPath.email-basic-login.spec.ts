@@ -4,7 +4,7 @@ import { ParaModalExamplePage } from "../../../../pages/paraModalExample";
 import * as webauthn from "../../../../helpers/webAuthn";
 import { logger } from "../../../../helpers/logger";
 
-test.describe("Para Modal - Email + Passkey Authentication", () => {
+test.describe("Para Modal - Email + Basic Login Authentication", () => {
   let originalEnv: Record<string, string | undefined>;
 
   test.beforeEach(() => {
@@ -52,7 +52,6 @@ test.describe("Para Modal - Email + Passkey Authentication", () => {
         isRecoverySecretEnabled: true,
         usePhoneNumber: false, // Use email
         isBasicLogin: true,
-        // No password parameter = passkey authentication
       });
 
     // Verify wallet is connected by checking for the address display (with extended timeout)
@@ -112,7 +111,6 @@ test.describe("Para Modal - Email + Passkey Authentication", () => {
       credential,
       emailOrPhone,
       isBasicLogin: true,
-      // No password = passkey login
     });
 
     // Verify same address after login in fresh context (with extended timeout)
