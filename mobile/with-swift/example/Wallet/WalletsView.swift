@@ -313,7 +313,8 @@ struct WalletsView: View {
                         .padding(.top, 24)
 
                     VStack(spacing: 8) {
-                        ForEach([WalletType.evm, .solana, .cosmos], id: \.self) { type in
+                        // Only enable EVM for now
+                        ForEach([WalletType.evm], id: \.self) { type in
                             Button(action: {
                                 createWallet(type: type)
                             }) {
