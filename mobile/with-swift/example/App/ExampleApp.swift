@@ -10,8 +10,8 @@ struct ExampleApp: App {
     init() {
         // Para Configuration
         let config = ParaConfig(
-            apiKey: "12e3517d125169ea9847d0da5bdcd9c9", // Get from: http://developer.getpara.com
-            environment: .sandbox,
+            apiKey: "beta_9818e6b9dcbb2483b4998c744fb11f85", // Get from: http://developer.getpara.com
+            environment: .beta,
         )
 
         // Para app scheme for deep linking
