@@ -16,7 +16,7 @@ export function isPortal(ctx: Ctx, env?: Environment) {
   // Direct access: both window.opener and window.parent are undefined (copied link)
   const isInIframe = window.parent !== window && !window.opener;
   const isInPopup = window.opener && window.parent === window;
-  const isDirectAccess = !window.opener && !window.parent;
+  const isDirectAccess = window.parent === window && !window.opener;
 
   return isInIframe || isInPopup || isDirectAccess;
 }
