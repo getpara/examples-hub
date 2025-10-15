@@ -162,6 +162,12 @@ export class ParaModalExamplePage {
       ? getRandomPhoneNumber()
       : getRandomEmail();
 
+    this.logger.logInfo(
+      `Creating user with ${
+        usePhoneNumber ? "phone" : "email"
+      }: ${emailOrPhone}`
+    );
+
     // Fill the auth input - target the native input inside the shadow DOM
     // The input starts with placeholder "Enter email or phone" and changes dynamically
     // For phone numbers, it will change to "Enter phone" after detecting numeric input
