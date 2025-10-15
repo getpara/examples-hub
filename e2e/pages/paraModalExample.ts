@@ -640,9 +640,14 @@ export class ParaModalExamplePage {
 
     // Wait for logout to complete - header should show connect button again
     this.logger.logInfo("Waiting for logout to complete...");
-    await this.page.waitForTimeout(1000);
+
+    // First wait for the account display to disappear (logout in progress)
+    const accountDisplay = this.page.getByTestId("account-address-display");
+    await expect(accountDisplay).toBeHidden({ timeout: 10000 });
+
+    // Then wait for the connect button to appear (logout complete)
     const connectButton = this.page.getByTestId("header-connect-button");
-    await expect(connectButton).toBeVisible({ timeout: 5000 });
+    await expect(connectButton).toBeVisible({ timeout: 10000 });
     this.logger.logInfo("Logout completed - connect button visible");
   }
 
@@ -688,5 +693,52 @@ export class ParaModalExamplePage {
     this.logger.logInfo(`Got signature: ${signature}`);
 
     return signature || "";
+  }
+
+  async cleanupTestUser(): Promise<void> {
+    try {
+      this.logger.logInfo("Checking if cleanup function is available...");
+
+      // Check if the function exists and get userId before deletion
+      const cleanupInfo = await this.page.evaluate(() => {
+        const deleteFunc = (window as any).__deleteTestUser;
+        const para = (window as any).para;
+
+        return {
+          functionExists: typeof deleteFunc === 'function',
+          userId: para?.userId || null,
+        };
+      });
+
+      if (!cleanupInfo.functionExists) {
+        this.logger.logWarning(
+          "Cleanup function not available - user deletion skipped"
+        );
+        return;
+      }
+
+      if (!cleanupInfo.userId) {
+        this.logger.logWarning(
+          "No userId found - user may not be logged in or already deleted"
+        );
+        return;
+      }
+
+      this.logger.logInfo(`Deleting test user: ${cleanupInfo.userId}`);
+
+      await this.page.evaluate(() => {
+        return (window as any).__deleteTestUser();
+      });
+
+      this.logger.logStep(
+        `Test user deleted successfully (userId: ${cleanupInfo.userId})`,
+        true
+      );
+    } catch (error) {
+      this.logger.logWarning(
+        `Failed to delete test user: ${(error as Error).message}`
+      );
+      // Don't throw - cleanup failure shouldn't fail the test
+    }
   }
 }

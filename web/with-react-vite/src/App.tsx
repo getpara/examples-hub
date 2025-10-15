@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useAccount, useModal, useWallet, useSignMessage } from "@getpara/react-sdk";
+import { useState, useEffect } from "react";
+import { useAccount, useModal, useWallet, useSignMessage, useClient } from "@getpara/react-sdk";
 import { Header } from "@/components/layout/Header";
 import { StatusAlert } from "@/components/ui/StatusAlert";
 import { ConnectWalletCard } from "@/components/ui/ConnectWalletCard";
@@ -7,6 +7,36 @@ import { SignMessageForm } from "@/components/ui/SignMessageForm";
 import { SignatureDisplay } from "@/components/ui/SignatureDisplay";
 
 export default function Home() {
+  const para = useClient();
+
+  // Expose cleanup function and para client for E2E tests (development only)
+  useEffect(() => {
+    if (import.meta.env.DEV && para) {
+      // Expose para client for test verification
+      (window as any).para = para;
+
+      // Expose cleanup function
+      (window as any).__deleteTestUser = async () => {
+        if (para?.userId) {
+          try {
+            await para.ctx.client.deleteSelf(para.userId);
+            console.log('[E2E Cleanup] Test user deleted:', para.userId);
+          } catch (error: any) {
+            console.error('[E2E Cleanup] Failed to delete test user:', error.message);
+            throw error;
+          }
+        }
+      };
+    }
+
+    return () => {
+      if (import.meta.env.DEV) {
+        delete (window as any).__deleteTestUser;
+        delete (window as any).para;
+      }
+    };
+  }, [para]);
+
   const [message, setMessage] = useState("Hello Para!");
   const { openModal } = useModal();
   const { isConnected } = useAccount();

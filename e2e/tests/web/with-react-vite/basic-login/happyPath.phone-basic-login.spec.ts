@@ -2,6 +2,7 @@ import { test, expect } from "@playwright/test";
 
 import { ParaModalExamplePage } from "../../../../pages/paraModalExample";
 import * as webauthn from "../../../../helpers/webAuthn";
+import { logger } from "../../../../helpers/logger";
 
 test.describe("Para Modal - Phone + Basic Login Authentication", () => {
   test("happy path - create and login with phone and basic login", async ({
@@ -58,5 +59,13 @@ test.describe("Para Modal - Phone + Basic Login Authentication", () => {
     expect(signature).toBeTruthy();
     expect(signature.length).toBeGreaterThan(0);
     expect(signature).toMatch(/^[a-fA-F0-9]+$/); // Should be a hex string (may or may not have 0x prefix)
+
+    logger.logStep('React Vite E2E test completed successfully', true);
+
+    // Cleanup: delete test user
+    await paraModalExamplePage.cleanupTestUser();
+
+    // Cleanup: ensure context is properly closed
+    await context.close();
   });
 });
