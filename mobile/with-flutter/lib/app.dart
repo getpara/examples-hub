@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:para/para.dart';
 import 'client/para.dart';
 import 'screens/launch_screen.dart';
 import 'screens/auth_screen.dart';
@@ -21,51 +21,40 @@ class _ParaAppState extends State<ParaApp> {
   AppState _state = AppState.launch;
   bool _showLaunchScreen = true;
   final _deepLinkService = DeepLinkService();
+  late final VoidCallback _sessionStatusListener;
 
   @override
   void initState() {
     super.initState();
-    _initializePara();
+    _sessionStatusListener = () => _handleSessionStatus(para.sessionStatus.value);
+    para.sessionStatus.addListener(_sessionStatusListener);
+    _handleSessionStatus(para.sessionStatus.value);
     _initializeDeepLinks();
   }
 
   @override
   void dispose() {
+    para.sessionStatus.removeListener(_sessionStatusListener);
     _deepLinkService.dispose();
     super.dispose();
   }
 
-  Future<void> _initializePara() async {
-    final prefs = await SharedPreferences.getInstance();
-
-    // Attempt to restore any previously persisted Para session.
-    try {
-      final restored = await para.restorePersistedSession();
-      if (restored) {
-        await prefs.setBool('isAuthenticated', true);
-        if (mounted) {
-          setState(() => _state = AppState.home);
-        }
-        return;
-      }
-    } catch (_) {
-      // Ignore errors during restore and allow the app to fall back to auth flow.
+  void _handleSessionStatus(SessionStatus status) {
+    if (!mounted) return;
+    AppState nextState;
+    switch (status) {
+      case SessionStatus.restoring:
+        nextState = AppState.launch;
+        break;
+      case SessionStatus.authenticated:
+        nextState = AppState.home;
+        break;
+      case SessionStatus.needsAuth:
+        nextState = AppState.auth;
+        break;
     }
-
-    await prefs.setBool('isAuthenticated', false);
-    if (mounted) {
-      setState(() => _state = AppState.auth);
-    }
-
-    // Warm up the bridge without blocking the UI.
-    unawaited(_warmParaBridge());
-  }
-
-  Future<void> _warmParaBridge() async {
-    try {
-      await para.currentUser().timeout(const Duration(seconds: 5));
-    } catch (_) {
-      // Ignore any initialization issues; regular auth flow will handle them.
+    if (_state != nextState) {
+      setState(() => _state = nextState);
     }
   }
 
@@ -129,16 +118,13 @@ class _ParaAppState extends State<ParaApp> {
     });
   }
 
-  void _onAuthSuccess() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('isAuthenticated', true);
+  void _onAuthSuccess() {
     setState(() => _state = AppState.home);
   }
 
   void _onLogout() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('isAuthenticated', false);
     await para.logout();
+    if (!mounted) return;
     setState(() => _state = AppState.auth);
   }
 
