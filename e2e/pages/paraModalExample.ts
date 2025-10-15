@@ -12,8 +12,9 @@ import { AuthPortalPage } from "./authPortal";
 import { Logger } from "../helpers/logger";
 
 function getRandomPhoneNumber() {
-  const last4 = `${Math.floor(Math.random() * 10000)}`.padStart(4, "0");
-  return `415555${last4}`;
+  const areaCode = crypto.randomInt(100, 1000).toString().padStart(3, "0");
+  const last4 = crypto.randomInt(0, 10000).toString().padStart(4, "0");
+  return `${areaCode}555${last4}`;
 }
 
 function getRandomEmail() {
