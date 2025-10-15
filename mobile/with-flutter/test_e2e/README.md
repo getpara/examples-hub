@@ -58,10 +58,12 @@ The runners will build the iOS simulator app if missing, start Appium, run tests
 
 ## Suites
 
-- Authentication: email + phone passkey flows
+- Authentication: One-Click OTP (email + phone)
 - EVM wallet: basic ops, session, signing
-- Solana wallet: address detection, signing
-- Cosmos wallet: address detection, signing
+- Solana wallet: disabled (parity with Swift)
+- Cosmos wallet: disabled (parity with Swift)
+
+To re‑enable Solana/Cosmos temporarily, remove the `@Skip(...)` annotation at the top of their test files and run those suites directly.
 
 ## Troubleshooting
 

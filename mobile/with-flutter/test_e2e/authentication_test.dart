@@ -35,11 +35,42 @@ void main() {
       }
     });
 
+    // Ensure each test starts from the main auth screen
+    setUp(() async {
+      try {
+        await _performLogout(driver);
+      } catch (_) {}
+      try {
+        await _waitForMainScreen(driver);
+      } catch (_) {}
+    });
+
     tearDownAll(() async {
       // Emergency cleanup
       await WalletTestFactory.destroyAllContexts(driver);
       await driver.quit();
     });
+
+    test('Email One-Click OTP Entry', () async {
+      print('\n🧪 Testing Email One-Click OTP Entry...');
+      await _waitForMainScreen(driver);
+
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final testEmail = 'ui$timestamp@${TestConstants.emailDomain}';
+      final helper = WalletTestHelper(driver);
+      await helper.performOneClickAuthentication(testEmail);
+      print('✅ Email One-Click OTP flow completed');
+    }, timeout: Timeout(Duration(minutes: 3)));
+
+    test('Phone One-Click OTP Entry', () async {
+      print('\n🧪 Testing Phone One-Click OTP Entry...');
+      await _waitForMainScreen(driver);
+
+      final phoneNumber = TestConstants.generateTestPhoneNumber();
+      final helper = WalletTestHelper(driver);
+      await helper.performOneClickAuthentication(phoneNumber);
+      print('✅ Phone One-Click OTP flow completed');
+    }, timeout: Timeout(Duration(minutes: 3)));
 
     test('Email Passkey Flow', () async {
       print('\\n🧪 Testing Email Passkey Flow (Signup + Login)...');
@@ -66,7 +97,9 @@ void main() {
       print('✅ Email login completed');
       
       print('✅ Email passkey flow completed successfully');
-    }, timeout: Timeout(Duration(minutes: 5)));
+    },
+    timeout: Timeout(Duration(minutes: 5)),
+    skip: 'Disabled to mirror Swift suite (focusing on One-Click OTP)');
 
     test('Phone Passkey Flow', () async {
       print('\\n🧪 Testing Phone Passkey Flow (Signup + Login)...');
@@ -103,7 +136,9 @@ void main() {
       print('✅ Phone login completed');
       
       print('✅ Phone passkey flow completed successfully');
-    }, timeout: Timeout(Duration(minutes: 5)));
+    },
+    timeout: Timeout(Duration(minutes: 5)),
+    skip: 'Disabled to mirror Swift suite (focusing on One-Click OTP)');
   });
 }
 

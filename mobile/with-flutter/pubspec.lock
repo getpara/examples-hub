@@ -614,7 +614,7 @@ packages:
       path: "/Users/tyson/para/flutter-sdk"
       relative: false
     source: path
-    version: "2.2.0"
+    version: "2.3.0"
   passkeys:
     dependency: transitive
     description:

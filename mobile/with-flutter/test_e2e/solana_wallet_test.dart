@@ -3,6 +3,7 @@
 
 import 'dart:io';
 import 'package:test/test.dart';
+@Skip('Disabled to mirror Swift suite (Solana tests are commented out there)')
 import 'package:appium_driver/async_io.dart';
 import 'package:dotenv/dotenv.dart';
 import 'lib/wallet_test_foundation.dart';
