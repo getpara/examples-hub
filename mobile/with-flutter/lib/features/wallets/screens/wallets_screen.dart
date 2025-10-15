@@ -254,44 +254,53 @@ class _WalletsScreenState extends State<WalletsScreen> {
               : RefreshIndicator(
                   onRefresh: _refreshWallets,
                   child: _wallets.isEmpty
-                      ? Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              GestureDetector(
-                                onTap: _showCreateWalletSheet,
-                                child: Container(
-                                  width: 250,
-                                  height: 200,
-                                  padding: const EdgeInsets.all(40),
-                                  decoration: BoxDecoration(
-                                    color: Colors.blue.withAlpha((255 * 0.1).round()),
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(
-                                        Icons.add_circle,
-                                        size: 60,
-                                        color: Colors.blue[600],
+                      ? LayoutBuilder(
+                          builder: (context, constraints) {
+                            final minHeight = constraints.maxHeight.isFinite
+                                ? constraints.maxHeight
+                                : MediaQuery.of(context).size.height;
+                            return SingleChildScrollView(
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 48),
+                              child: ConstrainedBox(
+                                constraints: BoxConstraints(minHeight: minHeight),
+                                child: Center(
+                                  child: GestureDetector(
+                                    onTap: _showCreateWalletSheet,
+                                    child: Container(
+                                      width: 250,
+                                      height: 200,
+                                      padding: const EdgeInsets.all(40),
+                                      decoration: BoxDecoration(
+                                        color: Colors.blue.withAlpha((255 * 0.1).round()),
+                                        borderRadius: BorderRadius.circular(16),
                                       ),
-                                      const SizedBox(height: 16),
-                                      const Text(
-                                        'Create Your First Wallet',
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.w600,
-                                          color: Colors.black,
-                                        ),
+                                      child: Column(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Icon(
+                                            Icons.add_circle,
+                                            size: 60,
+                                            color: Colors.blue[600],
+                                          ),
+                                          const SizedBox(height: 16),
+                                          const Text(
+                                            'Create Your First Wallet',
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                              fontSize: 20,
+                                              fontWeight: FontWeight.w600,
+                                              color: Colors.black,
+                                            ),
+                                          ),
+                                        ],
                                       ),
-                                    ],
+                                    ),
                                   ),
                                 ),
                               ),
-                            ],
-                          ),
+                            );
+                          },
                         )
                       : ListView.builder(
                           padding: const EdgeInsets.all(16),
@@ -302,7 +311,7 @@ class _WalletsScreenState extends State<WalletsScreen> {
                                 onTap: _showCreateWalletSheet,
                               );
                             }
-                            
+
                             final wallet = _wallets[index];
                             return Padding(
                               padding: const EdgeInsets.only(bottom: 12),

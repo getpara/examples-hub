@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'client/para.dart';
@@ -24,55 +26,68 @@ class _ParaAppState extends State<ParaApp> {
   void initState() {
     super.initState();
     _initializePara();
-    _checkAuthStatus();
     _initializeDeepLinks();
   }
-  
+
   @override
   void dispose() {
     _deepLinkService.dispose();
     super.dispose();
   }
-  
+
   Future<void> _initializePara() async {
-    // Initialize Para by making a simple call to trigger bridge setup
+    final prefs = await SharedPreferences.getInstance();
+
+    // Attempt to restore any previously persisted Para session.
     try {
-      await para.currentUser();
+      final restored = await para.restorePersistedSession();
+      if (restored) {
+        await prefs.setBool('isAuthenticated', true);
+        if (mounted) {
+          setState(() => _state = AppState.home);
+        }
+        return;
+      }
     } catch (_) {
-      // Ignore errors - we just want to trigger initialization
+      // Ignore errors during restore and allow the app to fall back to auth flow.
+    }
+
+    await prefs.setBool('isAuthenticated', false);
+    if (mounted) {
+      setState(() => _state = AppState.auth);
+    }
+
+    // Warm up the bridge without blocking the UI.
+    unawaited(_warmParaBridge());
+  }
+
+  Future<void> _warmParaBridge() async {
+    try {
+      await para.currentUser().timeout(const Duration(seconds: 5));
+    } catch (_) {
+      // Ignore any initialization issues; regular auth flow will handle them.
     }
   }
 
-  Future<void> _checkAuthStatus() async {
-    // Quick check of stored auth state (like Swift)
-    final prefs = await SharedPreferences.getInstance();
-    final isAuthenticated = prefs.getBool('isAuthenticated') ?? false;
-    
-    // Set initial state immediately based on stored value
-    setState(() {
-      _state = isAuthenticated ? AppState.home : AppState.auth;
-    });
-  }
-  
   Future<void> _initializeDeepLinks() async {
     await _deepLinkService.initialize(
       onDeepLinkReceived: _handleDeepLink,
     );
   }
-  
+
   void _handleDeepLink(Uri uri) {
     // Validate the scheme first
     if (uri.scheme != 'paraflutter') {
       return;
     }
-    
+
     try {
       // Handle Para callback URLs
       if (DeepLinkService.isParaCallback(uri)) {
         // Para SDK should handle these automatically through web view
         _showSnackBar('Processing authentication callback...');
       }
-      
+
       // Handle wallet connection URLs
       else if (DeepLinkService.isWalletConnectionCallback(uri)) {
         // Validate and extract address parameter
@@ -83,7 +98,7 @@ class _ParaAppState extends State<ParaApp> {
           _showSnackBar('Invalid wallet connection link');
         }
       }
-      
+
       // Handle other custom deep links
       else {
         _showSnackBar('Unrecognized deep link');
@@ -92,12 +107,12 @@ class _ParaAppState extends State<ParaApp> {
       _showSnackBar('Error processing link');
     }
   }
-  
+
   String _truncateAddress(String address) {
     if (address.length <= 12) return address;
     return '${address.substring(0, 6)}...${address.substring(address.length - 4)}';
   }
-  
+
   void _showSnackBar(String message) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(

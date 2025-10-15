@@ -1251,10 +1251,16 @@ class WalletTestHelper {
         if (!isVisible || !isEnabled) {
           continue;
         }
-        final label = (await field.attributes['label'])?.toString().toLowerCase() ?? '';
-        final name = (await field.attributes['name'])?.toString().toLowerCase() ?? '';
-        final placeholder = (await field.attributes['placeholderValue'])?.toString().toLowerCase() ?? '';
-        final value = (await field.attributes['value'])?.toString().toLowerCase() ?? '';
+        final attributes = field.attributes;
+        String normalize(dynamic value) {
+          if (value == null) return '';
+          final raw = value is String ? value : value.toString();
+          return raw.toLowerCase();
+        }
+        final label = normalize(attributes['label']);
+        final name = normalize(attributes['name']);
+        final placeholder = normalize(attributes['placeholderValue']);
+        final value = normalize(attributes['value']);
         bool looksLikeCredentialField(String candidate) {
           return candidate.contains('email') ||
               candidate.contains('phone') ||
@@ -1527,7 +1533,7 @@ Map<String, String>? _ensureBootedSimulator({String? udid}) {
     if (booted != null) return booted;
 
     String? deviceName;
-    String? target;
+    late final String target;
     if (udid != null && udid.isNotEmpty) {
       // Lookup name for the specific UDID
       final specific = _firstMatchFromCommand(
@@ -1554,15 +1560,13 @@ Map<String, String>? _ensureBootedSimulator({String? udid}) {
     // Launch Simulator app
     Process.runSync('open', ['-a', 'Simulator']);
     // Boot device
-    if (target != null) {
-      Process.runSync('xcrun', ['simctl', 'boot', target]);
-    }
+    Process.runSync('xcrun', ['simctl', 'boot', target]);
 
     // Small wait for boot
     sleep(const Duration(seconds: 2));
 
     return {
-      'udid': target ?? '',
+      'udid': target,
       'deviceName': deviceName ?? 'iPhone',
     };
   } catch (_) {

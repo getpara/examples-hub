@@ -23,9 +23,12 @@ final config = ParaConfiguration(
 );
 
 // Initialize Para using configuration
+final sessionPersistence = SessionPersistenceService();
+
 final para = Para.fromConfig(
   config: config.toParaConfig(),
   appScheme: 'paraflutter',  // Para app scheme for deep linking
+  sessionPersistence: sessionPersistence,
 );
 
 // External wallet connectors
