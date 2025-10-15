@@ -384,9 +384,11 @@ export class ParaModalExamplePage {
       await skipButton.click();
     } else {
       // Click the Done button - target native button in shadow DOM
+      // Wait for the button to appear after the page transition
       const doneButton = this.page.locator(
         'cpsl-button:has-text("Done") button.button-native'
       );
+      await doneButton.waitFor({ state: "visible", timeout: 10000 });
       await doneButton.click();
     }
 

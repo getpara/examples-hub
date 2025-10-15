@@ -38,6 +38,13 @@ test.describe("Para Modal - Phone + PIN Authentication", () => {
     );
     const createAddressText = await addressElement.textContent();
 
+    // Test message signing before logout to ensure connection is stable
+    const testMessage = "Hello Para E2E Test with Phone + PIN!";
+    const signature = await paraModalExamplePage.signMessage(testMessage);
+    expect(signature).toBeTruthy();
+    expect(signature.length).toBeGreaterThan(0);
+    expect(signature).toMatch(/^[a-fA-F0-9]+$/);
+
     await paraModalExamplePage.logout();
     await paraModalExamplePage.login({
       context,
@@ -53,13 +60,10 @@ test.describe("Para Modal - Phone + PIN Authentication", () => {
     const loginAddressText = await loginAddressElement.textContent();
     expect(loginAddressText).toBe(createAddressText);
 
-    // Test message signing
-    const testMessage = "Hello Para E2E Test with Phone + Passkey!";
-    const signature = await paraModalExamplePage.signMessage(testMessage);
+    // Cleanup: delete test user
+    await paraModalExamplePage.cleanupTestUser();
 
-    // Verify signature
-    expect(signature).toBeTruthy();
-    expect(signature.length).toBeGreaterThan(0);
-    expect(signature).toMatch(/^[a-fA-F0-9]+$/); // Should be a hex string (may or may not have 0x prefix)
+    // Cleanup: ensure context is properly closed
+    await context.close();
   });
 });
