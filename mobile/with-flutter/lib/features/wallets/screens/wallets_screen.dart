@@ -254,11 +254,12 @@ class _WalletsScreenState extends State<WalletsScreen> {
               : RefreshIndicator(
                   onRefresh: _refreshWallets,
                   child: _wallets.isEmpty
-                      ? Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              GestureDetector(
+                      ? ListView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 48),
+                          children: [
+                            Center(
+                              child: GestureDetector(
                                 onTap: _showCreateWalletSheet,
                                 child: Container(
                                   width: 250,
@@ -290,8 +291,8 @@ class _WalletsScreenState extends State<WalletsScreen> {
                                   ),
                                 ),
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         )
                       : ListView.builder(
                           padding: const EdgeInsets.all(16),
@@ -302,7 +303,7 @@ class _WalletsScreenState extends State<WalletsScreen> {
                                 onTap: _showCreateWalletSheet,
                               );
                             }
-                            
+
                             final wallet = _wallets[index];
                             return Padding(
                               padding: const EdgeInsets.only(bottom: 12),

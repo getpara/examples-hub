@@ -3,7 +3,6 @@
 
 import 'dart:io';
 import 'package:test/test.dart';
-@Skip('Disabled to mirror Swift suite (Cosmos tests are commented out there)')
 import 'package:appium_driver/async_io.dart';
 import 'package:dotenv/dotenv.dart';
 import 'lib/wallet_test_foundation.dart';
@@ -79,7 +78,7 @@ void main() {
       
       print('✅ Cosmos wallet signing operations completed');
     });
-  });
+  }, skip: 'Disabled to mirror Swift suite (Cosmos tests are commented out there)');
 }
 
 // Helper class for Cosmos wallet tests
