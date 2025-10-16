@@ -9,7 +9,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  para: ^2.1.0-alpha.1
+  para: ^2.4.0
   flutter_dotenv: ^5.2.1
   flutter_inappwebview: ^6.1.5
   font_awesome_flutter: ^10.8.0
