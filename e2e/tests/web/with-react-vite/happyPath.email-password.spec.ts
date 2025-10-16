@@ -96,7 +96,10 @@ test.describe('Para Modal - Email + Password Authentication', () => {
     expect(loginSignature).toMatch(/^[a-fA-F0-9]+$/);
     
     logger.logStep('React Vite Para Modal E2E test completed successfully', true);
-    
+
+    // Cleanup: delete test user
+    await loginParaModalPage.cleanupTestUser();
+
     // Clean up
     await loginContext.close();
   });

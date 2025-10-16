@@ -52,5 +52,13 @@ test.describe('Para Modal - Phone + Passkey Authentication', () => {
     expect(signature).toBeTruthy();
     expect(signature.length).toBeGreaterThan(0);
     expect(signature).toMatch(/^[a-fA-F0-9]+$/); // Should be a hex string (may or may not have 0x prefix)
+
+    logger.logStep('React Vite Para Modal E2E test completed successfully', true);
+
+    // Cleanup: delete test user
+    await paraModalExamplePage.cleanupTestUser();
+
+    // Cleanup: ensure context is properly closed
+    await context.close();
   });
 });

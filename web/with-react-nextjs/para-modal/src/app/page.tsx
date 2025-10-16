@@ -1,6 +1,7 @@
 "use client";
 
-import { useAccount, useModal, useWallet, useSignMessage } from "@getpara/react-sdk";
+import { useEffect } from "react";
+import { useAccount, useModal, useWallet, useSignMessage, useClient } from "@getpara/react-sdk";
 import { StatusAlert } from "@/components/ui/StatusAlert";
 import { ConnectWalletCard } from "@/components/ui/ConnectWalletCard";
 import { SignatureDisplay } from "@/components/ui/SignatureDisplay";
@@ -10,6 +11,35 @@ import { ConnectedWallet } from "@/components/ConnectedWallet";
 const HELLO_WORLD_MESSAGE = "Hello World!";
 
 export default function Home() {
+  const para = useClient();
+
+  // Expose cleanup function and para client for E2E tests (development only)
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development' && para) {
+      // Expose para client for test verification
+      (window as any).para = para;
+
+      // Expose cleanup function
+      (window as any).__deleteTestUser = async () => {
+        if (para?.userId) {
+          try {
+            await para.ctx.client.deleteSelf(para.userId);
+            console.log('[E2E Cleanup] Test user deleted:', para.userId);
+          } catch (error: any) {
+            console.error('[E2E Cleanup] Failed to delete test user:', error.message);
+            throw error;
+          }
+        }
+      };
+    }
+
+    return () => {
+      if (process.env.NODE_ENV === 'development') {
+        delete (window as any).__deleteTestUser;
+        delete (window as any).para;
+      }
+    };
+  }, [para]);
   const { openModal } = useModal();
   const { isConnected } = useAccount();
   const { data: wallet } = useWallet();
