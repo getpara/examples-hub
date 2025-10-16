@@ -142,6 +142,12 @@ export const ParaProviderMin = forwardRef<
   }, [paraClientConfig]);
 
   useEffect(() => {
+    if (client) {
+      client.portalTheme = paraModalConfig?.theme;
+    }
+  }, [paraModalConfig?.theme, client]);
+
+  useEffect(() => {
     if (client && !client.isReady) {
       client
         .ready()
