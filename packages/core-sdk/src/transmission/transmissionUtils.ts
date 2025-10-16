@@ -2,17 +2,18 @@ import { Encrypt as ECIESEncrypt, Decrypt as ECIESDecrypt } from '@celo/utils/li
 import { Buffer } from 'buffer';
 import * as eutil from '@ethereumjs/util';
 import Client from '@getpara/user-management-client';
-import { randomBytes } from 'crypto';
 
 export async function upload(message: string, userManagementClient: Client) {
   let secret: string;
   let publicKeyUint8Array: Uint8Array;
   while (true) {
     try {
-      secret = randomBytes(32).toString('hex');
+      const privateKeyUint8Array = new Uint8Array(32);
+      crypto.getRandomValues(privateKeyUint8Array);
+      secret = Buffer.from(privateKeyUint8Array).toString('hex');
       // privateToPublic throws error when private key is larger than group order
       // so we want to keep trying until we get a valid private key
-      publicKeyUint8Array = eutil.privateToPublic(Buffer.from(secret, 'hex'));
+      publicKeyUint8Array = eutil.privateToPublic(privateKeyUint8Array);
       break;
     } catch (e) {
       continue;

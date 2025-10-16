@@ -61,7 +61,6 @@ export const getEmbeddedAccount = async (
   try {
     authMethods = await (para as ParaInternal).supportedUserAuthMethods();
   } catch (error) {
-    console.error('Error getting supported auth methods:', error);
     authMethods = new Set<AuthMethod>();
   }
 
