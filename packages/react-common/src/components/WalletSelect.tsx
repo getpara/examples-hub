@@ -1,43 +1,50 @@
 import { useEffect, useRef } from 'react';
-import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
-import { useDropdownPosition } from '../AuthInput/hooks/useDropdownPosition.js';
-import { safeStyled, useCopyToClipboard, WalletTypeIcon as WalletTypeIconBase } from '@getpara/react-common';
-import { useAccount, useWallet, useWalletState } from '../../../provider/index.js';
+import { useDropdownPosition, useCopyToClipboard } from '../hooks/index.js';
+import { safeStyled } from '../utils/index.js';
 import { CpslButton, CpslIcon, CpslSelect, CpslSelectItem, CpslText } from '@getpara/react-components';
-import { TWalletType, Wallet as TWallet } from '@getpara/web-sdk';
+import { AvailableWallet, TWalletType, TExternalWallet } from '@getpara/web-sdk';
+import { WalletTypeIcon as WalletTypeIconBase } from './WalletTypeIcon.js';
 
-const getValue = (id?: string, type?: TWalletType) => {
-  return id && type ? `${id}~${type}` : undefined;
+type EntryProps = {
+  name?: string;
+  type?: TWalletType;
+  externalWallet?: TExternalWallet | string;
+  withCopy?: boolean;
+  withIcon?: boolean;
+  copyValue?: string;
 };
 
-const Wallet = ({
-  wallet,
+const Entry = ({
+  isDark = false,
   withCopy,
   slot,
   withIcon,
+  name,
+  type,
+  externalWallet,
+  copyValue,
+  isMultiOption,
 }: {
-  wallet: Omit<TWallet, 'signer'>;
-  withCopy?: boolean;
+  isDark?: boolean;
   slot?: string;
-  withIcon?: boolean;
-}) => {
-  const para = useInternalClient();
+  isMenu?: boolean;
+  isMultiOption?: boolean;
+} & EntryProps) => {
   const [isCopied, copy] = useCopyToClipboard();
 
   return (
-    <WalletContainer slot={slot} style={{ flex: '1' }}>
+    <WalletContainer slot={slot} style={{ flex: '1' }} isMultiOption={isMultiOption}>
       {withIcon && (
-        <WalletTypeIcon
-          externalWallet={wallet.isExternal ? wallet.externalProviderId : undefined}
-          walletType={wallet.type}
-          size="32px"
-          inset="6px"
-        />
+        <WalletTypeIcon isDark={isDark} externalWallet={externalWallet} walletType={type} size="32px" inset="6px" />
       )}
-      <CpslText variant="bodyM" color="contrast" style={{ flex: '1' }}>
-        {para.getDisplayAddress(wallet.id, { truncate: true, addressType: wallet.type })}
+      <CpslText
+        variant="bodyM"
+        color="contrast"
+        style={{ flex: '1', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'clip' }}
+      >
+        {name}
       </CpslText>
-      {withCopy && (
+      {withCopy && copyValue && (
         <CopyButton
           id="ignore-click"
           size="small"
@@ -45,7 +52,7 @@ const Wallet = ({
           onClick={e => {
             e.stopPropagation();
             e.preventDefault();
-            copy(para.getDisplayAddress(wallet.id, { addressType: wallet.type! }));
+            copy(copyValue);
           }}
         >
           <CpslIcon id="ignore-click" slot="start" icon={isCopied ? 'check' : 'copy'} />
@@ -55,38 +62,55 @@ const Wallet = ({
   );
 };
 
-export const WalletSelectOld = () => {
+export const WalletSelect = ({
+  isDark = false,
+  style,
+  className,
+  value,
+  onChange,
+  options,
+  getEntryProps,
+  getSelectValue,
+  helperText,
+}: {
+  isDark;
+  style?: React.CSSProperties;
+  className?: string;
+  value: AvailableWallet;
+  onChange: (_: AvailableWallet) => void;
+  options: AvailableWallet[];
+  getEntryProps: (wallet: AvailableWallet) => EntryProps;
+  getSelectValue: (wallet: AvailableWallet) => `${string}~${TWalletType}`;
+  helperText?: string;
+}) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const { dropdownMaxHeight, dropdownWidth, mobileAnchor, resize } = useDropdownPosition(containerRef);
 
-  const { setSelectedWallet } = useWalletState();
-  const { data: activeWallet } = useWallet();
-  const { embedded } = useAccount();
+  const isMulti = options.length > 1;
 
-  const availableWallets = embedded?.wallets;
-  const isMultiWallet = availableWallets && availableWallets.length > 1;
-
-  const ActiveWalletNode = activeWallet ? <Wallet withCopy wallet={activeWallet} slot="selected-item" withIcon /> : null;
+  const ActiveEntry = value ? (
+    <Entry isDark={isDark} withCopy slot="selected-item" {...getEntryProps(value)} isMultiOption={isMulti} />
+  ) : null;
 
   useEffect(() => {
-    if (dropdownMaxHeight && activeWallet?.address) {
+    if (dropdownMaxHeight && value?.address) {
       resize();
     }
-  }, [activeWallet, availableWallets, dropdownMaxHeight]);
+  }, [value, options, dropdownMaxHeight]);
 
   return (
-    <Container>
-      {isMultiWallet && (
+    <Container className={className} style={style}>
+      {isMulti && helperText && (
         <CpslText variant="bodyM" color="secondary" weight="semiBold">
-          Select Wallet
+          {helperText}
         </CpslText>
       )}
       <SelectContainer ref={containerRef} id="addressInputContainer">
         <Select
-          selectedValue={getValue(activeWallet?.id, activeWallet?.type)}
+          selectedValue={getSelectValue(value)}
           onCpslSelectValueChange={e => {
             const [id, type] = e.detail.split('~');
-            setSelectedWallet({ id, type: type as TWalletType });
+            onChange(options.find(o => o.id === id && o.type === type));
           }}
           showFormattedSelectedItem
           placeholder="Choose wallet..."
@@ -96,15 +120,16 @@ export const WalletSelectOld = () => {
           // Adding 16 for the top padding + 1 for the border
           $top={(mobileAnchor ?? 0) + 16 + 1}
           selectedItemVariant="bodyXS"
-          icon={isMultiWallet ? 'chevronUp' : null}
-          disabled={!isMultiWallet}
+          icon={isMulti ? 'chevronUp' : null}
+          disabled={!isMulti}
+          isMultiOption={isMulti}
         >
-          {activeWallet && ActiveWalletNode}
-          {(availableWallets || []).map(wallet => {
-            const key = getValue(wallet.id, wallet.type);
+          {value && ActiveEntry}
+          {(options || []).map(wallet => {
+            const key = getSelectValue(wallet);
             return (
               <SelectItem key={key} slot="items" value={key}>
-                <Wallet wallet={wallet} withIcon />
+                <Entry isDark={isDark} {...getEntryProps(wallet)} />
               </SelectItem>
             );
           })}
@@ -121,10 +146,12 @@ const Container = safeStyled.div`
   align-items: center;
 `;
 
-const WalletContainer = safeStyled.div`
+const WalletContainer = safeStyled.div<{ isMultiOption?: boolean }>`
   display: flex;
   align-items: center;
   gap: 8px;
+  max-width: 100%;
+  padding-inline-end: ${({ isMultiOption }) => (isMultiOption ? '40px' : '0px')};
 `;
 
 export const Select = safeStyled(CpslSelect)<{ $width: number; $top?: number }>`
@@ -132,7 +159,7 @@ export const Select = safeStyled(CpslSelect)<{ $width: number; $top?: number }>`
   --icon-height: 32px;
   --container-border-color: var(--cpsl-color-background-16);
   --container-background-color-disabled: var(--container-background-color);
-  width: 286px;
+  width: 100%;
   position: relative;
 
   &::part(selected-text) {
@@ -145,21 +172,24 @@ export const Select = safeStyled(CpslSelect)<{ $width: number; $top?: number }>`
 
   &::part(icon) {
     --icon-color: var(--cpsl-color-text-primary);
+    position: absolute;
+    right: 12px;
   }
 `;
 
-export const SelectItem = safeStyled(CpslSelectItem)`
+export const SelectItem = safeStyled(CpslSelectItem)<{ isMultiOption?: boolean }>`
   --outer-container-padding-start: 0px;
   --outer-container-padding-end: 0px;
   --outer-container-padding-top: 0px;
   --outer-container-padding-bottom: 0px;
   --container-padding-start: 12px;
-  --container-padding-end: 12px;
+  --container-padding-end: ${({ isMultiOption }) => (isMultiOption ? '40px' : '12px')};
   --container-padding-top: 8px;
   --container-padding-bottom: 8px;
 `;
 
 export const SelectContainer = safeStyled.div`
+  width: 100%;
   position: relative;
   display: flex;
   align-items: center;

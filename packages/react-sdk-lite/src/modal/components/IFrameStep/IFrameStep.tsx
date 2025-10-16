@@ -2,10 +2,9 @@ import { useEffect, useState } from 'react';
 import { useModalStore } from '../../stores/index.js';
 import { IFrameSteps } from '../../utils/steps.js';
 import { safeStyled } from '@getpara/react-common';
-import { SpinnerContainer } from '@getpara/react-common';
+import { SpinnerContainer, MOBILE_SIZE } from '@getpara/react-common';
 import { CpslSpinner } from '@getpara/react-components';
 import { getPortalBaseURL } from '@getpara/web-sdk';
-import { MOBILE_SIZE } from '../../constants/constants.js';
 import { useStore } from '../../../provider/stores/useStore.js';
 import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
 

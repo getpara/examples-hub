@@ -1,9 +1,8 @@
-import { getAuthDisplay, safeStyled } from '@getpara/react-common';
+import { getAuthDisplay, safeStyled, BODY_MOTION_VARIANTS, BODY_TRANSITION } from '@getpara/react-common';
 import { useStepTitle } from './hooks/useStepTitle.js';
 import { CenteredText } from '../common.js';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useModalStore } from '../../stores/index.js';
-import { BODY_MOTION_VARIANTS, BODY_TRANSITION } from '../../constants/constants.js';
 import { useAccount } from '../../../provider/index.js';
 import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
 import { CpslIcon, CpslText } from '@getpara/react-components';

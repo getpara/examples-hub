@@ -2,9 +2,10 @@ import { ENV } from '../constants';
 import { Environment } from '@getpara/web-sdk';
 import { WarningBanner } from '@getpara/react-common';
 import { styled } from 'styled-components';
+import { isIFramed } from '../utils/isIFramed';
 
 export const BetaBannerNoChakra = () => {
-  if (ENV === Environment.PROD) {
+  if (ENV === Environment.PROD || isIFramed) {
     return null;
   }
 

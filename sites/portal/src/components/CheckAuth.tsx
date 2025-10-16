@@ -32,7 +32,7 @@ type SwitchWalletsParams = {
 type AdditionalAuthParams<T extends CheckAuthType> = BaseAdditionalAuthParams &
   (T extends 'ADD_CREDENTIAL' ? AddCredentialParams : SwitchWalletsParams);
 
-type CheckAuthType = 'ADD_CREDENTIAL' | 'SWITCH_WALLETS';
+type CheckAuthType = 'ADD_CREDENTIAL' | 'SWITCH_WALLETS' | 'EXPORT_PRIVATE_KEY';
 
 type CheckAuthProps = { type: CheckAuthType } & PropsWithChildren;
 
@@ -111,6 +111,13 @@ export const CheckAuth = ({ type, children }: CheckAuthProps) => {
               isForNewDevice: 'true',
               addNewCredentialPasskeyId: searchParams.get('addNewCredentialPasskeyId') || undefined,
               addNewCredentialPasswordId: searchParams.get('addNewCredentialPasswordId') || undefined,
+            };
+            break;
+          case 'EXPORT_PRIVATE_KEY':
+            additionalParams = {
+              sessionId: sessionLookupId,
+              clientSessionId,
+              loginCallbackRoute: typeof window !== 'undefined' ? window.location.pathname : '',
             };
             break;
           case 'SWITCH_WALLETS':

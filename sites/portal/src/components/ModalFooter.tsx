@@ -1,19 +1,21 @@
 import { styled } from 'styled-components';
 import { CpslIcon, CpslText } from '@getpara/react-components';
 import { AuthLoginStep } from '../constants';
+import React from 'react';
 
 interface ModalFooterProps {
+  justifyContent?: React.CSSProperties['justifyContent'];
   step?: AuthLoginStep;
   setStep?: (step: AuthLoginStep) => void;
 }
 
-export const ModalFooter = ({ step, setStep }: ModalFooterProps) => {
+export const ModalFooter = ({ justifyContent = 'space-between', step, setStep }: ModalFooterProps) => {
   const handleTroubleshootingClick = () => {
     setStep?.(AuthLoginStep.LOGIN_FAILED_TROUBLESHOOTING);
   };
 
   return (
-    <FooterContentContainer>
+    <FooterContentContainer justifyContent={justifyContent}>
       <PoweredByContainer>
         <FooterText color="secondary" variant="bodyXS">
           Powered by
@@ -29,11 +31,11 @@ export const ModalFooter = ({ step, setStep }: ModalFooterProps) => {
   );
 };
 
-const FooterContentContainer = styled.div`
+const FooterContentContainer = styled.div<{ justifyContent?: React.CSSProperties['justifyContent'] }>`
   width: 100%;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: ${({ justifyContent }) => justifyContent};
   gap: 8px;
   padding-top: 16px;
   padding-bottom: 20px;

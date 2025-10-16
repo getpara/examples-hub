@@ -1,7 +1,6 @@
 import { OnRampConfig } from '@getpara/web-sdk';
 import { useState } from 'react';
-import { ON_RAMP_PROVIDERS, OnRampProviderConfig } from '../../constants/constants.js';
-import { safeStyled } from '@getpara/react-common';
+import { safeStyled, ON_RAMP_PROVIDERS, OnRampProviderConfig } from '@getpara/react-common';
 import { CpslButton, CpslIcon, CpslSpinner, CpslText } from '@getpara/react-components';
 import { motion } from 'framer-motion';
 

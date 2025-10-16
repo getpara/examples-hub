@@ -7,7 +7,7 @@ import { ModalStep, RESET_TO_ACCOUNT_STEPS, RESET_TO_AUTH_STEPS } from './utils/
 import { AuthLayout, ParaModalHandle, ParaModalProps } from './types/modalProps.js';
 import { DEFAULTS } from './constants/defaults.js';
 import { useGoBack } from './hooks/useGoBack.js';
-import { safeStyled } from '@getpara/react-common';
+import { safeStyled, SDK_VERSION } from '@getpara/react-common';
 import { hasEmbeddedAuth, hasExternalWallet } from './utils/authLayoutHelpers.js';
 import { useAccount, useModal, useParaStatus, useWalletState } from '../provider/index.js';
 import { useInternalClient } from '../provider/hooks/utils/useInternalClient.js';
@@ -16,7 +16,6 @@ import { useStore } from '../provider/stores/useStore.js';
 import parsePhoneNumberFromString from 'libphonenumber-js';
 import { useAuthActions } from '../provider/providers/AuthProvider.js';
 import { validateInput } from './utils/authInputHelpers.js';
-import { SDK_VERSION } from './constants/constants.js';
 
 defineCustomElements();
 

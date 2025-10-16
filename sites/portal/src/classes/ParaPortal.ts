@@ -8,6 +8,8 @@ export class ParaPortal extends ParaInternal {
 
   protected nonPersistedStorageKeys: string[] = [LOCAL_STORAGE_CURRENT_WALLET_IDS, LOCAL_STORAGE_WALLETS];
 
+  getPrivateKey = super.getPrivateKey;
+
   get pregenIds(): PregenIds {
     return Object.keys({ ...super.pregenIds, ...this._pregenIds }).reduce(
       (acc, pregenIdentifierType) => {

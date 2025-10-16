@@ -1,7 +1,6 @@
 import * as comp from '@getpara/react-components';
 import { formatCurrency, getOnRampNetworks, TOnRampAsset } from '@getpara/web-sdk';
-import { safeStyled } from '@getpara/react-common';
-import { getAssetCode, getAssetName, ON_RAMP_ASSETS } from '../../constants/constants.js';
+import { safeStyled, getAssetCode, getAssetName, ON_RAMP_ASSETS } from '@getpara/react-common';
 import { useModalStore } from '../../stores/index.js';
 import { useState } from 'react';
 import { useAddFunds } from './AddFundsContext.js';

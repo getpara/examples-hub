@@ -103,6 +103,7 @@ import {
   AccountLinkError,
   AuthStateSignupOrLoginOrDone,
   AuthStateDone,
+  AvailableWallet,
 } from './types/index.js';
 import { PlatformUtils } from './PlatformUtils.js';
 import { sendRecoveryForShare } from './shares/recovery.js';
@@ -775,6 +776,7 @@ export abstract class ParaCore implements CoreInterface {
       isFarcasterLogin,
       isAddNewCredential,
       isSwitchWallets,
+      isExportPrivateKey,
     ] = [
       ['createAuth', 'createPassword', 'createPIN'].includes(type),
       ['loginAuth', 'loginPassword', 'loginPIN', 'loginOTP', 'switchWallets'].includes(type),
@@ -785,6 +787,7 @@ export abstract class ParaCore implements CoreInterface {
       type === 'loginFarcaster',
       type === 'addNewCredential',
       type === 'switchWallets',
+      type === 'exportPrivateKey',
     ];
 
     if (isOAuth && !opts.oAuthMethod) {
@@ -797,7 +800,7 @@ export abstract class ParaCore implements CoreInterface {
     }
 
     let sessionId = opts.sessionId;
-    if ((isLogin || isOnRamp || isTelegramLogin || isFarcasterLogin) && !sessionId) {
+    if ((isLogin || isOnRamp || isTelegramLogin || isFarcasterLogin || isExportPrivateKey) && !sessionId) {
       const session = await this.touchSession(true);
 
       sessionId = session.sessionId;
@@ -876,6 +879,10 @@ export abstract class ParaCore implements CoreInterface {
         path = '/auth/add-new-credential';
         break;
       }
+      case 'exportPrivateKey': {
+        path = `/web/users/${this.userId}/private-key/${opts.pathId}`;
+        break;
+      }
       default: {
         throw new Error(`invalid URL type ${type}`);
       }
@@ -916,7 +923,8 @@ export abstract class ParaCore implements CoreInterface {
       portalTextColor: this.portalTextColor,
       portalPrimaryButtonTextColor: this.portalPrimaryButtonTextColor,
       isForNewDevice: opts.isForNewDevice ? opts.isForNewDevice.toString() : undefined,
-      ...(this.authInfo && (isCreate || isLogin || isAddNewCredential || isOAuthCallback || isSwitchWallets)
+      ...(this.authInfo &&
+      (isCreate || isLogin || isAddNewCredential || isOAuthCallback || isSwitchWallets || isExportPrivateKey)
         ? {
             authInfo: JSON.stringify(this.authInfo),
             ...(isPhone(this.authInfo.auth) ? splitPhoneNumber(this.authInfo.auth.phone) : this.authInfo.auth),
@@ -925,7 +933,13 @@ export abstract class ParaCore implements CoreInterface {
           }
         : {}),
       ...(isOnRamp ? { email: this.email } : {}),
-      ...(isLogin || isOAuth || isOAuthCallback || isTelegramLogin || isFarcasterLogin || isAddNewCredential
+      ...(isLogin ||
+      isOAuth ||
+      isOAuthCallback ||
+      isTelegramLogin ||
+      isFarcasterLogin ||
+      isAddNewCredential ||
+      isExportPrivateKey
         ? {
             sessionId: thisDevice.sessionId,
             encryptionKey: thisDevice.encryptionKey,
@@ -2041,10 +2055,7 @@ Need help? Visit: https://docs.getpara.com or contact support
     }
   }
 
-  get availableWallets(): Pick<
-    Wallet,
-    'id' | 'type' | 'name' | 'address' | 'partner' | 'isExternal' | 'externalProviderId' | 'isExternalConnectionOnly'
-  >[] {
+  get availableWallets(): AvailableWallet[] {
     return [
       ...[...this.currentWalletIdsArray, ...this.#guestWalletIdsArray]
         .map(([address, type]): [string, TWalletType, boolean] => [address, type, false])
@@ -4872,5 +4883,47 @@ Need help? Visit: https://docs.getpara.com or contact support
     const { userId } = await this.ctx.client.sendLoginVerificationCode(this.authInfo);
 
     this.setUserId(userId);
+  }
+
+  async exportPrivateKey(args: CoreMethodParams<'exportPrivateKey'> = {}): CoreMethodResponse<'exportPrivateKey'> {
+    let walletId = args?.walletId;
+    if (!args?.walletId) {
+      walletId = this.findWalletId(undefined, { forbidPregen: true, scheme: ['DKLS'] });
+    }
+
+    const wallet = this.wallets[walletId];
+
+    if (this.externalWallets[walletId]) {
+      throw new Error('Cannot export private key for an external wallet');
+    }
+
+    if (!wallet || !wallet.signer) {
+      throw new Error('Wallet not found with id: ' + walletId);
+    }
+
+    if (wallet.scheme !== 'DKLS') {
+      throw new Error('Cannot export private key for a Solana wallet');
+    }
+
+    if (wallet.isPregen && !!wallet.pregenIdentifier && wallet.pregenIdentifierType !== 'GUEST_ID') {
+      throw new Error('Cannot export private key for a pregenerated wallet');
+    }
+
+    if (args.shouldOpenPopup) {
+      this.popupWindow = await this.platformUtils.openPopup('about:blank', { type: PopupType.EXPORT_PRIVATE_KEY });
+    }
+
+    const exportPrivateKeyUrl = await this.constructPortalUrl('exportPrivateKey', {
+      pathId: walletId,
+    });
+
+    if (args.shouldOpenPopup) {
+      this.popupWindow.location.href = exportPrivateKeyUrl;
+    }
+
+    return {
+      url: exportPrivateKeyUrl,
+      popupWindow: this.popupWindow,
+    };
   }
 }

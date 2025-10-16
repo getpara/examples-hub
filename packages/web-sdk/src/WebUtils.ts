@@ -175,7 +175,8 @@ export class WebUtils implements PlatformUtils {
           popUpHeight = 464;
           break;
         }
-        case PopupType.SIGN_MESSAGE_REVIEW: {
+        case PopupType.SIGN_MESSAGE_REVIEW:
+        case PopupType.EXPORT_PRIVATE_KEY: {
           popUpHeight = 585;
           break;
         }

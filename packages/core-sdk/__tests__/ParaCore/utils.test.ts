@@ -1,7 +1,7 @@
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { MockPara } from '../mocks/mockParaCore';
-import { getWorkerContent, prepareMock } from '../utils';
-import { API_KEY, USER_EMAIL, USER_ID } from '../constants';
+import { expectSearchParams, getWorkerContent, prepareMock } from '../utils';
+import { API_KEY, COMMON_SEARCH_PARAMS, SESSION_ID, USER_EMAIL, USER_ID } from '../constants';
 import { AuthMethod, Environment, Wallet } from '../../src';
 import { faker } from '@faker-js/faker';
 import {
@@ -9,6 +9,8 @@ import {
   mockGetSupportedAuthMethodsV2,
   mockSendLoginVerificationCode,
 } from '../mocks/mockUserManagementClient';
+import { mockWindowLocation } from '../setup.js';
+import * as cryptoUtils from '../../src/cryptography/utils';
 
 describe('ParaCore - utils', () => {
   let para: MockPara;
@@ -382,6 +384,56 @@ describe('ParaCore - utils', () => {
       expect(mockGetSupportedAuthMethods).toHaveBeenCalledWith(para.authInfo.auth);
       expect(resp.size).toBe(2);
       expect(resp instanceof Set).toBe(true);
+    });
+  });
+
+  describe('exportPrivateKey', () => {
+    beforeEach(async () => {
+      para = new MockPara(Environment.DEV, API_KEY);
+      await prepareMock(para, { excludePregen: true });
+    });
+
+    it('should export private key for a wallet', async () => {
+      // Mock window.location to ensure origin is available
+      vi.spyOn(window, 'location', 'get').mockReturnValue(mockWindowLocation as Location);
+
+      const mockEncryptionKey = 'mock-encryption-key-hex';
+      const getPublicKeyHexSpy = vi.spyOn(cryptoUtils, 'getPublicKeyHex').mockReturnValue(mockEncryptionKey);
+
+      const result = await para.exportPrivateKey({ shouldOpenPopup: true });
+
+      // Verify the return object structure
+      expect(result).toBeDefined();
+      expect(result.url).toBeDefined();
+      expect(result.popupWindow).toBeDefined();
+      expect(result.popupWindow).toBe(para.popupWindow);
+
+      // Verify the popup was opened with about:blank
+      expect((para as any).platformUtils.openPopup).toHaveBeenCalledWith('about:blank', { type: 'EXPORT_PRIVATE_KEY' });
+
+      // Verify the URL is constructed correctly and window is redirected
+      const url = new URL(result.url);
+
+      // Get the wallet ID that was selected (should be a DKLS wallet, not pregenerated)
+      const selectedWalletId = para.findWalletId(undefined, { forbidPregen: true, scheme: ['DKLS'] });
+      expect(url.pathname).toEqual(`/web/users/${para.userId}/private-key/${selectedWalletId}`);
+
+      // Verify the popup window was redirected to the URL
+      expect((result.popupWindow as any).location.href).toBe(result.url);
+
+      // Verify search params
+      expectSearchParams(url, {
+        ...COMMON_SEARCH_PARAMS,
+        apiKey: API_KEY,
+        origin: mockWindowLocation.origin,
+        sessionId: SESSION_ID,
+        encryptionKey: mockEncryptionKey,
+        pregenIds: JSON.stringify(para.pregenIds),
+        authInfo: JSON.stringify(para.authInfo),
+        email: para.email!,
+      });
+
+      getPublicKeyHexSpy.mockRestore();
     });
   });
 });

@@ -1,12 +1,13 @@
 import { CurrentWalletIds, OnRampConfig, OnRampPurchase, OnRampPurchaseUpdateParams } from '@getpara/user-management-client';
-import { OfframpDepositRequest } from '@getpara/core-sdk';
+import { OfframpDepositRequest, Wallet } from '@getpara/core-sdk';
 
 export type PortalMessageType =
   | 'ONRAMPS__INIT'
   | 'ONRAMPS__UPDATE_PURCHASE'
   | 'ONRAMPS__SIGN_MOONPAY_URL'
   | 'ONRAMPS__SIGN_DEPOSIT_TX'
-  | 'WALLET_SWITCH_COMPLETED';
+  | 'WALLET_SWITCH_COMPLETED'
+  | 'SYNC_WALLETS';
 
 export type PortalMessageStatus = 'ERROR' | 'SUCCESS';
 
@@ -27,7 +28,9 @@ export type PortalRequestPayload<T extends PortalMessageType> = T extends 'ONRAM
         ? {
             walletIds?: CurrentWalletIds;
           }
-        : never;
+        : T extends 'SYNC_WALLETS'
+          ? undefined
+          : never;
 
 export type PortalRequest = { isPara: boolean; id: string; status?: undefined } & (
   | {
@@ -50,6 +53,10 @@ export type PortalRequest = { isPara: boolean; id: string; status?: undefined } 
       type: 'WALLET_SWITCH_COMPLETED';
       payload: PortalRequestPayload<'WALLET_SWITCH_COMPLETED'>;
     }
+  | {
+      type: 'SYNC_WALLETS';
+      payload?: undefined;
+    }
 );
 
 export type PortalResponsePayload<T extends PortalMessageType> = T extends 'ONRAMPS__INIT'
@@ -65,7 +72,9 @@ export type PortalResponsePayload<T extends PortalMessageType> = T extends 'ONRA
         ? { txHash: string; onRampPurchase: OnRampPurchase }
         : T extends 'WALLET_SWITCH_COMPLETED'
           ? { walletIds?: CurrentWalletIds }
-          : never;
+          : T extends 'SYNC_WALLETS'
+            ? { wallets: Record<string, Wallet>; currentWalletIds?: CurrentWalletIds }
+            : never;
 
 export type PortalResponse = { id: string; status: PortalMessageStatus; type: PortalMessageType } & (
   | {
@@ -96,5 +105,10 @@ export type PortalResponse = { id: string; status: PortalMessageStatus; type: Po
       status: 'SUCCESS';
       type: 'WALLET_SWITCH_COMPLETED';
       payload: PortalResponsePayload<'WALLET_SWITCH_COMPLETED'>;
+    }
+  | {
+      status: 'SUCCESS';
+      type: 'SYNC_WALLETS';
+      payload: PortalResponsePayload<'SYNC_WALLETS'>;
     }
 );

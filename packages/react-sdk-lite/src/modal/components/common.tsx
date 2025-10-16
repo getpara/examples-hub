@@ -1,7 +1,6 @@
 import { CpslIcon, CpslInput, CpslSelect, CpslSelectItem, CpslText, CpslTileButton } from '@getpara/react-components';
-import { ACCOUNT_TYPES, CommonWallet, safeStyled } from '@getpara/react-common';
-import { MOBILE_SIZE, NETWORKS, ON_RAMP_ASSETS, WALLET_TYPES_METADATA } from '../constants/constants.js';
-import { TExternalWallet, TLinkedAccountType, TNetwork, TOnRampAsset, TWalletType } from '@getpara/web-sdk';
+import { ACCOUNT_TYPES, safeStyled, MOBILE_SIZE, NETWORKS, ON_RAMP_ASSETS } from '@getpara/react-common';
+import { TLinkedAccountType, TNetwork, TOnRampAsset } from '@getpara/web-sdk';
 import { useStore } from '../../provider/stores/useStore.js';
 import { ComponentProps, PropsWithChildren, useEffect, useRef, useState } from 'react';
 
@@ -175,42 +174,6 @@ export function NetworkIcon({ network, size }: { network?: TNetwork; size?: stri
       inset={data.isCircular ? undefined : '15%'}
       color={data?.isPlain ? 'var(--cpsl-color-text-contrast)' : undefined}
       invert={isDark && data.isDark}
-    />
-  );
-}
-
-export function WalletTypeIcon({
-  className,
-  walletType,
-  externalWallet,
-  ...props
-}: {
-  className?: string;
-  walletType: TWalletType;
-  externalWallet?: TExternalWallet | CommonWallet | string;
-} & Parameters<typeof CpslIcon>[0]) {
-  const isDark = useStore(state => state.modalConfig?.theme?.mode === 'dark');
-
-  // If iconUrl is provided, use it directly
-  if (typeof externalWallet === 'object' && 'iconUrl' in externalWallet) {
-    return <CpslIcon className={className} src={externalWallet.iconUrl} {...props} inset={props.inset ?? '10%'} />;
-  }
-
-  // Otherwise, use the existing logic
-  const data = (externalWallet ? ACCOUNT_TYPES[externalWallet] : WALLET_TYPES_METADATA[walletType]) || {
-    icon: 'wallet02',
-    isDark: true,
-  };
-
-  props.size;
-
-  return (
-    <CpslIcon
-      className={className}
-      icon={data.icon}
-      invert={isDark && data.isDark}
-      {...props}
-      inset={props.inset ?? '10%'}
     />
   );
 }

@@ -48,7 +48,8 @@ export type PortalUrlType =
   | 'telegramLoginVerify'
   | 'loginFarcaster'
   | 'switchWallets'
-  | 'addNewCredential';
+  | 'addNewCredential'
+  | 'exportPrivateKey';
 
 export type PortalUrlOptions = {
   params?: Record<string, string | undefined | null>;

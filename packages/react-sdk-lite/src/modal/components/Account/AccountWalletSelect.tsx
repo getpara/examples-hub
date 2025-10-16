@@ -71,7 +71,7 @@ const Wallet = ({
   );
 };
 
-export const WalletSelect = () => {
+export const AccountWalletSelect = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const { dropdownMaxHeight, dropdownWidth, mobileAnchor, resize } = useDropdownPosition(containerRef);
 
@@ -203,7 +203,8 @@ export const SelectContainer = safeStyled.div`
   background-color: transparent;
 `;
 
-const WalletIcon = safeStyled(CpslIcon)`  --icon-border: 1px solid var(--cpsl-color-background-8);
+const WalletIcon = safeStyled(CpslIcon)`
+  --icon-border: 1px solid var(--cpsl-color-background-8);
   --icon-background: var(--cpsl-color-background-0);
   --icon-border-radius: 4px;
 `;

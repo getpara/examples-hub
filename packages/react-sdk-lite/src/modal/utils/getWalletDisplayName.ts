@@ -1,5 +1,5 @@
 import ParaWeb from '@getpara/web-sdk';
-import { WALLET_TYPES_METADATA } from '../constants/constants.js';
+import { WALLET_TYPES_METADATA } from '@getpara/react-common';
 
 export function getWalletDisplayName(
   para: ParaWeb,

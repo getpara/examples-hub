@@ -93,6 +93,7 @@ export const PARA_CORE_METHODS = [
   'getLinkedAccounts',
   'accountLinkInProgress',
   'addCredential',
+  'exportPrivateKey',
 ] as const;
 
 export const PARA_INTERNAL_METHODS = [
@@ -630,6 +631,15 @@ export type CoreMethods = Record<CoreMethodName, { params?: unknown; response?: 
   addCredential: {
     params: Pick<NewCredentialUrlParams, 'authMethod'>;
     response: Promise<string>;
+  };
+  exportPrivateKey: {
+    params:
+      | {
+          walletId?: string;
+          shouldOpenPopup?: boolean;
+        }
+      | undefined;
+    response: { popupWindow?: Window; url: string };
   };
 };
 

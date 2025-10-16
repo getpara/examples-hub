@@ -8,7 +8,7 @@ import {
 import { v4 as uuid } from 'uuid';
 
 export class PortalEmitter {
-  private counterpart: Window;
+  private counterpart: Window | null;
   private origin: string;
 
   constructor(origin?: string) {
@@ -71,5 +71,9 @@ export class PortalEmitter {
 
   async walletSwitchCompleted(payload: PortalRequestPayload<'WALLET_SWITCH_COMPLETED'>) {
     return await this.sendMessage({ type: 'WALLET_SWITCH_COMPLETED', payload });
+  }
+
+  async syncWallets() {
+    return await this.sendMessage<'SYNC_WALLETS'>({ type: 'SYNC_WALLETS' });
   }
 }

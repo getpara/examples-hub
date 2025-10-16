@@ -5,7 +5,7 @@ import { truncateAddress } from '@getpara/web-sdk';
 import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
 import { useAssets } from '../../../provider/providers/AssetsProvider.js';
 import { useAccount, useWallet } from '../../../provider/index.js';
-import { WalletSelect } from '../WalletSelect/WalletSelect.js';
+import { AccountWalletSelect } from './AccountWalletSelect.js';
 
 export const AccountHeader = ({ withBalance = false }: { withBalance?: boolean } = {}) => {
   const para = useInternalClient();
@@ -44,7 +44,7 @@ export const AccountHeader = ({ withBalance = false }: { withBalance?: boolean }
         src={src}
       />
       {connectionType === 'both' ? (
-        <WalletSelect />
+        <AccountWalletSelect />
       ) : (
         <CpslText variant="headingXS" weight="semiBold" color="contrast">
           {name}

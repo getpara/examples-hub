@@ -16,9 +16,8 @@ import {
 } from '@getpara/react-components';
 import { CountryCallingCode } from 'libphonenumber-js';
 import { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
-import { safeStyled } from '@getpara/react-common';
+import { safeStyled, MOBILE_SIZE } from '@getpara/react-common';
 import countryCodes from '../../utils/countryCodes.js';
-import { MOBILE_SIZE } from '../../constants/constants.js';
 import { useDropdownPosition } from './hooks/useDropdownPosition.js';
 import { defaultPhoneMask, phoneMasks } from './phoneMasks.js';
 import { Auth, AuthType, extractAuthInfo, PrimaryAuthInfo } from '@getpara/user-management-client';

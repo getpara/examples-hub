@@ -1,4 +1,4 @@
-import { AccountTypeIcon, GradientScroll, StepContainer, WalletTypeIcon } from '../common.js';
+import { AccountTypeIcon, GradientScroll, StepContainer } from '../common.js';
 import { CpslButton, CpslIcon, CpslText } from '@getpara/react-components';
 import { useAccount } from '../../../provider/index.js';
 import { useLinkedAccounts } from '../../../provider/hooks/index.js';
@@ -14,7 +14,7 @@ import {
 } from '@getpara/web-sdk';
 import { useAccountLinking } from '../../../provider/providers/AccountLinkProvider.js';
 import { ReactNode, useEffect, useMemo } from 'react';
-import { ACCOUNT_TYPES, safeStyled, useCopyToClipboard } from '@getpara/react-common';
+import { ACCOUNT_TYPES, safeStyled, useCopyToClipboard, WalletTypeIcon } from '@getpara/react-common';
 import { useExternalWallets } from '../../../provider/providers/ExternalWalletProvider.js';
 import { useStore } from '../../../provider/stores/useStore.js';
 import { useAssets } from '../../../provider/providers/AssetsProvider.js';

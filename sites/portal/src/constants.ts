@@ -62,3 +62,5 @@ export function PARA_CONNECT_DOMAINS() {
       throw new Error(`env: ${ENV} not supported`);
   }
 }
+
+export const RETRIEVED_WALLETS_KEY = '@PARA-PORTAL/retrievedWallets';

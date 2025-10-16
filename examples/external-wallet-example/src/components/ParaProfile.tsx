@@ -10,6 +10,7 @@ import { http } from 'viem';
 import { createSolanaRpc, getUtf8Encoder } from '@solana/kit';
 import bs58 from 'bs58';
 import { WalletSelector } from './WalletSelector';
+import { useExportPrivateKey } from '@getpara/react-sdk-lite';
 
 const paraRpc = createSolanaRpc('https://api.testnet.solana.com');
 
@@ -26,6 +27,7 @@ export const ParaProfile = () => {
   const { solanaSigner } = useSolanaSigner({ rpc: paraRpc });
   const paraClient = useClient();
   const { addAuthMethod } = useAddAuthMethod();
+  const { mutateAsync: exportPrivateKeyAsync, isPending: isExportingPrivateKey } = useExportPrivateKey();
 
   const [message, setMessage] = useState<string>('');
   const [messageSignature, setMessageSignature] = useState<string>();
@@ -101,7 +103,20 @@ export const ParaProfile = () => {
   };
 
   const handleAddAuthMethod = () => {
-    addAuthMethod(undefined, { onError: e => console.error('Error adding auth method:', e) });
+    addAuthMethod(undefined, { onError: (e: Error) => console.error('Error adding auth method:', e) });
+  };
+
+  const handleExportPrivateKey = async () => {
+    if (!wallet?.id) {
+      console.error('No wallet ID available');
+      return;
+    }
+
+    try {
+      await exportPrivateKeyAsync({ walletId: wallet.id });
+    } catch (error) {
+      console.error('Error exporting private key:', error);
+    }
   };
 
   const embeddedConnected = isConnected && embedded?.isConnected && embedded?.wallets?.some(w => !w.isExternal);
@@ -135,7 +150,7 @@ export const ParaProfile = () => {
             <WalletSelector />
             <CpslInput
               placeholder="Message to sign"
-              onCpslInput={e => {
+              onCpslInput={(e: CustomEvent<{ value?: string }>) => {
                 setMessage(e.detail.value ?? '');
               }}
             />
@@ -179,6 +194,9 @@ export const ParaProfile = () => {
           }}
         >
           Delete User
+        </CpslButton>
+        <CpslButton disabled={!isConnected || !wallet?.id || isExportingPrivateKey} onClick={handleExportPrivateKey}>
+          {isExportingPrivateKey ? 'Exporting...' : 'Export Private Key'}
         </CpslButton>
       </ProfileInnerContainer>
     </Card>

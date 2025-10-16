@@ -3,12 +3,12 @@
 :host {
   --container-gap: 8px;
 
-  --container-padding-top: 14px;
-  --container-padding-bottom: 14px;
-  --container-padding-start: 16px;
-  --container-padding-end: 16px;
+  --container-padding-top: 8px;
+  --container-padding-bottom: 8px;
+  --container-padding-start: 8px;
+  --container-padding-end: 8px;
 
-  --container-font-size: var(--cpsl-font-size-body-m);
+  --container-font-size: var(--cpsl-font-size-body-s);
 
   --container-border-width: 1px;
   --container-border-radius: var(--cpsl-border-radius-alert);
@@ -22,7 +22,7 @@
 
   --title-container-gap: 8px;
 
-  --title-container-align-items: center;
+  --title-container-align-items: flex-start;
   --title-container-justify-content: center;
 
   display: inline-block;
@@ -30,6 +30,8 @@
 }
 
 :host(.error) {
+  --container-color: var(--cpsl-color-black);
+  --container-icon-color: var(--cpsl-color-utility-red);
   --container-border-color: var(--cpsl-color-utility-red);
 
   &:host(.filled) {
@@ -38,6 +40,8 @@
 }
 
 :host(.warning) {
+  --container-color: var(--cpsl-color-black);
+  --container-icon-color: var(--cpsl-color-utility-yellow);
   --container-border-color: var(--cpsl-color-utility-yellow);
 
   &:host(.filled) {
@@ -46,6 +50,8 @@
 }
 
 :host(.success) {
+  --container-color: var(--cpsl-color-black);
+  --container-icon-color: var(--cpsl-color-utility-green);
   --container-border-color: var(--cpsl-color-utility-green);
 
   &:host(.filled) {
@@ -56,8 +62,8 @@
 :host {
   cpsl-icon {
     --icon-color: var(--container-icon-color);
-    --height: 20px;
-    --width: 20px;
+    --height: 24px;
+    --width: 24px;
   }
 }
 

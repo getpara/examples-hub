@@ -7,6 +7,7 @@ import { AuthLoginParams } from '../types';
 import { AuthExtras, AuthParams, extractAuthInfo } from '@getpara/user-management-client';
 import { useExtractedParams } from '../hooks/useExtractedParams';
 import { PortalEmitter } from '../classes';
+import { RETRIEVED_WALLETS_KEY } from '../constants';
 
 interface ParaProviderProps extends PropsWithChildren {
   apiKey: string;
@@ -99,6 +100,21 @@ export const ParaProvider = (props: ParaProviderProps) => {
         }
 
         return;
+      }
+
+      // Retrieve wallets from origin window if we are on the export private key page
+      if (location.pathname.includes('/private-key')) {
+        try {
+          const retrieveWalletsResult = await portalEmitter?.syncWallets();
+
+          sessionStorage.setItem(RETRIEVED_WALLETS_KEY, JSON.stringify(retrieveWalletsResult));
+        } catch (error) {
+          // Store error flag in sessionStorage so ExportPrivateKey can show appropriate error
+          sessionStorage.setItem(
+            RETRIEVED_WALLETS_KEY,
+            JSON.stringify({ error: true, message: error.message || 'Failed to sync wallets' }),
+          );
+        }
       }
 
       await para.logout();

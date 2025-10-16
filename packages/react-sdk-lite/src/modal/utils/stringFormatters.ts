@@ -1,5 +1,5 @@
 import { TNetwork } from '@getpara/web-sdk';
-import { getNetworkName } from '../constants/constants.js';
+import { getNetworkName } from '@getpara/react-common';
 import { format } from 'date-fns';
 
 export const formatNetworkList = (networks: TNetwork[]) => {

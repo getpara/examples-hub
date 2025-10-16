@@ -171,6 +171,14 @@ export class Para extends ParaCore {
             payload = {};
           }
           break;
+        case 'SYNC_WALLETS':
+          {
+            payload = {
+              wallets: this.wallets,
+              currentWalletIds: this.currentWalletIds,
+            };
+          }
+          break;
       }
     } catch (e) {
       status = 'ERROR';

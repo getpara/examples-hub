@@ -1,4 +1,4 @@
-import { safeStyled } from '@getpara/react-common';
+import { safeStyled, WalletTypeIcon } from '@getpara/react-common';
 import { useModalStore } from '../../stores/index.js';
 import { CpslButton, CpslIcon, CpslText } from '@getpara/react-components';
 import { truncateAddress, TWalletType } from '@getpara/web-sdk';
@@ -7,7 +7,6 @@ import { useWalletState } from '../../../provider/index.js';
 import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
 import { useStore } from '../../../provider/stores/useStore.js';
 import { ReactNode } from 'react';
-import { WalletTypeIcon } from '../common.js';
 
 export const ExternalWalletCard = ({
   address,

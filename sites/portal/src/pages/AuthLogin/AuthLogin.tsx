@@ -11,7 +11,7 @@ import { useModalOutletContext } from '../../hooks/useModalOutletContext';
 import { useCloseWindow } from '../../hooks/useCloseWindow';
 import { AuthMethod, TAuthMethod, isPasskeySupported } from '@getpara/web-sdk';
 import { validateCallbackUrl } from '../../utils/validateCallbackUrl';
-import { NativeCallbackStatus } from '../../constants/nativeCallback';
+import { NativeCallbackStatus } from '../../types';
 import { isIFramed } from '../../utils/isIFramed';
 import { getDefaultWalletIds } from '../../utils/getDefaultWalletIds';
 import { LoginRes } from '../../types';

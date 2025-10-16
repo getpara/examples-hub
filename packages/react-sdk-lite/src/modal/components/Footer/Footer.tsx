@@ -1,6 +1,5 @@
-import { safeStyled } from '@getpara/react-common';
+import { safeStyled, PARA_TERMS_AND_CONDITIONS } from '@getpara/react-common';
 import { CpslIcon, CpslText } from '@getpara/react-components';
-import { PARA_TERMS_AND_CONDITIONS } from '../../constants/constants.js';
 import { useModalStore } from '../../stores/index.js';
 import { ModalStep } from '../../utils/steps.js';
 import { useAccountLinking } from '../../../provider/providers/AccountLinkProvider.js';

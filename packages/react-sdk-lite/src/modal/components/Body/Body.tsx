@@ -1,4 +1,4 @@
-import { safeStyled, WarningBanner } from '@getpara/react-common';
+import { safeStyled, WarningBanner, BODY_MOTION_VARIANTS, BODY_TRANSITION, MOBILE_SIZE } from '@getpara/react-common';
 import { IFrameSteps, ModalStep } from '../../utils/steps.js';
 import { CpslAlert, CpslIcon } from '@getpara/react-components';
 import { VerificationCodeStep } from '../VerificationCodeStep/VerificationCodeStep.js';
@@ -18,7 +18,6 @@ import { AddFundsAwaiting, AddFundsDone, AddFunds } from '../AddFunds/index.js';
 import { FarcasterOAuthStep } from '../OAuth/FarcasterOAuthStep.js';
 import { Header } from '../Header/Header.js';
 import { AuthMainStep } from '../AuthMainStep/AuthMainStep.js';
-import { BODY_MOTION_VARIANTS, BODY_TRANSITION, MOBILE_SIZE } from '../../constants/constants.js';
 import { Account } from '../Account/Account.js';
 import { AuthOptions } from '../AuthOptions/AuthOptions.js';
 import { ExternalWallets } from '../ExternalWallets/ExternalWallets.js';

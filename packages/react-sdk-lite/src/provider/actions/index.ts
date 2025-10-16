@@ -39,3 +39,4 @@ export const verifyFarcasterLink = generateInternalAction('verifyFarcasterLink')
 export const verifyTelegramLink = generateInternalAction('verifyTelegramLink');
 export const verifyOAuthLink = generateInternalAction('verifyOAuthLink');
 export const verifyExternalWalletLink = generateInternalAction('verifyExternalWalletLink');
+export const exportPrivateKey = generateCoreAction('exportPrivateKey');

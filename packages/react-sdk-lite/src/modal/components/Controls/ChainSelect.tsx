@@ -1,11 +1,10 @@
 import { CpslText } from '@getpara/react-components';
-import { CommonChain, getNetworkFromChainId, safeStyled } from '@getpara/react-common';
+import { CommonChain, getNetworkFromChainId, getNetworkName, safeStyled } from '@getpara/react-common';
 import { useEffect, useRef } from 'react';
 import { useDropdownPosition } from '../AuthInput/hooks/useDropdownPosition.js';
 import { useWallet } from '../../../provider/index.js';
 import { HeaderSelect, HeaderSelectContainer, HeaderSelectItem, NetworkIcon } from '../common.js';
 import { useExternalWallets } from '../../../provider/providers/ExternalWalletProvider.js';
-import { getNetworkName } from '../../constants/constants.js';
 
 const Chain = ({
   chain: { id, name },

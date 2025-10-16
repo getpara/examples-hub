@@ -48,3 +48,19 @@ export type AuthUpdateKeySharesParams = PortalAuthParams & {
 };
 
 export type GroupedWallets = Partial<Record<TWalletType, WalletEntity[]>>;
+
+export enum NativeCallbackStatus {
+  NEW_USER = 'NEW_USER',
+  COMPLETE = 'COMPLETE',
+  ERROR = 'ERROR',
+}
+
+export enum NativeCallbackReason {
+  NO_SESSION = 'NO_SESSION',
+  PROCESSING_FAILED = 'PROCESSING_FAILED',
+}
+
+export type NativeCallbackParams = {
+  status: NativeCallbackStatus;
+  reason?: NativeCallbackReason;
+};

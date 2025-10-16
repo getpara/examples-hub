@@ -7,3 +7,5 @@ export * from './QRCode.js';
 export * from './UserIdentifier.js';
 export * from './NetworkSpeedBanner.js';
 export * from './WarningBanner.js';
+export * from './WalletSelect.js';
+export * from './WalletTypeIcon.js';

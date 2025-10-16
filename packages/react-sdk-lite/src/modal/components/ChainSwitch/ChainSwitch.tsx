@@ -2,11 +2,9 @@ import { CpslButton, CpslIcon, CpslQrCode, CpslSpinner, CpslText } from '@getpar
 import { HeroAccountTypeIcon, InnerStepContainer, QRContainer, StepContainer } from '../common.js';
 import { useEffect, useMemo } from 'react';
 import { useModalStore } from '../../stores/index.js';
-import { HeroSpinner, safeStyled } from '@getpara/react-common';
-import { useCopyToClipboard } from '@getpara/react-common';
+import { HeroSpinner, safeStyled, NETWORK_NOT_SUPPORTED_ERROR, useCopyToClipboard } from '@getpara/react-common';
 import { ModalStep } from '../../utils/steps.js';
 import { routeMobileExternalWallet } from '../../utils/routeMobileExternalWallet.js';
-import { NETWORK_NOT_SUPPORTED_ERROR } from '../../constants/constants.js';
 import { useExternalWallets } from '../../../provider/providers/ExternalWalletProvider.js';
 
 export const ChainSwitch = () => {

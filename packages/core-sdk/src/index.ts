@@ -82,6 +82,7 @@ export {
   type DeniedSignatureRes,
   type DeniedSignatureResWithUrl,
   type Wallet,
+  type AvailableWallet,
   type GetWalletBalanceParams,
   type AccountLinkInProgress,
   AccountLinkError,

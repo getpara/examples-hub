@@ -10,6 +10,7 @@ import { AuthLoginStep, ENV } from './constants';
 import { lazy } from 'react';
 import './clients/sentry';
 import { CheckAuth } from './components/CheckAuth';
+import { ExportPrivateKey } from './pages/ExportPrivateKey/ExportPrivateKey';
 
 defineCustomElements();
 
@@ -64,6 +65,14 @@ export const App = () => {
           <Route element={<TransactionReview />} path="users/:userId/transaction-review/:pendingTransactionId" />
           <Route element={<OnRampTransaction />} path="users/:userId/on-ramp-transaction/:purchaseId" />
           <Route element={<OnRampTransactionV2 />} path="users/:userId/on-ramp-transaction/v2/:purchaseId" />
+          <Route
+            element={
+              <CheckAuth type="EXPORT_PRIVATE_KEY">
+                <ExportPrivateKey />
+              </CheckAuth>
+            }
+            path="users/:userId/private-key/:walletId"
+          />
         </Route>
         <Route element={<ModalLayout />} path="/auth">
           <Route element={<TelegramLogin />} path="telegram" />

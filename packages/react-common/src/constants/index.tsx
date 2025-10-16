@@ -1,7 +1,7 @@
 import { TNetwork, TOnRampAsset, OnRampMethod, OnRampProvider, TWalletType } from '@getpara/core-sdk';
 import { IconType } from '@getpara/react-components';
 import { Transition, Variants } from 'framer-motion';
-import { DisplayMetadata } from '@getpara/react-common';
+import { DisplayMetadata } from '../types/commonTypes.js';
 
 export const PARA_CONNECT = 'https://connect.getpara.com/';
 export const PARA_TERMS_AND_CONDITIONS = 'https://getpara.com/terms';
@@ -160,3 +160,7 @@ export const BODY_TRANSITION: Transition = {
 };
 
 export const SDK_VERSION = process.env.PARA_REACT_SDK_VERSION ?? '';
+
+export * from './aaguiMetadata.js';
+export * from './externalWalletDefaults.js';
+export * from './oAuthLogos.js';

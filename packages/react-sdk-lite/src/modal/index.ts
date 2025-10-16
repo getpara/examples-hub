@@ -11,6 +11,6 @@ export {
   getAssetCode,
   getNetworkIcon,
   getNetworkName,
-} from './constants/constants.js';
+} from '@getpara/react-common';
 export { SaveRecoverySecret } from './components/RecoverySecretStep/RecoverySecretStep.js';
 export * from './utils/validateOnRampConfig.js';

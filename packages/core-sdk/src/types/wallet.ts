@@ -35,6 +35,11 @@ export interface Wallet
   ensAvatar?: string | null;
 }
 
+export type AvailableWallet = Pick<
+  Wallet,
+  'id' | 'type' | 'name' | 'address' | 'partner' | 'isExternal' | 'externalProviderId' | 'isExternalConnectionOnly'
+>;
+
 /** @deprecated */
 export enum PregenIdentifierType {
   EMAIL = 'EMAIL',

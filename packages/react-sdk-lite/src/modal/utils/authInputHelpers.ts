@@ -1,5 +1,5 @@
 import { Auth } from '@getpara/user-management-client';
-import { EMAIL_REGEX } from '../constants/constants.js';
+import { EMAIL_REGEX } from '@getpara/react-common';
 import { formatPhoneNumber } from '@getpara/web-sdk';
 import countryCodes from './countryCodes.js';
 

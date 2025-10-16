@@ -1,8 +1,7 @@
 import { CpslHero, CpslIcon, CpslIdenticon } from '@getpara/react-components';
-import { safeStyled } from '@getpara/react-common';
+import { safeStyled, NETWORK_NOT_SUPPORTED_ERROR } from '@getpara/react-common';
 import { ModalStep } from '../../utils/steps.js';
 import { useModalStore } from '../../stores/index.js';
-import { NETWORK_NOT_SUPPORTED_ERROR } from '../../constants/constants.js';
 import { useEffect, useState } from 'react';
 import { isMobile } from '@getpara/web-sdk';
 import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
