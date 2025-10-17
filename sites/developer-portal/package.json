@@ -13,6 +13,7 @@
     "@typeform/embed-react": "^4.1.0",
     "axios": "^1.8.4",
     "color2k": "^2.0.3",
+    "ipaddr.js": "^1.9.1",
     "date-fns": "^3.6.0",
     "framer-motion": "^11.3.31",
     "i18next": "^25.1.1",

@@ -1,6 +1,7 @@
 import { ContentWrapper } from '../../components/ContentWrapper';
 import { useSecurityForm } from './hooks/useSecurityForm';
-// import { AllowedIpAddresses } from './components/AllowedIpAddresses'; // Hidden until REST API launch
+/* TODO(REST API): Re-enable once Allowed IP management ships. */
+// import { AllowedIpAddresses } from './components/AllowedIpAddresses';
 import { Origins } from './components/Origins';
 import { AuthMethods } from './components/AuthMethods';
 import { TransactionPopups } from './components/TransactionPopups';
@@ -15,7 +16,9 @@ export const ApiKeySecurity = () => {
       <ContentWrapper
         columnOne={
           <>
-            {/* <AllowedIpAddresses /> -- Hidden until REST API launch */}
+            {/* TODO(REST API): Re-enable once Allowed IP management ships.
+            <AllowedIpAddresses />
+            */}
             <Origins />
             <AuthMethods />
             <TransactionPopups />

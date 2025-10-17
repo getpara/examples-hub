@@ -8,24 +8,26 @@ export const AllowedIpAddresses = () => {
 
   return (
     <ConfigCard
-      title="Allowed IP Addresses"
-      subtitle="This is the list of IP addresses that can call Para's REST API endpoints. Requests from any other IP addresses, even if they are using your secret key, will be blocked."
+      title="IP Allowlist"
+      subtitle="Provide the CIDR blocks that can call Para's REST API endpoints. Requests from any other addresses are blocked even when using your secret key."
     >
       <FormField
         control={form.control}
-        name="allowedIps"
+        name="ipAllowlistCidrs"
         render={({ field }) => (
           <FormItem className="para:flex-1">
-            <FormLabel>IP Addresses</FormLabel>
+            <FormLabel>CIDR blocks</FormLabel>
             <FormControl>
               <Textarea
                 {...field}
                 value={field.value ?? undefined}
-                placeholder="e.g. 192.168.1.1, 10.0.0.1, 2001:db8::1"
+                placeholder="e.g. 203.0.113.0/24, 2001:db8::/64, ::ffff:192.0.2.0/120"
                 className="para:resize-none para:h-[112px]"
               />
             </FormControl>
-            <FormDescription>Separate each address by a comma. Supports both IPv4 and IPv6 addresses.</FormDescription>
+            <FormDescription>
+              Separate each value with a comma and use CIDR notation. IPv4, IPv6, and IPv4-mapped IPv6 ranges are supported.
+            </FormDescription>
             <FormMessage />
           </FormItem>
         )}

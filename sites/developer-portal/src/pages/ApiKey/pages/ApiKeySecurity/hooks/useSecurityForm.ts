@@ -1,51 +1,23 @@
+import { useEffect, useMemo, useRef } from 'react';
 import { useParams } from 'react-router-dom';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useGetOrganizationKey } from '../../../../../hooks/api/queries/useOrganizationKeys';
 import { Environment } from '../../../../../types/environment';
 import { UpdateApiKeyFormData } from '../../../../../types/api';
 import { z } from 'zod';
 import { SchemaFromInterface } from '../../../../../types/helpers';
 import { useUpdateApiKey } from '../../../../../hooks/api/mutations/useUpdateApiKey';
+import { getApiKeyIpAllowlist } from '../../../../../api/apiKeys/queries';
+import { updateApiKeyAllowlist } from '../../../../../api/apiKeys/mutations';
 import { AUTH_METHODS } from '../../../../../utils/constants';
 import { SubmitVars, useForm } from '../../../hooks/useForm';
+import { AxiosError } from 'axios';
+import { isValidCidrBlock, normalizeCidrEntries } from '../../../../../utils/ipAllowlist';
 
 export type SecurityForm = Pick<
   UpdateApiKeyFormData,
-  'origins' | 'allowedIps' | 'supportedAuthMethods' | 'sessionMaxAge' | 'forceTransactionPopups'
+  'origins' | 'ipAllowlistCidrs' | 'supportedAuthMethods' | 'sessionMaxAge' | 'forceTransactionPopups'
 >;
-
-// Helper function to validate IP addresses (IPv4 and IPv6)
-// Basic validation - backend does strict validation
-const isValidIpAddress = (ip: string): boolean => {
-  // IPv4: Check for 4 groups of 1-3 digits separated by dots
-  const ipv4Regex = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
-  const ipv4Match = ip.match(ipv4Regex);
-
-  if (ipv4Match) {
-    // Validate each octet is 0-255
-    return ipv4Match.slice(1).every(octet => {
-      const num = parseInt(octet, 10);
-      return num >= 0 && num <= 255;
-    });
-  }
-
-  // IPv6: Basic validation for common patterns
-  // Must contain only hex digits, colons, and at most one ::
-  // Reject if it has triple colons or invalid characters
-  if (ip.includes(':::')) return false;
-  if (!/^[0-9a-fA-F:]+$/.test(ip)) return false;
-
-  // Check for valid :: compression (max one occurrence)
-  const doubleColonCount = (ip.match(/::/g) || []).length;
-  if (doubleColonCount > 1) return false;
-
-  // Very simplified IPv6 check - just ensure it has valid hex and colon structure
-  // The backend will do the complete validation
-  const parts = ip.split(':');
-  const hasValidParts = parts.every(part => part === '' || /^[0-9a-fA-F]{1,4}$/i.test(part));
-  const hasReasonableLength = parts.length >= 3 && parts.length <= 8;
-
-  return hasValidParts && hasReasonableLength;
-};
 
 const formSchema = z.object({
   origins: z
@@ -61,16 +33,19 @@ const formSchema = z.object({
     )
     .optional()
     .nullable(),
-  allowedIps: z
+  ipAllowlistCidrs: z
     .string()
     .refine(
-      v =>
-        v === '' ||
-        v
-          .split(',')
-          .map(v => v.trim())
-          .every(ip => isValidIpAddress(ip)),
-      { message: 'Invalid IP address format, values must be valid IPv4 or IPv6 addresses' },
+      v => {
+        if (v === '') {
+          return true;
+        }
+
+        const entries = normalizeCidrEntries(v);
+
+        return entries.every(entry => isValidCidrBlock(entry));
+      },
+      { message: 'Invalid CIDR block, use notation like 203.0.113.0/24 or 2001:db8::/64' },
     )
     .optional()
     .nullable(),
@@ -94,28 +69,51 @@ const formSchema = z.object({
 }) satisfies SchemaFromInterface<SecurityForm>;
 
 export const useSecurityForm = () => {
-  const { apiKey, env, projectId } = useParams();
-  const { data: apiKeyData } = useGetOrganizationKey(projectId ?? '', apiKey ?? '', env as Environment);
+  const { organizationId, apiKey, env, projectId } = useParams();
+  const environment = env as Environment;
+  const { data: apiKeyData } = useGetOrganizationKey(projectId ?? '', apiKey ?? '', environment);
   const { mutateAsync: updateKey } = useUpdateApiKey();
+  const queryClient = useQueryClient();
 
-  const defaultData = {
-    ...apiKeyData,
-    origins: apiKeyData?.origins?.join(', ') ?? '',
-    allowedIps: apiKeyData?.allowedIps?.join(', ') ?? '',
-    // convert from ms to minutes
-    sessionMaxAge: apiKeyData?.sessionMaxAge ? parseInt(apiKeyData.sessionMaxAge) / (60 * 1000) : null,
-  };
+  const { data: allowlistCidrs = [] } = useQuery({
+    enabled: Boolean(organizationId && projectId && apiKey && environment),
+    queryKey: ['apiKeyAllowlist', organizationId, projectId, apiKey, environment],
+    queryFn: async () => {
+      if (!organizationId || !projectId || !apiKey) {
+        return [] as string[];
+      }
+
+      const { data } = await getApiKeyIpAllowlist(organizationId, projectId, apiKey, environment);
+      return data.allowlistCidrs ?? [];
+    },
+  });
+
+  const defaultData = useMemo(
+    () => ({
+      ...apiKeyData,
+      origins: apiKeyData?.origins?.join(', ') ?? '',
+      ipAllowlistCidrs: allowlistCidrs.length > 0 ? allowlistCidrs.join(', ') : '',
+      // convert from ms to minutes
+      sessionMaxAge: apiKeyData?.sessionMaxAge ? parseInt(apiKeyData.sessionMaxAge) / (60 * 1000) : null,
+    }),
+    [apiKeyData, allowlistCidrs],
+  );
+
+  const defaultsSignature = useMemo(() => JSON.stringify(defaultData), [defaultData]);
+  const previousDefaultsSignatureRef = useRef<string | null>(null);
 
   const onSubmit = async (updateData: SecurityForm, { projectId, apiKey, env }: SubmitVars) => {
+    const { ipAllowlistCidrs, ...rest } = updateData;
+
     await updateKey({
       projectId,
       keyId: apiKey,
       env,
       data: {
-        ...updateData,
-        ...(updateData.origins
+        ...rest,
+        ...(rest.origins
           ? {
-              origins: updateData.origins
+              origins: rest.origins
                 .split(',')
                 .map(v => v.trim())
                 .filter(Boolean),
@@ -130,14 +128,50 @@ export const useSecurityForm = () => {
         //         .filter(Boolean),
         //     }
         //   : { allowedIps: null }),
-        ...(updateData.sessionMaxAge
-          ? { sessionMaxAge: (updateData.sessionMaxAge * 60 * 1000).toString(10) } // convert minutes to ms
+        ...(rest.sessionMaxAge
+          ? { sessionMaxAge: (rest.sessionMaxAge * 60 * 1000).toString(10) } // convert minutes to ms
           : { sessionMaxAge: null }),
       },
+    });
+
+    if (!organizationId) {
+      return;
+    }
+
+    const allowlist = normalizeCidrEntries(ipAllowlistCidrs);
+
+    try {
+      await updateApiKeyAllowlist({
+        organizationId,
+        projectId,
+        keyId: apiKey,
+        env,
+        allowlistCidrs: allowlist,
+      });
+    } catch (error) {
+      const axiosError = error as AxiosError<{ message?: string } | string>;
+      const responseMessage = axiosError.response?.data;
+      const message =
+        typeof responseMessage === 'string'
+          ? responseMessage
+          : (responseMessage?.message ?? 'Failed to update IP allowlist. Please verify the CIDR entries.');
+
+      throw new Error(message);
+    }
+
+    queryClient.invalidateQueries({
+      queryKey: ['apiKeyAllowlist', organizationId, projectId, apiKey, env],
     });
   };
 
   const { form, submitForm } = useForm<SecurityForm>({ formSchema, defaultValues: defaultData, onSubmit });
+
+  useEffect(() => {
+    if (defaultsSignature !== previousDefaultsSignatureRef.current) {
+      form.reset(defaultData);
+      previousDefaultsSignatureRef.current = defaultsSignature;
+    }
+  }, [form, defaultData, defaultsSignature]);
 
   return { form, submitForm };
 };

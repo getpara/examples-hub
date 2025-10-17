@@ -1,5 +1,11 @@
 import { axiosClient } from '../../clients/axios';
-import { ApiKeyResponse, LogoUploadUrlResponse, PartnerAssetType, UpdateApiKeyBody } from '../../types/api';
+import {
+  ApiKeyIpAllowlistResponse,
+  ApiKeyResponse,
+  LogoUploadUrlResponse,
+  PartnerAssetType,
+  UpdateApiKeyBody,
+} from '../../types/api';
 
 export type CreateApiKeyVars = {
   organizationId: string;
@@ -24,6 +30,29 @@ export const updateApiKey = async ({ organizationId, projectId, keyId, env, data
   const endpoint = `/organizations/${organizationId}/projects/${projectId}/${env}/keys/${keyId}`;
 
   return (await axiosClient.patch<boolean>(endpoint, data)).data;
+};
+
+export type UpdateApiKeyAllowlistVars = {
+  organizationId: string;
+  projectId: string;
+  keyId: string;
+  env: string;
+  allowlistCidrs: string[];
+};
+export const updateApiKeyAllowlist = async ({
+  organizationId,
+  projectId,
+  keyId,
+  env,
+  allowlistCidrs,
+}: UpdateApiKeyAllowlistVars) => {
+  const endpoint = `/organizations/${organizationId}/projects/${projectId}/${env}/keys/${keyId}/ip-allowlist`;
+
+  return (
+    await axiosClient.put<ApiKeyIpAllowlistResponse>(endpoint, {
+      allowlistCidrs,
+    })
+  ).data;
 };
 
 export type ArchiveApiKeyVars = {

@@ -198,7 +198,7 @@ export type ApiKey = {
   transactionPopupsEnabled: boolean;
   forceTransactionPopups?: boolean;
   origins?: string[] | null;
-  allowedIps?: string[] | null;
+  ipAllowlistCidrs?: string[] | null;
   supportedWalletTypes: SupportedWalletTypes;
   cosmosPrefix: string;
   androidSha256CertFingerprints: string[] | null;
@@ -263,6 +263,7 @@ export type UpdateApiKeyBody = Nullable<
       | 'transactionPopupsEnabled'
       | 'forceTransactionPopups'
       | 'origins'
+      | 'ipAllowlistCidrs'
       // | 'allowedIps'
       | 'supportedWalletTypes'
       | 'cosmosPrefix'
@@ -276,12 +277,16 @@ export type UpdateApiKeyBody = Nullable<
 >;
 // Overriding string[] types here to allow for textfield inputs in the forms. Data will be formatted back before submit.
 export type UpdateApiKeyFormData = Partial<
-  Omit<UpdateApiKeyBody, 'origins' | 'allowedIps' | 'androidSha256CertFingerprints' | 'sessionMaxAge'>
+  Omit<UpdateApiKeyBody, 'origins' | 'ipAllowlistCidrs' | 'androidSha256CertFingerprints' | 'sessionMaxAge'>
 > & {
   androidSha256CertFingerprints?: string | null;
   origins?: string | null;
-  allowedIps?: string | null;
+  ipAllowlistCidrs?: string | null;
   sessionMaxAge?: number | null;
+};
+
+export type ApiKeyIpAllowlistResponse = {
+  allowlistCidrs: string[];
 };
 
 export enum PartnerAssetType {

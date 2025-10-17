@@ -1,38 +1,5 @@
 import { describe, it, expect } from 'vitest';
-
-// Extract the IP validation logic for testing
-// Basic validation - backend does strict validation
-const isValidIpAddress = (ip: string): boolean => {
-  // IPv4: Check for 4 groups of 1-3 digits separated by dots
-  const ipv4Regex = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
-  const ipv4Match = ip.match(ipv4Regex);
-
-  if (ipv4Match) {
-    // Validate each octet is 0-255
-    return ipv4Match.slice(1).every(octet => {
-      const num = parseInt(octet, 10);
-      return num >= 0 && num <= 255;
-    });
-  }
-
-  // IPv6: Basic validation for common patterns
-  // Must contain only hex digits, colons, and at most one ::
-  // Reject if it has triple colons or invalid characters
-  if (ip.includes(':::')) return false;
-  if (!/^[0-9a-fA-F:]+$/.test(ip)) return false;
-
-  // Check for valid :: compression (max one occurrence)
-  const doubleColonCount = (ip.match(/::/g) || []).length;
-  if (doubleColonCount > 1) return false;
-
-  // Very simplified IPv6 check - just ensure it has valid hex and colon structure
-  // The backend will do the complete validation
-  const parts = ip.split(':');
-  const hasValidParts = parts.every(part => part === '' || /^[0-9a-fA-F]{1,4}$/i.test(part));
-  const hasReasonableLength = parts.length >= 3 && parts.length <= 8;
-
-  return hasValidParts && hasReasonableLength;
-};
+import { isValidIpAddress, isValidCidrBlock, normalizeCidrEntries } from '../../../../../utils/ipAllowlist';
 
 describe('IP Address Validation', () => {
   describe('IPv4 validation', () => {
@@ -63,6 +30,8 @@ describe('IP Address Validation', () => {
       expect(isValidIpAddress('fe80::1')).toBe(true);
       expect(isValidIpAddress('2001:db8:85a3::8a2e:370:7334')).toBe(true);
       expect(isValidIpAddress('2001:0db8:0000:0000:0000:0000:0000:0001')).toBe(true);
+      expect(isValidIpAddress('::ffff:192.0.2.0')).toBe(true);
+      expect(isValidIpAddress('2001:db8::ffff:203.0.113.5')).toBe(true);
     });
 
     it('should reject invalid IPv6 addresses', () => {
@@ -71,6 +40,9 @@ describe('IP Address Validation', () => {
       expect(isValidIpAddress('2001:db8:::1')).toBe(false);
       expect(isValidIpAddress('not-an-ip')).toBe(false);
       expect(isValidIpAddress('')).toBe(false);
+      expect(isValidIpAddress('::ffff:999.0.2.1')).toBe(false);
+      expect(isValidIpAddress('::ffff:192.0.2.1:123')).toBe(false);
+      expect(isValidIpAddress('2001:db8:192.0.2.1')).toBe(false);
     });
   });
 
@@ -78,7 +50,7 @@ describe('IP Address Validation', () => {
     it('should handle empty strings and whitespace', () => {
       expect(isValidIpAddress('')).toBe(false);
       expect(isValidIpAddress(' ')).toBe(false);
-      expect(isValidIpAddress('  192.168.1.1  ')).toBe(false); // Has whitespace
+      expect(isValidIpAddress('  192.168.1.1  ')).toBe(true); // Trimming allows whitespace
     });
 
     it('should handle malformed inputs', () => {
@@ -86,5 +58,44 @@ describe('IP Address Validation', () => {
       expect(isValidIpAddress('http://192.168.1.1')).toBe(false);
       expect(isValidIpAddress('192.168.1.1:8080')).toBe(false);
     });
+  });
+});
+
+describe('CIDR validation', () => {
+  it('accepts valid IPv4 CIDRs', () => {
+    expect(isValidCidrBlock('192.168.1.0/24')).toBe(true);
+    expect(isValidCidrBlock('10.0.0.1/32')).toBe(true);
+  });
+
+  it('accepts valid IPv6 CIDRs', () => {
+    expect(isValidCidrBlock('2001:db8::/64')).toBe(true);
+    expect(isValidCidrBlock('::1/128')).toBe(true);
+  });
+
+  it('accepts IPv4-mapped IPv6 CIDRs', () => {
+    expect(isValidCidrBlock('::ffff:192.0.2.0/120')).toBe(true);
+  });
+
+  it('rejects malformed CIDRs', () => {
+    expect(isValidCidrBlock('not-a-cidr')).toBe(false);
+    expect(isValidCidrBlock('192.168.1.0')).toBe(false);
+    expect(isValidCidrBlock('::ffff:192.0.2.0/129')).toBe(false);
+    expect(isValidCidrBlock('999.0.0.0/12')).toBe(false);
+  });
+});
+
+describe('normalizeCidrEntries', () => {
+  it('splits and trims comma-separated values', () => {
+    expect(normalizeCidrEntries(' 10.0.0.1/32 ,  10.0.0.2/32 ')).toEqual(['10.0.0.1/32', '10.0.0.2/32']);
+  });
+
+  it('filters empty values', () => {
+    expect(normalizeCidrEntries(' , 192.168.1.0/24,, ')).toEqual(['192.168.1.0/24']);
+  });
+
+  it('returns empty array for nullish input', () => {
+    expect(normalizeCidrEntries('')).toEqual([]);
+    expect(normalizeCidrEntries(null)).toEqual([]);
+    expect(normalizeCidrEntries(undefined)).toEqual([]);
   });
 });

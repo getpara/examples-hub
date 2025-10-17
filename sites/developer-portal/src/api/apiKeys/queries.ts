@@ -9,6 +9,7 @@ import {
   ApiKeyTotalUsersTSResponse,
   ApiKeyUsersLoginMetricsResponse,
   ApiKeysResponse,
+  ApiKeyIpAllowlistResponse,
   UsersTableDataResponse,
 } from '../../types/api';
 import { LoginMethod } from '../../types/loginMethod';
@@ -23,6 +24,12 @@ export const getApiKey = async (organizationId: string, projectId: string, keyId
   const endpoint = `/organizations/${organizationId}/projects/${projectId}/${env}/keys/${keyId}`;
 
   return axiosClient.get<ApiKeyResponse>(endpoint);
+};
+
+export const getApiKeyIpAllowlist = async (organizationId: string, projectId: string, keyId: string, env: string) => {
+  const endpoint = `/organizations/${organizationId}/projects/${projectId}/${env}/keys/${keyId}/ip-allowlist`;
+
+  return axiosClient.get<ApiKeyIpAllowlistResponse>(endpoint);
 };
 
 export const getApiKeyUsersTableData = async (
