@@ -21,15 +21,8 @@ describe('ParaCore - switch wallets', () => {
   const NEW_SOLANA_WALLET_ID = 'new-solana-wallet-id';
   const NEW_EVM_SIGNER = 'new-evm-signer-mock-value';
   const NEW_SOLANA_SIGNER = 'new-solana-signer-mock-value';
-
-  // Helper to set up wallet switch IDs
-  const setupWalletSwitchIds = (evmId: string, solanaId: string) => {
-    (para as any).walletSwitchIds = {
-      EVM: [evmId],
-      COSMOS: [evmId],
-      SOLANA: [solanaId],
-    };
-  };
+  const ORIGINAL_WALLET_IDS_HASH = 'original-hash-123';
+  const NEW_WALLET_IDS_HASH = 'new-hash-456';
 
   // Helper to create new wallet IDs structure
   const createWalletIdsStructure = (evmId: string, solanaId: string) => ({
@@ -103,16 +96,37 @@ describe('ParaCore - switch wallets', () => {
   });
 
   it('waitForWalletSwitching works correctly', async () => {
-    // Set up the wallet switch IDs that would be set by the portal
-    setupWalletSwitchIds(NEW_EVM_WALLET_ID, NEW_SOLANA_WALLET_ID);
+    // Set up initial currentWalletIds in para instance to match what's in the session
+    para.currentWalletIds = createWalletIdsStructure(WALLET.id, SOLANA_WALLET.id);
 
-    // Mock touchSession to return the new wallet IDs
-    // Note: Use mockResolvedValue (not Once) because touchSession is called multiple times during polling
-    mockTouchSession.mockResolvedValue({
-      ...SESSION,
-      currentWalletIds: createWalletIdsStructure(NEW_EVM_WALLET_ID, NEW_SOLANA_WALLET_ID),
-      needsWallet: false,
-    });
+    // Mock touchSession to return different hashes
+    // First call: returns original hash (wallet switching mode starts)
+    // Second call: returns new hash (wallet switching is complete)
+    mockTouchSession
+      .mockResolvedValueOnce({
+        ...SESSION,
+        currentWalletIds: createWalletIdsStructure(WALLET.id, SOLANA_WALLET.id),
+        currentWalletIdsHash: ORIGINAL_WALLET_IDS_HASH,
+        isAuthenticated: true,
+        needsWallet: false,
+        partnerId: PARTNER.id,
+      })
+      .mockResolvedValueOnce({
+        ...SESSION,
+        currentWalletIds: createWalletIdsStructure(NEW_EVM_WALLET_ID, NEW_SOLANA_WALLET_ID),
+        currentWalletIdsHash: NEW_WALLET_IDS_HASH,
+        isAuthenticated: true,
+        needsWallet: false,
+        partnerId: PARTNER.id,
+      })
+      .mockResolvedValue({
+        ...SESSION,
+        currentWalletIds: createWalletIdsStructure(NEW_EVM_WALLET_ID, NEW_SOLANA_WALLET_ID),
+        currentWalletIdsHash: NEW_WALLET_IDS_HASH,
+        isAuthenticated: true,
+        needsWallet: false,
+        partnerId: PARTNER.id,
+      });
 
     // Mock getTransmissionKeyshares to return shares for the new wallets
     mockGetTransmissionKeyshares.mockResolvedValue({
@@ -165,9 +179,6 @@ describe('ParaCore - switch wallets', () => {
     // Verify that setupAfterLogin was called
     expect(setupAfterLoginSpy).toHaveBeenCalled();
 
-    // Verify that walletSwitchIds was cleared after successful switching
-    expect((para as any).walletSwitchIds).toBeUndefined();
-
     // Verify that currentWalletIds were updated
     expect(para.currentWalletIds).toEqual(createWalletIdsStructure(NEW_EVM_WALLET_ID, NEW_SOLANA_WALLET_ID));
 
@@ -186,8 +197,8 @@ describe('ParaCore - switch wallets', () => {
   });
 
   it('waitForWalletSwitching handles polling and cancellation correctly', async () => {
-    // Set up the wallet switch IDs that would be set by the portal
-    setupWalletSwitchIds(NEW_EVM_WALLET_ID, NEW_SOLANA_WALLET_ID);
+    // Set up initial currentWalletIds in para instance to match what's in the session
+    para.currentWalletIds = createWalletIdsStructure(WALLET.id, SOLANA_WALLET.id);
 
     // Create mock callbacks
     // isCanceled returns false initially, then true after first poll
@@ -200,11 +211,14 @@ describe('ParaCore - switch wallets', () => {
       pollCount++;
     });
 
-    // Mock touchSession - return no walletSwitchIds to trigger polling
+    // Mock touchSession - return same hash to keep polling (hash never changes)
     mockTouchSession.mockResolvedValue({
       ...SESSION,
-      currentWalletIds: createWalletIdsStructure(NEW_EVM_WALLET_ID, NEW_SOLANA_WALLET_ID),
+      currentWalletIds: createWalletIdsStructure(WALLET.id, SOLANA_WALLET.id),
+      currentWalletIdsHash: ORIGINAL_WALLET_IDS_HASH,
+      isAuthenticated: true,
       needsWallet: false,
+      partnerId: PARTNER.id,
     });
 
     // Call waitForWalletSwitching with cancellation
@@ -220,8 +234,5 @@ describe('ParaCore - switch wallets', () => {
 
     // Verify that onCancel was called
     expect(onCancel).toHaveBeenCalledOnce();
-
-    // Verify that walletSwitchIds was cleared after cancellation
-    expect((para as any).walletSwitchIds).toBeUndefined();
   });
 });

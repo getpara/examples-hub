@@ -164,13 +164,6 @@ export class Para extends ParaCore {
             }
           }
           break;
-        case 'WALLET_SWITCH_COMPLETED':
-          {
-            const { walletIds } = event.data.payload;
-            this.walletSwitchIds = walletIds;
-            payload = {};
-          }
-          break;
         case 'SYNC_WALLETS':
           {
             payload = {

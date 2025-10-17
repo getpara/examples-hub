@@ -156,7 +156,7 @@ export abstract class ParaCore implements CoreInterface {
 
   #authInfo?: CoreAuthInfo;
 
-  protected walletSwitchIds?: CurrentWalletIds; // Track expected wallet IDs during wallet switching
+  protected isSwitchingWallets = false;
 
   protected isNativePasskey: boolean = false;
 
@@ -2511,7 +2511,7 @@ Need help? Visit: https://docs.getpara.com or contact support
 
     // If wallet switching is in progress, consider the user logged in
     // to avoid flickering during the transition
-    if (this.walletSwitchIds) {
+    if (this.isSwitchingWallets) {
       return isSessionActive;
     }
 
@@ -2992,18 +2992,46 @@ Need help? Visit: https://docs.getpara.com or contact support
     skipSessionRefresh = false,
     isSwitchingWallets = false,
   }: CoreMethodParams<'waitForLogin'> & { isSwitchingWallets?: boolean } = {}): CoreMethodResponse<'waitForLogin'> {
+    this.devLog('[waitForLoginProcess] Starting', {
+      isSwitchingWallets,
+      skipSessionRefresh,
+      isExternalWalletAuth: this.isExternalWalletAuth,
+    });
+
     const startedAt = Date.now();
+    let originalCurrentWalletIdsHash: string | undefined;
+    if (isSwitchingWallets) {
+      this.devLog('[waitForLoginProcess] Wallet switching mode enabled');
+      this.isSwitchingWallets = true;
+      const session = await this.touchSession();
+      originalCurrentWalletIdsHash = session.currentWalletIdsHash;
+      this.devLog('[waitForLoginProcess] Original wallet IDs hash', { originalCurrentWalletIdsHash });
+    }
     return new Promise((resolve, reject) => {
       (async () => {
         if (!this.isExternalWalletAuth && !isSwitchingWallets) {
+          this.devLog('[waitForLoginProcess] Clearing external wallets');
           // Remove external wallets if logging in with Capsule
           this.externalWallets = {};
         }
 
+        let pollCount = 0;
         while (true) {
+          pollCount++;
+          this.devLog('[waitForLoginProcess] Poll iteration', {
+            pollCount,
+            elapsedMs: Date.now() - startedAt,
+          });
+
           if (isCanceled() || Date.now() - startedAt > constants.POLLING_TIMEOUT_MS) {
+            this.devLog('[waitForLoginProcess] Canceled or timed out', {
+              wasCanceled: isCanceled(),
+              timedOut: Date.now() - startedAt > constants.POLLING_TIMEOUT_MS,
+              elapsedMs: Date.now() - startedAt,
+            });
+
             if (isSwitchingWallets) {
-              this.walletSwitchIds = undefined;
+              this.isSwitchingWallets = false;
             } else {
               dispatchEvent(ParaEvent.LOGIN_EVENT, { isComplete: false }, 'failed to setup user');
             }
@@ -3014,48 +3042,84 @@ Need help? Visit: https://docs.getpara.com or contact support
           await new Promise(resolve => setTimeout(resolve, constants.POLLING_INTERVAL_MS));
 
           try {
+            this.devLog('[waitForLoginProcess] Touching session');
             let session = await this.touchSession();
 
+            this.devLog('[waitForLoginProcess] Session state', {
+              isAuthenticated: session.isAuthenticated,
+              currentWalletIdsHash: session.currentWalletIdsHash,
+              needsWallet: session.needsWallet,
+            });
+
             // Check authentication based on whether we're switching wallets or doing normal login
-            const shouldContinuePolling =
-              (!isSwitchingWallets && !session.isAuthenticated) || (isSwitchingWallets && !this.walletSwitchIds);
+            const shouldContinuePolling = isSwitchingWallets
+              ? originalCurrentWalletIdsHash === session.currentWalletIdsHash
+              : !session.isAuthenticated;
+
+            this.devLog('[waitForLoginProcess] Should continue polling', {
+              shouldContinuePolling,
+              isSwitchingWallets,
+              originalCurrentWalletIdsHash,
+              sessionCurrentWalletIdsHash: session.currentWalletIdsHash,
+              isAuthenticated: session.isAuthenticated,
+            });
 
             if (shouldContinuePolling) {
               onPoll?.();
               continue;
             }
 
+            this.devLog('[waitForLoginProcess] Authentication check passed, setting up user');
             session = await this.userSetupAfterLogin();
 
             const needsWallet = session.needsWallet ?? false;
+            this.devLog('[waitForLoginProcess] User setup complete', { needsWallet });
 
             // For wallet switching, check if wallet selection is complete
             if (isSwitchingWallets) {
               // Check if we have received wallet IDs from portal and if they match the session
-              if (this.walletSwitchIds) {
-                const walletIdsMatch = currentWalletIdsEq(session.currentWalletIds, this.walletSwitchIds);
+              const isWalletSwitchingComplete = originalCurrentWalletIdsHash !== session.currentWalletIdsHash;
 
-                if (!walletIdsMatch) {
-                  onPoll?.();
-                  continue;
-                }
+              this.devLog('[waitForLoginProcess] Wallet switching check', {
+                isWalletSwitchingComplete,
+                originalHash: originalCurrentWalletIdsHash,
+                sessionHash: session.currentWalletIdsHash,
+              });
 
-                // Don't clear walletSwitchIds yet - let the login flow complete first
-              } else {
+              if (!isWalletSwitchingComplete) {
                 onPoll?.();
                 continue;
               }
             } else if (!needsWallet) {
+              this.devLog('[waitForLoginProcess] Checking wallet IDs', {
+                currentWalletIdsArrayLength: this.currentWalletIdsArray.length,
+              });
+
               if (this.currentWalletIdsArray.length === 0) {
+                this.devLog('[waitForLoginProcess] No wallet IDs yet, continuing to poll');
                 onPoll?.();
                 continue;
               }
             }
 
+            this.devLog('[waitForLoginProcess] Getting transmission key shares');
             const tempSharesRes = await this.getTransmissionKeyShares();
+            this.devLog('[waitForLoginProcess] Transmission shares received', {
+              shareCount: tempSharesRes.data.temporaryShares.length,
+              shares: tempSharesRes.data.temporaryShares.map(s => ({
+                walletId: s.walletId,
+                walletScheme: s.walletScheme,
+              })),
+            });
+
             let hasSharesForCurrentWallets: boolean;
             if (!isSwitchingWallets) {
+              this.devLog('[waitForLoginProcess] Fetching wallets');
               const fetchedWallets = await this.fetchWallets();
+              this.devLog('[waitForLoginProcess] Wallets fetched', {
+                walletCount: fetchedWallets.length,
+                wallets: fetchedWallets.map(w => ({ id: w.id, type: w.type, scheme: w.scheme })),
+              });
 
               hasSharesForCurrentWallets = tempSharesRes.data.temporaryShares.length === fetchedWallets.length;
             } else {
@@ -3064,29 +3128,49 @@ Need help? Visit: https://docs.getpara.com or contact support
               });
             }
 
+            this.devLog('[waitForLoginProcess] Checking shares for current wallets', {
+              hasSharesForCurrentWallets,
+              currentWalletIdsCount: this.currentWalletIdsArray.length,
+              shareCount: tempSharesRes.data.temporaryShares.length,
+            });
+
             // Proceed if we have shares for all currently selected wallets
             if (hasSharesForCurrentWallets) {
+              this.devLog('[waitForLoginProcess] Setting up after login');
               await this.setupAfterLogin({ temporaryShares: tempSharesRes.data.temporaryShares, skipSessionRefresh });
+              this.devLog('[waitForLoginProcess] Setup after login complete');
 
+              this.devLog('[waitForLoginProcess] Claiming pregen wallets');
               await this.claimPregenWallets();
+              this.devLog('[waitForLoginProcess] Pregen wallets claimed');
 
               const resp = {
                 needsWallet: needsWallet || Object.values(this.wallets).length === 0,
                 partnerId: session.partnerId,
               };
 
+              this.devLog('[waitForLoginProcess] Login process complete', {
+                needsWallet: resp.needsWallet,
+                partnerId: resp.partnerId,
+                walletCount: Object.values(this.wallets).length,
+                isSwitchingWallets,
+              });
+
               // Clear wallet switching state after successful login completion
               if (isSwitchingWallets) {
-                this.walletSwitchIds = undefined;
+                this.devLog('[waitForLoginProcess] Clearing wallet switching state');
+                this.isSwitchingWallets = false;
               } else {
+                this.devLog('[waitForLoginProcess] Dispatching LOGIN_EVENT');
                 dispatchEvent(ParaEvent.LOGIN_EVENT, resp);
               }
               return resolve(resp);
             }
+            this.devLog('[waitForLoginProcess] Not all shares available yet, continuing to poll');
             onPoll?.();
           } catch (err) {
             // want to continue polling on error
-            console.error(err);
+            console.error('[waitForLoginProcess] Error during polling iteration', err);
             onPoll?.();
           }
         }
@@ -4280,7 +4364,7 @@ Need help? Visit: https://docs.getpara.com or contact support
     return `Para ${JSON.stringify(obj, null, 2)}`;
   }
 
-  protected devLog(...s: string[]) {
+  protected devLog(...s: any[]) {
     if (this.ctx.env === Environment.DEV || this.ctx.env === Environment.SANDBOX) {
       // eslint-disable-next-line no-console
       console.log(...s);

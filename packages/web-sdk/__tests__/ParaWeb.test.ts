@@ -523,30 +523,5 @@ describe('ParaCore', () => {
       });
       expect(mocks.close).toHaveBeenCalled();
     });
-
-    it('should handle WALLET_SWITCH_COMPLETED event successfully', async () => {
-      const mockWalletIds = { EVM: ['wallet-123'] };
-
-      const event = {
-        data: { isPara: true, type: 'WALLET_SWITCH_COMPLETED', id: 'test-id', payload: { walletIds: mockWalletIds } },
-        origin: 'https://portal.example.com',
-        ports: [mockMessagePort],
-      } as unknown as MessageEvent;
-
-      await (para as any).portalEventListener(event);
-
-      // Verify that walletSwitchIds was set
-      expect((para as any).walletSwitchIds).toEqual(mockWalletIds);
-
-      // Verify the message was sent back
-      expect(mocks.postMessage).toHaveBeenCalledWith({
-        id: 'test-id',
-        type: 'WALLET_SWITCH_COMPLETED',
-        isPara: true,
-        status: 'SUCCESS',
-        payload: {},
-      });
-      expect(mocks.close).toHaveBeenCalled();
-    });
   });
 });
