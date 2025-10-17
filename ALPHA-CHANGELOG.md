@@ -1,3 +1,42 @@
+# Release (Thu Oct 16 2025)
+
+## Package Versions
+- @getpara/web-sdk@2.0.0-alpha.65
+- @getpara/wagmi-v2-integration@2.0.0-alpha.65
+- @getpara/wagmi-v2-connector@2.0.0-alpha.65
+- @getpara/viem-v2-integration@2.0.0-alpha.65
+- @getpara/viem-v1-integration@2.0.0-alpha.65
+- @getpara/user-management-client@2.0.0-alpha.65
+- @getpara/solana-web3.js-v1-integration@2.0.0-alpha.65
+- @getpara/solana-wallet-connectors@2.0.0-alpha.65
+- @getpara/solana-signers-v2-integration@2.0.0-alpha.65
+- @getpara/server-sdk@2.0.0-alpha.65
+- @getpara/react-sdk-lite@2.0.0-alpha.65
+- @getpara/react-sdk@2.0.0-alpha.65
+- @getpara/react-native-wallet@2.0.0-alpha.65
+- @getpara/react-components@2.0.0-alpha.65
+- @getpara/react-component-library@1.0.0-alpha.60
+- @getpara/react-common@2.0.0-alpha.65
+- @getpara/evm-wallet-connectors@2.0.0-alpha.65
+- @getpara/ethers-v6-integration@2.0.0-alpha.65
+- @getpara/ethers-v5-integration@2.0.0-alpha.65
+- @getpara/cosmos-wallet-connectors@2.0.0-alpha.65
+- @getpara/cosmjs-v0-integration@2.0.0-alpha.65
+- @getpara/core-sdk@2.0.0-alpha.65
+- @getpara/core-components@2.0.0-alpha.65
+
+### Features
+- Export private key hook https
+
+### Fixes
+- use hash to track changes to currentWalletIds (#1265) - 71c485cab
+- Portal dynamic theming (#1264) - 7b811cf63
+- OAuth portal redirect loop (#1261) - e29f8f549
+- timer cleanup race conditions (#1257) - 3873298f8
+
+### Chores
+- Remove Crypto from transmission utils (#1259) - da2fd09e8
+
 # Release (Thu Oct 09 2025)
 
 ## Package Versions

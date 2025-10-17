@@ -1,6 +1,6 @@
 {
   "name": "@getpara/user-management-client",
-  "version": "2.0.0-alpha.64",
+  "version": "2.0.0-alpha.65",
   "dependencies": {
     "@getpara/shared": "1.4.0",
     "axios": "^1.8.4",

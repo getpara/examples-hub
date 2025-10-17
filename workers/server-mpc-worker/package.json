@@ -1,8 +1,8 @@
 {
   "name": "capsule-mpc-worker-server",
-  "version": "2.0.0-alpha.64",
+  "version": "2.0.0-alpha.65",
   "dependencies": {
-    "@getpara/server-sdk": "2.0.0-alpha.64"
+    "@getpara/server-sdk": "2.0.0-alpha.65"
   },
   "devDependencies": {
     "crypto-browserify": "^3.12.0",
