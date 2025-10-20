@@ -11,8 +11,8 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "graz": "^0.4.1",
     "@getpara/web-sdk": "2.0.0-alpha.65",
+    "graz": "^0.4.1",
     "vue": "^3.5.13"
   },
   "devDependencies": {

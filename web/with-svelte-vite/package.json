@@ -12,8 +12,8 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "graz": "^0.4.1",
-    "@getpara/web-sdk": "2.0.0-alpha.65"
+    "@getpara/web-sdk": "2.0.0-alpha.65",
+    "graz": "^0.4.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.29.0",
