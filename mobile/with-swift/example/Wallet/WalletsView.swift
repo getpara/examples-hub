@@ -46,6 +46,7 @@ struct WalletsView: View {
     @State private var createWalletError: Error?
     @State private var showCreateWalletError = false
     @State private var isCreatingWallet = false
+    @State private var hasPerformedInitialRefresh = false
 
     private func createWallet(type: WalletType) {
         isCreatingWallet = true
@@ -76,7 +77,6 @@ struct WalletsView: View {
         Task {
             do {
                 let wallets = try await paraManager.fetchWallets()
-                // Update the published wallets property
                 await MainActor.run {
                     paraManager.wallets = wallets
                     isRefreshing = false
@@ -89,6 +89,12 @@ struct WalletsView: View {
                 }
             }
         }
+    }
+
+    private func triggerInitialRefreshIfNeeded() {
+        guard !hasPerformedInitialRefresh else { return }
+        hasPerformedInitialRefresh = true
+        refreshWallets()
     }
 
     @ViewBuilder
@@ -345,6 +351,9 @@ struct WalletsView: View {
                 Button("OK", role: .cancel) {}
             } message: {
                 Text(createWalletError?.localizedDescription ?? "An unknown error occurred")
+            }
+            .onAppear {
+                triggerInitialRefreshIfNeeded()
             }
         }
         .accessibilityIdentifier("walletsView")
