@@ -17,7 +17,7 @@
     "@cosmjs/stargate": "^0.34.0",
     "@cosmjs/tendermint-rpc": "^0.34.0",
     "@getpara/ethers-v6-integration": "2.0.0-alpha.64",
-    "@getpara/graz": "2.0.0-alpha.20",
+    "graz": "^0.4.1",
     "@getpara/react-sdk": "2.0.0-alpha.64",
     "@getpara/solana-web3.js-v1-integration": "2.0.0-alpha.64",
     "@hookform/resolvers": "^3.9.1",
