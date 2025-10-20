@@ -23,7 +23,7 @@ export function BalanceCard({ address, onRefresh }: BalanceCardProps) {
   } = useBalance({
     chainId: activeChain?.chainId || "cosmoshub-4",
     denom: chainDenom,
-    bech32Address: address || undefined,
+    bech32Address: address!,
   });
 
   const handleRefresh = () => {
@@ -37,7 +37,7 @@ export function BalanceCard({ address, onRefresh }: BalanceCardProps) {
   };
 
   const hasBalance = balance && parseFloat(balance.amount) > 0;
-  
+
   return (
     <div className="mb-8 rounded-none border border-gray-200">
       <div className="flex justify-between items-center px-6 py-3 bg-gray-50 border-b border-gray-200">
@@ -68,12 +68,16 @@ export function BalanceCard({ address, onRefresh }: BalanceCardProps) {
           Network: {activeChain?.chainName || "Unknown"}
         </p>
         {isLoading ? (
-          <p className="text-lg font-medium text-gray-900" data-testid="account-balance-display">
+          <p
+            className="text-lg font-medium text-gray-900"
+            data-testid="account-balance-display">
             Loading...
           </p>
         ) : !balance || !hasBalance ? (
           <div className="mt-2">
-            <p className="text-lg font-medium text-gray-900 mb-2" data-testid="account-balance-display">
+            <p
+              className="text-lg font-medium text-gray-900 mb-2"
+              data-testid="account-balance-display">
               {balance ? formatCosmosBalance(balance.amount, balance.denom) : "Unable to fetch balance"}
             </p>
             <div className="bg-blue-50 border border-blue-200 p-3 rounded-none">
@@ -83,13 +87,15 @@ export function BalanceCard({ address, onRefresh }: BalanceCardProps) {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1 text-sm bg-blue-600 text-white px-3 py-1 hover:bg-blue-700 transition-colors rounded-none">
-                Get Tokens 
+                Get Tokens
                 <span className="text-xs">↗</span>
               </a>
             </div>
           </div>
         ) : (
-          <p className="text-lg font-medium text-gray-900" data-testid="account-balance-display">
+          <p
+            className="text-lg font-medium text-gray-900"
+            data-testid="account-balance-display">
             {formatCosmosBalance(balance.amount, balance.denom)}
           </p>
         )}

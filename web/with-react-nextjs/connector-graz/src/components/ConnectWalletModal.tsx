@@ -13,7 +13,8 @@ interface ConnectWalletModalProps {
 export function ConnectWalletModal({ isOpen, onClose }: ConnectWalletModalProps) {
   const { connect, status } = useConnect();
   const { disconnect } = useDisconnect();
-  const { data: account, isConnected } = useAccount();
+  const { data: accountRecord, isConnected } = useAccount();
+  const account = accountRecord?.[0];
   const availableWallets = getAvailableWallets();
   const wallets = Object.entries(availableWallets)
     .filter(([_, isAvailable]) => isAvailable)

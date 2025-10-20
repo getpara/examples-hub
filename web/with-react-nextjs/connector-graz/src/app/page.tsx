@@ -19,7 +19,7 @@ export default function Home() {
   const [refreshKey, setRefreshKey] = useState(0);
   const { openModal } = useModal();
   const { data: account, isConnected } = useAccount();
-  const address = account?.bech32Address || "";
+  const address = account?.bech32Address?.bech32Address || "";
 
   // Get active chain info
   const activeChains = useActiveChains();
@@ -34,12 +34,13 @@ export default function Home() {
   const { refetch: refetchBalance } = useBalance({
     chainId,
     denom: chainDenom,
-    bech32Address: address || undefined,
+    bech32Address: address,
   });
 
   // Graz hooks for sending tokens
   const { sendTokensAsync } = useSendTokens();
-  const { data: signingClient } = useStargateSigningClient();
+  const { data: signingClients } = useStargateSigningClient();
+  const signingClient = signingClients?.[chainId] || null;
 
   const handleRefresh = useCallback(() => {
     setRefreshKey((prev) => prev + 1);
