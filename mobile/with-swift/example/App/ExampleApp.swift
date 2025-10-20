@@ -1,3 +1,4 @@
+import Combine
 import os
 import ParaSwift
 import SwiftUI
@@ -10,8 +11,8 @@ struct ExampleApp: App {
     init() {
         // Para Configuration
         let config = ParaConfig(
-            apiKey: "12e3517d125169ea9847d0da5bdcd9c9", // Get from: http://developer.getpara.com
-            environment: .sandbox,
+            apiKey: "beta_24dfb313f04d46bf73300d7ef2933648", // Get from: http://developer.getpara.com
+            environment: .beta,
         )
 
         // Para app scheme for deep linking
@@ -46,6 +47,16 @@ struct ExampleApp: App {
                 // Handle MetaMask deep links
                 if url.scheme == "paraswift", url.host == "mmsdk" {
                     MetaMaskConnector.handleDeepLink(url)
+                }
+            }
+            .onReceive(paraManager.$sessionState) { state in
+                switch state {
+                case .activeLoggedIn:
+                    appRootManager.setAuthenticated(true)
+                case .inactive, .active:
+                    appRootManager.setAuthenticated(false)
+                default:
+                    break
                 }
             }
             .onAppear {

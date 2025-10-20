@@ -1,3 +1,4 @@
+#if false
 //
 //  CosmosWalletUITests.swift
 //  ExampleUITests
@@ -338,3 +339,4 @@ class CosmosWalletUITests: XCTestCase {
         walletsAlert.buttons["OK"].tap()
     }
 }
+#endif

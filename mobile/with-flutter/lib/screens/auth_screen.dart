@@ -11,6 +11,11 @@ import '../features/auth/models/external_wallet_provider.dart';
 import 'wallet_creation_loading_screen.dart';
 import 'external_wallet_demo_screen.dart';
 
+enum _AuthFlow {
+  emailOrPhone,
+  oauth,
+}
+
 class AuthScreen extends StatefulWidget {
   final VoidCallback onSuccess;
 
@@ -34,7 +39,6 @@ class _AuthScreenState extends State<AuthScreen> {
     _webAuthSession = FlutterWebAuthSession(callbackUrlScheme: 'paraflutter');
   }
 
-
   Future<void> _handleSocialAuth(SocialProvider provider) async {
     setState(() => _loadingProvider = provider);
 
@@ -50,9 +54,7 @@ class _AuthScreenState extends State<AuthScreen> {
         appScheme: 'paraflutter',
       );
 
-      if (authState.stage == AuthStage.login) {
-        widget.onSuccess();
-      }
+      await _continueAuth(authState, flow: _AuthFlow.oauth);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -67,72 +69,24 @@ class _AuthScreenState extends State<AuthScreen> {
   }
 
   Future<void> _handleEmailPhone(String value, bool isPhone) async {
+    if (_isProcessing) {
+      return;
+    }
+
     setState(() => _isProcessing = true);
 
     try {
-      // Small delay to ensure Para bridge is ready
-      await Future.delayed(const Duration(milliseconds: 500));
-      
+      await _ensureBridgeReady();
+
       final auth = isPhone ? Auth.phone(value) : Auth.email(value);
       final authState = await para.initiateAuthFlow(auth: auth);
 
-      if (await _handleSloFlowIfNeeded(authState)) {
-        return;
-      }
-
-      if (authState.stage == AuthStage.verify && mounted) {
-        // Show OTP verification and await result
-        final result = await showOTPVerificationSheet(
-          context: context,
-          identifier: value,
-          onVerify: (otp) => _handleOTPVerification(authState, otp),
-          onResend: () => _resendOTP(auth),
-        );
-        
-        // Handle navigation based on result
-        if (result is AuthState && result.stage == AuthStage.signup && mounted) {
-          // Let user choose signup method (Passkey or Password)
-          final chosen = await _chooseSignupMethod();
-
-          if (chosen == SignupMethod.passkey) {
-            if (!mounted) return;
-            // Navigate to wallet creation loading screen
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => WalletCreationLoadingScreen(
-                  onComplete: widget.onSuccess,
-                ),
-              ),
-            );
-
-            // Start wallet creation with passkey
-            _handleWalletCreation(result);
-          } else if (chosen == SignupMethod.password) {
-            // Handle password signup via web auth session
-            try {
-              setState(() => _isProcessing = true);
-              await para.handleSignup(
-                authState: result,
-                signupMethod: SignupMethod.password,
-                webAuthenticationSession: _webAuthSession,
-              );
-              if (!mounted) return;
-              widget.onSuccess();
-            } catch (e) {
-              if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Password setup failed: ${e.toString()}')),
-                );
-              }
-            } finally {
-              if (mounted) setState(() => _isProcessing = false);
-            }
-          }
-        }
-      } else if (authState.stage == AuthStage.login) {
-        // Existing user - try to login
-        await _handleLogin(authState);
-      }
+      await _continueAuth(
+        authState,
+        flow: _AuthFlow.emailOrPhone,
+        authForResend: auth,
+        identifier: value,
+      );
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -146,25 +100,68 @@ class _AuthScreenState extends State<AuthScreen> {
     }
   }
 
-  Future<AuthState?> _handleOTPVerification(AuthState authState, String otp) async {
+  Future<void> _continueAuth(
+    AuthState authState, {
+    required _AuthFlow flow,
+    Auth? authForResend,
+    String? identifier,
+  }) async {
+    if (await _handleOneClick(authState)) {
+      return;
+    }
+
+    switch (authState.stage) {
+      case AuthStage.verify:
+        if (authForResend == null || identifier == null) {
+          return;
+        }
+
+        final verifiedState = await _promptOtp(
+          identifier: identifier,
+          auth: authForResend,
+        );
+
+        if (verifiedState != null) {
+          await _continueAuth(
+            verifiedState,
+            flow: flow,
+            authForResend: authForResend,
+            identifier: identifier,
+          );
+        }
+        break;
+      case AuthStage.login:
+        if (flow == _AuthFlow.oauth) {
+          await _finalizeOAuthLogin();
+        } else {
+          await _completeLogin(authState);
+        }
+        break;
+      case AuthStage.signup:
+        await _startSignup(authState);
+        break;
+    }
+  }
+
+  Future<AuthState?> _promptOtp({
+    required String identifier,
+    required Auth auth,
+  }) async {
+    final result = await showOTPVerificationSheet(
+      context: context,
+      identifier: identifier,
+      onVerify: _verifyOtp,
+      onResend: () => _resendOTP(auth),
+    );
+
+    return result is AuthState ? result : null;
+  }
+
+  Future<AuthState?> _verifyOtp(String otp) async {
     try {
-      final verifiedState = await para.verifyOtp(
+      return await para.verifyOtp(
         otp: otp,
       );
-      
-      if (await _handleSloFlowIfNeeded(verifiedState)) {
-        return null;
-      }
-      
-      if (verifiedState.stage == AuthStage.signup && mounted) {
-        // Return the verified state so AuthScreen can handle navigation
-        return verifiedState;
-      } else if (verifiedState.stage == AuthStage.login && mounted) {
-        // For existing users, handle login and complete authentication
-        await _handleLogin(verifiedState);
-        return null; // Login handled, no further action needed
-      }
-      return null;
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -175,9 +172,56 @@ class _AuthScreenState extends State<AuthScreen> {
     }
   }
 
-  Future<void> _handleWalletCreation(AuthState verifiedState) async {
+  Future<void> _startSignup(AuthState authState) async {
+    final chosen = await _chooseSignupMethod();
+    if (!mounted || chosen == null) {
+      return;
+    }
+
+    if (chosen == SignupMethod.passkey) {
+      await _startPasskeySignup(authState);
+    } else if (chosen == SignupMethod.password) {
+      await _startPasswordSignup(authState);
+    }
+  }
+
+  Future<void> _startPasskeySignup(AuthState authState) async {
+    if (!mounted) return;
+
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => WalletCreationLoadingScreen(
+          onComplete: widget.onSuccess,
+        ),
+      ),
+    );
+
+    await _completePasskeySignup(authState);
+  }
+
+  Future<void> _startPasswordSignup(AuthState authState) async {
     try {
-      // Create wallets using passkey signup method
+      setState(() => _isProcessing = true);
+      await para.handleSignup(
+        authState: authState,
+        signupMethod: SignupMethod.password,
+        webAuthenticationSession: _webAuthSession,
+      );
+      if (!mounted) return;
+      widget.onSuccess();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Password setup failed: ${e.toString()}')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isProcessing = false);
+    }
+  }
+
+  Future<void> _completePasskeySignup(AuthState verifiedState) async {
+    try {
       await para.handleSignup(
         authState: verifiedState,
         signupMethod: SignupMethod.passkey,
@@ -199,74 +243,79 @@ class _AuthScreenState extends State<AuthScreen> {
     }
   }
 
-  Future<bool> _handleSloFlowIfNeeded(AuthState authState) async {
-    String? sloUrl = authState.loginUrl;
-    final nextStage = authState.effectiveNextStage;
-    final isSloLogin =
-        authState.stage == AuthStage.login || nextStage == AuthStage.login;
-
-    if (sloUrl == null || sloUrl.isEmpty) {
-      final methods =
-          isSloLogin ? authState.loginMethods : authState.signupMethods;
-      if (methods.contains('BASIC_LOGIN')) {
-        try {
-          sloUrl = await para.getLoginUrl(authMethod: 'BASIC_LOGIN');
-          debugPrint('[EmailAuth] Generated SLO login URL via getLoginUrl');
-        } catch (e) {
-          debugPrint('[EmailAuth] Failed to fetch login URL via getLoginUrl: $e');
-        }
-      }
-    }
-
-    if (sloUrl == null || sloUrl.isEmpty) {
-      return false;
-    }
-
-    final contextLabel = isSloLogin ? 'SLO login' : 'SLO signup';
-
+  Future<void> _finalizeOAuthLogin() async {
     try {
-      final callbackURL = await para.presentAuthUrl(
-        url: sloUrl,
+      await para.touchSession();
+    } catch (_) {
+      // Session touch is best effort for OAuth callbacks
+    }
+
+    await para.fetchWallets();
+
+    if (mounted) {
+      widget.onSuccess();
+    }
+  }
+
+  Future<void> _completeLogin(AuthState authState) async {
+    try {
+      await para.handleLogin(
+        authState: authState,
         webAuthenticationSession: _webAuthSession,
-        context: contextLabel,
-        loadTransmissionKeyshares: true,
       );
-
-      if (callbackURL != null) {
-        debugPrint('[EmailAuth] $contextLabel session callback ${callbackURL.toString()}');
-      } else {
-        debugPrint('[EmailAuth] $contextLabel session completed without callback URL');
-      }
-
-      if (isSloLogin) {
-        final loginResult = await para.waitForLogin();
-        debugPrint('[EmailAuth] waitForLogin resolved ($contextLabel) $loginResult');
-      } else {
-        final signupResult = await para.waitForSignup();
-        debugPrint('[EmailAuth] waitForSignup resolved $signupResult');
-      }
-
-      try {
-        final session = await para.touchSession();
-        debugPrint('[EmailAuth] Session after $contextLabel ${session ?? {}}');
-      } catch (touchError) {
-        debugPrint('[EmailAuth] touchSession failed: $touchError');
-      }
-
-      await para.fetchWallets();
-
       if (mounted) {
         widget.onSuccess();
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Authentication failed: ${e.toString()}')),
+          SnackBar(content: Text('Login failed: ${e.toString()}')),
         );
       }
     }
+  }
 
-    return true;
+  Future<bool> _handleOneClick(AuthState authState) async {
+    final url = authState.loginUrl;
+    if (url?.isNotEmpty != true) {
+      return false;
+    }
+
+    try {
+      await para.presentAuthUrl(
+        url: url!,
+        webAuthenticationSession: _webAuthSession,
+      );
+
+      final nextStage = authState.effectiveNextStage;
+      if (nextStage == AuthStage.signup) {
+        await para.waitForSignup();
+      } else {
+        await para.waitForLogin();
+      }
+
+      await para.touchSession();
+      await para.fetchWallets();
+
+      if (mounted) {
+        widget.onSuccess();
+      }
+
+      return true;
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Authentication failed: ${e.toString()}')),
+        );
+      }
+
+      return false;
+    }
+  }
+
+  Future<void> _ensureBridgeReady() async {
+    // Small delay to ensure Para bridge is ready
+    await Future.delayed(const Duration(milliseconds: 500));
   }
 
   Future<SignupMethod?> _chooseSignupMethod() async {
@@ -290,26 +339,6 @@ class _AuthScreenState extends State<AuthScreen> {
         );
       },
     );
-  }
-
-  Future<void> _handleLogin(AuthState authState) async {
-    try {
-      if (await _handleSloFlowIfNeeded(authState)) {
-        return;
-      }
-      // Use handleLogin for existing users
-      await para.handleLogin(
-        authState: authState,
-        webAuthenticationSession: _webAuthSession,
-      );
-      widget.onSuccess();
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Login failed: ${e.toString()}')),
-        );
-      }
-    }
   }
 
   Future<void> _resendOTP(Auth auth) async {
@@ -342,30 +371,26 @@ class _AuthScreenState extends State<AuthScreen> {
   }
 
   Future<void> _handleExternalWalletAuth(ExternalWalletProvider provider) async {
+    if (!mounted) return;
+
     try {
-      String? address;
-      if (provider == ExternalWalletProvider.phantom) {
-        address = await phantomConnector.connect();
-      } else if (provider == ExternalWalletProvider.metamask) {
-        await metamaskConnector.connect();
-        address = metamaskConnector.accounts.isNotEmpty ? metamaskConnector.accounts.first : null;
-      }
-      
-      // Success - close sheet and navigate to demo view
-      if (mounted && address != null) {
-        Navigator.pop(context); // Close the sheet
+      final address = await _connectExternalWallet(provider);
+
+      if (!mounted) return;
+
+      Navigator.pop(context);
+
+      if (address != null) {
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => ExternalWalletDemoScreen(
               provider: provider,
-              address: address!,
+              address: address,
             ),
           ),
         );
-      } else if (mounted && address == null) {
-        // No address returned - close sheet and show error
-        Navigator.pop(context); // Close the sheet
+      } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('No wallet address found')),
         );
@@ -378,6 +403,19 @@ class _AuthScreenState extends State<AuthScreen> {
         );
       }
     }
+  }
+
+  Future<String?> _connectExternalWallet(ExternalWalletProvider provider) async {
+    if (provider == ExternalWalletProvider.phantom) {
+      return phantomConnector.connect();
+    }
+
+    if (provider == ExternalWalletProvider.metamask) {
+      await metamaskConnector.connect();
+      return metamaskConnector.accounts.isNotEmpty ? metamaskConnector.accounts.first : null;
+    }
+
+    return null;
   }
 
   @override

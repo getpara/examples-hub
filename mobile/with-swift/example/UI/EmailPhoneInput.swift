@@ -127,11 +127,21 @@ struct EmailPhoneInput: View {
     private func updateInputType() {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
 
-        if trimmed.isEmpty {
+        guard !trimmed.isEmpty else {
             inputType = .unknown
-        } else if trimmed.contains("@") {
+            return
+        }
+
+        if trimmed.contains("@") {
             inputType = .email
-        } else if trimmed.rangeOfCharacter(from: .decimalDigits) != nil {
+            return
+        }
+
+        let phoneCharacters = CharacterSet.decimalDigits.union(CharacterSet(charactersIn: "+-() "))
+        let hasOnlyPhoneCharacters = trimmed.unicodeScalars.allSatisfy { phoneCharacters.contains($0) }
+        let digitCount = trimmed.unicodeScalars.filter { CharacterSet.decimalDigits.contains($0) }.count
+
+        if hasOnlyPhoneCharacters && digitCount > 0 {
             inputType = .phone
         } else {
             inputType = .unknown

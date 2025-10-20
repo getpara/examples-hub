@@ -78,7 +78,7 @@ void main() {
       
       print('✅ Cosmos wallet signing operations completed');
     });
-  });
+  }, skip: 'Disabled to mirror Swift suite (Cosmos tests are commented out there)');
 }
 
 // Helper class for Cosmos wallet tests

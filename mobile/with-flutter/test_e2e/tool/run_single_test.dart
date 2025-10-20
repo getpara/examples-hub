@@ -62,23 +62,24 @@ void main(List<String> args) async {
   await Future.delayed(Duration(seconds: 5));
   
   try {
-    // Run the specific test file
-    final testResult = await Process.run(
+    // Run the specific test file with live log streaming
+    final proc = await Process.start(
       'dart',
-      ['test', '--timeout', '300s', testFile],
+      ['test', '-r', 'expanded', '--timeout', '300s', testFile],
+      mode: ProcessStartMode.normal,
+      workingDirectory: Directory.current.path,
     );
-    
-    print(testResult.stdout);
-    if (testResult.stderr.isNotEmpty) {
-      print(testResult.stderr);
-    }
-    
-    if (testResult.exitCode == 0) {
+
+    proc.stdout.listen((data) => stdout.add(data));
+    proc.stderr.listen((data) => stderr.add(data));
+
+    final code = await proc.exitCode;
+    if (code == 0) {
       print('\n✅ $testType tests PASSED');
     } else {
-      print('\n❌ $testType tests FAILED');
+      print('\n❌ $testType tests FAILED (exit code $code)');
     }
-    
+
   } finally {
     print('\n🛑 Stopping Appium server...');
     appiumProcess.kill();

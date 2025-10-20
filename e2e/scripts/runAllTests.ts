@@ -28,19 +28,24 @@ const args = process.argv.slice(2);
 const cliArgs: CLIArgs = parseCliArgs(args);
 
 const isSingleTestMode = !!(cliArgs.framework && cliArgs.testType);
-const isAllTestsMode = !cliArgs.framework || (!cliArgs.testType && cliArgs.framework);
+const isAllTestsMode =
+  !cliArgs.framework || (!cliArgs.testType && cliArgs.framework);
 
-async function runSingleTest(framework: string, testType?: string): Promise<void> {
+async function runSingleTest(
+  framework: string,
+  testType?: string
+): Promise<void> {
   if (!framework) {
     logger.logError("Usage: tsx runAllTests.ts <framework> [test-type]");
     logger.logError("Frameworks: react-vite, react-nextjs, vue, svelte, node");
-    logger.logError("Test types: email-password, email-passkey, phone-password, phone-passkey");
+    logger.logError(
+      "Test types: email-password, email-passkey, phone-password, phone-passkey"
+    );
     process.exit(1);
   }
 
   try {
     const config = getTestConfig(framework);
-    const appFullPath = path.resolve(EXAMPLES_REPO_PATH, config.path);
 
     let testPath = `e2e/tests/${config.path}`;
     if (testType) {
@@ -63,9 +68,23 @@ async function runSingleTest(framework: string, testType?: string): Promise<void
       playwrightArgs.push("--headed");
     }
 
+    // Remove "basic-login" suffix for directory path so tests run properly after env vars are setup
+    if (config.path.includes("/basic-login")) {
+      config.path = config.path.replace("/basic-login", "");
+    }
+
+    // Remove "pin" suffix for directory path so tests run properly after env vars are setup
+    if (config.path.includes("/pin")) {
+      config.path = config.path.replace("/pin", "");
+    }
+
+    const appFullPath = path.resolve(EXAMPLES_REPO_PATH, config.path);
+
     const command = `yarn playwright test ${playwrightArgs.join(" ")}`;
 
-    logger.logInfo(`Running tests for ${framework}${testType ? ` (${testType})` : ""}`);
+    logger.logInfo(
+      `Running tests for ${framework}${testType ? ` (${testType})` : ""}`
+    );
     logger.logInfo(`Command: ${command}\n`);
 
     const testEnv = {
@@ -89,7 +108,20 @@ async function runSingleTest(framework: string, testType?: string): Promise<void
 const runTestsForApp = async (appName: string): Promise<TestResult> => {
   try {
     const config = getTestConfig(appName);
-    const appFullPath = path.resolve(EXAMPLES_REPO_PATH, config.path);
+
+    let appPath = config.path;
+
+    // Remove "basic-login" suffix for directory path so tests run properly after env vars are setup
+    if (appPath.includes("/basic-login")) {
+      appPath = appPath.replace("/basic-login", "");
+    }
+
+    // Remove "pin" suffix for directory path so tests run properly after env vars are setup
+    if (appPath.includes("/pin")) {
+      appPath = appPath.replace("/pin", "");
+    }
+
+    const appFullPath = path.resolve(EXAMPLES_REPO_PATH, appPath);
 
     logger.log("", "=".repeat(60));
     logger.logInfo(`Running tests for ${appName}`);
@@ -104,7 +136,8 @@ const runTestsForApp = async (appName: string): Promise<TestResult> => {
     }
 
     const playwrightArgs = [
-      `e2e/tests/${config.path}`,
+      // Only running tests in the exact directory to avoid running other tests that need different env vars
+      `e2e/tests/${config.path}/*.spec.ts`,
       "--config=e2e/example-hub-playwright.config.ts",
       "--reporter=line",
       "--workers=1",
@@ -141,7 +174,9 @@ let candidateFrameworks = detectChangedFrameworks(cliArgs.isDiffOnly);
 
 const appsToTest = candidateFrameworks.filter((appName) => {
   if (cliArgs.isWebOnly) {
-    return ["react-vite", "react-nextjs", "vue", "svelte"].some((webFw) => appName.includes(webFw));
+    return ["react-vite", "react-nextjs", "vue", "svelte"].some((webFw) =>
+      appName.includes(webFw)
+    );
   }
   if (cliArgs.framework) {
     return appName.includes(cliArgs.framework);

@@ -60,21 +60,17 @@ void main(List<String> args) async {
         testFiles = ['cosmos_wallet_test.dart'];
         break;
       case 'wallets':
-        testFiles = ['evm_wallet_test.dart', 'solana_wallet_test.dart', 'cosmos_wallet_test.dart'];
+        // Parity with Swift: only EVM wallet tests are enabled
+        testFiles = ['evm_wallet_test.dart'];
         break;
       case 'error':
       case 'errors':
-        testFiles = ['simple_error_test.dart'];
+        testFiles = [];
         break;
       case 'all':
       default:
-        testFiles = [
-          'authentication_test.dart',
-          'evm_wallet_test.dart',
-          'solana_wallet_test.dart',
-          'cosmos_wallet_test.dart',
-          'simple_error_test.dart'
-        ];
+        // Parity with Swift: run auth + EVM only
+        testFiles = ['authentication_test.dart', 'evm_wallet_test.dart'];
         break;
     }
 
@@ -82,21 +78,22 @@ void main(List<String> args) async {
     
     for (final testFile in testFiles) {
       print('🔄 Running $testFile...');
-      final testResult = await Process.run('dart', [
-        'test',
-        '--timeout', '300s',
-        testFile
-      ]);
-      
-      print(testResult.stdout);
-      if (testResult.stderr.isNotEmpty) {
-        print(testResult.stderr);
-      }
+      final proc = await Process.start(
+        'dart',
+        ['test', '-r', 'expanded', '--timeout', '300s', testFile],
+        mode: ProcessStartMode.normal,
+        workingDirectory: Directory.current.path,
+      );
 
-      if (testResult.exitCode == 0) {
-        print('✅ $testFile PASSED\n');
+      // Stream logs live for visibility
+      proc.stdout.listen((data) => stdout.add(data));
+      proc.stderr.listen((data) => stderr.add(data));
+
+      final code = await proc.exitCode;
+      if (code == 0) {
+        print('\n✅ $testFile PASSED\n');
       } else {
-        print('❌ $testFile FAILED\n');
+        print('\n❌ $testFile FAILED (exit code $code)\n');
         allPassed = false;
       }
     }

@@ -90,6 +90,9 @@ test.describe('Para Modal - Email + Passkey Authentication', () => {
     
     logger.logStep('React Next.js Para Modal E2E test completed successfully', true);
 
+    // Cleanup: delete test user
+    await loginParaModalPage.cleanupTestUser();
+
     // Cleanup: ensure login context is properly closed
     await loginContext.close();
   });

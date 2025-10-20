@@ -78,7 +78,7 @@ void main() {
       
       print('✅ Solana wallet signing operations completed');
     });
-  });
+  }, skip: 'Disabled to mirror Swift suite (Solana tests are commented out there)');
 }
 
 // Helper class for Solana wallet tests

@@ -279,6 +279,287 @@ class WalletTestHelper {
   
   WalletTestHelper(this.driver);
   
+  /// Performs One-Click authentication (email or phone) with OTP entry in web view
+  /// Mirrors Swift's performOneClickAuthentication: enters credential, taps Continue,
+  /// handles any system "Continue" prompts, enters OTP digits, and waits for wallets view.
+  Future<void> performOneClickAuthentication(String credential, {String otpCode = TestConstants.verificationCode}) async {
+    print('🔐 Performing One-Click authentication: $credential');
+
+    // Switch to appropriate mode based on credential
+    final isEmail = credential.contains('@');
+    if (isEmail) {
+      await _switchToEmailMode();
+      await _enterEmailAndContinue(credential);
+    } else {
+      await _switchToPhoneMode();
+      await _enterPhoneAndContinue(credential);
+    }
+
+    // Allow any system dialog that may request confirmation to proceed
+    await _allowUseCapsuleSignInIfNeeded();
+
+    // Wait for OTP fields to appear and enter the code
+    await _waitForOtpFieldsAndEnterCode(otpCode);
+
+    // Phone flows often present an extra Continue + biometric hand-off after OTP.
+    if (!isEmail) {
+      await _finalizePhoneOneClickIfNeeded();
+    }
+
+    // After OTP, the Safari view should dismiss and app should foreground wallets view
+    await waitForWalletsView();
+    print('✅ One-Click authentication completed');
+  }
+
+  /// If a system or in-app alert is present with a Continue button, tap it.
+  Future<void> _allowUseCapsuleSignInIfNeeded() async {
+    try {
+      // Poll briefly to catch any alert
+      for (int attempt = 0; attempt < 10; attempt++) {
+        // 1) Try a real iOS alert first
+        final alerts = await driver.findElements(AppiumBy.className('XCUIElementTypeAlert')).toList();
+        if (alerts.isNotEmpty) {
+          final alert = alerts.first;
+          final buttons = await alert.findElements(AppiumBy.className('XCUIElementTypeButton')).toList();
+          AppiumWebElement? continueBtn;
+          for (final b in buttons) {
+            try {
+              final label = await b.attributes['label'];
+              if (label.toLowerCase().contains('continue')) {
+                continueBtn = b; break;
+              }
+            } catch (_) {}
+          }
+          final toTap = continueBtn ?? (buttons.isNotEmpty ? buttons.last : null);
+          if (toTap != null) {
+            await toTap.click();
+            print('✅ Allowed sign-in via system alert');
+            await Future.delayed(const Duration(milliseconds: 500));
+            return;
+          }
+        }
+
+        // 2) Some sheets are not XCUIElementTypeAlert. Only try tapping a "Continue"
+        //    button if we detect sheet-like copy (to avoid re-tapping the app's Continue).
+        bool looksLikeSignInSheet = false;
+        try {
+          final texts = await driver.findElements(AppiumBy.className('XCUIElementTypeStaticText')).toList();
+          for (final t in texts) {
+            try {
+              final val = await t.text;
+              if (val.contains('usecapsule.com') ||
+                  val.contains('Wants to Use') ||
+                  val.contains('Sign In')) {
+                looksLikeSignInSheet = true; break;
+              }
+            } catch (_) {}
+          }
+        } catch (_) {}
+
+        if (looksLikeSignInSheet) {
+          try {
+            final continueById = await driver.findElement(AppiumBy.accessibilityId('Continue'));
+            final enabled = await continueById.enabled;
+            if (enabled) {
+              await continueById.click();
+              print('✅ Allowed sign-in by tapping Continue (accessibility)');
+              await Future.delayed(const Duration(milliseconds: 500));
+              return;
+            }
+          } catch (_) {}
+
+          // Broad button scan last
+          try {
+            final allButtons = await driver.findElements(AppiumBy.className('XCUIElementTypeButton')).toList();
+            for (final b in allButtons.reversed) {
+              try {
+                final label = await b.attributes['label'];
+                if (label.toLowerCase().contains('continue')) {
+                  await b.click();
+                  print('✅ Allowed sign-in by tapping Continue (broad scan)');
+                  await Future.delayed(const Duration(milliseconds: 500));
+                  return;
+                }
+              } catch (_) {}
+            }
+          } catch (_) {}
+        }
+
+        // Avoid blindly tapping generic "Continue" buttons on the auth landing screen,
+        // which would just restart the login flow.
+        bool onAuthLanding = false;
+        try {
+          final staticTexts = await driver.findElements(AppiumBy.className('XCUIElementTypeStaticText')).toList();
+          for (final t in staticTexts) {
+            try {
+              final val = await t.text;
+              if (val.contains('Sign Up or Log In') ||
+                  val.contains('By logging in you agree') ||
+                  val.contains('Powered by')) {
+                onAuthLanding = true;
+                break;
+              }
+            } catch (_) {}
+          }
+        } catch (_) {}
+
+        if (!onAuthLanding) {
+          final buttons = await driver.findElements(AppiumBy.className('XCUIElementTypeButton')).toList();
+          for (final b in buttons) {
+            try {
+              final label = await b.attributes['label'];
+              if (label.toLowerCase().contains('continue')) {
+                await b.click();
+                print('✅ Allowed sign-in by tapping Continue (generic button)');
+                await Future.delayed(const Duration(milliseconds: 500));
+                return;
+              }
+            } catch (_) {}
+          }
+        }
+
+        // 3) Try Appium's iOS alert accept command
+        try {
+          await driver.execute('mobile:alert', <dynamic>[<String, dynamic>{'action': 'accept'}]);
+          print('✅ Allowed sign-in by mobile:alert accept');
+          await Future.delayed(const Duration(milliseconds: 500));
+          return;
+        } catch (_) {}
+
+        // 4) As a last resort, attempt coordinate taps at likely button position
+        if (attempt > 2) {
+          final tapped = await _tapSystemContinueOnly();
+          if (tapped) {
+            print('✅ Allowed sign-in by coordinate tap');
+            await Future.delayed(const Duration(milliseconds: 500));
+            return;
+          }
+        }
+        await Future.delayed(const Duration(milliseconds: 250));
+      }
+    } catch (_) {
+      // Ignore alert handling failures
+    }
+  }
+
+  Future<void> _finalizePhoneOneClickIfNeeded() async {
+    print('📱 Finalizing phone One-Click post-OTP...');
+    await Future.delayed(const Duration(milliseconds: 800));
+
+    final webViews = await driver.findElements(AppiumBy.className('XCUIElementTypeWebView')).toList();
+    if (webViews.isEmpty) {
+      print('ℹ️ No web views present post-OTP; skipping phone-specific finalization.');
+      return;
+    }
+
+    // Re-scan for any explicit Continue buttons presented by the web view/sheet.
+    bool tappedExplicitContinue = false;
+    try {
+      final targetViews = webViews.take(2).toList().reversed;
+      for (final webView in targetViews) {
+        try {
+          final buttons = await webView.findElements(AppiumBy.className('XCUIElementTypeButton')).toList();
+          for (final button in buttons) {
+            try {
+              final label = await button.attributes['label'];
+              if (label.toLowerCase().contains('continue')) {
+                await button.click();
+                tappedExplicitContinue = true;
+                print('✅ Tapped explicit Continue button inside web view post-OTP');
+                await Future.delayed(const Duration(milliseconds: 500));
+                break;
+              }
+            } catch (_) {}
+          }
+          if (tappedExplicitContinue) break;
+        } catch (_) {}
+      }
+    } catch (_) {}
+
+    // Allow any sheets that might have appeared during the OTP transition.
+    await _allowUseCapsuleSignInIfNeeded();
+
+    // Some builds require a system Continue + biometric confirmation.
+    if (tappedExplicitContinue || webViews.isNotEmpty) {
+      try {
+        await tapSystemContinueAndAuthenticate(driver);
+      } catch (e) {
+        if (!tappedExplicitContinue) {
+          print('ℹ️ No system biometric prompt detected post-OTP: $e');
+        } else {
+          print('ℹ️ System biometric prompt not triggered after tapping Continue: $e');
+        }
+      }
+    }
+  }
+
+  /// Try coordinate taps in the bottom portion of the screen where iOS places Continue.
+  /// Returns true if a tap was sent.
+  Future<bool> _tapSystemContinueOnly() async {
+    try {
+      final window = await driver.window;
+      final size = await window.size;
+      // Try several X positions biased to the right where "Continue" sits
+      final xs = <double>[0.60, 0.68, 0.76, 0.84, 0.90];
+      // Try several Y positions above the keyboard and near sheet buttons
+      final ys = <double>[0.78, 0.82, 0.86, 0.90, 0.94];
+      for (final fx in xs) {
+        for (final fy in ys) {
+          final x = (size.width * fx).round();
+          final y = (size.height * fy).round();
+          await driver.execute('mobile:tap', <dynamic>[<String, dynamic>{'x': x, 'y': y}]);
+          await Future.delayed(const Duration(milliseconds: 120));
+        }
+      }
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<void> _waitForOtpFieldsAndEnterCode(String code) async {
+    print('⏳ Waiting for OTP fields to appear...');
+    // Wait up to ~20s for OTP text fields to appear (often from SafariViewService)
+    for (int attempt = 0; attempt < 40; attempt++) {
+      try {
+        // Check web view visibility for diagnostics
+        final webViews = await driver.findElements(AppiumBy.className('XCUIElementTypeWebView')).toList();
+        if (attempt % 5 == 0) {
+          print('🔎 WebViews visible: ${webViews.length}');
+        }
+        // If we still don't see a web view after a few attempts, try foregrounding SafariViewService
+        if (webViews.isEmpty && (attempt == 6 || attempt == 12)) {
+          try {
+            print('ℹ️ Attempting to foreground SafariViewService (attempt $attempt)');
+            await driver.execute('mobile: activateApp', <dynamic>[<String, dynamic>{'bundleId': 'com.apple.SafariViewService'}]);
+            await Future.delayed(const Duration(milliseconds: 600));
+          } catch (_) {}
+        }
+
+        // Collect both plain and secure text fields
+        final plain = await driver.findElements(AppiumBy.className('XCUIElementTypeTextField')).toList();
+        final secure = await driver.findElements(AppiumBy.className('XCUIElementTypeSecureTextField')).toList();
+        if (attempt % 5 == 0) {
+          print('🔎 TextFields: ${plain.length}, SecureTextFields: ${secure.length}');
+        }
+        final fields = [...plain, ...secure];
+        if (fields.length >= 6 || fields.length == 1) {
+          final entered = await _completeOtpEntryInternal(code, fields);
+          if (entered) {
+            await Future.delayed(const Duration(seconds: 1));
+            return;
+          }
+        }
+        // While waiting, also allow any popups that request confirmation
+        await _allowUseCapsuleSignInIfNeeded();
+      } catch (_) {
+        // keep polling
+      }
+      await Future.delayed(const Duration(milliseconds: 500));
+    }
+    throw Exception('OTP fields did not appear for One-Click flow');
+  }
+  
   /// Performs email authentication with comprehensive error handling
   Future<void> performEmailAuthWithPasskey(String email) async {
     print('🔐 Performing email authentication: $email');
@@ -298,6 +579,49 @@ class WalletTestHelper {
     await _performBiometricAuth();
     
     print('✅ Email authentication completed');
+  }
+
+  // Private implementation methods for login mode switching and credential entry
+  Future<void> _switchToPhoneMode() async {
+    final buttons = await driver.findElements(AppiumBy.className('XCUIElementTypeButton')).toList();
+    for (final button in buttons) {
+      try {
+        final label = await button.attributes['label'];
+        if (label.contains('Phone')) {
+          await button.click();
+          await Future.delayed(const Duration(milliseconds: 500));
+          return;
+        }
+      } catch (_) {}
+    }
+  }
+
+  Future<void> _enterPhoneAndContinue(String phone) async {
+    final textFields = await driver.findElements(AppiumBy.className('XCUIElementTypeTextField')).toList();
+    if (textFields.isEmpty) {
+      throw Exception('No phone text field found');
+    }
+
+    await textFields.first.click();
+    await textFields.first.clear();
+    await textFields.first.sendKeys(phone);
+    await Future.delayed(const Duration(seconds: 1));
+
+    // Click Continue button
+    final buttons = await driver.findElements(AppiumBy.className('XCUIElementTypeButton')).toList();
+    for (final button in buttons) {
+      try {
+        final label = await button.attributes['label'];
+        final enabled = await button.enabled;
+        if (label == 'Continue' && enabled) {
+          await button.click();
+          await _allowUseCapsuleSignInIfNeeded();
+          return;
+        }
+      } catch (_) {}
+    }
+
+    throw Exception('Continue button not found or not enabled');
   }
 
   /// If the "Choose Authentication Method" dialog appears, choose "Use Passkey".
@@ -373,6 +697,8 @@ class WalletTestHelper {
           }
           // Opportunistically pick passkey if dialog is up
           await handleAuthMethodDialogIfPresent();
+          // Also allow system/in-app Continue prompts if present
+          await _allowUseCapsuleSignInIfNeeded();
         } else if (!screenState.isOnWalletScreen) {
           print('🔍 Unknown screen state (attempt $attempt)');
           print('  - Not login, not wallet, checking for any activity...');
@@ -848,6 +1174,8 @@ class WalletTestHelper {
         final enabled = await button.enabled;
         if (label == 'Continue' && enabled) {
           await button.click();
+          // Immediately handle potential sign-in confirmation
+          await _allowUseCapsuleSignInIfNeeded();
           return;
         }
       } catch (e) {
@@ -865,7 +1193,7 @@ class WalletTestHelper {
         final buttons = await driver.findElements(AppiumBy.className('XCUIElementTypeButton')).toList();
         for (final button in buttons) {
           final label = await button.attributes['label'];
-          if (label.toLowerCase().contains('resend')) {
+          if (label.toLowerCase().contains('resend') || label.toLowerCase().contains('continue')) {
             print('✅ OTP verification view found');
             break;
           }
@@ -887,34 +1215,145 @@ class WalletTestHelper {
     await Future.delayed(Duration(seconds: 1));
     
     try {
-      // Get all text fields
-      final textFields = await driver.findElements(AppiumBy.className('XCUIElementTypeTextField')).toList();
-      
-      if (textFields.length >= 6) {
-        // Use the last 6 text fields as OTP fields
-        final otpFields = textFields.sublist(textFields.length - 6);
-        
-        for (int i = 0; i < 6 && i < code.length; i++) {
-          await otpFields[i].click();
-          await otpFields[i].clear();
-          await otpFields[i].sendKeys(code[i]);
-          await Future.delayed(Duration(milliseconds: 300));
-        }
-        
-        await Future.delayed(Duration(seconds: 2));
+      // Collect both plain and secure text fields (handles both OTP UIs)
+      final plain = await driver.findElements(AppiumBy.className('XCUIElementTypeTextField')).toList();
+      final secure = await driver.findElements(AppiumBy.className('XCUIElementTypeSecureTextField')).toList();
+      final fields = [...plain, ...secure];
+
+      if (await _completeOtpEntryInternal(code, fields)) {
+        await Future.delayed(const Duration(seconds: 1));
         return;
       }
-      
-      throw Exception('Expected at least 6 text fields for OTP, found ${textFields.length}');
+
+      // If fields are not yet present or entry failed, try the robust waiter used by One‑Click
+      print('ℹ️ OTP fields not ready or entry failed (found ${fields.length}); retrying with robust waiter...');
+      await _waitForOtpFieldsAndEnterCode(code);
+      return;
       
     } catch (e) {
       throw Exception('Failed to enter OTP code: $e');
     }
   }
+
+  /// Shared, robust OTP entry used by both One‑Click and Passkey flows.
+  /// Returns true if an entry strategy was applied.
+  Future<bool> _completeOtpEntryInternal(String code, List<AppiumWebElement> allFields) async {
+    // Normalize list order and inspect
+    final fields = List<AppiumWebElement>.from(allFields);
+    if (fields.isEmpty) return false;
+
+    // Filter obvious non-OTP fields (email entry, search bars, etc.) so we focus on the code inputs.
+    final otpCandidates = <AppiumWebElement>[];
+    for (final field in fields) {
+      try {
+        final isVisible = await field.displayed;
+        final isEnabled = await field.enabled;
+        if (!isVisible || !isEnabled) {
+          continue;
+        }
+        final attributes = field.attributes;
+        String normalize(dynamic value) {
+          if (value == null) return '';
+          final raw = value is String ? value : value.toString();
+          return raw.toLowerCase();
+        }
+        final label = normalize(attributes['label']);
+        final name = normalize(attributes['name']);
+        final placeholder = normalize(attributes['placeholderValue']);
+        final value = normalize(attributes['value']);
+        bool looksLikeCredentialField(String candidate) {
+          return candidate.contains('email') ||
+              candidate.contains('phone') ||
+              candidate.contains('log in') ||
+              candidate.contains('login') ||
+              candidate.contains('sign up');
+        }
+        if (looksLikeCredentialField(label) ||
+            looksLikeCredentialField(name) ||
+            looksLikeCredentialField(placeholder) ||
+            looksLikeCredentialField(value)) {
+          continue;
+        }
+        otpCandidates.add(field);
+      } catch (_) {
+        // Keep field for fallback handling below.
+      }
+    }
+
+    final refined = otpCandidates.isNotEmpty ? otpCandidates : fields;
+
+    // Strategy A: single-field OTP — enter full code
+    if (refined.length == 1) {
+      final field = refined.first;
+      try {
+        await field.click();
+        try {
+          await field.clear();
+        } catch (_) {
+          // Some OTP widgets reject clear(); continue without failing.
+        }
+        await field.sendKeys(code);
+        await Future.delayed(const Duration(milliseconds: 200));
+        try {
+          await field.sendKeys('\n');
+        } catch (_) {
+          // Return key may not exist; ignore.
+        }
+        print('✅ Entered OTP via single-field entry');
+        return true;
+      } catch (_) {}
+    }
+
+    // Strategy B: multi-field OTP — try entering full code in the first field (auto-advance)
+    if (refined.length >= code.length) {
+      // Prefer the last N fields since host views often keep credential inputs earlier.
+      final otpFields = refined.length > code.length
+          ? refined.sublist(refined.length - code.length)
+          : refined;
+
+      try {
+        for (int i = 0; i < code.length; i++) {
+          final digit = code[i];
+          final field = otpFields[i];
+          await field.click();
+          try {
+            await field.clear();
+          } catch (_) {
+            // Some OTP boxes do not support clear()
+          }
+          await field.sendKeys(digit);
+          await Future.delayed(const Duration(milliseconds: 120));
+        }
+        print('✅ Entered OTP digits via multi-field entry (${otpFields.length} fields)');
+        await Future.delayed(const Duration(milliseconds: 400));
+        return true;
+      } catch (e) {
+        print('ℹ️ Multi-field OTP entry attempt failed: $e');
+      }
+
+      // Fallback: let auto-advance logic handle it if available.
+      try {
+        final first = refined.first;
+        await first.click();
+        await first.clear();
+        await first.sendKeys(code);
+        await Future.delayed(const Duration(milliseconds: 400));
+        return true; // most OTP widgets auto-advance
+      } catch (_) {}
+
+    }
+
+    return false;
+  }
   
   Future<void> _performBiometricAuth() async {
     // Short grace to allow sheet to present
     await Future.delayed(const Duration(milliseconds: 800));
+
+    // First try to accept any visible system/in-app Continue prompts
+    await _allowUseCapsuleSignInIfNeeded();
+
+    // If that didn't transition, proactively try coordinate-based Continue + biometric
     await tapSystemContinueAndAuthenticate(driver);
   }
 }
@@ -965,6 +1404,10 @@ Map<String, dynamic> buildIOSCapabilities() {
     'allowTouchIdEnroll': true,
     'touchIdMatch': true,
     'simpleIsVisibleCheck': true,
+    // Auto-accept system alerts such as "... wants to use usecapsule.com"
+    'autoAcceptAlerts': true,
+    // Prefer tapping a Continue-like button when accepting alerts
+    'acceptAlertButtonSelector': "label == 'Continue' OR name == 'Continue'",
   };
 
   // Only set optional selectors if provided, to avoid mismatches with local Xcode
@@ -995,17 +1438,33 @@ Map<String, dynamic> buildIOSCapabilities() {
 /// Create an iOS Appium driver using defaults and optional APPIUM_SERVER_URL env override.
 Future<AppiumWebDriver> createIOSDriver() async {
   final serverUrl = Platform.environment['APPIUM_SERVER_URL'] ?? 'http://127.0.0.1:4723/';
-  // Ensure a simulator is booted to avoid Appium trying to create a new one
-  final booted = _detectSimulator();
-  if (booted == null) {
-    final ensured = _ensureBootedSimulator();
+
+  // Respect explicit simulator choice via env and ensure it is booted
+  final targetUdid = Platform.environment['IOS_SIM_UDID'];
+  if (targetUdid != null && targetUdid.isNotEmpty) {
+    print('📱 Ensuring target simulator is booted: UDID=$targetUdid');
+    final ensured = _ensureBootedSimulator(udid: targetUdid);
     if (ensured != null) {
-      // give Simulator app time to launch and settle
       await Future.delayed(const Duration(seconds: 3));
+    }
+  } else {
+    // Otherwise, ensure any simulator is booted to avoid Appium creating a new one
+    final booted = _detectSimulator();
+    if (booted == null) {
+      final ensured = _ensureBootedSimulator();
+      if (ensured != null) {
+        await Future.delayed(const Duration(seconds: 3));
+      }
     }
   }
 
   final desired = buildIOSCapabilities();
+  if (desired.containsKey('udid')) {
+    print('📦 Using desired capabilities with UDID: ${desired['udid']} (deviceName: ${desired['deviceName']})');
+  } else {
+    print('📦 Using desired capabilities without explicit UDID (deviceName: ${desired['deviceName']})');
+  }
+
   return createDriver(
     uri: Uri.parse(serverUrl),
     desired: desired,
@@ -1013,7 +1472,7 @@ Future<AppiumWebDriver> createIOSDriver() async {
 }
 
 /// Inspect local simulators and find a booted one; else pick the first available iPhone.
-Map<String, String>? _detectSimulator() {
+Map<String, String>? _detectSimulator({String? targetUdid}) {
   try {
     // Prefer booted
     final booted = _firstMatchFromCommand(
@@ -1023,6 +1482,10 @@ Map<String, String>? _detectSimulator() {
     if (booted != null) {
       final deviceName = booted.group(1)!.trim();
       final udid = booted.group(2)!.trim();
+      if (targetUdid != null && targetUdid.isNotEmpty && udid != targetUdid) {
+        // A different simulator is booted; signal mismatch by returning null
+        return null;
+      }
       return {
         'udid': udid,
         'deviceName': deviceName,
@@ -1063,33 +1526,48 @@ RegExpMatch? _firstMatchFromCommand(List<String> command, RegExp pattern) {
 }
 
 /// Try to boot a simulator if none is booted.
-Map<String, String>? _ensureBootedSimulator() {
+Map<String, String>? _ensureBootedSimulator({String? udid}) {
   try {
-    // Already booted?
-    final booted = _detectSimulator();
+    // Already booted? If target UDID specified, ensure it's the one booted
+    final booted = _detectSimulator(targetUdid: udid);
     if (booted != null) return booted;
 
-    // Find any available iPhone simulator
-    final m = _firstMatchFromCommand(
-      ['xcrun', 'simctl', 'list', 'devices', 'available'],
-      RegExp(r'^(iPhone[^\(]+) \(([A-F0-9-]{36})\) \((?:Shutdown|Booted)\)'),
-    );
-    if (m == null) return null;
-
-    final deviceName = m.group(1)!.trim();
-    final udid = m.group(2)!.trim();
+    String? deviceName;
+    late final String target;
+    if (udid != null && udid.isNotEmpty) {
+      // Lookup name for the specific UDID
+      final specific = _firstMatchFromCommand(
+        ['xcrun', 'simctl', 'list', 'devices', 'available'],
+        RegExp('^(iPhone[^\\(]+) \\(($udid)\\) \\((?:Shutdown|Booted)\\)')
+      );
+      if (specific != null) {
+        deviceName = specific.group(1)!.trim();
+        target = udid;
+      } else {
+        target = udid; // we'll try to boot anyway
+      }
+    } else {
+      // Find any available iPhone simulator
+      final m = _firstMatchFromCommand(
+        ['xcrun', 'simctl', 'list', 'devices', 'available'],
+        RegExp(r'^(iPhone[^\(]+) \(([A-F0-9-]{36})\) \((?:Shutdown|Booted)\)'),
+      );
+      if (m == null) return null;
+      deviceName = m.group(1)!.trim();
+      target = m.group(2)!.trim();
+    }
 
     // Launch Simulator app
     Process.runSync('open', ['-a', 'Simulator']);
     // Boot device
-    Process.runSync('xcrun', ['simctl', 'boot', udid]);
+    Process.runSync('xcrun', ['simctl', 'boot', target]);
 
     // Small wait for boot
     sleep(const Duration(seconds: 2));
 
     return {
-      'udid': udid,
-      'deviceName': deviceName,
+      'udid': target,
+      'deviceName': deviceName ?? 'iPhone',
     };
   } catch (_) {
     return null;

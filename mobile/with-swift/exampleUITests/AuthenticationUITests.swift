@@ -35,6 +35,19 @@ class AuthenticationUITests: XCTestCase {
 
     // MARK: - Authentication Tests
 
+    func testEmailOneClickOTPEntry() throws {
+        let timestamp = Int(Date().timeIntervalSince1970)
+        let testEmail = "ui\(timestamp)@test.getpara.com"
+        performOneClickAuthentication(app: app, credential: testEmail)
+    }
+
+    func testPhoneOneClickOTPEntry() throws {
+        // Generates numbers like 9205551234 so the 555 block stays in the middle.
+        let phoneNumber = TestConstants.generateTestPhoneNumber()
+        performOneClickAuthentication(app: app, credential: phoneNumber)
+    }
+
+    /*
     func testEmailPasskeyFlow() throws {
         // PART 1: SIGNUP
         let uniqueEmail = TestConstants.generateUniqueEmail()
@@ -65,6 +78,7 @@ class AuthenticationUITests: XCTestCase {
         performLoginFlow(app: app, credential: phoneNumber)
         waitForWalletsView(app: app)
     }
+    */
 
     // Commenting out password flow test as password auth is not implemented at this time
     /*

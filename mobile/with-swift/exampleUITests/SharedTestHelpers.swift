@@ -8,6 +8,35 @@
 import Foundation
 import XCTest
 
+private enum DialogHelper {
+    static func tapContinue(in alert: XCUIElement) -> Bool {
+        if let continueButton = alert.buttons["Continue"].firstMatchIfExists {
+            continueButton.tap()
+            return true
+        }
+
+        for button in alert.buttons.allElementsBoundByIndex where button.label.lowercased().contains("continue") {
+            button.tap()
+            return true
+        }
+
+        if alert.buttons.count > 1 {
+            let secondButton = alert.buttons.element(boundBy: 1)
+            if secondButton.exists {
+                secondButton.tap()
+                return true
+            }
+        }
+
+        if let firstButton = alert.buttons.allElementsBoundByIndex.first {
+            firstButton.tap()
+            return true
+        }
+
+        return false
+    }
+}
+
 // MARK: - Test Constants
 
 enum TestConstants {
@@ -63,6 +92,112 @@ enum TestHelper {
 
     // MARK: - Static Authentication Helpers (for class setup)
 
+    static func allowUseCapsuleSignInIfNeeded(app: XCUIApplication) {
+        let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
+
+        let appAlert = app.alerts.firstMatch
+        if appAlert.exists, DialogHelper.tapContinue(in: appAlert) {
+            return
+        }
+
+        let springboardAlert = springboard.alerts.firstMatch
+        if springboardAlert.exists {
+            _ = DialogHelper.tapContinue(in: springboardAlert)
+        }
+    }
+
+    @discardableResult
+    static func waitForWalletsView(app: XCUIApplication) -> Bool {
+        guard app.otherElements["walletsView"].waitForExistence(timeout: TestConstants.longTimeout) else {
+            return false
+        }
+
+        let firstWalletCell = app.cells.element(boundBy: 0)
+        let createFirstWalletButton = app.buttons["createFirstWalletButton"]
+
+        let hasWallets = firstWalletCell.waitForExistence(timeout: TestConstants.defaultTimeout)
+        let hasCreateButton = createFirstWalletButton.waitForExistence(timeout: TestConstants.defaultTimeout)
+
+        return hasWallets || hasCreateButton
+    }
+
+    static func performOneClickAuthentication(app: XCUIApplication, credential: String, otpCode: String = TestConstants.verificationCode) {
+        let emailPhoneField = app.textFields["Enter email or phone"]
+        guard emailPhoneField.waitForExistence(timeout: TestConstants.longTimeout) else {
+            fatalError("Email/phone field did not appear on main screen.")
+        }
+        emailPhoneField.clearAndTypeText(credential)
+
+        let continueButton = app.buttons["Continue"]
+        guard continueButton.waitForExistence(timeout: TestConstants.defaultTimeout) else {
+            fatalError("Continue button did not appear after entering credential.")
+        }
+        continueButton.tap()
+
+        let safariApp = XCUIApplication(bundleIdentifier: "com.apple.SafariViewService")
+        let launchDeadline = Date().addingTimeInterval(TestConstants.longTimeout)
+        var isSafariRunning = false
+
+        while Date() < launchDeadline {
+            if safariApp.state == .runningForeground {
+                isSafariRunning = true
+                break
+            }
+
+            allowUseCapsuleSignInIfNeeded(app: app)
+            RunLoop.current.run(until: Date().addingTimeInterval(0.2))
+        }
+
+        guard isSafariRunning else {
+            fatalError("Safari web view was never presented for One-Click flow.")
+        }
+
+        let webView = safariApp.webViews.firstMatch
+        guard webView.waitForExistence(timeout: TestConstants.longTimeout) else {
+            fatalError("Safari web view failed to load for One-Click verification.")
+        }
+
+        var otpFields = webView.textFields.allElementsBoundByIndex + webView.secureTextFields.allElementsBoundByIndex
+        let otpDeadline = Date().addingTimeInterval(TestConstants.defaultTimeout)
+
+        while otpFields.isEmpty && Date() < otpDeadline {
+            RunLoop.current.run(until: Date().addingTimeInterval(0.2))
+            otpFields = webView.textFields.allElementsBoundByIndex + webView.secureTextFields.allElementsBoundByIndex
+        }
+
+        guard !otpFields.isEmpty else {
+            fatalError("OTP input fields were not found in One-Click web view.")
+        }
+
+        guard otpFields.count >= otpCode.count else {
+            fatalError("Not enough OTP fields were present in One-Click web view.")
+        }
+
+        let digits = Array(otpCode)
+        for (index, digit) in digits.enumerated() {
+            let field = otpFields[index]
+            guard field.waitForExistence(timeout: 1) else {
+                fatalError("OTP digit field \(index + 1) did not appear.")
+            }
+            field.tap()
+            field.typeText(String(digit))
+            RunLoop.current.run(until: Date().addingTimeInterval(0.1))
+        }
+
+        let dismissalDeadline = Date().addingTimeInterval(TestConstants.longTimeout)
+        while safariApp.state == .runningForeground && Date() < dismissalDeadline {
+            RunLoop.current.run(until: Date().addingTimeInterval(0.2))
+        }
+
+        guard app.wait(for: .runningForeground, timeout: TestConstants.defaultTimeout) else {
+            fatalError("Main app did not return to foreground after OTP submission.")
+        }
+
+        guard waitForWalletsView(app: app) else {
+            fatalError("Wallets view did not appear after completing One-Click flow.")
+        }
+    }
+
     static func performEmailAuthWithPasskey(app: XCUIApplication, email: String) {
         // Enter email in unified field
         let emailPhoneField = app.textFields["Enter email or phone"]
@@ -116,6 +251,10 @@ enum TestHelper {
 }
 
 extension XCTestCase {
+    func performOneClickAuthentication(app: XCUIApplication, credential: String, otpCode: String = TestConstants.verificationCode) {
+        TestHelper.performOneClickAuthentication(app: app, credential: credential, otpCode: otpCode)
+    }
+
     func ensureLoggedOut(app: XCUIApplication) {
         TestHelper.ensureLoggedOut(app: app)
     }
@@ -133,6 +272,10 @@ extension XCTestCase {
     func performBiometricAuthenticationForLogin(app: XCUIApplication) {
         // For login - button appears higher from bottom
         performBiometricAuthenticationWithOffsetFromBottom(50, app: app)
+    }
+
+    func allowUseCapsuleSignInIfNeeded(app: XCUIApplication) {
+        TestHelper.allowUseCapsuleSignInIfNeeded(app: app)
     }
 
     func performBiometricAuthenticationWithOffsetFromBottom(_ offsetFromBottom: CGFloat, app: XCUIApplication) {
@@ -235,17 +378,7 @@ extension XCTestCase {
     }
 
     func waitForWalletsView(app: XCUIApplication) {
-        let walletsView = app.otherElements["walletsView"]
-        XCTAssertTrue(walletsView.waitForExistence(timeout: TestConstants.longTimeout), "Wallets view should appear")
-
-        // Check if we have wallets or the create first wallet button
-        let firstWalletCell = app.cells.element(boundBy: 0)
-        let createFirstWalletButton = app.buttons["createFirstWalletButton"]
-
-        let hasWallets = firstWalletCell.waitForExistence(timeout: TestConstants.defaultTimeout)
-        let hasCreateButton = createFirstWalletButton.waitForExistence(timeout: TestConstants.defaultTimeout)
-
-        XCTAssertTrue(hasWallets || hasCreateButton, "Either first wallet should exist or create wallet button should be visible")
+        XCTAssertTrue(TestHelper.waitForWalletsView(app: app), "Wallets view should appear with existing wallet or create button")
     }
 
     func waitForAndDismissAlert(app: XCUIApplication, validateSuccess: Bool = true) {
@@ -263,6 +396,10 @@ extension XCTestCase {
 // MARK: - XCUIElement Extensions
 
 extension XCUIElement {
+    var firstMatchIfExists: XCUIElement? {
+        exists ? self : nil
+    }
+
     func clearAndTypeText(_ text: String) {
         guard let stringValue = value as? String else {
             typeText(text)
