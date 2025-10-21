@@ -38,6 +38,8 @@
   background: var(--icon-background, transparent);
 
   color: var(--icon-color);
+
+  box-sizing: border-box;
 }
 
 :host svg {

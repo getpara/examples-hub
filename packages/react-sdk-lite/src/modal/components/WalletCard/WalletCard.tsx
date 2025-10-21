@@ -167,7 +167,7 @@ const WalletNameContainer = safeStyled.div`
 const Name = safeStyled(CpslText)`
   width: 100%;
   &::part(text-element) {
-    line-height: 100%;
+    line-height: 150%;
     text-overflow: ellipsis;
     overflow: hidden;
     white-space: nowrap;
