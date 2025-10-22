@@ -2515,12 +2515,33 @@ Need help? Visit: https://docs.getpara.com or contact support
       return isSessionActive;
     }
 
-    return (
-      isSessionActive &&
-      (this.isNoWalletConfig ||
-        (this.currentWalletIdsArray.length > 0 &&
-          this.currentWalletIdsArray.reduce((acc, [id]) => acc && !!this.wallets[id], true)))
-    );
+    // Check if session is active first
+    if (!isSessionActive) {
+      return false;
+    }
+
+    // If no wallet configuration is required, return session status
+    if (this.isNoWalletConfig) {
+      return true;
+    }
+
+    const { supportedWalletTypes } = await this.#assertPartner();
+
+    // Check if we have at least one wallet for each required supported wallet type
+    const requiredWalletTypes = supportedWalletTypes.filter(({ optional }) => !optional);
+
+    for (const { type } of requiredWalletTypes) {
+      const hasWalletForType = this.currentWalletIdsArray.some(([walletId, walletType]) => {
+        const wallet = this.wallets[walletId];
+        return wallet && walletType === type;
+      });
+
+      if (!hasWalletForType) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   #assertIsLinkingAccount(types?: TLinkedAccountType[]): AccountLinkInProgress {

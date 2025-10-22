@@ -37,7 +37,7 @@ export const ONBOARDING_TRANSITION: Transition = {
   duration: 0.1,
 };
 
-export const Layout = () => {
+const LayoutContent = () => {
   const { pathname } = useLocation();
   const [searchParams] = useSearchParams();
   const {
@@ -66,42 +66,48 @@ export const Layout = () => {
   const stepDirection = previousStepNumber.current < currentStepNumber ? 1 : -1;
 
   return (
-    <AuthenticatedWrapper>
-      <div className="para:min-h-dvh para:flex para:flex-col para:bg-muted">
-        <AuthMinAppBar />
-        <main className="para:flex para:flex-col para:gap-8 para:justify-center para:items-center para:box-border para:overflow-auto para:px-6 para:pb-6 para:pt-10">
-          <SentryErrorBoundary
-            fallback={({ error, resetError }) => (
-              <ErrorBoundary
-                onResetError={resetError}
-                variant="error"
-                containerType="unauthenticated"
-                errorMessage={(error as Error)?.message}
-              />
-            )}
-          >
-            <Progress
-              value={(currentStepNumber / totalSteps) * 100}
-              className="para:max-w-[210px] para:bg-mist-100 para:h-1"
+    <div className="para:min-h-dvh para:flex para:flex-col para:bg-muted">
+      <AuthMinAppBar />
+      <main className="para:flex para:flex-col para:gap-8 para:justify-center para:items-center para:box-border para:overflow-auto para:px-6 para:pb-6 para:pt-10">
+        <SentryErrorBoundary
+          fallback={({ error, resetError }) => (
+            <ErrorBoundary
+              onResetError={resetError}
+              variant="error"
+              containerType="unauthenticated"
+              errorMessage={(error as Error)?.message}
             />
-            <AnimatePresence mode="wait" initial={false} custom={stepDirection}>
-              <motion.div
-                className="para:will-change-auto para:w-full"
-                key={location.pathname}
-                variants={ONBOARDING_MOTION_VARIANTS}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                transition={ONBOARDING_TRANSITION}
-                custom={stepDirection}
-              >
-                {/* https://medium.com/@antonio.falcescu/animating-react-pages-with-react-router-dom-outlet-and-framer-motion-animatepresence-bd5438b3433b */}{' '}
-                {element && cloneElement(element, { key: location.pathname })}
-              </motion.div>
-            </AnimatePresence>
-          </SentryErrorBoundary>
-        </main>
-      </div>
+          )}
+        >
+          <Progress
+            value={(currentStepNumber / totalSteps) * 100}
+            className="para:max-w-[210px] para:bg-mist-100 para:h-1"
+          />
+          <AnimatePresence mode="wait" initial={false} custom={stepDirection}>
+            <motion.div
+              className="para:will-change-auto para:w-full"
+              key={location.pathname}
+              variants={ONBOARDING_MOTION_VARIANTS}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={ONBOARDING_TRANSITION}
+              custom={stepDirection}
+            >
+              {/* https://medium.com/@antonio.falcescu/animating-react-pages-with-react-router-dom-outlet-and-framer-motion-animatepresence-bd5438b3433b */}{' '}
+              {element && cloneElement(element, { key: location.pathname })}
+            </motion.div>
+          </AnimatePresence>
+        </SentryErrorBoundary>
+      </main>
+    </div>
+  );
+};
+
+export const Layout = () => {
+  return (
+    <AuthenticatedWrapper flow="ONBOARDING">
+      <LayoutContent />
     </AuthenticatedWrapper>
   );
 };

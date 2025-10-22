@@ -1,78 +1,35 @@
 import { PropsWithChildren, useEffect } from 'react';
 import { useGetAllOrganizationsWithAccess } from '../../hooks/api/queries/useOrganizations';
 import { useLogout } from '../../hooks/useLogout';
-import { useOrganizationMember } from '../../hooks/api/queries/useOrganizationMember';
 import { MainLoader } from '../MainLoader';
 import { useSetSelectedOrganizationWithNavigation } from '../../hooks/useSetSelectedOrganizationWithNavigation';
-import { useGetOrganizationSubscription } from '../../hooks/api/queries/useOrganizationSubscription';
-import { usePlans } from '../../hooks/api/queries/usePlans';
-import { useLocation, useSearchParams } from 'react-router-dom';
-import { useGetInvite } from '../../hooks/api/queries/useUserInvite';
+import { useNavigate } from 'react-router-dom';
 import { useAccount } from '@getpara/react-sdk';
-import { toast } from '@getpara/react-component-library';
 
 interface AuthenticatedWrapperProps extends PropsWithChildren {
-  requireOrgs?: boolean;
+  flow: 'ONBOARDING' | 'ORGANIZATION' | 'INVITE';
 }
 
-export const AuthenticatedWrapper = ({ requireOrgs, children }: AuthenticatedWrapperProps) => {
-  const { pathname } = useLocation();
-  const [searchParams] = useSearchParams();
-  const { logout } = useLogout();
-  const inviteId = searchParams.get('invite');
-  const [inviteOrgId, inviteMemberId] = inviteId?.split('|') ?? [];
-  const { data: invite, isLoading: isLoadingInvite } = useGetInvite(inviteOrgId, inviteMemberId);
+export const AuthenticatedWrapper = ({ flow, children }: AuthenticatedWrapperProps) => {
   const { isConnected, isLoading: isLoadingLoggedIn } = useAccount();
-  const { isLoading: isLoadingSubscription } = useGetOrganizationSubscription();
-  const { isLoading: isLoadingPlans } = usePlans();
-  const { isLoading: isLoadingMember } = useOrganizationMember();
+  const { logout } = useLogout();
   const { data: orgsWithAccess, isLoading: isLoadingOrgs } = useGetAllOrganizationsWithAccess();
   const { setSelectedOrganization } = useSetSelectedOrganizationWithNavigation(false);
+  const navigate = useNavigate();
 
-  const isInvite = pathname.includes('/invite');
-  const isOnboarding = !isInvite && pathname.includes('/onboarding');
-
-  // invite route useEffect
   useEffect(() => {
-    if (isInvite && !isLoadingLoggedIn) {
-      if (isConnected && !isLoadingInvite) {
-        if (!inviteId || (inviteId && !invite)) {
-          toast.error('Invite not found', {
-            description: 'Please try again. If the problem persists, contact Para support.',
-          });
-          setSelectedOrganization();
-        }
-      }
+    // Handle onboarding nav when user has orgs
+    if (flow === 'ONBOARDING' && orgsWithAccess?.length) {
+      setSelectedOrganization();
     }
-  }, [isConnected, isLoadingInvite, isLoadingLoggedIn, inviteId, invite, setSelectedOrganization, isInvite]);
-
-  // onboarding route useEffect
-  useEffect(() => {
-    if (isOnboarding && !isLoadingLoggedIn) {
-      if (isConnected && !isLoadingOrgs && orgsWithAccess?.length) {
-        setSelectedOrganization();
-      }
+    // Handle org nav when user has no orgs
+    if (flow === 'ORGANIZATION' && !orgsWithAccess?.length) {
+      navigate(`/onboarding`, { replace: true });
     }
-  }, [isLoadingLoggedIn, isLoadingOrgs, isConnected, isOnboarding, orgsWithAccess?.length, setSelectedOrganization]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [flow, orgsWithAccess?.length]);
 
-  // default route useEffect
-  useEffect(() => {
-    if (!isOnboarding && !isInvite && !isLoadingLoggedIn) {
-      if (isConnected && !isLoadingOrgs && orgsWithAccess?.length) {
-        setSelectedOrganization();
-      }
-    }
-  }, [
-    isInvite,
-    isLoadingLoggedIn,
-    isLoadingOrgs,
-    isConnected,
-    isOnboarding,
-    orgsWithAccess?.length,
-    setSelectedOrganization,
-  ]);
-
-  if (isLoadingLoggedIn || isLoadingOrgs || isLoadingMember || isLoadingSubscription || isLoadingPlans || isLoadingInvite) {
+  if (isLoadingLoggedIn) {
     return <MainLoader />;
   }
 
@@ -81,7 +38,15 @@ export const AuthenticatedWrapper = ({ requireOrgs, children }: AuthenticatedWra
     return null;
   }
 
-  if (requireOrgs && !orgsWithAccess?.length) {
+  if (isLoadingOrgs) {
+    return <MainLoader />;
+  }
+
+  if (flow === 'ORGANIZATION' && !orgsWithAccess?.length) {
+    return null;
+  }
+
+  if (flow === 'ONBOARDING' && orgsWithAccess?.length) {
     return null;
   }
 

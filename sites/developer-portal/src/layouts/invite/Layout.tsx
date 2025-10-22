@@ -6,7 +6,7 @@ import { AuthenticatedWrapper } from '../../components/AuthenticatedWrapper/Auth
 
 export const Layout = () => {
   return (
-    <AuthenticatedWrapper>
+    <AuthenticatedWrapper flow="INVITE">
       <AuthMinAppBar />
       <main className="para:flex para:justify-center para:box-border para:overflow-auto para:px-6 para:pb-6 para:pt-10">
         <SentryErrorBoundary

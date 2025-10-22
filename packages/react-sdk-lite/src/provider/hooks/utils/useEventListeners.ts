@@ -72,8 +72,10 @@ export const useEventListeners = ({
 
   const logoutListener = useCallback(
     (event: LogoutEvent) => {
-      queryClient.refetchQueries({ queryKey: [IS_FULLY_LOGGED_IN_BASE_KEY] });
-      queryClient.refetchQueries({ queryKey: [ACCOUNT_BASE_KEY] });
+      // Set all IS_FULLY_LOGGED_IN queries to false and invalidate them
+      queryClient.setQueriesData({ queryKey: [IS_FULLY_LOGGED_IN_BASE_KEY] }, false);
+      queryClient.invalidateQueries({ queryKey: [IS_FULLY_LOGGED_IN_BASE_KEY] });
+      queryClient.invalidateQueries({ queryKey: [ACCOUNT_BASE_KEY] });
       clearSelectedWallet();
       onLogout?.(event);
     },

@@ -1,4 +1,4 @@
-import { useNavigate, useLocation, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useAppStore } from '../stores/app/useAppStore';
 import { useGetAllOrganizations } from './api/queries/useOrganizations';
 import { useLogout } from './useLogout';
@@ -16,7 +16,6 @@ export const useSetSelectedOrganizationWithNavigation = (shouldRefetch: boolean)
   const getSelectedOrganization = useAppStore(state => state.getSelectedOrganization);
   const { logout } = useLogout();
   const navigate = useNavigate();
-  const { pathname } = useLocation();
 
   const setSelectedOrganization = async () => {
     if (!isConnected) {
@@ -58,11 +57,10 @@ export const useSetSelectedOrganizationWithNavigation = (shouldRefetch: boolean)
 
       const pathStart = `/${selectedOrgId}`;
 
-      if (pathname.includes('/onboarding') || !pathname.startsWith(pathStart)) {
-        navigate(`${pathStart}/dashboard`, { replace: true });
-      }
+      navigate(`${pathStart}/dashboard`, { replace: true });
     } else {
-      navigate(`/onboarding`, { replace: true });
+      console.error('No organizations found for user:', { userId });
+      await logout();
     }
   };
 

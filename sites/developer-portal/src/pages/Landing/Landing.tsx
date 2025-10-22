@@ -1,27 +1,15 @@
-import { ParaModal, useAccount } from '@getpara/react-sdk';
+import { ParaModal } from '@getpara/react-sdk';
 import styled from 'styled-components';
 import { Footer } from './components/Footer';
 import { Heading } from './components/Heading';
-import { useState } from 'react';
-import { Loading } from './components/Loading';
 
 export const Landing = () => {
-  const { isConnected } = useAccount();
-
-  const [isLoading, setIsLoading] = useState(false);
-
-  const handleModalClose = () => {
-    if (isConnected) {
-      setIsLoading(true);
-    }
-  };
-
   return (
     <div className="para:flex para:flex-1 para:flex-col para:items-center para:gap-6 para:max-w-[558px] para:w-full">
       <Heading />
       {/* Leaving this component here for now in case we want to re-enable it later */}
       {/* <CTA /> */}
-      {isLoading ? <Loading /> : <StyledModal onClose={handleModalClose} />}
+      <StyledModal />
       <Footer />
     </div>
   );

@@ -11,7 +11,7 @@ export const Layout = () => {
   useScrollToAnchor();
 
   return (
-    <AuthenticatedWrapper requireOrgs>
+    <AuthenticatedWrapper flow="ORGANIZATION">
       <SentryErrorBoundary
         fallback={({ error, resetError }) => (
           <ErrorBoundary

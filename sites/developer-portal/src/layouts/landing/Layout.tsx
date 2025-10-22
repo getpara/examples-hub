@@ -11,23 +11,28 @@ export const Layout = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { isConnected } = useAccount();
-  const isLoggedIn = isConnected;
   const { data: allOrgs, isLoading: isLoadingOrgs, isRefetching: isRefetchingOrgs } = useGetAllOrganizations();
   const { setSelectedOrganization } = useSetSelectedOrganizationWithNavigation(false);
 
   useEffect(() => {
-    if (isLoggedIn && !isLoadingOrgs && !isRefetchingOrgs) {
-      const inviteId = searchParams.get('invite');
-      if (inviteId) {
-        const route = !allOrgs?.length ? '/onboarding/invite' : '/invite';
-        navigate({ pathname: route, search: searchParams.toString() }, { replace: true });
-      } else {
-        setSelectedOrganization();
+    const setup = async () => {
+      if (isConnected && !isLoadingOrgs && !isRefetchingOrgs) {
+        const inviteId = searchParams.get('invite');
+        if (inviteId) {
+          const route = !allOrgs?.length ? '/onboarding/invite' : '/invite';
+          navigate({ pathname: route, search: searchParams.toString() }, { replace: true });
+        } else if (!allOrgs?.length) {
+          navigate(`/onboarding`, { replace: true });
+        } else {
+          await setSelectedOrganization();
+        }
       }
-    }
-  }, [isLoggedIn, isLoadingOrgs, navigate, setSelectedOrganization, allOrgs?.length, isRefetchingOrgs, searchParams]);
+    };
+    setup();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isConnected, isLoadingOrgs, isRefetchingOrgs]);
 
-  if (isLoggedIn) {
+  if (isConnected) {
     return null;
   }
 

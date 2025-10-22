@@ -37,7 +37,7 @@ export const LandingAppBar = () => {
             ) : (
               <div className="para:flex para:gap-6 para:items-center">
                 {LANDING_HEADER_LINKS.map(({ label, url }) => (
-                  <Link to={url} target="_blank">
+                  <Link key={url} to={url} target="_blank">
                     <Button key={url} className="para:px-0 para:text-foreground para:no-underline!" variant="link">
                       {label}
                     </Button>
