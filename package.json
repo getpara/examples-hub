@@ -41,6 +41,7 @@
     "alpha-release": "node scripts/alpha-publish-workflow.mjs",
     "alpha-version": "lerna version prerelease --preid alpha --no-push --no-git-tag-version && yarn gen-changelog-alpha",
     "build": "lerna run build --parallel --concurrency 2",
+    "postinstall": "yarn graz -g",
     "build:dev": "yarn link-shared-symlink && lerna run build --scope=@getpara/* --scope=capsule-mpc-worker --scope=capsule-mpc-worker-server --concurrency 4",
     "check-bundle-size": "node scripts/check-bundle-size.js",
     "clean": "find . \\( -name \"node_modules\" -o -name \"dist\" -o -name \"build\" \\) -type d -prune -exec rm -rf {} +",

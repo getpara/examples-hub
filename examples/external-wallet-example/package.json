@@ -2,15 +2,16 @@
   "name": "capsule-external-wallet-example",
   "version": "2.0.0-alpha.65",
   "dependencies": {
-    "@cosmjs/amino": "^0.31.3",
-    "@cosmjs/cosmwasm-stargate": "^0.31.3",
+    "@cosmjs/amino": "^0.32.4",
+    "@cosmjs/cosmwasm-stargate": "^0.32.4",
     "@cosmjs/launchpad": "*",
-    "@cosmjs/proto-signing": "^0.31.3",
-    "@cosmjs/stargate": "^0.31.3",
-    "@cosmjs/tendermint-rpc": "^0.31.3",
+    "@cosmjs/proto-signing": "^0.32.4",
+    "@cosmjs/stargate": "^0.32.4",
+    "@cosmjs/tendermint-rpc": "^0.32.4",
     "@farcaster/mini-app-solana": "^1.0.5",
     "@farcaster/miniapp-sdk": "^0.1.2",
     "@farcaster/miniapp-wagmi-connector": "^1.0.0",
+    "graz": "^0.4.1",
     "@getpara/cosmos-wallet-connectors": "2.0.0-alpha.65",
     "@getpara/evm-wallet-connectors": "2.0.0-alpha.65",
     "@getpara/graz": "2.0.0-alpha.5",
@@ -43,7 +44,7 @@
     "eslint-plugin-react-hooks": "^5.0.0",
     "eslint-plugin-react-refresh": "^0.4.7",
     "eslint-plugin-storybook": "^0.8.0",
-    "starknet": "6.11.0",
+    "starknet": "^6.11.0",
     "typescript": "^5.8.3",
     "vite": "^5.3.5",
     "vite-plugin-node-polyfills": "^0.22.0"
@@ -58,7 +59,6 @@
     "deploy-sandbox": "VITE_ENVIRONMENT=SANDBOX VITE_BUCKET_NAME=capsule-rainbowkit-playground VITE_PARA_API_KEY=2f938ac0c48ef356050a79bd66042a23 yarn deploy-s3",
     "dev": "vite --host",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "postinstall": "yarn graz -g",
     "preview": "vite preview"
   },
   "type": "module"

@@ -71,7 +71,7 @@ const BUNDLE_CONFIG = {
         '@farcaster/miniapp-sdk',
         '@farcaster/miniapp-wagmi-connector',
         '@farcaster/mini-app-solana',
-        '@getpara/graz',
+        'graz',
         '@solana-mobile/wallet-adapter-mobile',
         '@solana/wallet-adapter-base',
         '@solana/wallet-adapter-react',
@@ -82,6 +82,9 @@ const BUNDLE_CONFIG = {
         '@cosmjs/encoding',
         '@cosmjs/proto-signing',
         '@cosmjs/stargate',
+        '@cosmjs/tendermint-rpc',
+        '@keplr-wallet/types',
+        'cosmjs-types',
         '@solana/addresses',
         '@solana/keys',
         '@solana/rpc-api',
@@ -132,7 +135,67 @@ const BUNDLE_CONFIG = {
         gzipped: '72KB',
       },
       entry: 'dist/index.js',
-      external: ['@getpara/graz', 'react', 'react-dom', '@farcaster/miniapp-sdk'],
+      external: [
+        'graz',
+        'react',
+        'react-dom',
+        '@farcaster/miniapp-sdk',
+        '@cosmjs/amino',
+        '@cosmjs/encoding',
+        '@cosmjs/proto-signing',
+        '@cosmjs/stargate',
+        '@cosmjs/tendermint-rpc',
+        '@keplr-wallet/types',
+        'cosmjs-types',
+        '@getpara/graz-connector',
+        '@getpara/react-common',
+        '@getpara/web-sdk',
+      ],
+    },
+    '@getpara/graz-connector': {
+      thresholds: {
+        raw: '60KB',
+        minified: '60KB',
+        gzipped: '20KB',
+      },
+      entry: 'dist/esm/index.js',
+      external: [
+        '@cosmjs/amino',
+        '@cosmjs/encoding',
+        '@cosmjs/proto-signing',
+        '@cosmjs/stargate',
+        '@cosmjs/tendermint-rpc',
+        '@keplr-wallet/types',
+        'cosmjs-types',
+        'graz',
+        '@farcaster/miniapp-sdk',
+        '@getpara/cosmjs-v0-integration',
+        '@getpara/web-sdk',
+      ],
+    },
+    '@getpara/graz-integration': {
+      thresholds: {
+        raw: '60KB',
+        minified: '60KB',
+        gzipped: '20KB',
+      },
+      entry: 'dist/esm/index.js',
+      external: [
+        '@getpara/react-sdk-lite',
+        '@tanstack/react-query',
+        'graz',
+        'react',
+        'react-dom',
+        '@cosmjs/amino',
+        '@cosmjs/encoding',
+        '@cosmjs/proto-signing',
+        '@cosmjs/stargate',
+        '@cosmjs/tendermint-rpc',
+        '@keplr-wallet/types',
+        'cosmjs-types',
+        '@farcaster/miniapp-sdk',
+        '@getpara/graz-connector',
+      ],
     },
     '@getpara/solana-wallet-connectors': {
       thresholds: {
@@ -338,8 +401,9 @@ function validateExternalDependencies(packages) {
     }
 
     // Check that all external dependencies are peer dependencies
+    // Internal @getpara packages can be regular dependencies, not just peers
     for (const external of configExternals) {
-      if (!allPeerDeps.has(external)) {
+      if (!external.startsWith('@getpara/') && !allPeerDeps.has(external)) {
         errors.push(
           `${packageInfo.packageJson.name}: external dependency "${external}" not found as direct or transitive peer dependency`,
         );

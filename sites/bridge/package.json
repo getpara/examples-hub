@@ -11,10 +11,10 @@
     "not op_mini all"
   ],
   "dependencies": {
-    "@cosmjs/amino": "^0.33.1",
-    "@cosmjs/encoding": "^0.33.1",
-    "@cosmjs/proto-signing": "^0.33.1",
-    "@cosmjs/stargate": "^0.33.1",
+    "@cosmjs/amino": "^0.32.4",
+    "@cosmjs/encoding": "^0.32.4",
+    "@cosmjs/proto-signing": "^0.32.4",
+    "@cosmjs/stargate": "^0.32.4",
     "@getpara/cosmjs-v0-integration": "1.12.0",
     "@getpara/ethers-v6-integration": "1.12.0",
     "@getpara/solana-web3.js-v1-integration": "1.12.0",

@@ -11,7 +11,7 @@ import {
   getChainInfo,
   getWallet as grazGetWallet,
   WALLET_TYPES,
-} from '@getpara/graz';
+} from 'graz';
 import { useExternalWalletStore } from '../stores/useStore.js';
 import { WalletWithType } from '../types/Wallet.js';
 import { AuthState, ExternalWalletInfo, rawSecp256k1PubkeyToRawAddress, TExternalWallet } from '@getpara/web-sdk';
@@ -71,10 +71,17 @@ export function CosmosExternalWalletProvider({
     isConnecting,
     isReconnecting,
     isConnected,
-  } = useAccount({
-    chainId: multiChain ? chains.map(c => c.chainId) : (selectedChainId ?? ''),
-    multiChain,
-  });
+  } = useAccount(
+    multiChain
+      ? {
+          chainId: chains.map(c => c.chainId),
+        }
+      : selectedChainId
+        ? {
+            chainId: [selectedChainId],
+          }
+        : undefined,
+  );
   const { connectAsync } = useConnect();
   const { disconnectAsync } = useDisconnect();
   const { walletType } = useActiveWalletType();
@@ -84,10 +91,8 @@ export function CosmosExternalWalletProvider({
 
   const connectedWallet = connectedWalletProp ? para.findWallet(connectedWalletProp.id, connectedWalletProp.type) : null;
 
-  const ethAddress = multiChain
-    ? account?.[selectedChainId]?.ethereumHexAddress?.toLowerCase()
-    : account?.ethereumHexAddress?.toLowerCase();
-  const address = multiChain ? account?.[selectedChainId]?.bech32Address : account?.bech32Address;
+  const ethAddress = account?.[selectedChainId]?.ethereumHexAddress?.toLowerCase();
+  const address = account?.[selectedChainId]?.bech32Address;
 
   const isLinkingAccount = useRef(false);
   const verificationMessage = useRef<string>();

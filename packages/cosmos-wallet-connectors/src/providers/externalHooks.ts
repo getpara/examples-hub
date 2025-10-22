@@ -1,8 +1,7 @@
-import { useAccount } from '@getpara/graz';
-import { MultiChainHookArgs } from '../types/ExternalHooks.js';
+import { useAccount } from 'graz';
 
 export type TExternalHooks = {
-  useAccount: typeof useAccount<MultiChainHookArgs>;
+  useAccount: typeof useAccount;
 };
 
-export const externalHooks = { useAccount: useAccount as typeof useAccount };
+export const externalHooks = { useAccount };

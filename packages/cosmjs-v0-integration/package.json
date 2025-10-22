@@ -5,10 +5,10 @@
     "@getpara/core-sdk": "2.0.0-alpha.65"
   },
   "devDependencies": {
-    "@cosmjs/amino": "^0.33.1",
-    "@cosmjs/encoding": "^0.33.1",
-    "@cosmjs/proto-signing": "^0.33.1",
-    "@cosmjs/stargate": "^0.33.1",
+    "@cosmjs/amino": "^0.32.4",
+    "@cosmjs/encoding": "^0.32.4",
+    "@cosmjs/proto-signing": "^0.32.4",
+    "@cosmjs/stargate": "^0.32.4",
     "cosmjs-types": "0.9.0",
     "typescript": "^5.8.3"
   },
@@ -20,10 +20,10 @@
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
   "peerDependencies": {
-    "@cosmjs/amino": ">= 0.31.3 < 1",
-    "@cosmjs/encoding": ">= 0.31.3 < 1",
-    "@cosmjs/proto-signing": ">= 0.31.3 < 1",
-    "@cosmjs/stargate": ">= 0.31.3 < 1"
+    "@cosmjs/amino": ">=0.32.4",
+    "@cosmjs/encoding": ">=0.32.4",
+    "@cosmjs/proto-signing": ">=0.32.4",
+    "@cosmjs/stargate": ">=0.32.4"
   },
   "scripts": {
     "build": "rm -rf dist && node ./scripts/build.mjs && yarn build:types",
