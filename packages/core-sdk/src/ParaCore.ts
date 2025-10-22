@@ -4461,16 +4461,18 @@ Need help? Visit: https://docs.getpara.com or contact support
 
     const { sessionId } = await this.touchSession();
 
-    const url = await this.constructPortalUrl(isForNewDevice ? 'addNewCredential' : urlType, {
-      isForNewDevice,
-      pathId: credentialId,
-      portalTheme,
-      shorten,
-      sessionId: isForNewDevice ? sessionId : undefined,
-      addNewCredentialType: optsAuthMethod,
-      addNewCredentialPasskeyId: passkeyId,
-      addNewCredentialPasswordId: passwordId,
-    });
+    const url =
+      (isForNewDevice || urlType) &&
+      (await this.constructPortalUrl(isForNewDevice ? 'addNewCredential' : urlType, {
+        isForNewDevice,
+        pathId: credentialId,
+        portalTheme,
+        shorten,
+        sessionId: isForNewDevice ? sessionId : undefined,
+        addNewCredentialType: optsAuthMethod,
+        addNewCredentialPasskeyId: passkeyId,
+        addNewCredentialPasswordId: passwordId,
+      }));
 
     return { credentialId, ...(url ? { url } : {}) };
   }
