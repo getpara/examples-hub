@@ -1,3 +1,44 @@
+# Release (Wed Oct 22 2025)
+
+## Package Versions
+- @getpara/web-sdk@2.0.0-alpha.66
+- @getpara/wagmi-v2-integration@2.0.0-alpha.66
+- @getpara/wagmi-v2-connector@2.0.0-alpha.66
+- @getpara/viem-v2-integration@2.0.0-alpha.66
+- @getpara/viem-v1-integration@2.0.0-alpha.66
+- @getpara/user-management-client@2.0.0-alpha.66
+- @getpara/solana-web3.js-v1-integration@2.0.0-alpha.66
+- @getpara/solana-wallet-connectors@2.0.0-alpha.66
+- @getpara/solana-signers-v2-integration@2.0.0-alpha.66
+- @getpara/server-sdk@2.0.0-alpha.66
+- @getpara/react-sdk-lite@2.0.0-alpha.66
+- @getpara/react-sdk@2.0.0-alpha.66
+- @getpara/react-native-wallet@2.0.0-alpha.66
+- @getpara/react-components@2.0.0-alpha.66
+- @getpara/react-component-library@1.0.0-alpha.61
+- @getpara/react-common@2.0.0-alpha.66
+- @getpara/graz-integration@2.0.0-alpha.66
+- @getpara/graz-connector@2.0.0-alpha.66
+- @getpara/evm-wallet-connectors@2.0.0-alpha.66
+- @getpara/ethers-v6-integration@2.0.0-alpha.66
+- @getpara/ethers-v5-integration@2.0.0-alpha.66
+- @getpara/cosmos-wallet-connectors@2.0.0-alpha.66
+- @getpara/cosmjs-v0-integration@2.0.0-alpha.66
+- @getpara/core-sdk@2.0.0-alpha.66
+- @getpara/core-components@2.0.0-alpha.66
+
+### Features
+- remerge graz connector (#1239) - 018de1a93
+- Enable IP Allowlist management with shared CIDR validation in the developer portal (#1247) - 0c1d98469
+
+### Fixes
+- get credential url generation (#1273) - 2fe2a84db
+- Dev Portal - Signup and login flows (#1271) - 4648ba783
+- wallet card styling (#1269) - f6ccf9f19
+
+### Chores
+- Remove @getpara/graz dependency (#1272) - 7b8956e2b
+
 # Release (Thu Oct 16 2025)
 
 ## Package Versions

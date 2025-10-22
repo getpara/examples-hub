@@ -1,18 +1,18 @@
 {
   "name": "@getpara/cosmos-wallet-connectors",
-  "version": "2.0.0-alpha.65",
+  "version": "2.0.0-alpha.66",
   "dependencies": {
-    "@getpara/graz-connector": "2.0.0-alpha.65",
-    "@getpara/react-common": "2.0.0-alpha.65",
-    "@getpara/web-sdk": "2.0.0-alpha.65",
+    "@getpara/graz-connector": "2.0.0-alpha.66",
+    "@getpara/react-common": "2.0.0-alpha.66",
+    "@getpara/web-sdk": "2.0.0-alpha.66",
     "@leapwallet/cosmos-social-login-capsule-provider": "^0.0.41",
     "zustand": "^4.5.2",
     "zustand-sync-tabs": "^0.2.2"
   },
   "devDependencies": {
-    "graz": "^0.4.1",
     "@types/react": "^18.0.31",
     "@types/react-dom": "^18.2.7",
+    "graz": "^0.4.1",
     "typescript": "^5.8.3"
   },
   "exports": {
