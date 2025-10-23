@@ -21,4 +21,5 @@ final class AppRootManager: ObservableObject {
         isAuthenticated = authenticated
         currentRoot = authenticated ? .home : .authentication
     }
+
 }
