@@ -5,6 +5,8 @@ import { AuthState, ExternalWalletInfo } from '@getpara/web-sdk';
 import { CreateWalletFn } from '../types/Wallet.js';
 import {
   defaultSolanaExternalWallet,
+  DisconnectBaseOptions,
+  DisconnectType,
   ExternalWalletContextType,
   ExternalWalletProviderConfig,
   ExternalWalletProviderConfigBase,
@@ -22,7 +24,7 @@ export type SolanaExternalWalletContextType = ExternalWalletContextType & TExter
 export const SolanaExternalWalletContext = createContext<SolanaExternalWalletContextType>({
   ...defaultSolanaExternalWallet,
   farcasterStatus: undefined,
-});
+} as SolanaExternalWalletContextType);
 
 export type SolanaExternalWalletProviderConfig = ExternalWalletProviderConfigBase;
 
@@ -41,13 +43,14 @@ export function SolanaExternalWalletProvider({
     wallets: adapters,
     select: selectWallet,
     disconnect,
+    disconnecting,
     publicKey: solanaAddress,
     wallet,
     connecting,
     signMessage: solanaSignMessage,
   } = useWallet();
 
-  const isLinkingAccount = useRef(false);
+  const disconnectTypeRef = useRef<DisconnectType | undefined>();
 
   const solanaSignMessageRef = useRef<typeof solanaSignMessage>(solanaSignMessage);
   const solanaAddressRef = useRef<typeof solanaAddress | undefined>(solanaAddress);
@@ -119,7 +122,7 @@ export function SolanaExternalWalletProvider({
   useEffect(() => {
     const storedExternalWallet = para.externalWallets[solanaAddress?.toString() ?? ''];
 
-    if (!!solanaAddress && !storedExternalWallet && !isLinkingAccount.current) {
+    if (!!solanaAddress && !storedExternalWallet && !disconnectTypeRef.current) {
       reset();
     }
   }, []);
@@ -141,7 +144,7 @@ export function SolanaExternalWalletProvider({
       (!wallet || wallet?.adapter.connected) &&
       storedExternalWallet?.type === 'SOLANA' &&
       storedExternalWallet?.address !== solanaAddress?.toString() &&
-      !isLinkingAccount.current
+      !disconnectTypeRef.current
     ) {
       switchWallet(solanaAddress?.toString());
     }
@@ -283,7 +286,7 @@ export function SolanaExternalWalletProvider({
 
     const adapter = getAdapter(wallet.name ?? '');
 
-    isLinkingAccount.current = true;
+    disconnectTypeRef.current = 'ACCOUNT_LINKING';
     try {
       const address = await connectBase(adapter);
 
@@ -303,7 +306,7 @@ export function SolanaExternalWalletProvider({
     }
   };
 
-  const disconnectBase = async (providerId: TExternalWallet) => {
+  const disconnectBase = async (providerId: TExternalWallet, { disconnectType }: DisconnectBaseOptions = {}) => {
     const wallet = wallets.find(w => w.id === providerId);
 
     if (!wallet) {
@@ -316,7 +319,9 @@ export function SolanaExternalWalletProvider({
       return;
     }
 
-    isLinkingAccount.current = true;
+    if (disconnectType) {
+      disconnectTypeRef.current = disconnectType;
+    }
 
     try {
       await adapter.disconnect();
@@ -325,7 +330,7 @@ export function SolanaExternalWalletProvider({
       // Don't throw the error - just log it since this is for account linking cleanup
       // The wallet might not be properly connected or available
     } finally {
-      isLinkingAccount.current = false;
+      disconnectTypeRef.current = undefined;
     }
   };
 
@@ -437,6 +442,7 @@ export function SolanaExternalWalletProvider({
         () => ({
           wallets: walletsWithInjected,
           disconnect,
+          disconnectStatus: disconnecting ? 'pending' : 'idle',
           signMessage,
           signVerificationMessage,
           requestInfo,
@@ -447,6 +453,7 @@ export function SolanaExternalWalletProvider({
         [
           walletsWithInjected,
           disconnect,
+          disconnecting,
           signMessage,
           signVerificationMessage,
           requestInfo,

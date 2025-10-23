@@ -687,6 +687,10 @@ export abstract class ParaCore implements CoreInterface {
     return true;
   }
 
+  private truncateAddress(...args: Parameters<typeof truncateAddress>) {
+    return truncateAddress(args[0], args[1], { prefix: this.cosmosPrefix, ...(args[2] || {}) });
+  }
+
   /**
    * Returns the formatted address for the desired wallet ID, depending on your app settings.
    * @param {string} walletId the ID of the wallet address to display.
@@ -2064,16 +2068,30 @@ Need help? Visit: https://docs.getpara.com or contact support
 
           if (!wallet) return null;
 
+          const name = wallet.name;
+          const address = this.getDisplayAddress(id, { addressType: type });
+          const addressShort = this.getDisplayAddress(id, { addressType: type, truncate: true });
+
           return {
             id: wallet.id,
             partner: wallet.partner,
             type,
-            address: this.getDisplayAddress(id, { addressType: type }),
-            name: wallet.name,
+            address,
+            name,
+            addressShort,
+            displayName: name ?? addressShort,
+            ensName: wallet.ensName,
+            ensAvatar: wallet.ensAvatar,
           };
         })
         .filter(obj => obj !== null),
-      ...Object.values(this.externalWallets ?? {}),
+      ...Object.values(this.externalWallets ?? {}).map(wallet => {
+        return {
+          ...wallet,
+          addressShort: truncateAddress(wallet.address, wallet.type, { prefix: this.cosmosPrefix }),
+          displayName: wallet.externalProviderId,
+        };
+      }),
     ];
   }
 

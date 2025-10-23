@@ -5,6 +5,7 @@ export const defaultCosmosExternalWallet = {
   chains: [],
   chainId: undefined,
   disconnect: () => Promise.resolve(),
+  disconnectStatus: 'idle',
   switchChain: () => Promise.resolve(),
   connectParaEmbedded: () => Promise.resolve({}),
   signMessage: () => Promise.resolve({}),
@@ -22,6 +23,7 @@ export const defaultEvmExternalWallet = {
   avatar: undefined,
   balance: undefined,
   disconnect: () => Promise.resolve(),
+  disconnectStatus: 'idle',
   switchChain: () => Promise.resolve(),
   connectParaEmbedded: () => Promise.resolve({}),
   signMessage: () => Promise.resolve({}),
@@ -37,6 +39,7 @@ export const defaultEvmExternalWallet = {
 export const defaultSolanaExternalWallet = {
   wallets: [],
   disconnect: () => Promise.resolve(),
+  disconnectStatus: 'idle',
   signMessage: () => Promise.resolve({}),
   signVerificationMessage: () => Promise.resolve({}),
   requestInfo: () => Promise.resolve({} as ExternalWalletInfo),

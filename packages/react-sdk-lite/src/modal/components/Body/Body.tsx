@@ -42,6 +42,7 @@ import { AwaitingAccountStep } from '../AwaitingAccountStep/AwaitingAccountStep.
 import { SwitchWalletsStep } from '../SwitchWalletsStep/SwitchWalletsStep.js';
 import { Footer } from '../Footer/Footer.js';
 import { renderTextWithLinks } from '../../utils/renderTextWithLinks.js';
+import { AccountWallet } from '../Account/AccountWallet.js';
 
 interface BodyProps {
   oAuthMethods?: TOAuthMethod[];
@@ -190,6 +191,9 @@ export const Body = ({
       }
       case ModalStep.ACCOUNT_PROFILE_REMOVE: {
         return <AccountProfileUnlink />;
+      }
+      case ModalStep.ACCOUNT_WALLET: {
+        return <AccountWallet />;
       }
       case ModalStep.EX_WALLET_SELECTED: {
         return <ExternalWalletStep />;

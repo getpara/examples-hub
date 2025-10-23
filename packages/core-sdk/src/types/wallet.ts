@@ -37,8 +37,17 @@ export interface Wallet
 
 export type AvailableWallet = Pick<
   Wallet,
-  'id' | 'type' | 'name' | 'address' | 'partner' | 'isExternal' | 'externalProviderId' | 'isExternalConnectionOnly'
->;
+  | 'id'
+  | 'type'
+  | 'name'
+  | 'address'
+  | 'partner'
+  | 'ensName'
+  | 'ensAvatar'
+  | 'isExternal'
+  | 'externalProviderId'
+  | 'isExternalConnectionOnly'
+> & { addressShort?: string; displayName?: string };
 
 /** @deprecated */
 export enum PregenIdentifierType {

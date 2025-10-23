@@ -54,7 +54,7 @@ const ICON_TYPES = {
 type Networks = Record<TNetwork, DisplayMetadata>;
 
 export const WALLET_TYPES_METADATA: Record<TWalletType, DisplayMetadata> = {
-  EVM: { name: 'EVM', icon: 'ethereum', isDark: true },
+  EVM: { name: 'EVM', icon: 'ethCircle', isCircular: true },
   SOLANA: { name: 'Solana', icon: 'solana' },
   COSMOS: { name: 'Cosmos', icon: 'cosmos', isCircular: true, isDark: true },
 };

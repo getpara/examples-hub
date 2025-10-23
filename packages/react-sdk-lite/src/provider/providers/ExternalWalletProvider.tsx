@@ -10,7 +10,9 @@ import {
   ChainManagement,
   CommonChain,
   CommonWallet,
+  DisconnectBaseOptions,
   ExternalWalletContextType,
+  MutationStatus,
   TExternalWallet,
 } from '@getpara/react-common';
 import { ExternalWalletInfo, VerifyExternalWalletParams, ParaEvent, dispatchEvent } from '@getpara/web-sdk';
@@ -55,14 +57,17 @@ export const defaultExternalWallet = {
   isSigningMessage: false,
   getWalletBalance: () => Promise.resolve(undefined),
   requestInfo: (_: string) => Promise.resolve({} as ExternalWalletInfo),
-  disconnectBase: (_: string, __: TWalletType) => Promise.resolve(),
+  disconnectBase: (_: string, __: TWalletType, ___?: DisconnectBaseOptions) => Promise.resolve(),
   connectFarcasterMiniApp: () => Promise.resolve(),
   verificationStage: undefined,
+  evmDisconnectStatus: 'idle',
+  solanaDisconnectStatus: 'idle',
+  cosmosDisconnectStatus: 'idle',
 };
 
 type Value = Omit<
   ExternalWalletContextType<CosmosSignResult>,
-  'disconnect' | 'signVerificationMessage' | 'requestInfo' | 'disconnectBase'
+  'disconnect' | 'disconnectStatus' | 'signVerificationMessage' | 'requestInfo' | 'disconnectBase'
 > &
   ChainManagement<string, void> &
   BalanceManagement & {
@@ -84,12 +89,15 @@ type Value = Omit<
     isSigningMessage: boolean;
     verifyWalletSignature: () => Promise<VerifyExternalWalletParams | undefined>;
     requestInfo: (_: string, __: TWalletType) => Promise<ExternalWalletInfo>;
-    disconnectBase: (_: string, __: TWalletType) => Promise<void>;
+    disconnectBase: (_: string, __: TWalletType, ___?: DisconnectBaseOptions) => Promise<void>;
     connectFarcasterMiniApp: () => Promise<void>;
     verificationStage?: 'verifying' | 'switchingChain';
+    evmDisconnectStatus: MutationStatus;
+    solanaDisconnectStatus: MutationStatus;
+    cosmosDisconnectStatus: MutationStatus;
   };
 
-export const ExternalWalletContext = createContext<Value>(defaultExternalWallet);
+export const ExternalWalletContext = createContext<Value>(defaultExternalWallet as Value);
 
 export function ExternalWalletProvider({ children }: PropsWithChildren) {
   const { isReady, isFarcasterMiniApp } = useParaStatus();
@@ -120,6 +128,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
     disconnectBase: evmDisconnectBase,
     farcasterStatus: evmFarcasterStatus,
     verificationStage: evmVerificationStage,
+    disconnectStatus: evmDisconnectStatus,
   } = useContext(evmContext);
   const {
     wallets: solanaWallets,
@@ -129,6 +138,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
     requestInfo: solanaRequestInfo,
     disconnectBase: solanaDisconnectBase,
     farcasterStatus: solanaFarcasterStatus,
+    disconnectStatus: solanaDisconnectStatus,
   } = useContext(solanaContext);
   const {
     wallets: cosmosWallets,
@@ -141,6 +151,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
     signVerificationMessage: cosmosSignVerificationMessage,
     requestInfo: cosmosRequestInfo,
     disconnectBase: cosmosDisconnectBase,
+    disconnectStatus: cosmosDisconnectStatus,
   } = useContext(cosmosContext);
   const onLoginRef = useStore(state => state.onLoginRef);
   const setStep = useModalStore(state => state.setStep);
@@ -705,20 +716,35 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
     }
   };
 
-  const disconnectBase = async (providerId: TExternalWallet, type: TWalletType) => {
+  const disconnectBase = async (providerId: TExternalWallet, type: TWalletType, opts?: DisconnectBaseOptions) => {
     switch (type) {
       case 'EVM':
-        await evmDisconnectBase(providerId);
+        await evmDisconnectBase(providerId, opts);
         break;
 
       case 'SOLANA':
-        await solanaDisconnectBase(providerId);
+        await solanaDisconnectBase(providerId, opts);
         break;
 
       default: {
-        await cosmosDisconnectBase();
+        await cosmosDisconnectBase(undefined, opts);
         break;
       }
+    }
+
+    // Remove just the target wallet from Para's externalWallets object
+    if (opts?.disconnectType === 'ACCOUNT_WIDGET') {
+      await para.setExternalWallets(prev =>
+        Object.entries(prev).reduce((acc: typeof para.externalWallets, [address, externalWallet]) => {
+          if (externalWallet.type === type && externalWallet.externalProviderId === providerId) {
+            return acc;
+          }
+          return {
+            ...acc,
+            [address]: externalWallet,
+          };
+        }, {}),
+      );
     }
   };
 
@@ -860,6 +886,9 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
           disconnectBase,
           connectFarcasterMiniApp,
           verificationStage,
+          evmDisconnectStatus,
+          solanaDisconnectStatus,
+          cosmosDisconnectStatus,
         }),
         [
           wallets,
@@ -885,6 +914,9 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
           disconnectBase,
           connectFarcasterMiniApp,
           verificationStage,
+          evmDisconnectStatus,
+          solanaDisconnectStatus,
+          cosmosDisconnectStatus,
         ],
       )}
     >

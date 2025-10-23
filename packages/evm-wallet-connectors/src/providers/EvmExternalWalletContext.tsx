@@ -18,6 +18,8 @@ import { normalize } from 'viem/ens';
 import { useExternalWalletStore } from '../stores/useStore.js';
 import {
   defaultEvmExternalWallet,
+  DisconnectBaseOptions,
+  DisconnectType,
   FarcasterMiniAppManagement,
   type BalanceManagement,
   type ChainManagement,
@@ -49,7 +51,7 @@ export const EvmExternalWalletContext = createContext<EvmExternalWalletContextTy
   ...defaultEvmExternalWallet,
   farcasterStatus: undefined,
   verificationStage: undefined,
-});
+} as EvmExternalWalletContextType);
 
 export type EvmExternalWalletProviderConfig = ExternalWalletProviderConfigBase;
 
@@ -74,7 +76,7 @@ export function EvmExternalWalletProvider({
   } = useAccount();
   const { switchAccount: wagmiSwitchAccount } = useSwitchAccount();
   const { chains, switchChainAsync } = useSwitchChain();
-  const { disconnectAsync } = useDisconnect();
+  const { disconnectAsync, status: disconnectStatus } = useDisconnect();
   const { data: ensName, refetch: refetchEnsName } = useEnsName({ address: wagmiAddress });
   const { data: ensAvatar, refetch: refetchEnsAvatar } = useEnsAvatar({
     name: normalize(ensName),
@@ -83,7 +85,7 @@ export function EvmExternalWalletProvider({
 
   const connectedWallet = connectedWalletProp ? para.findWallet(connectedWalletProp.id, connectedWalletProp.type) : null;
 
-  const isLinkingAccount = useRef(false);
+  const disconnectTypeRef = useRef<DisconnectType | undefined>();
   const verificationMessage = useRef<string>();
   const { refetch: getBalance } = useBalance({ address: wagmiAddress });
 
@@ -158,7 +160,7 @@ export function EvmExternalWalletProvider({
       !isLocalConnecting &&
       !!wagmiAddress &&
       !storedExternalWallet &&
-      !isLinkingAccount.current &&
+      !disconnectTypeRef.current &&
       para.isReady &&
       !para.isFarcasterMiniApp
     ) {
@@ -176,7 +178,7 @@ export function EvmExternalWalletProvider({
       storedExternalWallet?.type === 'EVM' &&
       storedExternalWallet?.address !== wagmiAddress &&
       connectedConnector?.id !== 'para' &&
-      !isLinkingAccount.current
+      !disconnectTypeRef.current
     ) {
       switchWallet(wagmiAddress);
     }
@@ -490,7 +492,7 @@ export function EvmExternalWalletProvider({
   const requestInfo = async (providerId: string): Promise<ExternalWalletInfo> => {
     const connector = findConnector(providerId);
 
-    isLinkingAccount.current = true;
+    disconnectTypeRef.current = 'ACCOUNT_LINKING';
     try {
       let address: string | undefined;
 
@@ -517,18 +519,22 @@ export function EvmExternalWalletProvider({
     }
   };
 
-  const disconnectBase = async (providerId?: string): Promise<void> => {
+  const disconnectBase = async (providerId?: string, { disconnectType }: DisconnectBaseOptions = {}): Promise<void> => {
     if (!providerId) {
       throw new Error('Provider ID is required to disconnect');
     }
 
     const connector = findConnector(providerId);
 
-    isLinkingAccount.current = true;
+    if (disconnectType) {
+      disconnectTypeRef.current = disconnectType;
+    }
     try {
       await connector?.disconnect();
     } catch (e) {
       throw new Error(e?.message ?? e);
+    } finally {
+      disconnectTypeRef.current = undefined;
     }
   };
 
@@ -677,6 +683,7 @@ export function EvmExternalWalletProvider({
         username,
         avatar: ensAvatar,
         disconnect: disconnectAsync,
+        disconnectStatus,
         switchChain,
         connectParaEmbedded,
         signMessage,

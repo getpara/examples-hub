@@ -260,7 +260,7 @@ export const AccountLinkProvider = ({ children }: PropsWithChildren) => {
             setLinkAccountError(e.message);
           } finally {
             if (linkWallet.type === 'EVM' || linkWallet.type === 'SOLANA') {
-              await disconnectBase(providerId, linkWallet.type);
+              await disconnectBase(providerId, linkWallet.type, { disconnectType: 'ACCOUNT_LINKING' });
             }
           }
         }
@@ -406,6 +406,7 @@ export const AccountLinkProvider = ({ children }: PropsWithChildren) => {
         await disconnectBase(
           accountLinkInProgress.externalWallet.providerId as TExternalWallet,
           accountLinkInProgress.externalWallet.type as TWalletType,
+          { disconnectType: 'ACCOUNT_LINKING' },
         );
       } catch (error) {}
     }

@@ -42,7 +42,15 @@ describe('getEmbeddedAccount', () => {
         identifier: authInfo.identifier,
         isGuestMode: false,
         ...auth,
-        wallets: [TEST_WALLET],
+        wallets: [
+          {
+            ...TEST_WALLET,
+            addressShort: '0x1a5F...9f3a',
+            displayName: TEST_WALLET.name,
+            ensAvatar: undefined,
+            ensName: undefined,
+          },
+        ],
         userId: TEST_USER_ID,
         authMethods: undefined,
       });

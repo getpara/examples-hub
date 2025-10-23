@@ -200,7 +200,6 @@ export const SelectContainer = safeStyled.div`
 
 const WalletTypeIcon = safeStyled(WalletTypeIconBase)`
   --border: 1px solid var(--cpsl-color-background-8);
-  --background: var(--cpsl-color-background-0);
   --border-radius: 4px;
 `;
 

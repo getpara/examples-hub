@@ -201,7 +201,7 @@ const BUNDLE_CONFIG = {
       thresholds: {
         raw: '24KB',
         minified: '24KB',
-        gzipped: '9KB',
+        gzipped: '10KB',
       },
       entry: 'dist/index.js',
       external: [

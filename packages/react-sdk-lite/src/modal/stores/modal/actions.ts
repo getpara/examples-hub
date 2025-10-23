@@ -170,4 +170,5 @@ export const getActions = (set: StoreApi<ModalStore>['setState'], get: StoreApi<
   setAuthStepRoute: authStepRoute => set({ authStepRoute }),
   setIsPasskeySupported: isPasskeySupported => set({ isPasskeySupported }),
   setAccountLinkOptions: accountLinkOptions => set({ accountLinkOptions }),
+  setProfileWallet: profileWallet => set({ profileWallet }),
 });

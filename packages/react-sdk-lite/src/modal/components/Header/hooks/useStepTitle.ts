@@ -16,6 +16,7 @@ export const useStepTitle = () => {
   const isLogin = useModalStore(state => state.isLogin());
   const currentStep = useModalStore(state => state.step);
   const authLayout = useModalStore(state => state.authLayout) || [];
+  const profileWallet = useModalStore(state => state.profileWallet);
   const { data: activeWallet } = useWallet();
 
   const [isAuthFirst, isAuthCondensed, isExternalFirst, isExternalCondensed, isBothCondensed] = [
@@ -82,6 +83,7 @@ export const useStepTitle = () => {
       [ModalStep.ADD_EX_WALLET_SELECTED]: 'Add Wallet',
       [ModalStep.EXTERNAL_WALLET_VERIFICATION]: 'Verify Wallet',
       [ModalStep.AWAITING_ACCOUNT]: isLogin ? 'Login' : 'Sign Up',
+      [ModalStep.ACCOUNT_WALLET]: profileWallet?.displayName ?? 'Wallet Settings',
     }),
     [isLogin, chainId, hideWallets, authStepTitle],
   );

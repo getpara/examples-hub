@@ -7,6 +7,12 @@ import ParaWeb, {
   Wallet,
 } from '@getpara/web-sdk';
 
+export type DisconnectType = 'ACCOUNT_LINKING' | 'ACCOUNT_WIDGET';
+
+export type MutationStatus = 'idle' | 'pending' | 'error' | 'success';
+
+export type DisconnectBaseOptions = { disconnectType?: DisconnectType };
+
 export type WalletMetadata = {
   id: string;
   internalId: TExternalWallet;
@@ -101,7 +107,8 @@ export type ExternalWalletContextType<S extends SignResult = SignResult> = {
   signMessage: (_: SignArgs) => Promise<S>;
   signVerificationMessage: () => Promise<S>;
   requestInfo: (_: string) => Promise<ExternalWalletInfo>;
-  disconnectBase: (_?: string) => Promise<void>;
+  disconnectBase: (_?: string, __?: DisconnectBaseOptions) => Promise<void>;
+  disconnectStatus: MutationStatus;
 };
 
 export type ExternalWalletProviderConfigBase = {

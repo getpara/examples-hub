@@ -17,6 +17,8 @@ import { WalletWithType } from '../types/Wallet.js';
 import { AuthState, ExternalWalletInfo, rawSecp256k1PubkeyToRawAddress, TExternalWallet } from '@getpara/web-sdk';
 import {
   defaultCosmosExternalWallet,
+  DisconnectBaseOptions,
+  DisconnectType,
   type ChainManagement,
   type CommonChain,
   type CommonWallet,
@@ -48,7 +50,9 @@ export type CosmosExternalWalletProviderConfigFull = ExternalWalletProviderConfi
   Omit<ParaCosmosProviderConfig, 'wallets'>
 >;
 
-export const CosmosExternalWalletContext = createContext<CosmosExternalWalletContextType>(defaultCosmosExternalWallet);
+export const CosmosExternalWalletContext = createContext<CosmosExternalWalletContextType>(
+  defaultCosmosExternalWallet as CosmosExternalWalletContextType,
+);
 
 export function CosmosExternalWalletProvider({
   children,
@@ -83,7 +87,7 @@ export function CosmosExternalWalletProvider({
         : undefined,
   );
   const { connectAsync } = useConnect();
-  const { disconnectAsync } = useDisconnect();
+  const { disconnectAsync, status: disconnectStatus } = useDisconnect();
   const { walletType } = useActiveWalletType();
   const isLocalConnecting = useExternalWalletStore(state => state.isConnecting);
   const updateExternalWalletState = useExternalWalletStore(state => state.updateState);
@@ -94,7 +98,7 @@ export function CosmosExternalWalletProvider({
   const ethAddress = account?.[selectedChainId]?.ethereumHexAddress?.toLowerCase();
   const address = account?.[selectedChainId]?.bech32Address;
 
-  const isLinkingAccount = useRef(false);
+  const disconnectTypeRef = useRef<DisconnectType | undefined>();
   const verificationMessage = useRef<string>();
 
   const reset = async () => {
@@ -194,7 +198,7 @@ export function CosmosExternalWalletProvider({
       !!ethAddress &&
       !storedExternalWallet &&
       walletType !== GrazWalletType.PARA &&
-      !isLinkingAccount.current
+      !disconnectTypeRef.current
     ) {
       reset();
     }
@@ -210,7 +214,7 @@ export function CosmosExternalWalletProvider({
         connectedWallet &&
         connectedWallet.type === 'COSMOS' &&
         (connectedWallet.isExternal ? walletType !== connectedWallet.name?.toLowerCase() : walletType !== 'para') &&
-        !isLinkingAccount.current &&
+        !disconnectTypeRef.current &&
         !isConnectError.current
       ) {
         const isLoggedIn = await para.isFullyLoggedIn();
@@ -464,7 +468,7 @@ export function CosmosExternalWalletProvider({
       throw new Error(`Wallet for provider ${providerId} not found`);
     }
 
-    isLinkingAccount.current = true;
+    disconnectTypeRef.current = 'ACCOUNT_LINKING';
     try {
       const externalWallet = await connectBase(
         (wallet as any).grazType,
@@ -478,13 +482,17 @@ export function CosmosExternalWalletProvider({
     }
   };
 
-  const disconnectBase = async (): Promise<void> => {
-    isLinkingAccount.current = true;
+  const disconnectBase = async (_?: string, { disconnectType }: DisconnectBaseOptions = {}): Promise<void> => {
+    if (disconnectType) {
+      disconnectTypeRef.current = disconnectType;
+    }
     try {
       await disconnectAsync();
     } catch (e) {
       console.error('Error linking account:', e);
       throw new Error(e?.message ?? e);
+    } finally {
+      disconnectTypeRef.current = undefined;
     }
   };
 
@@ -496,6 +504,7 @@ export function CosmosExternalWalletProvider({
           chains: formattedChains,
           chainId: selectedChainId,
           disconnect: disconnectAsync,
+          disconnectStatus,
           switchChain,
           connectParaEmbedded,
           signMessage,

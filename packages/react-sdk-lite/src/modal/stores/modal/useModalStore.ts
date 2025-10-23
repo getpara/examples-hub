@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { PARA_STORAGE_PREFIX } from '@getpara/core-sdk';
+import { AvailableWallet, PARA_STORAGE_PREFIX } from '@getpara/core-sdk';
 import { ModalStep } from '../../utils/steps.js';
 import { getActions } from './actions.js';
 import {
@@ -70,6 +70,7 @@ interface ModalState {
   };
   isPasskeySupported: boolean;
   accountLinkOptions: SupportedAccountLinks;
+  profileWallet?: AvailableWallet;
 }
 
 export interface ModalActions {
@@ -106,6 +107,7 @@ export interface ModalActions {
   setAuthStepRoute: (_?: ModalStep) => void;
   setIsPasskeySupported: (_: boolean) => void;
   setAccountLinkOptions: (_: SupportedAccountLinks) => void;
+  setProfileWallet: (_?: AvailableWallet) => void;
 }
 
 export type ModalStore = ModalState & ModalActions;
@@ -142,6 +144,7 @@ export const DEFAULT_MODAL_STATE: Omit<ModalState, 'step' | 'onRampConfig'> = {
   },
   isPasskeySupported: true,
   accountLinkOptions: [...LINKED_ACCOUNT_TYPES],
+  profileWallet: undefined,
 };
 
 export const useModalStore = create<ModalStore>()(
