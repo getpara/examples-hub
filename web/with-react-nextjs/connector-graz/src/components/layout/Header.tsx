@@ -10,8 +10,8 @@ interface HeaderProps {
 
 export default function Header({ onConnectClick }: HeaderProps) {
   const pathname = usePathname();
-  const { data: account, isConnected } = useAccount();
-
+  const { data: accountRecord, isConnected } = useAccount();
+  const account = accountRecord?.[0];
   return (
     <header className="border-b border-gray-200">
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
