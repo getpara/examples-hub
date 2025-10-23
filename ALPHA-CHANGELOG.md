@@ -1,3 +1,38 @@
+# Release (Thu Oct 23 2025)
+
+## Package Versions
+- @getpara/web-sdk@2.0.0-alpha.67
+- @getpara/wagmi-v2-integration@2.0.0-alpha.67
+- @getpara/wagmi-v2-connector@2.0.0-alpha.67
+- @getpara/viem-v2-integration@2.0.0-alpha.67
+- @getpara/viem-v1-integration@2.0.0-alpha.67
+- @getpara/user-management-client@2.0.0-alpha.67
+- @getpara/solana-web3.js-v1-integration@2.0.0-alpha.67
+- @getpara/solana-wallet-connectors@2.0.0-alpha.67
+- @getpara/solana-signers-v2-integration@2.0.0-alpha.67
+- @getpara/server-sdk@2.0.0-alpha.67
+- @getpara/react-sdk-lite@2.0.0-alpha.67
+- @getpara/react-sdk@2.0.0-alpha.67
+- @getpara/react-native-wallet@2.0.0-alpha.67
+- @getpara/react-components@2.0.0-alpha.67
+- @getpara/react-component-library@1.0.0-alpha.62
+- @getpara/react-common@2.0.0-alpha.67
+- @getpara/graz-integration@2.0.0-alpha.67
+- @getpara/graz-connector@2.0.0-alpha.67
+- @getpara/evm-wallet-connectors@2.0.0-alpha.67
+- @getpara/ethers-v6-integration@2.0.0-alpha.67
+- @getpara/ethers-v5-integration@2.0.0-alpha.67
+- @getpara/cosmos-wallet-connectors@2.0.0-alpha.67
+- @getpara/cosmjs-v0-integration@2.0.0-alpha.67
+- @getpara/core-sdk@2.0.0-alpha.67
+- @getpara/core-components@2.0.0-alpha.67
+
+### Features
+- Add account profile wallet screen (#1268) - 407c94280
+
+### Fixes
+- More rigorous isFullyLoggedIn (#1275) - 0f02758d9
+
 # Release (Wed Oct 22 2025)
 
 ## Package Versions
