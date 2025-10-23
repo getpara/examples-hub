@@ -2550,8 +2550,12 @@ Need help? Visit: https://docs.getpara.com or contact support
 
     for (const { type } of requiredWalletTypes) {
       const hasWalletForType = this.currentWalletIdsArray.some(([walletId, walletType]) => {
-        const wallet = this.wallets[walletId];
-        return wallet && walletType === type;
+        try {
+          const wallet = this.wallets[walletId];
+          return wallet && walletType === type && typeof wallet.address === 'string';
+        } catch (e) {
+          return false;
+        }
       });
 
       if (!hasWalletForType) {

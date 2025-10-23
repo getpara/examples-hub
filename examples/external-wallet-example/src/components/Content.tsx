@@ -7,7 +7,7 @@ import { EvmProfile } from './EvmProfile';
 import { CosmosProfile } from './CosmosProfile';
 import { ParaProfile } from './ParaProfile';
 import { FloatingModalOpener } from './FloatingModalOpener';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export const Content = () => {
   const { isLoading } = useAccount();
@@ -176,7 +176,8 @@ const ParaClientDisplay = () => {
 
 // JWT Display Component
 const JwtDisplay = () => {
-  const { issueJwtAsync, data: jwtData, isLoading, error } = useIssueJwt();
+  const { issueJwtAsync, data: jwtData, isPending, error } = useIssueJwt();
+  const { isConnected } = useAccount();
   const [decodedToken, setDecodedToken] = useState<any>(null);
 
   const handleIssueJwt = async () => {
@@ -203,14 +204,21 @@ const JwtDisplay = () => {
     }
   };
 
+  // Automatically issue JWT when user becomes connected
+  useEffect(() => {
+    if (isConnected) {
+      handleIssueJwt();
+    }
+  }, [isConnected]);
+
   return (
     <SectionCard>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <CpslText variant="headingXS" weight="semiBold">
           JWT Token
         </CpslText>
-        <CpslButton onClick={handleIssueJwt} disabled={isLoading}>
-          {isLoading ? 'Issuing JWT...' : 'Issue JWT'}
+        <CpslButton onClick={handleIssueJwt} disabled={isPending}>
+          {isPending ? 'Issuing JWT...' : 'Issue JWT'}
         </CpslButton>
       </div>
 
