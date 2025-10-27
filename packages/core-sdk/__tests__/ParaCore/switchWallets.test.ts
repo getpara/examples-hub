@@ -90,6 +90,7 @@ describe('ParaCore - switch wallets', () => {
       pregenIds: '{}',
       sessionId: SESSION_ID,
       userId: para.userId!,
+      isBasicLoginUpgradeVersion: 'true',
     });
 
     getPublicKeyHexSpy.mockRestore();

@@ -4267,10 +4267,10 @@
   dependencies:
     "@getpara/core-sdk" "1.12.0"
 
-"@getpara/shared@1.4.0":
-  version "1.4.0"
-  resolved "https://registry.npmjs.org/@getpara/shared/-/shared-1.4.0.tgz#3aed7ff9bfa40911b03c2260814bb1e049a6d8c2"
-  integrity sha512-3Fmly3HGPjyHamU5yJ9Z95tv/zduKCSoqDlXfQ8dO+zdFLNXEkOj3APl8xAhXfmiSFHj1Uh9dHR4iD5ZEsQbAg==
+"@getpara/shared@1.5.0":
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/@getpara/shared/-/shared-1.5.0.tgz#40eaba14fb98727beb0d5cd5b4b5c3d92b16729b"
+  integrity sha512-G7Co9CXairZuOPa4IjKDDLHu+SgJhhJsPdaMk8RWeVRDRthRqZm8Zz1GFPAdOv0jPKm4IditftxgK5db5qymUg==
 
 "@getpara/solana-web3.js-v1-integration@1.12.0":
   version "1.12.0"

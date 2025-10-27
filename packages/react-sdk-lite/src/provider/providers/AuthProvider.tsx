@@ -1,5 +1,5 @@
 import { BiometricHints, useUserAgent } from '@getpara/react-common';
-import { createContext, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useModalStore } from '../../modal/stores/index.js';
 import { ModalStep } from '../../modal/utils/steps.js';
 import {
@@ -151,6 +151,8 @@ export function AuthProvider({
   const [switchWalletsUrl, setSwitchWalletsUrl] = useState<string | undefined>(undefined);
   const [isSwitchWalletsPending, setIsSwitchWalletsPending] = useState(mutateIsSwitchWalletsPending);
 
+  const messageHandlerRef = useRef<((event: MessageEvent) => void) | null>(null);
+
   const goBackIfPopupClosedOnSteps = (steps: ModalStep[]) => {
     if (refs.popupWindow.current?.closed && (!refs.currentStep.current || steps.includes(refs.currentStep.current))) {
       refs.popupWindow.current = null;
@@ -164,7 +166,13 @@ export function AuthProvider({
   };
 
   const setupListener = () => {
-    window.addEventListener('message', function handleMessage(event) {
+    // Remove any existing listener first
+    if (messageHandlerRef.current) {
+      window.removeEventListener('message', messageHandlerRef.current);
+    }
+
+    // Create the handler function
+    const handleMessage = (event: MessageEvent) => {
       const portalBase = getPortalBaseURL(para.ctx);
       const portalLocalBase = getPortalBaseURL(para.ctx, true);
 
@@ -182,8 +190,13 @@ export function AuthProvider({
         }
         // Remove the listener after handling the matching event
         window.removeEventListener('message', handleMessage);
+        messageHandlerRef.current = null;
       }
-    });
+    };
+
+    // Store the handler reference and add the listener
+    messageHandlerRef.current = handleMessage;
+    window.addEventListener('message', handleMessage);
   };
 
   const pollSignup = () => {
@@ -833,7 +846,10 @@ export function AuthProvider({
 
   useEffect(() => {
     return () => {
-      window?.clearTimeout(refs.poll.current?.timeout);
+      window?.clearTimeout(refs.poll.current?.timeout); // Clean up message listener on unmount
+      if (messageHandlerRef.current) {
+        window.removeEventListener('message', messageHandlerRef.current);
+      }
     };
   }, []);
 

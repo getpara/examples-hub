@@ -158,6 +158,7 @@ function testLoginUrl(
     encryptionKey: getPublicKeyHex(para.loginEncryptionKeyPair!),
     sessionId: SESSION_LOOKUP_ID,
     pregenIds: '{}',
+    isBasicLoginUpgradeVersion: 'true',
     ...extraParams,
   });
 }

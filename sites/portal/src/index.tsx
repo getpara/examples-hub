@@ -38,6 +38,9 @@ const ShortUrl = lazy(() => import('./pages/ShortUrl/ShortUrl'));
 const AddCredential = lazy(() =>
   import('./pages/AddCredential/AddCredential').then(module => ({ default: module.AddCredential })),
 );
+const BasicLoginUpgrade = lazy(() =>
+  import('./pages/BasicLoginUpgrade/BasicLoginUpgrade').then(module => ({ default: module.BasicLoginUpgrade })),
+);
 
 export const App = () => {
   const [searchParams] = useSearchParams();
@@ -73,6 +76,7 @@ export const App = () => {
             }
             path="users/:userId/private-key/:walletId"
           />
+          <Route element={<BasicLoginUpgrade />} path="users/:userId/basic-login" />
         </Route>
         <Route element={<ModalLayout />} path="/auth">
           <Route element={<TelegramLogin />} path="telegram" />

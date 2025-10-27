@@ -10,6 +10,26 @@ describe('ParaCore - addCredential', () => {
     para = new MockPara(Environment.DEV, API_KEY);
   });
 
+  describe('basic login', () => {
+    it("can't add", async () => {
+      para.supportedUserAuthMethods = () => Promise.resolve(new Set([AuthMethod.BASIC_LOGIN]));
+      para.setAuth({ email: USER_EMAIL });
+
+      await expect(para.addCredential({ authMethod: 'BASIC_LOGIN' })).rejects.toThrow(
+        'That user is already using basic login',
+      );
+    });
+
+    it('success', async () => {
+      para.setAuth({ email: USER_EMAIL });
+
+      const resp = await para.addCredential({ authMethod: 'BASIC_LOGIN' });
+      expect(resp).toContain('https://test.com/auth/add-new-credential');
+      expect(resp).toContain('addNewCredentialType=BASIC_LOGIN');
+      expect(resp).toContain('isForNewDevice=true');
+    });
+  });
+
   describe('passkey only', () => {
     it('not supported', async () => {
       para.isPasskeySupported = () => Promise.resolve(false);

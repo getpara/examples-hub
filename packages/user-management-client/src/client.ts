@@ -60,6 +60,7 @@ import {
   PrimaryAuthInfo,
   ServerAuthStateLogin,
   ServerAuthStateDone,
+  UserPreferences,
 } from '@getpara/shared';
 import { extractWalletRef, fromAccountMetadata, fromLinkedAccounts } from './utils.js';
 import { SESSION_COOKIE_HEADER_NAME, VERSION_HEADER_NAME, PARTNER_ID_HEADER_NAME, API_KEY_HEADER_NAME } from './consts.js';
@@ -1385,6 +1386,16 @@ class Client {
 
   refreshEnclaveJwt = async (encryptedPayload: string): Promise<{ payload: string }> => {
     const res = await this.baseRequest.post<{ payload: string }>(`/enclave/jwt/refresh`, { encryptedPayload });
+    return res.data;
+  };
+
+  getUserPreferences = async (userId: string): Promise<{ preferences: UserPreferences }> => {
+    const res = await this.baseRequest.get<{ preferences: UserPreferences }>(`/users/${userId}/preferences`);
+    return res.data;
+  };
+
+  updateUserPreferences = async (userId: string, preferences: Partial<UserPreferences>): Promise<UserPreferences> => {
+    const res = await this.baseRequest.patch<UserPreferences>(`/users/${userId}/preferences`, { preferences });
     return res.data;
   };
 }

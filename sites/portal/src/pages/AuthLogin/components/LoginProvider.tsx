@@ -38,6 +38,7 @@ type Login = {
       loginRes?: LoginRes;
       sessionLookupId: string;
     }) => Promise<void>;
+    getSkipBasicLoginUpgradePromptPreference: () => Promise<boolean>;
   };
   authInfo?: AuthInfo | undefined;
   params: AuthLoginParams;
@@ -61,6 +62,7 @@ export const LoginContext = createContext<Login>({
     checkIsEnclaveUser: NOOP,
     addAllEnclaveSharesForNewCredential: NOOP,
     addAllSharesForNewCredential: NOOP,
+    getSkipBasicLoginUpgradePromptPreference: NOOP,
   },
   params: {} as unknown as AuthLoginParams,
 });
@@ -75,7 +77,7 @@ export const LoginProvider = ({
 }) => {
   const para = usePara();
 
-  const params = useExtractedParams<AuthLoginParams & AuthParams & AuthExtras>();
+  const params = useExtractedParams<AuthLoginParams & AuthParams & AuthExtras & { isBasicLoginUpgradeVersion?: boolean }>();
   const authInfo: CoreAuthInfo = params.authInfo ?? {
     ...extractAuthInfo(params),
     pfpUrl: params.pfpUrl,
@@ -94,6 +96,24 @@ export const LoginProvider = ({
   const [wallets, setWallets] = useState<GroupedWallets>();
   const [biometricLocationHints, setBiometricLocationHints] = useState<BiometricLocationHint[]>([]);
   const [sessionOrigin, setSessionOrigin] = useState<string>();
+
+  const getSkipBasicLoginUpgradePromptPreference = useCallback(async () => {
+    if (!params.isBasicLoginUpgradeVersion) {
+      return false;
+    }
+
+    if (para.userId) {
+      try {
+        const {
+          preferences: { shouldSkipBasicLoginUpgradePrompt },
+        } = await para.ctx.client.getUserPreferences(para.userId);
+        return shouldSkipBasicLoginUpgradePrompt;
+      } catch (_) {
+        return false;
+      }
+    }
+    return false;
+  }, [para, params.sessionId]);
 
   const checkIsEnclaveUser = useCallback(async () => {
     const auth = await para.ctx.client.sessionAuth(params.sessionId);
@@ -307,6 +327,7 @@ export const LoginProvider = ({
           checkIsEnclaveUser,
           addAllEnclaveSharesForNewCredential,
           addAllSharesForNewCredential,
+          getSkipBasicLoginUpgradePromptPreference,
         },
         authInfo,
         params,

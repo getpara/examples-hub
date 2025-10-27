@@ -1487,11 +1487,24 @@ describe('Client', () => {
 
       expect(mocks.post).toBeCalledWith('/enclave/jwt/refresh', { encryptedPayload: 'payload' });
     });
+
+    it('getUserPreferences', async () => {
+      await client.getUserPreferences(userId);
+
+      expect(mocks.get).toBeCalledWith(`/users/${userId}/preferences`);
+    });
+
+    it('updateUserPreferences', async () => {
+      await client.updateUserPreferences(userId, { theme: 'dark' });
+
+      expect(mocks.patch).toBeCalledWith(`/users/${userId}/preferences`, { preferences: { theme: 'dark' } });
+    });
   });
 
   it('should handle useFetchAdapter option', () => {
     const clientWithFetchAdapter = new Client({
       userManagementHost: 'http://localhost:3000',
+      apiKey: 'test-api-key',
       opts: {
         useFetchAdapter: true,
       },

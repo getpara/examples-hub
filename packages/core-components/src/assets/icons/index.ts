@@ -195,6 +195,7 @@ import Wallet from './wallet.svg';
 import X from './x.svg';
 import YoutubeBrand from './youtube-brand.svg';
 import Youtube from './youtube.svg';
+import Zap from './zap.svg';
 import Zerion from './zerion.svg';
 import AD from './flags/AD.svg';
 import AE from './flags/AE.svg';
@@ -628,6 +629,7 @@ export const Icons = {
   x: X,
   youtubeBrand: YoutubeBrand,
   youtube: Youtube,
+  zap: Zap,
   zerion: Zerion,
   AD: AD,
   AE: AE,

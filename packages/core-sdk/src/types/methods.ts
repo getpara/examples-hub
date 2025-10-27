@@ -64,7 +64,7 @@ export type PortalUrlOptions = {
   oAuthMethod?: OAuthUrlParams['method'];
   appScheme?: string;
   encryptionKey?: string;
-  addNewCredentialType?: Exclude<TAuthMethod, 'BASIC_LOGIN'>;
+  addNewCredentialType?: TAuthMethod;
   addNewCredentialPasswordId?: string;
   addNewCredentialPasskeyId?: string;
 };
@@ -147,7 +147,7 @@ export type NewCredentialUrlParams = WithCustomTheme &
     /**
      * The authentication method to add.
      */
-    authMethod?: Exclude<TAuthMethod, 'BASIC_LOGIN'>;
+    authMethod?: TAuthMethod;
   };
 
 export type OAuthUrlParams = {

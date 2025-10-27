@@ -976,6 +976,10 @@ export abstract class ParaCore implements CoreInterface {
             addNewCredentialPasswordId: opts.addNewCredentialPasswordId,
           }
         : {}),
+      ...(isLogin && {
+        // Prior versions won't have this param which will skip the upgrade prompt
+        isBasicLoginUpgradeVersion: 'true',
+      }),
     };
 
     const url = constructUrl({ base, path, params });
@@ -4422,8 +4426,14 @@ Need help? Visit: https://docs.getpara.com or contact support
   }: NewCredentialUrlParams = {}): Promise<{ credentialId: string; url?: string }> {
     const userAuthMethods = await this.supportedUserAuthMethods();
     const isEnclaveUser = userAuthMethods.has(AuthMethod.BASIC_LOGIN);
+    const isAddingBasicLogin = optsAuthMethod === 'BASIC_LOGIN';
 
-    if (isEnclaveUser) {
+    if (isEnclaveUser && isAddingBasicLogin) {
+      throw new Error('That user is already using basic login');
+    }
+
+    // If a current basic login user OR adding basic login, always treat as new device
+    if (isEnclaveUser || isAddingBasicLogin) {
       isForNewDevice = true;
     }
 
@@ -4433,52 +4443,55 @@ Need help? Visit: https://docs.getpara.com or contact support
 
     this.assertIsAuthSet();
 
-    const canAddPasswordOrPIN = !userAuthMethods.has(AuthMethod.PASSWORD) && !userAuthMethods.has(AuthMethod.PIN);
-
     let passkeyId: string | undefined,
       passwordId: string | undefined,
-      urlType: Extract<PortalUrlType, 'createAuth' | 'createPassword' | 'createPIN'>;
+      urlType: Extract<PortalUrlType, 'createAuth' | 'createPassword' | 'createPIN'>,
+      credentialId: string | undefined;
 
-    if (authMethods.includes('PASSKEY') && (await this.isPasskeySupported())) {
-      ({
-        data: { id: passkeyId },
-      } = await this.ctx.client.addSessionPublicKey(this.userId, {
-        status: AuthMethodStatus.PENDING,
-        type: PublicKeyType.WEB,
-      }));
-      urlType = 'createAuth';
-    }
+    if (!isAddingBasicLogin) {
+      const canAddPasswordOrPIN = !userAuthMethods.has(AuthMethod.PASSWORD) && !userAuthMethods.has(AuthMethod.PIN);
 
-    if (authMethods.includes('PASSWORD')) {
-      if (!canAddPasswordOrPIN) {
-        if (optsAuthMethod === 'PASSWORD') throw new Error('A user cannot have more than one password or PIN.');
-      } else {
+      if (authMethods.includes('PASSKEY') && (await this.isPasskeySupported())) {
         ({
-          data: { id: passwordId },
-        } = await this.ctx.client.addSessionPasswordPublicKey(this.userId, {
+          data: { id: passkeyId },
+        } = await this.ctx.client.addSessionPublicKey(this.userId, {
           status: AuthMethodStatus.PENDING,
+          type: PublicKeyType.WEB,
         }));
-        urlType = 'createPassword';
+        urlType = 'createAuth';
       }
-    }
 
-    if (authMethods.includes('PIN')) {
-      if (!canAddPasswordOrPIN) {
-        if (optsAuthMethod === 'PIN') throw new Error('A user cannot have more than one password or PIN.');
-      } else {
-        ({
-          data: { id: passwordId },
-        } = await this.ctx.client.addSessionPasswordPublicKey(this.userId, {
-          status: AuthMethodStatus.PENDING,
-        }));
-        urlType = 'createPIN';
+      if (authMethods.includes('PASSWORD')) {
+        if (!canAddPasswordOrPIN) {
+          if (optsAuthMethod === 'PASSWORD') throw new Error('A user cannot have more than one password or PIN.');
+        } else {
+          ({
+            data: { id: passwordId },
+          } = await this.ctx.client.addSessionPasswordPublicKey(this.userId, {
+            status: AuthMethodStatus.PENDING,
+          }));
+          urlType = 'createPassword';
+        }
       }
-    }
 
-    const credentialId = passkeyId ?? passwordId;
+      if (authMethods.includes('PIN')) {
+        if (!canAddPasswordOrPIN) {
+          if (optsAuthMethod === 'PIN') throw new Error('A user cannot have more than one password or PIN.');
+        } else {
+          ({
+            data: { id: passwordId },
+          } = await this.ctx.client.addSessionPasswordPublicKey(this.userId, {
+            status: AuthMethodStatus.PENDING,
+          }));
+          urlType = 'createPIN';
+        }
+      }
 
-    if (this.isNativePasskey && authMethods.includes('PASSKEY')) {
-      return { credentialId };
+      credentialId = passkeyId ?? passwordId;
+
+      if (this.isNativePasskey && authMethods.includes('PASSKEY')) {
+        return { credentialId };
+      }
     }
 
     const { sessionId } = await this.touchSession();

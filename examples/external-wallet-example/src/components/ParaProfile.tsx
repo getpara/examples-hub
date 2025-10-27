@@ -1,6 +1,6 @@
 import { CpslButton, CpslInput, CpslText } from '@getpara/react-components';
 import { Card, OverflowText, ProfileInnerContainer } from './common';
-import { ParaCore, useAccount, useAddAuthMethod, useClient, useWallet } from '@getpara/react-sdk';
+import { AuthMethod, ParaCore, useAccount, useAddAuthMethod, useClient, useWallet } from '@getpara/react-sdk';
 import { useEffect, useState } from 'react';
 import { useViemClient } from '@getpara/react-sdk/evm';
 import { useCosmjsProtoSigner } from '@getpara/react-sdk/cosmos';
@@ -103,7 +103,9 @@ export const ParaProfile = () => {
   };
 
   const handleAddAuthMethod = () => {
-    addAuthMethod(undefined, { onError: (e: Error) => console.error('Error adding auth method:', e) });
+    addAuthMethod(!embedded.authMethods?.has(AuthMethod.BASIC_LOGIN) ? { authMethod: AuthMethod.BASIC_LOGIN } : undefined, {
+      onError: e => console.error('Error adding auth method:', e),
+    });
   };
 
   const handleExportPrivateKey = async () => {
@@ -161,7 +163,7 @@ export const ParaProfile = () => {
           </>
         )}
         <CpslButton disabled={!isConnected} onClick={handleAddAuthMethod}>
-          Add Auth Method
+          {!embedded.authMethods?.has(AuthMethod.BASIC_LOGIN) ? 'Upgrade to Basic Login' : 'Add Auth Method'}
         </CpslButton>
         <CpslButton
           disabled={!isConnected}

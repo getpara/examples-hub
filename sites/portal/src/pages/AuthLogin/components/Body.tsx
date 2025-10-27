@@ -17,6 +17,7 @@ import { OAuthCallback } from './OAuthCallback';
 import { OTP } from './OTP';
 import { Farcaster } from './Farcaster';
 import { TelegramLogin } from '../../TelegramLogin/TelegramLogin';
+import { BasicLoginUpgrade } from '../../BasicLoginUpgrade/BasicLoginUpgrade';
 
 interface BodyProps {
   addDeviceUrl?: string;
@@ -34,6 +35,8 @@ interface BodyProps {
   isEmbedded?: boolean;
   postLogin: () => Promise<void>;
   isSwitchingWallets?: boolean;
+  onBasicLoginUpgradeClick: () => Promise<void>;
+  onSkipBasicLoginUpgradeClick: (_?: boolean) => Promise<void>;
 }
 
 export const Body = ({
@@ -51,6 +54,8 @@ export const Body = ({
   isEmbedded,
   postLogin,
   isSwitchingWallets = false,
+  onBasicLoginUpgradeClick,
+  onSkipBasicLoginUpgradeClick,
 }: BodyProps) => {
   const { partner } = useModalOutletContext();
 
@@ -131,6 +136,9 @@ export const Body = ({
       }
       case AuthLoginStep.TELEGRAM: {
         return <TelegramLogin onLogin={postLogin} />;
+      }
+      case AuthLoginStep.BASIC_LOGIN_UPGRADE: {
+        return <BasicLoginUpgrade onUpgradeClick={onBasicLoginUpgradeClick} onSkipClick={onSkipBasicLoginUpgradeClick} />;
       }
     }
   };

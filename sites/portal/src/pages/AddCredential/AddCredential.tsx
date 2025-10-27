@@ -34,6 +34,10 @@ export const AddCredential = () => {
     navigate(`/web/users/${para.userId}/${isPIN ? 'pin' : 'passwords'}/${addNewCredentialPasswordId}`, {});
   };
 
+  const handleAddBasicLogin = () => {
+    navigate(`/web/users/${para.userId}/basic-login`, {});
+  };
+
   useEffect(() => {
     if (addNewCredentialType) {
       if (addNewCredentialType === 'PASSKEY') {
@@ -44,12 +48,22 @@ export const AddCredential = () => {
         handleAddPassword(addNewCredentialType === 'PIN');
         return;
       }
+      if (addNewCredentialType === 'BASIC_LOGIN') {
+        handleAddBasicLogin();
+        return;
+      }
     }
     setIsReady(true);
   }, [addNewCredentialType]);
 
   if (!isReady) {
-    return <ModalLoading noText />;
+    return (
+      <StyledCard>
+        <CardContent>
+          <ModalLoading noText />
+        </CardContent>
+      </StyledCard>
+    );
   }
 
   return (
