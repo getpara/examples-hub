@@ -99,7 +99,7 @@ export const LoginProvider = ({
 
   const getSkipBasicLoginUpgradePromptPreference = useCallback(async () => {
     if (!params.isBasicLoginUpgradeVersion) {
-      return false;
+      return true;
     }
 
     if (para.userId) {
