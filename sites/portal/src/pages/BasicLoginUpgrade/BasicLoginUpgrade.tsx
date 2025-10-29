@@ -23,6 +23,7 @@ export const BasicLoginUpgrade = ({ onUpgradeClick, onSkipClick }: BasicLoginUpg
   const [searchParams] = useSearchParams();
 
   const [isDone, setIsDone] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
   const [isSetup, setIsSetup] = useState<boolean>(false);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [loginMethodLabel, setLoginMethodLabel] = useState<string | null>('email');
@@ -115,12 +116,11 @@ export const BasicLoginUpgrade = ({ onUpgradeClick, onSkipClick }: BasicLoginUpg
   };
 
   const handleUpgrade = async () => {
+    setError(null);
     setIsProcessing(true);
     try {
       onUpgradeClick && (await onUpgradeClick());
-      await basicLoginUpgrade(para, {
-        userId: para.userId,
-      });
+      await basicLoginUpgrade(para);
 
       setIsDone(true);
 
@@ -136,6 +136,7 @@ export const BasicLoginUpgrade = ({ onUpgradeClick, onSkipClick }: BasicLoginUpg
         closeWindow(true);
       }
     } catch (e) {
+      setError('An unexpected error occurred during the upgrade process.');
       console.error(e);
     } finally {
       setIsProcessing(false);
@@ -170,11 +171,17 @@ export const BasicLoginUpgrade = ({ onUpgradeClick, onSkipClick }: BasicLoginUpg
                 <CpslText variant="bodyL" weight="semiBold">
                   Quick Login
                 </CpslText>
-                <CpslText variant="bodyS" color="secondary" weight="medium" style={{ textAlign: 'center' }}>
-                  {`You can now login with your ${loginMethodLabel} only. This means you no longer need a ${supportedAuthMethodLabel}.`}
-                </CpslText>
+                {!!error ? (
+                  <CpslText variant="bodyS" color="error" weight="medium" style={{ textAlign: 'center' }}>
+                    {error}
+                  </CpslText>
+                ) : (
+                  <CpslText variant="bodyS" color="secondary" weight="medium" style={{ textAlign: 'center' }}>
+                    {`You can now login with your ${loginMethodLabel} only. This means you no longer need a ${supportedAuthMethodLabel}.`}
+                  </CpslText>
+                )}
               </Header>
-              {isProcessing ? (
+              {!!error ? null : isProcessing ? (
                 <ModalLoading noText />
               ) : (
                 <>

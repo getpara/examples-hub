@@ -1,11 +1,7 @@
 import { decryptWithPrivateKey, ShareData } from '@getpara/web-sdk';
 import { ParaPortal } from '../classes/ParaPortal';
 
-export type BasicLoginUpgradeParams = {
-  userId: string;
-};
-
-export async function basicLoginUpgrade(para: ParaPortal, { userId }: BasicLoginUpgradeParams): Promise<void> {
+export async function basicLoginUpgrade(para: ParaPortal): Promise<void> {
   const temporaryShares = (await para.getTransmissionKeyShares({ isForNewDevice: true })).data.temporaryShares;
   const shares = temporaryShares.map(share => {
     const userShare = decryptWithPrivateKey(
@@ -15,7 +11,7 @@ export async function basicLoginUpgrade(para: ParaPortal, { userId }: BasicLogin
     );
 
     const shareData: ShareData = {
-      userId,
+      userId: share.userId,
       walletId: share.walletId,
       walletScheme: share.wallet?.scheme!,
       partnerId: share.partnerId,
@@ -25,6 +21,22 @@ export async function basicLoginUpgrade(para: ParaPortal, { userId }: BasicLogin
 
     return shareData;
   });
+
+  const missing = shares
+    .map((s, i) => {
+      const missingFields: string[] = [];
+      if (!s.userId) missingFields.push('userId');
+      if (!s.walletId) missingFields.push('walletId');
+      if (!s.signer) missingFields.push('signer');
+      if (!s.walletScheme) missingFields.push('walletScheme');
+      return missingFields.length ? { index: i, missingFields } : null;
+    })
+    .filter(Boolean) as Array<{ index: number; missingFields: string[] }>;
+
+  if (missing.length) {
+    const details = missing.map(m => `share[${m.index}]: missing ${m.missingFields.join(', ')};`).join('; ');
+    throw new Error(`Missing required fields for basic login upgrade: ${details}`);
+  }
 
   await para.ctx.enclaveClient.persistSharesWithRetry(shares);
 }
