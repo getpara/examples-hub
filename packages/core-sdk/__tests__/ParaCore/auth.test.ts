@@ -149,6 +149,7 @@ function testLoginUrl(
   );
   expectSearchParams(url, {
     ...COMMON_SEARCH_PARAMS,
+    userId: USER_ID,
     authInfo: JSON.stringify(authInfo),
     ...(isPhone(authInfo.auth) ? splitPhoneNumber(authInfo.auth.phone) : authInfo.auth),
     ...(authInfo.displayName ? { displayName: authInfo!.displayName } : {}),
@@ -179,6 +180,7 @@ function testCreateUrl(
   );
   expectSearchParams(url, {
     ...COMMON_SEARCH_PARAMS,
+    userId: USER_ID,
     authInfo: JSON.stringify(authInfo),
     ...(origin ? { origin } : {}),
     ...(isPhone(authInfo.auth) ? splitPhoneNumber(authInfo.auth.phone) : authInfo.auth),

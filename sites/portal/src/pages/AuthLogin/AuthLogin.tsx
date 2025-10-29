@@ -225,7 +225,12 @@ const AuthLoginBase = ({ step: propsStep }: { step?: AuthLoginStep }) => {
 
     const defaultWalletIds = getDefaultWalletIds(wallets, { partnerId, supportedWalletTypes: para.supportedWalletTypes });
 
-    if (para.isNoWalletConfig || !!defaultWalletIds || (isWithoutWallets && !para.ctx.apiKey)) {
+    // Since we return if the user is new here, we can check if the partner is using basic login here to ensure we create wallets in the correct place
+    // This will mainly apply to users who have connected external wallets before and are now using that wallet as an auth method
+    const isUsingBasicLogin = isEnclaveUser || partner.supportedAuthMethods?.includes(AuthMethod.BASIC_LOGIN);
+
+    // If the user has no wallets and needs them, create them here is there is no apiKey passed in (legacy flow) OR if they are not an enclave user (those wallets will be created in the core-sdk automatically)
+    if (para.isNoWalletConfig || !!defaultWalletIds || (isWithoutWallets && (!para.ctx.apiKey || isUsingBasicLogin))) {
       await para.setCurrentWalletIds(defaultWalletIds ?? {}, {
         sessionLookupId: sessionId,
         needsWallet: isWithoutWallets,

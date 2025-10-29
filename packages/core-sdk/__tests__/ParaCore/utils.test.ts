@@ -424,6 +424,7 @@ describe('ParaCore - utils', () => {
       // Verify search params
       expectSearchParams(url, {
         ...COMMON_SEARCH_PARAMS,
+        userId: USER_ID,
         apiKey: API_KEY,
         origin: mockWindowLocation.origin,
         sessionId: SESSION_ID,

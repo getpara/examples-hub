@@ -52,9 +52,9 @@ export const ExternalWalletNetworkSelectStep = ({ type = 'CONNECT' }: { type?: E
         setSelectedExternalWallet({ id: wallet.id, type: wallet.type });
         setStep(ModalStep.EX_WALLET_SELECTED);
         if (wallet.installed || wallet.internalId === 'FARCASTER') {
-          connectExternalWallet(wallet);
+          connectExternalWallet({ wallet });
         } else if (wallet.isMobile) {
-          connectExternalWallet(wallet, true);
+          connectExternalWallet({ wallet, isMobile: true });
         }
         break;
     }

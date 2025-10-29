@@ -1,3 +1,5 @@
+import { isMobile } from '@getpara/web-sdk';
+
 export function openPopup({
   url,
   target,
@@ -14,7 +16,8 @@ export function openPopup({
     | 'CREATE_PASSWORD'
     | 'LOGIN_PASSWORD'
     | 'SWITCH_WALLETS'
-    | 'ADD_CREDENTIAL';
+    | 'ADD_CREDENTIAL'
+    | 'LOGIN_EXTERNAL_WALLET';
   current?: Window | null;
 }): Window | null {
   if (typeof window === 'undefined') {
@@ -50,6 +53,7 @@ export function openPopup({
     }
     case 'OAUTH':
     case 'ADD_CREDENTIAL':
+    case 'LOGIN_EXTERNAL_WALLET':
     default: {
       popUpHeight = 768;
       break;
@@ -77,7 +81,7 @@ export function openPopup({
   const windowFeatures = `toolbar=no, menubar=no, width=${popUpWidth}, 
     height=${popUpHeight}, top=${top}, left=${left}`;
 
-  let popupWindow = window.open(url, target, windowFeatures);
+  let popupWindow = window.open(url, isMobile() ? '_blank' : target, windowFeatures);
   if (!popupWindow) {
     setTimeout(() => {
       popupWindow = window.open(url, '_blank');

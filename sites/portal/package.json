@@ -68,7 +68,7 @@
     "dev": "DISABLE_ESLINT_PLUGIN=true VITE_ENVIRONMENT=dev vite --port 3003 --host",
     "legacy-deploy-beta": "VITE_PARA_PORTAL_ID=4bdd84d3-7606-406f-8321-19721cac17a1 VITE_ENVIRONMENT=beta yarn legacy-deploy-s3",
     "legacy-deploy-prod": "VITE_PARA_PORTAL_ID=1106a19e-0a78-4a26-b414-d6538b6a2064 VITE_ENVIRONMENT=prod yarn legacy-deploy-s3",
-    "legacy-deploy-s3": "yarn && yarn build && yarn check-wasm-file-exists && yarn check-mpc-worker-file-exists && aws s3 sync dist/ s3://capsule-$VITE_ENVIRONMENT-web-portal --profile $VITE_ENVIRONMENT",
+    "legacy-deploy-s3": "yarn && yarn build && yarn check-wasm-file-exists && yarn check-mpc-worker-file-exists && aws s3 sync dist/ s3://capsule-$VITE_ENVIRONMENT-web-portal",
     "legacy-deploy-sandbox": "VITE_PARA_PORTAL_ID=4bdd84d3-7606-406f-8321-19721cac17a1 VITE_ENVIRONMENT=sandbox yarn legacy-deploy-s3",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",

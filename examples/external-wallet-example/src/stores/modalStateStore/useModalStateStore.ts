@@ -28,6 +28,7 @@ interface ModalStateState {
   balancesExcludeStandardAssets?: boolean;
   balancesAdditionalAssets?: CustomAsset[];
   balancesAsset?: CustomAsset;
+  apiKey: string;
 }
 
 export interface ModalStateActions {
@@ -52,6 +53,7 @@ const DEFAULT_STATE: ModalStateState = {
   isFullAuth: false,
   balancesDisplayType: 'AGGREGATED',
   balancesExcludeStandardAssets: false,
+  apiKey: import.meta.env.VITE_PARA_API_KEY,
 };
 
 export const useModalStateStore = create<ModalStateStore>()(

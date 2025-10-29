@@ -401,13 +401,19 @@ class Client {
   loginExternalWallet = async ({
     externalWallet,
     shouldTrackUser,
+    chainId,
+    uri,
   }: {
     externalWallet: ExternalWalletInfo;
     shouldTrackUser?: boolean;
+    chainId?: string;
+    uri?: string;
   }): Promise<LoginExternalWalletResponse> => {
     const res = await this.baseRequest.post<LoginExternalWalletResponse>(`/users/external-wallets/login/v2`, {
       externalWallet,
       shouldTrackUser,
+      chainId,
+      uri,
     });
     return res.data;
   };
@@ -508,8 +514,8 @@ class Client {
   verifyExternalWallet = async (
     userId: string,
     body: VerifyExternalWalletParams,
-  ): Promise<ServerAuthStateSignup | ServerAuthStateLogin> => {
-    const res = await this.baseRequest.post<ServerAuthStateSignup | ServerAuthStateLogin>(
+  ): Promise<ServerAuthStateSignup | ServerAuthStateLogin | ServerAuthStateDone> => {
+    const res = await this.baseRequest.post<ServerAuthStateSignup | ServerAuthStateLogin | ServerAuthStateDone>(
       `/users/${userId}/external-wallets/verify/v2`,
       body,
     );
@@ -572,6 +578,12 @@ class Client {
     return res.data;
   };
 
+  // POST /sessions/portal-verification
+  sessionAddPortalVerification = async (): Promise<{ success: boolean }> => {
+    const res = await this.baseRequest.post<{ success: boolean }>(`/sessions/portal-verification`);
+    return res.data;
+  };
+
   // GET /sessions/:sessionLookupId/origin
   sessionOrigin = async (sessionLookupId: string): Promise<{ origin?: string }> => {
     const res = await this.baseRequest.get<{ origin?: string }>(`/sessions/${sessionLookupId}/origin`);
@@ -607,6 +619,12 @@ class Client {
       auth: PrimaryAuth;
       isNewUser: boolean;
     }>(`/sessions/${sessionLookupId}/auth`);
+    return res.data;
+  };
+
+  // GET /sessions/:sessionLookupId/siwe-message
+  sessionSIWEMessage = async (sessionLookupId: string): Promise<{ message?: string; code?: string }> => {
+    const res = await this.baseRequest.get<{ message?: string; code?: string }>(`/sessions/${sessionLookupId}/siwe-message`);
     return res.data;
   };
 

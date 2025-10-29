@@ -23,6 +23,23 @@ describe('isMobile', () => {
       const resp = isAndroid();
       expect(resp).toBeTruthy();
     });
+    it('success - linux mobile', () => {
+      global.navigator = {
+        userAgent: 'Linux; Mobile',
+      } as any;
+
+      const resp = isAndroid();
+      expect(resp).toBeTruthy();
+    });
+    it('success - platform android', () => {
+      global.navigator = {
+        userAgent: 'some other agent',
+        platform: 'Android',
+      } as any;
+
+      const resp = isAndroid();
+      expect(resp).toBeTruthy();
+    });
     it('fail - no navigator', () => {
       global.navigator = undefined as any;
 
@@ -32,6 +49,15 @@ describe('isMobile', () => {
     it('fail - incorrect useragent', () => {
       global.navigator = {
         userAgent: 'ios',
+      } as any;
+
+      const resp = isAndroid();
+      expect(resp).toBeFalsy();
+    });
+    it('fail - no platform', () => {
+      global.navigator = {
+        userAgent: 'some other agent',
+        platform: undefined,
       } as any;
 
       const resp = isAndroid();
@@ -120,8 +146,99 @@ describe('isMobile', () => {
       const resp = isTablet();
       expect(resp).toBeTruthy();
     });
+    it('success - MacIntel with touch points', () => {
+      global.navigator = {
+        userAgent: 'MacIntel',
+        platform: 'MacIntel',
+        maxTouchPoints: 2,
+      } as any;
+
+      const resp = isTablet();
+      expect(resp).toBeTruthy();
+    });
+    it('success - android tablet without mobile', () => {
+      global.navigator = {
+        userAgent: 'android',
+      } as any;
+      Object.defineProperty(global, 'screen', {
+        value: { width: 800 },
+        writable: true,
+        configurable: true,
+      });
+
+      const resp = isTablet();
+      expect(resp).toBeTruthy();
+    });
+    it('success - android with tablet keyword', () => {
+      global.navigator = {
+        userAgent: 'android tablet',
+      } as any;
+
+      const resp = isTablet();
+      expect(resp).toBeTruthy();
+    });
+    it('success - kindle', () => {
+      global.navigator = {
+        userAgent: 'kindle',
+      } as any;
+
+      const resp = isTablet();
+      expect(resp).toBeTruthy();
+    });
+    it('success - playbook', () => {
+      global.navigator = {
+        userAgent: 'playbook',
+      } as any;
+
+      const resp = isTablet();
+      expect(resp).toBeTruthy();
+    });
+    it('success - silk', () => {
+      global.navigator = {
+        userAgent: 'silk',
+      } as any;
+
+      const resp = isTablet();
+      expect(resp).toBeTruthy();
+    });
     it('fail - no navigator', () => {
       global.navigator = undefined as any;
+
+      const resp = isTablet();
+      expect(resp).toBeFalsy();
+    });
+    it('fail - android mobile with small screen', () => {
+      global.navigator = {
+        userAgent: 'android mobile',
+      } as any;
+      Object.defineProperty(global, 'screen', {
+        value: { width: 400 },
+        writable: true,
+        configurable: true,
+      });
+
+      const resp = isTablet();
+      expect(resp).toBeFalsy();
+    });
+    it('fail - MacIntel with no touch points', () => {
+      global.navigator = {
+        userAgent: 'MacIntel',
+        platform: 'MacIntel',
+        maxTouchPoints: 0,
+      } as any;
+
+      const resp = isTablet();
+      expect(resp).toBeFalsy();
+    });
+    it('fail - android with screen width check but no screen object', () => {
+      global.navigator = {
+        userAgent: 'android',
+      } as any;
+      Object.defineProperty(global, 'screen', {
+        value: undefined,
+        writable: true,
+        configurable: true,
+      });
 
       const resp = isTablet();
       expect(resp).toBeFalsy();

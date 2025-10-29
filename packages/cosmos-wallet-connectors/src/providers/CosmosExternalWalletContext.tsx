@@ -179,6 +179,8 @@ export function CosmosExternalWalletProvider({
           withVerification: includeWalletVerification,
           isConnectionOnly: connectionOnly,
         },
+        uri: window?.location.origin,
+        chainId: selectedChainId,
       });
     } catch (err) {
       await reset();
@@ -429,7 +431,6 @@ export function CosmosExternalWalletProvider({
       return {
         connect: () => connect(wallet.grazType),
         connectMobile: () => connect(wallet.grazType),
-        getQrUri: () => '',
         type: 'COSMOS',
         ...wallet,
         // Using name here since that's the only common id across the networks

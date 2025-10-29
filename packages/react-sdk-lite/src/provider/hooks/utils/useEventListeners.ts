@@ -150,6 +150,8 @@ export const useEventListeners = ({
   }, [queryClient, refs.balancesInvalidationTime]);
 
   useEffect(() => {
+    if (typeof window === 'undefined') return; // Prevent SSR errors
+
     window.addEventListener(ParaEvent.LOGIN_EVENT, loginListener);
     window.addEventListener(ParaEvent.ACCOUNT_SETUP_EVENT, accountSetupListener);
     window.addEventListener(ParaEvent.ACCOUNT_CREATION_EVENT, accountCreationListener);
@@ -164,6 +166,8 @@ export const useEventListeners = ({
     window.addEventListener(ParaEvent.ASSET_TRANSFERRED, assetTransferListener);
 
     return () => {
+      if (typeof window === 'undefined') return; // Prevent SSR errors
+
       window.removeEventListener(ParaEvent.LOGIN_EVENT, loginListener);
       window.removeEventListener(ParaEvent.ACCOUNT_SETUP_EVENT, accountSetupListener);
       window.removeEventListener(ParaEvent.ACCOUNT_CREATION_EVENT, accountCreationListener);

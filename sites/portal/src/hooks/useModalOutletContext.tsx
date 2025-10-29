@@ -6,6 +6,7 @@ type ModalOutletContextType = {
   homepageUrl: string;
   isDark: boolean;
   toggleBranding: (_?: boolean) => void;
+  trustedOrigin: string;
 };
 
 export function useModalOutletContext() {

@@ -6,6 +6,7 @@ import { useSearchParams } from 'react-router-dom';
 import { isIFramed } from '../../../utils/isIFramed.js';
 import { isMobile } from '@getpara/web-sdk';
 import { FlexStartInnerContainer } from '../../../components/common.js';
+import { useModalOutletContext } from '../../../hooks/useModalOutletContext.js';
 
 const isMobileDevice = isMobile();
 
@@ -17,6 +18,7 @@ export const Farcaster = ({ onLogin }: FarcasterStepProps) => {
   const para = usePara();
   const [searchParams] = useSearchParams();
   const [farcasterConnectUri, setFarcasterConnectUri] = useState<string>();
+  const { trustedOrigin } = useModalOutletContext();
 
   useEffect(() => {
     const setup = async () => {
@@ -40,7 +42,7 @@ export const Farcaster = ({ onLogin }: FarcasterStepProps) => {
                 if (loginCallbackRoute || serverAuthState.stage === 'done') {
                   await onLogin();
                 }
-                window?.parent?.postMessage({ type: 'FARCASTER_SUCCESS', payload: serverAuthState }, '*');
+                window?.parent?.postMessage({ type: 'FARCASTER_SUCCESS', payload: serverAuthState }, trustedOrigin);
 
                 return resolve(serverAuthState);
               }

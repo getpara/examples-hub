@@ -1,31 +1,47 @@
 import { CpslButton, CpslIcon, CpslQrCode, CpslSpinner, CpslText } from '@getpara/react-components';
 import { CenteredText, HeroAccountTypeIcon, InnerStepContainer, QRContainer, StepContainer } from '../common.js';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { useModalStore } from '../../stores/index.js';
 import { CommonWallet, HeroSpinner, safeStyled } from '@getpara/react-common';
 import { useCopyToClipboard } from '@getpara/react-common';
 import { ModalStep } from '../../utils/steps.js';
-import { isMobile, isTablet } from '@getpara/web-sdk';
+import { isMobile, isTablet, TExternalWallet } from '@getpara/web-sdk';
 import { routeMobileExternalWallet } from '../../utils/routeMobileExternalWallet.js';
 import { useExternalWallets } from '../../../provider/providers/ExternalWalletProvider.js';
 import { useStore } from '../../../provider/stores/useStore.js';
 
+// Add helper function to detect Solana wallet in-app browsers
+const isSolanaWalletInAppBrowser = (wallet: TExternalWallet) => {
+  switch (wallet) {
+    case 'PHANTOM':
+      return !!(window as any)?.phantom?.solana;
+    case 'SOLFLARE':
+      return !!(window as any)?.solflare;
+    case 'BACKPACK':
+      return !!(window as any)?.backpack;
+    case 'GLOW':
+      return !!(window as any)?.glowSolana;
+    default:
+      break;
+  }
+};
+
 export const ExternalWalletMobileConnect = ({
   wallet,
-  qrUri: propsQrUri,
   onConnectWc,
-  isSelfFetching = false,
+  onRetryClick,
 }: {
   wallet: CommonWallet;
   qrUri?: string;
   onConnectWc: (_: CommonWallet) => Promise<void>;
+  onRetryClick?: () => Promise<void>;
   isSelfFetching?: boolean;
 }) => {
   const externalWalletError = useModalStore(state => state.externalWalletError);
   const [isCopied, copy] = useCopyToClipboard();
   const appName = useStore(state => state.appName);
-  const [qrUri, setQrUri] = useState<string | undefined>(isSelfFetching ? undefined : propsQrUri);
   const isWalletConnect = wallet.id === 'WalletConnect';
+  const { qrUri } = useExternalWallets();
 
   const handleCopy = () => {
     if (qrUri) {
@@ -33,27 +49,23 @@ export const ExternalWalletMobileConnect = ({
     }
   };
 
-  useEffect(() => {
-    const fetchQrUri = () => {
-      if (!isSelfFetching) {
-        return;
-      }
-
-      wallet.getQrUri?.().then(setQrUri).catch();
-    };
-
-    fetchQrUri();
-  }, [wallet, isSelfFetching]);
-
-  useEffect(() => {
-    setQrUri(propsQrUri);
-  }, [propsQrUri]);
-
   const isError = !!externalWalletError?.[0];
+
+  const handleRetryClick = async () => {
+    if (isError && onRetryClick) {
+      await onRetryClick();
+    } else {
+      await routeMobileExternalWallet(qrUri);
+    }
+  };
+
+  console.log('🚀 ~ ExternalWalletMobileConnect ~ isMobile:', isMobile());
+  console.log('🚀 ~ ExternalWalletMobileConnect ~ isTablet:', !isTablet());
+  console.log('🚀 ~ ExternalWalletMobileConnect ~ wallet:', wallet.type);
   if (wallet.type === 'SOLANA' || (isMobile() && !isTablet())) {
     return (
       <>
-        {wallet.type === 'SOLANA' && qrUri && (
+        {wallet.type === 'SOLANA' && !!qrUri && !isSolanaWalletInAppBrowser(wallet.internalId) && (
           <InnerStepContainer>
             <HeroSpinner
               icon={<HeroAccountTypeIcon accountType={wallet.internalId} src={wallet ? wallet.iconUrl : undefined} />}
@@ -67,13 +79,26 @@ export const ExternalWalletMobileConnect = ({
           <InnerStepContainer>
             <HeroSpinner
               icon={<HeroAccountTypeIcon accountType={wallet.internalId} src={wallet ? wallet.iconUrl : undefined} />}
-              status={isError ? 'error' : 'pending'}
-              text={isError ? externalWalletError[0] : `Confirm connection request in the ${wallet.name} app.`}
+              status={
+                wallet.type === 'SOLANA' && !isSolanaWalletInAppBrowser(wallet.internalId)
+                  ? 'idle'
+                  : isError
+                    ? 'error'
+                    : 'pending'
+              }
+              text={
+                wallet.type === 'SOLANA' && (!isSolanaWalletInAppBrowser(wallet.internalId) || wallet.hasIosSafariExtension)
+                  ? ''
+                  : isError
+                    ? externalWalletError[0]
+                    : `Confirm connection request in the ${wallet.name} app.`
+              }
               secondaryText={externalWalletError?.[1]}
             />
-            {(wallet.type === 'SOLANA' && qrUri && !wallet.hasIosSafariExtension) || wallet.type !== 'SOLANA' ? (
-              <CpslButton onClick={() => routeMobileExternalWallet(qrUri)} fullWidth>
-                Connect Wallet
+            {(wallet.type === 'SOLANA' && isSolanaWalletInAppBrowser(wallet.internalId) && !wallet.hasIosSafariExtension) ||
+            wallet.type !== 'SOLANA' ? (
+              <CpslButton onClick={handleRetryClick} fullWidth>
+                {isError ? 'Retry' : 'Connect Wallet'}
               </CpslButton>
             ) : (
               <Text weight="semiBold">
@@ -135,23 +160,21 @@ export const ExternalWalletStep = ({ isAddingWallets = false }: { isAddingWallet
   const { connectExternalWallet, addAdditionalExternalWallet, wallet, qrUri, walletDisplayHelpers } = useExternalWallets();
 
   const handleConnect = useCallback(
-    async (wallet: CommonWallet, isWc = false) => {
+    async (wallet: CommonWallet, isWc = false, isRetryConnection = false) => {
       if (isAddingWallets) {
         await addAdditionalExternalWallet(wallet);
       } else {
-        await (isWc ? connectExternalWallet(wallet, true, true) : connectExternalWallet(wallet));
+        await (isWc
+          ? connectExternalWallet({ wallet, isMobile: true, isManualWalletConnect: true })
+          : connectExternalWallet({ wallet, isMobile: wallet.isMobile, isRetryConnection }));
       }
     },
     [isAddingWallets, addAdditionalExternalWallet, connectExternalWallet],
   );
 
-  useEffect(() => {
-    routeMobileExternalWallet(qrUri);
-  }, [qrUri]);
-
   const handleTryAgainClick = async () => {
     if (wallet) {
-      await handleConnect(wallet);
+      await handleConnect(wallet, false, true);
     }
   };
 
@@ -218,6 +241,9 @@ export const ExternalWalletStep = ({ isAddingWallets = false }: { isAddingWallet
           qrUri={qrUri}
           onConnectWc={async (w: CommonWallet) => {
             await handleConnect(w, true);
+          }}
+          onRetryClick={async () => {
+            await connectExternalWallet({ wallet, isMobile: true, isRetryConnection: true });
           }}
         />
       );

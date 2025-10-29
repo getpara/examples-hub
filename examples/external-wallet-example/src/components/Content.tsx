@@ -7,7 +7,7 @@ import { EvmProfile } from './EvmProfile';
 import { CosmosProfile } from './CosmosProfile';
 import { ParaProfile } from './ParaProfile';
 import { FloatingModalOpener } from './FloatingModalOpener';
-import { useState, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export const Content = () => {
   const { isLoading } = useAccount();
@@ -20,6 +20,7 @@ export const Content = () => {
         <InnerContainer>
           <FloatingModalOpener />
           <WalletStatusPanel>
+            <ConsoleDisplay />
             <SectionCard>
               <CpslText variant="headingXS" weight="semiBold">
                 Status & Profiles
@@ -249,6 +250,167 @@ const JwtDisplay = () => {
           )}
         </BalanceDisplayContainer>
       )}
+    </SectionCard>
+  );
+};
+
+const ConsoleLogContainer = styled.div`
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--cpsl-color-text-primary);
+  white-space: pre-wrap;
+  word-break: break-word;
+  height: calc(20 * 1.4em); /* 20 lines at 1.4 line height */
+  overflow-y: auto;
+  padding: 12px;
+  background: var(--cpsl-color-background-16);
+  border: 1px solid var(--cpsl-color-border);
+  border-radius: 4px;
+  position: relative;
+`;
+
+const LogEntry = styled.div<{ level: 'log' | 'warn' | 'error' | 'info' }>`
+  margin-bottom: 2px;
+  color: ${props => {
+    switch (props.level) {
+      case 'error':
+        return 'var(--cpsl-color-error)';
+      case 'warn':
+        return '#ff9500';
+      case 'info':
+        return '#007aff';
+      default:
+        return 'var(--cpsl-color-text-primary)';
+    }
+  }};
+`;
+
+const ConsoleDisplay = () => {
+  const [logs, setLogs] = useState<Array<{ message: string; level: 'log' | 'warn' | 'error' | 'info'; timestamp: string }>>(
+    [],
+  );
+  const containerRef = useRef<HTMLDivElement>(null);
+  const originalConsole = useRef<typeof console>();
+
+  useEffect(() => {
+    // Store original console methods
+    originalConsole.current = {
+      log: console.log,
+      warn: console.warn,
+      error: console.error,
+      info: console.info,
+    } as typeof console;
+
+    // Helper function to safely stringify arguments
+    const stringifyArg = (arg: any): string => {
+      if (typeof arg === 'string') return arg;
+      if (typeof arg === 'number' || typeof arg === 'boolean') return String(arg);
+      if (arg === null) return 'null';
+      if (arg === undefined) return 'undefined';
+      if (typeof arg === 'function') return `[Function: ${arg.name || 'anonymous'}]`;
+
+      if (typeof arg === 'object') {
+        try {
+          const seen = new Set();
+          return JSON.stringify(
+            arg,
+            (key, value) => {
+              if (typeof value === 'object' && value !== null) {
+                if (seen.has(value)) {
+                  return '[Circular Reference]';
+                }
+                seen.add(value);
+              }
+              return value;
+            },
+            2,
+          );
+        } catch (error) {
+          return '[Object - Cannot stringify]';
+        }
+      }
+
+      return String(arg);
+    };
+
+    // Override console methods
+    const addLog = (level: 'log' | 'warn' | 'error' | 'info', args: any[]) => {
+      const message = args.map(stringifyArg).join(' ');
+      const timestamp = new Date().toLocaleTimeString();
+
+      setLogs(prevLogs => {
+        const newLogs = [...prevLogs, { message, level, timestamp }];
+        // Keep only the last 1000 logs to prevent memory issues
+        return newLogs.slice(-1000);
+      });
+    };
+
+    // Override console methods
+    console.log = (...args) => {
+      originalConsole.current?.log(...args);
+      addLog('log', args);
+    };
+
+    console.warn = (...args) => {
+      originalConsole.current?.warn(...args);
+      addLog('warn', args);
+    };
+
+    console.error = (...args) => {
+      originalConsole.current?.error(...args);
+      addLog('error', args);
+    };
+
+    console.info = (...args) => {
+      originalConsole.current?.info(...args);
+      addLog('info', args);
+    };
+
+    // Cleanup function to restore original console
+    return () => {
+      if (originalConsole.current) {
+        console.log = originalConsole.current.log;
+        console.warn = originalConsole.current.warn;
+        console.error = originalConsole.current.error;
+        console.info = originalConsole.current.info;
+      }
+    };
+  }, []);
+
+  // Auto-scroll to bottom when new logs are added
+  useEffect(() => {
+    if (containerRef.current) {
+      containerRef.current.scrollTop = containerRef.current.scrollHeight;
+    }
+  }, [logs]);
+
+  const clearLogs = () => {
+    setLogs([]);
+  };
+
+  return (
+    <SectionCard>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <CpslText variant="headingXS" weight="semiBold">
+          Console Logs ({logs.length})
+        </CpslText>
+        <CpslButton onClick={clearLogs} variant="outline">
+          Clear Logs
+        </CpslButton>
+      </div>
+      <ConsoleLogContainer ref={containerRef}>
+        {logs.length === 0 ? (
+          <div style={{ color: 'var(--cpsl-color-text-secondary)', fontStyle: 'italic' }}>No console logs yet...</div>
+        ) : (
+          logs.map((log, index) => (
+            <LogEntry key={index} level={log.level}>
+              <span style={{ color: 'var(--cpsl-color-text-secondary)' }}>[{log.timestamp}] </span>
+              {log.message}
+            </LogEntry>
+          ))
+        )}
+      </ConsoleLogContainer>
     </SectionCard>
   );
 };

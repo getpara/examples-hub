@@ -28,8 +28,8 @@ import {
   AuthState,
   AuthStateSignup,
   AuthStateLogin,
-  getPortalBaseURL,
   AuthStateVerify,
+  isMobile,
 } from '@getpara/web-sdk';
 import { useInternalClient } from '../../provider/hooks/utils/useInternalClient.js';
 import { ParaModalProps } from '../../modal/types/modalProps.js';
@@ -39,6 +39,7 @@ import { routeMobileExternalWallet } from '../../modal/utils/routeMobileExternal
 import { useStore } from '../stores/useStore.js';
 import { useFormattedBiometricHints } from '../hooks/utils/useFormattedBiometricHints.js';
 import { MutationStatus, useQueryClient } from '@tanstack/react-query';
+import { validatePortalOrigin } from '../../modal/utils/validatePortalOrigin.js';
 
 type Value = {
   signUpOrLogIn: (_: VerifiedAuth) => void;
@@ -173,10 +174,7 @@ export function AuthProvider({
 
     // Create the handler function
     const handleMessage = (event: MessageEvent) => {
-      const portalBase = getPortalBaseURL(para.ctx);
-      const portalLocalBase = getPortalBaseURL(para.ctx, true);
-
-      if (!event.origin.startsWith(portalBase) && !event.origin.startsWith(portalLocalBase)) {
+      if (!validatePortalOrigin(event, para.ctx)) {
         return; // Ignore messages from untrusted origins
       }
 
@@ -262,12 +260,14 @@ export function AuthProvider({
             setStep(ModalStep.AWAITING_BIOMETRIC_CREATION);
           }
 
-          refs.popupWindow.current = openPopup({
-            url: authState.passkeyUrl!,
-            target: 'ParaPasskey',
-            type: 'CREATE_PASSKEY',
-            current: refs.popupWindow.current,
-          });
+          if (typeof window !== 'undefined') {
+            refs.popupWindow.current = openPopup({
+              url: authState.passkeyUrl!,
+              target: 'ParaPasskey',
+              type: 'CREATE_PASSKEY',
+              current: refs.popupWindow.current,
+            });
+          }
           break;
         case AuthMethod.PASSWORD:
           setupListener();
@@ -316,14 +316,16 @@ export function AuthProvider({
   );
 
   const login = (authState: AuthStateLogin) => {
-    if (authState.isWalletSelectionNeeded || authState.passkeyUrl) {
-      setStep(ModalStep.BIOMETRIC_LOGIN);
-    } else {
+    const hasPasskey = !!authState.passkeyUrl;
+
+    if (!hasPasskey) {
       setupListener();
 
       setIFrameUrl(authState.passwordUrl! || authState.pinUrl!);
       setIsIFrameReady(false);
       setStep(ModalStep.EMBEDDED_PASSWORD_LOGIN);
+    } else {
+      setStep(ModalStep.BIOMETRIC_LOGIN);
     }
 
     pollLogin();
@@ -399,12 +401,14 @@ export function AuthProvider({
         return;
       }
 
-      refs.popupWindow.current = openPopup({
-        url: isPIN ? authState.pinUrl! : isPassword ? authState.passwordUrl! : authState.passkeyUrl!,
-        target: isPIN ? 'ParaPIN' : isPassword ? 'ParaPassword' : 'ParaPasskey',
-        type: isPIN ? 'LOGIN_PASSWORD' : isPassword ? 'LOGIN_PASSWORD' : 'LOGIN_PASSKEY',
-        current: refs.popupWindow.current,
-      });
+      if (typeof window !== 'undefined') {
+        refs.popupWindow.current = openPopup({
+          url: isPIN ? authState.pinUrl! : isPassword ? authState.passwordUrl! : authState.passkeyUrl!,
+          target: isPIN ? 'ParaPIN' : isPassword ? 'ParaPassword' : 'ParaPasskey',
+          type: isPIN ? 'LOGIN_PASSWORD' : isPassword ? 'LOGIN_PASSWORD' : 'LOGIN_PASSKEY',
+          current: refs.popupWindow.current,
+        });
+      }
 
       setStep(isPassword || isPIN ? ModalStep.AWAITING_PASSWORD_LOGIN : ModalStep.AWAITING_BIOMETRIC_LOGIN);
     },
@@ -412,13 +416,39 @@ export function AuthProvider({
   );
 
   const onNewAuthState = async (authState: AuthState) => {
-    refs.popupWindow.current = null;
     setAuthState(authState);
 
     switch (authState.stage) {
       case 'verify':
-        if (isExternalWallet(authState.auth) && authState.signatureVerificationMessage) {
-          setStep(ModalStep.EXTERNAL_WALLET_VERIFICATION);
+        if (isExternalWallet(authState.auth)) {
+          if (authState.loginUrl && authState.externalWallet?.withFullParaAuth) {
+            let isBasicLogin = false;
+
+            if (authState.nextStage === 'login') {
+              isBasicLogin = authState.loginAuthMethods.includes(AuthMethod.BASIC_LOGIN);
+            } else {
+              isBasicLogin = authState.signupAuthMethods.includes(AuthMethod.BASIC_LOGIN);
+            }
+
+            if (authState.nextStage === 'login') {
+              setFlow('login');
+              isBasicLogin && pollLogin();
+            } else {
+              setFlow('signup');
+              isBasicLogin && pollSignup();
+            }
+
+            if (!isMobile() && refs.popupWindow.current) {
+              (refs.popupWindow.current as Window).location.href = authState.loginUrl;
+              setStep(ModalStep.AWAITING_ACCOUNT);
+            } else {
+              setIFrameUrl(authState.loginUrl);
+              setStep(ModalStep.OTP);
+              setupListener();
+            }
+          } else {
+            setStep(ModalStep.EXTERNAL_WALLET_VERIFICATION);
+          }
         } else {
           if (authState.nextStage === 'login') {
             setFlow('login');
@@ -470,12 +500,15 @@ export function AuthProvider({
         }
         break;
       case 'done':
-        if (authState.isNewUser) {
-          pollSignup();
-          setFlow('signup');
-        } else {
-          pollLogin();
-          setFlow('login');
+        // This is done in the verify step for withFullParaAuth external wallets & should not be done for verify-only external wallets
+        if (!authState.externalWallet?.withFullParaAuth && !authState.externalWallet?.withVerification) {
+          if (authState.isNewUser) {
+            pollSignup();
+            setFlow('signup');
+          } else {
+            pollLogin();
+            setFlow('login');
+          }
         }
 
         if (!authState.isWalletSelectionNeeded) {

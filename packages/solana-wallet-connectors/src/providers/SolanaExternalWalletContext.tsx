@@ -18,6 +18,7 @@ import {
 import bs58 from 'bs58';
 import { externalHooks, TExternalHooks } from './externalHooks.js';
 import { farcasterWallet } from '../wallets/connectors/index.js';
+import { Chain } from '@solana-mobile/mobile-wallet-adapter-protocol';
 
 export type SolanaExternalWalletContextType = ExternalWalletContextType & TExternalHooks & FarcasterMiniAppManagement;
 
@@ -38,7 +39,8 @@ export function SolanaExternalWalletProvider({
   walletsWithFullAuth,
   includeWalletVerification,
   connectionOnly,
-}: SolanaExternalWalletProviderConfigFull & PropsWithChildren) {
+  chain,
+}: SolanaExternalWalletProviderConfigFull & PropsWithChildren & { chain: Chain }) {
   const {
     wallets: adapters,
     select: selectWallet,
@@ -86,6 +88,8 @@ export function SolanaExternalWalletProvider({
           withVerification: includeWalletVerification,
           isConnectionOnly: connectionOnly,
         },
+        uri: window?.location.origin,
+        chainId: chain,
       });
     } catch (err) {
       await reset();
@@ -192,6 +196,14 @@ export function SolanaExternalWalletProvider({
       throw new Error('Adapter not found.');
     }
 
+    const wallet = getWallet(adapter.name);
+
+    if (wallet.getQrUri) {
+      const qrUri = await wallet.getQrUri();
+
+      window.dispatchEvent(new CustomEvent<string>('PARA_WALLETCONNECT_URI_READY', { detail: qrUri }));
+    }
+
     // if (switchWallet) {
     selectWallet(adapter.name);
     // Using a timeout here to ensure the selectWallet function sets the wallet completely before connecting.
@@ -267,7 +279,8 @@ export function SolanaExternalWalletProvider({
       switch (err.message) {
         case 'User aborted.':
         case 'Approval Denied':
-        case 'You canceled this request.': {
+        case 'You canceled this request.':
+        case 'Disconnected before connect event': {
           error = 'Connection request rejected';
           break;
         }

@@ -63,7 +63,9 @@ export function ParaSolanaProvider({ children, config, internalConfig }: ParaSol
         localStorageKey="paraSolanaExternal"
         autoConnect={true}
       >
-        <SolanaExternalWalletProvider {...solanaExternalWalletProviderProps}>{children}</SolanaExternalWalletProvider>
+        <SolanaExternalWalletProvider {...solanaExternalWalletProviderProps} chain={chain}>
+          {children}
+        </SolanaExternalWalletProvider>
       </SolanaWalletProvider>
     </ConnectionProvider>
   );

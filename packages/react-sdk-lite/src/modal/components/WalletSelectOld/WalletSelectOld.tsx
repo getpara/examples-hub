@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
 import { useDropdownPosition } from '../AuthInput/hooks/useDropdownPosition.js';
-import { safeStyled, useCopyToClipboard, WalletTypeIcon as WalletTypeIconBase } from '@getpara/react-common';
+import { MOBILE_SIZE, safeStyled, useCopyToClipboard, WalletTypeIcon as WalletTypeIconBase } from '@getpara/react-common';
 import { useAccount, useWallet, useWalletState } from '../../../provider/index.js';
 import { CpslButton, CpslIcon, CpslSelect, CpslSelectItem, CpslText } from '@getpara/react-components';
 import { TWalletType, Wallet as TWallet } from '@getpara/web-sdk';
@@ -81,7 +81,7 @@ export const WalletSelectOld = () => {
           Select Wallet
         </CpslText>
       )}
-      <SelectContainer ref={containerRef} id="addressInputContainer">
+      <SelectContainer ref={containerRef} id="addressInputContainerOld">
         <Select
           selectedValue={getValue(activeWallet?.id, activeWallet?.type)}
           onCpslSelectValueChange={e => {
@@ -90,11 +90,11 @@ export const WalletSelectOld = () => {
           }}
           showFormattedSelectedItem
           placeholder="Choose wallet..."
-          anchorElId="addressInputContainer"
+          anchorElId="addressInputContainerOld"
           dropdownMaxHeight={dropdownMaxHeight}
           $width={dropdownWidth ?? 0}
-          // Adding 16 for the top padding + 1 for the border
-          $top={(mobileAnchor ?? 0) + 16 + 1}
+          // Adding 220 for the top padding + 1 for the border
+          $top={(mobileAnchor ?? 0) + 220 + 1}
           selectedItemVariant="bodyXS"
           icon={isMultiWallet ? 'chevronUp' : null}
           disabled={!isMultiWallet}
@@ -141,7 +141,20 @@ export const Select = safeStyled(CpslSelect)<{ $width: number; $top?: number }>`
 
   &::part(dropdown) {
     min-width: ${({ $width }) => `${$width - 2}px`};
+  } 
+
+  &::part(popover) {
+      /* Have to adjust the top of the popover here since we're using a transform on the modal which causes fixed position items to not be relative to the viewport */
+      @media (max-width: ${MOBILE_SIZE}px) {
+        top: ${({ $top }) => ($top ? `${$top}px` : '0px')};
+        bottom: 16px;
+      }
+      cpsl-auth-modal.force-mobile-media & {
+        top: ${({ $top }) => ($top ? `${$top}px` : '0px')};
+        bottom: 16px;
+      }
   }
+  
 
   &::part(icon) {
     --icon-color: var(--cpsl-color-text-primary);

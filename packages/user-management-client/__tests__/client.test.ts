@@ -309,6 +309,8 @@ describe('Client', () => {
           type: 'EVM' as TWalletType,
           provider: 'metamask',
         },
+        chainId: 'chain-id',
+        uri: 'https://uri.com',
       };
 
       await client.loginExternalWallet(body);
@@ -445,12 +447,26 @@ describe('Client', () => {
       expect(mocks.post).toBeCalledWith(`/touch?regenerate=${!!regenerate}`);
     });
 
+    it('sessionAddPortalVerification', async () => {
+      await client.sessionAddPortalVerification();
+
+      expect(mocks.post).toBeCalledWith(`/sessions/portal-verification`);
+    });
+
     it('sessionOrigin', async () => {
       const sessionLookupId = 'session-lookup-id';
 
       await client.sessionOrigin(sessionLookupId);
 
       expect(mocks.get).toBeCalledWith(`/sessions/${sessionLookupId}/origin`);
+    });
+
+    it('sessionSIWEMessage', async () => {
+      const sessionLookupId = 'session-lookup-id';
+
+      await client.sessionSIWEMessage(sessionLookupId);
+
+      expect(mocks.get).toBeCalledWith(`/sessions/${sessionLookupId}/siwe-message`);
     });
 
     it('verifyWebChallenge', async () => {

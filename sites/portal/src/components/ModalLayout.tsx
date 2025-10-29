@@ -18,13 +18,13 @@ const DEFAULT_THEME = {
   backgroundColor: '#FFF',
 };
 
-const sendHeightToParent = (height: number) => {
+const sendHeightToParent = (height: number, trustedOrigin: string) => {
   (window.opener || window.parent)?.postMessage(
     {
       type: 'HEIGHT',
       height,
     },
-    '*',
+    trustedOrigin,
   );
 };
 
@@ -60,6 +60,7 @@ export const ModalLayout = () => {
   const portalBorderRadius = searchParams.get('portalPrimaryButtonTextColor');
   const portalFont = searchParams.get('portalFont');
   const portalThemeMode = searchParams.get('portalThemeMode');
+  const trustedOrigin = searchParams.get('origin') || '*';
 
   const [partner, setPartner] = useState<PartnerEntity | undefined>();
   const [isDark, setIsDark] = useState<boolean>(false);
@@ -157,7 +158,7 @@ export const ModalLayout = () => {
     }
     getPartner();
 
-    (window.opener || window.parent)?.postMessage({ type: 'LOADED' }, '*');
+    (window.opener || window.parent)?.postMessage({ type: 'LOADED' }, trustedOrigin);
   }, []);
 
   // Add this effect to measure content height
@@ -166,7 +167,7 @@ export const ModalLayout = () => {
       const observer = new ResizeObserver(entries => {
         for (const entry of entries) {
           const height = entry.contentRect.height;
-          sendHeightToParent(height);
+          sendHeightToParent(height, trustedOrigin);
         }
       });
 
@@ -174,7 +175,7 @@ export const ModalLayout = () => {
 
       // Send initial height
       const initialHeight = contentRef.current.scrollHeight;
-      sendHeightToParent(initialHeight);
+      sendHeightToParent(initialHeight, trustedOrigin);
 
       return () => {
         observer.disconnect();
@@ -191,7 +192,7 @@ export const ModalLayout = () => {
       <OuterContainer isBranded={isBranded}>
         <ContentMeasurer ref={contentRef}>
           <Suspense fallback={<ModalLoading noText />}>
-            <Outlet context={{ partner, homepageUrl, isDark, toggleBranding }} />
+            <Outlet context={{ partner, homepageUrl, isDark, toggleBranding, trustedOrigin }} />
           </Suspense>
         </ContentMeasurer>
       </OuterContainer>

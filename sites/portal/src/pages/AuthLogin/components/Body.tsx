@@ -18,6 +18,7 @@ import { OTP } from './OTP';
 import { Farcaster } from './Farcaster';
 import { TelegramLogin } from '../../TelegramLogin/TelegramLogin';
 import { BasicLoginUpgrade } from '../../BasicLoginUpgrade/BasicLoginUpgrade';
+import { ExternalWallet } from './ExternalWallet';
 
 interface BodyProps {
   addDeviceUrl?: string;
@@ -139,6 +140,9 @@ export const Body = ({
       }
       case AuthLoginStep.BASIC_LOGIN_UPGRADE: {
         return <BasicLoginUpgrade onUpgradeClick={onBasicLoginUpgradeClick} onSkipClick={onSkipBasicLoginUpgradeClick} />;
+      }
+      case AuthLoginStep.EXTERNAL_WALLET: {
+        return <ExternalWallet onLogin={postLogin} />;
       }
     }
   };

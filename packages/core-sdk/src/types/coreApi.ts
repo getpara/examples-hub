@@ -16,6 +16,9 @@ import {
   TLinkedAccountType,
   LinkedAccounts,
   AuthMethod,
+  ServerAuthStateSignup,
+  ServerAuthStateLogin,
+  ServerAuthStateDone,
 } from '@getpara/user-management-client';
 import {
   AuthStateLogin,
@@ -37,6 +40,7 @@ import {
   TelegramParams,
   OAuthParams,
   NewCredentialUrlParams,
+  AuthStateDone,
 } from './methods.js';
 import { ParaCore } from '../ParaCore.js';
 import { FullSignatureRes, Wallet } from './wallet.js';
@@ -293,12 +297,29 @@ export type CoreMethods = Record<CoreMethodName, { params?: unknown; response?: 
        * The external wallet information to use for login.
        */
       externalWallet: ExternalWalletInfo | ExternalWalletInfo[];
+      /**
+       * The chain ID used to generate the SIWE message.
+       */
+      chainId?: string;
+      /**
+       * The URI used to generate the SIWE message.
+       */
+      uri?: string;
     };
     response: AuthStateVerifyOrLogin;
   };
   verifyExternalWallet: {
-    params: AuthStateBaseParams & VerifyExternalWalletParams;
-    response: AuthStateSignup | AuthStateLogin;
+    params:
+      | (AuthStateBaseParams & {
+          serverAuthState: ServerAuthStateSignup | ServerAuthStateLogin | ServerAuthStateDone;
+          // When serverAuthState is present, exclude VerifyExternalWalletParams
+        })
+      | (AuthStateBaseParams &
+          VerifyExternalWalletParams & {
+            serverAuthState?: undefined;
+            // When serverAuthState is undefined, require VerifyExternalWalletParams
+          });
+    response: AuthStateSignup | AuthStateLogin | AuthStateDone;
   };
   resendVerificationCode: {
     params: { type?: 'SIGNUP' | 'LINK_ACCOUNT' | 'LOGIN' } | undefined;

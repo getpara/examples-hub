@@ -1,5 +1,14 @@
 export function isAndroid(): boolean {
-  return typeof navigator !== 'undefined' && /android/i.test(navigator.userAgent);
+  if (typeof navigator === 'undefined') return false;
+
+  const userAgent = navigator.userAgent.toLowerCase();
+
+  // Check multiple indicators
+  return (
+    /android/i.test(userAgent) ||
+    /linux.*mobile/i.test(userAgent) ||
+    (navigator.platform && navigator.platform.toLowerCase().includes('android'))
+  );
 }
 
 export function isSmallIOS(): boolean {
@@ -14,12 +23,26 @@ export function isLargeIOS(): boolean {
 }
 
 export function isTablet(): boolean {
-  return (
-    typeof navigator !== 'undefined' &&
-    /(ipad|tablet|(android(?!.*mobile))|(windows(?!.*phone)(.*touch))|kindle|playbook|silk|(puffin(?!.*(IP|AP|WP))))/.test(
-      navigator.userAgent,
-    )
-  );
+  if (typeof navigator === 'undefined') return false;
+
+  const userAgent = navigator.userAgent.toLowerCase();
+
+  // iPad detection (including iPad Pro on desktop Safari)
+  if (/ipad/.test(userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) {
+    return true;
+  }
+
+  // Android tablet detection - look for explicit tablet indicators
+  if (/android/.test(userAgent)) {
+    // Only consider it a tablet if it explicitly says "tablet" or has certain screen characteristics
+    return (
+      /tablet/.test(userAgent) ||
+      (/android/.test(userAgent) && !/mobile/.test(userAgent) && typeof screen !== 'undefined' && screen.width >= 768)
+    );
+  }
+
+  // Other known tablet patterns
+  return /(tablet|kindle|playbook|silk)/.test(userAgent);
 }
 
 export function isIOS(): boolean {

@@ -4,6 +4,13 @@ import { useCloseWindow } from '../../src/hooks/useCloseWindow';
 import { REDIRECT_TIMEOUT } from '../../src/constants';
 import * as isIFramedModule from '../../src/utils/isIFramed';
 
+// Mock the modal outlet context
+vi.mock('../../src/hooks/useModalOutletContext', () => ({
+  useModalOutletContext: () => ({
+    trustedOrigin: '*',
+  }),
+}));
+
 describe('useCloseWindow', () => {
   let mockParentPostMessage: ReturnType<typeof vi.fn>;
 

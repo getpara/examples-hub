@@ -2,8 +2,8 @@ import { CpslSpinner } from '@getpara/react-components';
 import { useFarcasterLogin } from '../../hooks/useFarcasterLogin.js';
 import { safeStyled } from '@getpara/react-common';
 import { useEffect, useState } from 'react';
-import { getPortalBaseURL } from '@getpara/web-sdk';
 import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
+import { validatePortalOrigin } from '../../utils/validatePortalOrigin.js';
 
 export function FarcasterOAuthStep() {
   const { url, isLoaded, setIsLoaded } = useFarcasterLogin({
@@ -18,9 +18,7 @@ export function FarcasterOAuthStep() {
         return; // No iFrame URL to check against
       }
 
-      const portalBase = getPortalBaseURL(para.ctx);
-
-      if (!event.origin.startsWith(portalBase)) {
+      if (!validatePortalOrigin(event, para.ctx)) {
         return; // Ignore messages from untrusted origins
       }
 
@@ -30,8 +28,10 @@ export function FarcasterOAuthStep() {
         }
       }
     };
-    window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
+    typeof window !== 'undefined' && window.addEventListener('message', handleMessage);
+    return () => {
+      typeof window !== 'undefined' && window.removeEventListener('message', handleMessage);
+    };
   }, [url]);
 
   return (

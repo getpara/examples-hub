@@ -13,7 +13,7 @@ import {
 } from 'wagmi';
 import { ParaDetails, WagmiConnectorInstance } from '../types/Wallet.js';
 import { isEIP6963Connector } from '../utils/isEIP6963Connector.js';
-import { getWalletConnectUri } from '../utils/getWalletConnectUri.js';
+import { emitWalletConnectUri } from '../utils/getWalletConnectUri.js';
 import { normalize } from 'viem/ens';
 import { useExternalWalletStore } from '../stores/useStore.js';
 import {
@@ -366,6 +366,8 @@ export function EvmExternalWalletProvider({
           isConnectionOnly: connectionOnly,
           withVerification: includeWalletVerification,
         },
+        uri: window?.location.origin,
+        chainId: (chains[0]?.id ?? chainId)?.toString(),
       });
     } catch (err) {
       await disconnectAsync();
@@ -404,6 +406,14 @@ export function EvmExternalWalletProvider({
   };
 
   const connectBase = async (connector: WagmiConnectorInstance): Promise<string | undefined> => {
+    if (
+      connector.type === 'walletConnect' ||
+      connector.paraDetails?.internalId === 'WALLETCONNECT' ||
+      connector.paraDetails?.showQrModal
+    ) {
+      await emitWalletConnectUri(connector, (connector as any).getUri);
+    }
+
     const walletChainId = await connector.getChainId();
 
     const data = await connectAsync({
@@ -479,15 +489,13 @@ export function EvmExternalWalletProvider({
   };
 
   const findConnector = (providerId: string): WagmiConnectorInstance | undefined => {
-    return connectorsRef.current.find(w =>
+    const connector = connectorsRef.current.find(w =>
       [w?.paraDetails?.name, w?.paraDetails?.id, w?.paraDetails?.internalId].includes(providerId),
     );
-  };
 
-  // old solution, kept for reference
-  // const getQrUri = (connector: WagmiConnectorInstance) => () => {
-  //   return getWalletConnectUri(connector, connector.paraDetails?.getUri);
-  // };
+    // Moving getUri up a level so the qr event is properly emitted on connect
+    return connector ? { ...connector, getUri: connector.paraDetails?.getUri } : undefined;
+  };
 
   const requestInfo = async (providerId: string): Promise<ExternalWalletInfo> => {
     const connector = findConnector(providerId);
@@ -588,12 +596,6 @@ export function EvmExternalWalletProvider({
 
       const connector = { ...c, ...c.paraDetails };
 
-      // Detect WC‑capable connectors
-      const supportsWalletConnect =
-        connector.type === 'walletConnect' ||
-        connector.paraDetails?.internalId === 'WALLETCONNECT' ||
-        connector.paraDetails?.showQrModal;
-
       const isInjected = !c.paraDetails && eip6963Names.includes(c.name);
 
       // If there is a para connector, use that not to injected
@@ -612,7 +614,6 @@ export function EvmExternalWalletProvider({
         connect: () => connect(connector),
         connectMobile: (manual?: boolean) => connectMobile(connector, manual),
         type: 'EVM',
-        ...(supportsWalletConnect && { getQrUri: () => getWalletConnectUri(connector, connector.getUri) }),
       } as CommonWallet;
     })
     .filter(Boolean); // remove undefined from map

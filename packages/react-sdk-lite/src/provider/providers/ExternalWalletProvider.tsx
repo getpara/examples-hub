@@ -1,8 +1,8 @@
-import { PropsWithChildren, createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { PropsWithChildren, createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { isMobile, truncateAddress, TWalletType, Wallet } from '@getpara/web-sdk';
 import { useInternalClient } from '../hooks/utils/useInternalClient.js';
 import { useStore } from '../stores/useStore.js';
-import { ModalStep } from '../../modal/index.js';
+import { ModalStep, openPopup } from '../../modal/index.js';
 import { useModalStore } from '../../modal/stores/index.js';
 import { useAccount, useModal, useParaStatus, useVerifyExternalWallet, useWalletState } from '../hooks/index.js';
 import {
@@ -20,6 +20,10 @@ import { useAuthActions } from './AuthProvider.js';
 import { CosmosSignResult } from '@getpara/cosmos-wallet-connectors';
 import { IS_FULLY_LOGGED_IN_BASE_KEY } from '../hooks/queries/useIsFullyLoggedIn.js';
 import { useQueryClient } from '@tanstack/react-query';
+import { ServerAuthStateDone, ServerAuthStateLogin, ServerAuthStateSignup } from '@getpara/user-management-client';
+import { useGoBack } from '../../modal/hooks/useGoBack.js';
+import { validatePortalOrigin } from '../../modal/utils/validatePortalOrigin.js';
+import { routeMobileExternalWallet } from '../../modal/utils/routeMobileExternalWallet.js';
 
 export const useWalletDisplayHelpers = (wallet: CommonWallet | undefined) => {
   const isUsingMobileConnector = useModalStore(state => state.isUsingMobileConnector);
@@ -81,7 +85,13 @@ type Value = Omit<
     };
     username?: string;
     avatar?: string;
-    connectExternalWallet: (wallet: CommonWallet, isMobile?: boolean, isManualWalletConnect?: boolean) => Promise<void>;
+    connectExternalWallet: (_: {
+      wallet: CommonWallet;
+      isMobile?: boolean;
+      isManualWalletConnect?: boolean;
+      isResetAfterManualWalletConnect?: boolean;
+      isRetryConnection?: boolean;
+    }) => Promise<void>;
     addAdditionalExternalWallet: (wallet: CommonWallet) => Promise<void>;
     disconnectExternalWallet: () => Promise<void>;
     setChainIdSwitchingTo: (chainId?: string) => void;
@@ -168,10 +178,12 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
   const { onNewAuthState } = useAuthActions();
   const { verifyExternalWalletAsync } = useVerifyExternalWallet();
   const queryClient = useQueryClient();
+  const goBack = useGoBack();
 
   const [qrUri, setQrUri] = useState<string>();
   const [chainIdSwitchingTo, setChainIdSwitchingTo] = useState<string>();
   const [isSigningMessage, setIsSigningMessage] = useState(false);
+  const popupCloseIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Filter any wallets that aren't included in the sort array, sort by the array then sort by installed extensions
   const allWallets = [...evmWallets, ...solanaWallets, ...cosmosWallets];
@@ -199,21 +211,32 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
     [wallets, selectedExternalWallet],
   );
 
-  const updateQrUri = async () => {
-    const uri = await wallet?.getQrUri?.();
+  const [walletConnectCleanup, setWalletConnectCleanup] = useState<(() => void) | null>(null);
 
-    setQrUri(uri);
-  };
-
-  useEffect(() => {
-    if (wallet) {
-      if (!qrUri) {
-        updateQrUri();
-      }
-    } else if (qrUri) {
-      setQrUri(undefined);
+  const listenForWalletConnectUri = () => {
+    setQrUri(undefined);
+    // Clean up any existing listener first
+    if (walletConnectCleanup) {
+      walletConnectCleanup();
     }
-  }, [wallet]);
+
+    const callback = (event: CustomEvent<string>) => {
+      routeMobileExternalWallet(event.detail);
+      setQrUri(event.detail);
+      // Clean up after receiving the event
+      cleanup();
+      setWalletConnectCleanup(null);
+    };
+
+    const cleanup = () => {
+      window.removeEventListener('PARA_WALLETCONNECT_URI_READY', callback);
+    };
+
+    window.addEventListener('PARA_WALLETCONNECT_URI_READY', callback);
+    setWalletConnectCleanup(() => cleanup);
+
+    return cleanup;
+  };
 
   const isWithFullAuth = (wallet: Wallet | CommonWallet) => {
     if (connectionOnly) {
@@ -438,7 +461,19 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
   }, [cosmosSignVerificationMessage, evmSignVerificationMessage, solanaSignVerificationMessage, wallet]);
 
   const signMessage = useCallback(
-    async ({ message, externalWallet: _externalWallet }: { message: string; externalWallet?: ExternalWalletInfo }) => {
+    async ({
+      message,
+      externalWallet: _externalWallet,
+    }: {
+      message: string;
+      externalWallet?: ExternalWalletInfo;
+    }): Promise<{
+      address: string;
+      signature: string;
+      cosmosPublicKeyHex?: string;
+      cosmosSigner?: string;
+      addressBech32?: string;
+    }> => {
       setExternalWalletError();
       setIsSigningMessage(true);
       let externalWallet = _externalWallet;
@@ -449,16 +484,18 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
         switch (walletType) {
           case 'COSMOS':
             {
-              const { address, signature, error, cosmosPublicKeyHex, cosmosSigner } = await cosmosSignMessage({
-                message,
-                externalWallet,
-              });
+              const { address, signature, error, cosmosPublicKeyHex, cosmosSigner, addressBech32 } = await cosmosSignMessage(
+                {
+                  message,
+                  externalWallet,
+                },
+              );
 
               if (error) {
                 throw new Error(error);
               } else if (signature && address) {
                 // If signature is returned address, cosmosPublicKeyHex and cosmosSigner will also be returned
-                response = { address, signature, cosmosPublicKeyHex, cosmosSigner };
+                response = { address, signature, cosmosPublicKeyHex, cosmosSigner, addressBech32 };
               }
             }
             break;
@@ -503,6 +540,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
 
   const addAdditionalExternalWallet = useCallback(
     async (wallet: CommonWallet) => {
+      setExternalWalletError();
       try {
         // Use the walletInfo passed from connectExternalWallet, or get it if not provided
         const walletInfo = await requestInfo(wallet.id as TExternalWallet, wallet.type as TWalletType);
@@ -589,13 +627,235 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
     [para, connectionOnly, includeWalletVerification, setStep, setExternalWalletError],
   );
 
+  const setupExternalWalletVerificationStatusListener = (wallet: ExternalWalletInfo) => {
+    typeof window !== 'undefined' &&
+      window.addEventListener('message', async function handleMessage(event) {
+        if (!validatePortalOrigin(event, para.ctx)) {
+          return; // Ignore messages from untrusted origins
+        }
+
+        if (event.data?.type === 'EW_VERIFY_SUCCESS') {
+          clearPopupWindowCloseListener();
+          const serverAuthState = event.data?.serverAuthState as
+            | ServerAuthStateSignup
+            | ServerAuthStateLogin
+            | ServerAuthStateDone;
+
+          if (serverAuthState && serverAuthState.externalWallet?.withFullParaAuth) {
+            const authState = await para.verifyExternalWallet({ serverAuthState });
+            await onNewAuthState(authState);
+          } else {
+            setStep(ModalStep.LOGIN_DONE);
+          }
+          window.removeEventListener('message', handleMessage);
+        }
+
+        if (event.data?.type === 'EW_VERIFY_RETRY') {
+          await handleTriggerSignMessage(wallet, event.data.message);
+          window.removeEventListener('message', handleMessage);
+        }
+      });
+  };
+
+  const handlePostMessage = (message: any) => {
+    if (refs.popupWindow.current) {
+      refs.popupWindow.current.postMessage(message, '*');
+    } else if (refs.iFrame.current) {
+      refs.iFrame.current.contentWindow?.postMessage(message, '*');
+    }
+  };
+
+  const handleTriggerSignMessage = async (wallet: ExternalWalletInfo, message: string) => {
+    setupExternalWalletVerificationStatusListener(wallet);
+    try {
+      const { address, signature, cosmosPublicKeyHex, cosmosSigner, addressBech32 } = await signMessage({
+        message,
+        externalWallet: wallet,
+      });
+
+      const paraWallet = Object.values(para.externalWallets)[0];
+      const walletType = paraWallet?.type;
+
+      let verifyExternalWalletParams: VerifyExternalWalletParams | undefined;
+
+      const withVerification = includeWalletVerification;
+      const isConnectionOnly = connectionOnly;
+      const withFullParaAuth = paraWallet?.name ? isWithFullAuth(paraWallet) : false;
+
+      const defaultWalletInfo = {
+        withVerification,
+        isConnectionOnly,
+        withFullParaAuth,
+        provider: paraWallet.name,
+        providerId: paraWallet.externalProviderId,
+        isExternal: true,
+      };
+
+      switch (walletType) {
+        case 'COSMOS':
+          {
+            verifyExternalWalletParams = {
+              externalWallet: {
+                partnerId: para.partnerId!,
+                type: 'COSMOS',
+                address,
+                addressBech32,
+                ...defaultWalletInfo,
+              },
+              signedMessage: signature,
+              cosmosPublicKeyHex,
+              cosmosSigner,
+            };
+          }
+          break;
+        case 'EVM':
+          {
+            verifyExternalWalletParams = {
+              externalWallet: {
+                partnerId: para.partnerId!,
+                type: 'EVM',
+                address,
+                ...defaultWalletInfo,
+              },
+              signedMessage: signature,
+            };
+          }
+          break;
+        case 'SOLANA':
+          {
+            verifyExternalWalletParams = {
+              externalWallet: {
+                partnerId: para.partnerId!,
+                type: 'SOLANA',
+                address,
+                ...defaultWalletInfo,
+              },
+              signedMessage: signature,
+            };
+          }
+          break;
+        default:
+          break;
+      }
+
+      if (!verifyExternalWalletParams?.externalWallet || !verifyExternalWalletParams?.signedMessage) {
+        console.error('No signature or address found on the verifyWalletSignature response.');
+        handlePostMessage({ type: 'EW_SIGN_MESSAGE_ERROR', error: 'Signature verification failed.' });
+        return;
+      }
+      handlePostMessage({ type: 'EW_SIGN_MESSAGE_SUCCESS', verifyExternalWalletParams });
+    } catch (error) {
+      handlePostMessage({ type: 'EW_SIGN_MESSAGE_ERROR', error: error.message || 'Error signing message' });
+    }
+  };
+
+  const setupExternalWalletVerificationTriggerListener = (wallet?: ExternalWalletInfo) => {
+    if (!wallet) {
+      return;
+    }
+
+    typeof window !== 'undefined' &&
+      window.addEventListener('message', async function handleMessage(event) {
+        if (!validatePortalOrigin(event, para.ctx)) {
+          return; // Ignore messages from untrusted origins
+        }
+
+        if (event.data?.type === 'EW_TRIGGER_SIGN_MESSAGE') {
+          await handleTriggerSignMessage(wallet, event.data.message);
+
+          window.removeEventListener('message', handleMessage);
+        }
+      });
+  };
+
+  const setupPopupWindowCloseListener = () => {
+    const popup = refs.popupWindow.current;
+    if (!popup) return;
+
+    // Clear any previous interval
+    if (popupCloseIntervalRef.current) {
+      clearInterval(popupCloseIntervalRef.current);
+    }
+
+    popupCloseIntervalRef.current = setInterval(() => {
+      if (popup.closed) {
+        if (popupCloseIntervalRef.current) {
+          clearInterval(popupCloseIntervalRef.current);
+          popupCloseIntervalRef.current = null;
+        }
+        goBack();
+        disconnectExternalWallet();
+      }
+    }, 500);
+  };
+
+  const clearPopupWindowCloseListener = () => {
+    if (popupCloseIntervalRef.current) {
+      clearInterval(popupCloseIntervalRef.current);
+      popupCloseIntervalRef.current = null;
+    }
+  };
+
+  const handlePostConnectRetry = () => {
+    handlePostMessage({ type: 'EW_CONNECT_RETRY' });
+  };
+
+  const handlePostConnectError = (error: string) => {
+    handlePostMessage({ type: 'EW_CONNECT_ERROR', error });
+  };
+
+  const handleConnectRetryMessage = (wallet: CommonWallet) => async event => {
+    if (!validatePortalOrigin(event, para.ctx)) {
+      return; // Ignore messages from untrusted origins
+    }
+
+    if (event.data?.type === 'EW_CONNECT_RETRY') {
+      clearExternalWalletConnectionRetryListener(wallet);
+      await connectExternalWallet({ wallet, isMobileConnect: wallet.isMobile, isRetryConnection: true });
+    }
+  };
+
+  const setupExternalWalletConnectionRetryListener = (wallet: CommonWallet) => {
+    typeof window !== 'undefined' && window.addEventListener('message', handleConnectRetryMessage(wallet));
+  };
+
+  const clearExternalWalletConnectionRetryListener = (wallet: CommonWallet) => {
+    window.removeEventListener('message', handleConnectRetryMessage(wallet));
+  };
+
   const connectExternalWallet = useCallback(
-    async (
-      wallet: CommonWallet,
-      isMobileConnect?: boolean,
-      isManualWalletConnect?: boolean,
-      isResetAfterManualWalletConnect?: boolean,
-    ) => {
+    async ({
+      wallet,
+      isManualWalletConnect,
+      isMobileConnect,
+      isResetAfterManualWalletConnect,
+      isRetryConnection,
+    }: {
+      wallet: CommonWallet;
+      isMobileConnect?: boolean;
+      isManualWalletConnect?: boolean;
+      isResetAfterManualWalletConnect?: boolean;
+      isRetryConnection?: boolean;
+    }) => {
+      if (isRetryConnection) {
+        clearExternalWalletConnectionRetryListener(wallet);
+        handlePostConnectRetry();
+      }
+
+      if (!isMobile() && isWithFullAuth(wallet)) {
+        const popupUrl = await para.constructPortalUrl('connectExternalWallet');
+
+        if (typeof window !== undefined) {
+          refs.popupWindow.current = openPopup({
+            url: popupUrl,
+            type: 'LOGIN_EXTERNAL_WALLET',
+            target: 'ParaExternalWallet',
+          });
+        }
+
+        setupPopupWindowCloseListener();
+      }
+
       // If triggering the WC modal manually from desktop, disconnect the current connection attempt to trigger the mobile connection attempt
       if (isExternalWalletConnecting && isManualWalletConnect) {
         await evmDisconnect();
@@ -605,11 +865,12 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
         setIsExternalWalletConnecting(false);
       }
 
-      if (isResetAfterManualWalletConnect || isManualWalletConnect || !isExternalWalletConnecting) {
+      if (isResetAfterManualWalletConnect || isManualWalletConnect || isMobileConnect || !isExternalWalletConnecting) {
         setExternalWalletError();
         setIsExternalWalletConnecting(true);
         setIsUsingMobileConnector(isMobileConnect);
 
+        listenForWalletConnectUri();
         const { address, error, authState } = await (isMobileConnect
           ? wallet.connectMobile(isManualWalletConnect, connectionOnly)
           : wallet.connect(connectionOnly));
@@ -617,18 +878,21 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
         if (error) {
           setExternalWalletError([error]);
           setIsUsingMobileConnector();
+          handlePostConnectError(error);
 
           // If triggering the WC modal manually from desktop, attempt desktop reconnect on connection rejection
           if (isManualWalletConnect && error === 'Connection request rejected') {
             setExternalWalletError();
 
-            await connectExternalWallet(wallet, false, false, true);
-            await updateQrUri();
+            await connectExternalWallet({ wallet, isResetAfterManualWalletConnect: true });
             return;
           }
+          setupExternalWalletConnectionRetryListener(wallet);
         } else if (address) {
           if (!!authState && (isWithFullAuth(wallet) || includeWalletVerification)) {
+            clearExternalWalletConnectionRetryListener(wallet);
             onNewAuthState(authState);
+            setupExternalWalletVerificationTriggerListener(authState.externalWallet);
           } else {
             setStep(ModalStep.LOGIN_DONE);
           }
@@ -661,7 +925,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
             isConnectionOnly: true,
           } as ExternalWalletInfo);
         } else {
-          await connectExternalWallet(evmWallet, false, true);
+          await connectExternalWallet({ wallet: evmWallet, isManualWalletConnect: true });
         }
       }
       if (solanaWallet && solanaFarcasterStatus?.isPresent) {
@@ -676,7 +940,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
             isConnectionOnly: true,
           } as ExternalWalletInfo);
         } else {
-          await connectExternalWallet(solanaWallet, false, true);
+          await connectExternalWallet({ wallet: solanaWallet, isManualWalletConnect: true });
         }
       }
 
@@ -691,6 +955,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
   };
 
   const requestInfo = async (providerId: TExternalWallet, type: TWalletType) => {
+    listenForWalletConnectUri();
     switch (type) {
       case 'EVM': {
         const externalWallet = await evmRequestInfo(providerId);

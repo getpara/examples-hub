@@ -49,7 +49,9 @@ export type PortalUrlType =
   | 'loginFarcaster'
   | 'switchWallets'
   | 'addNewCredential'
-  | 'exportPrivateKey';
+  | 'exportPrivateKey'
+  | 'loginExternalWallet'
+  | 'connectExternalWallet';
 
 export type PortalUrlOptions = {
   params?: Record<string, string | undefined | null>;

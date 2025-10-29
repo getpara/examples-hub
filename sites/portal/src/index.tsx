@@ -41,6 +41,9 @@ const AddCredential = lazy(() =>
 const BasicLoginUpgrade = lazy(() =>
   import('./pages/BasicLoginUpgrade/BasicLoginUpgrade').then(module => ({ default: module.BasicLoginUpgrade })),
 );
+const ConnectExternalWallet = lazy(() =>
+  import('./pages/ConnectExternalWallet/ConnectExternalWallet').then(module => ({ default: module.ConnectExternalWallet })),
+);
 
 export const App = () => {
   const [searchParams] = useSearchParams();
@@ -91,6 +94,8 @@ export const App = () => {
             }
             path="add-new-credential"
           />
+          <Route element={<AuthLogin step={AuthLoginStep.EXTERNAL_WALLET} />} path="external-wallet" />
+          <Route element={<ConnectExternalWallet />} path="connect-external-wallet" />
           <Route element={<AuthLogin step={AuthLoginStep.OAUTH_CALLBACK} />} path=":method/callback" />
           <Route element={<OAuthLogin />} path=":method" />
           <Route

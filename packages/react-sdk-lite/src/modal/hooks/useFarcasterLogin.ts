@@ -4,6 +4,7 @@ import { VerifyThirdPartyAuth } from '@getpara/user-management-client';
 import { MutationStatus } from '@tanstack/react-query';
 import { useModalStore } from '../stores/index.js';
 import { useAuthActions } from '../../provider/providers/AuthProvider.js';
+import { validatePortalOrigin } from '../utils/validatePortalOrigin.js';
 
 type EventType = 'FARCASTER_LOGIN' | 'FARCASTER_SUCCESS' | 'FARCASTER_FAILED';
 
@@ -42,7 +43,13 @@ export const useFarcasterLogin = ({
   }, [isActive, url]);
 
   useEffect(() => {
+    if (typeof window === 'undefined') return; // Prevent SSR errors
+
     const updateState = async (event: MessageEvent<Event>) => {
+      if (!validatePortalOrigin(event, para.ctx)) {
+        return; // Ignore messages from untrusted origins
+      }
+
       switch (event.data.type) {
         case 'FARCASTER_LOGIN':
           setMsgStatus('pending');
@@ -70,7 +77,9 @@ export const useFarcasterLogin = ({
     }
 
     return () => {
-      window?.removeEventListener('message', updateState, false);
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('message', updateState, false);
+      }
     };
   }, [isActive]);
 

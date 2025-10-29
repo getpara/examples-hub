@@ -4,8 +4,8 @@ import { useTelegramLogin } from '../../hooks/useTelegramLogin.js';
 import React, { useEffect, useState } from 'react';
 import { useAuthActions } from '../../../provider/providers/AuthProvider.js';
 import { useModalStore } from '../../stores/index.js';
-import { getPortalBaseURL } from '@getpara/web-sdk';
 import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
+import { validatePortalOrigin } from '../../utils/validatePortalOrigin.js';
 
 export function TelegramOAuthStep() {
   const { verifyTelegramStatus, verifyTelegram } = useAuthActions();
@@ -25,9 +25,7 @@ export function TelegramOAuthStep() {
         return; // No iFrame URL to check against
       }
 
-      const portalBase = getPortalBaseURL(para.ctx, true);
-
-      if (!event.origin.startsWith(portalBase)) {
+      if (!validatePortalOrigin(event, para.ctx)) {
         return; // Ignore messages from untrusted origins
       }
 
@@ -37,8 +35,10 @@ export function TelegramOAuthStep() {
         }
       }
     };
-    window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
+    typeof window !== 'undefined' && window.addEventListener('message', handleMessage);
+    return () => {
+      typeof window !== 'undefined' && window.removeEventListener('message', handleMessage);
+    };
   }, [url]);
 
   return (

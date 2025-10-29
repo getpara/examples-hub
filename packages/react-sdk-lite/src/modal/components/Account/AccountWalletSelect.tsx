@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
 import { useDropdownPosition } from '../AuthInput/hooks/useDropdownPosition.js';
-import { getExternalWalletIcon, safeStyled, useCopyToClipboard } from '@getpara/react-common';
+import { getExternalWalletIcon, MOBILE_SIZE, safeStyled, useCopyToClipboard } from '@getpara/react-common';
 import { useAccount, useWallet, useWalletState } from '../../../provider/index.js';
 import { CpslButton, CpslIcon, CpslSelect, CpslSelectItem, CpslText } from '@getpara/react-components';
 import { TWalletType, Wallet as TWallet, truncateAddress } from '@getpara/web-sdk';
@@ -109,8 +109,8 @@ export const AccountWalletSelect = () => {
           anchorElId="addressInputContainer"
           dropdownMaxHeight={dropdownMaxHeight}
           $width={dropdownWidth ?? 0}
-          // Adding 16 for the top padding + 1 for the border
-          $top={(mobileAnchor ?? 0) + 16 + 1}
+          // Adding 184 for the top padding + 1 for the border
+          $top={(mobileAnchor ?? 0) + 184 + 1}
           selectedItemVariant="bodyXS"
           icon={isMultiWallet ? 'chevronUp' : null}
           disabled={!isMultiWallet}
@@ -136,6 +136,7 @@ export const AccountWalletSelect = () => {
 };
 
 const Container = safeStyled.div`
+  flex: 0;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -174,6 +175,18 @@ export const Select = safeStyled(CpslSelect)<{ $width: number; $top?: number }>`
   &::part(dropdown) {
     min-width: ${({ $width }) => `${$width - 2}px`};
   }
+
+  &::part(popover) {
+      /* Have to adjust the top of the popover here since we're using a transform on the modal which causes fixed position items to not be relative to the viewport */
+      @media (max-width: ${MOBILE_SIZE}px) {
+        top: ${({ $top }) => ($top ? `${$top}px` : '0px')};
+        bottom: 16px;
+      }
+      cpsl-auth-modal.force-mobile-media & {
+        top: ${({ $top }) => ($top ? `${$top}px` : '0px')};
+        bottom: 16px;
+      }
+    }
 
   &::part(icon) {
     --icon-color: var(--cpsl-color-text-primary);

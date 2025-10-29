@@ -401,6 +401,7 @@ export const SelectWallet = ({
                       }}
                       isClaimable={isClaimable}
                       isSelected={selectedWalletIds[walletType]?.includes(wallet.id) || false}
+                      disabled={isConnecting}
                     />
                   );
                 })}
@@ -416,6 +417,7 @@ export const SelectWallet = ({
                         setSelectedWalletIds(prev => ({ ...prev, [walletType]: [] }));
                       }
                     }}
+                    disabled={isConnecting}
                   >
                     <CreateWalletContainer>
                       <CreateWalletIcon>
@@ -446,6 +448,7 @@ export const SelectWallet = ({
     recoverySecret,
     isRecoverySecretSaved,
     isAtBottom,
+    isConnecting,
   ]);
 
   const isCreated = Object.values(newWallets).length > 0;
@@ -557,6 +560,15 @@ const Wallets = styled(FlexColumn)<{ isAtBottom?: boolean }>`
   gap: 32px;
   mask-image: ${({ isAtBottom }) =>
     isAtBottom ? 'none' : 'linear-gradient(to bottom, black calc(100% - 24px), transparent 100%)'};
+
+  /* Hide scrollbar for Webkit browsers */
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  /* Hide scrollbar for Firefox */
+  scrollbar-width: none;
+  /* Hide scrollbar for IE, Edge */
+  -ms-overflow-style: none;
 `;
 
 const Container = styled(FlexColumn)`
@@ -572,7 +584,8 @@ const PageHeading = styled(FlexColumn)`
 `;
 
 const WalletGroupHeading = styled.div`
-  color: var(--cpsl-color-foreground-0, #0a0a0a);
+  background: var(--cpsl-color-background-0);
+  color: var(--cpsl-color-text-primary);
   font-size: var(--Typography-Text-L, 20px);
   font-size: 20px;
   font-weight: 500;

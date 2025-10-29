@@ -104,6 +104,7 @@ import {
   AuthStateSignupOrLoginOrDone,
   AuthStateDone,
   AvailableWallet,
+  AuthStateBaseParams,
 } from './types/index.js';
 import { PlatformUtils } from './PlatformUtils.js';
 import { sendRecoveryForShare } from './shares/recovery.js';
@@ -783,7 +784,7 @@ export abstract class ParaCore implements CoreInterface {
       isExportPrivateKey,
     ] = [
       ['createAuth', 'createPassword', 'createPIN'].includes(type),
-      ['loginAuth', 'loginPassword', 'loginPIN', 'loginOTP', 'switchWallets'].includes(type),
+      ['loginAuth', 'loginPassword', 'loginPIN', 'loginOTP', 'switchWallets', 'loginExternalWallet'].includes(type),
       type === 'onRamp',
       type === 'oAuth',
       type === 'oAuthCallback',
@@ -887,6 +888,14 @@ export abstract class ParaCore implements CoreInterface {
         path = `/web/users/${this.userId}/private-key/${opts.pathId}`;
         break;
       }
+      case 'loginExternalWallet': {
+        path = '/auth/external-wallet';
+        break;
+      }
+      case 'connectExternalWallet': {
+        path = '/auth/connect-external-wallet';
+        break;
+      }
       default: {
         throw new Error(`invalid URL type ${type}`);
       }
@@ -907,11 +916,11 @@ export abstract class ParaCore implements CoreInterface {
       encryptionKey: getPublicKeyHex(this.loginEncryptionKeyPair),
       sessionId,
     };
-
     const params: Record<string, string | undefined | null> = {
       apiKey: this.ctx.apiKey,
       origin: typeof window !== 'undefined' ? window.location.origin : undefined,
       partnerId: partner?.id,
+      ...(typeof window !== 'undefined' && window.location?.origin ? { origin: window.location.origin } : {}),
       portalFont: opts.portalTheme?.font || this.portalTheme?.font || partner?.font,
       portalBorderRadius: opts.portalTheme?.borderRadius || this.portalTheme?.borderRadius,
       portalThemeMode: opts.portalTheme?.mode || this.portalTheme?.mode || partner?.themeMode,
@@ -934,6 +943,7 @@ export abstract class ParaCore implements CoreInterface {
             ...(isPhone(this.authInfo.auth) ? splitPhoneNumber(this.authInfo.auth.phone) : this.authInfo.auth),
             pfpUrl: this.authInfo.pfpUrl,
             displayName: this.authInfo.displayName,
+            userId: this.userId,
           }
         : {}),
       ...(isOnRamp ? { email: this.email } : {}),
@@ -2265,6 +2275,8 @@ Need help? Visit: https://docs.getpara.com or contact support
    */
   async loginExternalWallet({
     externalWallet,
+    chainId,
+    uri,
     ...urlOptions
   }: CoreMethodParams<'loginExternalWallet'>): CoreMethodResponse<'loginExternalWallet'> {
     const externalWallets = Array.isArray(externalWallet) ? externalWallet : [externalWallet];
@@ -2290,35 +2302,67 @@ Need help? Visit: https://docs.getpara.com or contact support
 
     this.requireApiKey();
 
-    const serverAuthState = await this.ctx.client.loginExternalWallet({ externalWallet });
+    const serverAuthState = await this.ctx.client.loginExternalWallet({ externalWallet, chainId, uri });
 
     if (!externalWallet.withFullParaAuth && externalWallet.withVerification) {
       await this.touchSession(true);
     }
 
-    return this.#prepareAuthState(serverAuthState, urlOptions);
-  }
-
-  async verifyExternalWallet({
-    externalWallet,
-    signedMessage,
-    cosmosPublicKeyHex,
-    cosmosSigner,
-    ...urlOptions
-  }: CoreMethodParams<'verifyExternalWallet'>): CoreMethodResponse<'verifyExternalWallet'> {
-    const serverAuthState = await this.ctx.client.verifyExternalWallet(this.userId, {
-      externalWallet,
-      signedMessage,
-      cosmosPublicKeyHex,
-      cosmosSigner,
-    });
-
-    if (serverAuthState.stage === 'login' && serverAuthState.loginAuthMethods?.includes(AuthMethod.PIN)) {
-      const { sessionLookupId } = await this.touchSession();
-      return this.#prepareLoginState(serverAuthState, { ...urlOptions, sessionLookupId });
+    if (externalWallet.withFullParaAuth) {
+      await this.ctx.client.sessionAddPortalVerification();
     }
 
     return this.#prepareAuthState(serverAuthState, urlOptions);
+  }
+
+  async verifyExternalWallet(
+    params: { serverAuthState: ServerAuthStateSignup | ServerAuthStateLogin | ServerAuthStateDone } & Omit<
+      CoreMethodParams<'verifyExternalWallet'>,
+      keyof VerifyExternalWalletParams
+    >,
+  ): CoreMethodResponse<'verifyExternalWallet'>;
+  async verifyExternalWallet(
+    params: VerifyExternalWalletParams & { serverAuthState?: undefined } & Omit<
+        CoreMethodParams<'verifyExternalWallet'>,
+        'serverAuthState'
+      >,
+  ): CoreMethodResponse<'verifyExternalWallet'>;
+
+  async verifyExternalWallet(params: CoreMethodParams<'verifyExternalWallet'>): CoreMethodResponse<'verifyExternalWallet'> {
+    let serverAuthState: ServerAuthStateLogin | ServerAuthStateSignup | ServerAuthStateDone;
+    let urlOptions: AuthStateBaseParams;
+
+    if ('serverAuthState' in params && params.serverAuthState !== undefined) {
+      const { serverAuthState: optsServerAuthState, ...rest } = params;
+
+      serverAuthState = optsServerAuthState;
+      urlOptions = rest;
+    } else if ('externalWallet' in params) {
+      const { externalWallet, signedMessage, cosmosPublicKeyHex, cosmosSigner, ...rest } = params;
+      const _serverAuthState = await this.ctx.client.verifyExternalWallet(this.userId, {
+        externalWallet,
+        signedMessage,
+        cosmosPublicKeyHex,
+        cosmosSigner,
+      });
+      serverAuthState = _serverAuthState;
+      urlOptions = rest;
+    }
+
+    if (serverAuthState.stage === 'login' && serverAuthState.loginAuthMethods?.includes(AuthMethod.PIN)) {
+      const { sessionLookupId } = await this.touchSession();
+      return await this.#prepareLoginState(serverAuthState, { ...urlOptions, sessionLookupId });
+    }
+
+    let state;
+
+    try {
+      state = await this.#prepareAuthState(serverAuthState, urlOptions);
+    } catch (err) {
+      console.error('Error prepping state:', err);
+    }
+
+    return state;
   }
 
   protected async verifyExternalWalletLink(
@@ -4542,7 +4586,7 @@ Need help? Visit: https://docs.getpara.com or contact support
 
     this.assertIsAuthSet();
 
-    let urlType: 'loginAuth' | 'loginPassword' | 'loginPIN' | 'loginOTP';
+    let urlType: 'loginAuth' | 'loginPassword' | 'loginPIN' | 'loginOTP' | 'loginExternalWallet';
     switch (authMethod) {
       case 'PASSKEY':
         urlType = 'loginAuth';
@@ -4554,7 +4598,7 @@ Need help? Visit: https://docs.getpara.com or contact support
         urlType = 'loginPIN';
         break;
       case 'BASIC_LOGIN':
-        urlType = 'loginOTP';
+        urlType = this.authInfo.authType === 'externalWallet' ? 'loginExternalWallet' : 'loginOTP';
         break;
       default:
         throw new Error(`invalid authentication method: '${authMethod}'`);
@@ -4686,9 +4730,11 @@ Need help? Visit: https://docs.getpara.com or contact support
 
     this.isEnclaveUser = isSLOPossible;
 
+    const isExternalWalletFullAuth = verifyState.externalWallet?.withFullParaAuth;
+
     return {
       ...verifyState,
-      ...(isSLOPossible
+      ...(isSLOPossible || isExternalWalletFullAuth
         ? {
             loginUrl: await this.getLoginUrl({
               authMethod: AuthMethod.BASIC_LOGIN,

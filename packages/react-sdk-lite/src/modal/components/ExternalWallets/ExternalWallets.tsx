@@ -67,9 +67,9 @@ export const ExternalWallets = ({ isAddingWallets = false }: { isAddingWallets?:
     } else {
       // For initial connection, use connectExternalWallet
       if (wallet.installed) {
-        connectExternalWallet(wallet);
+        connectExternalWallet({ wallet });
       } else if (wallet.isMobile) {
-        connectExternalWallet(wallet, true);
+        connectExternalWallet({ wallet, isMobile: true });
       }
     }
   };

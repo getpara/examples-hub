@@ -67,6 +67,7 @@ interface ModalState {
     telegramIFrame: MutableRefObject<HTMLIFrameElement | null>;
     wasSignedIn: MutableRefObject<boolean | null>;
     initialFarcasterConnected: MutableRefObject<boolean | null>;
+    iFrame: MutableRefObject<HTMLIFrameElement | null>;
   };
   isPasskeySupported: boolean;
   accountLinkOptions: SupportedAccountLinks;
@@ -141,6 +142,7 @@ export const DEFAULT_MODAL_STATE: Omit<ModalState, 'step' | 'onRampConfig'> = {
     telegramIFrame: createRef(),
     wasSignedIn: createRef(),
     initialFarcasterConnected: createRef(),
+    iFrame: createRef(),
   },
   isPasskeySupported: true,
   accountLinkOptions: [...LINKED_ACCOUNT_TYPES],

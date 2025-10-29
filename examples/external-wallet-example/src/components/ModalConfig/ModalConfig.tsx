@@ -12,6 +12,7 @@ import { memo } from 'react';
 
 export const ModalConfig = memo(() => {
   const { embedded } = useAccount();
+
   return (
     <CpslCard>
       <CpslText variant="headingXS" weight="semiBold">

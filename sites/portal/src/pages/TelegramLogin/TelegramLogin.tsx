@@ -7,6 +7,7 @@ import { Environment } from '@getpara/web-sdk';
 import { useSearchParams } from 'react-router-dom';
 import { isIFramed } from '../../utils/isIFramed';
 import { SpinnerContainer } from '@getpara/react-common';
+import { useModalOutletContext } from '../../hooks/useModalOutletContext';
 
 interface Options {
   bot_id: string;
@@ -35,6 +36,7 @@ export function TelegramLogin({ onLogin }: TelegramLoginProps) {
   const [isWaiting, setIsWaiting] = useState(false);
   const [isSecondAttempt, setIsSecondAttempt] = useState(false);
   const [searchParams] = useSearchParams();
+  const { trustedOrigin } = useModalOutletContext();
 
   const shouldVerify = !!onLogin;
 
@@ -54,7 +56,7 @@ export function TelegramLogin({ onLogin }: TelegramLoginProps) {
 
   const onClick = () => {
     setIsWaiting(true);
-    window?.parent?.postMessage({ type: 'TELEGRAM_LOGIN' }, '*');
+    window?.parent?.postMessage({ type: 'TELEGRAM_LOGIN' }, trustedOrigin);
 
     const script = document.createElement('script');
     script.src = 'https://telegram.org/js/telegram-widget.js?22';
@@ -62,7 +64,7 @@ export function TelegramLogin({ onLogin }: TelegramLoginProps) {
     script.onload = () => {
       window.Telegram?.Login.auth({ bot_id: `${botId}`, request_access: true }, async data => {
         if (!data) {
-          window?.parent?.postMessage({ type: 'TELEGRAM_FAILED' }, '*');
+          window?.parent?.postMessage({ type: 'TELEGRAM_FAILED' }, trustedOrigin);
           setIsWaiting(false);
           setIsSecondAttempt(true);
           return;
@@ -83,7 +85,10 @@ export function TelegramLogin({ onLogin }: TelegramLoginProps) {
           }
         }
 
-        window?.parent?.postMessage({ type: 'TELEGRAM_SUCCESS', payload: shouldVerify ? serverAuthState : data }, '*');
+        window?.parent?.postMessage(
+          { type: 'TELEGRAM_SUCCESS', payload: shouldVerify ? serverAuthState : data },
+          trustedOrigin,
+        );
       });
     };
 
@@ -95,6 +100,10 @@ export function TelegramLogin({ onLogin }: TelegramLoginProps) {
     document.getElementById('root').style.backgroundColor = 'transparent';
 
     const onMessage = async (message: MessageEvent<Event>) => {
+      if (trustedOrigin !== '*' && message.origin !== trustedOrigin) {
+        return; // Ignore messages from untrusted origins
+      }
+
       if (message.data.type === 'TELEGRAM_FAILED' || message.data.type === 'TELEGRAM_RETRY') {
         setIsWaiting(false);
         setIsSecondAttempt(true);

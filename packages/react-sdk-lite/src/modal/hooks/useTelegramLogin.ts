@@ -3,6 +3,7 @@ import { useInternalClient } from '../../provider/hooks/utils/useInternalClient.
 import { TelegramAuthResponse, VerifyThirdPartyAuth } from '@getpara/user-management-client';
 import { MutationStatus } from '@tanstack/react-query';
 import { useModalStore } from '../stores/index.js';
+import { validatePortalOrigin } from '../utils/validatePortalOrigin.js';
 
 type EventType = 'TELEGRAM_LOGIN' | 'TELEGRAM_SUCCESS' | 'TELEGRAM_FAILED';
 
@@ -50,6 +51,10 @@ export const useTelegramLogin = ({
 
   useEffect(() => {
     const updateState = async (event: MessageEvent<Event>) => {
+      if (!validatePortalOrigin(event, para.ctx)) {
+        return; // Ignore messages from untrusted origins
+      }
+
       switch (event.data.type) {
         case 'TELEGRAM_LOGIN':
           setMsgStatus('pending');
