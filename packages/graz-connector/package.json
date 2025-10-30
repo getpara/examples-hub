@@ -1,6 +1,6 @@
 {
   "name": "@getpara/graz-connector",
-  "version": "2.0.0-alpha.67",
+  "version": "2.0.0-alpha.68",
   "sideEffects": false,
   "main": "dist/esm/index.js",
   "types": "dist/types/index.d.ts",
@@ -19,8 +19,8 @@
     "build:types": "rm -rf dist/types && tsc --module esnext --declarationDir dist/types --emitDeclarationOnly --declaration"
   },
   "dependencies": {
-    "@getpara/cosmjs-v0-integration": "2.0.0-alpha.67",
-    "@getpara/web-sdk": "2.0.0-alpha.67"
+    "@getpara/cosmjs-v0-integration": "2.0.0-alpha.68",
+    "@getpara/web-sdk": "2.0.0-alpha.68"
   },
   "devDependencies": {
     "@cosmjs/amino": "^0.32.4",

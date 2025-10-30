@@ -1,3 +1,44 @@
+# Release (Thu Oct 30 2025)
+
+## Package Versions
+- @getpara/web-sdk@2.0.0-alpha.68
+- @getpara/wagmi-v2-integration@2.0.0-alpha.68
+- @getpara/wagmi-v2-connector@2.0.0-alpha.68
+- @getpara/viem-v2-integration@2.0.0-alpha.68
+- @getpara/viem-v1-integration@2.0.0-alpha.68
+- @getpara/user-management-client@2.0.0-alpha.68
+- @getpara/solana-web3.js-v1-integration@2.0.0-alpha.68
+- @getpara/solana-wallet-connectors@2.0.0-alpha.68
+- @getpara/solana-signers-v2-integration@2.0.0-alpha.68
+- @getpara/server-sdk@2.0.0-alpha.68
+- @getpara/react-sdk-lite@2.0.0-alpha.68
+- @getpara/react-sdk@2.0.0-alpha.68
+- @getpara/react-native-wallet@2.0.0-alpha.68
+- @getpara/react-components@2.0.0-alpha.68
+- @getpara/react-component-library@1.0.0-alpha.63
+- @getpara/react-common@2.0.0-alpha.68
+- @getpara/graz-integration@2.0.0-alpha.68
+- @getpara/graz-connector@2.0.0-alpha.68
+- @getpara/evm-wallet-connectors@2.0.0-alpha.68
+- @getpara/ethers-v6-integration@2.0.0-alpha.68
+- @getpara/ethers-v5-integration@2.0.0-alpha.68
+- @getpara/cosmos-wallet-connectors@2.0.0-alpha.68
+- @getpara/cosmjs-v0-integration@2.0.0-alpha.68
+- @getpara/core-sdk@2.0.0-alpha.68
+- @getpara/core-components@2.0.0-alpha.68
+
+### Features
+- Add basic login external wallets (#1228) - c4a046efb
+- Quick login upgrade (#1270) - cf63668e2
+
+### Fixes
+- skip basic login upgrade (#1283) - c325c189f
+
+### Chores
+- Fork WalletConnect connector (#1285) - e30c20749
+- Improve slo upgrade erroring (#1284) - 63dfcedeb
+- Add package README (#1281) - d6c71ef1b
+
 # Release (Thu Oct 23 2025)
 
 ## Package Versions
