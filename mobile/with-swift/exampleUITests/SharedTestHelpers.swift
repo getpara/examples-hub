@@ -112,13 +112,31 @@ enum TestHelper {
             return false
         }
 
-        let firstWalletCell = app.cells.element(boundBy: 0)
+        let walletCards = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "walletCell_"))
         let createFirstWalletButton = app.buttons["createFirstWalletButton"]
+        let addWalletButton = app.buttons["addWalletButton"]
+        let logoutButton = app.buttons["logoutButton"]
+        let refreshButton = app.buttons["refreshButton"]
 
-        let hasWallets = firstWalletCell.waitForExistence(timeout: TestConstants.defaultTimeout)
-        let hasCreateButton = createFirstWalletButton.waitForExistence(timeout: TestConstants.defaultTimeout)
+        let deadline = Date().addingTimeInterval(TestConstants.defaultTimeout)
 
-        return hasWallets || hasCreateButton
+        while Date() < deadline {
+            if walletCards.firstMatch.exists
+                || createFirstWalletButton.exists
+                || addWalletButton.exists
+                || logoutButton.exists
+                || refreshButton.exists {
+                return true
+            }
+
+            RunLoop.current.run(until: Date().addingTimeInterval(0.2))
+        }
+
+        return walletCards.firstMatch.exists
+            || createFirstWalletButton.exists
+            || addWalletButton.exists
+            || logoutButton.exists
+            || refreshButton.exists
     }
 
     static func performOneClickAuthentication(app: XCUIApplication, credential: String, otpCode: String = TestConstants.verificationCode) {
