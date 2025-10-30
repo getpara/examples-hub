@@ -12,10 +12,12 @@ export const zerionWallet = ({ projectId, walletConnectParameters }: ZerionWalle
     flag: 'isZerion',
   });
 
+  const deeplinkUri = 'zerion://';
+
+  const baseUri = isTelegram() && isIOS() ? 'https://app.zerion.io/wc' : `${deeplinkUri}wc`;
+
   const getUri = (uri: string) => {
-    return isTelegram() && isIOS()
-      ? `https://app.zerion.io/wc?uri=${encodeURIComponent(uri)}`
-      : `zerion://wc?uri=${encodeURIComponent(uri)}`;
+    return `${baseUri}?uri=${encodeURIComponent(uri)}`;
   };
 
   return {
@@ -28,6 +30,7 @@ export const zerionWallet = ({ projectId, walletConnectParameters }: ZerionWalle
     isExtension: true,
     isMobile: true,
     getUri,
+    deeplinkUri,
     downloadUrl: 'https://zerion.io/download',
     createConnector: isZerionInjected
       ? getInjectedConnector({

@@ -1,4 +1,4 @@
-import { BiometricHints, useUserAgent } from '@getpara/react-common';
+import { BiometricHints, openMobileUrl, useUserAgent } from '@getpara/react-common';
 import { createContext, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useModalStore } from '../../modal/stores/index.js';
 import { ModalStep } from '../../modal/utils/steps.js';
@@ -35,7 +35,6 @@ import { useInternalClient } from '../../provider/hooks/utils/useInternalClient.
 import { ParaModalProps } from '../../modal/types/modalProps.js';
 import { useGoBack } from '../../modal/hooks/useGoBack.js';
 import { isExternalWallet, VerifiedAuth, VerifyThirdPartyAuth } from '@getpara/user-management-client';
-import { routeMobileExternalWallet } from '../../modal/utils/routeMobileExternalWallet.js';
 import { useStore } from '../stores/useStore.js';
 import { useFormattedBiometricHints } from '../hooks/utils/useFormattedBiometricHints.js';
 import { MutationStatus, useQueryClient } from '@tanstack/react-query';
@@ -573,7 +572,7 @@ export function AuthProvider({
         isCanceled: () => refs.currentStep.current !== ModalStep.FARCASTER_OAUTH,
         onConnectUri: connectUri => {
           setFarcasterConnectUri(connectUri);
-          routeMobileExternalWallet(connectUri);
+          openMobileUrl(connectUri);
         },
         useShortUrls: true,
         serverAuthState,

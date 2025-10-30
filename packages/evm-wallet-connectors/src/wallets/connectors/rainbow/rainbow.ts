@@ -9,14 +9,19 @@ export type RainbowWalletOptions = DefaultWalletOptions;
 export const rainbowWallet = ({ projectId, walletConnectParameters }: RainbowWalletOptions): Wallet => {
   const isRainbowInjected = hasInjectedProvider({ flag: 'isRainbow' });
 
+  const deeplinkUri = 'rainbow://';
+
+  const baseUri = isAndroid()
+    ? `${deeplinkUri}wc`
+    : isIOS()
+      ? !isTelegram()
+        ? // currently broken in MetaMask v6.5.0 https://github.com/MetaMask/metamask-mobile/issues/6457
+          `${deeplinkUri}wc`
+        : 'https://rnbwapp.com/wc'
+      : 'https://rnbwapp.com/wc';
+
   const getUri = (uri: string) => {
-    return isAndroid()
-      ? `rainbow://wc?uri=${encodeURIComponent(uri)}`
-      : isIOS()
-        ? !isTelegram()
-          ? `rainbow://wc?uri=${encodeURIComponent(uri)}`
-          : `https://rnbwapp.com/wc?uri=${encodeURIComponent(uri)}`
-        : `https://rnbwapp.com/wc?uri=${encodeURIComponent(uri)}`;
+    return `${baseUri}?uri=${encodeURIComponent(uri)}`;
   };
 
   return {
@@ -30,6 +35,7 @@ export const rainbowWallet = ({ projectId, walletConnectParameters }: RainbowWal
     isMobile: true,
     downloadUrl: 'https://rainbow.me/',
     getUri,
+    deeplinkUri,
     createConnector: isRainbowInjected
       ? getInjectedConnector({ flag: 'isRainbow' })
       : getWalletConnectConnector({

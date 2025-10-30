@@ -1,14 +1,15 @@
 import { Connector, CreateConnectorFn } from 'wagmi';
-import { WalletConnectParameters } from 'wagmi/connectors';
 import { CoinbaseWalletOptions } from '../wallets/connectors/coinbase/coinbase.js';
 import { WalletConnectWalletOptions } from '../wallets/connectors/walletConnect/walletConnect.js';
 import { type WalletMetadata } from '@getpara/react-common';
 import ParaWeb from '@getpara/web-sdk';
+import { WalletConnectParameters } from '../connectors/walletConnect.js';
 
 export type Wallet = {
   createConnector?: (walletDetails: WalletDetailsParams) => CreateConnectorFn;
   createMobileConnector?: (walletDetails: WalletDetailsParams) => CreateConnectorFn;
   getUri?: (uri: string) => string;
+  deeplinkUri?: string;
 } & WalletMetadata;
 
 export interface DefaultWalletOptions {

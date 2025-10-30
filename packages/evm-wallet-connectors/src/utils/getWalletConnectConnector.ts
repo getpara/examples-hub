@@ -1,7 +1,7 @@
 import { createConnector } from 'wagmi';
 import type { CreateConnectorFn } from 'wagmi';
-import { WalletConnectParameters, walletConnect } from 'wagmi/connectors';
 import type { CreateConnector, ParaDetails, ParaWalletConnectParameters, WalletDetailsParams } from '../types/Wallet.js';
+import { walletConnect, WalletConnectParameters } from '../connectors/walletConnect.js';
 
 interface GetWalletConnectConnectorParams {
   projectId: string;

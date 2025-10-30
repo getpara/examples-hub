@@ -13,6 +13,7 @@ import {
   DisconnectBaseOptions,
   ExternalWalletContextType,
   MutationStatus,
+  openMobileUrl,
   TExternalWallet,
 } from '@getpara/react-common';
 import { ExternalWalletInfo, VerifyExternalWalletParams, ParaEvent, dispatchEvent } from '@getpara/web-sdk';
@@ -23,7 +24,6 @@ import { useQueryClient } from '@tanstack/react-query';
 import { ServerAuthStateDone, ServerAuthStateLogin, ServerAuthStateSignup } from '@getpara/user-management-client';
 import { useGoBack } from '../../modal/hooks/useGoBack.js';
 import { validatePortalOrigin } from '../../modal/utils/validatePortalOrigin.js';
-import { routeMobileExternalWallet } from '../../modal/utils/routeMobileExternalWallet.js';
 
 export const useWalletDisplayHelpers = (wallet: CommonWallet | undefined) => {
   const isUsingMobileConnector = useModalStore(state => state.isUsingMobileConnector);
@@ -221,7 +221,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
     }
 
     const callback = (event: CustomEvent<string>) => {
-      routeMobileExternalWallet(event.detail);
+      openMobileUrl(event.detail);
       setQrUri(event.detail);
       // Clean up after receiving the event
       cleanup();

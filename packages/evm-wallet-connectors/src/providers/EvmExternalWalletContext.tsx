@@ -21,6 +21,7 @@ import {
   DisconnectBaseOptions,
   DisconnectType,
   FarcasterMiniAppManagement,
+  openMobileUrl,
   type BalanceManagement,
   type ChainManagement,
   type CommonChain,
@@ -246,6 +247,21 @@ export function EvmExternalWalletProvider({
 
   const signMessage = async ({ message, externalWallet }: SignArgs) => {
     let signOpts: SignOptions = {};
+
+    const connector = findConnector(
+      externalWallet ? externalWallet.providerId : getConnectorInfo(connectedConnector).providerId,
+    );
+
+    const signUri = isMobile() && connector.type === 'walletConnect' ? connector.paraDetails?.deeplinkUri : undefined;
+
+    const openApp = () => {
+      if (signUri) {
+        openMobileUrl(signUri);
+      }
+    };
+
+    openApp();
+
     if (externalWallet) {
       signOpts = findConnectorAndAccount(externalWallet);
 

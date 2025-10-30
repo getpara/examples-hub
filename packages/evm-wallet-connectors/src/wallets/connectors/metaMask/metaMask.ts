@@ -69,15 +69,19 @@ export const metaMaskWallet = ({ projectId, walletConnectParameters }: MetaMaskW
     metaMaskTarget = providerMapTarget;
   }
 
+  const deeplinkUri = 'metamask://';
+
+  const baseUri = isAndroid()
+    ? `${deeplinkUri}wc`
+    : isIOS()
+      ? !isTelegram()
+        ? // currently broken in MetaMask v6.5.0 https://github.com/MetaMask/metamask-mobile/issues/6457
+          `${deeplinkUri}wc`
+        : 'https://metamask.app.link/wc'
+      : 'https://metamask.app.link/wc';
+
   const getUri = (uri: string) => {
-    return isAndroid()
-      ? `metamask://wc?uri=${encodeURIComponent(uri)}`
-      : isIOS()
-        ? !isTelegram()
-          ? // currently broken in MetaMask v6.5.0 https://github.com/MetaMask/metamask-mobile/issues/6457
-            `metamask://wc?uri=${encodeURIComponent(uri)}`
-          : `https://metamask.app.link/wc?uri=${encodeURIComponent(uri)}`
-        : `https://metamask.app.link/wc?uri=${encodeURIComponent(uri)}`;
+    return `${baseUri}?uri=${encodeURIComponent(uri)}`;
   };
 
   return {
@@ -91,6 +95,7 @@ export const metaMaskWallet = ({ projectId, walletConnectParameters }: MetaMaskW
     isMobile: true,
     downloadUrl: 'https://metamask.io/download/',
     getUri,
+    deeplinkUri,
     createConnector: isMetaMaskInjected
       ? getInjectedConnector({
           target: metaMaskTarget,

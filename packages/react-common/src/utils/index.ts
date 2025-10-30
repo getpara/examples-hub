@@ -139,3 +139,4 @@ export * from './formatBiometricHints.js';
 export * from './getExternalWalletDisplayName.js';
 export * from './getExternalWalletIcon.js';
 export * from './safeStyled.js';
+export * from './openMobileUrl.js';

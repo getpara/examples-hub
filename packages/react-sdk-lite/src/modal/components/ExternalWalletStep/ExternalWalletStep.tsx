@@ -2,11 +2,10 @@ import { CpslButton, CpslIcon, CpslQrCode, CpslSpinner, CpslText } from '@getpar
 import { CenteredText, HeroAccountTypeIcon, InnerStepContainer, QRContainer, StepContainer } from '../common.js';
 import { useCallback, useEffect, useMemo } from 'react';
 import { useModalStore } from '../../stores/index.js';
-import { CommonWallet, HeroSpinner, safeStyled } from '@getpara/react-common';
+import { CommonWallet, HeroSpinner, openMobileUrl, safeStyled } from '@getpara/react-common';
 import { useCopyToClipboard } from '@getpara/react-common';
 import { ModalStep } from '../../utils/steps.js';
 import { isMobile, isTablet, TExternalWallet } from '@getpara/web-sdk';
-import { routeMobileExternalWallet } from '../../utils/routeMobileExternalWallet.js';
 import { useExternalWallets } from '../../../provider/providers/ExternalWalletProvider.js';
 import { useStore } from '../../../provider/stores/useStore.js';
 
@@ -55,13 +54,10 @@ export const ExternalWalletMobileConnect = ({
     if (isError && onRetryClick) {
       await onRetryClick();
     } else {
-      await routeMobileExternalWallet(qrUri);
+      await openMobileUrl(qrUri);
     }
   };
 
-  console.log('🚀 ~ ExternalWalletMobileConnect ~ isMobile:', isMobile());
-  console.log('🚀 ~ ExternalWalletMobileConnect ~ isTablet:', !isTablet());
-  console.log('🚀 ~ ExternalWalletMobileConnect ~ wallet:', wallet.type);
   if (wallet.type === 'SOLANA' || (isMobile() && !isTablet())) {
     return (
       <>

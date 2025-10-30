@@ -5,6 +5,7 @@
     "@coinbase/wallet-sdk": "4.3.0",
     "@getpara/wagmi-v2-connector": "2.0.0-alpha.67",
     "@getpara/web-sdk": "2.0.0-alpha.67",
+    "@walletconnect/ethereum-provider": "^2.22.4",
     "zustand": "^4.5.2",
     "zustand-sync-tabs": "^0.2.2"
   },
