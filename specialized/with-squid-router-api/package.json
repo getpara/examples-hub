@@ -20,7 +20,6 @@
     "@getpara/react-sdk": "2.0.0-alpha.65",
     "@getpara/solana-web3.js-v1-integration": "2.0.0-alpha.65",
     "@hookform/resolvers": "^3.9.1",
-    "@leapwallet/cosmos-social-login-capsule-provider": "^0.0.44",
     "@radix-ui/react-accordion": "1.2.2",
     "@radix-ui/react-alert-dialog": "1.1.4",
     "@radix-ui/react-aspect-ratio": "1.1.1",

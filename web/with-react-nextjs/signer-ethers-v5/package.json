@@ -20,7 +20,6 @@
     "@cosmjs/tendermint-rpc": "^0.34.0",
     "@getpara/ethers-v5-integration": "2.0.0-alpha.65",
     "@getpara/react-sdk": "2.0.0-alpha.65",
-    "@leapwallet/cosmos-social-login-capsule-provider": "^0.0.44",
     "@solana-mobile/wallet-adapter-mobile": "^2.2.2",
     "@solana/wallet-adapter-base": "^0.9.27",
     "@solana/wallet-adapter-react": "^0.15.39",

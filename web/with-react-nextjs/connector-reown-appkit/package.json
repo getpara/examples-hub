@@ -20,7 +20,6 @@
     "@cosmjs/tendermint-rpc": "^0.34.0",
     "@getpara/react-sdk": "2.0.0-alpha.65",
     "@getpara/wagmi-v2-integration": "2.0.0-alpha.65",
-    "@leapwallet/cosmos-social-login-capsule-provider": "^0.0.44",
     "@reown/appkit": "^1.7.16",
     "@reown/appkit-adapter-wagmi": "^1.7.16",
     "@solana-mobile/wallet-adapter-mobile": "^2.2.2",

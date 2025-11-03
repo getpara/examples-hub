@@ -24,7 +24,6 @@
     "@getpara/react-sdk": "2.0.0-alpha.65",
     "@getpara/solana-signers-v2-integration": "2.0.0-alpha.65",
     "@getpara/solana-web3.js-v1-integration": "2.0.0-alpha.65",
-    "@leapwallet/cosmos-social-login-capsule-provider": "^0.0.44",
     "@solana-mobile/wallet-adapter-mobile": "^2.2.2",
     "@solana-program/system": "^0.7.0",
     "@solana/addresses": "^2.2.1",
