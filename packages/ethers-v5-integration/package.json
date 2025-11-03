@@ -1,8 +1,8 @@
 {
   "name": "@getpara/ethers-v5-integration",
-  "version": "2.0.0-alpha.68",
+  "version": "2.0.0-alpha.69",
   "dependencies": {
-    "@getpara/core-sdk": "2.0.0-alpha.68"
+    "@getpara/core-sdk": "2.0.0-alpha.69"
   },
   "devDependencies": {
     "ethers": "^5.8.0",
