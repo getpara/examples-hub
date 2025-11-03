@@ -3,6 +3,13 @@ import { ParaPortal } from '../classes/ParaPortal';
 
 export async function basicLoginUpgrade(para: ParaPortal): Promise<void> {
   const temporaryShares = (await para.getTransmissionKeyShares({ isForNewDevice: true })).data.temporaryShares;
+
+  // If the user has no shares to persist, try to upgrade them anyway
+  if (temporaryShares.length === 0) {
+    await para.ctx.client.persistEnclaveShares({ hasNoShares: true });
+    return;
+  }
+
   const shares = temporaryShares.map(share => {
     const userShare = decryptWithPrivateKey(
       para.loginEncryptionKeyPair.privateKey,

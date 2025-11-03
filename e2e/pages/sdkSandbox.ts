@@ -139,6 +139,8 @@ export class WebExamplePage {
       await this.page.frameLocator('#root iframe').getByRole('textbox', { name: 'Enter password' }).click();
       await this.page.frameLocator('#root iframe').getByRole('textbox', { name: 'Enter password' }).fill(password);
       await this.page.frameLocator('#root iframe').getByRole('button', { name: 'Login' }).click();
+      await this.page.waitForTimeout(750);
+      await this.page.frameLocator('#root iframe').getByRole('button', { name: 'Keep Using Password' }).click();
     } else {
       const page2Promise = this.page.waitForEvent('popup');
       await this.page.waitForTimeout(750);
@@ -146,6 +148,9 @@ export class WebExamplePage {
       const page2 = await page2Promise;
       const authPortal = new AuthPortalPage(page2);
       await authPortal.login(context, credential);
+
+      await page2.waitForTimeout(750);
+      await page2.getByRole('button', { name: 'Keep Using Passkey' }).click();
     }
 
     await this.page.waitForTimeout(1000);

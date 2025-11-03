@@ -15,9 +15,10 @@ import { HeaderIcon } from '../../components/HeaderIcon';
 type BasicLoginUpgradeProps = {
   onUpgradeClick?: () => Promise<void>;
   onSkipClick?: (_?: boolean) => Promise<void>;
+  onLogin?: () => Promise<void>;
 };
 
-export const BasicLoginUpgrade = ({ onUpgradeClick, onSkipClick }: BasicLoginUpgradeProps) => {
+export const BasicLoginUpgrade = ({ onUpgradeClick, onSkipClick, onLogin }: BasicLoginUpgradeProps) => {
   const para = usePara();
   const closeWindow = useCloseWindow();
   const [searchParams] = useSearchParams();
@@ -139,6 +140,7 @@ export const BasicLoginUpgrade = ({ onUpgradeClick, onSkipClick }: BasicLoginUpg
       setError('An unexpected error occurred during the upgrade process.');
       console.error(e);
     } finally {
+      await onLogin?.();
       setIsProcessing(false);
     }
   };

@@ -183,7 +183,10 @@ export function AuthProvider({
           setAuthStepRoute();
           setIFrameUrl();
           setIsIFrameReady(false);
-          setStep(ModalStep.AWAITING_ACCOUNT);
+
+          if (refs.currentStep.current !== ModalStep.LOGIN_DONE && refs.currentStep.current !== ModalStep.AWAITING_ACCOUNT) {
+            setStep(ModalStep.AWAITING_ACCOUNT);
+          }
         }
         // Remove the listener after handling the matching event
         window.removeEventListener('message', handleMessage);

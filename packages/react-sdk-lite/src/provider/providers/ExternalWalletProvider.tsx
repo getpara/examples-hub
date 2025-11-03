@@ -793,6 +793,8 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
     if (popupCloseIntervalRef.current) {
       clearInterval(popupCloseIntervalRef.current);
       popupCloseIntervalRef.current = null;
+      // Reset popup window ref to null so the login listener doesn't try to listen for it to close
+      refs.popupWindow.current = null;
     }
   };
 

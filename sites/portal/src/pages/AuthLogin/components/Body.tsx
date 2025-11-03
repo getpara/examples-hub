@@ -38,6 +38,7 @@ interface BodyProps {
   isSwitchingWallets?: boolean;
   onBasicLoginUpgradeClick: () => Promise<void>;
   onSkipBasicLoginUpgradeClick: (_?: boolean) => Promise<void>;
+  onBasicLoginPostLogin: () => Promise<void>;
 }
 
 export const Body = ({
@@ -57,6 +58,7 @@ export const Body = ({
   isSwitchingWallets = false,
   onBasicLoginUpgradeClick,
   onSkipBasicLoginUpgradeClick,
+  onBasicLoginPostLogin,
 }: BodyProps) => {
   const { partner } = useModalOutletContext();
 
@@ -139,7 +141,13 @@ export const Body = ({
         return <TelegramLogin onLogin={postLogin} />;
       }
       case AuthLoginStep.BASIC_LOGIN_UPGRADE: {
-        return <BasicLoginUpgrade onUpgradeClick={onBasicLoginUpgradeClick} onSkipClick={onSkipBasicLoginUpgradeClick} />;
+        return (
+          <BasicLoginUpgrade
+            onUpgradeClick={onBasicLoginUpgradeClick}
+            onSkipClick={onSkipBasicLoginUpgradeClick}
+            onLogin={onBasicLoginPostLogin}
+          />
+        );
       }
       case AuthLoginStep.EXTERNAL_WALLET: {
         return <ExternalWallet onLogin={postLogin} />;

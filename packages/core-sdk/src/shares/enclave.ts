@@ -254,7 +254,7 @@ export class EnclaveClient {
     const encryptedPayloadStr = JSON.stringify(encryptedPayload);
 
     // Call user-management service
-    return await this.userManagementClient.persistEnclaveShares(encryptedPayloadStr);
+    return await this.userManagementClient.persistEnclaveShares({ encryptedPayload: encryptedPayloadStr });
   }
 
   /**

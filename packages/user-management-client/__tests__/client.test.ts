@@ -1481,9 +1481,15 @@ describe('Client', () => {
     });
 
     it('persistEnclaveShares', async () => {
-      await client.persistEnclaveShares('payload');
+      await client.persistEnclaveShares({ encryptedPayload: 'payload' });
 
       expect(mocks.post).toBeCalledWith('/enclave/key-shares', { encryptedPayload: 'payload' });
+    });
+
+    it('persistEnclaveShares - no shares', async () => {
+      await client.persistEnclaveShares({ hasNoShares: true });
+
+      expect(mocks.post).toBeCalledWith('/enclave/key-shares', { hasNoShares: true });
     });
 
     it('retrieveEnclaveShares', async () => {

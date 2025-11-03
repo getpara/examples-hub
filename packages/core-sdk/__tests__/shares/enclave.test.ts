@@ -340,7 +340,9 @@ describe('EnclaveClient', () => {
 
       expect(result).toEqual(mockResponse);
       expect(enclaveClient['encryptForEnclave']).toHaveBeenCalledWith(JSON.stringify({ shares, jwt: 'mock-jwt' }));
-      expect(mockUserManagementClient.persistEnclaveShares).toHaveBeenCalledWith(JSON.stringify(mockEncryptedPayload));
+      expect(mockUserManagementClient.persistEnclaveShares).toHaveBeenCalledWith({
+        encryptedPayload: JSON.stringify(mockEncryptedPayload),
+      });
     });
   });
 

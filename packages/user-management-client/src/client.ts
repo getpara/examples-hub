@@ -1380,8 +1380,14 @@ class Client {
    * Persist encrypted key shares to the enclave
    * @param encryptedPayload JSON string containing the encrypted ECIES payload
    */
-  persistEnclaveShares = async (encryptedPayload: string): Promise<{ payload: any }> => {
-    const body = { encryptedPayload };
+  persistEnclaveShares = async ({
+    encryptedPayload,
+    hasNoShares,
+  }: {
+    encryptedPayload?: string;
+    hasNoShares?: boolean;
+  }): Promise<{ payload: any }> => {
+    const body = { encryptedPayload, hasNoShares };
     const res = await this.baseRequest.post<{ payload: any }>('/enclave/key-shares', body);
     return res.data;
   };
