@@ -134,7 +134,7 @@ export const SelectWallet = ({
   isKnownDeviceLogin,
   isSwitchingWallets = false,
 }: {
-  onSuccess: (_: { withDelay?: boolean; isEnclaveUser: boolean; shouldSkipBasicLoginUpgradePrompt: boolean }) => void;
+  onSuccess: (_: { withDelay?: boolean }) => void;
   sessionLookupId: string;
   isKnownDeviceLogin: boolean;
   isSwitchingWallets?: boolean;
@@ -143,7 +143,7 @@ export const SelectWallet = ({
   const portalEmitter = usePortalEmitter();
   const {
     authInfo,
-    fns: { authUpdateKeyShares, authUpdateEnclaveKeyShares, checkIsEnclaveUser, getSkipBasicLoginUpgradePromptPreference },
+    fns: { authUpdateKeyShares, authUpdateEnclaveKeyShares, checkIsEnclaveUser },
     params: { newDeviceSessionLookupId },
     wallets,
     sessionOrigin,
@@ -269,14 +269,13 @@ export const SelectWallet = ({
 
       // Update key shares for the newly selected wallets (including any newly created ones)
       await (isEnclaveUser ? authUpdateEnclaveKeyShares() : authUpdateKeyShares(loginRes));
-      const shouldSkipBasicLoginUpgradePrompt = await getSkipBasicLoginUpgradePromptPreference();
 
       // Send wallet switch completion message to parent
       if (isSwitchingWallets) {
         portalEmitter.walletSwitchCompleted({ walletIds: finalWalletIds });
       }
 
-      onSuccess({ withDelay: toCreate.length > 0 && isIFramed, isEnclaveUser, shouldSkipBasicLoginUpgradePrompt });
+      onSuccess({ withDelay: toCreate.length > 0 && isIFramed });
     },
     [para, onSuccess, isSwitchingWallets],
   );

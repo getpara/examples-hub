@@ -438,9 +438,9 @@ const AuthLoginBase = ({ step: propsStep }: { step?: AuthLoginStep }) => {
     return (
       <SelectWallet
         sessionLookupId={sessionId}
-        onSuccess={({ withDelay, isEnclaveUser, shouldSkipBasicLoginUpgradePrompt }) => {
-          const nextStep =
-            !isEnclaveUser && !shouldSkipBasicLoginUpgradePrompt ? AuthLoginStep.BASIC_LOGIN_UPGRADE : AuthLoginStep.SUCCESS;
+        onSuccess={({ withDelay }) => {
+          // Basic login upgrade would have been asked prior to wallet selection, no need to handle that here
+          const nextStep = AuthLoginStep.SUCCESS;
 
           if (withDelay) {
             setTimeout(() => {
