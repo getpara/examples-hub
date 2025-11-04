@@ -65,9 +65,10 @@ export const useEventListeners = ({
 
   const accountCreationListener = useCallback(
     (event: AccountCreationEvent) => {
+      loginOrSetupListener();
       onAccountCreation?.(event);
     },
-    [onAccountCreation],
+    [loginOrSetupListener, onAccountCreation],
   );
 
   const logoutListener = useCallback(
