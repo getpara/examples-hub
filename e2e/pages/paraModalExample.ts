@@ -551,12 +551,14 @@ export class ParaModalExamplePage {
     const modalContent = this.page.getByTestId("modal-content");
     await expect(modalContent).toBeVisible({ timeout: 10000 });
 
-    // Click the Profile button (new UI flow) - auto-wait built into click
+    // Wait for Profile button to be visible before clicking
     const profileButton = modalContent.locator('cpsl-tile-button:has-text("Profile") button.button-native');
+    await expect(profileButton).toBeVisible({ timeout: 10000 });
     await profileButton.click({ timeout: 10000 });
 
-    // Click Disconnect Wallet button - auto-wait built into click
+    // Wait for Disconnect Wallet button to be visible before clicking
     const disconnectButton = modalContent.locator('cpsl-button:has-text("Disconnect Wallet") button.button-native');
+    await expect(disconnectButton).toBeVisible({ timeout: 10000 });
     await disconnectButton.click({ timeout: 10000 });
 
     // Wait for logout to complete - header should show connect button again
