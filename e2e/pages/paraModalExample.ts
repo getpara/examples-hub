@@ -53,11 +53,8 @@ export class ParaModalExamplePage {
       timeout: 10000,
     });
 
-    // Get the iframe locator
+    // Get the iframe locator - content readiness will be validated by subsequent element checks
     const frameLocator = this.page.frameLocator("iframe").first();
-
-    // Wait for the frame to be loaded and visible
-    await frameLocator.locator("body").waitFor({ state: "visible", timeout: 10000 });
 
     return frameLocator;
   }
@@ -84,6 +81,27 @@ export class ParaModalExamplePage {
     return iframeOTPInput;
   }
 
+  /**
+   * Helper method to click an optional button (e.g., "Keep Using" buttons)
+   * Returns true if button was found and clicked, false otherwise
+   */
+  private async clickOptionalButton(
+    locatorOrPage: Locator | Page,
+    selector: string,
+    buttonName: string,
+    timeout: number = 5000
+  ): Promise<boolean> {
+    const button = locatorOrPage.locator(selector);
+    if (await button.isVisible({ timeout })) {
+      this.logger.logInfo(`Found '${buttonName}' button, clicking...`);
+      await button.click();
+      return true;
+    } else {
+      this.logger.logInfo(`'${buttonName}' button not found, proceeding`);
+      return false;
+    }
+  }
+
   async visit() {
     await this.page.goto("/");
     // Wait for page to be fully loaded and interactive
@@ -102,26 +120,22 @@ export class ParaModalExamplePage {
     this.logger.logStep("Waiting for UI stability before modal interaction...");
 
     // Check which button is present (connected or disconnected state)
-    // The button changes based on connection state
     const accountButton = this.page.getByTestId("account-address-display");
     const connectButton = this.page.getByTestId("header-connect-button");
 
     // Wait for either button to be visible
     let modalButton;
-    try {
-      // First check if we're in connected state
-      await accountButton.waitFor({ state: "visible", timeout: 2000 });
+    if (await accountButton.isVisible({ timeout: 2000 })) {
       modalButton = accountButton;
       this.logger.logInfo("Found account button (connected state)");
-    } catch {
-      // Otherwise we should be in disconnected state
-      await connectButton.waitFor({ state: "visible", timeout: 10000 });
+    } else {
+      await expect(connectButton).toBeVisible({ timeout: 10000 });
       modalButton = connectButton;
       this.logger.logInfo("Found connect button (disconnected state)");
     }
 
-    // Additional wait to ensure any animations or async operations complete
-    await this.page.waitForTimeout(1500);
+    // Brief wait to ensure animations complete (necessary for reliable modal opening)
+    await this.page.waitForTimeout(1000);
 
     // Verify button is still visible and clickable
     await expect(modalButton).toBeVisible();
@@ -297,31 +311,19 @@ export class ParaModalExamplePage {
 
     let clipboardText = "";
     if (!isBasicLogin && isRecoverySecretEnabled) {
-      // Wait for the recovery secret screen to be visible
-      await this.page.waitForTimeout(2000);
-
-      // Look for the copy tile button with the correct structure
-      // The tile button has icon="copy" and contains "Copy" text
+      // Look for the copy tile button - auto-wait for visibility
       const copyTileButton = this.page.locator('cpsl-tile-button[icon="copy"]:has(cpsl-text:has-text("Copy"))');
+      await copyTileButton.click({ timeout: 10000 });
 
-      // Wait for the tile button to be visible
-      await copyTileButton.waitFor({ state: "visible", timeout: 10000 });
-
-      // Click the tile button directly - Playwright should handle the shadow DOM
-      await copyTileButton.click();
-
-      // Wait for clipboard operation to complete
-      await this.page.waitForTimeout(500);
+      // Read clipboard contents
       clipboardText = await this.page.evaluate("navigator.clipboard.readText()");
 
-      // Click "I've saved my recovery secret" button - try multiple selectors
-      // The text might vary slightly, so let's be more flexible
+      // Click "I've saved my recovery secret" button - auto-wait with click timeout
       const savedSecretButton = this.page
         .locator("cpsl-button")
         .filter({ hasText: /saved.*recovery|recovery.*saved/i })
         .locator("button.button-native");
-      await savedSecretButton.waitFor({ state: "visible", timeout: 5000 });
-      await savedSecretButton.click();
+      await savedSecretButton.click({ timeout: 10000 });
     }
 
     if (is2FAEnabled) {
@@ -330,11 +332,9 @@ export class ParaModalExamplePage {
       const skipButton = this.page.locator('cpsl-button:has-text("Skip") button.button-native');
       await skipButton.click();
     } else {
-      // Click the Done button - target native button in shadow DOM
-      // Wait for the button to appear after the page transition
+      // Click the Done button - auto-wait for visibility
       const doneButton = this.page.locator('cpsl-button:has-text("Done") button.button-native');
-      await doneButton.waitFor({ state: "visible", timeout: 10000 });
-      await doneButton.click();
+      await doneButton.click({ timeout: 10000 });
     }
 
     // Wait for modal to close and app state to update
@@ -461,20 +461,14 @@ export class ParaModalExamplePage {
         await loginButton.click();
         this.logger.logInfo("Clicked Login button");
 
-        // After login, check for "Keep Using PIN" button in iframe - target native button in shadow DOM
+        // Check for optional "Keep Using PIN" button
         this.logger.logInfo("Checking for 'Keep Using PIN' button in iframe after login...");
-        const keepUsingButton = iframeLocator.locator('cpsl-button:has-text("Keep Using") button.button-native');
-        try {
-          await keepUsingButton.waitFor({ state: "visible", timeout: 5000 });
-          this.logger.logInfo("Found 'Keep Using PIN' button in iframe after login, clicking...");
-          await keepUsingButton.click();
-          await this.page.waitForTimeout(500);
-        } catch (error) {
-          this.logger.logInfo("Keep Using PIN button not found, proceeding with login completion");
-        }
+        await this.clickOptionalButton(
+          iframeLocator,
+          'cpsl-button:has-text("Keep Using") button.button-native',
+          "Keep Using PIN"
+        );
 
-        // Wait for modal to close and user to be logged in
-        await this.page.waitForTimeout(2000);
         this.logger.logInfo("Login completed");
       } catch (error) {
         this.logger.logError("Error in PIN login flow:", error);
@@ -503,20 +497,14 @@ export class ParaModalExamplePage {
         await loginButton.click();
         this.logger.logInfo("Clicked Login button");
 
-        // After login, check for "Keep Using Password" button in iframe - target native button in shadow DOM
+        // Check for optional "Keep Using Password" button
         this.logger.logInfo("Checking for 'Keep Using Password' button in iframe after login...");
-        const keepUsingButton = iframeLocator.locator('cpsl-button:has-text("Keep Using") button.button-native');
-        try {
-          await keepUsingButton.waitFor({ state: "visible", timeout: 5000 });
-          this.logger.logInfo("Found 'Keep Using Password' button in iframe after login, clicking...");
-          await keepUsingButton.click();
-          await this.page.waitForTimeout(500);
-        } catch (error) {
-          this.logger.logInfo("Keep Using Password button not found, proceeding with login completion");
-        }
+        await this.clickOptionalButton(
+          iframeLocator,
+          'cpsl-button:has-text("Keep Using") button.button-native',
+          "Keep Using Password"
+        );
 
-        // Wait for modal to close and user to be logged in
-        await this.page.waitForTimeout(2000);
         this.logger.logInfo("Login completed");
       } catch (error) {
         this.logger.logError("Error in password login flow:", error);
@@ -531,61 +519,45 @@ export class ParaModalExamplePage {
       const authPortal = new AuthPortalPage(page2);
       await authPortal.login(context, credential);
 
-      // After passkey authentication, check for "Keep Using Passkey" button in popup - target native button in shadow DOM
+      // Check for optional "Keep Using Passkey" button in popup
       this.logger.logInfo("Checking for 'Keep Using Passkey' button in popup after authentication...");
-      try {
-        const keepUsingButton = page2.locator('cpsl-button:has-text("Keep Using") button.button-native');
-        await keepUsingButton.waitFor({ state: "visible", timeout: 5000 });
-        this.logger.logInfo("Found 'Keep Using Passkey' button in popup after authentication, clicking...");
-        await keepUsingButton.click();
-        await page2.waitForTimeout(500);
-      } catch (error) {
-        this.logger.logInfo("Keep Using Passkey button not found, proceeding with login completion");
-      }
+      await this.clickOptionalButton(
+        page2,
+        'cpsl-button:has-text("Keep Using") button.button-native',
+        "Keep Using Passkey"
+      );
     }
 
     // Wait for login to complete and connection state to update
     this.logger.logStep("Waiting for login completion and connection state update...");
-    await this.page.waitForTimeout(2000);
 
     if (is2FAEnabled) {
       const skipButton = this.page.locator('cpsl-button:has-text("Skip") button.button-native');
       await skipButton.click();
-      await this.page.waitForTimeout(2100);
     }
 
     // Verify login completion by checking for account address display
-    try {
-      await this.page.waitForSelector('[data-testid="account-address-display"]', {
-        state: "visible",
-        timeout: 10000,
-      });
-      this.logger.logStep("Para Modal login confirmed - account address display visible", true);
-    } catch (error) {
-      this.logger.logWarning("Account address display not found after login, may need more time");
-      await this.page.waitForTimeout(2000);
-    }
+    await expect(this.page.getByTestId("account-address-display")).toBeVisible({
+      timeout: 15000,
+    });
+    this.logger.logStep("Para Modal login confirmed - account address display visible", true);
   }
 
   async logout() {
     // Click on the connected address button to open modal
     await this.page.getByTestId("account-address-display").click();
-    await this.page.waitForTimeout(500);
 
-    // Wait for modal content to be visible
+    // Wait for modal content to be visible and click Profile button
     const modalContent = this.page.getByTestId("modal-content");
-    await modalContent.waitFor({ state: "visible", timeout: 5000 });
+    await expect(modalContent).toBeVisible({ timeout: 10000 });
 
-    // Click the Profile button first (new UI flow) - target native button in shadow DOM
+    // Click the Profile button (new UI flow) - auto-wait built into click
     const profileButton = modalContent.locator('cpsl-tile-button:has-text("Profile") button.button-native');
-    await profileButton.waitFor({ state: "visible", timeout: 5000 });
-    await profileButton.click();
-    await this.page.waitForTimeout(500);
+    await profileButton.click({ timeout: 10000 });
 
-    // Now click the Disconnect Wallet button - target native button in shadow DOM
+    // Click Disconnect Wallet button - auto-wait built into click
     const disconnectButton = modalContent.locator('cpsl-button:has-text("Disconnect Wallet") button.button-native');
-    await disconnectButton.waitFor({ state: "visible", timeout: 5000 });
-    await disconnectButton.click();
+    await disconnectButton.click({ timeout: 10000 });
 
     // Wait for logout to complete - header should show connect button again
     this.logger.logInfo("Waiting for logout to complete...");
