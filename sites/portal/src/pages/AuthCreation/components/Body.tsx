@@ -5,6 +5,7 @@ import { ModalFooter } from '../../../components/ModalFooter';
 import { ModalLoading } from '../../../components/ModalLoading';
 import { ModalSuccess } from '../../../components/ModalSuccess';
 import { useModalOutletContext } from '../../../hooks/useModalOutletContext';
+import { isIFramed } from '../../../utils/isIFramed';
 
 interface BodyProps {
   step: AuthCreationStep;
@@ -64,6 +65,6 @@ const InnerContainer = styled.div`
   flex-direction: column;
   gap: 8px;
   width: 100%;
-  padding: 0px 24px;
+  ${!isIFramed && 'padding: 0px 24px'}
   overflow: auto;
 `;

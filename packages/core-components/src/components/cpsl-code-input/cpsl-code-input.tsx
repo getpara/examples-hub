@@ -1,4 +1,4 @@
-import { Component, Host, h, Prop, Element, Event, EventEmitter } from '@stencil/core';
+import { Component, Host, h, Prop, Element, Event, EventEmitter, Watch } from '@stencil/core';
 import { CodeChangeEventDetail } from './code-change-interface.js';
 
 @Component({
@@ -41,6 +41,16 @@ export class CpslCodeInput {
    */
   @Event() cpslInput!: EventEmitter<CodeChangeEventDetail>;
 
+  @Watch('code')
+  watchCodeProp(newCode: string) {
+    // Update the input values when the code prop changes externally
+    const inputElements = this.inputs;
+    if (inputElements.length > 0) {
+      inputElements.forEach((input, index) => {
+        input.value = newCode?.[index] || '';
+      });
+    }
+  }
   private handleInput = (ind: number, ev: InputEvent) => {
     const inputElements = this.inputs;
 
@@ -52,31 +62,35 @@ export class CpslCodeInput {
 
     if (ev.inputType === 'insertText') {
       if (this.type === 'number' && isNaN(parseInt(ev.data))) {
+        ev.preventDefault();
         inputElements[ind].value = '';
         return;
       }
 
+      // Prevent the default behavior FIRST
+      ev.preventDefault();
+
+      // Build the new code from the current component state, not the DOM
+      const currentCode = this.code || '';
+
       // Prevent input beyond the maximum length
-      if (this.code && this.code.length >= this.length) {
-        inputElements[ind].value = this.code[ind] || '';
+      if (currentCode.length >= this.length) {
         return;
       }
 
-      const newCode = `${this.code ?? ''}${ev.data}`;
+      // Insert the new character at the correct position
+      const newCode = currentCode + ev.data;
 
-      // Ensure we don't exceed the maximum length
-      if (newCode.length > this.length) {
-        const truncatedCode = newCode.substring(0, this.length);
-        this.cpslInput.emit({ value: truncatedCode });
-        this.code = truncatedCode;
-        // Set each input to its corresponding character
-        inputElements.forEach((input, index) => {
-          input.value = truncatedCode[index] || '';
-        });
-      } else {
-        inputElements[Math.min(this.length - 1, newCode.length)].focus();
-        this.cpslInput.emit({ value: newCode });
-        this.code = newCode;
+      // Update the component state and emit event
+      this.cpslInput.emit({ value: newCode });
+      this.code = newCode;
+
+      // Update the specific input that was typed in
+      inputElements[ind].value = ev.data;
+
+      // Focus next input if not at the end
+      if (newCode.length < this.length) {
+        inputElements[newCode.length].focus();
       }
     }
   };

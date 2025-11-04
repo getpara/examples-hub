@@ -1,6 +1,7 @@
 import { PropsWithChildren } from 'react';
 import { styled } from 'styled-components';
 import { ModalFooter } from './ModalFooter';
+import { isIFramed } from '../utils/isIFramed';
 
 export const ModalLayoutInner = ({
   children,
@@ -36,7 +37,7 @@ const InnerContainer = styled.div<{ $styles?: string }>`
   flex-direction: column;
   gap: 8px;
   width: 100%;
-  padding: 0px 24px;
+  ${!isIFramed && 'padding: 0px 24px'}
   overflow: auto;
   ${({ $styles }) => $styles};
 `;

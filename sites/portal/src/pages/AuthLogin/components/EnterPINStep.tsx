@@ -218,8 +218,6 @@ const ErrorIcon = styled(CpslIcon)`
 
 const Container = styled.form<{ $isEmbedded?: boolean }>`
   flex: 1;
-  padding-left: ${({ $isEmbedded }) => ($isEmbedded ? '0px' : '83px')};
-  padding-right: ${({ $isEmbedded }) => ($isEmbedded ? '0px' : '83px')};
   padding-top: ${({ $isEmbedded }) => ($isEmbedded ? '0px' : '24px')};
   box-sizing: border-box;
   width: 100%;

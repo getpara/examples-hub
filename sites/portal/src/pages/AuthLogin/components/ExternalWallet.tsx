@@ -106,7 +106,7 @@ export const ExternalWallet = ({ onLogin }: ExternalWalletStepProps) => {
         <CpslText variant="bodyL" weight="semiBold">
           Wallet Security Code
         </CpslText>
-        <CpslText variant="bodyS" color="secondary" weight="medium">
+        <CpslText variant="bodyS" color="secondary" weight="medium" align="center">
           Make sure the following code matches the code in the message your wallet is asking you to sign.
         </CpslText>
       </InnerContainer>
