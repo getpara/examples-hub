@@ -26,7 +26,8 @@ class _ParaAppState extends State<ParaApp> {
   @override
   void initState() {
     super.initState();
-    _sessionStatusListener = () => _handleSessionStatus(para.sessionStatus.value);
+    _sessionStatusListener =
+        () => _handleSessionStatus(para.sessionStatus.value);
     para.sessionStatus.addListener(_sessionStatusListener);
     _handleSessionStatus(para.sessionStatus.value);
     _initializeDeepLinks();
@@ -128,6 +129,11 @@ class _ParaAppState extends State<ParaApp> {
     setState(() => _state = AppState.auth);
   }
 
+  void _onDeleteAccount() {
+    if (!mounted) return;
+    setState(() => _state = AppState.auth);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -137,7 +143,10 @@ class _ParaAppState extends State<ParaApp> {
           switch (_state) {
             AppState.launch => const SizedBox.shrink(),
             AppState.auth => AuthScreen(onSuccess: _onAuthSuccess),
-            AppState.home => HomeScreen(onLogout: _onLogout),
+            AppState.home => HomeScreen(
+                onLogout: _onLogout,
+                onDeleteAccount: _onDeleteAccount,
+              ),
           },
           // Launch screen overlay
           if (_showLaunchScreen)

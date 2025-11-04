@@ -4,10 +4,12 @@ import '../features/wallets/screens/wallets_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final VoidCallback onLogout;
+  final VoidCallback onDeleteAccount;
 
   const HomeScreen({
     super.key,
     required this.onLogout,
+    required this.onDeleteAccount,
   });
 
   @override
@@ -42,6 +44,9 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     // Directly show the WalletsScreen since this is the main home screen
-    return WalletsScreen(onLogout: widget.onLogout);
+    return WalletsScreen(
+      onLogout: widget.onLogout,
+      onDeleteAccount: widget.onDeleteAccount,
+    );
   }
 }
