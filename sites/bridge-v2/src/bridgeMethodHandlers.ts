@@ -102,6 +102,33 @@ export const bridgeMethodHandlers: Record<string, (para: ParaWeb, args: any) => 
     await para.logout();
     return null;
   },
+  deleteAccount: async (para, _) => {
+    logger.info('Deleting account...');
+
+    const userId = para.userId;
+    if (!userId) {
+      logger.warn('deleteAccount called with no authenticated user.');
+      throw new Error('No authenticated user');
+    }
+
+    try {
+      logger.info('Calling deleteSelf for user:', userId);
+      await para.ctx.client.deleteSelf(userId);
+      logger.info('deleteSelf succeeded, logging out…');
+    } catch (error) {
+      logger.error('deleteAccount failed while calling deleteSelf:', error);
+      throw error;
+    }
+
+    try {
+      await para.logout();
+    } catch (error) {
+      logger.error('deleteAccount failed while logging out:', error);
+      throw error;
+    }
+
+    return null;
+  },
   setEmail: async (para, args: SetEmailArgs) => {
     logger.info('Setting email...');
     await para.setEmail(args.email);
