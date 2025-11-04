@@ -190,6 +190,7 @@ export class ParaModalExamplePage {
     const authInput = authInputWrapper.locator("input.native-input").first();
     console.log("🚀 ~ ParaModalExamplePage ~ createUser ~ authInput:", authInput);
 
+    await expect(authInput).toBeVisible({ timeout: 10000 });
     await authInput.click();
 
     if (usePhoneNumber) {
@@ -220,6 +221,7 @@ export class ParaModalExamplePage {
 
       for (let i = 0; i < 6; i++) {
         const otpInput = iframeOTPInputLocator.locator(`#code-input-${i}`);
+        await expect(otpInput).toBeVisible({ timeout: 5000 });
         await otpInput.click();
         await otpInput.fill((i + 1).toString());
       }
@@ -235,6 +237,7 @@ export class ParaModalExamplePage {
 
       for (let i = 0; i < 6; i++) {
         const otpInput = codeInputWrapper.locator(`#code-input-${i}`);
+        await expect(otpInput).toBeVisible({ timeout: 5000 });
         await otpInput.click();
         await otpInput.fill((i + 1).toString());
       }
@@ -252,12 +255,14 @@ export class ParaModalExamplePage {
 
         for (let i = 0; i < 4; i++) {
           const otpInput = firstPINInputLocator.locator(`#code-input-${i}`);
+          await expect(otpInput).toBeVisible({ timeout: 5000 });
           await otpInput.click();
           await otpInput.fill(pin[i].toString());
         }
 
         // Click Continue button - target native button in shadow DOM
         const continueButton = iframeLocator.locator('cpsl-button:has-text("Continue") button.button-native');
+        await expect(continueButton).toBeVisible({ timeout: 10000 });
         await continueButton.click();
 
         // Use helper function to get iframe OTP input
@@ -269,16 +274,19 @@ export class ParaModalExamplePage {
 
         for (let i = 0; i < 4; i++) {
           const otpInput = secondPINInputLocator.locator(`#code-input-${i}`);
+          await expect(otpInput).toBeVisible({ timeout: 5000 });
           await otpInput.click();
           await otpInput.fill(pin[i].toString());
         }
 
         // Click Set PIN button - target native button in shadow DOM
         const setPINButton = iframeLocator.locator('cpsl-button:has-text("Set PIN") button.button-native');
+        await expect(setPINButton).toBeVisible({ timeout: 10000 });
         await setPINButton.click();
       } else if (password) {
         // Click the "Choose Password" button - target native button in shadow DOM
         const choosePasswordButton = this.page.locator('cpsl-button:has-text("Choose Password") button.button-native');
+        await expect(choosePasswordButton).toBeVisible({ timeout: 10000 });
         await choosePasswordButton.click();
 
         // Use helper function to get iframe password input
@@ -287,21 +295,25 @@ export class ParaModalExamplePage {
         // Enter password in iframe - target native inputs in shadow DOM
         const passwordInputWrapper = iframeLocator.locator('cpsl-input[placeholder="Enter password"]');
         const passwordInput = passwordInputWrapper.locator("input.native-input");
+        await expect(passwordInput).toBeVisible({ timeout: 10000 });
         await passwordInput.click();
         await passwordInput.fill(password);
 
         const confirmPasswordInputWrapper = iframeLocator.locator('cpsl-input[placeholder="Confirm password"]');
         const confirmPasswordInput = confirmPasswordInputWrapper.locator("input.native-input");
+        await expect(confirmPasswordInput).toBeVisible({ timeout: 10000 });
         await confirmPasswordInput.click();
         await confirmPasswordInput.fill(password);
 
         // Click Save Password button - target native button in shadow DOM
         const savePasswordButton = iframeLocator.locator('cpsl-button:has-text("Save Password") button.button-native');
+        await expect(savePasswordButton).toBeVisible({ timeout: 10000 });
         await savePasswordButton.click();
       } else {
         const page1Promise = this.page.waitForEvent("popup");
         // Click the "Create Passkey" button - target native button in shadow DOM
         const createPasskeyButton = this.page.locator('cpsl-button:has-text("Create Passkey") button.button-native');
+        await expect(createPasskeyButton).toBeVisible({ timeout: 10000 });
         await createPasskeyButton.click();
 
         const page1 = await page1Promise;
@@ -314,6 +326,7 @@ export class ParaModalExamplePage {
     if (!isBasicLogin && isRecoverySecretEnabled) {
       // Look for the copy tile button - auto-wait for visibility
       const copyTileButton = this.page.locator('cpsl-tile-button[icon="copy"]:has(cpsl-text:has-text("Copy"))');
+      await expect(copyTileButton).toBeVisible({ timeout: 10000 });
       await copyTileButton.click({ timeout: 10000 });
 
       // Read clipboard contents
@@ -324,17 +337,21 @@ export class ParaModalExamplePage {
         .locator("cpsl-button")
         .filter({ hasText: /saved.*recovery|recovery.*saved/i })
         .locator("button.button-native");
+      await expect(savedSecretButton).toBeVisible({ timeout: 10000 });
       await savedSecretButton.click({ timeout: 10000 });
     }
 
     if (is2FAEnabled) {
       const continueButton = this.page.locator('cpsl-button:has-text("Continue") button.button-native');
+      await expect(continueButton).toBeVisible({ timeout: 10000 });
       await continueButton.click();
       const skipButton = this.page.locator('cpsl-button:has-text("Skip") button.button-native');
+      await expect(skipButton).toBeVisible({ timeout: 10000 });
       await skipButton.click();
     } else {
       // Click the Done button - auto-wait for visibility
       const doneButton = this.page.locator('cpsl-button:has-text("Done") button.button-native');
+      await expect(doneButton).toBeVisible({ timeout: 10000 });
       await doneButton.click({ timeout: 10000 });
     }
 
@@ -380,6 +397,7 @@ export class ParaModalExamplePage {
     // Click the connect button (will always be disconnected with fresh context)
     this.logger.logInfo("Looking for connect button");
     const connectButton = this.page.getByTestId("header-connect-button");
+    await expect(connectButton).toBeVisible({ timeout: 10000 });
     await connectButton.click();
     this.logger.logInfo("Modal opened");
 
@@ -391,6 +409,7 @@ export class ParaModalExamplePage {
     // Fill the auth input - target the native input inside the shadow DOM
     // Use .first() to avoid conflicts with country search input when using phone
     const authInput = authInputWrapper.locator("input.native-input").first();
+    await expect(authInput).toBeVisible({ timeout: 10000 });
     await authInput.click();
     await authInput.fill(emailOrPhone);
     await expect(authInputWrapper).toHaveAttribute("value", emailOrPhone);
@@ -413,6 +432,7 @@ export class ParaModalExamplePage {
 
       for (let i = 0; i < 6; i++) {
         const otpInput = iframeOTPInputLocator.locator(`#code-input-${i}`);
+        await expect(otpInput).toBeVisible({ timeout: 5000 });
         await otpInput.click();
         await otpInput.fill((i + 1).toString());
       }
@@ -433,6 +453,7 @@ export class ParaModalExamplePage {
 
         for (let i = 0; i < 6; i++) {
           const otpInput = iframeVerificationInputLocator.locator(`#code-input-${i}`);
+          await expect(otpInput).toBeVisible({ timeout: 5000 });
           await otpInput.click();
           await otpInput.fill((i + 1).toString());
         }
@@ -450,6 +471,7 @@ export class ParaModalExamplePage {
 
         for (let i = 0; i < 4; i++) {
           const otpInput = iframePINInputLocator.locator(`#code-input-${i}`);
+          await expect(otpInput).toBeVisible({ timeout: 5000 });
           await otpInput.click();
           await otpInput.fill(pin[i].toString());
         }
@@ -485,12 +507,14 @@ export class ParaModalExamplePage {
         const passwordInputWrapper = iframeLocator.locator('cpsl-input[placeholder="Enter password"]');
         const passwordInput = passwordInputWrapper.locator("input.native-input");
         this.logger.logInfo("Found password input in iframe");
+        await expect(passwordInput).toBeVisible({ timeout: 10000 });
         await passwordInput.click();
         await passwordInput.fill(password);
         this.logger.logInfo("Entered password");
 
-        // Now the Login button should be enabled - target native button in shadow DOM
+        // Now the Login button should be visible and enabled - target native button in shadow DOM
         const loginButton = iframeLocator.locator('cpsl-button:has-text("Login") button.button-native');
+        await expect(loginButton).toBeVisible({ timeout: 10000 });
         await expect(loginButton).toBeEnabled({ timeout: 5000 });
         this.logger.logInfo("Found Login button in iframe, clicking...");
 
@@ -514,7 +538,9 @@ export class ParaModalExamplePage {
     } else {
       this.logger.logInfo("Passkey login flow");
       const page2Promise = this.page.waitForEvent("popup");
-      await this.page.getByText("Login with passkey").click();
+      const passkeyLink = this.page.getByText("Login with passkey");
+      await expect(passkeyLink).toBeVisible({ timeout: 10000 });
+      await passkeyLink.click();
       const page2 = await page2Promise;
 
       const authPortal = new AuthPortalPage(page2);
@@ -533,6 +559,7 @@ export class ParaModalExamplePage {
 
     if (is2FAEnabled) {
       const skipButton = this.page.locator('cpsl-button:has-text("Skip") button.button-native');
+      await expect(skipButton).toBeVisible({ timeout: 10000 });
       await skipButton.click();
     }
 
@@ -544,6 +571,9 @@ export class ParaModalExamplePage {
   }
 
   async logout() {
+    // Ensure UI is stable after previous modal close before reopening
+    await this.waitForUIStability();
+
     // Click on the connected address button to open modal
     await this.page.getByTestId("account-address-display").click();
 
@@ -590,6 +620,7 @@ export class ParaModalExamplePage {
 
       // Click the sign button
       const signButton = this.page.getByTestId("sign-submit-button");
+      await expect(signButton).toBeVisible({ timeout: 10000 });
       await signButton.click();
       this.logger.logInfo("Clicked sign button");
     } else {
@@ -597,6 +628,7 @@ export class ParaModalExamplePage {
       this.logger.logInfo('Signing hardcoded "Hello World!" message');
 
       const signButton = this.page.getByText("Sign Hello World!");
+      await expect(signButton).toBeVisible({ timeout: 10000 });
       await signButton.click();
       this.logger.logInfo("Clicked sign button");
     }
