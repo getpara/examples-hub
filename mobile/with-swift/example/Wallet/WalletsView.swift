@@ -46,6 +46,10 @@ struct WalletsView: View {
     @State private var createWalletError: Error?
     @State private var showCreateWalletError = false
     @State private var isCreatingWallet = false
+    @State private var isDeletingAccount = false
+    @State private var showDeleteConfirmation = false
+    @State private var deleteAccountError: Error?
+    @State private var showDeleteAccountError = false
     @State private var hasPerformedInitialRefresh = false
 
     private func createWallet(type: WalletType) {
@@ -95,6 +99,29 @@ struct WalletsView: View {
         guard !hasPerformedInitialRefresh else { return }
         hasPerformedInitialRefresh = true
         refreshWallets()
+    }
+
+    private func performDeleteAccount() {
+        guard !isDeletingAccount else { return }
+        isDeletingAccount = true
+        deleteAccountError = nil
+
+        Task {
+            do {
+                try await paraManager.deleteAccount()
+
+                await MainActor.run {
+                    appRootManager.setAuthenticated(false)
+                    isDeletingAccount = false
+                }
+            } catch {
+                await MainActor.run {
+                    deleteAccountError = error
+                    showDeleteAccountError = true
+                    isDeletingAccount = false
+                }
+            }
+        }
     }
 
     @ViewBuilder
@@ -295,7 +322,7 @@ struct WalletsView: View {
                 ToolbarItem(placement: .navigationBarLeading) {
                     refreshButton
                 }
-                ToolbarItem(placement: .navigationBarTrailing) {
+                ToolbarItemGroup(placement: .navigationBarTrailing) {
                     Button("Logout") {
                         Task {
                             do {
@@ -309,7 +336,21 @@ struct WalletsView: View {
                             }
                         }
                     }
+                    .disabled(isDeletingAccount)
                     .accessibilityIdentifier("logoutButton")
+
+                    Button(role: .destructive) {
+                        showDeleteConfirmation = true
+                    } label: {
+                        if isDeletingAccount {
+                            ProgressView()
+                                .progressViewStyle(.circular)
+                        } else {
+                            Text("Delete")
+                        }
+                    }
+                    .disabled(isDeletingAccount)
+                    .accessibilityIdentifier("deleteAccountButton")
                 }
             }
             .sheet(isPresented: $showCreateWalletSheet) {
@@ -351,6 +392,23 @@ struct WalletsView: View {
                 Button("OK", role: .cancel) {}
             } message: {
                 Text(createWalletError?.localizedDescription ?? "An unknown error occurred")
+            }
+            .confirmationDialog(
+                "Delete Account?",
+                isPresented: $showDeleteConfirmation,
+                titleVisibility: .visible
+            ) {
+                Button("Delete Account", role: .destructive) {
+                    performDeleteAccount()
+                }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("This will permanently remove your Para account and wallets. This action cannot be undone.")
+            }
+            .alert("Delete Account Failed", isPresented: $showDeleteAccountError) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text(deleteAccountError?.localizedDescription ?? "An unknown error occurred")
             }
             .onAppear {
                 triggerInitialRefreshIfNeeded()

@@ -8,10 +8,12 @@ import 'details/cosmos_wallet_view.dart';
 
 class WalletsScreen extends StatefulWidget {
   final VoidCallback onLogout;
+  final VoidCallback onDeleteAccount;
 
   const WalletsScreen({
     super.key,
     required this.onLogout,
+    required this.onDeleteAccount,
   });
 
   @override
@@ -23,6 +25,7 @@ class _WalletsScreenState extends State<WalletsScreen> {
   bool _isLoading = true;
   bool _isRefreshing = false;
   WalletType? _creatingWalletType;
+  bool _isDeletingAccount = false;
   String? _error;
 
   @override
@@ -53,9 +56,9 @@ class _WalletsScreenState extends State<WalletsScreen> {
 
   Future<void> _refreshWallets() async {
     if (_isRefreshing) return;
-    
+
     setState(() => _isRefreshing = true);
-    
+
     try {
       final wallets = await para.fetchWallets();
       if (mounted) {
@@ -81,7 +84,7 @@ class _WalletsScreenState extends State<WalletsScreen> {
   Future<void> _createWallet(WalletType type, StateSetter setModalState) async {
     setState(() => _creatingWalletType = type);
     setModalState(() => _creatingWalletType = type);
-    
+
     try {
       await para.createWallet(type: type, skipDistribute: false);
       await _loadWallets();
@@ -100,6 +103,51 @@ class _WalletsScreenState extends State<WalletsScreen> {
     }
   }
 
+  Future<void> _handleDeleteAccount() async {
+    if (_isDeletingAccount) return;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Account?'),
+        content: const Text(
+          'This will permanently remove your Para account and all wallets. This action cannot be undone.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) {
+      return;
+    }
+
+    setState(() => _isDeletingAccount = true);
+    try {
+      await para.deleteAccount();
+      if (!mounted) {
+        return;
+      }
+      widget.onDeleteAccount();
+    } catch (e) {
+      if (!mounted) {
+        return;
+      }
+      setState(() => _isDeletingAccount = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Delete account failed: ${e.toString()}')),
+      );
+    }
+  }
+
   void _showCreateWalletSheet() {
     showModalBottomSheet(
       context: context,
@@ -115,49 +163,50 @@ class _WalletsScreenState extends State<WalletsScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-              const Text(
-                'Select Wallet Type',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black,
-                ),
-              ),
-              const SizedBox(height: 24),
-              ...WalletType.values.map((type) => Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: ElevatedButton(
-                    onPressed: _creatingWalletType != null 
-                      ? null 
-                      : () => _createWallet(type, setModalState),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.black,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    child: _creatingWalletType == type
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                          ),
-                        )
-                      : Text(
-                          type.value,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w500,
-                            color: Colors.white,
-                          ),
-                        ),
+                const Text(
+                  'Select Wallet Type',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black,
                   ),
                 ),
-              )),
+                const SizedBox(height: 24),
+                ...WalletType.values.map((type) => Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: SizedBox(
+                        width: double.infinity,
+                        height: 50,
+                        child: ElevatedButton(
+                          onPressed: _creatingWalletType != null
+                              ? null
+                              : () => _createWallet(type, setModalState),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.black,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: _creatingWalletType == type
+                              ? const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.white),
+                                  ),
+                                )
+                              : Text(
+                                  type.value,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                        ),
+                      ),
+                    )),
               ],
             ),
           ),
@@ -215,11 +264,27 @@ class _WalletsScreenState extends State<WalletsScreen> {
         actions: [
           TextButton(
             key: const ValueKey('wallets_screen_logout_button'),
-            onPressed: widget.onLogout,
+            onPressed: _isDeletingAccount ? null : widget.onLogout,
             child: const Text(
               'Logout',
               style: TextStyle(color: Colors.black),
             ),
+          ),
+          TextButton(
+            key: const ValueKey('wallets_screen_delete_account_button'),
+            onPressed: _isDeletingAccount ? null : _handleDeleteAccount,
+            child: _isDeletingAccount
+                ? const SizedBox(
+                    height: 16,
+                    width: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                    ),
+                  )
+                : const Text(
+                    'Delete',
+                    style: TextStyle(color: Colors.red),
+                  ),
           ),
         ],
       ),
@@ -256,7 +321,8 @@ class _WalletsScreenState extends State<WalletsScreen> {
                   child: _wallets.isEmpty
                       ? ListView(
                           physics: const AlwaysScrollableScrollPhysics(),
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 48),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 48),
                           children: [
                             Center(
                               child: GestureDetector(
@@ -266,7 +332,8 @@ class _WalletsScreenState extends State<WalletsScreen> {
                                   height: 200,
                                   padding: const EdgeInsets.all(40),
                                   decoration: BoxDecoration(
-                                    color: Colors.blue.withAlpha((255 * 0.1).round()),
+                                    color: Colors.blue
+                                        .withAlpha((255 * 0.1).round()),
                                     borderRadius: BorderRadius.circular(16),
                                   ),
                                   child: Column(
