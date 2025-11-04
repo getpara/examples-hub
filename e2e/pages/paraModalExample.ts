@@ -1,11 +1,5 @@
 import * as crypto from "node:crypto";
-import {
-  BrowserContext,
-  Page,
-  FrameLocator,
-  expect,
-  Locator,
-} from "@playwright/test";
+import { BrowserContext, Page, FrameLocator, expect, Locator } from "@playwright/test";
 import { Protocol } from "playwright-core/types/protocol";
 
 import { AuthPortalPage } from "./authPortal";
@@ -14,26 +8,19 @@ import { Logger } from "../helpers/logger";
 function getRandomPhoneNumber() {
   // Valid US area codes (sampling of common ones to avoid invalid ranges)
   const validAreaCodes = [
-    201, 202, 203, 205, 206, 207, 208, 209, 210, 212, 213, 214, 215, 216, 217,
-    218, 219, 224, 225, 228, 229, 231, 234, 239, 240, 248, 251, 252, 253, 254,
-    256, 260, 262, 267, 269, 270, 276, 281, 301, 302, 303, 304, 305, 307, 308,
-    309, 310, 312, 313, 314, 315, 316, 317, 318, 319, 320, 321, 323, 325, 330,
-    331, 334, 336, 337, 339, 347, 351, 352, 360, 361, 386, 401, 402, 404, 405,
-    406, 407, 408, 409, 410, 412, 413, 414, 415, 417, 419, 423, 424, 425, 430,
-    432, 434, 435, 440, 443, 458, 469, 470, 475, 478, 479, 480, 484, 501, 502,
-    503, 504, 505, 507, 508, 509, 510, 512, 513, 515, 516, 517, 518, 520, 530,
-    540, 541, 551, 559, 561, 562, 563, 564, 567, 570, 571, 573, 574, 575, 580,
-    585, 586, 601, 602, 603, 605, 606, 607, 608, 609, 610, 612, 614, 615, 616,
-    617, 618, 619, 620, 623, 626, 630, 631, 636, 641, 646, 650, 651, 660, 661,
-    662, 667, 678, 682, 701, 702, 703, 704, 706, 707, 708, 712, 713, 714, 715,
-    716, 717, 718, 719, 720, 724, 727, 730, 731, 732, 734, 737, 740, 754, 757,
-    760, 763, 765, 770, 772, 773, 774, 775, 781, 785, 786, 787, 801, 802, 803,
-    804, 805, 806, 808, 810, 812, 813, 814, 815, 816, 817, 818, 828, 830, 831,
-    832, 843, 845, 847, 848, 850, 856, 857, 858, 859, 860, 862, 863, 864, 865,
-    870, 872, 878, 901, 903, 904, 906, 907, 908, 909, 910, 912, 913, 914, 915,
-    916, 917, 918, 919, 920, 925, 928, 929, 931, 934, 936, 937, 940, 941, 947,
-    949, 951, 952, 954, 956, 959, 970, 971, 972, 973, 978, 979, 980, 984, 985,
-    989,
+    201, 202, 203, 205, 206, 207, 208, 209, 210, 212, 213, 214, 215, 216, 217, 218, 219, 224, 225, 228, 229, 231, 234,
+    239, 240, 248, 251, 252, 253, 254, 256, 260, 262, 267, 269, 270, 276, 281, 301, 302, 303, 304, 305, 307, 308, 309,
+    310, 312, 313, 314, 315, 316, 317, 318, 319, 320, 321, 323, 325, 330, 331, 334, 336, 337, 339, 347, 351, 352, 360,
+    361, 386, 401, 402, 404, 405, 406, 407, 408, 409, 410, 412, 413, 414, 415, 417, 419, 423, 424, 425, 430, 432, 434,
+    435, 440, 443, 458, 469, 470, 475, 478, 479, 480, 484, 501, 502, 503, 504, 505, 507, 508, 509, 510, 512, 513, 515,
+    516, 517, 518, 520, 530, 540, 541, 551, 559, 561, 562, 563, 564, 567, 570, 571, 573, 574, 575, 580, 585, 586, 601,
+    602, 603, 605, 606, 607, 608, 609, 610, 612, 614, 615, 616, 617, 618, 619, 620, 623, 626, 630, 631, 636, 641, 646,
+    650, 651, 660, 661, 662, 667, 678, 682, 701, 702, 703, 704, 706, 707, 708, 712, 713, 714, 715, 716, 717, 718, 719,
+    720, 724, 727, 730, 731, 732, 734, 737, 740, 754, 757, 760, 763, 765, 770, 772, 773, 774, 775, 781, 785, 786, 787,
+    801, 802, 803, 804, 805, 806, 808, 810, 812, 813, 814, 815, 816, 817, 818, 828, 830, 831, 832, 843, 845, 847, 848,
+    850, 856, 857, 858, 859, 860, 862, 863, 864, 865, 870, 872, 878, 901, 903, 904, 906, 907, 908, 909, 910, 912, 913,
+    914, 915, 916, 917, 918, 919, 920, 925, 928, 929, 931, 934, 936, 937, 940, 941, 947, 949, 951, 952, 954, 956, 959,
+    970, 971, 972, 973, 978, 979, 980, 984, 985, 989,
   ];
 
   const areaCode = validAreaCodes[crypto.randomInt(0, validAreaCodes.length)];
@@ -70,9 +57,7 @@ export class ParaModalExamplePage {
     const frameLocator = this.page.frameLocator("iframe").first();
 
     // Wait for the frame to be loaded and visible
-    await frameLocator
-      .locator("body")
-      .waitFor({ state: "visible", timeout: 10000 });
+    await frameLocator.locator("body").waitFor({ state: "visible", timeout: 10000 });
 
     return frameLocator;
   }
@@ -81,9 +66,7 @@ export class ParaModalExamplePage {
     const frameLocator = await this.getParaIframe();
 
     // Ensure password input is visible in the iframe - check for the wrapper element
-    const passwordInputWrapper = frameLocator.locator(
-      'cpsl-input[placeholder="Enter password"]'
-    );
+    const passwordInputWrapper = frameLocator.locator('cpsl-input[placeholder="Enter password"]');
     await expect(passwordInputWrapper).toBeVisible({ timeout: 10000 });
     this.logger.logInfo("Found password input in iframe");
 
@@ -182,24 +165,15 @@ export class ParaModalExamplePage {
     const authInputWrapper = this.page.getByTestId("auth-input");
     await expect(authInputWrapper).toBeVisible({ timeout: 5000 });
 
-    const emailOrPhone = usePhoneNumber
-      ? getRandomPhoneNumber()
-      : getRandomEmail();
+    const emailOrPhone = usePhoneNumber ? getRandomPhoneNumber() : getRandomEmail();
 
-    this.logger.logInfo(
-      `Creating user with ${
-        usePhoneNumber ? "phone" : "email"
-      }: ${emailOrPhone}`
-    );
+    this.logger.logInfo(`Creating user with ${usePhoneNumber ? "phone" : "email"}: ${emailOrPhone}`);
 
     // Fill the auth input - target the native input inside the shadow DOM
     // The input starts with placeholder "Enter email or phone" and changes dynamically
     // For phone numbers, it will change to "Enter phone" after detecting numeric input
     const authInput = authInputWrapper.locator("input.native-input").first();
-    console.log(
-      "🚀 ~ ParaModalExamplePage ~ createUser ~ authInput:",
-      authInput
-    );
+    console.log("🚀 ~ ParaModalExamplePage ~ createUser ~ authInput:", authInput);
 
     await authInput.click();
 
@@ -212,10 +186,7 @@ export class ParaModalExamplePage {
     }
 
     await expect(authInputWrapper).toHaveAttribute("value", emailOrPhone);
-    console.log(
-      "🚀 ~ ParaModalExamplePage ~ createUser ~ authInputWrapper:",
-      authInputWrapper
-    );
+    console.log("🚀 ~ ParaModalExamplePage ~ createUser ~ authInputWrapper:", authInputWrapper);
 
     // Press Enter to continue (or click the continue arrow button)
     // The button is: cpsl-button[slot="end"] > shadow root > button.button-native
@@ -271,9 +242,7 @@ export class ParaModalExamplePage {
         }
 
         // Click Continue button - target native button in shadow DOM
-        const continueButton = iframeLocator.locator(
-          'cpsl-button:has-text("Continue") button.button-native'
-        );
+        const continueButton = iframeLocator.locator('cpsl-button:has-text("Continue") button.button-native');
         await continueButton.click();
 
         // Use helper function to get iframe OTP input
@@ -290,48 +259,34 @@ export class ParaModalExamplePage {
         }
 
         // Click Set PIN button - target native button in shadow DOM
-        const setPINButton = iframeLocator.locator(
-          'cpsl-button:has-text("Set PIN") button.button-native'
-        );
+        const setPINButton = iframeLocator.locator('cpsl-button:has-text("Set PIN") button.button-native');
         await setPINButton.click();
       } else if (password) {
         // Click the "Choose Password" button - target native button in shadow DOM
-        const choosePasswordButton = this.page.locator(
-          'cpsl-button:has-text("Choose Password") button.button-native'
-        );
+        const choosePasswordButton = this.page.locator('cpsl-button:has-text("Choose Password") button.button-native');
         await choosePasswordButton.click();
 
         // Use helper function to get iframe password input
         const iframeLocator = await this.getIframePasswordInput();
 
         // Enter password in iframe - target native inputs in shadow DOM
-        const passwordInputWrapper = iframeLocator.locator(
-          'cpsl-input[placeholder="Enter password"]'
-        );
-        const passwordInput =
-          passwordInputWrapper.locator("input.native-input");
+        const passwordInputWrapper = iframeLocator.locator('cpsl-input[placeholder="Enter password"]');
+        const passwordInput = passwordInputWrapper.locator("input.native-input");
         await passwordInput.click();
         await passwordInput.fill(password);
 
-        const confirmPasswordInputWrapper = iframeLocator.locator(
-          'cpsl-input[placeholder="Confirm password"]'
-        );
-        const confirmPasswordInput =
-          confirmPasswordInputWrapper.locator("input.native-input");
+        const confirmPasswordInputWrapper = iframeLocator.locator('cpsl-input[placeholder="Confirm password"]');
+        const confirmPasswordInput = confirmPasswordInputWrapper.locator("input.native-input");
         await confirmPasswordInput.click();
         await confirmPasswordInput.fill(password);
 
         // Click Save Password button - target native button in shadow DOM
-        const savePasswordButton = iframeLocator.locator(
-          'cpsl-button:has-text("Save Password") button.button-native'
-        );
+        const savePasswordButton = iframeLocator.locator('cpsl-button:has-text("Save Password") button.button-native');
         await savePasswordButton.click();
       } else {
         const page1Promise = this.page.waitForEvent("popup");
         // Click the "Create Passkey" button - target native button in shadow DOM
-        const createPasskeyButton = this.page.locator(
-          'cpsl-button:has-text("Create Passkey") button.button-native'
-        );
+        const createPasskeyButton = this.page.locator('cpsl-button:has-text("Create Passkey") button.button-native');
         await createPasskeyButton.click();
 
         const page1 = await page1Promise;
@@ -347,9 +302,7 @@ export class ParaModalExamplePage {
 
       // Look for the copy tile button with the correct structure
       // The tile button has icon="copy" and contains "Copy" text
-      const copyTileButton = this.page.locator(
-        'cpsl-tile-button[icon="copy"]:has(cpsl-text:has-text("Copy"))'
-      );
+      const copyTileButton = this.page.locator('cpsl-tile-button[icon="copy"]:has(cpsl-text:has-text("Copy"))');
 
       // Wait for the tile button to be visible
       await copyTileButton.waitFor({ state: "visible", timeout: 10000 });
@@ -359,9 +312,7 @@ export class ParaModalExamplePage {
 
       // Wait for clipboard operation to complete
       await this.page.waitForTimeout(500);
-      clipboardText = await this.page.evaluate(
-        "navigator.clipboard.readText()"
-      );
+      clipboardText = await this.page.evaluate("navigator.clipboard.readText()");
 
       // Click "I've saved my recovery secret" button - try multiple selectors
       // The text might vary slightly, so let's be more flexible
@@ -374,37 +325,26 @@ export class ParaModalExamplePage {
     }
 
     if (is2FAEnabled) {
-      const continueButton = this.page.locator(
-        'cpsl-button:has-text("Continue") button.button-native'
-      );
+      const continueButton = this.page.locator('cpsl-button:has-text("Continue") button.button-native');
       await continueButton.click();
-      const skipButton = this.page.locator(
-        'cpsl-button:has-text("Skip") button.button-native'
-      );
+      const skipButton = this.page.locator('cpsl-button:has-text("Skip") button.button-native');
       await skipButton.click();
     } else {
       // Click the Done button - target native button in shadow DOM
       // Wait for the button to appear after the page transition
-      const doneButton = this.page.locator(
-        'cpsl-button:has-text("Done") button.button-native'
-      );
+      const doneButton = this.page.locator('cpsl-button:has-text("Done") button.button-native');
       await doneButton.waitFor({ state: "visible", timeout: 10000 });
       await doneButton.click();
     }
 
     // Wait for modal to close and app state to update
-    this.logger.logStep(
-      "Waiting for Para Modal to close and connection state to update..."
-    );
+    this.logger.logStep("Waiting for Para Modal to close and connection state to update...");
 
     // Wait for the account address display to appear (indicates successful connection)
     await expect(this.page.getByTestId("account-address-display")).toBeVisible({
       timeout: 15000,
     });
-    this.logger.logStep(
-      "Para Modal connection confirmed - account address display visible",
-      true
-    );
+    this.logger.logStep("Para Modal connection confirmed - account address display visible", true);
 
     return {
       emailOrPhone,
@@ -476,9 +416,7 @@ export class ParaModalExamplePage {
         await otpInput.fill((i + 1).toString());
       }
     } else if (pin) {
-      this.logger.logInfo(
-        "PIN login flow - looking for verification code input in iframe..."
-      );
+      this.logger.logInfo("PIN login flow - looking for verification code input in iframe...");
 
       try {
         // Use helper function to get iframe
@@ -489,22 +427,17 @@ export class ParaModalExamplePage {
 
         // The OTP inputs are already native inputs with IDs in the shadow DOM
         // Wait for first OTP input to be ready
-        const verificationCodeInput =
-          iframeVerificationInputLocator.locator("#code-input-0");
+        const verificationCodeInput = iframeVerificationInputLocator.locator("#code-input-0");
         await expect(verificationCodeInput).toBeVisible({ timeout: 5000 });
 
         for (let i = 0; i < 6; i++) {
-          const otpInput = iframeVerificationInputLocator.locator(
-            `#code-input-${i}`
-          );
+          const otpInput = iframeVerificationInputLocator.locator(`#code-input-${i}`);
           await otpInput.click();
           await otpInput.fill((i + 1).toString());
         }
 
         // Now the Login button should be visible - target native button in shadow DOM
-        const loginButton = iframeLocator.locator(
-          'cpsl-button:has-text("Login") button.button-native'
-        );
+        const loginButton = iframeLocator.locator('cpsl-button:has-text("Login") button.button-native');
         await expect(loginButton).toBeVisible({ timeout: 3000 });
 
         // Use helper function to get iframe OTP input
@@ -536,34 +469,39 @@ export class ParaModalExamplePage {
         throw error;
       }
     } else if (password) {
-      this.logger.logInfo(
-        "Password login flow - looking for password input in iframe..."
-      );
+      this.logger.logInfo("Password login flow - looking for password input in iframe...");
       try {
         // Use helper function to get iframe
         const iframeLocator = await this.getParaIframe();
 
         // Enter password in iframe - target native input in shadow DOM
-        const passwordInputWrapper = iframeLocator.locator(
-          'cpsl-input[placeholder="Enter password"]'
-        );
-        const passwordInput =
-          passwordInputWrapper.locator("input.native-input");
+        const passwordInputWrapper = iframeLocator.locator('cpsl-input[placeholder="Enter password"]');
+        const passwordInput = passwordInputWrapper.locator("input.native-input");
         this.logger.logInfo("Found password input in iframe");
         await passwordInput.click();
         await passwordInput.fill(password);
         this.logger.logInfo("Entered password");
 
         // Now the Login button should be enabled - target native button in shadow DOM
-        const loginButton = iframeLocator.locator(
-          'cpsl-button:has-text("Login") button.button-native'
-        );
+        const loginButton = iframeLocator.locator('cpsl-button:has-text("Login") button.button-native');
         await expect(loginButton).toBeEnabled({ timeout: 5000 });
         this.logger.logInfo("Found Login button in iframe, clicking...");
 
         // Click login button - no popup needed for password login with iframe
         await loginButton.click();
-        this.logger.logInfo("Clicked Login button, login should complete");
+        this.logger.logInfo("Clicked Login button");
+
+        // After login, check for "Keep Using Password" button in iframe - target native button in shadow DOM
+        this.logger.logInfo("Checking for 'Keep Using Password' button in iframe after login...");
+        const keepUsingButton = iframeLocator.locator('cpsl-button:has-text("Keep Using") button.button-native');
+        try {
+          await keepUsingButton.waitFor({ state: "visible", timeout: 5000 });
+          this.logger.logInfo("Found 'Keep Using Password' button in iframe after login, clicking...");
+          await keepUsingButton.click();
+          await this.page.waitForTimeout(500);
+        } catch (error) {
+          this.logger.logInfo("Keep Using Password button not found, proceeding with login completion");
+        }
 
         // Wait for modal to close and user to be logged in
         await this.page.waitForTimeout(2000);
@@ -577,41 +515,42 @@ export class ParaModalExamplePage {
       const page2Promise = this.page.waitForEvent("popup");
       await this.page.getByText("Login with passkey").click();
       const page2 = await page2Promise;
+
       const authPortal = new AuthPortalPage(page2);
       await authPortal.login(context, credential);
+
+      // After passkey authentication, check for "Keep Using Passkey" button in popup - target native button in shadow DOM
+      this.logger.logInfo("Checking for 'Keep Using Passkey' button in popup after authentication...");
+      try {
+        const keepUsingButton = page2.locator('cpsl-button:has-text("Keep Using") button.button-native');
+        await keepUsingButton.waitFor({ state: "visible", timeout: 5000 });
+        this.logger.logInfo("Found 'Keep Using Passkey' button in popup after authentication, clicking...");
+        await keepUsingButton.click();
+        await page2.waitForTimeout(500);
+      } catch (error) {
+        this.logger.logInfo("Keep Using Passkey button not found, proceeding with login completion");
+      }
     }
 
     // Wait for login to complete and connection state to update
-    this.logger.logStep(
-      "Waiting for login completion and connection state update..."
-    );
+    this.logger.logStep("Waiting for login completion and connection state update...");
     await this.page.waitForTimeout(2000);
 
     if (is2FAEnabled) {
-      const skipButton = this.page.locator(
-        'cpsl-button:has-text("Skip") button.button-native'
-      );
+      const skipButton = this.page.locator('cpsl-button:has-text("Skip") button.button-native');
       await skipButton.click();
       await this.page.waitForTimeout(2100);
     }
 
     // Verify login completion by checking for account address display
     try {
-      await this.page.waitForSelector(
-        '[data-testid="account-address-display"]',
-        {
-          state: "visible",
-          timeout: 10000,
-        }
-      );
-      this.logger.logStep(
-        "Para Modal login confirmed - account address display visible",
-        true
-      );
+      await this.page.waitForSelector('[data-testid="account-address-display"]', {
+        state: "visible",
+        timeout: 10000,
+      });
+      this.logger.logStep("Para Modal login confirmed - account address display visible", true);
     } catch (error) {
-      this.logger.logWarning(
-        "Account address display not found after login, may need more time"
-      );
+      this.logger.logWarning("Account address display not found after login, may need more time");
       await this.page.waitForTimeout(2000);
     }
   }
@@ -626,17 +565,13 @@ export class ParaModalExamplePage {
     await modalContent.waitFor({ state: "visible", timeout: 5000 });
 
     // Click the Profile button first (new UI flow) - target native button in shadow DOM
-    const profileButton = modalContent.locator(
-      'cpsl-tile-button:has-text("Profile") button.button-native'
-    );
+    const profileButton = modalContent.locator('cpsl-tile-button:has-text("Profile") button.button-native');
     await profileButton.waitFor({ state: "visible", timeout: 5000 });
     await profileButton.click();
     await this.page.waitForTimeout(500);
 
     // Now click the Disconnect Wallet button - target native button in shadow DOM
-    const disconnectButton = modalContent.locator(
-      'cpsl-button:has-text("Disconnect Wallet") button.button-native'
-    );
+    const disconnectButton = modalContent.locator('cpsl-button:has-text("Disconnect Wallet") button.button-native');
     await disconnectButton.waitFor({ state: "visible", timeout: 5000 });
     await disconnectButton.click();
 
@@ -681,13 +616,10 @@ export class ParaModalExamplePage {
     }
 
     // Wait for signature to appear
-    const signatureDisplay = await this.page.waitForSelector(
-      '[data-testid="sign-signature-display"]',
-      {
-        state: "visible",
-        timeout: 10000,
-      }
-    );
+    const signatureDisplay = await this.page.waitForSelector('[data-testid="sign-signature-display"]', {
+      state: "visible",
+      timeout: 10000,
+    });
     this.logger.logInfo("Signature appeared");
 
     // Get the signature text
@@ -707,22 +639,18 @@ export class ParaModalExamplePage {
         const para = (window as any).para;
 
         return {
-          functionExists: typeof deleteFunc === 'function',
+          functionExists: typeof deleteFunc === "function",
           userId: para?.userId || null,
         };
       });
 
       if (!cleanupInfo.functionExists) {
-        this.logger.logWarning(
-          "Cleanup function not available - user deletion skipped"
-        );
+        this.logger.logWarning("Cleanup function not available - user deletion skipped");
         return;
       }
 
       if (!cleanupInfo.userId) {
-        this.logger.logWarning(
-          "No userId found - user may not be logged in or already deleted"
-        );
+        this.logger.logWarning("No userId found - user may not be logged in or already deleted");
         return;
       }
 
@@ -732,14 +660,9 @@ export class ParaModalExamplePage {
         return (window as any).__deleteTestUser();
       });
 
-      this.logger.logStep(
-        `Test user deleted successfully (userId: ${cleanupInfo.userId})`,
-        true
-      );
+      this.logger.logStep(`Test user deleted successfully (userId: ${cleanupInfo.userId})`, true);
     } catch (error) {
-      this.logger.logWarning(
-        `Failed to delete test user: ${(error as Error).message}`
-      );
+      this.logger.logWarning(`Failed to delete test user: ${(error as Error).message}`);
       // Don't throw - cleanup failure shouldn't fail the test
     }
   }
