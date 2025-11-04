@@ -713,9 +713,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@getpara/core-components@npm:2.0.0-alpha.65":
-  version: 2.0.0-alpha.65
-  resolution: "@getpara/core-components@npm:2.0.0-alpha.65"
+"@getpara/core-components@npm:2.0.0-alpha.69":
+  version: 2.0.0-alpha.69
+  resolution: "@getpara/core-components@npm:2.0.0-alpha.69"
   dependencies:
     "@stencil/core": "npm:^4.7.0"
     color-blend: "npm:^4.0.0"
@@ -723,47 +723,47 @@ __metadata:
     gsap: "npm:^3.12.5"
     inputmask: "npm:5.0.9"
     qrcode-with-logos: "npm:1.1.1"
-  checksum: 10/0a43c4d9a8cc42fa2a40291be5b0f004ebfb3ed1bda182d2c2e882c42ae30a7ff2ffdee0a93d16a982e3bb798752722e4825bffe7cc2fffa633d0c58cf3d06ff
+  checksum: 10/69f93270ead0005c4cd997f9d8bee944dce5afe5a6dffec0cb85aaa28dd92c18c0dc66550ac5a709b41c8b5a7411c037a4355065f4bc995f4dc3394142ad7ac1
   languageName: node
   linkType: hard
 
-"@getpara/core-sdk@npm:2.0.0-alpha.65":
-  version: 2.0.0-alpha.65
-  resolution: "@getpara/core-sdk@npm:2.0.0-alpha.65"
+"@getpara/core-sdk@npm:2.0.0-alpha.69":
+  version: 2.0.0-alpha.69
+  resolution: "@getpara/core-sdk@npm:2.0.0-alpha.69"
   dependencies:
     "@celo/utils": "npm:^8.0.2"
     "@cosmjs/encoding": "npm:^0.32.4"
     "@ethereumjs/util": "npm:^9.1.0"
-    "@getpara/user-management-client": "npm:2.0.0-alpha.65"
+    "@getpara/user-management-client": "npm:2.0.0-alpha.69"
     "@noble/hashes": "npm:^1.5.0"
     base64url: "npm:^3.0.1"
     libphonenumber-js: "npm:^1.11.7"
     node-forge: "npm:^1.3.1"
     uuid: "npm:^11.1.0"
-  checksum: 10/b623528d2dc8732af181bdfb05d3418759ff0add4850576454f5399a8e3ec18f6a73a872a0af326330e87cff82c5eef514ac388eb6f2e528c63f7cfa94d4272a
+  checksum: 10/c6ceab926fb3a8f4a954c8081b8a0e8eeb66f6caf1304a2c41ecc6f59ccd536a11c52df78de7bc4b8a9fbae489e7160811c880dc2cade9c95b5fdf49cf2377a9
   languageName: node
   linkType: hard
 
-"@getpara/cosmjs-v0-integration@npm:2.0.0-alpha.65":
-  version: 2.0.0-alpha.65
-  resolution: "@getpara/cosmjs-v0-integration@npm:2.0.0-alpha.65"
+"@getpara/cosmjs-v0-integration@npm:2.0.0-alpha.69":
+  version: 2.0.0-alpha.69
+  resolution: "@getpara/cosmjs-v0-integration@npm:2.0.0-alpha.69"
   dependencies:
-    "@getpara/core-sdk": "npm:2.0.0-alpha.65"
+    "@getpara/core-sdk": "npm:2.0.0-alpha.69"
   peerDependencies:
-    "@cosmjs/amino": ">= 0.31.3 < 1"
-    "@cosmjs/encoding": ">= 0.31.3 < 1"
-    "@cosmjs/proto-signing": ">= 0.31.3 < 1"
-    "@cosmjs/stargate": ">= 0.31.3 < 1"
-  checksum: 10/fc1c7b01d9c86e63f142e6b4960dc4dd6fcaeb007e0656e0cafdb14eeb281f824c3971bfe27a74cb255265033e2adcd72a2da10072546a3e0819d80f3f7fb151
+    "@cosmjs/amino": ">=0.32.4"
+    "@cosmjs/encoding": ">=0.32.4"
+    "@cosmjs/proto-signing": ">=0.32.4"
+    "@cosmjs/stargate": ">=0.32.4"
+  checksum: 10/03843f129d43775a1eee61dc3943348a20d2cce2458188ec4b0ba3dc5ec1b4cbd3a28e509f270dc1ed8c046706224eed7904292d644572fcdf62ab149f0f7262
   languageName: node
   linkType: hard
 
-"@getpara/graz-connector@npm:2.0.0-alpha.65":
-  version: 2.0.0-alpha.65
-  resolution: "@getpara/graz-connector@npm:2.0.0-alpha.65"
+"@getpara/graz-connector@npm:2.0.0-alpha.69":
+  version: 2.0.0-alpha.69
+  resolution: "@getpara/graz-connector@npm:2.0.0-alpha.69"
   dependencies:
-    "@getpara/cosmjs-v0-integration": "npm:2.0.0-alpha.65"
-    "@getpara/web-sdk": "npm:2.0.0-alpha.65"
+    "@getpara/cosmjs-v0-integration": "npm:2.0.0-alpha.69"
+    "@getpara/web-sdk": "npm:2.0.0-alpha.69"
   peerDependencies:
     "@cosmjs/amino": ">=0.32.4"
     "@cosmjs/encoding": ">=0.32.4"
@@ -773,31 +773,31 @@ __metadata:
     "@keplr-wallet/types": ">=0.12.156"
     cosmjs-types: ">=0.8.0"
     graz: ">=0.4.1"
-  checksum: 10/5d413cc8407e7b238e53cd7f1c958ea80c34e1a03eecb3b6b741ae7eeaef5c35427fcfbea8f223eb78fc704a15c33e1e2b28e550851e17de9fea855983accf25
+  checksum: 10/c426ed03839522f16b34c27f219279dd31d1d04d438cbb938fa61b6a87f298923b493d5d4cf614c05006b5673c398d70abd2053f3bbb68880a2b8429fa611ec6
   languageName: node
   linkType: hard
 
-"@getpara/graz-integration@npm:2.0.0-alpha.65":
-  version: 2.0.0-alpha.65
-  resolution: "@getpara/graz-integration@npm:2.0.0-alpha.65"
+"@getpara/graz-integration@npm:2.0.0-alpha.69":
+  version: 2.0.0-alpha.69
+  resolution: "@getpara/graz-integration@npm:2.0.0-alpha.69"
   dependencies:
-    "@getpara/graz-connector": "npm:2.0.0-alpha.65"
+    "@getpara/graz-connector": "npm:2.0.0-alpha.69"
   peerDependencies:
     "@getpara/react-sdk-lite": 2.0.0-alpha.65
     "@tanstack/react-query": ^5.74.0
     graz: ">=0.4.1"
     react: ">=18.0.0"
     react-dom: ">=18.0.0"
-  checksum: 10/4c475188591b70edaf59e2dcc8d529a9cbffa96ba8c1a34c0be2b7509a0a675089fd84455fdd89b9847bf1fe90ba786c9fc116fd075a6900e5eb1d0b79d01eee
+  checksum: 10/ab57c5e01e4f6966c2d41ffceba9f14968252696fa59e47a5865c1a6660f6d33483cb97a83e3c5c8d00c199130c0c88ce30481144114957444c91eef848dba45
   languageName: node
   linkType: hard
 
-"@getpara/react-common@npm:2.0.0-alpha.65":
-  version: 2.0.0-alpha.65
-  resolution: "@getpara/react-common@npm:2.0.0-alpha.65"
+"@getpara/react-common@npm:2.0.0-alpha.69":
+  version: 2.0.0-alpha.69
+  resolution: "@getpara/react-common@npm:2.0.0-alpha.69"
   dependencies:
-    "@getpara/react-components": "npm:2.0.0-alpha.65"
-    "@getpara/web-sdk": "npm:2.0.0-alpha.65"
+    "@getpara/react-components": "npm:2.0.0-alpha.69"
+    "@getpara/web-sdk": "npm:2.0.0-alpha.69"
     "@moonpay/moonpay-react": "npm:^1.8.3"
     "@ramp-network/ramp-instant-sdk": "npm:^4.0.5"
     libphonenumber-js: "npm:^1.11.7"
@@ -806,26 +806,26 @@ __metadata:
   peerDependencies:
     react: "*"
     react-dom: "*"
-  checksum: 10/47d96cb6efcbcec9dc333e64e42449357730974c5476bbea87f8ff52c6636b646a435b95632bf146945d39eda99ae956f1878f181007d8e34ab04128e0b5398f
+  checksum: 10/287256adcd323f8b5aa29ded550fa0de67c2d7e46f05037bec4371d0d1bf002c3b4ddd68eb38b2ee6ae859da26d104ecd0fd50ea75969b4f1595a890331f19d9
   languageName: node
   linkType: hard
 
-"@getpara/react-components@npm:2.0.0-alpha.65":
-  version: 2.0.0-alpha.65
-  resolution: "@getpara/react-components@npm:2.0.0-alpha.65"
+"@getpara/react-components@npm:2.0.0-alpha.69":
+  version: 2.0.0-alpha.69
+  resolution: "@getpara/react-components@npm:2.0.0-alpha.69"
   dependencies:
-    "@getpara/core-components": "npm:2.0.0-alpha.65"
-  checksum: 10/e00072a20b42e39841ad15a58d4575cfe2d9d2f9a38cadd1529bad77d5d8f823903ca1eb024b7cdc235c9b81d3623ee2038df3e169ee1ffd7a229e6194394198
+    "@getpara/core-components": "npm:2.0.0-alpha.69"
+  checksum: 10/695727e82db080e6f63ab837decbd8dd543ff2aa3b95a9f125f075b899c7949954ec384e352d5b284be4eb9bd1f25b26739b85742365786257d7912629f47542
   languageName: node
   linkType: hard
 
-"@getpara/react-sdk-lite@npm:2.0.0-alpha.65":
-  version: 2.0.0-alpha.65
-  resolution: "@getpara/react-sdk-lite@npm:2.0.0-alpha.65"
+"@getpara/react-sdk-lite@npm:2.0.0-alpha.69":
+  version: 2.0.0-alpha.69
+  resolution: "@getpara/react-sdk-lite@npm:2.0.0-alpha.69"
   dependencies:
-    "@getpara/react-common": "npm:2.0.0-alpha.65"
-    "@getpara/react-components": "npm:2.0.0-alpha.65"
-    "@getpara/web-sdk": "npm:2.0.0-alpha.65"
+    "@getpara/react-common": "npm:2.0.0-alpha.69"
+    "@getpara/react-components": "npm:2.0.0-alpha.69"
+    "@getpara/web-sdk": "npm:2.0.0-alpha.69"
     date-fns: "npm:^3.6.0"
     framer-motion: "npm:^11.3.31"
     libphonenumber-js: "npm:^1.11.7"
@@ -838,34 +838,34 @@ __metadata:
     react-dom: "*"
   bin:
     setup-para: dist/cli/cli.mjs
-  checksum: 10/4f4f80ae1df7b03ea2a80603e508ec3e981226bb338bf1c5181eb92e7a79b119a5ae8baa954d00702872e576185714b3eb5e203ae4e373561d299ca3d169dd96
+  checksum: 10/0fca53a624f10fbc3b07c35702ffa03b1e5030f5bfa59e1823b388d2f180d49f6150f94b64730361eead15d2ccfba537ff9be27b0c0773214b9e3b446829a1b9
   languageName: node
   linkType: hard
 
-"@getpara/shared@npm:1.4.0":
-  version: 1.4.0
-  resolution: "@getpara/shared@npm:1.4.0"
-  checksum: 10/2536f29b80285a2758f3f99c254114c3b30d2cb298a719928b9e52e813323cb09937b24d95643d40389df636d1ed41a2939f754d29c212206479f347de76e04a
+"@getpara/shared@npm:1.5.0":
+  version: 1.5.0
+  resolution: "@getpara/shared@npm:1.5.0"
+  checksum: 10/dc4bbb325b2d03a8f68cf9dcca0b397f2f8784ca5c126c1a9e76ab4ce84d9f9b29d9a8348eef02d025828981565f5edab8450a303bcb5207806cdf005d4271d4
   languageName: node
   linkType: hard
 
-"@getpara/user-management-client@npm:2.0.0-alpha.65":
-  version: 2.0.0-alpha.65
-  resolution: "@getpara/user-management-client@npm:2.0.0-alpha.65"
+"@getpara/user-management-client@npm:2.0.0-alpha.69":
+  version: 2.0.0-alpha.69
+  resolution: "@getpara/user-management-client@npm:2.0.0-alpha.69"
   dependencies:
-    "@getpara/shared": "npm:1.4.0"
+    "@getpara/shared": "npm:1.5.0"
     axios: "npm:^1.8.4"
     libphonenumber-js: "npm:^1.11.7"
-  checksum: 10/701651c45cfbee780394ef5120d8d4f6f7dd33fc207bd2d788c17783ef30bf4c5a18145febae5119b56941080d137088f81733e84cdcac5c40fed3f0ffd48832
+  checksum: 10/cddf220e7db3d51126703e4db52e12445656d4f569b7dc06d8453fab590a39975d206f4100fa3cd35292735cdafa0c41a8c5aba09364607354fc27972c5f0317
   languageName: node
   linkType: hard
 
-"@getpara/web-sdk@npm:2.0.0-alpha.65":
-  version: 2.0.0-alpha.65
-  resolution: "@getpara/web-sdk@npm:2.0.0-alpha.65"
+"@getpara/web-sdk@npm:2.0.0-alpha.69":
+  version: 2.0.0-alpha.69
+  resolution: "@getpara/web-sdk@npm:2.0.0-alpha.69"
   dependencies:
-    "@getpara/core-sdk": "npm:2.0.0-alpha.65"
-    "@getpara/user-management-client": "npm:2.0.0-alpha.65"
+    "@getpara/core-sdk": "npm:2.0.0-alpha.69"
+    "@getpara/user-management-client": "npm:2.0.0-alpha.69"
     base64url: "npm:^3.0.1"
     buffer: "npm:6.0.3"
     cbor-web: "npm:^9.0.2"
@@ -876,7 +876,7 @@ __metadata:
   peerDependenciesMeta:
     "@farcaster/miniapp-sdk":
       optional: true
-  checksum: 10/8182aee2420e4b573024a36d04e9ca116680fb710a746f8dec2cad5b29bd533157e3a3a8f95c7222a622e33bb149271e47054bdd39d15d85181107cdc34dfe1a
+  checksum: 10/2abc024d3ed90c5c60aa70e954776cdd40bb751794930c597693df254e7ca3d7320826fbe06c2aee72d25c9411972d6d6fd5e11c2b1d211b7410f8712df3476f
   languageName: node
   linkType: hard
 
@@ -3357,8 +3357,8 @@ __metadata:
     "@cosmjs/proto-signing": "npm:0.36.0"
     "@cosmjs/stargate": "npm:0.36.0"
     "@eslint/js": "npm:^9.29.0"
-    "@getpara/graz-integration": "npm:2.0.0-alpha.65"
-    "@getpara/react-sdk-lite": "npm:2.0.0-alpha.65"
+    "@getpara/graz-integration": "npm:2.0.0-alpha.69"
+    "@getpara/react-sdk-lite": "npm:2.0.0-alpha.69"
     "@tailwindcss/postcss": "npm:^4.1.10"
     "@tanstack/react-query": "npm:5.85.3"
     "@types/node": "npm:^20"
