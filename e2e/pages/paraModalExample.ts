@@ -457,15 +457,27 @@ export class ParaModalExamplePage {
         await expect(loginButton).toBeEnabled({ timeout: 5000 });
         this.logger.logInfo("Found Login button in iframe, clicking...");
 
-        // Click login button - no popup needed for password login with iframe
+        // Click login button
         await loginButton.click();
-        this.logger.logInfo("Clicked Login button, login should complete");
+        this.logger.logInfo("Clicked Login button");
+
+        // After login, check for "Keep Using PIN" button in iframe - target native button in shadow DOM
+        this.logger.logInfo("Checking for 'Keep Using PIN' button in iframe after login...");
+        const keepUsingButton = iframeLocator.locator('cpsl-button:has-text("Keep Using") button.button-native');
+        try {
+          await keepUsingButton.waitFor({ state: "visible", timeout: 5000 });
+          this.logger.logInfo("Found 'Keep Using PIN' button in iframe after login, clicking...");
+          await keepUsingButton.click();
+          await this.page.waitForTimeout(500);
+        } catch (error) {
+          this.logger.logInfo("Keep Using PIN button not found, proceeding with login completion");
+        }
 
         // Wait for modal to close and user to be logged in
         await this.page.waitForTimeout(2000);
         this.logger.logInfo("Login completed");
       } catch (error) {
-        this.logger.logError("Error in password login flow:", error);
+        this.logger.logError("Error in PIN login flow:", error);
         throw error;
       }
     } else if (password) {
