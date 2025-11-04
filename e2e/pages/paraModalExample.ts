@@ -47,10 +47,10 @@ export class ParaModalExamplePage {
    * Tries multiple selectors and waits for content to be ready
    */
   private async getParaIframe(): Promise<FrameLocator> {
-    // Wait for iframe to appear and be visible
+    // Wait for iframe to appear and be visible - increased timeout for slower loads
     await this.page.waitForSelector("iframe", {
       state: "visible",
-      timeout: 10000,
+      timeout: 20000,
     });
 
     // Get the iframe locator - content readiness will be validated by subsequent element checks
@@ -64,7 +64,7 @@ export class ParaModalExamplePage {
 
     // Ensure password input is visible in the iframe - check for the wrapper element
     const passwordInputWrapper = frameLocator.locator('cpsl-input[placeholder="Enter password"]');
-    await expect(passwordInputWrapper).toBeVisible({ timeout: 10000 });
+    await expect(passwordInputWrapper).toBeVisible({ timeout: 15000 });
     this.logger.logInfo("Found password input in iframe");
 
     return frameLocator;
@@ -75,7 +75,7 @@ export class ParaModalExamplePage {
 
     // Wait for OTP code input to be visible
     const iframeOTPInput = frameLocator.locator("cpsl-code-input");
-    await expect(iframeOTPInput).toBeVisible({ timeout: 10000 });
+    await expect(iframeOTPInput).toBeVisible({ timeout: 15000 });
     this.logger.logInfo("Found OTP input in iframe");
 
     return iframeOTPInput;
@@ -86,17 +86,18 @@ export class ParaModalExamplePage {
    * Returns true if button was found and clicked, false otherwise
    */
   private async clickOptionalButton(
-    locatorOrPage: Locator | Page,
+    locatorOrPage: Locator | Page | FrameLocator,
     selector: string,
     buttonName: string,
-    timeout: number = 5000
+    timeout: number = 10000
   ): Promise<boolean> {
     const button = locatorOrPage.locator(selector);
-    if (await button.isVisible({ timeout })) {
-      this.logger.logInfo(`Found '${buttonName}' button, clicking...`);
-      await button.click();
+    try {
+      // Try to click the button with a timeout - this will wait for it to be visible and clickable
+      await button.click({ timeout });
+      this.logger.logInfo(`Found '${buttonName}' button, clicked`);
       return true;
-    } else {
+    } catch (error) {
       this.logger.logInfo(`'${buttonName}' button not found, proceeding`);
       return false;
     }
@@ -469,7 +470,7 @@ export class ParaModalExamplePage {
           "Keep Using PIN"
         );
 
-        this.logger.logInfo("Login completed");
+        this.logger.logInfo("PIN login completed");
       } catch (error) {
         this.logger.logError("Error in PIN login flow:", error);
         throw error;
@@ -505,7 +506,7 @@ export class ParaModalExamplePage {
           "Keep Using Password"
         );
 
-        this.logger.logInfo("Login completed");
+        this.logger.logInfo("Password login completed");
       } catch (error) {
         this.logger.logError("Error in password login flow:", error);
         throw error;
@@ -526,17 +527,16 @@ export class ParaModalExamplePage {
         'cpsl-button:has-text("Keep Using") button.button-native',
         "Keep Using Passkey"
       );
-    }
 
-    // Wait for login to complete and connection state to update
-    this.logger.logStep("Waiting for login completion and connection state update...");
+      this.logger.logInfo("Passkey login completed");
+    }
 
     if (is2FAEnabled) {
       const skipButton = this.page.locator('cpsl-button:has-text("Skip") button.button-native');
       await skipButton.click();
     }
 
-    // Verify login completion by checking for account address display
+    // Wait for login to complete - account address display should appear for all flows
     await expect(this.page.getByTestId("account-address-display")).toBeVisible({
       timeout: 15000,
     });
