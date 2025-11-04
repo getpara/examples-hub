@@ -57,8 +57,6 @@
     "test:react-nextjs:email-pin": "tsx e2e/scripts/runAllTests.ts react-nextjs-pin email-pin",
     "test:react-nextjs:email-password": "tsx e2e/scripts/runAllTests.ts react-nextjs email-password",
     "test:react-nextjs:email-passkey": "tsx e2e/scripts/runAllTests.ts react-nextjs email-passkey",
-    "test:vue": "tsx e2e/scripts/runAllTests.ts vue",
-    "test:svelte": "tsx e2e/scripts/runAllTests.ts svelte",
     "test:node": "tsx e2e/scripts/runAllTests.ts node",
     "test:web": "tsx e2e/scripts/runAllTests.ts --web",
     "dev:setup": "yarn clean && yarn install:all && yarn build:all",
