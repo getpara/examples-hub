@@ -37,7 +37,7 @@ async function runSingleTest(
 ): Promise<void> {
   if (!framework) {
     logger.logError("Usage: tsx runAllTests.ts <framework> [test-type]");
-    logger.logError("Frameworks: react-vite, react-nextjs, vue, svelte, node");
+    logger.logError("Frameworks: react-vite, react-nextjs, node");
     logger.logError(
       "Test types: email-password, email-passkey, phone-password, phone-passkey"
     );
@@ -174,7 +174,7 @@ let candidateFrameworks = detectChangedFrameworks(cliArgs.isDiffOnly);
 
 const appsToTest = candidateFrameworks.filter((appName) => {
   if (cliArgs.isWebOnly) {
-    return ["react-vite", "react-nextjs", "vue", "svelte"].some((webFw) =>
+    return ["react-vite", "react-nextjs"].some((webFw) =>
       appName.includes(webFw)
     );
   }
