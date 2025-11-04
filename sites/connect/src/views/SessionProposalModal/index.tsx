@@ -5,7 +5,7 @@ import { Flex } from 'rebass';
 
 import ModalStore from '@/store/ModalStore';
 import { styledToast } from '@/utils/HelperUtil';
-import { web3wallet } from '@/utils/WalletConnectUtil';
+import { walletKit } from '@/utils/WalletConnectUtil';
 import { EIP155_CHAINS, EIP155_SIGNING_METHODS } from '@/data/EIP155Data';
 import ChainDataMini from '@/components/ChainDataMini';
 import ChainAddressMini from '@/components/ChainAddressMini';
@@ -93,7 +93,7 @@ export default function SessionProposalModal() {
       });
 
       try {
-        await web3wallet.approveSession({
+        await walletKit.approveSession({
           id,
           relayProtocol: relays[0].protocol,
           namespaces,
@@ -110,7 +110,7 @@ export default function SessionProposalModal() {
   async function onReject() {
     if (proposal) {
       try {
-        await web3wallet.rejectSession({
+        await walletKit.rejectSession({
           id,
           reason: getSdkError('USER_REJECTED_METHODS'),
         });

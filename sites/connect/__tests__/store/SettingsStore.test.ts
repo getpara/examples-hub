@@ -157,6 +157,7 @@ describe('SettingsStore', () => {
         verified: {
           validation: 'VALID' as const,
           origin: 'https://example.com',
+          verifyUrl: 'https://example.com/verify',
         },
       };
       SettingsStore.setCurrentRequestVerifyContext(mockContext);
@@ -168,6 +169,7 @@ describe('SettingsStore', () => {
         verified: {
           validation: 'INVALID' as const,
           origin: 'https://malicious.com',
+          verifyUrl: 'https://example.com/verify',
         },
       };
       SettingsStore.setCurrentRequestVerifyContext(invalidContext);

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { web3wallet } from '@/utils/WalletConnectUtil';
+import { walletKit } from '@/utils/WalletConnectUtil';
 import { getSdkError } from '@walletconnect/utils';
 import { Flex } from 'rebass';
 
@@ -25,18 +25,18 @@ const HomePage = () => {
   const para = useClient();
   const [uriState, setUriState] = useState('');
   const [instructionPanelOpenState, setInstructionPanelOpenState] = useState(false);
-  const [pairings, setPairings] = useState(web3wallet.core.pairing.getPairings().filter(pair => pair.peerMetadata));
+  const [pairings, setPairings] = useState(walletKit.core.pairing.getPairings().filter(pair => pair.peerMetadata));
   const isMobile = useIsMobile();
 
   const onConnect = async (uri: string) => {
     try {
-      await web3wallet.pair({ uri });
+      await walletKit.pair({ uri });
     } catch (error) {
       console.error(error);
       toast.error(`could not connect App: ${error}`);
     } finally {
       const interval = setInterval(async () => {
-        const currentPairings = web3wallet.core.pairing.getPairings();
+        const currentPairings = walletKit.core.pairing.getPairings();
         if (currentPairings.length !== pairings.length && currentPairings[currentPairings.length - 1]?.active) {
           const newPairings = currentPairings.filter(pairing => pairing.peerMetadata?.name);
           setPairings(newPairings);
@@ -70,7 +70,7 @@ const HomePage = () => {
       if (!(await para.isFullyLoggedIn())) {
         for (const pairing of pairings) {
           try {
-            await web3wallet.disconnectSession({
+            await walletKit.disconnectSession({
               topic: pairing.topic,
               reason: getSdkError('USER_DISCONNECTED'),
             });
@@ -99,7 +99,7 @@ const HomePage = () => {
 
     for (const pairing of pairings) {
       try {
-        await web3wallet.disconnectSession({
+        await walletKit.disconnectSession({
           topic: pairing.topic,
           reason: getSdkError('USER_DISCONNECTED'),
         });
@@ -114,7 +114,7 @@ const HomePage = () => {
   const removePairing = async (topic: string) => {
     let newPairings;
     try {
-      await web3wallet.disconnectSession({
+      await walletKit.disconnectSession({
         topic,
         reason: getSdkError('USER_DISCONNECTED'),
       });

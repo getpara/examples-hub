@@ -1,5 +1,5 @@
 import SettingsStore from '@/store/SettingsStore';
-import { createWeb3Wallet, web3wallet } from '@/utils/WalletConnectUtil';
+import { createWalletKit, walletKit } from '@/utils/WalletConnectUtil';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSnapshot } from 'valtio';
 
@@ -11,7 +11,7 @@ export default function useInitialization() {
 
   const onInitialize = useCallback(async () => {
     try {
-      await createWeb3Wallet(relayerRegionURL);
+      await createWalletKit(relayerRegionURL);
       setInitialized(true);
     } catch (err: unknown) {
       alert(err);
@@ -21,7 +21,7 @@ export default function useInitialization() {
   // restart transport if relayer region changes
   const onRelayerRegionChange = useCallback(() => {
     try {
-      web3wallet.core.relayer.restartTransport(relayerRegionURL);
+      walletKit.core.relayer.restartTransport(relayerRegionURL);
       prevRelayerURLValue.current = relayerRegionURL;
     } catch (err: unknown) {
       alert(err);

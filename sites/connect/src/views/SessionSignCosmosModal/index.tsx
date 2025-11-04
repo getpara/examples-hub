@@ -7,7 +7,7 @@ import RequestMethodCard from '@/components/RequestMethodCard';
 import ModalStore from '@/store/ModalStore';
 import { approveRequest, rejectRequest } from '@/utils/CapsuleRequestHandlerUtil';
 import { styledToast } from '@/utils/HelperUtil';
-import { web3wallet } from '@/utils/WalletConnectUtil';
+import { walletKit } from '@/utils/WalletConnectUtil';
 import RequestModal from '../RequestModal';
 import { useSelectedWallet } from '@/hooks/useSelectedWallet';
 
@@ -25,7 +25,7 @@ export default function SessionSignCosmosModal() {
       const { topic } = requestEvent;
       const response = await approveRequest(requestEvent, wallet?.id);
       try {
-        await web3wallet.respondSessionRequest({
+        await walletKit.respondSessionRequest({
           topic,
           response,
         });
@@ -43,7 +43,7 @@ export default function SessionSignCosmosModal() {
       const { topic } = requestEvent;
       const response = rejectRequest(requestEvent);
       try {
-        await web3wallet.respondSessionRequest({
+        await walletKit.respondSessionRequest({
           topic,
           response,
         });

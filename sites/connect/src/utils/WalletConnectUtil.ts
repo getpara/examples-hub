@@ -1,13 +1,13 @@
-import { Web3Wallet, IWeb3Wallet } from '@walletconnect/web3wallet';
+import { WalletKit, IWalletKit } from '@reown/walletkit';
 import { Core } from '@walletconnect/core';
-export let web3wallet: IWeb3Wallet;
+export let walletKit: IWalletKit;
 
-export async function createWeb3Wallet(relayerRegionURL: string) {
+export async function createWalletKit(relayerRegionURL: string) {
   const core = new Core({
     projectId: process.env.NEXT_PUBLIC_PROJECT_ID,
     relayUrl: relayerRegionURL ?? process.env.NEXT_PUBLIC_RELAY_URL,
   });
-  web3wallet = await Web3Wallet.init({
+  walletKit = await WalletKit.init({
     core,
     metadata: {
       name: 'Para Wallet',
@@ -18,7 +18,7 @@ export async function createWeb3Wallet(relayerRegionURL: string) {
   });
 
   try {
-    const clientId = await web3wallet.engine.signClient.core.crypto.getClientId();
+    const clientId = await walletKit.engine.signClient.core.crypto.getClientId();
     localStorage.setItem('WALLETCONNECT_CLIENT_ID', clientId);
   } catch (error) {
     console.error('Failed to set WalletConnect clientId in localStorage: ', error);
@@ -27,11 +27,11 @@ export async function createWeb3Wallet(relayerRegionURL: string) {
 
 export async function updateSignClientChainId(chainId: string, address: string) {
   // get most recent session
-  const sessions = web3wallet.getActiveSessions();
+  const sessions = walletKit.getActiveSessions();
   if (!sessions) return;
   const namespace = chainId.split(':')[0];
   Object.values(sessions).forEach(async session => {
-    await web3wallet.updateSession({
+    await walletKit.updateSession({
       topic: session.topic,
       namespaces: {
         ...session.namespaces,
@@ -61,7 +61,7 @@ export async function updateSignClientChainId(chainId: string, address: string) 
       },
       chainId,
     };
-    await web3wallet.emitSessionEvent(chainChanged);
-    await web3wallet.emitSessionEvent(accountsChanged);
+    await walletKit.emitSessionEvent(chainChanged);
+    await walletKit.emitSessionEvent(accountsChanged);
   });
 }

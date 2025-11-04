@@ -1,66 +1,76 @@
 import { useSnapshot } from 'valtio';
 import { Col, Row, Text, Code } from '@nextui-org/react';
-import { getSdkError } from '@walletconnect/utils';
+import { buildAuthObject, getSdkError, populateAuthPayload } from '@walletconnect/utils';
 import ModalStore from '@/store/ModalStore';
 import SettingsStore from '@/store/SettingsStore';
-import { web3wallet } from '@/utils/WalletConnectUtil';
+import { walletKit } from '@/utils/WalletConnectUtil';
 import RequestModal from './RequestModal';
 import { approveAuthRequest } from '@/utils/CapsuleRequestHandlerUtil';
 import { useSelectedWallet } from '@/hooks/useSelectedWallet';
+import { EIP155_CHAINS, EIP155_SIGNING_METHODS } from '../data/EIP155Data';
 
 export default function AuthRequestModal() {
   const { capsuleAddress } = useSnapshot(SettingsStore.state);
   const { wallet } = useSelectedWallet();
   // Get request and wallet data from store
-  const request = ModalStore.state.data?.request;
+  const payload = ModalStore.state.data?.sessionAuthenticatePayload;
   // Ensure request and wallet are defined
-  if (!request) {
+  if (!payload) {
     return <Text>Missing request data</Text>;
   }
 
   const address = capsuleAddress;
-  const iss = `did:pkh:eip155:1:${address}`;
+  const iss = `eip155:1:${address}`;
 
-  // Get required request data
-  const { params } = request;
+  // Populate the authentication payload with the supported chains and methods
+  const authPayload = populateAuthPayload({
+    authPayload: payload.params.authPayload,
+    chains: Object.keys(EIP155_CHAINS),
+    methods: Object.values(EIP155_SIGNING_METHODS),
+  });
 
-  const message = web3wallet.formatMessage(params.cacaoPayload, iss);
+  const message = walletKit.formatAuthMessage({ request: authPayload, iss });
 
   // Handle approve action (logic varies based on request method)
   async function onApprove() {
-    if (request) {
+    if (payload) {
       const signature = await approveAuthRequest(message, wallet?.id);
-      await web3wallet.respondAuthRequest(
+
+      // Build the authentication object(s)
+      const auth = buildAuthObject(
+        authPayload,
         {
-          id: request.id,
-          signature: {
-            s: signature,
-            t: 'eip191',
-          },
+          t: 'eip191',
+          s: signature,
         },
         iss,
       );
+      console.log('🚀 ~ onApprove ~ auth:', auth);
+
+      // Approve
+      await walletKit.approveSessionAuthenticate({
+        id: payload.id,
+        auths: [auth],
+      });
+
       ModalStore.close();
     }
   }
 
   // Handle reject action
   async function onReject() {
-    if (request) {
-      await web3wallet.respondAuthRequest(
-        {
-          id: request.id,
-          error: getSdkError('USER_REJECTED'),
-        },
-        iss,
-      );
+    if (payload) {
+      await walletKit.rejectSessionAuthenticate({
+        id: payload.id,
+        reason: getSdkError('USER_REJECTED'),
+      });
       ModalStore.close();
     }
   }
   return (
     <RequestModal
       intention="request a signature"
-      metadata={request.params.requester.metadata}
+      metadata={payload.params.requester.metadata}
       onApprove={onApprove}
       onReject={onReject}
     >

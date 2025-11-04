@@ -1,10 +1,10 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 
 // Mock WalletConnect dependencies first (hoisted)
-vi.mock('@walletconnect/web3wallet');
+vi.mock('@reown/walletkit');
 vi.mock('@walletconnect/core');
 
-import { createWeb3Wallet, updateSignClientChainId } from '@/utils/WalletConnectUtil';
+import { createWalletKit, updateSignClientChainId } from '@/utils/WalletConnectUtil';
 
 // Mock localStorage
 const localStorageMock = {
@@ -48,10 +48,10 @@ describe('WalletConnectUtil', () => {
     };
 
     // Setup mock implementations
-    const web3wallet = await import('@walletconnect/web3wallet');
+    const walletKit = await import('@reown/walletkit');
     const core = await import('@walletconnect/core');
 
-    vi.mocked(web3wallet.Web3Wallet.init).mockResolvedValue(mockWeb3WalletInstance as any);
+    vi.mocked(walletKit.WalletKit.init).mockResolvedValue(mockWeb3WalletInstance as any);
     vi.mocked(core.Core).mockImplementation((config: any) => config as any);
   });
 
@@ -60,23 +60,23 @@ describe('WalletConnectUtil', () => {
     consoleErrorSpy.mockClear();
   });
 
-  describe('createWeb3Wallet', () => {
+  describe('createWalletKit', () => {
     it('should create Web3Wallet with custom relayer URL', async () => {
       const customRelayerURL = 'wss://custom-relay.example.com';
 
       mockWeb3WalletInstance.engine.signClient.core.crypto.getClientId.mockResolvedValue('test-client-id');
 
-      await createWeb3Wallet(customRelayerURL);
+      await createWalletKit(customRelayerURL);
 
       const core = await import('@walletconnect/core');
-      const web3wallet = await import('@walletconnect/web3wallet');
+      const walletKit = await import('@reown/walletkit');
 
       expect(core.Core).toHaveBeenCalledWith({
         projectId: 'test-project-id',
         relayUrl: customRelayerURL,
       });
 
-      expect(web3wallet.Web3Wallet.init).toHaveBeenCalledWith({
+      expect(walletKit.WalletKit.init).toHaveBeenCalledWith({
         core: { projectId: 'test-project-id', relayUrl: customRelayerURL },
         metadata: {
           name: 'Para Wallet',
@@ -92,7 +92,7 @@ describe('WalletConnectUtil', () => {
     it('should use default relay URL when custom URL is not provided', async () => {
       mockWeb3WalletInstance.engine.signClient.core.crypto.getClientId.mockResolvedValue('test-client-id');
 
-      await createWeb3Wallet('');
+      await createWalletKit('');
 
       const core = await import('@walletconnect/core');
 
@@ -107,7 +107,7 @@ describe('WalletConnectUtil', () => {
         new Error('Failed to get client ID'),
       );
 
-      await createWeb3Wallet('wss://test.com');
+      await createWalletKit('wss://test.com');
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         'Failed to set WalletConnect clientId in localStorage: ',
@@ -119,10 +119,10 @@ describe('WalletConnectUtil', () => {
     it('should create wallet with correct metadata', async () => {
       mockWeb3WalletInstance.engine.signClient.core.crypto.getClientId.mockResolvedValue('client-id');
 
-      await createWeb3Wallet('wss://test.com');
+      await createWalletKit('wss://test.com');
 
-      const web3wallet = await import('@walletconnect/web3wallet');
-      const initCall = vi.mocked(web3wallet.Web3Wallet.init).mock.calls[0][0];
+      const walletKit = await import('@reown/walletkit');
+      const initCall = vi.mocked(walletKit.WalletKit.init).mock.calls[0][0];
 
       expect(initCall.metadata).toEqual({
         name: 'Para Wallet',
@@ -137,7 +137,7 @@ describe('WalletConnectUtil', () => {
 
       mockWeb3WalletInstance.engine.signClient.core.crypto.getClientId.mockResolvedValue('test-id');
 
-      await createWeb3Wallet('wss://test.com');
+      await createWalletKit('wss://test.com');
 
       const core = await import('@walletconnect/core');
 
@@ -151,7 +151,7 @@ describe('WalletConnectUtil', () => {
   describe('updateSignClientChainId', () => {
     beforeEach(async () => {
       // Initialize web3wallet first
-      await createWeb3Wallet('wss://test.com');
+      await createWalletKit('wss://test.com');
       vi.clearAllMocks(); // Clear mocks after initialization
     });
 

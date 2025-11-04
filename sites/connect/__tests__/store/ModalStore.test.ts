@@ -24,10 +24,23 @@ describe('ModalStore', () => {
         proposal: {
           id: 123,
           params: {
-            proposer: { metadata: { name: 'Test App' } },
+            id: 123456,
+            expiryTimestamp: 0,
+            pairingTopic: 'test-topic',
+            proposer: {
+              publicKey: '0xabc123',
+              metadata: { name: 'Test App', description: 'A test DApp', url: 'https://example.com', icons: [] },
+            },
             requiredNamespaces: {},
             optionalNamespaces: {},
             relays: [{ protocol: 'irn' }],
+          },
+          verifyContext: {
+            verified: {
+              validation: 'VALID' as const,
+              origin: 'https://example.com',
+              verifyUrl: 'https://example.com/verify',
+            },
           },
         },
       };
@@ -70,9 +83,9 @@ describe('ModalStore', () => {
       expect(ModalStore.state.data?.requestEvent?.id).toBe(1);
 
       // Open second modal (should replace first)
-      ModalStore.open('AuthRequestModal', { request: { id: 2 } as any });
+      ModalStore.open('AuthRequestModal', { sessionAuthenticatePayload: { id: 2 } as any });
       expect(ModalStore.state.view).toBe('AuthRequestModal');
-      expect(ModalStore.state.data?.request?.id).toBe(2);
+      expect(ModalStore.state.data?.sessionAuthenticatePayload?.id).toBe(2);
       expect(ModalStore.state.data?.requestEvent).toBeUndefined();
     });
   });
@@ -130,11 +143,16 @@ describe('ModalStore', () => {
         proposal: {
           id: 456,
           params: {
+            id: 123456,
+            expiryTimestamp: 0,
+            pairingTopic: 'test-topic',
             proposer: {
+              publicKey: '0xabc123',
               metadata: {
                 name: 'DApp',
                 description: 'Test DApp',
                 url: 'https://example.com',
+                icons: [],
               },
             },
             requiredNamespaces: {
@@ -146,6 +164,13 @@ describe('ModalStore', () => {
             },
             optionalNamespaces: {},
             relays: [{ protocol: 'irn' }],
+          },
+          verifyContext: {
+            verified: {
+              validation: 'VALID' as const,
+              origin: 'https://example.com',
+              verifyUrl: 'https://example.com/verify',
+            },
           },
         },
       };
@@ -181,24 +206,45 @@ describe('ModalStore', () => {
 
     it('should handle auth request data correctly', () => {
       const authData = {
-        request: {
+        sessionAuthenticatePayload: {
           id: 101112,
           topic: 'auth-topic',
           params: {
-            domain: 'example.com',
-            aud: 'https://example.com',
-            type: 'eip4361',
-            nonce: 'test-nonce',
-            iat: '2023-01-01T00:00:00.000Z',
+            expiryTimestamp: 0,
+            requester: {
+              publicKey: '0xabc123',
+              metadata: {
+                name: 'DApp',
+                description: 'Test DApp',
+                url: 'https://example.com',
+                icons: [],
+              },
+            },
+            authPayload: {
+              domain: 'example.com',
+              aud: 'https://example.com',
+              type: 'eip4361',
+              nonce: 'test-nonce',
+              iat: '2023-01-01T00:00:00.000Z',
+              chains: [],
+              version: '1',
+            },
           },
-        } as any,
+          verifyContext: {
+            verified: {
+              validation: 'VALID' as const,
+              origin: 'https://example.com',
+              verifyUrl: 'https://example.com/verify',
+            },
+          },
+        },
       };
 
       ModalStore.open('AuthRequestModal', authData);
 
-      expect(ModalStore.state.data?.request?.id).toBe(101112);
-      expect(ModalStore.state.data?.request?.params.domain).toBe('example.com');
-      expect(ModalStore.state.data?.request?.params.type).toBe('eip4361');
+      expect(ModalStore.state.data?.sessionAuthenticatePayload?.id).toBe(101112);
+      expect(ModalStore.state.data?.sessionAuthenticatePayload?.params.authPayload.domain).toBe('example.com');
+      expect(ModalStore.state.data?.sessionAuthenticatePayload?.params.authPayload.type).toBe('eip4361');
     });
   });
 

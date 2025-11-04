@@ -5,7 +5,7 @@ import { SignClientTypes } from '@walletconnect/types';
 import RequestModalContainer from '@/components/RequestModalContainer';
 import ModalStore from '@/store/ModalStore';
 import { rejectRequest } from '@/utils/CapsuleRequestHandlerUtil';
-import { web3wallet } from '@/utils/WalletConnectUtil';
+import { walletKit } from '@/utils/WalletConnectUtil';
 import { styledToast } from '@/utils/HelperUtil';
 
 interface IProps {
@@ -47,7 +47,7 @@ export default function SessionRegenerateModal() {
       const { topic } = requestEvent;
       const response = rejectRequest(requestEvent);
       try {
-        await web3wallet.respondSessionRequest({
+        await walletKit.respondSessionRequest({
           topic,
           response,
         });

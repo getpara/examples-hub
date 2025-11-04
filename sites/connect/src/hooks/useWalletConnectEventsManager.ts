@@ -1,8 +1,8 @@
-import { Web3WalletTypes } from '@walletconnect/web3wallet';
+import { WalletKitTypes } from '@reown/walletkit';
 import { EIP155_SIGNING_METHODS } from '@/data/EIP155Data';
 import ModalStore from '@/store/ModalStore';
 import SettingsStore from '@/store/SettingsStore';
-import { web3wallet } from '@/utils/WalletConnectUtil';
+import { walletKit } from '@/utils/WalletConnectUtil';
 import { SignClientTypes } from '@walletconnect/types';
 import { useCallback, useEffect } from 'react';
 import { COSMOS_SIGNING_METHODS } from '@/data/COSMOSData';
@@ -19,8 +19,8 @@ export default function useWalletConnectEventsManager(initialized: boolean) {
   /******************************************************************************
    * 2. Open Auth modal for confirmation / rejection
    *****************************************************************************/
-  const onAuthRequest = useCallback((request: Web3WalletTypes.AuthRequest) => {
-    ModalStore.open('AuthRequestModal', { request });
+  const onSessionAuthenticate = useCallback((payload: WalletKitTypes.SessionAuthenticate) => {
+    ModalStore.open('AuthRequestModal', { sessionAuthenticatePayload: payload });
   }, []);
 
   /******************************************************************************
@@ -29,7 +29,7 @@ export default function useWalletConnectEventsManager(initialized: boolean) {
   const onSessionRequest = useCallback(async (requestEvent: SignClientTypes.EventArguments['session_request']) => {
     const { topic, params, verifyContext } = requestEvent;
     const { request } = params;
-    const requestSession = web3wallet.engine.signClient.session.get(topic);
+    const requestSession = walletKit.engine.signClient.session.get(topic);
     // set the verify context so it can be displayed in the projectInfoCard
     SettingsStore.setCurrentRequestVerifyContext(verifyContext);
 
@@ -85,13 +85,13 @@ export default function useWalletConnectEventsManager(initialized: boolean) {
   useEffect(() => {
     if (initialized) {
       //sign
-      web3wallet.on('session_proposal', onSessionProposal);
-      web3wallet.on('session_request', onSessionRequest);
+      walletKit.on('session_proposal', onSessionProposal);
+      walletKit.on('session_request', onSessionRequest);
       // auth
-      web3wallet.on('auth_request', onAuthRequest);
+      walletKit.on('session_authenticate', onSessionAuthenticate);
       // TODOs
-      web3wallet.engine.signClient.events.on('session_ping', data => console.log('ping', data));
-      web3wallet.on('session_delete', data => console.log('delete', data));
+      walletKit.engine.signClient.events.on('session_ping', data => console.log('ping', data));
+      walletKit.on('session_delete', data => console.log('delete', data));
     }
-  }, [initialized, onAuthRequest, onSessionProposal, onSessionRequest]);
+  }, [initialized, onSessionProposal, onSessionRequest]);
 }

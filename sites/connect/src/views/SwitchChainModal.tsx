@@ -1,7 +1,7 @@
 import RequestMethodCard from '@/components/RequestMethodCard';
 import ModalStore from '@/store/ModalStore';
 import SettingsStore from '@/store/SettingsStore';
-import { updateSignClientChainId, web3wallet } from '@/utils/WalletConnectUtil';
+import { updateSignClientChainId, walletKit } from '@/utils/WalletConnectUtil';
 import { Divider, Text } from '@nextui-org/react';
 import { rejectRequest } from '@/utils/CapsuleRequestHandlerUtil';
 import { styledToast } from '@/utils/HelperUtil';
@@ -32,7 +32,7 @@ export default function SwitchChainModal() {
       try {
         await updateSignClientChainId(`eip155:${parseInt(hexChain)}`, wallet?.address ?? '');
         await new Promise(resolve => setTimeout(resolve, 1000));
-        await web3wallet.respondSessionRequest({
+        await walletKit.respondSessionRequest({
           topic,
           response: formatJsonRpcResult(requestEvent.id, {}),
         });
@@ -49,7 +49,7 @@ export default function SwitchChainModal() {
     if (requestEvent) {
       const response = rejectRequest(requestEvent);
       try {
-        await web3wallet.respondSessionRequest({
+        await walletKit.respondSessionRequest({
           topic,
           response,
         });
