@@ -53,6 +53,10 @@
   "private": true,
   "scripts": {
     "build": "rm -rf build && tsc && vite build",
+    "build-beta": "VITE_ENV=beta yarn build-for-deploy",
+    "build-for-deploy": "cd ../../ && yarn build:dev && cd sites/bridge-v2 && yarn build",
+    "build-prod": "VITE_ENV=prod yarn build-for-deploy",
+    "build-sandbox": "VITE_ENV=sandbox yarn build-for-deploy",
     "test": "vitest --run",
     "test:watch": "vitest",
     "deploy-beta": "VITE_ENV=beta VITE_BUCKET_NAME=capsule-beta-alpha-js-bridge-site yarn deploy-s3",
