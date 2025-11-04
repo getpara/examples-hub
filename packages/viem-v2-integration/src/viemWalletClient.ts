@@ -11,10 +11,10 @@ import {
   Hex,
   SerializeTransactionFn,
   hashTypedData,
-  Account,
   Transport,
   Chain,
   LocalAccount,
+  RpcSchema,
 } from 'viem';
 import * as viemChains from 'viem/chains';
 
@@ -55,7 +55,7 @@ export function createParaAccount(para: ParaCore, walletAddress?: Hex): LocalAcc
         serializer = serializeTransaction;
       }
 
-      const serializedTx = serializer(transaction, {
+      const serializedTx = await serializer(transaction, {
         r: '0x',
         s: '0x',
         v: BigInt(0),
@@ -100,10 +100,10 @@ export function getViemChain(chainId: string): viemChains.Chain {
 
 export function createParaViemClient(
   para: ParaCore,
-  params: WalletClientConfig,
+  params: WalletClientConfig<Transport, Chain, LocalAccount, RpcSchema>,
   opts?: ViemClientOpts,
-): WalletClient<Transport, Chain, Account> {
-  return createWalletClient({
+): WalletClient<Transport, Chain, LocalAccount, RpcSchema> {
+  return createWalletClient<Transport, Chain, LocalAccount, RpcSchema>({
     account: opts?.noAccount ? undefined : createParaAccount(para),
     ...params,
   });

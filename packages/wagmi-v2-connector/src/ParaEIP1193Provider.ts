@@ -166,7 +166,9 @@ export class ParaEIP1193Provider extends EventEmitter implements EIP1193Provider
         // @ts-ignore
       },
       { noAccount: true },
-    ).extend(publicActions);
+    );
+
+    this.walletClient.extend(publicActions);
 
     this.emit('chainChanged', this.currentHexChainId);
   };

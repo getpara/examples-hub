@@ -40,7 +40,6 @@ export function Providers({
           twoFactorAuthEnabled: false,
         }}
       >
-        {/* @ts-expect-error - React version mismatch in monorepo */}
         {children}
       </ParaSDKProvider>
     </QueryClientProvider>

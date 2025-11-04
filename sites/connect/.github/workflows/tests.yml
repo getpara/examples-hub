@@ -1,0 +1,148 @@
+name: Tests
+
+on:
+  pull_request:
+    branches:
+      - main
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  AWS_REGION: us-east-1
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up cache key prefix
+        id: vars
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            echo "CACHE_KEY_PREFIX=${{ github.head_ref }}" >> $GITHUB_ENV
+          else
+            echo "CACHE_KEY_PREFIX=${{ github.ref_name }}" >> $GITHUB_ENV
+          fi
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.17.0'
+
+      - name: Yarn cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            **/node_modules
+          key: ${{ runner.os }}-yarn-${{ env.CACHE_KEY_PREFIX }}-${{ hashFiles('**/package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-${{ env.CACHE_KEY_PREFIX }}
+
+      - name: Install dependencies
+        run: yarn
+
+      - name: Run Lint
+        run: yarn lint
+
+      - name: Build packages
+        run: yarn build
+
+  unit-test:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.17.0'
+
+      - name: Set up cache key prefix
+        id: vars
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            echo "CACHE_KEY_PREFIX=${{ github.head_ref }}" >> $GITHUB_ENV
+          else
+            echo "CACHE_KEY_PREFIX=${{ github.ref_name }}" >> $GITHUB_ENV
+          fi
+
+      - name: Yarn cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            **/node_modules
+          key: ${{ runner.os }}-yarn-${{ env.CACHE_KEY_PREFIX }}-${{ hashFiles('**/package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-${{ env.CACHE_KEY_PREFIX }}
+
+      - name: Build packages
+        run: yarn build
+
+      - name: Run tests
+        run: yarn test
+
+  e2e-test:
+    needs: unit-test
+    permissions:
+      id-token: write
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.17.0'
+
+      - name: Set up cache key prefix
+        id: vars
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            echo "CACHE_KEY_PREFIX=${{ github.head_ref }}" >> $GITHUB_ENV
+          else
+            echo "CACHE_KEY_PREFIX=${{ github.ref_name }}" >> $GITHUB_ENV
+          fi
+
+      - name: Yarn cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            **/node_modules
+          key: ${{ runner.os }}-yarn-${{ env.CACHE_KEY_PREFIX }}-${{ hashFiles('**/package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-${{ env.CACHE_KEY_PREFIX }}
+
+      - name: Build packages
+        run: yarn build
+
+      - name: Install Playwright Browsers
+        run: npx playwright install chromium
+
+      - name: Run Playwright tests
+        run: xvfb-run npx playwright test --headed
+
+      - name: Configure AWS credentials
+        if: failure()
+        uses: aws-actions/configure-aws-credentials@67fbcbb121271f7775d2e7715933280b06314838
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/github-actions-role
+          role-session-name: github-upload-sandbox-artifacts
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Upload Trace Report
+        if: failure()
+        env:
+          BUCKET_NAME: capsule-sandbox-artifacts-site
+          RUN_ID: ${{ github.run_id }}
+        run: aws s3 sync playwright-report "s3://${BUCKET_NAME}/e2e-runs/${RUN_ID}/legacy-example"
+
+      - name: Trace Report URL
+        if: failure()
+        run: echo "View failed test artifacts at https://artifacts.sandbox.usecapsule.com/e2e-runs/${{ github.run_id }}/legacy-example/index.html"

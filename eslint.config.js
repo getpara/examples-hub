@@ -13,6 +13,8 @@ module.exports = [
     ignores: [
       '**/node_modules/**',
       '**/.nx/**',
+      '**/.next/**',
+      '**/_next/**',
       '**/playwright-report/**',
       '**/test-results/**',
       '**/coverage/**',

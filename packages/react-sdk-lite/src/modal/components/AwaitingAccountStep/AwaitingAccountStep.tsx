@@ -3,9 +3,9 @@ import { Waiting } from '../Waiting/Waiting.js';
 
 export const AwaitingAccountStep = () => {
   const isLogin = useModalStore(state => state.isLogin());
-  const verifyState = useModalStore(state => state.getVerifyState());
+  const refs = useModalStore(state => state.refs);
 
-  const isSLOPopup = !!verifyState?.isWalletSelectionNeeded;
+  const isSLOPopup = refs.popupWindow.current?.closed === false;
 
   return (
     <Waiting

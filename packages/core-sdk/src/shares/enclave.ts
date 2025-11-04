@@ -178,7 +178,7 @@ export class EnclaveClient {
     const encrypted = await crypto.subtle.encrypt(
       { name: 'AES-GCM', iv },
       encryptionKey,
-      new TextEncoder().encode(plaintext),
+      new TextEncoder().encode(plaintext) as BufferSource,
     );
 
     // Combine IV + encrypted data + auth tag (AES-GCM includes auth tag automatically)

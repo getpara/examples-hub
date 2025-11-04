@@ -7,7 +7,7 @@
   },
   "devDependencies": {
     "typescript": "^5.8.3",
-    "viem": "^2.24.2",
+    "viem": "^2.38.5",
     "wagmi": "^2.14.16"
   },
   "files": [

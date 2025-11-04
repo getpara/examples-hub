@@ -10,7 +10,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  NODE_VERSION: '22.11.0'
+  NODE_VERSION: '22.17.0'
   CACHE_KEY_PREFIX: ${{ github.event_name == 'pull_request' && github.head_ref || github.ref_name }}
 
 jobs:

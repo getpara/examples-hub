@@ -225,7 +225,9 @@ export function AuthProvider({
               onSuccess: () => {
                 if (para.isNoWalletConfig) {
                   onLoginComplete({
-                    on2faSetupOrError: () => setStep(ModalStep.LOGIN_DONE),
+                    on2faSetupOrError: () => {
+                      setStep(ModalStep.LOGIN_DONE);
+                    },
                     on2faNotSetup: () => setStep(ModalStep.SETUP_2FA),
                   });
                 } else {
