@@ -2,7 +2,7 @@ import { PropsWithChildren, createContext, useCallback, useContext, useEffect, u
 import * as utils from '../../../utils/authLogin';
 import { AuthLoginParams, GroupedWallets, LoginRes } from '../../../types';
 import { usePara } from '../../../components/ParaContext';
-import { CoreAuthInfo, entityToWallet, isWalletSupported, WalletEntity } from '@getpara/core-sdk';
+import { CoreAuthInfo, entityToWallet, getPublicKeyHex, isWalletSupported, WalletEntity } from '@getpara/core-sdk';
 import { formatISO } from 'date-fns';
 import {
   AuthExtras,
@@ -19,6 +19,11 @@ const NOOP = () => {
   throw new Error();
 };
 
+type UpdateKeySharesOpts = {
+  sessionId?: string;
+  encryptionKey?: string;
+};
+
 type Login = {
   fns: {
     authLogin: () => Promise<Awaited<ReturnType<typeof utils.authLogin>>>;
@@ -26,9 +31,9 @@ type Login = {
       password: string,
       isPIN?: boolean,
     ) => Promise<Awaited<ReturnType<typeof utils.authLoginWithPassword>>>;
-    authUpdateKeyShares: (_?: LoginRes) => Promise<void>;
+    authUpdateKeyShares: (_: LoginRes, __?: UpdateKeySharesOpts) => Promise<void>;
     fetchWallets: () => Promise<GroupedWallets>;
-    authUpdateEnclaveKeyShares: () => Promise<void>;
+    authUpdateEnclaveKeyShares: (_?: UpdateKeySharesOpts) => Promise<void>;
     checkIsEnclaveUser: () => Promise<boolean>;
     addAllEnclaveSharesForNewCredential: (sessionLookupId: string) => Promise<void>;
     addAllSharesForNewCredential: ({
@@ -206,18 +211,17 @@ export const LoginProvider = ({
   }, [para, params]);
 
   const authUpdateKeyShares = useCallback(
-    async (loginResParam?: LoginRes) => {
-      const _loginRes = loginResParam ?? loginRes;
-
-      if (!_loginRes) {
+    async (loginRes: LoginRes, opts: UpdateKeySharesOpts = {}) => {
+      if (!loginRes) {
         return;
       }
 
-      const { userId, userHandle, signature, passwordId } = _loginRes;
+      const { userId, userHandle, signature, passwordId } = loginRes;
 
       await utils.authUpdateKeyShares(para, {
         ...params,
-        encryptionKey: params.encryptionKey,
+        sessionId: opts.sessionId ?? params.sessionId,
+        encryptionKey: opts.encryptionKey ?? params.encryptionKey ?? getPublicKeyHex(para.loginEncryptionKeyPair),
         userHandle,
         signature,
         passwordId,
@@ -227,16 +231,20 @@ export const LoginProvider = ({
     [para, params, loginRes],
   );
 
-  const authUpdateEnclaveKeyShares = useCallback(async () => {
-    const shares = await para.ctx.enclaveClient.retrieveSharesWithRetry([{ userId: para.userId }]);
+  const authUpdateEnclaveKeyShares = useCallback(
+    async ({ sessionId, encryptionKey }: UpdateKeySharesOpts = {}) => {
+      const shares = await para.ctx.enclaveClient.retrieveSharesWithRetry([{ userId: para.userId }]);
 
-    await utils.authUpdateKeyShares(para, {
-      ...params,
-      encryptionKey: params.encryptionKey,
-      enclaveShares: shares,
-      userId: para.userId,
-    });
-  }, [para, params]);
+      await utils.authUpdateKeyShares(para, {
+        ...params,
+        sessionId: sessionId ?? params.sessionId,
+        encryptionKey: encryptionKey ?? params.encryptionKey ?? getPublicKeyHex(para.loginEncryptionKeyPair),
+        enclaveShares: shares,
+        userId: para.userId,
+      });
+    },
+    [para, params],
+  );
 
   const addAllSharesForNewCredential = useCallback(
     async ({ loginRes: loginResParam, sessionLookupId }: { loginRes?: LoginRes; sessionLookupId: string }) => {

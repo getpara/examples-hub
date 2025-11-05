@@ -1,13 +1,12 @@
 import { PropsWithChildren, createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { CoreAuthInfo, ConstructorOpts as ParaConstructorOpts, Environment as ParaEnvironment } from '@getpara/web-sdk';
-import { useSearchParams } from 'react-router-dom';
+import { useLocation, useSearchParams } from 'react-router-dom';
 import { ParaPortal } from '../classes/ParaPortal';
 import { DEFAULT_API_KEY } from '../constants';
 import { AuthLoginParams } from '../types';
 import { AuthExtras, AuthParams, extractAuthInfo } from '@getpara/user-management-client';
 import { useExtractedParams } from '../hooks/useExtractedParams';
 import { PortalEmitter } from '../classes';
-import { RETRIEVED_WALLETS_KEY } from '../constants';
 
 interface ParaProviderProps extends PropsWithChildren {
   apiKey: string;
@@ -66,6 +65,8 @@ export const ParaProvider = (props: ParaProviderProps) => {
   const [searchParams] = useSearchParams();
   const { apiKey, environment, options, onMount, children, partnerId } = props;
   const paramsSupportedWalletTypes = searchParams.get('supportedWalletTypes');
+  const loginCallbackRoute = searchParams.get('loginCallbackRoute');
+  const location = useLocation();
   const [isReady, setIsReady] = useState(false);
   const hasInitialized = useRef(false);
 
@@ -77,18 +78,23 @@ export const ParaProvider = (props: ParaProviderProps) => {
   // Check if current path is a callback route
   const isCallbackRoute = location.pathname.includes('/callback');
 
-  const para = useMemo(
-    () =>
-      props.para ??
-      new ParaPortal(environment, apiKey ?? DEFAULT_API_KEY, {
-        ...options,
-        ...(paramsSupportedWalletTypes
-          ? { supportedWalletTypes: JSON.parse(decodeURIComponent(paramsSupportedWalletTypes)) }
-          : {}),
-        ...(partnerId && { portalPartnerId: partnerId }),
-      }),
-    [apiKey, environment, options, props.para, paramsSupportedWalletTypes],
-  );
+  const isExportPrivateKey =
+    location.pathname.includes('/private-key') || loginCallbackRoute?.includes('/private-key') || false;
+
+  const para = useMemo(() => {
+    const opts = {
+      ...options,
+      isExportPrivateKey: isExportPrivateKey ?? false,
+      ...(paramsSupportedWalletTypes
+        ? { supportedWalletTypes: JSON.parse(decodeURIComponent(paramsSupportedWalletTypes)) }
+        : {}),
+      ...(partnerId && { portalPartnerId: partnerId }),
+    };
+
+    const client = props.para ?? new ParaPortal(environment, apiKey ?? DEFAULT_API_KEY, opts);
+
+    return client;
+  }, [apiKey, environment, options, props.para, paramsSupportedWalletTypes, partnerId, isExportPrivateKey]);
   para.ctx.isE2E = import.meta.env.VITE_IS_E2E === 'true';
 
   useEffect(() => {
@@ -100,21 +106,6 @@ export const ParaProvider = (props: ParaProviderProps) => {
         }
 
         return;
-      }
-
-      // Retrieve wallets from origin window if we are on the export private key page
-      if (location.pathname.includes('/private-key')) {
-        try {
-          const retrieveWalletsResult = await portalEmitter?.syncWallets();
-
-          sessionStorage.setItem(RETRIEVED_WALLETS_KEY, JSON.stringify(retrieveWalletsResult));
-        } catch (error) {
-          // Store error flag in sessionStorage so ExportPrivateKey can show appropriate error
-          sessionStorage.setItem(
-            RETRIEVED_WALLETS_KEY,
-            JSON.stringify({ error: true, message: error.message || 'Failed to sync wallets' }),
-          );
-        }
       }
 
       await para.logout();

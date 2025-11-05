@@ -179,14 +179,43 @@ const AuthLoginBase = ({ step: propsStep }: { step?: AuthLoginStep }) => {
     if (loginCallbackRoute && !isSwitchingWallets) {
       let callbackAdditionalParams: { sessionId?: string } = {};
 
-      switch (loginCallbackRoute) {
-        case '/auth/add-new-credential':
+      switch (true) {
+        case loginCallbackRoute === '/auth/add-new-credential':
           const { sessionLookupId } = await para.touchSession(true);
           await (isEnclaveUser
             ? addAllEnclaveSharesForNewCredential(sessionLookupId)
             : addAllSharesForNewCredential({ loginRes, sessionLookupId }));
           callbackAdditionalParams = { sessionId: sessionLookupId };
           break;
+        case loginCallbackRoute.includes('/private-key'): {
+          try {
+            // Fetch available wallets
+            await fetchWallets();
+
+            // Set portal encryption key
+            await para.setLoginEncryptionKeyPair();
+
+            // Regenerate session
+            const { sessionLookupId: sessionId } = await para.touchSession(true);
+
+            // Get desired wallet ID and set currentWalletIds
+            const walletId = /\/private-key\/(.*)$/.exec(loginCallbackRoute)?.[1];
+            await para.setCurrentWalletIds({
+              ...(para.supportedWalletTypes.some(({ type }) => type === 'EVM') ? { EVM: [walletId] } : {}),
+              ...(para.supportedWalletTypes.some(({ type }) => type === 'COSMOS') ? { COSMOS: [walletId] } : {}),
+            });
+
+            // Update key shares, complete login using *this* encryption key
+            const updateKeySharesOpts = { sessionId, encryptionKey: getPublicKeyHex(para.loginEncryptionKeyPair) };
+            await (isEnclaveUser
+              ? authUpdateEnclaveKeyShares(updateKeySharesOpts)
+              : authUpdateKeyShares(loginRes, updateKeySharesOpts));
+            await para.waitForLogin({});
+          } catch (error) {
+            console.error('Error exporting private key:', error);
+          }
+          break;
+        }
       }
 
       navigate(loginCallbackRoute, callbackAdditionalParams);
@@ -367,7 +396,6 @@ const AuthLoginBase = ({ step: propsStep }: { step?: AuthLoginStep }) => {
       if (
         !!authInfo &&
         sessionId &&
-        encryptionKey &&
         !skipAutoLogin &&
         authMethod === AuthMethod.PASSKEY &&
         (step === AuthLoginStep.MANUAL_LOGIN || step === AuthLoginStep.WAITING) &&

@@ -277,7 +277,7 @@ export const SelectWallet = ({
 
       onSuccess({ withDelay: toCreate.length > 0 && isIFramed });
     },
-    [para, onSuccess, isSwitchingWallets],
+    [para, onSuccess, loginRes, isSwitchingWallets],
   );
 
   const [key, header, heading, subheading, content] = useMemo(() => {

@@ -20,16 +20,10 @@ export const ExportPrivateKey = () => {
     const setup = async () => {
       if (para && para.isReady && !isReady) {
         try {
-          const retrievedWallets = typeof window !== 'undefined' ? sessionStorage.getItem(RETRIEVED_WALLETS_KEY) : null;
-          const parsedData = JSON.parse(retrievedWallets);
-
-          const { currentWalletIds, wallets } = parsedData;
-          await para.setCurrentWalletIds(currentWalletIds);
-          await para.setWallets(wallets);
-
           const privateKey = await para.getPrivateKey(walletId);
           setPrivateKey(privateKey);
         } catch (e) {
+          console.error(e);
           setErrorMessage('Sorry, we are unable to export your private key in this browser.');
           setIsError(true);
         } finally {

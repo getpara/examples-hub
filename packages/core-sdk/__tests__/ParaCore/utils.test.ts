@@ -428,8 +428,6 @@ describe('ParaCore - utils', () => {
         apiKey: API_KEY,
         origin: mockWindowLocation.origin,
         sessionId: SESSION_ID,
-        encryptionKey: mockEncryptionKey,
-        pregenIds: JSON.stringify(para.pregenIds),
         authInfo: JSON.stringify(para.authInfo),
         email: para.email!,
       });

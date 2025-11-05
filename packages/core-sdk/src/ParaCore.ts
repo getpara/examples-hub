@@ -947,13 +947,7 @@ export abstract class ParaCore implements CoreInterface {
           }
         : {}),
       ...(isOnRamp ? { email: this.email } : {}),
-      ...(isLogin ||
-      isOAuth ||
-      isOAuthCallback ||
-      isTelegramLogin ||
-      isFarcasterLogin ||
-      isAddNewCredential ||
-      isExportPrivateKey
+      ...(isLogin || isOAuth || isOAuthCallback || isTelegramLogin || isFarcasterLogin || isAddNewCredential
         ? {
             sessionId: thisDevice.sessionId,
             encryptionKey: thisDevice.encryptionKey,
@@ -990,6 +984,11 @@ export abstract class ParaCore implements CoreInterface {
         // Prior versions won't have this param which will skip the upgrade prompt
         isBasicLoginUpgradeVersion: 'true',
       }),
+      ...(isExportPrivateKey
+        ? {
+            sessionId: thisDevice.sessionId,
+          }
+        : {}),
     };
 
     const url = constructUrl({ base, path, params });
@@ -3204,7 +3203,7 @@ Need help? Visit: https://docs.getpara.com or contact support
             });
 
             let hasSharesForCurrentWallets: boolean;
-            if (!isSwitchingWallets) {
+            if (!isSwitchingWallets && !this.isPortal()) {
               this.devLog('[waitForLoginProcess] Fetching wallets');
               const fetchedWallets = await this.fetchWallets();
               this.devLog('[waitForLoginProcess] Wallets fetched', {
@@ -3221,8 +3220,11 @@ Need help? Visit: https://docs.getpara.com or contact support
 
             this.devLog('[waitForLoginProcess] Checking shares for current wallets', {
               hasSharesForCurrentWallets,
-              currentWalletIdsCount: this.currentWalletIdsArray.length,
-              shareCount: tempSharesRes.data.temporaryShares.length,
+              currentWalletIdsArray: this.currentWalletIdsArray,
+              shares: tempSharesRes.data.temporaryShares.map(s => ({
+                walletId: s.walletId,
+                walletScheme: s.walletScheme,
+              })),
             });
 
             // Proceed if we have shares for all currently selected wallets
