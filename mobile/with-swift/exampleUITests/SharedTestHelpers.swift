@@ -92,18 +92,41 @@ enum TestHelper {
 
     // MARK: - Static Authentication Helpers (for class setup)
 
-    static func allowUseCapsuleSignInIfNeeded(app: XCUIApplication) {
+    @discardableResult
+    static func allowUseCapsuleSignInIfNeeded(app: XCUIApplication, pollDuration: TimeInterval = 0) -> Bool {
         let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
+        let authServicesUI = XCUIApplication(bundleIdentifier: "com.apple.AuthenticationServicesUI")
+        let deadline = Date().addingTimeInterval(pollDuration)
 
-        let appAlert = app.alerts.firstMatch
-        if appAlert.exists, DialogHelper.tapContinue(in: appAlert) {
-            return
-        }
+        repeat {
+            // App-hosted alert or sheet.
+            let appAlert = app.alerts.firstMatch
+            if appAlert.exists, DialogHelper.tapContinue(in: appAlert) {
+                return true
+            }
 
-        let springboardAlert = springboard.alerts.firstMatch
-        if springboardAlert.exists {
-            _ = DialogHelper.tapContinue(in: springboardAlert)
-        }
+            // AuthenticationServicesUI-hosted consent (common on Xcode Cloud/headless).
+            let authContinue = authServicesUI.buttons["Continue"].firstMatch
+            if authContinue.exists {
+                if authContinue.isHittable {
+                    authContinue.tap()
+                } else {
+                    authContinue.tap()
+                }
+                return true
+            }
+
+            // SpringBoard fallback.
+            let springboardAlert = springboard.alerts.firstMatch
+            if springboardAlert.exists, DialogHelper.tapContinue(in: springboardAlert) {
+                return true
+            }
+
+            guard pollDuration > 0 else { break }
+            RunLoop.current.run(until: Date().addingTimeInterval(0.2))
+        } while Date() < deadline
+
+        return false
     }
 
     @discardableResult
@@ -139,7 +162,7 @@ enum TestHelper {
             || refreshButton.exists
     }
 
-    static func performOneClickAuthentication(app: XCUIApplication, credential: String, otpCode: String = TestConstants.verificationCode) {
+    static func performOneClickAuthentication(app: XCUIApplication, testCase: XCTestCase, credential: String, otpCode: String = TestConstants.verificationCode) {
         let emailPhoneField = app.textFields["Enter email or phone"]
         guard emailPhoneField.waitForExistence(timeout: TestConstants.longTimeout) else {
             fatalError("Email/phone field did not appear on main screen.")
@@ -150,7 +173,18 @@ enum TestHelper {
         guard continueButton.waitForExistence(timeout: TestConstants.defaultTimeout) else {
             fatalError("Continue button did not appear after entering credential.")
         }
+
+        let consentMonitor = testCase.installASWebAuthConsentMonitor()
+        defer { testCase.removeUIInterruptionMonitor(consentMonitor) }
+
+        guard continueButton.waitToBeHittable(timeout: 3) else {
+            fatalError("In-app Continue was not hittable in time.")
+        }
         continueButton.tap()
+
+        app.nudgeForInterruptionHandling()
+
+        _ = allowUseCapsuleSignInIfNeeded(app: app, pollDuration: 2)
 
         let safariApp = XCUIApplication(bundleIdentifier: "com.apple.SafariViewService")
         let launchDeadline = Date().addingTimeInterval(TestConstants.longTimeout)
@@ -162,7 +196,7 @@ enum TestHelper {
                 break
             }
 
-            allowUseCapsuleSignInIfNeeded(app: app)
+            _ = allowUseCapsuleSignInIfNeeded(app: app)
             RunLoop.current.run(until: Date().addingTimeInterval(0.2))
         }
 
@@ -270,7 +304,7 @@ enum TestHelper {
 
 extension XCTestCase {
     func performOneClickAuthentication(app: XCUIApplication, credential: String, otpCode: String = TestConstants.verificationCode) {
-        TestHelper.performOneClickAuthentication(app: app, credential: credential, otpCode: otpCode)
+        TestHelper.performOneClickAuthentication(app: app, testCase: self, credential: credential, otpCode: otpCode)
     }
 
     func ensureLoggedOut(app: XCUIApplication) {
@@ -292,8 +326,9 @@ extension XCTestCase {
         performBiometricAuthenticationWithOffsetFromBottom(50, app: app)
     }
 
-    func allowUseCapsuleSignInIfNeeded(app: XCUIApplication) {
-        TestHelper.allowUseCapsuleSignInIfNeeded(app: app)
+    @discardableResult
+    func allowUseCapsuleSignInIfNeeded(app: XCUIApplication, pollDuration: TimeInterval = 0) -> Bool {
+        TestHelper.allowUseCapsuleSignInIfNeeded(app: app, pollDuration: pollDuration)
     }
 
     func performBiometricAuthenticationWithOffsetFromBottom(_ offsetFromBottom: CGFloat, app: XCUIApplication) {
