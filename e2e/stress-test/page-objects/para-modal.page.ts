@@ -1,16 +1,16 @@
-import { BrowserContext, Page, FrameLocator, expect } from '@playwright/test';
+import { BrowserContext, Page, FrameLocator, Locator, expect } from '@playwright/test';
 import { Protocol } from 'playwright-core/types/protocol';
 import { AuthPortalPage } from './portal.page';
 import { getRandomPhoneNumber, getRandomEmail } from '../helpers/test-data';
 import { applyNetworkThrottling, type NetworkLevel } from '../helpers/network-throttling';
 
 const TIMEOUTS = {
-  DEFAULT: 20000,
-  SHORT: 10000,
-  BRIEF: 4000,
   QUICK: 1000,
-  LOADING: 3000,
-  LONG: 30000,
+  SHORT: 3000,
+  DEFAULT: 10000,
+  LOADING: 15000,
+  EXTENDED: 20000,
+  MAXIMUM: 30000,
 } as const;
 const DELAYS = {
   TYPING: 100,
@@ -18,37 +18,68 @@ const DELAYS = {
 
 export class ParaModalExamplePage {
   page: Page;
+
   constructor(page: Page) {
     this.page = page;
   }
 
   private async getParaIframe(): Promise<FrameLocator> {
-    await this.page.waitForSelector('iframe', { state: 'visible', timeout: TIMEOUTS.LONG });
+    await this.page.waitForSelector('iframe', {
+      state: 'visible',
+      timeout: TIMEOUTS.DEFAULT,
+    });
+
     const frameLocator = this.page.frameLocator('iframe').first();
-    await frameLocator.locator('body').waitFor({ state: 'visible', timeout: TIMEOUTS.LONG });
-    const passwordInputWrapper = frameLocator.locator('cpsl-input[placeholder="Enter password"]');
-    await expect(passwordInputWrapper).toBeVisible({ timeout: TIMEOUTS.LONG });
     return frameLocator;
+  }
+
+  private async getIframePasswordInput(): Promise<FrameLocator> {
+    const frameLocator = await this.getParaIframe();
+    const passwordInputWrapper = frameLocator.locator('cpsl-input[placeholder="Enter password"]');
+    await expect(passwordInputWrapper).toBeVisible({ timeout: TIMEOUTS.DEFAULT });
+    return frameLocator;
+  }
+
+  private async getIframeOTPInput(): Promise<Locator> {
+    const frameLocator = await this.getParaIframe();
+    const iframeOTPInput = frameLocator.locator('cpsl-code-input');
+    await expect(iframeOTPInput).toBeVisible({ timeout: TIMEOUTS.DEFAULT });
+    return iframeOTPInput;
+  }
+
+  private async clickOptionalButton(
+    locatorOrPage: Locator | Page | FrameLocator,
+    selector: string,
+    timeout: number = TIMEOUTS.DEFAULT,
+  ): Promise<boolean> {
+    const button = locatorOrPage.locator(selector);
+    try {
+      await button.click({ timeout });
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   async visit() {
     await this.page.goto('/');
     await this.page.waitForLoadState('networkidle');
-    await expect(this.page.getByTestId('header-connect-button')).toBeVisible({ timeout: TIMEOUTS.DEFAULT });
+    await expect(this.page.getByTestId('header-connect-button')).toBeVisible({
+      timeout: TIMEOUTS.SHORT,
+    });
   }
 
   async waitForUIStability() {
     const accountButton = this.page.getByTestId('account-address-display');
     const connectButton = this.page.getByTestId('header-connect-button');
     let modalButton;
-    try {
-      await accountButton.waitFor({ state: 'visible', timeout: TIMEOUTS.QUICK });
+    if (await accountButton.isVisible({ timeout: TIMEOUTS.LOADING })) {
       modalButton = accountButton;
-    } catch {
-      await connectButton.waitFor({ state: 'visible', timeout: TIMEOUTS.DEFAULT });
+    } else {
+      await expect(connectButton).toBeVisible({ timeout: TIMEOUTS.DEFAULT });
       modalButton = connectButton;
     }
-    await this.page.waitForTimeout(TIMEOUTS.LOADING);
+    await this.page.waitForTimeout(TIMEOUTS.QUICK);
     await expect(modalButton).toBeVisible();
     await expect(modalButton).toBeEnabled();
   }
@@ -87,71 +118,67 @@ export class ParaModalExamplePage {
     }
     await expect(authInputWrapper).toHaveAttribute('value', emailOrPhone);
     await authInput.press('Enter');
+    let credentials: Protocol.WebAuthn.Credential[] = [];
     const codeInputWrapper = this.page.locator('cpsl-code-input');
     await expect(codeInputWrapper).toBeVisible({ timeout: TIMEOUTS.SHORT });
     const firstCodeInput = codeInputWrapper.locator('#code-input-0');
     await expect(firstCodeInput).toBeVisible({ timeout: TIMEOUTS.SHORT });
     for (let i = 0; i < 6; i++) {
       const otpInput = codeInputWrapper.locator(`#code-input-${i}`);
+      await expect(otpInput).toBeVisible({ timeout: TIMEOUTS.SHORT });
       await otpInput.click();
       await otpInput.fill((i + 1).toString());
     }
-    let credentials: Protocol.WebAuthn.Credential[] = [];
+
     if (password) {
-      try {
-        const choosePasswordButton = this.page.locator('cpsl-button:has-text("Choose Password") button.button-native');
-        await choosePasswordButton.click();
-        const iframeLocator = await this.getParaIframe();
-        const passwordInputWrapper = iframeLocator.locator('cpsl-input[placeholder="Enter password"]');
-        const passwordInput = passwordInputWrapper.locator('input.native-input');
-        await passwordInput.click();
-        await passwordInput.fill(password);
-        const confirmPasswordInputWrapper = iframeLocator.locator('cpsl-input[placeholder="Confirm password"]');
-        const confirmPasswordInput = confirmPasswordInputWrapper.locator('input.native-input');
-        await confirmPasswordInput.click();
-        await confirmPasswordInput.fill(password);
-        const savePasswordButton = iframeLocator.locator('cpsl-button:has-text("Save Password") button.button-native');
-        await savePasswordButton.click();
-      } catch (error) {
-        throw error;
-      }
+      const choosePasswordButton = this.page.locator('cpsl-button:has-text("Choose Password") button.button-native');
+      await expect(choosePasswordButton).toBeVisible({ timeout: TIMEOUTS.DEFAULT });
+      await choosePasswordButton.click();
+      const iframeLocator = await this.getIframePasswordInput();
+      const passwordInputWrapper = iframeLocator.locator('cpsl-input[placeholder="Enter password"]');
+      const passwordInput = passwordInputWrapper.locator('input.native-input');
+      await expect(passwordInput).toBeVisible({ timeout: TIMEOUTS.DEFAULT });
+      await passwordInput.click();
+      await passwordInput.fill(password);
+      const confirmPasswordInputWrapper = iframeLocator.locator('cpsl-input[placeholder="Confirm password"]');
+      const confirmPasswordInput = confirmPasswordInputWrapper.locator('input.native-input');
+      await expect(confirmPasswordInput).toBeVisible({ timeout: TIMEOUTS.DEFAULT });
+      await confirmPasswordInput.click();
+      await confirmPasswordInput.fill(password);
+      const savePasswordButton = iframeLocator.locator('cpsl-button:has-text("Save Password") button.button-native');
+      await expect(savePasswordButton).toBeVisible({ timeout: TIMEOUTS.DEFAULT });
+      await savePasswordButton.click();
     } else {
-      try {
-        const page1Promise = this.page.waitForEvent('popup');
-        const createPasskeyButton = this.page.locator('cpsl-button:has-text("Create Passkey") button.button-native');
-        await createPasskeyButton.click();
-        const page1 = await page1Promise;
-        if (networkLevel) {
-          await applyNetworkThrottling(page1, networkLevel);
-        }
-        const authPortal = new AuthPortalPage(page1);
-        credentials = await authPortal.setup(context);
-      } catch (error) {
-        throw error;
+      const page1Promise = this.page.waitForEvent('popup');
+      const createPasskeyButton = this.page.locator('cpsl-button:has-text("Create Passkey") button.button-native');
+      await expect(createPasskeyButton).toBeVisible({ timeout: TIMEOUTS.DEFAULT });
+      await createPasskeyButton.click();
+      const page1 = await page1Promise;
+      if (networkLevel) {
+        await applyNetworkThrottling(page1, networkLevel);
       }
+      const authPortal = new AuthPortalPage(page1);
+      credentials = await authPortal.setup(context);
     }
     let clipboardText = '';
     if (isRecoverySecretEnabled) {
-      await this.page.waitForTimeout(TIMEOUTS.BRIEF);
+      await this.page.waitForTimeout(TIMEOUTS.SHORT);
       const copyTileButton = this.page.locator('cpsl-tile-button[icon="copy"]:has(cpsl-text:has-text("Copy"))');
-      await copyTileButton.waitFor({ state: 'visible', timeout: TIMEOUTS.LONG });
-      await copyTileButton.click();
+      await expect(copyTileButton).toBeVisible({ timeout: TIMEOUTS.EXTENDED });
+      await copyTileButton.click({ timeout: TIMEOUTS.DEFAULT });
       await this.page.waitForTimeout(TIMEOUTS.QUICK);
-      try {
-        clipboardText = await this.page.evaluate('navigator.clipboard.readText()');
-      } catch (error) {
-        throw error;
-      }
+      clipboardText = await this.page.evaluate('navigator.clipboard.readText()');
       const savedSecretButton = this.page
         .locator('cpsl-button')
         .filter({ hasText: /saved.*recovery|recovery.*saved/i })
         .locator('button.button-native');
-      await savedSecretButton.waitFor({ state: 'visible', timeout: TIMEOUTS.SHORT });
-      await savedSecretButton.click();
+      await expect(savedSecretButton).toBeVisible({ timeout: TIMEOUTS.SHORT });
+      await savedSecretButton.click({ timeout: TIMEOUTS.DEFAULT });
     }
     const doneButton = this.page.locator('cpsl-button:has-text("Done") button.button-native');
-    await doneButton.click();
-    await expect(this.page.getByTestId('account-address-display')).toBeVisible({ timeout: TIMEOUTS.LONG });
+    await expect(doneButton).toBeVisible({ timeout: TIMEOUTS.DEFAULT });
+    await doneButton.click({ timeout: TIMEOUTS.DEFAULT });
+    await expect(this.page.getByTestId('account-address-display')).toBeVisible({ timeout: TIMEOUTS.EXTENDED });
     return {
       emailOrPhone,
       credential: credentials[0],
@@ -174,6 +201,7 @@ export class ParaModalExamplePage {
   }) {
     await this.waitForUIStability();
     const connectButton = this.page.getByTestId('header-connect-button');
+    await expect(connectButton).toBeVisible({ timeout: TIMEOUTS.DEFAULT });
     await connectButton.click();
     const authInputWrapper = this.page.getByTestId('auth-input');
     await expect(authInputWrapper).toBeVisible({ timeout: TIMEOUTS.SHORT });
@@ -183,64 +211,71 @@ export class ParaModalExamplePage {
     await expect(authInputWrapper).toHaveAttribute('value', emailOrPhone);
     await authInput.press('Enter');
     if (password) {
-      try {
-        const iframeLocator = await this.getParaIframe();
-        const passwordInputWrapper = iframeLocator.locator('cpsl-input[placeholder="Enter password"]');
-        const passwordInput = passwordInputWrapper.locator('input.native-input');
-        await passwordInput.click();
-        await passwordInput.fill(password);
-        const loginButton = iframeLocator.locator('cpsl-button:has-text("Login") button.button-native');
-        await expect(loginButton).toBeEnabled({ timeout: TIMEOUTS.SHORT });
-        await loginButton.click();
-        await this.page.waitForTimeout(TIMEOUTS.BRIEF);
-      } catch (error) {
-        throw error;
-      }
+      const iframeLocator = await this.getParaIframe();
+      const passwordInputWrapper = iframeLocator.locator('cpsl-input[placeholder="Enter password"]');
+      const passwordInput = passwordInputWrapper.locator('input.native-input');
+      await expect(passwordInput).toBeVisible({ timeout: TIMEOUTS.DEFAULT });
+      await passwordInput.click();
+      await passwordInput.fill(password);
+      const loginButton = iframeLocator.locator('cpsl-button:has-text("Login") button.button-native');
+      await expect(loginButton).toBeVisible({ timeout: TIMEOUTS.DEFAULT });
+      await expect(loginButton).toBeEnabled({ timeout: TIMEOUTS.SHORT });
+      await loginButton.click();
+      await this.clickOptionalButton(iframeLocator, 'cpsl-button:has-text("Keep Using") button.button-native');
     } else {
-      try {
-        const page2Promise = this.page.waitForEvent('popup');
-        await this.page.getByText('Login with passkey').click();
-        const page2 = await page2Promise;
-        if (networkLevel) {
-          await applyNetworkThrottling(page2, networkLevel);
-        }
-        const authPortal = new AuthPortalPage(page2);
-        await authPortal.login(context, credential);
-      } catch (error) {
-        throw error;
+      const page2Promise = this.page.waitForEvent('popup');
+      const passkeyLink = this.page.getByText('Login with passkey');
+      await expect(passkeyLink).toBeVisible({ timeout: TIMEOUTS.DEFAULT });
+      await passkeyLink.click();
+      const page2 = await page2Promise;
+      if (networkLevel) {
+        await applyNetworkThrottling(page2, networkLevel);
       }
+      const authPortal = new AuthPortalPage(page2);
+      await authPortal.login(context, credential);
+      await this.clickOptionalButton(page2, 'cpsl-button:has-text("Keep Using") button.button-native');
     }
-    await this.page.waitForTimeout(TIMEOUTS.BRIEF);
-    try {
-      await this.page.waitForSelector('[data-testid="account-address-display"]', {
-        state: 'visible',
-        timeout: TIMEOUTS.DEFAULT,
-      });
-    } catch {
-      await this.page.waitForTimeout(TIMEOUTS.BRIEF);
-    }
+
+    await expect(this.page.getByTestId('account-address-display')).toBeVisible({
+      timeout: TIMEOUTS.EXTENDED,
+    });
   }
 
   async logout() {
+    await this.waitForUIStability();
     await this.page.getByTestId('account-address-display').click();
-    await this.page.waitForTimeout(TIMEOUTS.QUICK);
+
     const modalContent = this.page.getByTestId('modal-content');
-    await modalContent.waitFor({ state: 'visible', timeout: TIMEOUTS.SHORT });
+    await expect(modalContent).toBeVisible({ timeout: TIMEOUTS.SHORT });
     const profileButton = modalContent.locator('cpsl-tile-button:has-text("Profile") button.button-native');
-    await profileButton.waitFor({ state: 'visible', timeout: TIMEOUTS.SHORT });
-    await profileButton.click();
-    await this.page.waitForTimeout(TIMEOUTS.QUICK);
+    await expect(profileButton).toBeVisible({ timeout: TIMEOUTS.SHORT });
+    await profileButton.click({ timeout: TIMEOUTS.DEFAULT });
     const disconnectButton = modalContent.locator('cpsl-button:has-text("Disconnect Wallet") button.button-native');
-    await disconnectButton.waitFor({ state: 'visible', timeout: TIMEOUTS.SHORT });
-    await disconnectButton.click();
-    await this.page.waitForTimeout(TIMEOUTS.LOADING);
+    await expect(disconnectButton).toBeVisible({ timeout: TIMEOUTS.SHORT });
+    await disconnectButton.click({ timeout: TIMEOUTS.DEFAULT });
+    const accountDisplay = this.page.getByTestId('account-address-display');
+    await expect(accountDisplay).toBeHidden({ timeout: TIMEOUTS.DEFAULT });
     const connectButton = this.page.getByTestId('header-connect-button');
-    await expect(connectButton).toBeVisible({ timeout: TIMEOUTS.SHORT });
+    await expect(connectButton).toBeVisible({ timeout: TIMEOUTS.DEFAULT });
   }
 
-  async signMessage(): Promise<string> {
-    const signButton = this.page.getByText('Sign Hello World!');
-    await signButton.click();
+  async signMessage(message?: string): Promise<string> {
+    const messageInput = this.page.getByTestId('sign-message-input');
+    const hasInput = await messageInput.isVisible().catch(() => false);
+
+    if (hasInput && message) {
+      await messageInput.click();
+      await messageInput.clear();
+      await messageInput.fill(message);
+
+      const signButton = this.page.getByTestId('sign-submit-button');
+      await expect(signButton).toBeVisible({ timeout: TIMEOUTS.DEFAULT });
+      await signButton.click();
+    } else {
+      const signButton = this.page.getByText('Sign Hello World!');
+      await expect(signButton).toBeVisible({ timeout: TIMEOUTS.DEFAULT });
+      await signButton.click();
+    }
     const signatureDisplay = await this.page.waitForSelector('[data-testid="sign-signature-display"]', {
       state: 'visible',
       timeout: TIMEOUTS.DEFAULT,
