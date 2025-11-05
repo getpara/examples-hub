@@ -6,7 +6,7 @@ export const getParaSolanaLib = async () => {
   try {
     // @ts-ignore
     lib = await import('@getpara/solana-wallet-connectors');
-  } catch (e) {
+  } catch {
     lib = undefined;
   }
 

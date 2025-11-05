@@ -20,7 +20,7 @@ export class KeyContainer {
     try {
       const parsedObject = JSON.parse(serializedContainer);
       return Object.assign(new KeyContainer('', '', ''), parsedObject);
-    } catch (e) {
+    } catch {
       const container = new KeyContainer('', '', '');
       container.backupDecryptionKey = serializedContainer.split('|')[0];
       return container;
@@ -40,7 +40,7 @@ export class KeyContainer {
       const pubkey = this.getPublicEncryptionKey();
       const data = ECIESEncrypt(pubkey, Buffer.from(backup, 'ucs2')).toString('base64');
       return data;
-    } catch (error: any) {
+    } catch {
       throw Error('Error encrypting backup');
     }
   }
@@ -49,7 +49,7 @@ export class KeyContainer {
     try {
       const data = ECIESEncrypt(publicKey, Buffer.from(backup, 'ucs2')).toString('base64');
       return data;
-    } catch (error: any) {
+    } catch {
       throw Error('Error encrypting backup');
     }
   }
@@ -59,7 +59,7 @@ export class KeyContainer {
       const buf = Buffer.from(encryptedBackup, 'base64');
       const data = ECIESDecrypt(Buffer.from(this.backupDecryptionKey, 'hex'), buf);
       return Buffer.from(data.buffer).toString('ucs2');
-    } catch (error: any) {
+    } catch {
       throw Error('Error decrypting backup');
     }
   }

@@ -69,7 +69,7 @@ export const useTelegramLogin = ({
 
             try {
               await onSubmit?.(authObject);
-            } catch (e) {
+            } catch {
               refs.telegramIFrame.current?.contentWindow?.postMessage({ type: 'TELEGRAM_RETRY' }, '*');
             }
           }

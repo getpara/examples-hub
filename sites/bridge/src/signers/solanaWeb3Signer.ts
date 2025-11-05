@@ -152,7 +152,7 @@ export async function solanaWeb3SendTransaction(args: any[]) {
     try {
       transaction = VersionedTransaction.deserialize(txBytes);
       isVersioned = true;
-    } catch (_) {
+    } catch {
       try {
         transaction = Transaction.from(txBytes);
       } catch (txErr) {

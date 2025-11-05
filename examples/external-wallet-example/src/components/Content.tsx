@@ -326,7 +326,7 @@ const ConsoleDisplay = () => {
             },
             2,
           );
-        } catch (error) {
+        } catch {
           return '[Object - Cannot stringify]';
         }
       }

@@ -64,7 +64,7 @@ export const useCreateProjectAndKey = () => {
             `/${org.id}/project/${newProject.project.id}/key/${newKey.key.environment as Environment}/${newKey.key.id}`,
           );
         }
-      } catch (_) {
+      } catch {
         // No error here, errors are handled in the onError callbacks
       }
     }

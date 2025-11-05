@@ -408,7 +408,7 @@ export const AccountLinkProvider = ({ children }: PropsWithChildren) => {
           accountLinkInProgress.externalWallet.type as TWalletType,
           { disconnectType: 'ACCOUNT_LINKING' },
         );
-      } catch (error) {}
+      } catch {}
     }
 
     setTimeout(() => {

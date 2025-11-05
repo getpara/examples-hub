@@ -681,7 +681,7 @@ export function AuthProvider({
       setStep(recoverySecret && isRecoverySecretStepEnabled ? ModalStep.SECRET : ModalStep.WALLET_CREATION_DONE);
 
       onLoginComplete();
-    } catch (e) {}
+    } catch {}
   }, [para, isRecoverySecretStepEnabled, overrides?.createWallets]);
 
   const createGuestWallets = () => {

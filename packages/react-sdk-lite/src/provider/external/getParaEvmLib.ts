@@ -6,7 +6,7 @@ export const getParaEvmLib = async () => {
   try {
     // @ts-ignore
     lib = await import('@getpara/evm-wallet-connectors');
-  } catch (e) {
+  } catch {
     lib = undefined;
   }
 

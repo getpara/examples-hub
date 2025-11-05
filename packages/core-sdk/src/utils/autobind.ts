@@ -8,7 +8,7 @@ export function autoBind(instance) {
       if (typeof value === 'function' && key !== 'constructor') {
         try {
           instance[key] = value.bind(instance);
-        } catch (e) {
+        } catch {
           // continue
         }
       }

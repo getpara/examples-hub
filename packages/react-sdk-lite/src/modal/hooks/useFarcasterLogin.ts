@@ -64,7 +64,7 @@ export const useFarcasterLogin = ({
 
             try {
               await verifyFarcaster(authObject);
-            } catch (e) {
+            } catch {
               refs.telegramIFrame.current?.contentWindow?.postMessage({ type: 'FARCASTER_RETRY' }, '*');
             }
           }

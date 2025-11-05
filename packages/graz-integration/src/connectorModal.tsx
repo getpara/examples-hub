@@ -17,7 +17,7 @@ function getRenderer() {
       try {
         const { createRoot } = await import('react-dom/client');
         return { createRoot: (el: HTMLElement) => createRoot(el) };
-      } catch (err) {
+      } catch {
         const ReactDOM = await import('react-dom');
         return {
           legacyRender: ReactDOM.render,

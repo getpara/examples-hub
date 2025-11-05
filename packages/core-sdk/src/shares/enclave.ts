@@ -77,7 +77,7 @@ export class EnclaveClient {
   private async withJwtRefreshRetry(fn: () => Promise<any>): Promise<any> {
     try {
       return await fn();
-    } catch (error) {
+    } catch {
       await this.refreshJwt();
       return await fn();
     }

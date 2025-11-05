@@ -245,7 +245,7 @@ export class ParaEIP1193Provider extends EventEmitter implements EIP1193Provider
           const accounts = await this.waitForAccounts();
           this.emit('accountsChanged', accounts);
           return accounts;
-        } catch (error) {
+        } catch {
           throw new ProviderRpcError(new Error('accounts not available after login'), {
             code: 4001,
             shortMessage: 'accounts not available after login',

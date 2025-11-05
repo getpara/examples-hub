@@ -99,7 +99,7 @@ export const ParaModal = forwardRef<ParaModalHandle, ParaModalProps>((props, ref
           },
           reactSdkVersion: SDK_VERSION,
         });
-      } catch (_) {
+      } catch {
         // fail silently
       }
     };

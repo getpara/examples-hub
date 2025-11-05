@@ -45,7 +45,7 @@ export const formatError = (error: any): string => {
       });
     }
     return JSON.stringify(error);
-  } catch (e) {
+  } catch {
     return String(error);
   }
 };

@@ -111,7 +111,7 @@ describe('workerWrapper', () => {
       try {
         // This should throw an error since handleMessage is mocked to throw
         await syncWorker.postMessage({ functionType: 'TEST' });
-      } catch (error) {
+      } catch {
         // We expect the errorFn to be called with testError
         expect(errorFn).toHaveBeenCalledWith(testError);
       }

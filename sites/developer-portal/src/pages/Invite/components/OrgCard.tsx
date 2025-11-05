@@ -17,7 +17,7 @@ export const OrgCard = ({ organization }: OrgCardProps) => {
     try {
       await acceptInvite({ organizationId: organization.id });
       await setSelectedOrganization();
-    } catch (e) {
+    } catch {
       toast.error('Error Accepting Invitations', {
         description: 'Please try again. If the problem persists, contact Para support.',
       });

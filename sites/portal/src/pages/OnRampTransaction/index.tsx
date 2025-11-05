@@ -37,7 +37,7 @@ export function OnRampTransaction() {
     try {
       const fromParam = searchParams.get('currentWalletIds');
       return fromParam ? (JSON.parse(fromParam) as CurrentWalletIds) : undefined;
-    } catch (e) {
+    } catch {
       return undefined;
     }
   })();
@@ -96,7 +96,7 @@ export function OnRampTransaction() {
 
       setIsAwaitingPassword(false);
       await postLoginSetup();
-    } catch (err) {
+    } catch {
       setPasswordError('Password is incorrect');
     }
   }

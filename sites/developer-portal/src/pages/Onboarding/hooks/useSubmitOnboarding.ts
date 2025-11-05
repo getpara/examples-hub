@@ -66,12 +66,12 @@ export const useSubmitOnboarding = () => {
         }
         resetUser(userId);
         await createSubscription(planSlug, organizationId, location.origin);
-      } catch (e) {
+      } catch {
         toast.error('Error Updating Your Organization', {
           description: "If your organization data isn't correct, contact Para support.",
         });
       }
-    } catch (e) {
+    } catch {
       toast.error('Error Creating Your Organization', {
         description: 'Please try again. If the problem persists, contact Para support.',
       });

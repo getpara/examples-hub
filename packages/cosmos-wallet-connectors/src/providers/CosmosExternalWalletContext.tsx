@@ -182,7 +182,7 @@ export function CosmosExternalWalletProvider({
         uri: window?.location.origin,
         chainId: selectedChainId,
       });
-    } catch (err) {
+    } catch {
       await reset();
 
       throw 'Error logging you in. Please try again.';
@@ -235,7 +235,7 @@ export function CosmosExternalWalletProvider({
             walletType: targetWalletType,
             chainId,
           });
-        } catch (e) {
+        } catch {
           isConnectError.current = true;
         }
       }

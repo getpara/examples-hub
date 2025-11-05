@@ -176,7 +176,7 @@ export function validateConfigDiff(diff: Partial<ModalBuilderConfig>): Partial<M
 
     // Return validated config or null if empty
     return Object.keys(validated).length > 0 ? validated : null;
-  } catch (error) {
+  } catch {
     // If validation fails, return null
     return null;
   }

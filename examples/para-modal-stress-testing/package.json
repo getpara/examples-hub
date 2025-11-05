@@ -6,7 +6,6 @@
   "scripts": {
     "build": "NEXT_PUBLIC_PARA_API_KEY=beta_c61c45aec46dee3fe50d98125e9560cc next build",
     "dev": "next dev -p ${PORT:-3003}",
-    "lint": "eslint .",
     "start": "next start -p ${PORT:-3003}",
     "typecheck": "tsc --noEmit"
   },

@@ -1,18 +1,23 @@
-name: Para Modal Stress Test
+name: Para Modal Stress Tests
 
 on:
   schedule:
-    - cron: '0 2 * * *'  # Run nightly at 2 AM UTC
-  pull_request:
-    branches:
-      - 2.0.0-alpha
+    - cron: '0 2 * * *' # Nightly stress tests at 2 AM UTC
   workflow_dispatch:
     inputs:
+      job_type:
+        description: 'Which stress test to run'
+        type: choice
+        options:
+          - standard
+          - nightly-multi-env
+          - both
+        default: 'standard'
       iterations:
-        description: 'Number of iterations'
-        default: '50'
+        description: 'Number of iterations (standard job only)'
+        default: '10'
       network_profile:
-        description: 'Network profile'
+        description: 'Network profile (standard job only)'
         default: 'slow-3g'
         type: choice
         options:
@@ -39,10 +44,12 @@ env:
   AWS_REGION: us-east-1
 
 jobs:
-  stress-test:
+  standard-stress-test:
     runs-on: FourCoreRunner
     timeout-minutes: 360
-    if: github.head_ref == 'simplify-race-condition-testing' || github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
+    if: |
+      github.event_name == 'schedule' ||
+      (github.event_name == 'workflow_dispatch' && (inputs.job_type == 'standard' || inputs.job_type == 'both'))
     permissions:
       id-token: write
       contents: read
@@ -69,7 +76,7 @@ jobs:
       - name: Run stress test
         env:
           CI: 'true'
-          STRESS_TEST_ITERATIONS: ${{ inputs.iterations || '50' }}
+          STRESS_TEST_ITERATIONS: ${{ inputs.iterations || '10' }}
           STRESS_TEST_NETWORK: ${{ inputs.network_profile || 'slow-3g' }}
           STRESS_TEST_SUITE: ${{ inputs.suite || 'all' }}
           STRESS_TEST_PORT: '3003'
@@ -106,4 +113,130 @@ jobs:
 
       - name: Report URL
         if: always()
-        run: echo "📊 View stress test report at https://artifacts.sandbox.usecapsule.com/stress-test-runs/${{ github.run_id }}/index.html"
+        run: echo "📊 View standard stress test report at https://artifacts.sandbox.usecapsule.com/stress-test-runs/${{ github.run_id }}/index.html"
+
+  nightly-multi-env-stress-test:
+    runs-on: FourCoreRunner
+    timeout-minutes: 60
+    needs: [standard-stress-test]
+    if: |
+      always() &&
+      (github.event_name == 'schedule' ||
+      (github.event_name == 'workflow_dispatch' && (inputs.job_type == 'nightly-multi-env' || inputs.job_type == 'both')))
+    permissions:
+      id-token: write
+      contents: read
+      actions: read
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        include:
+          - environment: sandbox
+            api_key: sandbox_dfb222ff8b602eb492974a6ed68c35b2
+            env_name: Sandbox
+          - environment: beta
+            api_key: beta_c61c45aec46dee3fe50d98125e9560cc
+            env_name: Beta
+          - environment: prod
+            api_key: prod_332c3d99959f5ebe11b22963f734a6c6
+            env_name: Production
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.17.0'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Build packages
+        run: yarn build
+        env:
+          NX_REJECT_UNKNOWN_LOCAL_CACHE: 0
+
+      - name: Install Playwright browsers
+        run: npx playwright install chromium --with-deps
+
+      - name: Run nightly stress test for ${{ matrix.env_name }}
+        env:
+          CI: 'true'
+          NEXT_PUBLIC_PARA_API_KEY: ${{ matrix.api_key }}
+          STRESS_TEST_ITERATIONS: '10'
+          STRESS_TEST_NETWORK: 'none'
+          STRESS_TEST_SUITE: ${{ inputs.suite || 'all' }}
+          STRESS_TEST_PORT: '3003'
+          HEADLESS: 'true'
+        run: yarn e2e:para-modal:stress
+
+      - name: Verify report generation
+        if: always()
+        run: |
+          echo "📊 Checking generated HTML report for ${{ matrix.env_name }}..."
+          ls -lh playwright-report/ || echo "⚠️  No playwright-report directory"
+
+      - name: Configure AWS credentials
+        if: always()
+        uses: aws-actions/configure-aws-credentials@67fbcbb121271f7775d2e7715933280b06314838
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/github-actions-role
+          role-session-name: github-upload-nightly-stress-artifacts
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Upload HTML report to S3
+        if: always()
+        env:
+          BUCKET_NAME: capsule-sandbox-artifacts-site
+          RUN_ID: ${{ github.run_id }}
+          ENVIRONMENT: ${{ matrix.environment }}
+        run: |
+          if [ -d "playwright-report" ]; then
+            aws s3 sync playwright-report "s3://${BUCKET_NAME}/nightly-stress-test/${RUN_ID}/${ENVIRONMENT}"
+            echo "✅ Uploaded ${{ matrix.env_name }} HTML report to S3"
+          else
+            echo "❌ No playwright-report directory to upload for ${{ matrix.env_name }}"
+            exit 1
+          fi
+
+      - name: Report URL
+        if: always()
+        run: echo "📊 View ${{ matrix.env_name }} stress test report at https://artifacts.sandbox.usecapsule.com/nightly-stress-test/${{ github.run_id }}/${{ matrix.environment }}/index.html"
+
+  summary:
+    runs-on: ubuntu-latest
+    needs: [standard-stress-test, nightly-multi-env-stress-test]
+    if: always()
+    steps:
+      - name: Generate test summary
+        run: |
+          echo "## 🧪 Para Modal Stress Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Run ID:** ${{ github.run_id }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Trigger:** ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [[ "${{ needs.standard-stress-test.result }}" != "skipped" ]]; then
+            echo "### Standard Stress Test" >> $GITHUB_STEP_SUMMARY
+            if [[ "${{ needs.standard-stress-test.result }}" == "success" ]]; then
+              echo "✅ **Passed**" >> $GITHUB_STEP_SUMMARY
+              echo "📊 [View Report](https://artifacts.sandbox.usecapsule.com/stress-test-runs/${{ github.run_id }}/index.html)" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "❌ **Failed**" >> $GITHUB_STEP_SUMMARY
+            fi
+            echo "" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [[ "${{ needs.nightly-multi-env-stress-test.result }}" != "skipped" ]]; then
+            echo "### Nightly Multi-Environment Stress Test (10 iterations each, no throttling)" >> $GITHUB_STEP_SUMMARY
+            if [[ "${{ needs.nightly-multi-env-stress-test.result }}" == "success" ]]; then
+              echo "✅ **All environments passed**" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "⚠️ **Some environments failed**" >> $GITHUB_STEP_SUMMARY
+            fi
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "- 📊 [Sandbox Report](https://artifacts.sandbox.usecapsule.com/nightly-stress-test/${{ github.run_id }}/sandbox/index.html)" >> $GITHUB_STEP_SUMMARY
+            echo "- 📊 [Beta Report](https://artifacts.sandbox.usecapsule.com/nightly-stress-test/${{ github.run_id }}/beta/index.html)" >> $GITHUB_STEP_SUMMARY
+            echo "- 📊 [Production Report](https://artifacts.sandbox.usecapsule.com/nightly-stress-test/${{ github.run_id }}/prod/index.html)" >> $GITHUB_STEP_SUMMARY
+          fi

@@ -91,7 +91,7 @@ export function SolanaExternalWalletProvider({
         uri: window?.location.origin,
         chainId: chain,
       });
-    } catch (err) {
+    } catch {
       await reset();
 
       throw 'Error logging you in. Please try again.';
@@ -401,7 +401,7 @@ export function SolanaExternalWalletProvider({
         try {
           // @ts-ignore
           await import('@farcaster/mini-app-solana');
-        } catch (e) {}
+        } catch {}
       }
     };
 

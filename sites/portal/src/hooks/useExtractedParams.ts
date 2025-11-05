@@ -22,7 +22,7 @@ export function useExtractedParams<T extends Record<string, Array<unknown> | obj
           const parsedValue = JSON.parse(value);
 
           return { ...acc, [key]: typeof parsedValue === 'number' ? parsedValue.toString() : parsedValue };
-        } catch (e) {
+        } catch {
           return { ...acc, [key]: value.toString() };
         }
       }, {} as T),

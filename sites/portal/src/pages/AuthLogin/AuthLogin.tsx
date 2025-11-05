@@ -452,7 +452,7 @@ const AuthLoginBase = ({ step: propsStep }: { step?: AuthLoginStep }) => {
       try {
         await para.ctx.client.updateUserPreferences(para.userId, { shouldSkipBasicLoginUpgradePrompt: true });
         // Ignore error and continue in flow
-      } catch (_) {}
+      } catch {}
     }
 
     await postLogin({ loginRes: postLoginRes, fromBasicLoginUpgrade: true });

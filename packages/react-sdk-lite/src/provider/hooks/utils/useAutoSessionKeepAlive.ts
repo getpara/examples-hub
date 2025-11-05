@@ -35,7 +35,7 @@ export const useAutoSessionKeepAlive = ({ disabled }: { disabled?: boolean }) =>
 
       const expiresMatch = sessionCookie.match(/Expires=([^;]+)/);
       return expiresMatch ? new Date(expiresMatch[1]) : null;
-    } catch (err) {
+    } catch {
       return null;
     }
   };

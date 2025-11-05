@@ -219,7 +219,7 @@ export const bridgeMethodHandlers: Record<string, (para: ParaWeb, args: any) => 
               const fetched = await para.fetchWallets();
               const match = fetched.find((w: any) => w.id === args.walletId);
               publicKey = match?.publicKey;
-            } catch (e) {
+            } catch {
               // ignore, will fallback below
             }
           }
@@ -445,7 +445,7 @@ export const bridgeMethodHandlers: Record<string, (para: ParaWeb, args: any) => 
             const fetchedWallets = await para.fetchWallets();
             const matching = fetchedWallets.find((w: any) => w.id === args.walletId);
             pubKeyHex = matching?.publicKey;
-          } catch (e) {
+          } catch {
             // Ignore fetch errors here; we'll throw a clear error below if still missing
           }
         }
@@ -577,7 +577,7 @@ export const bridgeMethodHandlers: Record<string, (para: ParaWeb, args: any) => 
                 transaction = Transaction.from(buffer);
                 // Extract the message to sign
                 messageToSign = transaction.serializeMessage();
-              } catch (txError) {
+              } catch {
                 // If that fails, try as a Message
                 const message = Message.from(buffer);
                 transaction = Transaction.populate(message);

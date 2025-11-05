@@ -211,7 +211,7 @@ function TransactionReview() {
       }
 
       setTransactionReviewState(TransactionReviewState.AwaitingSignETHTransactionApproval);
-    } catch (err) {
+    } catch {
       setLoginWithPasswordError('Password is incorrect');
     }
   };

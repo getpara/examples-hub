@@ -11,6 +11,22 @@ export const networkProfiles: Record<
   fast: { latency: 20, downloadThroughput: 1000000, uploadThroughput: 200000 },
 } as const;
 
+/**
+ * Maps workflow network profiles to NetworkLevel
+ * @param profile - The network profile string from environment variables (e.g., 'slow-3g', 'fast-3g', 'none')
+ * @returns The corresponding NetworkLevel
+ */
+export function getNetworkLevel(profile: string): NetworkLevel {
+  const mapping: Record<string, NetworkLevel> = {
+    'none': 'fast',
+    'slow-3g': 'slow',
+    'fast-3g': 'medium',
+    'slow-4g': 'medium',
+    'cable': 'fast',
+  };
+  return mapping[profile] || 'fast';
+}
+
 export async function applyNetworkThrottling(page: Page, level: NetworkLevel): Promise<void> {
   const client = await page.context().newCDPSession(page);
   await client.send('Network.enable');

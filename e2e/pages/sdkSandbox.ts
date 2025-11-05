@@ -175,7 +175,7 @@ export class WebExamplePage {
 
       await paraButton.waitFor({ timeout: 3000 });
       await paraButton.click();
-    } catch (e) {}
+    } catch {}
   }
 
   async switchToDefaultView() {

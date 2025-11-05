@@ -68,7 +68,7 @@ export async function ed25519Keygen(ctx: Ctx, userId: string): Promise<{ signer:
       }),
     )) as string;
     return { signer: newSigner, walletId };
-  } catch (e) {
+  } catch {
     throw new Error(`error creating account of type SOLANA with userId ${userId} and walletId ${walletId}`);
   }
 }
@@ -97,7 +97,7 @@ export async function ed25519PreKeygen(
       }),
     )) as string;
     return { signer: newSigner, walletId };
-  } catch (e) {
+  } catch {
     throw new Error(`error creating account of type SOLANA with walletId ${walletId}`);
   }
 }
@@ -123,7 +123,7 @@ export async function ed25519Sign(
         }),
       )) as string;
       return { signature: base64Sig };
-    } catch (e) {
+    } catch {
       throw new Error(`error signing for account of type SOLANA with userId ${userId} and walletId ${walletId}`);
     }
   })();
@@ -177,7 +177,7 @@ export async function keygen(
       ),
     )) as string;
     return { signer: newSigner, walletId };
-  } catch (e) {
+  } catch {
     throw new Error(`error creating account of type ${type} with userId ${userId} and walletId ${walletId}`);
   }
 }
@@ -217,7 +217,7 @@ export async function preKeygen(
       ),
     )) as string;
     return { signer: newSigner, walletId };
-  } catch (e) {
+  } catch {
     throw new Error(`error creating account of type ${type} with walletId ${walletId}`);
   }
 }
@@ -255,7 +255,7 @@ export async function signMessage(
           resolve({ signature: result });
         }),
       );
-    } catch (e) {
+    } catch {
       throw new Error(`error signing for account with userId ${userId} and walletId ${walletId}`);
     }
   })();
@@ -299,7 +299,7 @@ export async function signTransaction(
           resolve({ signature: result });
         }),
       );
-    } catch (e) {
+    } catch {
       throw new Error(`error signing transaction for account with userId ${userId} and walletId ${walletId}`);
     }
   })();
@@ -345,7 +345,7 @@ export async function sendTransaction(
           resolve({ signature: result });
         }),
       );
-    } catch (e) {
+    } catch {
       throw new Error(`error signing transaction to send for account with userId ${userId} and walletId ${walletId}`);
     }
   })();
@@ -387,7 +387,7 @@ export async function refresh(
         resolve({ protocolId, signer: result });
       }),
     );
-  } catch (e) {
+  } catch {
     throw new Error(`error refreshing keys for account with userId ${userId} and walletId ${walletId}`);
   }
 }
@@ -407,7 +407,7 @@ export async function getPrivateKey(ctx: Ctx, share: string, walletId: string, u
         resolve(result);
       }),
     );
-  } catch (e) {
+  } catch {
     throw new Error(`error getting private key for account with userId ${userId} and walletId ${walletId}`);
   }
 }

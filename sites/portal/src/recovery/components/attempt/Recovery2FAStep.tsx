@@ -84,7 +84,7 @@ const Recovery2FAStep: React.FC = () => {
               setTwoFactorVerifiedInSession(true);
               setUserId(userId);
               setCurrentStep(ModalStep.RECOVERY_AWAITING);
-            } catch (error) {
+            } catch {
               setIncorrectCode(true);
             }
           } else {

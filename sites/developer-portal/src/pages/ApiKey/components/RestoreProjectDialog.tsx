@@ -54,7 +54,7 @@ export const RestoreProjectDialog = ({ isOpen, setIsOpen }: RestoreProjectDialog
             },
           },
         );
-      } catch (error) {
+      } catch {
         toast.error('Failed to archive projects', {
           description: 'Please try again. If the problem persists, contact Para support.',
         });

@@ -417,8 +417,8 @@ const testInitialLogin = async (para: MockPara, authInfo: PrimaryAuthInfo, cance
 
     try {
       await testPostLogin(para, { evmId, solanaId, evmSigner, solanaSigner });
-    } catch (e) {}
-  } catch (e) {
+    } catch {}
+  } catch {
     return;
   }
 };
@@ -436,7 +436,7 @@ const testReturningLogin = async (para: MockPara, authInfo: PrimaryAuthInfo, can
       evmSigner: signers[0],
       solanaSigner: signers[1],
     });
-  } catch (e) {
+  } catch {
     return;
   }
 };
@@ -510,7 +510,7 @@ const testPregenLogin = async (
         pregenIdentifierType: undefined,
       });
     });
-  } catch (e) {}
+  } catch {}
 };
 
 const { mockDecryptWithPrivateKey, mockGetAsymmetricKeyPair } = vi.hoisted(() => {

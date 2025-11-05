@@ -23,7 +23,7 @@ export function renderModal(para: ParaWeb, modalProps: Partial<ParaModalPropsFor
       const client = await import('react-dom/client');
       const root = client.createRoot(container);
       root.render(Modal);
-    } catch (e) {
+    } catch {
       const ReactDOM = await import('react-dom');
       ReactDOM.render(Modal, container);
     }

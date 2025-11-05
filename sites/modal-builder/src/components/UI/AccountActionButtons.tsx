@@ -30,7 +30,7 @@ export const AccountActionButtons: React.FC = () => {
       }
       await handleLogout();
       resetConfig(null);
-    } catch (error) {
+    } catch {
     } finally {
       setIsDeleting(false);
     }

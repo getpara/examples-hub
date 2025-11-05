@@ -23,7 +23,7 @@ export const useWalletState = () => {
         } else {
           setStoredSelectedWallet(id, type);
         }
-      } catch (e) {
+      } catch {
         clearSelectedWallet();
       }
     },

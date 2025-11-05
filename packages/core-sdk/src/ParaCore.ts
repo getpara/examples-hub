@@ -2067,7 +2067,7 @@ Need help? Visit: https://docs.getpara.com or contact support
           type,
         };
       }
-    } catch (e) {
+    } catch {
       return undefined;
     }
   }
@@ -2600,7 +2600,7 @@ Need help? Visit: https://docs.getpara.com or contact support
         try {
           const wallet = this.wallets[walletId];
           return wallet && walletType === type && typeof wallet.address === 'string';
-        } catch (e) {
+        } catch {
           return false;
         }
       });
@@ -3936,7 +3936,7 @@ Need help? Visit: https://docs.getpara.com or contact support
       this.#isCreateGuestWalletsPending = false;
 
       return wallets;
-    } catch (e) {
+    } catch (error) {
       dispatchEvent(ParaEvent.GUEST_WALLETS_CREATED, null, error?.message);
 
       this.#isCreateGuestWalletsPending = false;
@@ -4061,7 +4061,7 @@ Need help? Visit: https://docs.getpara.com or contact support
       try {
         pendingTransaction = (await this.ctx.client.getPendingTransaction(this.userId, signRes.pendingTransactionId)).data
           ?.pendingTransaction;
-      } catch (err) {
+      } catch {
         const error = new TransactionReviewDenied();
         dispatchEvent(ParaEvent.SIGN_MESSAGE_EVENT, signRes, error.message);
         throw error;
@@ -4189,7 +4189,7 @@ Need help? Visit: https://docs.getpara.com or contact support
         pendingTransaction = (
           await this.ctx.client.getPendingTransaction(this.userId, (signRes as DeniedSignatureRes).pendingTransactionId)
         ).data?.pendingTransaction;
-      } catch (err) {
+      } catch {
         const error = new TransactionReviewDenied();
         dispatchEvent(ParaEvent.SIGN_TRANSACTION_EVENT, signRes, error.message);
         throw error;
@@ -4276,7 +4276,7 @@ Need help? Visit: https://docs.getpara.com or contact support
     try {
       await this.ctx.client.keepSessionAlive(this.userId!);
       return true;
-    } catch (err) {
+    } catch {
       return false;
     }
   }

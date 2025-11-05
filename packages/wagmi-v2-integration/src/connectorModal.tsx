@@ -48,7 +48,7 @@ export function renderModal(
         Root = client.createRoot(container);
       }
       Root.render(Modal);
-    } catch (e) {
+    } catch {
       const ReactDOM = await import('react-dom');
       ReactDOM.render(Modal, container);
     }

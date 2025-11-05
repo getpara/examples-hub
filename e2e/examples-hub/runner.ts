@@ -584,7 +584,7 @@ class TestRunner {
                 this.log(`📦 Installing examples-hub dependencies... ${progressText}`, { newline: false });
                 lastUpdateTime = now;
               }
-            } catch (e) {
+            } catch {
               // Ignore non-JSON lines (yarn sometimes outputs plain text)
               if (this.args.verbose && !line.includes('"type"')) {
                 this.log(`  ${line}`, { newline: true, verbose: true });
@@ -840,7 +840,7 @@ class TestRunner {
             this.log(`  Error: ${lastError.message}`, { error: true, verbose: true });
           }
         }
-      } catch (error) {
+      } catch {
         this.endStep(false);
         this.log(`⚠️  Warning: Failed to clean up ${this.tempDir}`, { error: true });
       }

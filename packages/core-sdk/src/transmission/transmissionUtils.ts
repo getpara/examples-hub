@@ -15,7 +15,7 @@ export async function upload(message: string, userManagementClient: Client) {
       // so we want to keep trying until we get a valid private key
       publicKeyUint8Array = eutil.privateToPublic(privateKeyUint8Array);
       break;
-    } catch (e) {
+    } catch {
       continue;
     }
   }

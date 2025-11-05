@@ -107,7 +107,7 @@ const RecoveryWallet2FAStep: React.FC = () => {
               setUserId(userId);
               setIncorrectCode(false);
               setCurrentRecoveryStep(ModalStep.SECRET);
-            } catch (error) {
+            } catch {
               setIncorrectCode(true);
             }
           } else {

@@ -385,7 +385,7 @@ export function EvmExternalWalletProvider({
         uri: window?.location.origin,
         chainId: (chains[0]?.id ?? chainId)?.toString(),
       });
-    } catch (err) {
+    } catch {
       await disconnectAsync();
       await para.logout();
 

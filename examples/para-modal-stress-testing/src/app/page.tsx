@@ -1,15 +1,61 @@
 'use client';
 
-import { useAccount, useModal, useWallet, useSignMessage } from '@getpara/react-sdk';
+import { useEffect } from 'react';
+import { useAccount, useModal, useWallet, useSignMessage, useClient } from '@getpara/react-sdk';
 import { StatusAlert } from '@/components/ui/StatusAlert';
 import { ConnectWalletCard } from '@/components/ui/ConnectWalletCard';
 import { SignatureDisplay } from '@/components/ui/SignatureDisplay';
 import { PageHeader } from '@/components/PageHeader';
 import { ConnectedWallet } from '@/components/ConnectedWallet';
+import { IS_PRODUCTION, ENVIRONMENT } from '@/config/constants';
 
 const HELLO_WORLD_MESSAGE = 'Hello World!';
 
 export default function Home() {
+  const para = useClient();
+
+  // Expose cleanup function and para client for E2E tests (development only)
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development' && para) {
+      // Expose para client for test verification
+      (window as any).para = para;
+
+      // Expose environment info for test verification
+      (window as any).__paraEnvironment = ENVIRONMENT;
+
+      // Only expose cleanup function in non-production environments
+      if (!IS_PRODUCTION) {
+        (window as any).__deleteTestUser = async () => {
+          if (para?.userId) {
+            try {
+              await para.ctx.client.deleteSelf(para.userId);
+              console.log(`[E2E Cleanup] Test user deleted in ${ENVIRONMENT}:`, para.userId);
+              return { success: true, userId: para.userId, environment: ENVIRONMENT };
+            } catch (error: any) {
+              console.error(`[E2E Cleanup] Failed to delete test user in ${ENVIRONMENT}:`, error.message);
+              return { success: false, error: error.message, environment: ENVIRONMENT };
+            }
+          }
+          return { success: false, error: 'No userId available', environment: ENVIRONMENT };
+        };
+      } else {
+        // In production, expose a no-op function that clearly indicates deletion is disabled
+        (window as any).__deleteTestUser = async () => {
+          console.warn('[E2E Cleanup] User deletion is disabled in production environment');
+          return { success: false, error: 'User deletion disabled in production', environment: ENVIRONMENT };
+        };
+      }
+    }
+
+    return () => {
+      if (process.env.NODE_ENV === 'development') {
+        delete (window as any).__deleteTestUser;
+        delete (window as any).__paraEnvironment;
+        delete (window as any).para;
+      }
+    };
+  }, [para]);
+
   const { openModal } = useModal();
   const { isConnected } = useAccount();
   const { data: wallet } = useWallet();

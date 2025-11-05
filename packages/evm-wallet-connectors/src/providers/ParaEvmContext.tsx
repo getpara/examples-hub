@@ -145,7 +145,7 @@ export function ParaEvmProvider<
         try {
           // @ts-ignore
           createFarcasterConnector = (await import('@farcaster/miniapp-wagmi-connector')).farcasterMiniApp ?? undefined;
-        } catch (e) {}
+        } catch {}
 
         setConfig(createConfig([...propsWalletList, farcasterWallet], createFarcasterConnector));
       } else {

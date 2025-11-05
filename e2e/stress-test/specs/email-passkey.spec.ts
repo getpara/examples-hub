@@ -1,23 +1,8 @@
 import { test, expect } from '@playwright/test';
 import { ParaModalExamplePage } from '../page-objects/para-modal.page';
-import { applyNetworkThrottling, type NetworkLevel } from '../helpers/network-throttling';
+import { applyNetworkThrottling, getNetworkLevel } from '../helpers/network-throttling';
+import { TIMEOUTS } from '../helpers/test-data';
 import * as webAuthn from '../helpers/web-authn';
-
-const TIMEOUTS = {
-  LONG: 15000,
-} as const;
-
-// Map workflow network profiles to NetworkLevel
-const getNetworkLevel = (profile: string): NetworkLevel => {
-  const mapping: Record<string, NetworkLevel> = {
-    'none': 'fast',
-    'slow-3g': 'slow',
-    'fast-3g': 'medium',
-    'slow-4g': 'medium',
-    'cable': 'fast',
-  };
-  return mapping[profile] || 'fast';
-};
 
 test.describe('Para Modal - Email + Passkey Authentication', () => {
   test('stress iteration: create and login with email and passkey @stress', async ({ browser }) => {
@@ -72,6 +57,10 @@ test.describe('Para Modal - Email + Passkey Authentication', () => {
     const loginAddressText = await loginAddressElement.textContent();
     expect(loginAddressText).toBe(createAddressText);
     await paraModalPage.logout();
+
+    // Clean up test user before closing context
+    await paraModalPage.cleanupTestUser();
+
     await sharedContext.close();
   });
 });

@@ -6,7 +6,7 @@ export const getParaCosmosLib = async () => {
   try {
     // @ts-ignore
     lib = await import('@getpara/cosmos-wallet-connectors');
-  } catch (e) {
+  } catch {
     lib = undefined;
   }
 

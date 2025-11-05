@@ -225,11 +225,11 @@ export async function decryptPrivateKeyAndDecryptShare(
 
   try {
     privateKey = await decryptPrivateKey(encryptedPrivateKey, encryptionKey);
-  } catch (e) {}
+  } catch {}
 
   try {
     privateKey = await decryptPrivateKeyWithPassword(encryptedPrivateKey, encryptionKey);
-  } catch (e) {}
+  } catch {}
 
   if (!privateKey) {
     throw new Error('Could not decrypt private key');

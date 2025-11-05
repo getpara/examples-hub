@@ -567,7 +567,7 @@ function AppInner({
           return [para.wallets[walletId]?.type, walletId, !!para.wallets[walletId]?.pregenIdentifier];
         }
         return [undefined, undefined, false];
-      } catch (e) {
+      } catch {
         return [undefined, undefined, false];
       }
     })(),
@@ -1224,7 +1224,7 @@ function AppInner({
                         {(() => {
                           try {
                             return para?.getDisplayAddress(walletId, { addressType: walletType });
-                          } catch (e) {
+                          } catch {
                             return 'none';
                           }
                         })() ?? 'none'}

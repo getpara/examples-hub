@@ -611,7 +611,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
           } else {
             throw new Error('Unknown error linking external wallet');
           }
-        } catch (linkError) {
+        } catch {
           // Don't fail the whole process if account linking fails - the wallet is still added as external
         }
 
@@ -620,7 +620,7 @@ export function ExternalWalletProvider({ children }: PropsWithChildren) {
 
         // Return to account profile to show the newly added wallet
         setStep(ModalStep.ACCOUNT_PROFILE);
-      } catch (error) {
+      } catch {
         setExternalWalletError(['Failed to add wallet. Please try again.']);
       }
     },

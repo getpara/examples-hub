@@ -20,7 +20,7 @@ export class AuthPortalPage {
           return credentials;
         }
         await this.page.waitForTimeout(500);
-      } catch (error) {
+      } catch {
         await this.page.waitForTimeout(500);
       }
     }

@@ -117,7 +117,7 @@ export const LoginProvider = ({
           preferences: { shouldSkipBasicLoginUpgradePrompt },
         } = await para.ctx.client.getUserPreferences(para.userId);
         return shouldSkipBasicLoginUpgradePrompt;
-      } catch (_) {
+      } catch {
         return false;
       }
     }

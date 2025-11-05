@@ -177,7 +177,7 @@ export class ParaGrazConnector implements Omit<Wallet, 'experimentalSuggestChain
   async disconnect(): Promise<void> {
     try {
       await this.paraWebClient.logout();
-    } catch (err) {
+    } catch {
       throw new Error('Disconnect failed');
     } finally {
       this.enabledChainIds.clear();
@@ -188,7 +188,7 @@ export class ParaGrazConnector implements Omit<Wallet, 'experimentalSuggestChain
     try {
       const [wallet] = await this.waitForAccounts();
       return wallet;
-    } catch (err) {
+    } catch {
       throw new Error('No Para wallet available');
     }
   }

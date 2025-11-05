@@ -47,7 +47,7 @@ const RecoverWalletWithSecretStep: React.FC<RecoverWalletWithSecretStepProps> = 
         try {
           const decryptedShare = recoveryPrivateKeyContainer.decrypt(ks.encryptedShare);
           return { walletId: ks.walletId, decryptedShare };
-        } catch (e) {
+        } catch {
           return undefined;
         }
       })
@@ -135,7 +135,7 @@ const RecoverWalletWithSecretStep: React.FC<RecoverWalletWithSecretStepProps> = 
 
             setWebAuthURLForCreate(url);
             setCurrentRecoveryStep(ModalStep.BIOMETRIC);
-          } catch (error) {
+          } catch {
             setIncorrectCode(true);
           }
         }}

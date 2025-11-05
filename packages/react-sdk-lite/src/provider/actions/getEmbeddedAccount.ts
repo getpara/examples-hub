@@ -60,7 +60,7 @@ export const getEmbeddedAccount = async (
   let authMethods: Set<AuthMethod>;
   try {
     authMethods = await (para as ParaInternal).supportedUserAuthMethods();
-  } catch (error) {
+  } catch {
     authMethods = new Set<AuthMethod>();
   }
 

@@ -216,7 +216,7 @@ export class ParaModalExamplePage {
         state: 'visible',
         timeout: TIMEOUTS.DEFAULT,
       });
-    } catch (error) {
+    } catch {
       await this.page.waitForTimeout(TIMEOUTS.BRIEF);
     }
   }
@@ -247,5 +247,58 @@ export class ParaModalExamplePage {
     });
     const signature = await signatureDisplay.textContent();
     return signature || '';
+  }
+
+  async cleanupTestUser(): Promise<void> {
+    try {
+      // Check environment, function availability, and userId before deletion
+      const cleanupInfo = await this.page.evaluate(() => {
+        const win = globalThis as any;
+        const deleteFunc = win.__deleteTestUser;
+        const para = win.para;
+        const environment = win.__paraEnvironment;
+
+        return {
+          functionExists: typeof deleteFunc === 'function',
+          userId: para?.userId || null,
+          environment: environment || 'unknown',
+          isProduction: environment === 'production',
+        };
+      });
+
+      // Skip cleanup entirely in production
+      if (cleanupInfo.isProduction) {
+        console.log('[Cleanup] Skipping user deletion in production environment');
+        return;
+      }
+
+      if (!cleanupInfo.functionExists) {
+        console.warn('[Cleanup] Cleanup function not available - user deletion skipped');
+        return;
+      }
+
+      if (!cleanupInfo.userId) {
+        console.warn('[Cleanup] No userId found - user may not be logged in or already deleted');
+        return;
+      }
+
+      console.log(`[Cleanup] Attempting to delete test user in ${cleanupInfo.environment}: ${cleanupInfo.userId}`);
+
+      const result = await this.page.evaluate(() => {
+        return (globalThis as any).__deleteTestUser();
+      });
+
+      if (result?.success) {
+        console.log(`[Cleanup] ✓ Test user deleted successfully in ${result.environment} (userId: ${result.userId})`);
+      } else {
+        console.warn(
+          `[Cleanup] ✗ User deletion failed in ${result?.environment || 'unknown'}: ${result?.error || 'Unknown error'}`,
+        );
+      }
+    } catch (error) {
+      // Extra safety net - catch any unexpected errors from page.evaluate
+      console.warn(`[Cleanup] Unexpected error during cleanup: ${(error as Error).message}`);
+      // Don't throw - cleanup failure shouldn't fail the test
+    }
   }
 }

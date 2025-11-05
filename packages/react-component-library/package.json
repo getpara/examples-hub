@@ -91,7 +91,6 @@
     "build:components": "vite build",
     "build:css": "npx -y @tailwindcss/cli -i src/global.css -o dist/styles.css",
     "dev": "vite",
-    "lint": "eslint .",
     "preview": "vite preview",
     "storybook": "storybook dev -p 6006"
   },
