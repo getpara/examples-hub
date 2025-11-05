@@ -51,6 +51,7 @@ export class CpslCodeInput {
       });
     }
   }
+
   private handleInput = (ind: number, ev: InputEvent) => {
     const inputElements = this.inputs;
 
@@ -73,13 +74,15 @@ export class CpslCodeInput {
       // Build the new code from the current component state, not the DOM
       const currentCode = this.code || '';
 
+      // Insert the new character at the focused position, not at the end
+      const beforeFocused = currentCode.substring(0, ind);
+      const afterFocused = currentCode.substring(ind + 1);
+      const newCode = beforeFocused + ev.data + afterFocused;
+
       // Prevent input beyond the maximum length
-      if (currentCode.length >= this.length) {
+      if (newCode.length > this.length) {
         return;
       }
-
-      // Insert the new character at the correct position
-      const newCode = currentCode + ev.data;
 
       // Update the component state and emit event
       this.cpslInput.emit({ value: newCode });
@@ -89,11 +92,18 @@ export class CpslCodeInput {
       inputElements[ind].value = ev.data;
 
       // Focus next input if not at the end
-      if (newCode.length < this.length) {
-        inputElements[newCode.length].focus();
+      if (ind < this.length - 1) {
+        // Set flag to prevent handleFocus from interfering
+        this.isArrowNavigation = true;
+        setTimeout(() => {
+          inputElements[ind + 1].focus();
+          this.isArrowNavigation = false;
+        }, 0);
       }
     }
   };
+
+  private isArrowNavigation = false;
 
   private handleKeyDown = (ind: number, ev: KeyboardEvent) => {
     const inputElements = this.inputs;
@@ -102,20 +112,48 @@ export class CpslCodeInput {
       case 'Backspace': {
         let newCode;
         if (!inputElements[ind].value) {
-          inputElements[Math.max(0, ind - 1)].value = '';
-          inputElements[Math.max(0, ind - 1)].focus();
-          newCode = this.code.substring(0, ind - 1);
+          // If current input is empty, move to previous and clear it
+          if (ind > 0) {
+            inputElements[ind - 1].value = '';
+            setTimeout(() => {
+              inputElements[ind - 1].focus();
+            }, 0);
+            // Remove character at previous position
+            const currentCode = this.code || '';
+            newCode = currentCode.substring(0, ind - 1) + currentCode.substring(ind);
+          } else {
+            newCode = this.code;
+          }
         } else {
-          newCode = this.code.substring(0, ind);
+          // Clear current input and remove character at current position
+          inputElements[ind].value = '';
+          const currentCode = this.code || '';
+          newCode = currentCode.substring(0, ind) + currentCode.substring(ind + 1);
         }
         this.cpslInput.emit({ value: newCode });
         this.code = newCode;
         break;
       }
       case 'ArrowLeft': {
-        setTimeout(() => {
-          this.inputs[ind].setSelectionRange(1, 1);
-        }, 0);
+        ev.preventDefault();
+        if (ind > 0) {
+          this.isArrowNavigation = true;
+          setTimeout(() => {
+            inputElements[ind - 1].focus();
+            this.isArrowNavigation = false;
+          }, 0);
+        }
+        break;
+      }
+      case 'ArrowRight': {
+        ev.preventDefault();
+        if (ind < this.length - 1) {
+          this.isArrowNavigation = true;
+          setTimeout(() => {
+            inputElements[ind + 1].focus();
+            this.isArrowNavigation = false;
+          }, 0);
+        }
         break;
       }
       default: {
@@ -127,6 +165,23 @@ export class CpslCodeInput {
   private handleFocus = (ind: number) => {
     const inputElements = this.inputs;
 
+    // Don't interfere with arrow key navigation
+    if (this.isArrowNavigation) {
+      setTimeout(() => {
+        inputElements[ind].setSelectionRange(1, 1);
+      }, 0);
+      return;
+    }
+
+    // If the focused input already has a value, allow it to stay focused (user clicked on it)
+    if (inputElements[ind].value) {
+      setTimeout(() => {
+        inputElements[ind].setSelectionRange(1, 1);
+      }, 0);
+      return;
+    }
+
+    // Otherwise, use the default focus logic (find first empty or go to last)
     for (const input of inputElements) {
       if (!input.value) {
         input.focus();
