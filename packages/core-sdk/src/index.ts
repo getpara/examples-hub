@@ -54,6 +54,7 @@ export {
   type WalletBalance,
   type ProfileBalance,
   type OfframpDepositRequest,
+  type WalletWithMetadata,
   RecoveryStatus,
   ThemeMode,
   NON_ED25519,
@@ -66,6 +67,8 @@ export {
   EVM_WALLETS,
   SOLANA_WALLETS,
   COSMOS_WALLETS,
+  formatAssetQuantity,
+  formatCurrency,
 } from '@getpara/user-management-client';
 export {
   PopupType,

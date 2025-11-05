@@ -11,7 +11,9 @@ import {
   AuthParams,
   BiometricLocationHint,
   extractAuthInfo,
+  ProfileBalance,
   TAuthMethod,
+  TWalletType,
 } from '@getpara/user-management-client';
 import { useExtractedParams } from '../../../hooks/useExtractedParams';
 
@@ -53,6 +55,7 @@ type Login = {
   biometricLocationHints?: BiometricLocationHint[];
   sessionOrigin?: string;
   loginRes?: LoginRes;
+  balances?: ProfileBalance;
 };
 
 export const NO_DATE = formatISO(new Date(-8640000000000000));
@@ -99,6 +102,7 @@ export const LoginProvider = ({
 
   const [loginRes, setLoginRes] = useState<Awaited<ReturnType<typeof utils.authLogin>> | undefined>();
   const [wallets, setWallets] = useState<GroupedWallets>();
+  const [balances, setBalances] = useState<ProfileBalance>();
   const [biometricLocationHints, setBiometricLocationHints] = useState<BiometricLocationHint[]>([]);
   const [sessionOrigin, setSessionOrigin] = useState<string>();
 
@@ -323,6 +327,29 @@ export const LoginProvider = ({
     setUserDetails();
   }, [para, params, JSON.stringify(authInfo), biometricLocationHints]);
 
+  useEffect(() => {
+    async function loadBalances() {
+      if (wallets) {
+        const { balance } = await para.ctx.client.getProfileBalance({
+          wallets:
+            Object.values(wallets)
+              .flat()
+              .reduce(
+                (acc, { type, address }) => {
+                  if (acc.some(w => w.type === type && w.address === address)) {
+                    return acc;
+                  }
+                  return [...acc, { type: type === 'COSMOS' ? 'EVM' : type, address }];
+                },
+                [] as { type: TWalletType; address: string }[],
+              ) ?? [],
+        });
+        return balance;
+      }
+    }
+    loadBalances().then(setBalances).catch(console.error);
+  }, [wallets]);
+
   return (
     <LoginContext.Provider
       value={{
@@ -345,6 +372,7 @@ export const LoginProvider = ({
         biometricLocationHints,
         sessionOrigin,
         loginRes,
+        balances,
       }}
     >
       {children}
