@@ -99,26 +99,25 @@ enum TestHelper {
         let deadline = Date().addingTimeInterval(pollDuration)
 
         repeat {
-            // App-hosted alert or sheet.
             let appAlert = app.alerts.firstMatch
-            if appAlert.exists, DialogHelper.tapContinue(in: appAlert) {
+            if appAlert.exists, appAlert.buttons["Continue"].firstMatch.robustTap() {
                 return true
             }
 
-            // AuthenticationServicesUI-hosted consent (common on Xcode Cloud/headless).
             let authContinue = authServicesUI.buttons["Continue"].firstMatch
-            if authContinue.exists {
-                if authContinue.isHittable {
-                    authContinue.tap()
-                } else {
-                    authContinue.tap()
-                }
+            if authContinue.exists, authContinue.robustTap() {
                 return true
             }
 
-            // SpringBoard fallback.
             let springboardAlert = springboard.alerts.firstMatch
-            if springboardAlert.exists, DialogHelper.tapContinue(in: springboardAlert) {
+            if springboardAlert.exists, springboardAlert.buttons["Continue"].firstMatch.robustTap() {
+                return true
+            }
+
+            if XCTestCase.bruteforceRightButtonTap(in: authServicesUI) {
+                return true
+            }
+            if XCTestCase.bruteforceRightButtonTap(in: springboard) {
                 return true
             }
 
@@ -164,23 +163,22 @@ enum TestHelper {
 
     static func performOneClickAuthentication(app: XCUIApplication, testCase: XCTestCase, credential: String, otpCode: String = TestConstants.verificationCode) {
         let emailPhoneField = app.textFields["Enter email or phone"]
-        guard emailPhoneField.waitForExistence(timeout: TestConstants.longTimeout) else {
-            fatalError("Email/phone field did not appear on main screen.")
-        }
+        let emailFieldAppeared = emailPhoneField.waitForExistence(timeout: TestConstants.longTimeout)
+        XCTAssertTrue(emailFieldAppeared, "Email/phone field did not appear on main screen.")
+        guard emailFieldAppeared else { return }
         emailPhoneField.clearAndTypeText(credential)
 
         let continueButton = app.buttons["Continue"]
-        guard continueButton.waitForExistence(timeout: TestConstants.defaultTimeout) else {
-            fatalError("Continue button did not appear after entering credential.")
-        }
+        let continueExists = continueButton.waitForExistence(timeout: TestConstants.defaultTimeout)
+        XCTAssertTrue(continueExists, "Continue button did not appear after entering credential.")
+        guard continueExists else { return }
 
-        let consentMonitor = testCase.installASWebAuthConsentMonitor()
-        defer { testCase.removeUIInterruptionMonitor(consentMonitor) }
+        let monitor = testCase.installASWebAuthConsentMonitor()
+        defer { testCase.removeUIInterruptionMonitor(monitor) }
 
-        guard continueButton.waitToBeHittable(timeout: 3) else {
-            fatalError("In-app Continue was not hittable in time.")
-        }
-        continueButton.tap()
+        let didTapContinue = continueButton.robustTap(timeout: 3)
+        XCTAssertTrue(didTapContinue, "In-app Continue was not tappable in time.")
+        guard didTapContinue else { return }
 
         app.nudgeForInterruptionHandling()
 
@@ -188,49 +186,40 @@ enum TestHelper {
 
         let safariApp = XCUIApplication(bundleIdentifier: "com.apple.SafariViewService")
         let launchDeadline = Date().addingTimeInterval(TestConstants.longTimeout)
-        var isSafariRunning = false
-
-        while Date() < launchDeadline {
-            if safariApp.state == .runningForeground {
-                isSafariRunning = true
-                break
-            }
-
+        while Date() < launchDeadline && safariApp.state != .runningForeground {
             _ = allowUseCapsuleSignInIfNeeded(app: app)
             RunLoop.current.run(until: Date().addingTimeInterval(0.2))
         }
 
-        guard isSafariRunning else {
-            fatalError("Safari web view was never presented for One-Click flow.")
-        }
+        XCTAssertEqual(safariApp.state, .runningForeground, "Safari web view was never presented for One-Click flow.")
+        guard safariApp.state == .runningForeground else { return }
 
         let webView = safariApp.webViews.firstMatch
-        guard webView.waitForExistence(timeout: TestConstants.longTimeout) else {
-            fatalError("Safari web view failed to load for One-Click verification.")
-        }
+        let webViewAppeared = webView.waitForExistence(timeout: TestConstants.longTimeout)
+        XCTAssertTrue(webViewAppeared, "Safari web view failed to load for One-Click verification.")
+        guard webViewAppeared else { return }
 
         var otpFields = webView.textFields.allElementsBoundByIndex + webView.secureTextFields.allElementsBoundByIndex
         let otpDeadline = Date().addingTimeInterval(TestConstants.defaultTimeout)
-
         while otpFields.isEmpty && Date() < otpDeadline {
             RunLoop.current.run(until: Date().addingTimeInterval(0.2))
             otpFields = webView.textFields.allElementsBoundByIndex + webView.secureTextFields.allElementsBoundByIndex
         }
 
-        guard !otpFields.isEmpty else {
-            fatalError("OTP input fields were not found in One-Click web view.")
-        }
+        let hasOtpFields = !otpFields.isEmpty
+        XCTAssertTrue(hasOtpFields, "OTP input fields were not found in One-Click web view.")
+        guard hasOtpFields else { return }
 
-        guard otpFields.count >= otpCode.count else {
-            fatalError("Not enough OTP fields were present in One-Click web view.")
-        }
+        let otpFieldCountSufficient = otpFields.count >= otpCode.count
+        XCTAssertTrue(otpFieldCountSufficient, "Not enough OTP fields were present in One-Click web view.")
+        guard otpFieldCountSufficient else { return }
 
         let digits = Array(otpCode)
         for (index, digit) in digits.enumerated() {
             let field = otpFields[index]
-            guard field.waitForExistence(timeout: 1) else {
-                fatalError("OTP digit field \(index + 1) did not appear.")
-            }
+            let fieldExists = field.waitForExistence(timeout: 1)
+            XCTAssertTrue(fieldExists, "OTP digit field \(index + 1) did not appear.")
+            guard fieldExists else { return }
             field.tap()
             field.typeText(String(digit))
             RunLoop.current.run(until: Date().addingTimeInterval(0.1))
@@ -241,13 +230,13 @@ enum TestHelper {
             RunLoop.current.run(until: Date().addingTimeInterval(0.2))
         }
 
-        guard app.wait(for: .runningForeground, timeout: TestConstants.defaultTimeout) else {
-            fatalError("Main app did not return to foreground after OTP submission.")
-        }
+        let mainAppReturned = app.wait(for: .runningForeground, timeout: TestConstants.defaultTimeout)
+        XCTAssertTrue(mainAppReturned, "Main app did not return to foreground after OTP submission.")
+        guard mainAppReturned else { return }
 
-        guard waitForWalletsView(app: app) else {
-            fatalError("Wallets view did not appear after completing One-Click flow.")
-        }
+        let walletsVisible = waitForWalletsView(app: app)
+        XCTAssertTrue(walletsVisible, "Wallets view did not appear after completing One-Click flow.")
+        guard walletsVisible else { return }
     }
 
     static func performEmailAuthWithPasskey(app: XCUIApplication, email: String) {
