@@ -26,6 +26,14 @@ extension XCUIElement {
 extension XCUIApplication {
     /// Nudge to allow UI interruption monitors to fire.
     func nudgeForInterruptionHandling() {
-        tap()
+        let window = windows.firstMatch
+        guard window.exists else {
+            tap()
+            return
+        }
+
+        // Tap near the top-right corner so we don't trigger primary controls.
+        let safeCoordinate = window.coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: 0.05))
+        safeCoordinate.tap()
     }
 }
