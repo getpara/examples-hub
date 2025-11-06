@@ -1,3 +1,54 @@
+# Release (Thu Nov 06 2025)
+
+## Package Versions
+- @getpara/web-sdk@2.0.0-alpha.70
+- @getpara/wagmi-v2-integration@2.0.0-alpha.70
+- @getpara/wagmi-v2-connector@2.0.0-alpha.70
+- @getpara/viem-v2-integration@2.0.0-alpha.70
+- @getpara/viem-v1-integration@2.0.0-alpha.70
+- @getpara/user-management-client@2.0.0-alpha.70
+- @getpara/solana-web3.js-v1-integration@2.0.0-alpha.70
+- @getpara/solana-wallet-connectors@2.0.0-alpha.70
+- @getpara/solana-signers-v2-integration@2.0.0-alpha.70
+- @getpara/server-sdk@2.0.0-alpha.70
+- @getpara/react-sdk-lite@2.0.0-alpha.70
+- @getpara/react-sdk@2.0.0-alpha.70
+- @getpara/react-native-wallet@2.0.0-alpha.70
+- @getpara/react-components@2.0.0-alpha.70
+- @getpara/react-component-library@1.0.0-alpha.65
+- @getpara/react-common@2.0.0-alpha.70
+- @getpara/graz-integration@2.0.0-alpha.70
+- @getpara/graz-connector@2.0.0-alpha.70
+- @getpara/evm-wallet-connectors@2.0.0-alpha.70
+- @getpara/ethers-v6-integration@2.0.0-alpha.70
+- @getpara/ethers-v5-integration@2.0.0-alpha.70
+- @getpara/cosmos-wallet-connectors@2.0.0-alpha.70
+- @getpara/cosmjs-v0-integration@2.0.0-alpha.70
+- @getpara/core-sdk@2.0.0-alpha.70
+- @getpara/core-components@2.0.0-alpha.70
+
+### Features
+- Mobile Quick Login Upgrade (#1304) - c664bdea9
+- Wallet selection screen redesign (#1288) - 0f0d91978
+- delete account on bridge (#1293) - 1bef89f89
+
+### Fixes
+- stress test para modal page spec (#1306) - c37728bbc
+- Export private key without message passing (#1290) - 95b33ef0c
+- fix alpha bridge deploy (#1301) - 4ff003999
+- Portal & OTP updates  (#1299) - d23d73349
+- Dev Portal - Account creation with no wallet (#1297) - c2bc60332
+
+### Chores
+- Add wallet share persistence check (#1307) - c109fc580
+- add useeffect jitter patch to para modal stress test webpack (#1309) - 20182c2d8
+- Update code input UX (#1308) - 80a213222
+- Remove extra setup-para command (#1295) - 5b12fdce6
+- Add nightly multi-env testing, fix lint, and fix e2e run. (#1278) - 08af98341
+- Para Connect - Upgrade to Reown (#1296) - 9226642df
+- Don't show basic login upgrade after wallet select (#1294) - 781aff735
+- Move Para Connect (#1291) - 34a68f240
+
 # Release (Mon Nov 03 2025)
 
 ## Package Versions

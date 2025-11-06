@@ -1,8 +1,8 @@
 {
   "name": "@getpara/solana-signers-v2-integration",
-  "version": "2.0.0-alpha.69",
+  "version": "2.0.0-alpha.70",
   "dependencies": {
-    "@getpara/core-sdk": "2.0.0-alpha.69",
+    "@getpara/core-sdk": "2.0.0-alpha.70",
     "bs58": "^6.0.0"
   },
   "devDependencies": {
