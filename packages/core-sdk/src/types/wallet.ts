@@ -7,7 +7,10 @@ import {
 } from '@getpara/user-management-client';
 
 export interface Wallet
-  extends Omit<IWalletEntity, 'createdAt' | 'updatedAt' | 'lastUsedAt' | 'scheme' | 'type' | 'userId' | 'keyGenComplete'> {
+  extends Omit<
+    IWalletEntity,
+    'createdAt' | 'updatedAt' | 'lastUsedAt' | 'scheme' | 'type' | 'userId' | 'keyGenComplete' | 'sharesPersisted'
+  > {
   createdAt?: string;
   id: string;
   name?: string;

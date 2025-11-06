@@ -145,6 +145,7 @@ export const WALLET: WalletEntity = {
   pregenIdentifierType: null,
   id: 'ef3bf91c-fc1e-4d18-afe2-f2654c9556f8',
   keyGenComplete: true,
+  sharesPersisted: true,
   name: 'Test Wallet',
   partnerId: PARTNER.id,
   partner: PARTNER as PartnerEntity,

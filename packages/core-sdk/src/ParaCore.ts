@@ -2233,6 +2233,7 @@ Need help? Visit: https://docs.getpara.com or contact support
     return res.data.wallets.filter(
       wallet =>
         !!wallet.address &&
+        wallet.sharesPersisted &&
         (this.isParaConnect() || (!this.isParaConnect() && this.isWalletSupported(entityToWallet(wallet)))),
     );
   }
@@ -3614,31 +3615,33 @@ Need help? Visit: https://docs.getpara.com or contact support
     }
 
     const walletId = keygenRes.walletId;
+    const walletScheme = walletType === 'SOLANA' ? 'ED25519' : 'DKLS';
     signer = keygenRes.signer;
 
-    this.wallets[walletId] = {
-      id: walletId,
-      signer,
-      scheme: walletType === 'SOLANA' ? 'ED25519' : 'DKLS',
-      type: walletType,
-    };
-    wallet = this.wallets[walletId];
-
-    await this.waitForWalletAddress(wallet.id);
-    await this.populateWalletAddresses();
+    await this.waitForWalletAddress(walletId);
 
     let recoveryShare: string | null = null;
     if (!skipDistribute) {
       recoveryShare = await distributeNewShare({
         ctx: this.ctx,
         userId: this.userId,
-        walletId: wallet.id,
+        walletId,
         userShare: signer,
         emailProps: this.getBackupKitEmailProps(),
         isEnclaveUser: this.isEnclaveUser,
-        walletScheme: wallet.scheme,
+        walletScheme,
       });
     }
+
+    this.wallets[walletId] = {
+      id: walletId,
+      signer,
+      scheme: walletScheme,
+      type: walletType,
+    };
+    wallet = this.wallets[walletId];
+
+    await this.populateWalletAddresses();
 
     await this.setCurrentWalletIds({
       ...this.currentWalletIds,

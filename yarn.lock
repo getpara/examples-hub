@@ -5245,10 +5245,10 @@
   dependencies:
     "@getpara/core-sdk" "1.12.0"
 
-"@getpara/shared@1.6.0":
-  version "1.6.0"
-  resolved "https://registry.yarnpkg.com/@getpara/shared/-/shared-1.6.0.tgz#2734800dbe0234b7f4f69919a3cecf3793cb734b"
-  integrity sha512-OD7zX9MSn7xg10Df8QOzSwf2IZLzN4UU77TCQD8lQrFovxMKbmxz3FoxTzgHoeoHsJuYMIVtWkZqDQpZOOQiVQ==
+"@getpara/shared@1.7.0":
+  version "1.7.0"
+  resolved "https://registry.yarnpkg.com/@getpara/shared/-/shared-1.7.0.tgz#be7b897d60a2411884315cfd41a8acd71d8ee60e"
+  integrity sha512-1D2rW9n5Tkuz/Y5CL/J9Q2L+eMLqYG9oBI84o3HPdUUltQD0WBlPPMeGCQ6hgT6KkKgtL0JlJGp8O5/uPvvFHg==
 
 "@getpara/solana-web3.js-v1-integration@1.12.0":
   version "1.12.0"

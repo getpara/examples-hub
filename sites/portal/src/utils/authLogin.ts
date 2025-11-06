@@ -107,9 +107,11 @@ export async function authUpdateKeyShares(
       return !decryptedSharesForPartner.some(share => share.walletId === walletId);
     });
 
-    const decryptedSharesStillNeededForPartner = walletIdsWithoutPartnerIdShare.map(walletId => {
-      return enclaveShares.find(share => share.walletId === walletId);
-    });
+    const decryptedSharesStillNeededForPartner = walletIdsWithoutPartnerIdShare
+      .map(walletId => {
+        return enclaveShares.find(share => share.walletId === walletId);
+      })
+      .filter(share => !!share);
 
     decryptedShares = [...decryptedSharesForPartner, ...decryptedSharesStillNeededForPartner];
   } else {
