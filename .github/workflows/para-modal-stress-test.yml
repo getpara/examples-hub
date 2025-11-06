@@ -1,8 +1,7 @@
 name: Para Modal Stress Tests
-
 on:
   schedule:
-    - cron: '0 2 * * *' # Nightly stress tests at 2 AM UTC
+    - cron: '0 2 * * *'
   workflow_dispatch:
     inputs:
       job_type:
@@ -11,7 +10,8 @@ on:
         options:
           - standard
           - nightly-multi-env
-          - both
+          - jitter
+          - all
         default: 'standard'
       iterations:
         description: 'Number of iterations (standard job only)'
@@ -78,6 +78,7 @@ jobs:
           CI: 'true'
           STRESS_TEST_ITERATIONS: ${{ inputs.iterations || '10' }}
           STRESS_TEST_NETWORK: ${{ inputs.network_profile || 'slow-3g' }}
+          STRESS_TEST_JITTER: 'false'
           STRESS_TEST_SUITE: ${{ inputs.suite || 'all' }}
           STRESS_TEST_PORT: '3003'
           HEADLESS: 'true'
@@ -166,6 +167,7 @@ jobs:
           NEXT_PUBLIC_PARA_API_KEY: ${{ matrix.api_key }}
           STRESS_TEST_ITERATIONS: '10'
           STRESS_TEST_NETWORK: 'none'
+          STRESS_TEST_JITTER: 'false'
           STRESS_TEST_SUITE: ${{ inputs.suite || 'all' }}
           STRESS_TEST_PORT: '3003'
           HEADLESS: 'true'
@@ -204,9 +206,83 @@ jobs:
         if: always()
         run: echo "📊 View ${{ matrix.env_name }} stress test report at https://artifacts.sandbox.usecapsule.com/nightly-stress-test/${{ github.run_id }}/${{ matrix.environment }}/index.html"
 
+  jitter-stress-test:
+    runs-on: FourCoreRunner
+    timeout-minutes: 360
+    needs: [standard-stress-test]
+    if: |
+      always() &&
+      (github.event_name == 'schedule' ||
+      (github.event_name == 'workflow_dispatch' && (inputs.job_type == 'jitter' || inputs.job_type == 'all')))
+    permissions:
+      id-token: write
+      contents: read
+      actions: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.17.0'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Build packages
+        run: yarn build
+        env:
+          NX_REJECT_UNKNOWN_LOCAL_CACHE: 0
+
+      - name: Install Playwright browsers
+        run: npx playwright install chromium --with-deps
+
+      - name: Run jitter stress test (useEffect race condition testing)
+        env:
+          CI: 'true'
+          STRESS_TEST_ITERATIONS: '10'
+          STRESS_TEST_NETWORK: 'none'
+          STRESS_TEST_JITTER: 'true'
+          STRESS_TEST_SUITE: ${{ inputs.suite || 'all' }}
+          STRESS_TEST_PORT: '3003'
+          HEADLESS: 'true'
+        run: yarn e2e:para-modal:stress
+
+      - name: Verify report generation
+        if: always()
+        run: |
+          echo "📊 Checking generated HTML report..."
+          ls -lh playwright-report/ || echo "⚠️  No playwright-report directory"
+
+      - name: Configure AWS credentials
+        if: always()
+        uses: aws-actions/configure-aws-credentials@67fbcbb121271f7775d2e7715933280b06314838
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/github-actions-role
+          role-session-name: github-upload-jitter-stress-artifacts
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Upload HTML report to S3
+        if: always()
+        env:
+          BUCKET_NAME: capsule-sandbox-artifacts-site
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          if [ -d "playwright-report" ]; then
+            aws s3 sync playwright-report "s3://${BUCKET_NAME}/jitter-stress-test/${RUN_ID}"
+            echo "✅ Uploaded HTML report to S3"
+          else
+            echo "❌ No playwright-report directory to upload"
+            exit 1
+          fi
+
+      - name: Report URL
+        if: always()
+        run: echo "📊 View jitter stress test report at https://artifacts.sandbox.usecapsule.com/jitter-stress-test/${{ github.run_id }}/index.html"
+
   summary:
     runs-on: ubuntu-latest
-    needs: [standard-stress-test, nightly-multi-env-stress-test]
+    needs: [standard-stress-test, nightly-multi-env-stress-test, jitter-stress-test]
     if: always()
     steps:
       - name: Generate test summary
@@ -239,4 +315,15 @@ jobs:
             echo "- 📊 [Sandbox Report](https://artifacts.sandbox.usecapsule.com/nightly-stress-test/${{ github.run_id }}/sandbox/index.html)" >> $GITHUB_STEP_SUMMARY
             echo "- 📊 [Beta Report](https://artifacts.sandbox.usecapsule.com/nightly-stress-test/${{ github.run_id }}/beta/index.html)" >> $GITHUB_STEP_SUMMARY
             echo "- 📊 [Production Report](https://artifacts.sandbox.usecapsule.com/nightly-stress-test/${{ github.run_id }}/prod/index.html)" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [[ "${{ needs.jitter-stress-test.result }}" != "skipped" ]]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### Jitter Stress Test (10 iterations, useEffect race condition testing)" >> $GITHUB_STEP_SUMMARY
+            if [[ "${{ needs.jitter-stress-test.result }}" == "success" ]]; then
+              echo "✅ **Passed**" >> $GITHUB_STEP_SUMMARY
+              echo "📊 [View Report](https://artifacts.sandbox.usecapsule.com/jitter-stress-test/${{ github.run_id }}/index.html)" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "❌ **Failed**" >> $GITHUB_STEP_SUMMARY
+            fi
           fi

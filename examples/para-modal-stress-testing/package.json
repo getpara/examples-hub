@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "NEXT_PUBLIC_PARA_API_KEY=beta_c61c45aec46dee3fe50d98125e9560cc next build",
+    "build": "NEXT_PUBLIC_PARA_API_KEY=beta_c61c45aec46dee3fe50d98125e9560cc STRESS_TEST_JITTER=${STRESS_TEST_JITTER:-false} next build",
     "dev": "next dev -p ${PORT:-3003}",
     "start": "next start -p ${PORT:-3003}",
     "typecheck": "tsc --noEmit"
