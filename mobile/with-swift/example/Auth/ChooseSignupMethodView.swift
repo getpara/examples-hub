@@ -12,7 +12,6 @@ struct ChooseSignupMethodView: View {
     @State private var errorMessage: String?
 
     @Environment(\.authorizationController) private var authorizationController
-    @Environment(\.webAuthenticationSession) private var webAuthenticationSession
 
     var body: some View {
         VStack(spacing: 20) {
@@ -129,8 +128,7 @@ struct ChooseSignupMethodView: View {
                 try await paraManager.handleSignup(
                     authState: authState,
                     method: method,
-                    authorizationController: authorizationController,
-                    webAuthenticationSession: webAuthenticationSession,
+                    authorizationController: authorizationController
                 )
 
                 // Navigate to home screen on success

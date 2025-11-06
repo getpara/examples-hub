@@ -13,7 +13,6 @@ struct OTPVerificationView: View {
     @EnvironmentObject var appRootManager: AppRootManager
     @Environment(\.dismiss) private var dismiss
     @Environment(\.authorizationController) private var authorizationController
-    @Environment(\.webAuthenticationSession) private var webAuthenticationSession
 
     let authState: AuthState
     @Binding var showOTP: Bool
@@ -223,8 +222,7 @@ struct OTPVerificationView: View {
                 // Existing user verified - log them in
                 try await paraManager.handleLogin(
                     authState: resultState,
-                    authorizationController: authorizationController,
-                    webAuthenticationSession: webAuthenticationSession,
+                    authorizationController: authorizationController
                 )
                 appRootManager.setAuthenticated(true)
                 showOTP = false
@@ -271,8 +269,7 @@ struct OTPVerificationView: View {
             try await paraManager.handleSignup(
                 authState: authState,
                 method: method,
-                authorizationController: authorizationController,
-                webAuthenticationSession: webAuthenticationSession
+                authorizationController: authorizationController
             )
             
             // Authentication successful

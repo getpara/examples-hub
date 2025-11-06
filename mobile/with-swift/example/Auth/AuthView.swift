@@ -57,6 +57,9 @@ struct AuthView: View {
 
             footerSection
         }
+        .onAppear {
+            paraManager.setDefaultWebAuthenticationSession(webAuthenticationSession)
+        }
         .onTapGesture {
             textFieldFocus = false
         }
@@ -179,8 +182,7 @@ struct AuthView: View {
             do {
                 try await paraManager.handleOAuth(
                     provider: provider,
-                    webAuthenticationSession: webAuthenticationSession,
-                    authorizationController: authorizationController,
+                    authorizationController: authorizationController
                 )
                 appRootManager.setAuthenticated(true)
             } catch {
@@ -193,39 +195,17 @@ struct AuthView: View {
     private func handleEmailPhone(_ auth: Auth) {
         Task {
             do {
+                showOTP = false
+                currentAuthState = nil
+
                 // Start authentication flow with Para SDK
                 let state = try await paraManager.initiateAuthFlow(auth: auth)
 
-                // One Click path: launch hosted auth if Para provides a URL.
-                if let loginUrl = state.loginUrl {
-                    showOTP = false
-
-                    do {
-                        _ = try await paraManager.presentAuthUrl(
-                            loginUrl,
-                            context: "One Click Login",
-                            webAuthenticationSession: webAuthenticationSession
-                        )
-
-                        if state.stage == .login {
-                            _ = try await paraManager.waitForLogin()
-                        } else {
-                            _ = try await paraManager.waitForSignup()
-                        }
-
-                        appRootManager.setAuthenticated(true)
-                    } catch {
-                        errorMessage = error.localizedDescription
-                        showErrorAlert = true
-                    }
-
-                    return
-                }
-
-                // Fallback path: follow staged Para auth flow (OTP, login handler, etc.)
                 switch state.stage {
+                case .done:
+                    appRootManager.setAuthenticated(true)
                 case .verify:
-                    // New user - navigate to verification
+                    // New user - navigate to OTP verification
                     currentAuthState = state
                     showOTP = true
 
@@ -233,8 +213,7 @@ struct AuthView: View {
                     // Existing user - log them in with automatic method selection
                     try await paraManager.handleLogin(
                         authState: state,
-                        authorizationController: authorizationController,
-                        webAuthenticationSession: webAuthenticationSession,
+                        authorizationController: authorizationController
                     )
                     appRootManager.setAuthenticated(true)
 
@@ -242,9 +221,6 @@ struct AuthView: View {
                     // This shouldn't happen directly
                     errorMessage = "Unexpected authentication state"
                     showErrorAlert = true
-                case .done:
-                    // Portal-based flow already handled
-                    appRootManager.setAuthenticated(true)
                 }
             } catch {
                 // Handle any errors
