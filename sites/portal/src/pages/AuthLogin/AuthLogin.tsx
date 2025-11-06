@@ -62,6 +62,7 @@ const AuthLoginBase = ({ step: propsStep }: { step?: AuthLoginStep }) => {
       })(),
   );
   const [postLoginRes, setPostLoginRes] = useState<LoginRes>();
+  const loggedInFromAnotherDeviceRef = useRef(false);
 
   const [loginWithPasswordError, setLoginWithPasswordError] = useState<string | undefined>();
   const [isAddingDevice, setIsAddingDevice] = useState(false);
@@ -72,6 +73,7 @@ const AuthLoginBase = ({ step: propsStep }: { step?: AuthLoginStep }) => {
   const isAutoLoginAttempted = useRef(false);
 
   const handleLoginFromOtherDevice = async () => {
+    loggedInFromAnotherDeviceRef.current = true;
     await postLogin({ fromKnownDevice: true });
   };
 
@@ -85,6 +87,9 @@ const AuthLoginBase = ({ step: propsStep }: { step?: AuthLoginStep }) => {
     fromBasicLoginUpgrade?: boolean;
   }) => {
     setPostLoginRes(loginRes);
+    if (fromKnownDevice) {
+      loggedInFromAnotherDeviceRef.current = true;
+    }
 
     if (isSwitchingWallets) {
       await fetchWallets();
@@ -96,11 +101,10 @@ const AuthLoginBase = ({ step: propsStep }: { step?: AuthLoginStep }) => {
     const nativeCallbackUrl = searchParams.get('nativeCallbackUrl');
     const loginCallbackRoute = searchParams.get('loginCallbackRoute');
 
-    // Handle native apps first - they always redirect, even for new users
     if (nativeCallbackUrl && validateCallbackUrl(nativeCallbackUrl)) {
       await para.userSetupAfterLogin();
       const isEnclaveUser = await checkIsEnclaveUser();
-      // Native apps need wallet selection before redirecting
+      const shouldSkipUpgrade = await getSkipBasicLoginUpgradePromptPreference();
       const wallets = await fetchWallets();
       const isWithoutWallets = Object.values(wallets).every(arr => arr.length === 0);
       const selectionParams = {
@@ -138,7 +142,6 @@ const AuthLoginBase = ({ step: propsStep }: { step?: AuthLoginStep }) => {
         }
       }
 
-      // For native apps, persist wallet signers before redirecting
       if (isEnclaveUser || loginRes || selectionApplied) {
         try {
           if (!selectionApplied && para.currentWalletIdsArray.length === 0) {
@@ -148,21 +151,29 @@ const AuthLoginBase = ({ step: propsStep }: { step?: AuthLoginStep }) => {
           }
         } catch (error) {
           console.error('Failed to update keyshares before native redirect', error);
-          return; // Avoid redirecting if we failed to persist signers
+          return;
         }
       }
-      // Redirect to the native callback URL
+
       const statusParam = auth.isNewUser ? NativeCallbackStatus.NEW_USER : NativeCallbackStatus.COMPLETE;
       const url = new URL(nativeCallbackUrl);
       if (!url.searchParams.has('status')) {
         url.searchParams.set('status', statusParam);
       }
+
+      if (!isEnclaveUser && !shouldSkipUpgrade && !fromKnownDevice && !fromBasicLoginUpgrade) {
+        const portalUrl = new URL(window.location.href);
+        portalUrl.searchParams.set('nativeCallbackUrl', url.toString());
+        window.history.replaceState(null, '', portalUrl.toString());
+        setStep(AuthLoginStep.BASIC_LOGIN_UPGRADE);
+        return;
+      }
+
       window.location.href = url.toString();
-      return; // Exit early after redirect
+      return;
     }
 
     if (auth.isNewUser) {
-      // Issue JWT so wallet switching can work
       if (authMethod === 'BASIC_LOGIN') {
         await para.ctx.enclaveClient.issueEnclaveJwt();
       }
@@ -237,7 +248,6 @@ const AuthLoginBase = ({ step: propsStep }: { step?: AuthLoginStep }) => {
     }
 
     const wallets = await fetchWallets();
-
     const isWithoutWallets = Object.values(wallets).every(arr => arr.length === 0);
 
     const nextStep = fromKnownDevice ? AuthLoginStep.SUCCESS_FROM_KNOWN_DEVICE : AuthLoginStep.SUCCESS;
@@ -396,6 +406,7 @@ const AuthLoginBase = ({ step: propsStep }: { step?: AuthLoginStep }) => {
       if (
         !!authInfo &&
         sessionId &&
+        encryptionKey &&
         !skipAutoLogin &&
         authMethod === AuthMethod.PASSKEY &&
         (step === AuthLoginStep.MANUAL_LOGIN || step === AuthLoginStep.WAITING) &&
@@ -455,11 +466,19 @@ const AuthLoginBase = ({ step: propsStep }: { step?: AuthLoginStep }) => {
       } catch {}
     }
 
-    await postLogin({ loginRes: postLoginRes, fromBasicLoginUpgrade: true });
+    await postLogin({
+      loginRes: postLoginRes,
+      fromBasicLoginUpgrade: true,
+      fromKnownDevice: loggedInFromAnotherDeviceRef.current,
+    });
   };
 
   const onBasicLoginPostLogin = async () => {
-    await postLogin({ loginRes: postLoginRes, fromBasicLoginUpgrade: true });
+    await postLogin({
+      loginRes: postLoginRes,
+      fromBasicLoginUpgrade: true,
+      fromKnownDevice: loggedInFromAnotherDeviceRef.current,
+    });
   };
 
   if (step === AuthLoginStep.SELECT_WALLET) {
