@@ -406,7 +406,6 @@ const AuthLoginBase = ({ step: propsStep }: { step?: AuthLoginStep }) => {
       if (
         !!authInfo &&
         sessionId &&
-        encryptionKey &&
         !skipAutoLogin &&
         authMethod === AuthMethod.PASSKEY &&
         (step === AuthLoginStep.MANUAL_LOGIN || step === AuthLoginStep.WAITING) &&
