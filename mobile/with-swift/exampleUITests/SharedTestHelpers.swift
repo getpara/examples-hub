@@ -456,6 +456,11 @@ extension XCUIElement {
 
     private func typeTextSlowly(_ text: String) {
         for character in text {
+            if !hasKeyboardFocus {
+                tap()
+                RunLoop.current.run(until: Date().addingTimeInterval(0.05))
+            }
+
             typeText(String(character))
             RunLoop.current.run(until: Date().addingTimeInterval(0.05))
         }
