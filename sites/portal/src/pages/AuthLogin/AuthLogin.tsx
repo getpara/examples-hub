@@ -161,7 +161,7 @@ const AuthLoginBase = ({ step: propsStep }: { step?: AuthLoginStep }) => {
         url.searchParams.set('status', statusParam);
       }
 
-      if (!isEnclaveUser && !shouldSkipUpgrade && !fromKnownDevice && !fromBasicLoginUpgrade) {
+      if (!auth.isNewUser && !isEnclaveUser && !shouldSkipUpgrade && !fromKnownDevice && !fromBasicLoginUpgrade) {
         const portalUrl = new URL(window.location.href);
         portalUrl.searchParams.set('nativeCallbackUrl', url.toString());
         window.history.replaceState(null, '', portalUrl.toString());
@@ -242,7 +242,7 @@ const AuthLoginBase = ({ step: propsStep }: { step?: AuthLoginStep }) => {
       return;
     }
 
-    if (!fromBasicLoginUpgrade && !isEnclaveUser && !shouldSkipBasicLoginUpgradePrompt) {
+    if (!auth.isNewUser && !fromBasicLoginUpgrade && !isEnclaveUser && !shouldSkipBasicLoginUpgradePrompt) {
       setStep(AuthLoginStep.BASIC_LOGIN_UPGRADE);
       return;
     }
