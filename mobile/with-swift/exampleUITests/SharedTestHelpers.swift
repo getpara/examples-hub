@@ -456,7 +456,7 @@ extension XCUIElement {
 
     private func typeTextSlowly(_ text: String) {
         for character in text {
-            if !hasKeyboardFocus {
+            if !hasKeyboardFocusCompat {
                 tap()
                 RunLoop.current.run(until: Date().addingTimeInterval(0.05))
             }
@@ -464,5 +464,10 @@ extension XCUIElement {
             typeText(String(character))
             RunLoop.current.run(until: Date().addingTimeInterval(0.05))
         }
+    }
+
+    private var hasKeyboardFocusCompat: Bool {
+        guard responds(to: Selector(("hasKeyboardFocus"))) else { return false }
+        return (value(forKey: "hasKeyboardFocus") as? Bool) ?? false
     }
 }
