@@ -444,13 +444,20 @@ extension XCUIElement {
 
     func clearAndTypeText(_ text: String) {
         guard let stringValue = value as? String else {
-            typeText(text)
+            typeTextSlowly(text)
             return
         }
 
         tap()
         let deleteString = String(repeating: XCUIKeyboardKey.delete.rawValue, count: stringValue.count)
         typeText(deleteString)
-        typeText(text)
+        typeTextSlowly(text)
+    }
+
+    private func typeTextSlowly(_ text: String) {
+        for character in text {
+            typeText(String(character))
+            RunLoop.current.run(until: Date().addingTimeInterval(0.05))
+        }
     }
 }
