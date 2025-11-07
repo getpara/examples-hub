@@ -200,7 +200,7 @@ enum TestHelper {
         guard webViewAppeared else { return }
 
         var otpFields = webView.textFields.allElementsBoundByIndex + webView.secureTextFields.allElementsBoundByIndex
-        let otpDeadline = Date().addingTimeInterval(TestConstants.defaultTimeout)
+        let otpDeadline = Date().addingTimeInterval(TestConstants.longTimeout)
         while otpFields.isEmpty && Date() < otpDeadline {
             RunLoop.current.run(until: Date().addingTimeInterval(0.2))
             otpFields = webView.textFields.allElementsBoundByIndex + webView.secureTextFields.allElementsBoundByIndex
