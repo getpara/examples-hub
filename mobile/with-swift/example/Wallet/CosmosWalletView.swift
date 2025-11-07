@@ -391,18 +391,21 @@ struct CosmosWalletView: View {
         // For Cosmos wallets, the address changes based on the chain prefix
         // The wallet stores a default address, but we need to show the chain-specific one
         let (_, chainPrefix, _) = getChainConfig()
-        
-        // If this is a Cosmos wallet with addressSecondary, use that as base
-        if let addressSecondary = (selectedWallet as? [String: Any])?["addressSecondary"] as? String {
-            // The addressSecondary is the cosmos-prefixed address
-            // For display, we should ideally derive the correct prefix
-            // but for now, we'll show the address as stored
-            cosmosAddress = addressSecondary
-        } else {
-            // Fallback to main address
-            cosmosAddress = selectedWallet.address
+
+        // Prefer the Cosmos-specific bech32 address if it exists, otherwise fall back to the primary one
+        guard let baseAddress = selectedWallet.addressSecondary ?? selectedWallet.address else {
+            cosmosAddress = nil
+            return
         }
-        
+
+        // Replace the prefix before the first "1" delimiter so the displayed address matches the selected chain
+        if let oneIndex = baseAddress.firstIndex(of: "1") {
+            let suffix = baseAddress[oneIndex...]
+            cosmosAddress = "\(chainPrefix)\(suffix)"
+        } else {
+            cosmosAddress = baseAddress
+        }
+
         // Note: Proper address derivation happens in the bridge when making calls
         // The displayed address is for user reference
     }

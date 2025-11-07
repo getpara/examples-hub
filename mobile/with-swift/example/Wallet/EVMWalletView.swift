@@ -129,7 +129,8 @@ struct EVMWalletView: View {
     }
 
     private func sendTransaction() {
-        guard let transaction = createTransaction(value: "100000000000000") else { return }
+        // Validate the sample transaction parameters before attempting the transfer call
+        guard createTransaction(value: "100000000000000") != nil else { return }
 
         // Check if we have balance info and sufficient funds
         if let balanceString = balance {
@@ -283,7 +284,7 @@ struct EVMWalletView: View {
             if let error {
                 result = ("Error", "Failed to sign ERC20 transfer: \(error.localizedDescription)\nDuration: \(String(format: "%.2f", duration))s")
             } else if let sig = signature {
-                let hasSignedTx = sig.signedTransaction != nil
+                let hasSignedTx = !sig.signedTransaction.isEmpty
                 let signedTxInfo = hasSignedTx
                     ? "✅ Signed transaction with encoded function call"
                     : "⚠️ Only signature available"
