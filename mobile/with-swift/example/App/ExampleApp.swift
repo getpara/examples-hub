@@ -9,10 +9,8 @@ struct ExampleApp: App {
 
     init() {
         // Para Configuration
-        let config = ParaConfig(
-            apiKey: "beta_24dfb313f04d46bf73300d7ef2933648", // Get from: http://developer.getpara.com
-            environment: .beta,
-        )
+        //let config = ParaConfig(environment: .beta, apiKey: "beta_24dfb313f04d46bf73300d7ef2933648")
+        let config = ParaConfig(environment: .sandbox, apiKey: "sandbox_5661db38f7eeda772fb76959121b8d16")
 
         // Para app scheme for deep linking
         let appScheme = "paraswift"

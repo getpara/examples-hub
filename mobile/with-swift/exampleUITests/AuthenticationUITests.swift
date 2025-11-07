@@ -18,13 +18,6 @@ class AuthenticationUITests: XCTestCase {
     override func setUpWithError() throws {
         continueAfterFailure = false
 
-        // Set up environment variables
-        app.launchEnvironment = [
-            "PARA_API_KEY": ProcessInfo.processInfo.environment["PARA_API_KEY"] ?? "",
-            "PARA_ENVIRONMENT": "sandbox",
-            "RPC_URL": ProcessInfo.processInfo.environment["RPC_URL"] ?? "",
-        ]
-
         Biometrics.enrolled()
         app.launch()
 
