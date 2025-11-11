@@ -9,7 +9,42 @@ import { Buffer } from '@craftzdog/react-native-buffer';
 import process from 'process';
 import 'react-native-url-polyfill/auto';
 import { TextEncoder, TextDecoder } from 'text-encoding';
-import structuredClone from '@ungap/structured-clone';
+
+let cachedStructuredCloneImpl;
+
+const resolveStructuredClone = () => {
+  if (typeof cachedStructuredCloneImpl !== 'undefined') {
+    return cachedStructuredCloneImpl;
+  }
+
+  if (typeof globalThis.structuredClone === 'function') {
+    cachedStructuredCloneImpl = globalThis.structuredClone.bind(globalThis);
+    return cachedStructuredCloneImpl;
+  }
+
+  const isHermes = typeof globalThis.HermesInternal === 'object' && globalThis.HermesInternal !== null;
+  if (isHermes) {
+    // Hermes crashes when @ungap/structured-clone rewires Reflect helpers.
+    cachedStructuredCloneImpl = null;
+    return cachedStructuredCloneImpl;
+  }
+
+  try {
+    const maybePolyfill = require('@ungap/structured-clone');
+    const polyfill = (maybePolyfill && maybePolyfill.default) || maybePolyfill;
+    if (typeof polyfill === 'function') {
+      cachedStructuredCloneImpl = polyfill;
+      return cachedStructuredCloneImpl;
+    }
+  } catch (err) {
+    if (typeof __DEV__ !== 'undefined' && __DEV__) {
+      console.warn('[Para React Native shim] Failed to load structuredClone polyfill', err);
+    }
+  }
+
+  cachedStructuredCloneImpl = null;
+  return cachedStructuredCloneImpl;
+};
 
 const setupProcessPolyfill = () => {
   if (typeof globalThis.process === 'undefined') {
@@ -272,9 +307,37 @@ const setupTextEncodingPolyfills = () => {
 };
 
 const setupStructuredClonePolyfill = () => {
-  if (typeof globalThis.structuredClone === 'undefined') {
-    globalThis.structuredClone = structuredClone;
+  if (typeof globalThis.structuredClone === 'function') {
+    return;
   }
+
+  const structuredCloneImpl = resolveStructuredClone();
+  const safeStructuredClone = (value, options) => {
+    if (typeof structuredCloneImpl === 'function') {
+      try {
+        return structuredCloneImpl(value, options);
+      } catch (err) {
+        if (typeof __DEV__ !== 'undefined' && __DEV__) {
+          console.warn('[Para React Native shim] structuredClone polyfill failed, falling back to JSON clone', err);
+        }
+      }
+    }
+    try {
+      return JSON.parse(JSON.stringify(value));
+    } catch (_err) {
+      if (typeof __DEV__ !== 'undefined' && __DEV__) {
+        console.warn('[Para React Native shim] JSON clone failed, returning original value', _err);
+      }
+      return value;
+    }
+  };
+
+  Object.defineProperty(globalThis, 'structuredClone', {
+    value: safeStructuredClone,
+    configurable: true,
+    enumerable: false,
+    writable: true,
+  });
 };
 
 setupProcessPolyfill();
