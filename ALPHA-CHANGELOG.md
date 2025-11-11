@@ -1,3 +1,38 @@
+# Release (Tue Nov 11 2025)
+
+## Package Versions
+- @getpara/web-sdk@2.0.0-alpha.71
+- @getpara/wagmi-v2-integration@2.0.0-alpha.71
+- @getpara/wagmi-v2-connector@2.0.0-alpha.71
+- @getpara/viem-v2-integration@2.0.0-alpha.71
+- @getpara/viem-v1-integration@2.0.0-alpha.71
+- @getpara/user-management-client@2.0.0-alpha.71
+- @getpara/solana-web3.js-v1-integration@2.0.0-alpha.71
+- @getpara/solana-wallet-connectors@2.0.0-alpha.71
+- @getpara/solana-signers-v2-integration@2.0.0-alpha.71
+- @getpara/server-sdk@2.0.0-alpha.71
+- @getpara/react-sdk-lite@2.0.0-alpha.71
+- @getpara/react-sdk@2.0.0-alpha.71
+- @getpara/react-native-wallet@2.0.0-alpha.71
+- @getpara/react-components@2.0.0-alpha.71
+- @getpara/react-component-library@1.0.0-alpha.66
+- @getpara/react-common@2.0.0-alpha.71
+- @getpara/graz-integration@2.0.0-alpha.71
+- @getpara/graz-connector@2.0.0-alpha.71
+- @getpara/evm-wallet-connectors@2.0.0-alpha.71
+- @getpara/ethers-v6-integration@2.0.0-alpha.71
+- @getpara/ethers-v5-integration@2.0.0-alpha.71
+- @getpara/cosmos-wallet-connectors@2.0.0-alpha.71
+- @getpara/cosmjs-v0-integration@2.0.0-alpha.71
+- @getpara/core-sdk@2.0.0-alpha.71
+- @getpara/core-components@2.0.0-alpha.71
+
+
+### Fixes
+- Expo 54 integration (#1316) - b6aa29280
+- skip upgrade prompt for new quick-login signups (#1313) - c8bed7afd
+- private key regression (#1312) - 2aa2712a4
+
 # Release (Thu Nov 06 2025)
 
 ## Package Versions
