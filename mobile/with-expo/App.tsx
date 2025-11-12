@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, View, SafeAreaView, ActivityIndicator, Text } from "react-native";
+import { StyleSheet, View, ActivityIndicator, Text } from "react-native";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { para } from "./src/para";
 import { AuthSection } from "./src/components/AuthSection";
 import { WalletSection } from "./src/components/WalletSection";
@@ -52,10 +53,12 @@ export default function App() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      {!isAuthenticated ? <AuthSection onSuccess={handleAuthSuccess} /> : <WalletSection onLogout={handleLogout} />}
-      <StatusBar style="auto" />
-    </SafeAreaView>
+    <SafeAreaProvider>
+      <SafeAreaView style={styles.container}>
+        {!isAuthenticated ? <AuthSection onSuccess={handleAuthSuccess} /> : <WalletSection onLogout={handleLogout} />}
+        <StatusBar style="auto" />
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 
