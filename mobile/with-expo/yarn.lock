@@ -7451,6 +7451,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-native-safe-area-context@npm:~5.6.0":
+  version: 5.6.2
+  resolution: "react-native-safe-area-context@npm:5.6.2"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: 10/880d87ee60119321b366eef2c151ecefe14f5bc0d39cf5cfbfb167684e571d3dae2600ee19b9bc8521f5726eb285abecaa7aafb1a3b213529dafbac24703d302
+  languageName: node
+  linkType: hard
+
 "react-native-url-polyfill@npm:2.0.0":
   version: 2.0.0
   resolution: "react-native-url-polyfill@npm:2.0.0"
@@ -8801,6 +8811,7 @@ __metadata:
     react-native-passkey: "npm:^3.3.1"
     react-native-quick-base64: "npm:^2.2.0"
     react-native-quick-crypto: "npm:^0.7.14"
+    react-native-safe-area-context: "npm:~5.6.0"
     readable-stream: "npm:^4.5.2"
     typescript: "npm:^5.8.3"
     typescript-eslint: "npm:^8.22.0"
