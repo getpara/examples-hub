@@ -294,11 +294,30 @@ export class EnclaveClient {
     return decryptedData.shares;
   }
 
+  async deleteShares(): Promise<void> {
+    await this.issueEnclaveJwt();
+    // Generate frontend keypair to receive encrypted response
+    const frontendKeyPair = await this.generateFrontendKeyPair();
+    const responsePublicKeyPEM = await this.exportPublicKeyToPEM(frontendKeyPair.publicKey);
+
+    const payload = {
+      responsePublicKey: responsePublicKeyPEM,
+      jwt: this.retrieveJwt(),
+    };
+    const encryptedPayload = await this.encryptForEnclave(JSON.stringify(payload));
+    const encryptedPayloadStr = JSON.stringify(encryptedPayload);
+    await this.userManagementClient.deleteEnclaveShares(encryptedPayloadStr);
+  }
+
   async retrieveSharesWithRetry(query: ShareQuery[]): Promise<ShareData[]> {
     return await this.withJwtRefreshRetry(async () => this.retrieveShares(query));
   }
 
   async persistSharesWithRetry(shares: ShareData[]): Promise<any> {
     return await this.persistShares(shares);
+  }
+
+  async deleteSharesWithRetry(): Promise<void> {
+    return await this.withJwtRefreshRetry(async () => this.deleteShares());
   }
 }

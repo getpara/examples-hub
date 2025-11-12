@@ -1413,6 +1413,13 @@ class Client {
     return res.data;
   };
 
+  deleteEnclaveShares = async (encryptedPayload: string): Promise<{ payload: any }> => {
+    const res = await this.baseRequest.delete<{ payload: any }>(`/enclave/key-shares`, {
+      data: { encryptedPayload },
+    });
+    return res.data;
+  };
+
   getUserPreferences = async (userId: string): Promise<{ preferences: UserPreferences }> => {
     const res = await this.baseRequest.get<{ preferences: UserPreferences }>(`/users/${userId}/preferences`);
     return res.data;

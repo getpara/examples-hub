@@ -37,6 +37,7 @@ describe('EnclaveClient', () => {
       retrieveEnclaveShares: vi.fn(),
       issueEnclaveJwt: vi.fn(),
       refreshEnclaveJwt: vi.fn(),
+      deleteEnclaveShares: vi.fn(),
     };
 
     mockRetrieveJwt = vi.fn().mockReturnValue('mock-jwt');
@@ -456,6 +457,46 @@ describe('EnclaveClient', () => {
       await expect(enclaveClient.persistSharesWithRetry(shares)).rejects.toThrow('auth failed');
       expect(enclaveClient['persistShares']).toHaveBeenCalledTimes(1);
       expect(enclaveClient['persistShares']).toHaveBeenCalledWith(shares);
+    });
+  });
+
+  describe('deleteShares', () => {
+    it('should delete shares from enclave', async () => {
+      const mockKeyPair = { publicKey: {} as CryptoKey, privateKey: {} as CryptoKey };
+      const mockEncryptedPayload = { encryptedData: 'test' };
+
+      vi.spyOn(enclaveClient as any, 'issueEnclaveJwt').mockResolvedValue(undefined);
+      mockCrypto.subtle.generateKey.mockResolvedValue(mockKeyPair);
+      mockCrypto.subtle.exportKey.mockResolvedValue(new Uint8Array(65).buffer);
+      vi.spyOn(enclaveClient as any, 'encryptForEnclave').mockResolvedValue(mockEncryptedPayload);
+      mockUserManagementClient.deleteEnclaveShares.mockResolvedValue({ success: true });
+
+      await enclaveClient['deleteShares']();
+
+      expect(enclaveClient['issueEnclaveJwt']).toHaveBeenCalled();
+      expect(mockUserManagementClient.deleteEnclaveShares).toHaveBeenCalledWith(JSON.stringify(mockEncryptedPayload));
+    });
+  });
+
+  describe('deleteSharesWithRetry', () => {
+    it('should delete shares with retry logic', async () => {
+      vi.spyOn(enclaveClient as any, 'deleteShares').mockResolvedValue(undefined);
+
+      await enclaveClient.deleteSharesWithRetry();
+
+      expect(enclaveClient['deleteShares']).toHaveBeenCalled();
+    });
+
+    it('should retry on failure', async () => {
+      vi.spyOn(enclaveClient as any, 'deleteShares')
+        .mockRejectedValueOnce(new Error('auth failed'))
+        .mockResolvedValueOnce(undefined);
+      vi.spyOn(enclaveClient as any, 'refreshJwt').mockResolvedValue(undefined);
+
+      await enclaveClient.deleteSharesWithRetry();
+
+      expect(enclaveClient['deleteShares']).toHaveBeenCalledTimes(2);
+      expect(enclaveClient['refreshJwt']).toHaveBeenCalledTimes(1);
     });
   });
 });

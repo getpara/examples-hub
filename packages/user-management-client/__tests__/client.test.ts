@@ -1510,6 +1510,14 @@ describe('Client', () => {
       expect(mocks.post).toBeCalledWith('/enclave/jwt/refresh', { encryptedPayload: 'payload' });
     });
 
+    it('deleteEnclaveShares', async () => {
+      await client.deleteEnclaveShares('payload');
+
+      expect(mocks.delete).toBeCalledWith('/enclave/key-shares', {
+        data: { encryptedPayload: 'payload' },
+      });
+    });
+
     it('getUserPreferences', async () => {
       await client.getUserPreferences(userId);
 
