@@ -306,6 +306,49 @@ const setupTextEncodingPolyfills = () => {
   globalThis.TextDecoder = TextDecoder;
 };
 
+const setupWindowLocationPolyfill = () => {
+  const FALLBACK_HOST = 'para.mobile';
+  const FALLBACK_ORIGIN = `https://${FALLBACK_HOST}`;
+
+  const globalScope = globalThis;
+  if (!globalScope.window || typeof globalScope.window !== 'object') {
+    globalScope.window = globalScope;
+  }
+
+  const win = globalScope.window;
+  const existingLocation = (win && win.location) || globalScope.location;
+  const hasOrigin =
+    existingLocation &&
+    typeof existingLocation === 'object' &&
+    typeof existingLocation.origin === 'string' &&
+    typeof existingLocation.host === 'string';
+
+  if (hasOrigin) {
+    if (!globalScope.location) {
+      globalScope.location = existingLocation;
+    }
+    return;
+  }
+
+  const fallbackLocation = {
+    href: `${FALLBACK_ORIGIN}/`,
+    origin: FALLBACK_ORIGIN,
+    protocol: 'https:',
+    host: FALLBACK_HOST,
+    hostname: FALLBACK_HOST,
+    port: '',
+    pathname: '/',
+  };
+
+  const patchedLocation =
+    typeof existingLocation === 'object' && existingLocation !== null
+      ? Object.assign({}, fallbackLocation, existingLocation)
+      : fallbackLocation;
+
+  win.location = patchedLocation;
+  globalScope.location = patchedLocation;
+};
+
 const setupStructuredClonePolyfill = () => {
   if (typeof globalThis.structuredClone === 'function') {
     return;
@@ -343,6 +386,7 @@ const setupStructuredClonePolyfill = () => {
 setupProcessPolyfill();
 setupBufferPolyfill();
 setupBase64Polyfills();
+setupWindowLocationPolyfill();
 setupCryptoPolyfills();
 setupTextEncodingPolyfills();
 setupStructuredClonePolyfill();
