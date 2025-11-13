@@ -2,11 +2,12 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-REPO_ROOT="$SCRIPT_DIR/.."
-PROJECT_DIR="$REPO_ROOT/mobile/with-expo"
+IOS_DIR="${CI_PRIMARY_REPOSITORY_PATH:-"$SCRIPT_DIR/.."}"
+IOS_DIR="$(cd "$IOS_DIR" && pwd)"
+PROJECT_DIR="$(cd "$IOS_DIR/.." && pwd)"
 
 if [ ! -d "$PROJECT_DIR" ]; then
-  echo "with-expo project not found; skipping mobile setup."
+  echo "with-expo project not found at $PROJECT_DIR; skipping setup."
   exit 0
 fi
 
@@ -33,5 +34,5 @@ else
 fi
 
 echo "📚 Installing CocoaPods dependencies"
-cd ios
+cd "$IOS_DIR"
 pod install --repo-update
