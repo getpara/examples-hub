@@ -36,9 +36,9 @@ interface BodyProps {
   isEmbedded?: boolean;
   postLogin: () => Promise<void>;
   isSwitchingWallets?: boolean;
-  onBasicLoginUpgradeClick: () => Promise<void>;
-  onSkipBasicLoginUpgradeClick: (_?: boolean) => Promise<void>;
-  onBasicLoginPostLogin: () => Promise<void>;
+  onBasicLoginUpgradeConfirm: () => Promise<void>;
+  onBasicLoginUpgradeSkip: (_?: boolean) => Promise<void>;
+  onBasicLoginUpgradeComplete: () => Promise<void>;
 }
 
 export const Body = ({
@@ -56,9 +56,9 @@ export const Body = ({
   isEmbedded,
   postLogin,
   isSwitchingWallets = false,
-  onBasicLoginUpgradeClick,
-  onSkipBasicLoginUpgradeClick,
-  onBasicLoginPostLogin,
+  onBasicLoginUpgradeConfirm,
+  onBasicLoginUpgradeSkip,
+  onBasicLoginUpgradeComplete,
 }: BodyProps) => {
   const { partner } = useModalOutletContext();
 
@@ -143,9 +143,9 @@ export const Body = ({
       case AuthLoginStep.BASIC_LOGIN_UPGRADE: {
         return (
           <BasicLoginUpgrade
-            onUpgradeClick={onBasicLoginUpgradeClick}
-            onSkipClick={onSkipBasicLoginUpgradeClick}
-            onLogin={onBasicLoginPostLogin}
+            onUpgradeClick={onBasicLoginUpgradeConfirm}
+            onSkipClick={onBasicLoginUpgradeSkip}
+            onComplete={onBasicLoginUpgradeComplete}
           />
         );
       }

@@ -22,7 +22,6 @@ const AuthLoginBase = ({ step: propsStep }: { step?: AuthLoginStep }) => {
   const para = usePara();
   const closeWindow = useCloseWindow();
   const { toggleBranding, partner } = useModalOutletContext();
-  const { authMethod, isSwitchingWallets } = useLogin();
 
   const {
     fns: {
@@ -37,6 +36,8 @@ const AuthLoginBase = ({ step: propsStep }: { step?: AuthLoginStep }) => {
       getSkipBasicLoginUpgradePromptPreference,
     },
     authInfo,
+    authMethod,
+    isSwitchingWallets,
     params: { sessionId, partnerId, encryptionKey, newDeviceSessionLookupId, skipAutoLogin },
     biometricLocationHints,
   } = useLogin();
@@ -71,6 +72,7 @@ const AuthLoginBase = ({ step: propsStep }: { step?: AuthLoginStep }) => {
 
   const isKnownDeviceLogin = !!newDeviceSessionLookupId;
   const isAutoLoginAttempted = useRef(false);
+  const [shouldShowBasicLoginUpgrade, setShouldShowBasicLoginUpgrade] = useState(false);
 
   const handleLoginFromOtherDevice = async () => {
     loggedInFromAnotherDeviceRef.current = true;
@@ -242,15 +244,25 @@ const AuthLoginBase = ({ step: propsStep }: { step?: AuthLoginStep }) => {
       return;
     }
 
+    let shouldShowUpgrade = false;
+
     if (!auth.isNewUser && !fromBasicLoginUpgrade && !isEnclaveUser && !shouldSkipBasicLoginUpgradePrompt) {
-      setStep(AuthLoginStep.BASIC_LOGIN_UPGRADE);
-      return;
+      if (isIFramed) {
+        setStep(AuthLoginStep.BASIC_LOGIN_UPGRADE);
+        return;
+      }
+      shouldShowUpgrade = true;
+      setShouldShowBasicLoginUpgrade(shouldShowUpgrade);
     }
 
     const wallets = await fetchWallets();
     const isWithoutWallets = Object.values(wallets).every(arr => arr.length === 0);
 
-    const nextStep = fromKnownDevice ? AuthLoginStep.SUCCESS_FROM_KNOWN_DEVICE : AuthLoginStep.SUCCESS;
+    let nextStep = shouldShowUpgrade
+      ? AuthLoginStep.BASIC_LOGIN_UPGRADE
+      : fromKnownDevice
+        ? AuthLoginStep.SUCCESS_FROM_KNOWN_DEVICE
+        : AuthLoginStep.SUCCESS;
 
     if (partner.id === PARA_PORTAL_ID) {
       const allWalletIds = para.supportedWalletTypes.reduce(
@@ -448,7 +460,7 @@ const AuthLoginBase = ({ step: propsStep }: { step?: AuthLoginStep }) => {
     }
   };
 
-  const onBasicLoginUpgradeClick = async () => {
+  const onBasicLoginUpgradeConfirm = async () => {
     try {
       const { sessionLookupId } = await para.touchSession(true);
       await addAllSharesForNewCredential({ loginRes: postLoginRes, sessionLookupId });
@@ -457,27 +469,31 @@ const AuthLoginBase = ({ step: propsStep }: { step?: AuthLoginStep }) => {
     }
   };
 
-  const onSkipBasicLoginUpgradeClick = async (shouldSkipPrompt?: boolean) => {
+  const onBasicLoginUpgradeSkip = async (shouldSkipPrompt?: boolean) => {
     if (para.userId && shouldSkipPrompt) {
       try {
         await para.ctx.client.updateUserPreferences(para.userId, { shouldSkipBasicLoginUpgradePrompt: true });
         // Ignore error and continue in flow
       } catch {}
     }
-
-    await postLogin({
-      loginRes: postLoginRes,
-      fromBasicLoginUpgrade: true,
-      fromKnownDevice: loggedInFromAnotherDeviceRef.current,
-    });
+    if (isIFramed) {
+      await postLogin({
+        loginRes: postLoginRes,
+        fromBasicLoginUpgrade: true,
+        fromKnownDevice: loggedInFromAnotherDeviceRef.current,
+      });
+    }
+    setStep(AuthLoginStep.SUCCESS);
   };
 
-  const onBasicLoginPostLogin = async () => {
-    await postLogin({
-      loginRes: postLoginRes,
-      fromBasicLoginUpgrade: true,
-      fromKnownDevice: loggedInFromAnotherDeviceRef.current,
-    });
+  const onBasicLoginUpgradeComplete = async () => {
+    if (isIFramed) {
+      await postLogin({
+        loginRes: postLoginRes,
+        fromBasicLoginUpgrade: true,
+        fromKnownDevice: loggedInFromAnotherDeviceRef.current,
+      });
+    }
   };
 
   if (step === AuthLoginStep.SELECT_WALLET) {
@@ -485,8 +501,7 @@ const AuthLoginBase = ({ step: propsStep }: { step?: AuthLoginStep }) => {
       <SelectWallet
         sessionLookupId={sessionId}
         onSuccess={({ withDelay }) => {
-          // Basic login upgrade would have been asked prior to wallet selection, no need to handle that here
-          const nextStep = AuthLoginStep.SUCCESS;
+          const nextStep = shouldShowBasicLoginUpgrade ? AuthLoginStep.BASIC_LOGIN_UPGRADE : AuthLoginStep.SUCCESS;
 
           if (withDelay) {
             setTimeout(() => {
@@ -524,9 +539,9 @@ const AuthLoginBase = ({ step: propsStep }: { step?: AuthLoginStep }) => {
           isAddingDevice={isAddingDevice}
           postLogin={() => postLogin({})}
           isSwitchingWallets={isSwitchingWallets}
-          onBasicLoginUpgradeClick={onBasicLoginUpgradeClick}
-          onSkipBasicLoginUpgradeClick={onSkipBasicLoginUpgradeClick}
-          onBasicLoginPostLogin={onBasicLoginPostLogin}
+          onBasicLoginUpgradeConfirm={onBasicLoginUpgradeConfirm}
+          onBasicLoginUpgradeSkip={onBasicLoginUpgradeSkip}
+          onBasicLoginUpgradeComplete={onBasicLoginUpgradeComplete}
         />
       </CardContent>
     </Card>

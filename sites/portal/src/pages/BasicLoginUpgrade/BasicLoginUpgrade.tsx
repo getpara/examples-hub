@@ -15,10 +15,10 @@ import { HeaderIcon } from '../../components/HeaderIcon';
 type BasicLoginUpgradeProps = {
   onUpgradeClick?: () => Promise<void>;
   onSkipClick?: (_?: boolean) => Promise<void>;
-  onLogin?: () => Promise<void>;
+  onComplete?: () => Promise<void>;
 };
 
-export const BasicLoginUpgrade = ({ onUpgradeClick, onSkipClick, onLogin }: BasicLoginUpgradeProps) => {
+export const BasicLoginUpgrade = ({ onUpgradeClick, onSkipClick, onComplete }: BasicLoginUpgradeProps) => {
   const para = usePara();
   const closeWindow = useCloseWindow();
   const [searchParams] = useSearchParams();
@@ -140,7 +140,7 @@ export const BasicLoginUpgrade = ({ onUpgradeClick, onSkipClick, onLogin }: Basi
       setError('An unexpected error occurred during the upgrade process.');
       console.error(e);
     } finally {
-      await onLogin?.();
+      await onComplete?.();
       setIsProcessing(false);
     }
   };
@@ -151,8 +151,10 @@ export const BasicLoginUpgrade = ({ onUpgradeClick, onSkipClick, onLogin }: Basi
 
   const { partner } = useModalOutletContext();
 
-  const handleSkipClick = () => {
-    onSkipClick ? onSkipClick(shouldSkipPrompt) : closeWindow();
+  const handleSkipClick = async () => {
+    setIsProcessing(true);
+    onSkipClick ? await onSkipClick(shouldSkipPrompt) : closeWindow();
+    setIsProcessing(false);
   };
 
   return (
