@@ -1,40 +1,95 @@
 #!/bin/sh
 set -euo pipefail
 
+log() {
+  printf "%s %s\n" "[$(date +'%H:%M:%S')]" "$*"
+}
+
+log "ci_post_clone.sh starting (cwd=$(pwd))"
+
+###############################################################################
+# Resolve key paths
+###############################################################################
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 IOS_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
-PROJECT_DIR="$(cd "$IOS_DIR/.." && pwd)"
+REPO_ROOT="${CI_PRIMARY_REPOSITORY_PATH:-}"
 
-if [ ! -d "$PROJECT_DIR" ]; then
-  echo "with-expo project not found at $PROJECT_DIR; skipping setup."
-  exit 0
+if [ -z "$REPO_ROOT" ]; then
+  log "CI_PRIMARY_REPOSITORY_PATH not set; deriving repo root relative to script."
+  REPO_ROOT="$(cd "$SCRIPT_DIR/../../../.." && pwd)"
 fi
 
-echo "📁 Preparing $PROJECT_DIR"
-
-export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
-
-if command -v corepack >/dev/null 2>&1; then
-  corepack enable >/dev/null 2>&1 || true
-  corepack prepare yarn@stable --activate >/dev/null 2>&1 || true
-fi
-
-if ! command -v yarn >/dev/null 2>&1; then
-  echo "Yarn is required but not available."
+if [ ! -d "$REPO_ROOT" ]; then
+  log "❌ Repository root $REPO_ROOT not found."
   exit 1
 fi
 
-cd "$PROJECT_DIR"
-YARN_VERSION="$(yarn --version 2>/dev/null || echo "0")"
-YARN_MAJOR="${YARN_VERSION%%.*}"
-
-echo "📦 Installing JavaScript dependencies with Yarn $YARN_VERSION"
-if [ "${YARN_MAJOR:-0}" -ge 2 ] 2>/dev/null; then
-  yarn install --immutable
-else
-  yarn install --frozen-lockfile
+PROJECT_DIR="$REPO_ROOT/mobile/with-expo"
+if [ ! -d "$PROJECT_DIR" ]; then
+  log "with-expo project not found at $PROJECT_DIR; skipping setup."
+  exit 0
 fi
 
-echo "📚 Installing CocoaPods dependencies"
+log "Repo root: $REPO_ROOT"
+log "Expo project: $PROJECT_DIR"
+
+###############################################################################
+# Ensure Homebrew environment and Node availability
+###############################################################################
+BREW_BIN=""
+if [ -x "/opt/homebrew/bin/brew" ]; then
+  BREW_BIN="/opt/homebrew/bin/brew"
+elif [ -x "/usr/local/bin/brew" ]; then
+  BREW_BIN="/usr/local/bin/brew"
+elif command -v brew >/dev/null 2>&1; then
+  BREW_BIN="$(command -v brew)"
+fi
+
+if [ -z "$BREW_BIN" ]; then
+  log "❌ Homebrew not found on runner; cannot install Node/Yarn."
+  exit 1
+fi
+
+log "Using Homebrew at $BREW_BIN"
+eval "$($BREW_BIN shellenv)"
+
+if ! command -v node >/dev/null 2>&1; then
+  log "Node not found; installing via Homebrew..."
+  HOMEBREW_NO_AUTO_UPDATE=1 "$BREW_BIN" install node
+else
+  log "Node detected: $(node -v)"
+fi
+
+###############################################################################
+# Run Yarn via the checked-in release
+###############################################################################
+YARN_CJS="$(printf '%s\n' "$REPO_ROOT"/.yarn/releases/yarn-*.cjs 2>/dev/null | head -n 1 || true)"
+if [ -z "$YARN_CJS" ] || [ ! -f "$YARN_CJS" ]; then
+  log "❌ Unable to locate Yarn release in $REPO_ROOT/.yarn/releases"
+  exit 1
+fi
+
+log "Using Yarn script: $YARN_CJS"
+
+cd "$PROJECT_DIR"
+log "Installing JavaScript dependencies (immutable)..."
+if ! node "$YARN_CJS" install --immutable; then
+  log "Immutable install failed; retrying without --immutable"
+  node "$YARN_CJS" install
+fi
+
+###############################################################################
+# Ensure CocoaPods and install iOS dependencies
+###############################################################################
+if ! command -v pod >/dev/null 2>&1; then
+  log "CocoaPods not found; installing via Homebrew..."
+  HOMEBREW_NO_AUTO_UPDATE=1 "$BREW_BIN" install cocoapods
+else
+  log "CocoaPods detected: $(pod --version)"
+fi
+
+log "Running pod install in $IOS_DIR"
 cd "$IOS_DIR"
 pod install --repo-update
+
+log "ci_post_clone.sh finished successfully"
