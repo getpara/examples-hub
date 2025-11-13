@@ -1,3 +1,44 @@
+# Release (Thu Nov 13 2025)
+
+## Package Versions
+- @getpara/web-sdk@2.0.0-alpha.72
+- @getpara/wagmi-v2-integration@2.0.0-alpha.72
+- @getpara/wagmi-v2-connector@2.0.0-alpha.72
+- @getpara/viem-v2-integration@2.0.0-alpha.72
+- @getpara/viem-v1-integration@2.0.0-alpha.72
+- @getpara/user-management-client@2.0.0-alpha.72
+- @getpara/solana-web3.js-v1-integration@2.0.0-alpha.72
+- @getpara/solana-wallet-connectors@2.0.0-alpha.72
+- @getpara/solana-signers-v2-integration@2.0.0-alpha.72
+- @getpara/server-sdk@2.0.0-alpha.72
+- @getpara/react-sdk-lite@2.0.0-alpha.72
+- @getpara/react-sdk@2.0.0-alpha.72
+- @getpara/react-native-wallet@2.0.0-alpha.72
+- @getpara/react-components@2.0.0-alpha.72
+- @getpara/react-component-library@1.0.0-alpha.67
+- @getpara/react-common@2.0.0-alpha.72
+- @getpara/graz-integration@2.0.0-alpha.72
+- @getpara/graz-connector@2.0.0-alpha.72
+- @getpara/evm-wallet-connectors@2.0.0-alpha.72
+- @getpara/ethers-v6-integration@2.0.0-alpha.72
+- @getpara/ethers-v5-integration@2.0.0-alpha.72
+- @getpara/cosmos-wallet-connectors@2.0.0-alpha.72
+- @getpara/cosmjs-v0-integration@2.0.0-alpha.72
+- @getpara/core-sdk@2.0.0-alpha.72
+- @getpara/core-components@2.0.0-alpha.72
+
+### Features
+- Para Connect - UI Updates (#1300) - 5facd1356
+- allow deletion of enclave shares (#1310) - 30dce3b9e
+
+### Fixes
+- Allow closing basic upgrade portal (#1314) - 564f15808
+- Add Window Location Polyfill for RN (#1318) - 6c3fa4a9b
+
+### Chores
+- Update theme defaults (#1320) - de49f7688
+- Delete enclave shares on downgrade (#1319) - ce6abdfbf
+
 # Release (Tue Nov 11 2025)
 
 ## Package Versions
