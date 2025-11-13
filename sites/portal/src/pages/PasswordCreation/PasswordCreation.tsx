@@ -74,6 +74,7 @@ export const PasswordCreation = () => {
         password,
         passwordId,
         isForNewDevice: searchParams.get('isForNewDevice') === 'true',
+        sessionId: searchParams.get('sessionId') || undefined,
       });
 
       setPasswordCreated(true);

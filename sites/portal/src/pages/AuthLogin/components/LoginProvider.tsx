@@ -7,7 +7,6 @@ import { formatISO } from 'date-fns';
 import {
   AuthExtras,
   AuthInfo,
-  AuthMethod,
   AuthParams,
   BiometricLocationHint,
   extractAuthInfo,
@@ -16,6 +15,7 @@ import {
   TWalletType,
 } from '@getpara/user-management-client';
 import { useExtractedParams } from '../../../hooks/useExtractedParams';
+import { checkIsEnclaveUser as checkIsEnclaveUserUtil } from '../../../utils/checkIsEnclaveUser';
 
 const NOOP = () => {
   throw new Error();
@@ -125,10 +125,7 @@ export const LoginProvider = ({
   }, [para, params.sessionId]);
 
   const checkIsEnclaveUser = useCallback(async () => {
-    const auth = await para.ctx.client.sessionAuth(params.sessionId);
-    const isSLOUser = auth.loginAuthMethods?.methods.includes(AuthMethod.BASIC_LOGIN);
-    para.isEnclaveUser = isSLOUser;
-    return isSLOUser;
+    return await checkIsEnclaveUserUtil({ para, sessionId: params.sessionId });
   }, [para, params.sessionId]);
 
   const authLogin = useCallback(async (): ReturnType<typeof utils.authLogin> => {

@@ -100,6 +100,7 @@ export const PINCreation = () => {
         passwordId,
         isPIN: true,
         isForNewDevice: searchParams.get('isForNewDevice') === 'true',
+        sessionId: searchParams.get('sessionId') || undefined,
       });
 
       setPinCreated(true);

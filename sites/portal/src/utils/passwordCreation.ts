@@ -9,6 +9,7 @@ import {
 } from '@getpara/web-sdk';
 import { AuthMethodStatus, EncryptorType, KeyShareType } from '@getpara/user-management-client';
 import { ParaPortal } from '../classes/ParaPortal';
+import { checkIsEnclaveUser } from './checkIsEnclaveUser';
 
 export async function passwordCreation(
   para: ParaPortal,
@@ -19,6 +20,7 @@ export async function passwordCreation(
     passwordId,
     isPIN,
     isForNewDevice,
+    sessionId,
   }: {
     partnerId: string;
     userId: string;
@@ -26,6 +28,7 @@ export async function passwordCreation(
     passwordId: string;
     isPIN?: boolean;
     isForNewDevice?: boolean;
+    sessionId?: string;
   },
 ): Promise<void> {
   const keyPair = await getAsymmetricKeyPair(para.ctx);
@@ -48,7 +51,9 @@ export async function passwordCreation(
   // shares with new password
   // since we are redirecting to auth creation route from auth login route, the session initially
   // setup should still be available here
-  if (isForNewDevice) {
+  if (isForNewDevice && sessionId) {
+    const isEnclaveUser = await checkIsEnclaveUser({ para, sessionId });
+
     const temporaryShares = (await para.getTransmissionKeyShares({ isForNewDevice: true })).data.temporaryShares;
     const passwordEncryptedKeyshares = temporaryShares.map(share => {
       const decryptedShare = decryptWithPrivateKey(
@@ -70,5 +75,9 @@ export async function passwordCreation(
     });
 
     await para.ctx.client.uploadUserKeyShares(userId, passwordEncryptedKeyshares);
+
+    if (isEnclaveUser) {
+      await para.ctx.enclaveClient.deleteSharesWithRetry();
+    }
   }
 }

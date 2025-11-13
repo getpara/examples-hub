@@ -1,7 +1,7 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import { authCreation, AuthCreationParams } from '../../src/utils/authCreation';
 import { ParaPortal } from '../../src/classes/ParaPortal';
-import { KeyShareType, AuthMethodStatus, EncryptorType } from '@getpara/user-management-client';
+import { KeyShareType, AuthMethodStatus, EncryptorType, AuthMethod } from '@getpara/user-management-client';
 
 vi.mock('@getpara/web-sdk', async () => {
   const actual = await vi.importActual('@getpara/web-sdk');
@@ -29,6 +29,8 @@ import {
   getSHA256HashHex,
 } from '@getpara/web-sdk';
 
+const mockDeleteShares = vi.fn();
+
 describe('authCreation', () => {
   const mockParaPortal = {
     ctx: {
@@ -36,6 +38,10 @@ describe('authCreation', () => {
         patchSessionPublicKey: vi.fn(),
         uploadEncryptedWalletPrivateKey: vi.fn(),
         uploadUserKeyShares: vi.fn(),
+        sessionAuth: vi.fn().mockResolvedValue({ loginAuthMethods: { methods: [AuthMethod.BASIC_LOGIN] } }),
+      },
+      enclaveClient: {
+        deleteSharesWithRetry: mockDeleteShares,
       },
     },
     getTransmissionKeyShares: vi.fn(),
@@ -181,7 +187,7 @@ describe('authCreation', () => {
       }),
     );
 
-    await authCreation(mockParaPortal, { ...mockAuthParams, isForNewDevice: true });
+    await authCreation(mockParaPortal, { ...mockAuthParams, isForNewDevice: true, sessionId: 'mock-session-id' });
 
     expect(mockParaPortal.getTransmissionKeyShares).toHaveBeenCalledWith({
       isForNewDevice: true,
@@ -215,5 +221,7 @@ describe('authCreation', () => {
         ),
       ),
     );
+
+    expect(mockDeleteShares).toBeCalledTimes(1);
   });
 });

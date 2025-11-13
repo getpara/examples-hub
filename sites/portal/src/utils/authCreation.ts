@@ -12,6 +12,7 @@ import {
 import { ENV } from '../constants';
 import { EncryptorType, KeyShareType, PrimaryAuthInfo, AuthMethodStatus } from '@getpara/user-management-client';
 import { ParaPortal } from '../classes/ParaPortal';
+import { checkIsEnclaveUser } from './checkIsEnclaveUser';
 
 export type AuthCreationParams = {
   authInfo: CoreAuthInfo;
@@ -19,6 +20,7 @@ export type AuthCreationParams = {
   partnerId: string;
   isForNewDevice: boolean;
   userId: string;
+  sessionId?: string;
 };
 
 function getPublicKeyIdentifier(authInfo: PrimaryAuthInfo): string {
@@ -34,7 +36,7 @@ function getPublicKeyIdentifier(authInfo: PrimaryAuthInfo): string {
 
 export async function authCreation(
   para: ParaPortal,
-  { authInfo, biometricId, isForNewDevice, partnerId, userId }: AuthCreationParams,
+  { authInfo, biometricId, isForNewDevice, partnerId, userId, sessionId }: AuthCreationParams,
 ): Promise<void> {
   const { creds, userHandle, algorithm } = await createCredential(
     ENV,
@@ -64,7 +66,9 @@ export async function authCreation(
   // shares with new biometric
   // since we are redirecting to auth creation route from auth login route, the session initially
   // setup should still be available here
-  if (isForNewDevice) {
+  if (isForNewDevice && sessionId) {
+    const isEnclaveUser = await checkIsEnclaveUser({ para, sessionId });
+
     const temporaryShares = (await para.getTransmissionKeyShares({ isForNewDevice: true })).data.temporaryShares;
     const biometricEncryptedKeyshares = temporaryShares.map(share => {
       const decryptedShare = decryptWithPrivateKey(
@@ -86,5 +90,9 @@ export async function authCreation(
     });
 
     await para.ctx.client.uploadUserKeyShares(userId, biometricEncryptedKeyshares);
+
+    if (isEnclaveUser) {
+      await para.ctx.enclaveClient.deleteSharesWithRetry();
+    }
   }
 }
