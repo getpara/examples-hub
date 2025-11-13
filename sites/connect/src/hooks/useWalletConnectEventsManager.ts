@@ -6,16 +6,22 @@ import { walletKit } from '@/utils/WalletConnectUtil';
 import { SignClientTypes } from '@walletconnect/types';
 import { useCallback, useEffect } from 'react';
 import { COSMOS_SIGNING_METHODS } from '@/data/COSMOSData';
+import { useQueryClient } from '@tanstack/react-query';
+import { ACTIVE_SESSIONS_BASE_QUERY_KEY } from './useActiveSessions';
+import { styledToast } from '../utils/HelperUtil';
 
 export default function useWalletConnectEventsManager(initialized: boolean) {
+  const queryClient = useQueryClient();
+
   /******************************************************************************
    * 1. Open session proposal modal for confirmation / rejection
    *****************************************************************************/
   const onSessionProposal = useCallback((proposal: SignClientTypes.EventArguments['session_proposal']) => {
-    // set the verify context so it can be displayed in the projectInfoCard
+    // set the verify context so it can be displayed in the modal
     SettingsStore.setCurrentRequestVerifyContext(proposal.verifyContext);
     ModalStore.open('SessionProposalModal', { proposal });
   }, []);
+
   /******************************************************************************
    * 2. Open Auth modal for confirmation / rejection
    *****************************************************************************/
@@ -30,7 +36,7 @@ export default function useWalletConnectEventsManager(initialized: boolean) {
     const { topic, params, verifyContext } = requestEvent;
     const { request } = params;
     const requestSession = walletKit.engine.signClient.session.get(topic);
-    // set the verify context so it can be displayed in the projectInfoCard
+    // set the verify context so it can be displayed in the modal
     SettingsStore.setCurrentRequestVerifyContext(verifyContext);
 
     const { capsuleAddress } = SettingsStore.state;
@@ -72,7 +78,7 @@ export default function useWalletConnectEventsManager(initialized: boolean) {
           requestSession,
         });
       default:
-        return ModalStore.open('SessionUnsuportedMethodModal', {
+        return ModalStore.open('SessionUnsupportedMethodModal', {
           requestEvent,
           requestSession,
         });
@@ -89,9 +95,22 @@ export default function useWalletConnectEventsManager(initialized: boolean) {
       walletKit.on('session_request', onSessionRequest);
       // auth
       walletKit.on('session_authenticate', onSessionAuthenticate);
-      // TODOs
-      walletKit.engine.signClient.events.on('session_ping', data => console.log('ping', data));
-      walletKit.on('session_delete', data => console.log('delete', data));
+      // clean ups
+      walletKit.on('session_delete', () => {
+        queryClient.invalidateQueries({ queryKey: [ACTIVE_SESSIONS_BASE_QUERY_KEY], exact: false });
+      });
+      walletKit.on('proposal_expire', event => {
+        if (ModalStore.state.data?.proposal?.id === event.id) {
+          ModalStore.close();
+          styledToast('Session proposal has expired, please try again', 'error');
+        }
+      });
+      walletKit.on('session_request_expire', event => {
+        if (ModalStore.state.data?.requestEvent?.id === event.id) {
+          ModalStore.close();
+          styledToast('Request has expired, please try again', 'error');
+        }
+      });
     }
   }, [initialized, onSessionProposal, onSessionRequest]);
 }

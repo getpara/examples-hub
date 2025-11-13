@@ -26,12 +26,12 @@ To install components that require additional dependency installation do the fol
 
 ## Extending base Tailwind styles in other internal projects
 
-Our base tailwind css is exported from the component library as `internal-styles.css`. In order for these styles to be available in other internal projects the following should be added to the root css file (see the example in `index.css` in the `developer-portal` site):
+Our base tailwind css is exported from the component library as `theme.css`. In order for these styles to be available in other internal projects the following should be added to the root css file (see the example in `index.css` in the `developer-portal` site):
 
 ```
 @import '@getpara/react-component-library/styles.css';
-@import '@getpara/react-component-library/internal-styles.css';
-@import 'tailwindcss';
+@import '@getpara/react-component-library/theme.css';
+@import 'tailwindcss' prefix(para);
 ```
 
 This will both import the styles in css and add the source for Tailwind v4 as the internal styles from the component library in order for intellisense to work properly.

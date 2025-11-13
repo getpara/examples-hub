@@ -1,4 +1,11 @@
-@import url("@getpara/react-sdk/styles.css");
+@import url('@getpara/react-sdk/styles.css');
+@import 'tailwindcss' prefix(para);
+@import '@getpara/react-component-library/styles.css';
+@import '@getpara/react-component-library/theme.css';
+
+:root {
+  font-family: 'Inter', sans-serif;
+}
 
 * {
   box-sizing: border-box;
@@ -84,4 +91,30 @@ select:hover {
 
 i {
   margin-top: -5px !important;
+}
+
+.custom-modal {
+  --card-box-shadow:
+    0px 1px 1px 0px rgba(0, 0, 0, 0.05), 0px 4px 6px 0px rgba(34, 42, 53, 0.04), 0px 24px 68px 0px rgba(47, 48, 55, 0.05),
+    0px 2px 3px 0px rgba(0, 0, 0, 0.04);
+}
+
+.custom-modal::part(modal-container) {
+  overflow: visible;
+}
+
+.custom-modal::part(modal-body-card) {
+  --card-border-width: 0px;
+}
+
+.custom-modal::part(modal-mobile-footer) {
+  display: none;
+}
+
+.custom-modal::part(modal-footer) {
+  display: none;
+}
+
+.break-anywhere {
+  overflow-wrap: anywhere;
 }

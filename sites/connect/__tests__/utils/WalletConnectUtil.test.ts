@@ -72,12 +72,17 @@ describe('WalletConnectUtil', () => {
       const walletKit = await import('@reown/walletkit');
 
       expect(core.Core).toHaveBeenCalledWith({
+        customStoragePrefix: 'para_connect',
         projectId: 'test-project-id',
         relayUrl: customRelayerURL,
       });
 
       expect(walletKit.WalletKit.init).toHaveBeenCalledWith({
-        core: { projectId: 'test-project-id', relayUrl: customRelayerURL },
+        core: {
+          customStoragePrefix: 'para_connect',
+          projectId: 'test-project-id',
+          relayUrl: customRelayerURL,
+        },
         metadata: {
           name: 'Para Wallet',
           description: 'Para for WalletConnect',
@@ -85,8 +90,6 @@ describe('WalletConnectUtil', () => {
           icons: ['https://avatars.githubusercontent.com/u/37784886'],
         },
       });
-
-      expect(localStorageMock.setItem).toHaveBeenCalledWith('WALLETCONNECT_CLIENT_ID', 'test-client-id');
     });
 
     it('should use default relay URL when custom URL is not provided', async () => {
@@ -97,23 +100,10 @@ describe('WalletConnectUtil', () => {
       const core = await import('@walletconnect/core');
 
       expect(core.Core).toHaveBeenCalledWith({
+        customStoragePrefix: 'para_connect',
         projectId: 'test-project-id',
         relayUrl: '', // Empty string is passed as-is due to nullish coalescing
       });
-    });
-
-    it('should handle clientId retrieval error gracefully', async () => {
-      mockWeb3WalletInstance.engine.signClient.core.crypto.getClientId.mockRejectedValue(
-        new Error('Failed to get client ID'),
-      );
-
-      await createWalletKit('wss://test.com');
-
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        'Failed to set WalletConnect clientId in localStorage: ',
-        expect.any(Error),
-      );
-      expect(localStorageMock.setItem).not.toHaveBeenCalled();
     });
 
     it('should create wallet with correct metadata', async () => {
@@ -142,6 +132,7 @@ describe('WalletConnectUtil', () => {
       const core = await import('@walletconnect/core');
 
       expect(core.Core).toHaveBeenCalledWith({
+        customStoragePrefix: 'para_connect',
         projectId: undefined,
         relayUrl: 'wss://test.com',
       });

@@ -72,8 +72,7 @@ const OuterContainer = safeStyled.div<{ $isVisible: boolean; $embeddedModal: boo
   justify-content: center;
 
   @media (max-width: ${MOBILE_SIZE}px) {
-    padding: ${({ $embeddedModal, $isVisible }) =>
-      !$isVisible ? '0px' : $embeddedModal ? '12px 0px 0px' : '72px 16px 0px'};
+    padding: ${({ $embeddedModal, $isVisible }) => (!$isVisible ? '0px' : $embeddedModal ? '12px 0px 0px' : '0px')};
   }
 `;
 

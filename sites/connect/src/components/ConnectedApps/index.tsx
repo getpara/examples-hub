@@ -2,27 +2,23 @@ import React from 'react';
 
 import * as Styled from './styles';
 import ConnectedAppTag from '../ConnectedAppTag';
+import { useActiveSessions } from '../../hooks/useActiveSessions';
 
 interface ConnectedAppsProps {
-  pairings: {
-    topic: string;
-    peerMetadata: {
-      name: string;
-      icons: string[];
-    };
-  }[];
   onDelete: (topic: string) => void;
 }
 
-const ConnectedApps = ({ pairings, onDelete }: ConnectedAppsProps) => {
-  return !pairings.length ? (
-    <Styled.Container hasApps={!!pairings.length}>
+const ConnectedApps = ({ onDelete }: ConnectedAppsProps) => {
+  const { data: sessions } = useActiveSessions();
+
+  return !sessions || !Object.keys(sessions).length ? (
+    <Styled.Container hasApps={false}>
       <Styled.EmptyStateText>No Connected Apps</Styled.EmptyStateText>
     </Styled.Container>
   ) : (
-    <Styled.Container hasApps={!!pairings.length}>
-      {pairings.map(pair => (
-        <ConnectedAppTag key={pair.topic} pair={pair} onDelete={onDelete} />
+    <Styled.Container hasApps={true}>
+      {Object.values(sessions).map(session => (
+        <ConnectedAppTag key={session.topic} session={session} onDelete={onDelete} />
       ))}
     </Styled.Container>
   );

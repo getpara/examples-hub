@@ -6,10 +6,13 @@ import { useSnapshot } from 'valtio';
 export default function useInitialization() {
   const [initialized, setInitialized] = useState(false);
   const prevRelayerURLValue = useRef<string>('');
+  const initializationAttempted = useRef(false);
 
   const { relayerRegionURL } = useSnapshot(SettingsStore.state);
 
   const onInitialize = useCallback(async () => {
+    initializationAttempted.current = true;
+
     try {
       await createWalletKit(relayerRegionURL);
       setInitialized(true);
@@ -21,10 +24,11 @@ export default function useInitialization() {
   // restart transport if relayer region changes
   const onRelayerRegionChange = useCallback(() => {
     try {
-      walletKit.core.relayer.restartTransport(relayerRegionURL);
+      walletKit?.core?.relayer.restartTransport(relayerRegionURL);
       prevRelayerURLValue.current = relayerRegionURL;
     } catch (err: unknown) {
-      alert(err);
+      console.error('Failed to restart transport:', err);
+      alert(`Failed to change relay region: ${err}`);
     }
   }, [relayerRegionURL]);
 
@@ -32,7 +36,7 @@ export default function useInitialization() {
     if (!initialized) {
       onInitialize();
     }
-    if (prevRelayerURLValue.current !== relayerRegionURL) {
+    if (prevRelayerURLValue.current !== relayerRegionURL && initialized) {
       onRelayerRegionChange();
     }
   }, [initialized, onInitialize, relayerRegionURL, onRelayerRegionChange]);

@@ -1,8 +1,8 @@
-import { useQuery } from '@tanstack/react-query';
+import { QueryKey, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useInternalClient } from '../utils/useInternalClient.js';
 import { useIsFullyLoggedIn } from './useIsFullyLoggedIn.js';
 import { useStore } from '../../stores/useStore.js';
-import { useContext } from 'react';
+import { useContext, useEffect, useMemo } from 'react';
 import { Account, getEmbeddedAccount } from '../../actions/getEmbeddedAccount.js';
 import type {
   CosmosExternalWalletContextType,
@@ -116,6 +116,45 @@ function pickCosmosAccount(account: CosmosAccountType | undefined): CosmosAccoun
   return rest as CosmosAccountType;
 }
 
+// Global state for connection tracking to avoid redundant invalidations
+let lastConnectionState = '';
+let invalidationTimeoutId: NodeJS.Timeout | null = null;
+
+// Invalidation hook to manage query invalidation based on external connection state changes
+const useInvalidation = (connectionStates: { evm: boolean; cosmos: boolean; solana: boolean }, queryKey: QueryKey) => {
+  const queryClient = useQueryClient();
+  useEffect(() => {
+    // Create a stable string representation of the connection state
+    const connectionStateKey = `${connectionStates.evm}-${connectionStates.cosmos}-${connectionStates.solana}`;
+
+    // Only proceed if the state actually changed
+    if (connectionStateKey === lastConnectionState) {
+      return;
+    }
+
+    lastConnectionState = connectionStateKey;
+
+    // Clear any existing timeout
+    if (invalidationTimeoutId) {
+      clearTimeout(invalidationTimeoutId);
+    }
+
+    // Schedule the invalidation for the next tick
+    invalidationTimeoutId = setTimeout(() => {
+      queryClient.invalidateQueries({ queryKey });
+      invalidationTimeoutId = null;
+    }, 0);
+
+    // Cleanup on unmount
+    return () => {
+      if (invalidationTimeoutId) {
+        clearTimeout(invalidationTimeoutId);
+        invalidationTimeoutId = null;
+      }
+    };
+  }, [connectionStates, queryClient]);
+};
+
 /**
  * React Query hook for retrieving the current embedded account and connected external wallets.
  *
@@ -136,34 +175,44 @@ export const useAccount = ({ cosmos }: UseAccountParameters = {}): UseAccountRet
   const evmContext = useStore(state => state.evmContext);
   const { useAccount: useEvmAccount } = useContext(evmContext);
   const evmAccount = useEvmAccount();
-  const evmQueryKeys = [evmAccount?.status, evmAccount?.addresses, evmAccount?.chainId];
+  const evmQueryKeys = [evmAccount?.addresses, evmAccount?.chainId];
 
   const cosmosContext = useStore(state => state.cosmosContext);
   const { useAccount: useCosmosAccount } = useContext(cosmosContext);
   const cosmosAccount = useCosmosAccount(cosmos);
-  const cosmosQueryKeys = [cosmosAccount?.status, cosmosAccount?.data];
+  const cosmosQueryKeys = [cosmosAccount?.data];
 
   const solanaContext = useStore(state => state.solanaContext);
   const { useWallet: useSolanaWallet } = useContext(solanaContext);
   const solanaWallet = useSolanaWallet();
-  const solanaQueryKeys = [
-    solanaWallet?.wallet?.adapter?.connected,
-    solanaWallet?.wallet?.adapter?.connecting,
-    solanaWallet?.wallet?.adapter?.publicKey,
-  ];
+  const solanaQueryKeys = [solanaWallet?.wallet?.adapter?.publicKey];
   const solanaAdapter = solanaWallet?.wallet?.adapter;
+
+  const queryKey = [
+    ACCOUNT_BASE_KEY,
+    isFullyLoggedIn ?? null,
+    isFullyLoggedInLoading,
+    client?.userId ?? null,
+    evmQueryKeys,
+    cosmosQueryKeys,
+    solanaQueryKeys,
+  ];
+
+  // Combine all connection states into a single dependency
+  const connectionStates = useMemo(() => {
+    return {
+      evm: !!evmAccount?.isConnected,
+      cosmos: !!cosmosAccount?.isConnected,
+      solana: !!solanaWallet?.wallet?.adapter?.connected,
+    };
+  }, [!!evmAccount?.isConnected, !!cosmosAccount?.isConnected, !!solanaWallet?.wallet?.adapter?.connected]);
+
+  // Use the invalidation hook (only one instance will be active)
+  useInvalidation(connectionStates, queryKey);
 
   const { data, isLoading } = useQuery({
     enabled: isSuccess && !!client,
-    queryKey: [
-      ACCOUNT_BASE_KEY,
-      isFullyLoggedIn ?? null,
-      isFullyLoggedInLoading,
-      client?.userId ?? null,
-      evmQueryKeys,
-      cosmosQueryKeys,
-      solanaQueryKeys,
-    ],
+    queryKey: queryKey,
     queryFn: async () => {
       const paraAccount = await getEmbeddedAccount(client, isFullyLoggedIn);
 
@@ -249,5 +298,8 @@ export const useAccount = ({ cosmos }: UseAccountParameters = {}): UseAccountRet
     },
   };
 
-  return { ...(data ?? defaultResp), isLoading: isFullyLoggedInLoading || isLoading };
+  return {
+    ...(data ?? defaultResp),
+    isLoading: isFullyLoggedInLoading || isLoading,
+  };
 };

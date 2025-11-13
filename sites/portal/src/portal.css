@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Jersey+15&family=Jersey+25&family=Open+Sans&family=Inter&family=Poppins&family=Merriweather&family=Space+Mono&family=Cormorant&family=Source+Sans+Pro&family=Source+Serif+Pro&family=Roboto&family=Rubik&display=swap');
+@import 'tailwindcss' prefix(para);
 @import '@getpara/react-component-library/styles.css';
-@import '@getpara/react-component-library/internal-styles.css';
-@import 'tailwindcss';
+@import '@getpara/react-component-library/theme.css';
 @source "../../../packages/react-component-library/";
 
 html,

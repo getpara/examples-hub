@@ -1,19 +1,22 @@
-import { Toaster } from 'react-hot-toast';
 import { ReactElement, ReactNode, useEffect } from 'react';
 
 import Layout from '@/components/Layout';
-import Modal from '@/components/Modal';
 import useInitialization from '@/hooks/useInitialization';
 import useWalletConnectEventsManager from '@/hooks/useWalletConnectEventsManager';
 import { walletKit } from '@/utils/WalletConnectUtil';
 import { RELAYER_EVENTS } from '@walletconnect/core';
 import { AppProps } from 'next/app';
+// @ts-ignore
 import '../../public/main.css';
 import { styledToast } from '@/utils/HelperUtil';
 import Head from 'next/head';
 import { NextPage } from 'next';
 import { QueryProvider } from '../context/QueryProvider';
 import { ParaProvider } from '../context/ParaProvider';
+import { ReownModal } from '../components/ReownModal/ReownModal';
+import { Toaster } from '@getpara/react-component-library';
+import { CircleCheck } from 'lucide-react';
+import { MultipleTabDetection } from '../components/MultipleTabDetection';
 
 export type NextPageWithLayout<P = {}, IP = P> = NextPage<P, IP> & {
   getLayout?: (page: ReactElement) => ReactNode;
@@ -23,12 +26,13 @@ type AppPropsWithLayout = AppProps & {
   Component: NextPageWithLayout;
 };
 
-export default function App({ Component, pageProps }: AppPropsWithLayout) {
+function AppContent({ Component, pageProps }: AppPropsWithLayout) {
   useEffect(() => {
     if (location.href.includes('walletconnect.getpara.com')) {
       location.href = location.href.replace('walletconnect.getpara.com', 'connect.getpara.com');
     }
   }, []);
+
   // Step 1 - Initialize wallets and wallet connect client
   const initialized = useInitialization();
 
@@ -36,12 +40,12 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
   useWalletConnectEventsManager(initialized);
   useEffect(() => {
     if (!initialized) return;
-    walletKit.core.relayer.on(RELAYER_EVENTS.connect, () => {
+    walletKit?.core.relayer.on(RELAYER_EVENTS.connect, () => {
       styledToast('Network connection is restored!', 'success', 'network-connection-restored');
     });
 
-    walletKit.core.relayer.on(RELAYER_EVENTS.disconnect, () => {
-      // no-op
+    walletKit?.core.relayer.on(RELAYER_EVENTS.disconnect, () => {
+      styledToast('Network connection lost.', 'error', 'network-connection-lost');
     });
   }, [initialized]);
 
@@ -150,7 +154,6 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
         {/* Fonts */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet" />
 
         {/* DNS Prefetch for performance */}
         <link rel="dns-prefetch" href="//getpara.com" />
@@ -161,6 +164,11 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
         <meta httpEquiv="X-Frame-Options" content="DENY" />
         <meta httpEquiv="X-XSS-Protection" content="1; mode=block" />
         <meta name="referrer" content="strict-origin-when-cross-origin" />
+
+        <link
+          href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
+          rel="stylesheet"
+        />
       </Head>
       <style jsx global>{`
         body {
@@ -168,23 +176,29 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
           padding: 0px;
         }
       `}</style>
-      <QueryProvider>
-        <ParaProvider>
-          <>
-            <Layout initialized={initialized}>
-              <Toaster
-                toastOptions={{
-                  style: {
-                    fontFamily: 'Inter',
-                  },
-                }}
-              />
-              {getLayout(<Component {...pageProps} />)}
-            </Layout>
-            <Modal />
-          </>
-        </ParaProvider>
-      </QueryProvider>
+      <ParaProvider>
+        <>
+          <Layout initialized={initialized}>
+            <MultipleTabDetection />
+            <Toaster
+              theme="light"
+              icons={{
+                success: <CircleCheck className="para:stroke-background para:fill-green-600 para:size-5" />,
+              }}
+            />
+            {getLayout(<Component {...pageProps} />)}
+          </Layout>
+          <ReownModal />
+        </>
+      </ParaProvider>
     </>
+  );
+}
+
+export default function App(props: AppPropsWithLayout) {
+  return (
+    <QueryProvider>
+      <AppContent {...props} />
+    </QueryProvider>
   );
 }

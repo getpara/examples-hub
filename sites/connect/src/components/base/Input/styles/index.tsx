@@ -11,7 +11,6 @@ export const CustomInput = styled.input<CustomInputProps>`
   border-radius: 12px;
   padding: 14px 12px 14px 12px;
   gap: 10px;
-  box-shadow: 0px 1px 1px 0px #1212121a;
   font-family: Inter;
   font-size: 14px;
   font-weight: 500;
@@ -21,6 +20,9 @@ export const CustomInput = styled.input<CustomInputProps>`
   color: #000000;
   outline: none;
   border: none;
+  box-shadow:
+    0 1px 1px 0 rgba(18, 18, 18, 0.1),
+    0 0 0 1px rgba(18, 18, 18, 0.1);
 
   &::placeholder {
     color: #999999;
@@ -52,6 +54,9 @@ export const InputContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
+  box-shadow:
+    0 1px 1px 0 rgba(18, 18, 18, 0.1),
+    0 0 0 1px rgba(18, 18, 18, 0.1);
 
   @media (max-width: 768px) {
     width: 256px;

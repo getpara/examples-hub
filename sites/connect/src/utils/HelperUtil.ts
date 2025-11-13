@@ -1,5 +1,5 @@
-import toast from 'react-hot-toast';
 import { EIP155_CHAINS, TEIP155Chain } from '@/data/EIP155Data';
+import { toast } from '@getpara/react-component-library';
 
 import { ethers } from 'ethers';
 
@@ -94,26 +94,22 @@ export function formatChainName(chainId: string) {
   return EIP155_CHAINS[chainId as TEIP155Chain]?.name ?? chainId;
 }
 
-export function styledToast(message: string, type: string, id?: string) {
+export function styledToast(message: string, type: 'success' | 'error', id?: string) {
   if (type === 'success') {
-    toast.success(message, {
+    toast('Success!', {
       id,
-      position: 'bottom-left',
-      style: {
-        borderRadius: '10px',
-        background: '#333',
-        color: '#fff',
-      },
+      description: message,
+      position: 'bottom-right',
+      icon: null,
+      classNames: { title: 'para:!text-green-600' },
     });
   } else if (type === 'error') {
-    toast.error(message, {
+    toast('Error!', {
       id,
-      position: 'bottom-left',
-      style: {
-        borderRadius: '10px',
-        background: '#333',
-        color: '#fff',
-      },
+      description: message,
+      position: 'bottom-right',
+      icon: null,
+      classNames: { title: 'para:!text-destructive' },
     });
   }
 }

@@ -15,10 +15,6 @@ export default defineConfig({
     viteStaticCopy({
       targets: [
         {
-          src: 'src/global.css',
-          dest: '',
-        },
-        {
           src: 'src/theme.css',
           dest: '',
         },

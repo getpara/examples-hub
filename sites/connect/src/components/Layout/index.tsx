@@ -1,9 +1,10 @@
-import RouteTransition from '@/components/RouteTransition';
 import { Loading } from '@nextui-org/react';
 import { ReactNode } from 'react';
 
-import * as Styled from './styles';
-import Navbar from '../base/Navbar';
+import { useAccount } from '@getpara/react-sdk';
+import { PageWrapper } from '../PageWrapper';
+import { AuthedAppBar } from '../appBars/AuthedAppBar';
+import { LandingAppBar } from '../appBars/LandingAppBar';
 
 /**
  * Types
@@ -17,16 +18,24 @@ interface Props {
  * Container
  */
 export default function Layout({ children, initialized }: Props) {
+  const { isConnected, isLoading } = useAccount();
+
   return (
     <>
       {initialized ? (
-        <Styled.Container>
-          <Navbar />
-          <RouteTransition>{children}</RouteTransition>
-          <Styled.BackgroundContainer>
-            <Styled.Background src={'/background.png'} alt="Background Image" />
-          </Styled.BackgroundContainer>
-        </Styled.Container>
+        <PageWrapper>
+          {isConnected && !isLoading ? (
+            <>
+              <AuthedAppBar />
+              {children}
+            </>
+          ) : (
+            <>
+              <LandingAppBar />
+              {children}
+            </>
+          )}
+        </PageWrapper>
       ) : (
         <Loading />
       )}

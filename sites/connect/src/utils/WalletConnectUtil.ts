@@ -6,6 +6,7 @@ export async function createWalletKit(relayerRegionURL: string) {
   const core = new Core({
     projectId: process.env.NEXT_PUBLIC_PROJECT_ID,
     relayUrl: relayerRegionURL ?? process.env.NEXT_PUBLIC_RELAY_URL,
+    customStoragePrefix: 'para_connect',
   });
   walletKit = await WalletKit.init({
     core,
@@ -16,13 +17,6 @@ export async function createWalletKit(relayerRegionURL: string) {
       icons: ['https://avatars.githubusercontent.com/u/37784886'],
     },
   });
-
-  try {
-    const clientId = await walletKit.engine.signClient.core.crypto.getClientId();
-    localStorage.setItem('WALLETCONNECT_CLIENT_ID', clientId);
-  } catch (error) {
-    console.error('Failed to set WalletConnect clientId in localStorage: ', error);
-  }
 }
 
 export async function updateSignClientChainId(chainId: string, address: string) {

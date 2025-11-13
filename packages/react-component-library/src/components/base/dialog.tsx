@@ -39,7 +39,12 @@ const DialogOverlay = React.forwardRef(function DialogOverlay(
   );
 });
 
-function DialogContent({ className, children, ...props }: React.ComponentProps<typeof DialogPrimitive.Content>) {
+function DialogContent({
+  className,
+  children,
+  noClose,
+  ...props
+}: React.ComponentProps<typeof DialogPrimitive.Content> & { noClose?: boolean }) {
   return (
     <DialogPortal data-slot="dialog-portal">
       <DialogOverlay />
@@ -52,12 +57,40 @@ function DialogContent({ className, children, ...props }: React.ComponentProps<t
         {...props}
       >
         {children}
+        {!noClose && (
+          <DialogPrimitive.Close className="para:ring-offset-background para:focus:ring-ring para:data-[state=open]:bg-accent para:data-[state=open]:text-muted-foreground para:absolute para:top-4 para:right-4 para:rounded-xs para:opacity-70 para:transition-opacity para:hover:opacity-100 para:focus:ring-2 para:focus:ring-offset-2 para:focus:outline-hidden para:disabled:pointer-events-none para:[&_svg]:pointer-events-none para:[&_svg]:shrink-0 para:[&_svg:not([class*='size-'])]:size-4">
+            <XIcon />
+            <span className="para:sr-only">Close</span>
+          </DialogPrimitive.Close>
+        )}
+      </DialogPrimitive.Content>
+    </DialogPortal>
+  );
+}
+
+function DialogContentNoPortal({
+  className,
+  children,
+  noClose,
+  ...props
+}: React.ComponentProps<typeof DialogPrimitive.Content> & { noClose?: boolean }) {
+  return (
+    <DialogPrimitive.Content
+      data-slot="dialog-content"
+      className={cn(
+        'para:bg-background para:data-[state=open]:animate-in para:data-[state=closed]:animate-out para:data-[state=closed]:fade-out-0 para:data-[state=open]:fade-in-0 para:data-[state=closed]:zoom-out-95 para:data-[state=open]:zoom-in-95 para:fixed para:top-[50%] para:left-[50%] para:z-50 para:grid para:grid-cols-[minmax(0,1fr)] para:w-full para:max-w-[calc(100%-2rem)] para:translate-x-[-50%] para:translate-y-[-50%] para:gap-4 para:rounded-lg para:border para:border-border para:p-6 para:shadow-lg para:duration-200 para:sm:max-w-lg',
+        className,
+      )}
+      {...props}
+    >
+      {children}
+      {!noClose && (
         <DialogPrimitive.Close className="para:ring-offset-background para:focus:ring-ring para:data-[state=open]:bg-accent para:data-[state=open]:text-muted-foreground para:absolute para:top-4 para:right-4 para:rounded-xs para:opacity-70 para:transition-opacity para:hover:opacity-100 para:focus:ring-2 para:focus:ring-offset-2 para:focus:outline-hidden para:disabled:pointer-events-none para:[&_svg]:pointer-events-none para:[&_svg]:shrink-0 para:[&_svg:not([class*='size-'])]:size-4">
           <XIcon />
           <span className="para:sr-only">Close</span>
         </DialogPrimitive.Close>
-      </DialogPrimitive.Content>
-    </DialogPortal>
+      )}
+    </DialogPrimitive.Content>
   );
 }
 
@@ -112,4 +145,5 @@ export {
   DialogPortal,
   DialogTitle,
   DialogTrigger,
+  DialogContentNoPortal,
 };

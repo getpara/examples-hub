@@ -1,7 +1,6 @@
+@import 'tailwindcss' prefix(para);
 @import '@getpara/react-component-library/styles.css';
-@import '@getpara/react-component-library/internal-styles.css';
-@import 'tailwindcss';
-@source "../../../packages/react-component-library/";
+@import '@getpara/react-component-library/theme.css';
 
 :root {
   font-family: 'Inter', sans-serif;

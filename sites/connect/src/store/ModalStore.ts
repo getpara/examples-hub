@@ -19,8 +19,7 @@ interface State {
     | 'SessionSignModal'
     | 'SessionSignTypedDataModal'
     | 'SessionSendTransactionModal'
-    | 'SessionUnsuportedMethodModal'
-    | 'SessionRegenerateModal'
+    | 'SessionUnsupportedMethodModal'
     | 'SessionSignCosmosModal'
     | 'AuthRequestModal'
     | 'SwitchChainModal';
@@ -32,6 +31,8 @@ interface State {
  */
 const state = proxy<State>({
   open: false,
+  view: undefined,
+  data: {},
 });
 
 /**
@@ -48,6 +49,24 @@ const ModalStore = {
 
   close() {
     state.open = false;
+  },
+
+  isScam() {
+    return (
+      state.data?.proposal?.verifyContext?.verified.isScam ||
+      state.data?.sessionAuthenticatePayload?.verifyContext?.verified.isScam ||
+      state.data?.requestEvent?.verifyContext?.verified.isScam ||
+      false
+    );
+  },
+
+  isDomainMismatch() {
+    return (
+      state.data?.proposal?.verifyContext?.verified.validation === 'INVALID' ||
+      state.data?.sessionAuthenticatePayload?.verifyContext?.verified.validation === 'INVALID' ||
+      state.data?.requestEvent?.verifyContext?.verified.validation === 'INVALID' ||
+      false
+    );
   },
 };
 

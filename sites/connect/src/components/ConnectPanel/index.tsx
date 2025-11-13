@@ -9,16 +9,13 @@ import Input from '../base/Input';
 import ConnectedApps from '../ConnectedApps';
 import Divider from '../base/Divider';
 import MyWallet from '../MyWallet';
-import ConnectButton from '../ConnectButton';
 import useIsMobile from '@/hooks/MobileContext';
-import PanelFooterText from '../PanelFooterText';
 import toast from 'react-hot-toast';
 import { Tooltip } from '@mui/material';
-import { useAccount } from '@getpara/react-sdk';
 import { useSelectedWallet } from '@/hooks/useSelectedWallet';
+import PanelFooterText from '../PanelFooterText';
 
 interface Props {
-  pairings: any;
   onDelete: (topic: string) => void;
   onConnect: (uri: string) => void;
   logout: () => void;
@@ -53,8 +50,7 @@ const ParaHeader = () => {
   );
 };
 
-const ConnectPanel = ({ pairings, onDelete, onConnect, setUriState, logout, uriState }: Props) => {
-  const { isConnected } = useAccount();
+const ConnectPanel = ({ onDelete, onConnect, setUriState, logout, uriState }: Props) => {
   const { wallet } = useSelectedWallet();
   const isMobile = useIsMobile();
 
@@ -67,24 +63,20 @@ const ConnectPanel = ({ pairings, onDelete, onConnect, setUriState, logout, uriS
   };
 
   return (
-    <div>
-      <InfoPanel>
-        <Flex alignItems="center" flexDirection="column">
-          <Flex alignItems="center" justifyContent="center">
-            <ParaHeader />
-          </Flex>
-          <Flex mt="30px">
-            <Styled.SubheaderText>
-              Para helps you easily onboard to and interact with the onchain apps you love. Para Portal lets you securely
-              manage your Para Wallet and use it everywhere.
-            </Styled.SubheaderText>
-          </Flex>
-          {!isConnected ? (
-            <Styled.FullWidthContainer mt="25px">
-              <ConnectButton />
-            </Styled.FullWidthContainer>
-          ) : (
-            <Flex flexDirection="column" mt="30px">
+    <div className="para:flex-1 para:w-full para:p-4 para:flex para:items-center para:justify-center">
+      <div className="para:flex para:flex-col para:gap-2 para:w-full para:max-w-[592px]">
+        <InfoPanel>
+          <Flex alignItems="center" flexDirection="column">
+            <Flex alignItems="center" justifyContent="center">
+              <ParaHeader />
+            </Flex>
+            <Flex mt="30px">
+              <Styled.SubheaderText>
+                Para helps you easily onboard to and interact with the onchain apps you love. Para Portal lets you securely
+                manage your Para Wallet and use it everywhere.
+              </Styled.SubheaderText>
+            </Flex>
+            <Flex flexDirection="column" mt="30px" width="100%">
               {isMobile ? (
                 <>
                   <Flex>
@@ -105,21 +97,25 @@ const ConnectPanel = ({ pairings, onDelete, onConnect, setUriState, logout, uriS
                     </Tooltip>
                   </Flex>
                   <Flex mb="10px">
-                    <Input value={uriState} onChange={(event: any) => setUriState(event.target.value)} />
+                    <Input
+                      value={uriState}
+                      onChange={(event: any) => setUriState(event.target.value)}
+                      placeholder="eg. wc:d24a8..."
+                    />
                   </Flex>
                   <Flex mb="15px">
-                    <Flex alignItems="center">
-                      <Button disabled={wallet?.type === 'SOLANA'} onClick={handleConnect}>
+                    <Flex alignItems="center" width="100%">
+                      <Button disabled={wallet?.type === 'SOLANA'} onClick={handleConnect} isFullWidth>
                         Connect
                       </Button>
                     </Flex>
                   </Flex>
                   <Styled.FullWidthContainer>
-                    <ConnectedApps pairings={pairings} onDelete={onDelete} />
+                    <ConnectedApps onDelete={onDelete} />
                   </Styled.FullWidthContainer>
                 </>
               ) : (
-                <Flex alignItems="center">
+                <Flex alignItems="center" width="100%">
                   <Input
                     value={uriState}
                     onChange={(event: any) => setUriState(event.target.value)}
@@ -151,7 +147,7 @@ const ConnectPanel = ({ pairings, onDelete, onConnect, setUriState, logout, uriS
                     </Tooltip>
                   </Flex>
                   <Styled.FullWidthContainer>
-                    <ConnectedApps pairings={pairings} onDelete={onDelete} />
+                    <ConnectedApps onDelete={onDelete} />
                   </Styled.FullWidthContainer>
                 </Flex>
               )}
@@ -162,10 +158,10 @@ const ConnectPanel = ({ pairings, onDelete, onConnect, setUriState, logout, uriS
                 <MyWallet logout={logout} />
               </div>
             </Flex>
-          )}
-          {!isConnected && <PanelFooterText />}
-        </Flex>
-      </InfoPanel>
+          </Flex>
+        </InfoPanel>
+        <PanelFooterText />
+      </div>
     </div>
   );
 };

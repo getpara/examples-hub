@@ -4,10 +4,8 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 
 export const Container = styled.div`
   width: 100vw;
-  height: 44px;
   display: flex;
-  align-items: center;
-  flex: 3;
+  align-items: flex-end;
 
   @media (max-width: 768px) {
     flex: 1;

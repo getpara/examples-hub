@@ -20,9 +20,11 @@ export function ParaProvider({
       paraClientConfig={{
         apiKey: process.env.NEXT_PUBLIC_API_KEY ?? '',
       }}
-      config={{ appName: 'Para Portal' }}
+      config={{ appName: 'Para Portal', disableEmbeddedModal: true }}
       paraModalConfig={{
-        oAuthMethods: ['APPLE', 'DISCORD', 'FACEBOOK', 'GOOGLE', 'TWITTER', 'TELEGRAM', 'FARCASTER'],
+        oAuthMethods: ['GOOGLE', 'APPLE', 'DISCORD', 'FACEBOOK', 'TWITTER', 'TELEGRAM', 'FARCASTER'],
+        bareModal: true,
+        isOpen: true,
       }}
       externalWalletConfig={{
         wallets: [...EXTERNAL_WALLET_TYPES],

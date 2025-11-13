@@ -53,7 +53,7 @@ describe('ModalStore', () => {
     });
 
     it('should open modal with only view (no data)', () => {
-      const testView = 'SessionUnsuportedMethodModal';
+      const testView = 'SessionUnsupportedMethodModal';
 
       ModalStore.open(testView, undefined);
 
@@ -111,14 +111,9 @@ describe('ModalStore', () => {
       expect(ModalStore.state.view).toBe('SessionSendTransactionModal');
     });
 
-    it('should support SessionUnsuportedMethodModal view', () => {
-      ModalStore.open('SessionUnsuportedMethodModal', undefined);
-      expect(ModalStore.state.view).toBe('SessionUnsuportedMethodModal');
-    });
-
-    it('should support SessionRegenerateModal view', () => {
-      ModalStore.open('SessionRegenerateModal', undefined);
-      expect(ModalStore.state.view).toBe('SessionRegenerateModal');
+    it('should support SessionUnsupportedMethodModal view', () => {
+      ModalStore.open('SessionUnsupportedMethodModal', undefined);
+      expect(ModalStore.state.view).toBe('SessionUnsupportedMethodModal');
     });
 
     it('should support SessionSignCosmosModal view', () => {

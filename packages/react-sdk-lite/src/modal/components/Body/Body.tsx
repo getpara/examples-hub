@@ -59,10 +59,6 @@ const MIN_HEIGHT = {
   [ModalStep.ADD_FUNDS_AWAITING]: '680px',
 };
 
-const PADDING_TOP = {
-  [ModalStep.TELEGRAM_OAUTH]: '36px',
-};
-
 export const Body = ({
   oAuthMethods,
   twoFactorAuthEnabled,
@@ -354,12 +350,7 @@ const InnerContainer = safeStyled.div<{ $embeddedModal: boolean; $step: ModalSte
   height: ${({ $step }) => MIN_HEIGHT[$step] ?? 'auto'};
 
   @media (max-width: ${MOBILE_SIZE}px) {
-    padding: ${({ $embeddedModal, $step, $isIFrameStep }) =>
-      $isIFrameStep ? '0px' : $embeddedModal ? '12px 0px 0px' : `${PADDING_TOP[$step] ?? '72px'} 16px 0px`};
-  }
-
-  cpsl-auth-modal.force-mobile-media & {
-    padding: 72px 16px 0px;
+    padding: ${({ $embeddedModal, $isIFrameStep }) => ($isIFrameStep ? '0px' : $embeddedModal ? '12px 0px 0px' : '0px')};
   }
 `;
 

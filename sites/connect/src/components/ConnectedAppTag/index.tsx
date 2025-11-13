@@ -1,31 +1,25 @@
 import React, { useState } from 'react';
 
 import * as Styled from './styles';
+import { SessionTypes } from '@walletconnect/types';
 
 interface ConnectedAppTagProps {
-  pair: {
-    topic: string;
-    peerMetadata: {
-      name: string;
-      icons: string[];
-    };
-  };
+  session: SessionTypes.Struct;
   onDelete: (topic: string) => void;
 }
 
-const ConnectedAppTag = ({ pair, onDelete }: ConnectedAppTagProps) => {
+const ConnectedAppTag = ({ session, onDelete }: ConnectedAppTagProps) => {
   const [isHoveringState, setIsHoveringState] = useState(false);
-  const { peerMetadata } = pair;
+  const {
+    topic,
+    peer: { metadata: peerMetadata },
+  } = session;
 
   return (
-    <Styled.Tag
-      onMouseEnter={() => setIsHoveringState(true)}
-      onMouseLeave={() => setIsHoveringState(false)}
-      key={pair.topic}
-    >
+    <Styled.Tag onMouseEnter={() => setIsHoveringState(true)} onMouseLeave={() => setIsHoveringState(false)} key={topic}>
       <Styled.TagIcon backgroundImageUrl={peerMetadata?.icons[0] ?? ''}></Styled.TagIcon>
       <Styled.TagName>{peerMetadata?.name}</Styled.TagName>
-      {isHoveringState && <Styled.DeleteTag onClick={() => onDelete(pair.topic)} />}
+      {isHoveringState && <Styled.DeleteTag onClick={() => onDelete(topic)} />}
     </Styled.Tag>
   );
 };

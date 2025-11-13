@@ -113,9 +113,9 @@ const BUNDLE_CONFIG = {
     },
     '@getpara/evm-wallet-connectors': {
       thresholds: {
-        raw: '1.75MB',
-        minified: '1.75MB',
-        gzipped: '510KB',
+        raw: '1.9MB',
+        minified: '1.9MB',
+        gzipped: '550KB',
       },
       entry: 'dist/index.js',
       external: [

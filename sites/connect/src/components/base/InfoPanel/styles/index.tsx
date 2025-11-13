@@ -5,7 +5,7 @@ interface ContainerProps {
 }
 
 export const Container = styled.div<ContainerProps>`
-  width: ${({ isMobile }) => (isMobile ? '340px' : '561px')};
+  width: 100%;
   border-radius: 32px;
   border: 2px solid;
   background:

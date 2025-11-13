@@ -11,17 +11,14 @@ import {
   styledToast,
 } from '../../src/utils/HelperUtil';
 
-// Mock toast for testing
-vi.mock('react-hot-toast', () => ({
-  default: {
-    success: vi.fn(),
-    error: vi.fn(),
-  },
+// Add this mock for the toast function
+vi.mock('@getpara/react-component-library', () => ({
+  toast: vi.fn(),
 }));
 
 // ethers is imported for actual utility function testing (no mocking needed for synchronous functions)
 
-import toast from 'react-hot-toast';
+import { toast } from '@getpara/react-component-library';
 
 describe('HelperUtil', () => {
   describe('truncate', () => {
@@ -260,13 +257,14 @@ describe('HelperUtil', () => {
       const message = 'Operation successful';
       styledToast(message, 'success');
 
-      expect(toast.success).toHaveBeenCalledWith(message, {
-        position: 'bottom-left',
-        style: {
-          borderRadius: '10px',
-          background: '#333',
-          color: '#fff',
+      expect(toast).toHaveBeenCalledWith('Success!', {
+        classNames: {
+          title: 'para:!text-green-600',
         },
+        description: message,
+        icon: null,
+        id: undefined,
+        position: 'bottom-right',
       });
     });
 
@@ -274,13 +272,14 @@ describe('HelperUtil', () => {
       const message = 'Operation failed';
       styledToast(message, 'error');
 
-      expect(toast.error).toHaveBeenCalledWith(message, {
-        position: 'bottom-left',
-        style: {
-          borderRadius: '10px',
-          background: '#333',
-          color: '#fff',
+      expect(toast).toHaveBeenCalledWith('Error!', {
+        classNames: {
+          title: 'para:!text-destructive',
         },
+        description: message,
+        icon: null,
+        id: undefined,
+        position: 'bottom-right',
       });
     });
 
@@ -288,8 +287,7 @@ describe('HelperUtil', () => {
       const message = 'Some message';
       styledToast(message, 'unknown');
 
-      expect(toast.success).not.toHaveBeenCalled();
-      expect(toast.error).not.toHaveBeenCalled();
+      expect(toast).not.toHaveBeenCalled();
     });
   });
 });
