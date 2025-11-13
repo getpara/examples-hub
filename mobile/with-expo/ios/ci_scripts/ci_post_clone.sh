@@ -12,15 +12,11 @@ fi
 
 echo "📁 Preparing $PROJECT_DIR"
 
+export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
+
 if command -v corepack >/dev/null 2>&1; then
   corepack enable >/dev/null 2>&1 || true
-fi
-
-if ! command -v yarn >/dev/null 2>&1; then
-  if command -v corepack >/dev/null 2>&1; then
-    echo "Activating Yarn via Corepack"
-    corepack prepare yarn@stable --activate >/dev/null 2>&1 || true
-  fi
+  corepack prepare yarn@stable --activate >/dev/null 2>&1 || true
 fi
 
 if ! command -v yarn >/dev/null 2>&1; then
