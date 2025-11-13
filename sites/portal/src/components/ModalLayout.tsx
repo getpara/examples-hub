@@ -14,8 +14,8 @@ import { NetworkSpeedBanner } from '@getpara/react-common';
 import { isIFramed } from '../utils/isIFramed';
 
 const DEFAULT_THEME = {
-  foregroundColor: '#000',
-  backgroundColor: '#FFF',
+  foregroundColor: '#141414',
+  backgroundColor: '#FFFFFF',
 };
 
 const sendHeightToParent = (height: number, trustedOrigin: string) => {

@@ -3,8 +3,8 @@ import { Theme } from './interface.js';
 export const MOBILE_SIZE = 480;
 
 export const DEFAULT_THEME: Theme = {
-  foregroundColor: '#121212',
-  backgroundColor: '#FAFAFA',
+  foregroundColor: '#141414',
+  backgroundColor: '#FFFFFF',
 };
 
 export const COLOR_MIXES = [0, 0.04, 0.08, 0.16, 0.32, 0.48, 0.64, 0.8, 0.96];
