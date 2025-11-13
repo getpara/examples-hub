@@ -2,8 +2,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-IOS_DIR="${CI_PRIMARY_REPOSITORY_PATH:-"$SCRIPT_DIR/.."}"
-IOS_DIR="$(cd "$IOS_DIR" && pwd)"
+IOS_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 PROJECT_DIR="$(cd "$IOS_DIR/.." && pwd)"
 
 if [ ! -d "$PROJECT_DIR" ]; then
@@ -18,8 +17,15 @@ if command -v corepack >/dev/null 2>&1; then
 fi
 
 if ! command -v yarn >/dev/null 2>&1; then
-  echo "Installing Yarn globally via npm"
-  npm install --global yarn
+  if command -v corepack >/dev/null 2>&1; then
+    echo "Activating Yarn via Corepack"
+    corepack prepare yarn@stable --activate >/dev/null 2>&1 || true
+  fi
+fi
+
+if ! command -v yarn >/dev/null 2>&1; then
+  echo "Yarn is required but not available."
+  exit 1
 fi
 
 cd "$PROJECT_DIR"
