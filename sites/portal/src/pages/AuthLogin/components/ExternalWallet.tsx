@@ -92,13 +92,6 @@ export const ExternalWallet = ({ onLogin }: ExternalWalletStepProps) => {
     (window.opener || window.parent)?.postMessage({ type: 'EW_VERIFY_RETRY', message }, trustedOrigin);
   };
 
-  const handleSuspiciousActivityReport = () => {
-    window.open(
-      'mailto:support@getpara.com?subject=Suspicious%20Activity%20Report&body=I would like to report suspicious activity during wallet authentication.',
-      '_blank',
-    );
-  };
-
   return (
     <Container $isEmbedded={isIFramed}>
       <InnerContainer>
@@ -121,9 +114,6 @@ export const ExternalWallet = ({ onLogin }: ExternalWalletStepProps) => {
           <CpslButton onClick={handleRetry}>Retry</CpslButton>
         </>
       )}
-      <ClickableText variant="bodyS" weight="medium" onClick={handleSuspiciousActivityReport}>
-        Report Suspicious Activity
-      </ClickableText>
     </Container>
   );
 };
@@ -147,9 +137,4 @@ const InnerContainer = styled.div`
   flex-direction: column;
   align-items: center;
   gap: 8px;
-`;
-
-const ClickableText = styled(CpslText)`
-  cursor: pointer;
-  text-decoration: underline;
 `;
