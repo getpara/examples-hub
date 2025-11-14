@@ -16,6 +16,7 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  transpilePackages: ['graz'],
 };
 
 export default nextConfig;

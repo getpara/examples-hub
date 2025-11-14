@@ -17,6 +17,7 @@ import { ReownModal } from '../components/ReownModal/ReownModal';
 import { Toaster } from '@getpara/react-component-library';
 import { CircleCheck } from 'lucide-react';
 import { MultipleTabDetection } from '../components/MultipleTabDetection';
+import { PropsWithChildren } from 'react';
 
 export type NextPageWithLayout<P = {}, IP = P> = NextPage<P, IP> & {
   getLayout?: (page: ReactElement) => ReactNode;
@@ -24,6 +25,14 @@ export type NextPageWithLayout<P = {}, IP = P> = NextPage<P, IP> & {
 
 type AppPropsWithLayout = AppProps & {
   Component: NextPageWithLayout;
+};
+
+const Providers = ({ children }: PropsWithChildren) => {
+  return (
+    <QueryProvider>
+      <ParaProvider>{children}</ParaProvider>
+    </QueryProvider>
+  );
 };
 
 function AppContent({ Component, pageProps }: AppPropsWithLayout) {
@@ -176,29 +185,27 @@ function AppContent({ Component, pageProps }: AppPropsWithLayout) {
           padding: 0px;
         }
       `}</style>
-      <ParaProvider>
-        <>
-          <Layout initialized={initialized}>
-            <MultipleTabDetection />
-            <Toaster
-              theme="light"
-              icons={{
-                success: <CircleCheck className="para:stroke-background para:fill-green-600 para:size-5" />,
-              }}
-            />
-            {getLayout(<Component {...pageProps} />)}
-          </Layout>
-          <ReownModal />
-        </>
-      </ParaProvider>
+      <>
+        <Layout initialized={initialized}>
+          <MultipleTabDetection />
+          <Toaster
+            theme="light"
+            icons={{
+              success: <CircleCheck className="para:stroke-background para:fill-green-600 para:size-5" />,
+            }}
+          />
+          {getLayout(<Component {...pageProps} />)}
+        </Layout>
+        <ReownModal />
+      </>
     </>
   );
 }
 
 export default function App(props: AppPropsWithLayout) {
   return (
-    <QueryProvider>
+    <Providers>
       <AppContent {...props} />
-    </QueryProvider>
+    </Providers>
   );
 }

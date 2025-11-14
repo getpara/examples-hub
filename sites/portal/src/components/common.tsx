@@ -51,8 +51,8 @@ export const Card = styled(CpslCard)`
   overflow: auto;
 
   &::part(card-container) {
-    --card-padding-start: 0px;
-    --card-padding-end: 0px;
+    --card-padding-start: ${() => (!isIFramed ? '16px' : '0px')};
+    --card-padding-end: ${() => (!isIFramed ? '16px' : '0px')};
     height: 100%;
     border-radius: 0px;
     padding-bottom: 0px;

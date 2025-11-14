@@ -1,6 +1,6 @@
 'use client';
 
-import { EXTERNAL_WALLET_TYPES, ParaProvider as ParaSDKProvider } from '@getpara/react-sdk';
+import ParaWeb, { EXTERNAL_WALLET_TYPES, ParaProvider as ParaSDKProvider } from '@getpara/react-sdk';
 import { mainnet } from 'wagmi/chains';
 import { cosmoshub } from 'graz/chains';
 import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
@@ -10,6 +10,8 @@ const solanaNetwork = WalletAdapterNetwork.Mainnet;
 
 const endpoint = clusterApiUrl(solanaNetwork);
 
+const paraClient = new ParaWeb(process.env.NEXT_PUBLIC_API_KEY ?? 'sandbox_fa6a596bb94909469079d9b90bfb7a0e');
+
 export function ParaProvider({
   children,
 }: Readonly<{
@@ -17,9 +19,7 @@ export function ParaProvider({
 }>) {
   return (
     <ParaSDKProvider
-      paraClientConfig={{
-        apiKey: process.env.NEXT_PUBLIC_API_KEY ?? '',
-      }}
+      paraClientConfig={paraClient}
       config={{ appName: 'Para Portal', disableEmbeddedModal: true }}
       paraModalConfig={{
         oAuthMethods: ['GOOGLE', 'APPLE', 'DISCORD', 'FACEBOOK', 'TWITTER', 'TELEGRAM', 'FARCASTER'],
