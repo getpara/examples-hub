@@ -30,6 +30,42 @@ if [ ! -d "$PROJECT_DIR" ]; then
   exit 0
 fi
 
+###############################################################################
+# Ensure .env.local exists (copy template or build from CI variables)
+###############################################################################
+ensure_env_file() {
+  ENV_FILE="$PROJECT_DIR/.env.local"
+  EXAMPLE_FILE="$PROJECT_DIR/.env.local.example"
+  if [ -f "$ENV_FILE" ]; then
+    log ".env.local already present at $ENV_FILE"
+    return
+  fi
+
+  API_KEY_VALUE="${EXPO_PUBLIC_PARA_API_KEY:-${CI_EXPO_PUBLIC_PARA_API_KEY:-${PARA_API_KEY:-${CI_PARA_API_KEY:-}}}}"
+
+  if [ -n "$API_KEY_VALUE" ]; then
+    log "Creating .env.local from provided CI environment variables"
+    cat >"$ENV_FILE" <<EOF
+EXPO_PUBLIC_PARA_API_KEY=$API_KEY_VALUE
+EOF
+    log "Wrote $ENV_FILE with CI values"
+    return
+  fi
+
+  if [ -f "$EXAMPLE_FILE" ]; then
+    log "Copying $EXAMPLE_FILE to $ENV_FILE as fallback"
+    cp "$EXAMPLE_FILE" "$ENV_FILE"
+    return
+  fi
+
+  log "⚠️  No .env.local.example found; writing placeholder .env.local"
+  cat >"$ENV_FILE" <<'EOF'
+EXPO_PUBLIC_PARA_API_KEY=YOUR_SANDBOX_API_KEY
+EOF
+}
+
+ensure_env_file
+
 log "Repo root: $REPO_ROOT"
 log "Expo project: $PROJECT_DIR"
 

@@ -19,7 +19,7 @@ yarn install
 pnpm install
 ```
 
-2. Create a `.env.local` file in the root directory:
+2. Create a `.env.local` file in the root directory (Expo automatically loads `.env` plus any `.env.*` files, and `.env.local` is the convention for machine-specific secrets that should never be committed):
 ```bash
 EXPO_PUBLIC_PARA_API_KEY=your_api_key_here
 ```
@@ -55,6 +55,12 @@ npx expo run:android
 ```
 
 Android works out of the box as it uses the default `debug.keystore` which is pre-registered for development use.
+
+### Environment Variables & CI
+
+- Only environment variables prefixed with `EXPO_PUBLIC_` are bundled into the JavaScript runtime (see `src/para.ts`), so the Para API key must use `EXPO_PUBLIC_PARA_API_KEY`.
+- For local development, keep the key in `.env.local` (ignored by Git) to avoid leaking secrets while still letting Expo pick it up.
+- In CI (including Xcode Cloud), add `EXPO_PUBLIC_PARA_API_KEY` (or `CI_EXPO_PUBLIC_PARA_API_KEY`, `PARA_API_KEY`, or `CI_PARA_API_KEY`) to the workflow environment. The iOS post-clone hook (`ios/ci_scripts/ci_post_clone.sh`) writes `.env.local` from those variables or falls back to `.env.local.example` so the build never hangs waiting for config.
 
 ## Development
 
