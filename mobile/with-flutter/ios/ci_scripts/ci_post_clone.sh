@@ -34,52 +34,48 @@ log "Repo root: $REPO_ROOT"
 log "Flutter project: $PROJECT_DIR"
 
 ###############################################################################
-# Determine Flutter revision/channel from .metadata (if available)
-###############################################################################
-METADATA_FILE="$PROJECT_DIR/.metadata"
-FLUTTER_REVISION=""
-FLUTTER_CHANNEL="stable"
-if [ -f "$METADATA_FILE" ]; then
-  FLUTTER_REVISION="$(awk -F'"' '/revision:/ {print $2; exit}' "$METADATA_FILE" | tr -d '\r')"
-  CHANNEL_LINE="$(awk -F'"' '/channel:/ {print $2; exit}' "$METADATA_FILE" | tr -d '\r')"
-  if [ -n "$CHANNEL_LINE" ]; then
-    FLUTTER_CHANNEL="$CHANNEL_LINE"
-  fi
-fi
-
-log "Desired Flutter channel: $FLUTTER_CHANNEL"
-if [ -n "$FLUTTER_REVISION" ]; then
-  log "Desired Flutter revision: $FLUTTER_REVISION"
-fi
-
-###############################################################################
-# Ensure Flutter SDK is available
+# Ensure Flutter SDK is available (download from official bundle)
 ###############################################################################
 ensure_flutter() {
   if command -v flutter >/dev/null 2>&1; then
-    FLUTTER_BIN="$(command -v flutter)"
-    FLUTTER_HOME="$(cd "$(dirname "$FLUTTER_BIN")/.." && pwd)"
-    log "Flutter already installed at $FLUTTER_HOME ($(flutter --version | head -n1))."
+    log "Flutter already installed: $(flutter --version | head -n1)"
     return
   fi
 
-  FLUTTER_HOME="$HOME/flutter_ci/flutter"
-  FLUTTER_BIN="$FLUTTER_HOME/bin/flutter"
-
-  if [ ! -x "$FLUTTER_BIN" ]; then
-    log "Installing Flutter SDK into $FLUTTER_HOME"
-    rm -rf "$FLUTTER_HOME"
-    git clone --depth 1 --branch "$FLUTTER_CHANNEL" https://github.com/flutter/flutter.git "$FLUTTER_HOME"
-    if [ -n "$FLUTTER_REVISION" ]; then
-      log "Checking out Flutter revision $FLUTTER_REVISION"
-      git -C "$FLUTTER_HOME" fetch --depth 1 origin "$FLUTTER_REVISION" || git -C "$FLUTTER_HOME" fetch origin "$FLUTTER_REVISION"
-      git -C "$FLUTTER_HOME" checkout "$FLUTTER_REVISION"
-    fi
+  FLUTTER_VERSION_VALUE="${FLUTTER_VERSION:-3.35.6}"
+  ARCH="$(uname -m)"
+  if [ "$ARCH" = "arm64" ]; then
+    SDK_ZIP="flutter_macos_arm64_${FLUTTER_VERSION_VALUE}-stable.zip"
+  else
+    SDK_ZIP="flutter_macos_${FLUTTER_VERSION_VALUE}-stable.zip"
   fi
 
+  FLUTTER_ROOT="$HOME/flutter_ci"
+  FLUTTER_HOME="$FLUTTER_ROOT/flutter"
+  SDK_ZIP_PATH="$FLUTTER_ROOT/flutter_sdk.zip"
+
+  mkdir -p "$FLUTTER_ROOT"
+
+  if [ -x "$FLUTTER_HOME/bin/flutter" ] && [ -f "$FLUTTER_HOME/version" ]; then
+    INSTALLED_VERSION="$(tr -d '\r' < "$FLUTTER_HOME/version")"
+    if [ "$INSTALLED_VERSION" = "$FLUTTER_VERSION_VALUE" ]; then
+      export PATH="$FLUTTER_HOME/bin:$PATH"
+      log "Flutter already installed at $FLUTTER_HOME ($INSTALLED_VERSION)"
+      return
+    fi
+    log "Flutter $INSTALLED_VERSION found but $FLUTTER_VERSION_VALUE requested; reinstalling."
+  fi
+
+  DOWNLOAD_URL="https://storage.googleapis.com/flutter_infra_release/releases/stable/macos/$SDK_ZIP"
+  log "Downloading Flutter SDK $FLUTTER_VERSION_VALUE from $DOWNLOAD_URL"
+  curl -L --fail "$DOWNLOAD_URL" -o "$SDK_ZIP_PATH"
+  log "Unzipping Flutter SDK..."
+  rm -rf "$FLUTTER_HOME"
+  unzip -q "$SDK_ZIP_PATH" -d "$FLUTTER_ROOT"
+  rm -f "$SDK_ZIP_PATH"
+
   export PATH="$FLUTTER_HOME/bin:$PATH"
-  FLUTTER_BIN="$FLUTTER_HOME/bin/flutter"
-  "$FLUTTER_BIN" --version
+  log "Flutter installed at $FLUTTER_HOME: $(flutter --version | head -n1)"
 }
 
 ensure_flutter
