@@ -69,6 +69,21 @@ The project demonstrates comprehensive integration through these key components:
    cd ..
    ```
 
+### Xcode Cloud Workflow
+
+Xcode Cloud looks for optional automation hooks under `ci_scripts`. This project keeps the scripts inside
+`mobile/with-flutter/ios/ci_scripts`. Point the workflow's Post-Clone script location to that folder so
+`ci_post_clone.sh` runs before the archive step. The script:
+
+1. Ensures the Flutter SDK (matching `.metadata`) is installed on the runner, runs `flutter pub get`,
+   and precaches iOS artifacts so `ios/Flutter/Generated.xcconfig` and other ephemeral files exist.
+2. Installs CocoaPods (via Homebrew on the runner if needed) and executes `pod install --repo-update`
+   inside `mobile/with-flutter/ios`, generating the `Pods-Runner-frameworks-*.xcfilelist` files that
+   `[CP] Embed Pods Frameworks` expects.
+
+After enabling the script, rerun the workflow and Xcode Cloud will find the generated Flutter and Pods
+files before invoking `xcodebuild archive`.
+
 ### .env File
 
 Create a `.env` file (or rename `.env.example`) in your project root directory and add your Para API key:
