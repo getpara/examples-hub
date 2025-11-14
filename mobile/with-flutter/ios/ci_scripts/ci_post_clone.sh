@@ -73,59 +73,10 @@ log "Repo root: $REPO_ROOT"
 log "Flutter project: $PROJECT_DIR"
 
 ###############################################################################
-# Determine which Flutter version to install (defaults to latest stable)
-###############################################################################
-resolve_flutter_version() {
-  if [ -n "${FLUTTER_VERSION:-}" ]; then
-    printf '%s' "$FLUTTER_VERSION"
-    return
-  fi
-
-  CHANNEL="${FLUTTER_CHANNEL:-stable}"
-  VERSION=""
-
-  if command -v python3 >/dev/null 2>&1; then
-    if ! VERSION="$(python3 - "$CHANNEL" <<'PY'
-import json
-import sys
-import urllib.request
-
-channel = sys.argv[1]
-url = "https://storage.googleapis.com/flutter_infra_release/releases/releases_macos.json"
-try:
-    with urllib.request.urlopen(url) as resp:
-        data = json.load(resp)
-    release_hash = data["current_release"].get(channel)
-    if not release_hash:
-        raise SystemExit(1)
-    for release in data["releases"]:
-        if release["hash"] == release_hash:
-            print(release["version"], end="")
-            raise SystemExit(0)
-except Exception:
-    raise SystemExit(1)
-PY
-)"; then
-      VERSION=""
-    fi
-  fi
-
-  if [ -z "$VERSION" ]; then
-    VERSION="3.35.6"
-    log "⚠️  Unable to resolve latest $CHANNEL Flutter release; falling back to pinned $VERSION"
-  else
-    log "Resolved latest Flutter $CHANNEL release: $VERSION"
-  fi
-
-  printf '%s' "$VERSION"
-}
-
-###############################################################################
 # Ensure Flutter SDK is available (download from official bundle)
 ###############################################################################
 ensure_flutter() {
-  FLUTTER_CHANNEL_VALUE="${FLUTTER_CHANNEL:-stable}"
-  FLUTTER_VERSION_VALUE="$(resolve_flutter_version)"
+  FLUTTER_VERSION_VALUE="${FLUTTER_VERSION:-3.38.1}"
   if command -v flutter >/dev/null 2>&1; then
     log "Flutter already installed: $(flutter --version | head -n1)"
     return
@@ -133,9 +84,9 @@ ensure_flutter() {
 
   ARCH="$(uname -m)"
   if [ "$ARCH" = "arm64" ]; then
-    SDK_ZIP="flutter_macos_arm64_${FLUTTER_VERSION_VALUE}-${FLUTTER_CHANNEL_VALUE}.zip"
+    SDK_ZIP="flutter_macos_arm64_${FLUTTER_VERSION_VALUE}-stable.zip"
   else
-    SDK_ZIP="flutter_macos_${FLUTTER_VERSION_VALUE}-${FLUTTER_CHANNEL_VALUE}.zip"
+    SDK_ZIP="flutter_macos_${FLUTTER_VERSION_VALUE}-stable.zip"
   fi
 
   FLUTTER_ROOT="$HOME/flutter_ci"
@@ -154,7 +105,7 @@ ensure_flutter() {
     log "Flutter $INSTALLED_VERSION found but $FLUTTER_VERSION_VALUE requested; reinstalling."
   fi
 
-  DOWNLOAD_URL="https://storage.googleapis.com/flutter_infra_release/releases/${FLUTTER_CHANNEL_VALUE}/macos/$SDK_ZIP"
+  DOWNLOAD_URL="https://storage.googleapis.com/flutter_infra_release/releases/stable/macos/$SDK_ZIP"
   log "Downloading Flutter SDK $FLUTTER_VERSION_VALUE from $DOWNLOAD_URL"
   curl -L --fail "$DOWNLOAD_URL" -o "$SDK_ZIP_PATH"
   log "Unzipping Flutter SDK..."

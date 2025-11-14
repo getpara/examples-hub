@@ -81,9 +81,8 @@ Xcode Cloud looks for optional automation hooks under `ci_scripts`. This project
    inside `mobile/with-flutter/ios`, generating the `Pods-Runner-frameworks-*.xcfilelist` files that
    `[CP] Embed Pods Frameworks` expects.
 
-By default the script queries Flutter's release manifest and downloads the latest `stable` SDK so CI tracks the most
-recent release automatically. Set `FLUTTER_VERSION` in your workflow to pin to a specific version, or set
-`FLUTTER_CHANNEL` (`stable`/`beta`/`dev`) if you want the "latest" behavior but from a different channel.
+The script downloads Flutter `3.38.1` by default. Set `FLUTTER_VERSION` in your workflow if you need to pin CI to a
+different Flutter release.
 
 After enabling the script, rerun the workflow and Xcode Cloud will find the generated Flutter and Pods
 files before invoking `xcodebuild archive`.
