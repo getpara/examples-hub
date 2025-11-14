@@ -136,6 +136,9 @@ cd "$PROJECT_DIR"
 log "Running flutter pub get"
 flutter pub get
 
+log "Checking resolved para version:"
+flutter pub deps | grep '^\|-- para' || true
+
 ###############################################################################
 # Ensure CocoaPods availability and install iOS pods
 ###############################################################################
