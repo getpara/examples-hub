@@ -659,9 +659,10 @@ packages:
   para:
     dependency: "direct main"
     description:
-      path: "../../../flutter-sdk"
-      relative: true
-    source: path
+      name: para
+      sha256: e794994d295399c7a2f0eb1909b400ac895594cfceaa16906488446b12cd4a08
+      url: "https://pub.dev"
+    source: hosted
     version: "2.5.0"
   passkeys:
     dependency: transitive
