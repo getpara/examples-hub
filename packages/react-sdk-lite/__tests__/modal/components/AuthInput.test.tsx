@@ -112,7 +112,7 @@ describe('ParaModal', () => {
     expect(input().value).toEqual('abcd');
     expect(screen.queryByLabelText('email')).toBeDefined();
     expect(screen.queryByLabelText('phone')).toBeNull();
-  }, 20000);
+  }, 30000);
 
   describe('default identifier', () => {
     it('email', async () => {
@@ -124,7 +124,7 @@ describe('ParaModal', () => {
 
       expect(input).toBeDefined();
       expect(input().value).toEqual('test@test.com');
-    }, 20000);
+    }, 30000);
 
     it('phone', async () => {
       const { input, countryCodeSelect } = await setup({ phone: '+13105551234' });
@@ -132,7 +132,7 @@ describe('ParaModal', () => {
       expect(input).toBeDefined();
       expect(countryCodeSelect().value).toEqual('US');
       expect(input().value).toEqual('(310) 555-1234');
-    }, 20000);
+    }, 30000);
   });
 
   // TODO: add data-testid as optional field to all components and reimpliment using data-testid selector

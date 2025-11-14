@@ -82,13 +82,7 @@ jobs:
           STRESS_TEST_SUITE: ${{ inputs.suite || 'all' }}
           STRESS_TEST_PORT: '3003'
           HEADLESS: 'true'
-        run: yarn e2e:para-modal:stress
-
-      - name: Verify report generation
-        if: always()
-        run: |
-          echo "📊 Checking generated HTML report..."
-          ls -lh playwright-report/ || echo "⚠️  No playwright-report directory"
+        run: yarn e2e:stress-test
 
       - name: Configure AWS credentials
         if: always()
@@ -171,13 +165,7 @@ jobs:
           STRESS_TEST_SUITE: ${{ inputs.suite || 'all' }}
           STRESS_TEST_PORT: '3003'
           HEADLESS: 'true'
-        run: yarn e2e:para-modal:stress
-
-      - name: Verify report generation
-        if: always()
-        run: |
-          echo "📊 Checking generated HTML report for ${{ matrix.env_name }}..."
-          ls -lh playwright-report/ || echo "⚠️  No playwright-report directory"
+        run: yarn e2e:stress-test
 
       - name: Configure AWS credentials
         if: always()
@@ -246,13 +234,7 @@ jobs:
           STRESS_TEST_SUITE: ${{ inputs.suite || 'all' }}
           STRESS_TEST_PORT: '3003'
           HEADLESS: 'true'
-        run: yarn e2e:para-modal:stress
-
-      - name: Verify report generation
-        if: always()
-        run: |
-          echo "📊 Checking generated HTML report..."
-          ls -lh playwright-report/ || echo "⚠️  No playwright-report directory"
+        run: yarn e2e:stress-test
 
       - name: Configure AWS credentials
         if: always()

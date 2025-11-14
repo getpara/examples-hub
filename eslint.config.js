@@ -50,6 +50,7 @@ module.exports = [
       '**/loader/**',
       '**/www/**',
       '**/public/**',
+      '**/.cache-synpress/**',
     ],
   },
   {

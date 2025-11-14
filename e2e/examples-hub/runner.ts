@@ -251,7 +251,7 @@ class TestRunner {
       this.endStep(true);
     } catch (error) {
       this.endStep(false);
-      throw new Error(`Failed to clone repository: ${error.message}`);
+      throw new Error(`Failed to clone repository: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -348,7 +348,7 @@ class TestRunner {
       this.endStep(true);
     } catch (error) {
       this.endStep(false);
-      throw new Error(`Failed to copy local repository: ${error.message}`);
+      throw new Error(`Failed to copy local repository: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -370,7 +370,7 @@ class TestRunner {
       this.endStep(true);
     } catch (error) {
       this.endStep(false);
-      throw new Error(`Failed to disable immutable installs: ${error.message}`);
+      throw new Error(`Failed to disable immutable installs: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -393,7 +393,7 @@ class TestRunner {
       this.endStep(true);
     } catch (error) {
       this.endStep(false);
-      throw new Error(`Failed to create .env file: ${error.message}`);
+      throw new Error(`Failed to create .env file: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -441,7 +441,7 @@ class TestRunner {
       this.endStep(true);
     } catch (error) {
       this.endStep(false);
-      throw new Error(`Failed to build packages: ${error.message}`);
+      throw new Error(`Failed to build packages: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -513,7 +513,7 @@ class TestRunner {
       this.endStep(true);
     } catch (error) {
       this.endStep(false);
-      throw new Error(`Failed to link packages: ${error.message}`);
+      throw new Error(`Failed to link packages: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -597,7 +597,7 @@ class TestRunner {
       this.endStep(true);
     } catch (error) {
       this.endStep(false);
-      throw new Error(`Failed to install dependencies: ${error.message}`);
+      throw new Error(`Failed to install dependencies: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -613,7 +613,7 @@ class TestRunner {
       this.endStep(true);
     } catch (error) {
       this.endStep(false);
-      throw new Error(`Failed to install Playwright: ${error.message}`);
+      throw new Error(`Failed to install Playwright: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -659,7 +659,9 @@ class TestRunner {
           }
         }
       } catch (debugError) {
-        this.log(`  Debug listing failed: ${debugError.message}`, { verbose: true });
+        this.log(`  Debug listing failed: ${debugError instanceof Error ? debugError.message : String(debugError)}`, {
+          verbose: true,
+        });
       }
 
       // Build test command based on framework using local Yarn binary
@@ -765,7 +767,7 @@ class TestRunner {
             this.log(`  ✅ Yarn install succeeded in test directory`, { newline: true, verbose: true });
           } catch (error) {
             this.log(`  ❌ Yarn install failed with error:`, { newline: true, verbose: true });
-            this.log(`    ${error.message}`, { newline: true, verbose: true });
+            this.log(`    ${error instanceof Error ? error.message : String(error)}`, { newline: true, verbose: true });
             // Continue anyway - let the actual tests run
           }
         }
@@ -837,7 +839,10 @@ class TestRunner {
           this.endStep(false);
           this.log(`⚠️  Warning: Failed to clean up ${this.tempDir} after ${maxAttempts} attempts`, { error: true });
           if (lastError && this.args.verbose) {
-            this.log(`  Error: ${lastError.message}`, { error: true, verbose: true });
+            this.log(`  Error: ${lastError instanceof Error ? lastError.message : String(lastError)}`, {
+              error: true,
+              verbose: true,
+            });
           }
         }
       } catch {
@@ -853,7 +858,9 @@ class TestRunner {
       try {
         await handler();
       } catch (error) {
-        this.log(`⚠️  Warning: Cleanup handler failed: ${error.message}`, { error: true });
+        this.log(`⚠️  Warning: Cleanup handler failed: ${error instanceof Error ? error.message : String(error)}`, {
+          error: true,
+        });
       }
     }
   }
@@ -895,13 +902,8 @@ class TestRunner {
       const totalTime = ((Date.now() - startTime) / 1000).toFixed(1);
       this.log(`\n❌ Tests failed after ${totalTime}s\n`, { error: true });
 
-      if (error.message) {
-        this.log(`Error: ${error.message}\n`, { error: true });
-      }
-
-      // Always try to clean up on error
+      this.log(`Error: ${error instanceof Error ? error.message : String(error)}\n`, { error: true });
       await this.cleanup();
-
       process.exit(1);
     }
 

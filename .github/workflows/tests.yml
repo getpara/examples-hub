@@ -80,7 +80,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.19.3'
+          node-version: '22.17.0'
 
       - name: Set up cache key prefix
         id: vars
@@ -137,7 +137,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.19.3'
+          node-version: '22.17.0'
 
       - name: Set up cache key prefix
         id: vars
@@ -180,8 +180,8 @@ jobs:
       - name: Install Playwright Browsers
         run: npx playwright install chromium
 
-      - name: Run Playwright tests
-        run: xvfb-run npx playwright test --headed
+      - name: Run legacy E2E tests
+        run: xvfb-run yarn e2e:legacy --headed
 
       - name: Configure AWS credentials
         if: failure()
@@ -201,6 +201,96 @@ jobs:
       - name: Trace Report URL
         if: failure()
         run: echo "View failed test artifacts at https://artifacts.sandbox.usecapsule.com/e2e-runs/${{ github.run_id }}/legacy-example/index.html"
+
+  e2e-external-wallets:
+    runs-on: FourCoreRunner
+    needs: build
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.17.0'
+
+      - name: Set up cache key prefix
+        id: vars
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            echo "CACHE_KEY_PREFIX=${{ github.head_ref }}" >> $GITHUB_ENV
+          else
+            echo "CACHE_KEY_PREFIX=${{ github.ref_name }}" >> $GITHUB_ENV
+          fi
+      - name: Yarn cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            **/node_modules
+          key: ${{ runner.os }}-yarn-${{ env.CACHE_KEY_PREFIX }}-${{ github.run_id }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-${{ env.CACHE_KEY_PREFIX }}-
+      - name: Nx cache
+        uses: actions/cache@v4
+        with:
+          path: .nx
+          key: ${{ runner.os }}-nx-dir-${{ env.CACHE_KEY_PREFIX }}-${{ github.run_id }}
+          restore-keys: |
+            ${{ runner.os }}-nx-dir-${{ env.CACHE_KEY_PREFIX }}-
+      - name: Build packages
+        run: yarn build
+        env:
+          NX_REJECT_UNKNOWN_LOCAL_CACHE: 0
+          NX_IGNORE_MACHINE_CACHE: true
+          NODE_OPTIONS: '--max_old_space_size=14336'
+
+      - name: Build MPC Worker
+        run: yarn build
+        working-directory: ./workers/mpc-worker
+
+      - name: Build Server MPC Worker
+        run: yarn build
+        working-directory: ./workers/server-mpc-worker
+
+      - name: Install Playwright Browsers
+        run: npx playwright install chromium
+
+      - name: Cache Synpress wallet setup
+        uses: actions/cache@v4
+        with:
+          path: .cache-synpress
+          key: ${{ runner.os }}-synpress-${{ hashFiles('e2e/external-wallets/wallet-setup/**/*.ts') }}
+          restore-keys: |
+            ${{ runner.os }}-synpress-
+
+      - name: Generate wallet cache
+        run: yarn e2e:cache-wallets
+
+      - name: Run external wallets E2E tests
+        run: xvfb-run yarn e2e:external-wallets
+
+      - name: Configure AWS credentials
+        if: failure()
+        uses: aws-actions/configure-aws-credentials@67fbcbb121271f7775d2e7715933280b06314838
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/github-actions-role
+          role-session-name: github-upload-sandbox-artifacts
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Upload Trace Report
+        if: failure()
+        env:
+          BUCKET_NAME: capsule-sandbox-artifacts-site
+          RUN_ID: ${{ github.run_id }}
+        run: aws s3 sync playwright-report "s3://${BUCKET_NAME}/e2e-runs/${RUN_ID}/external-wallets"
+
+      - name: Trace Report URL
+        if: failure()
+        run: echo "View failed test artifacts at https://artifacts.sandbox.usecapsule.com/e2e-runs/${{ github.run_id }}/external-wallets/index.html"
 
   e2e-examples-hub-react-vite:
     runs-on: FourCoreRunner
@@ -312,7 +402,7 @@ jobs:
       - name: Run react-vite E2E tests
         run: |
           export PLAYWRIGHT_HTML_REPORT=./playwright-report
-          xvfb-run -a yarn e2e-examples-hub --branch "${{ steps.get-branch.outputs.branch }}" --framework react-vite --verbose
+          xvfb-run -a yarn e2e:examples-hub --branch "${{ steps.get-branch.outputs.branch }}" --framework react-vite --verbose
         env:
           CI: true
           SHELL: /bin/bash
@@ -448,7 +538,7 @@ jobs:
       - name: Run react-nextjs E2E tests
         run: |
           export PLAYWRIGHT_HTML_REPORT=./playwright-report
-          xvfb-run -a yarn e2e-examples-hub --branch "${{ steps.get-branch.outputs.branch }}" --framework react-nextjs --verbose
+          xvfb-run -a yarn e2e:examples-hub --branch "${{ steps.get-branch.outputs.branch }}" --framework react-nextjs --verbose
         env:
           CI: true
           SHELL: /bin/bash
@@ -584,7 +674,7 @@ jobs:
       - name: Run node E2E tests
         run: |
           export PLAYWRIGHT_HTML_REPORT=./playwright-report
-          xvfb-run -a yarn e2e-examples-hub --branch "${{ steps.get-branch.outputs.branch }}" --framework node --verbose
+          xvfb-run -a yarn e2e:examples-hub --branch "${{ steps.get-branch.outputs.branch }}" --framework node --verbose
         env:
           CI: true
           SHELL: /bin/bash

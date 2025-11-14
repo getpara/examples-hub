@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { ParaModalExamplePage } from '../page-objects/para-modal.page';
+import { ParaModalExamplePage } from '../pages/para-modal.page';
 import { applyNetworkThrottling, getNetworkLevel } from '../helpers/network-throttling';
 import { TIMEOUTS } from '../helpers/test-data';
 import * as webAuthn from '../helpers/web-authn';
