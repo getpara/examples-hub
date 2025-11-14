@@ -142,14 +142,25 @@ export const AuthVerificationStep = ({ isEmbedded, setStep }: AuthVerificationSt
   const para = usePara();
   const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState();
+  const hasSentCode = useRef(false);
 
   useEffect(() => {
     const setup = async () => {
-      await para.sendLoginCode();
+      if (hasSentCode.current) {
+        return;
+      }
+      hasSentCode.current = true;
+
+      try {
+        await para.sendLoginCode();
+      } catch (e) {
+        setError(e);
+        hasSentCode.current = false; // Allow retry on error
+      }
     };
 
     setup();
-  }, []);
+  }, [para]);
 
   if (!para.authInfo) {
     return null;
