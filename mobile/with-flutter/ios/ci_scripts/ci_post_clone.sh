@@ -30,6 +30,45 @@ if [ ! -d "$PROJECT_DIR" ]; then
   exit 0
 fi
 
+###############################################################################
+# Ensure .env exists (copy template or generate from CI secrets)
+###############################################################################
+ensure_env_file() {
+  ENV_FILE="$PROJECT_DIR/.env"
+  EXAMPLE_FILE="$PROJECT_DIR/.env.example"
+  if [ -f "$ENV_FILE" ]; then
+    log ".env already present at $ENV_FILE"
+    return
+  fi
+
+  API_KEY_VALUE="${PARA_API_KEY:-${CI_PARA_API_KEY:-}}"
+  ENV_VALUE="${PARA_ENV:-${CI_PARA_ENV:-}}"
+
+  if [ -n "$API_KEY_VALUE" ] && [ -n "$ENV_VALUE" ]; then
+    log "Creating .env from provided CI environment variables"
+    cat >"$ENV_FILE" <<EOF
+PARA_API_KEY=$API_KEY_VALUE
+PARA_ENV=$ENV_VALUE
+EOF
+    log "Wrote $ENV_FILE with CI values"
+    return
+  fi
+
+  if [ -f "$EXAMPLE_FILE" ]; then
+    log "Copying $EXAMPLE_FILE to $ENV_FILE as fallback"
+    cp "$EXAMPLE_FILE" "$ENV_FILE"
+    return
+  fi
+
+  log "⚠️  No .env.example found; writing placeholder .env"
+  cat >"$ENV_FILE" <<'EOF'
+PARA_API_KEY=YOUR_SANDBOX_API_KEY
+PARA_ENV=beta
+EOF
+}
+
+ensure_env_file
+
 log "Repo root: $REPO_ROOT"
 log "Flutter project: $PROJECT_DIR"
 

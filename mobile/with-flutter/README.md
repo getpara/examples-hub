@@ -91,11 +91,17 @@ files before invoking `xcodebuild archive`.
 
 ### .env File
 
-Create a `.env` file (or rename `.env.example`) in your project root directory and add your Para API key:
+Create a `.env` file (or rename `.env.example`) in the project root with the values your environment needs:
 
 ```
-PARA_BETA_API_KEY=your_api_key_here
+PARA_API_KEY=your_api_key_here
+# options: beta or prod
+PARA_ENV=beta
 ```
+
+When running in CI (including Xcode Cloud), define `PARA_API_KEY` and `PARA_ENV` as workflow environment variables or
+secrets. The `ios/ci_scripts/ci_post_clone.sh` hook generates the `.env` file automatically using those variables and
+falls back to the checked-in `.env.example` so the Flutter asset bundler always finds something to package.
 
 ### iOS Setup
 
