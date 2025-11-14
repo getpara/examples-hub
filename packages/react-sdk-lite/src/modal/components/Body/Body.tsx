@@ -284,7 +284,7 @@ export const Body = ({
               $step={currentStep}
               $isIFrameStep={IFrameSteps.includes(currentStep)}
             >
-              <NetworkSpeedBanner fontSize="12px" iconSize="16px" />
+              {!IFrameSteps.includes(currentStep) && <NetworkSpeedBanner fontSize="12px" iconSize="16px" />}
               {Content()}
               {onRampConfig?.testMode &&
                 [

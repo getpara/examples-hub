@@ -38,9 +38,7 @@ const BannerContainer = safeStyled.div<{ $maxWidth?: string }>`
   position: relative;
   z-index: 10;
   display: inline-flex;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  overflow: hidden;
+  flex-wrap: wrap;
 `;
 
 const WarningIcon = safeStyled(CpslIcon)<{ $size?: string }>`
