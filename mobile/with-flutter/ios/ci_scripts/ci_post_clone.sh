@@ -172,8 +172,4 @@ log "Running pod install in $IOS_DIR"
 cd "$IOS_DIR"
 pod install --repo-update
 
-cd "$PROJECT_DIR"
-log "Running flutter build ios --release --no-codesign in CI"
-flutter build ios --release --no-codesign
-
 log "ci_post_clone.sh finished successfully"
