@@ -322,7 +322,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "/bin/sh \"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" build";
+            shellScript = "if [ \"${CI_XCODE_CLOUD:-}\" = \"TRUE\" ]; then\n  echo \"CI_XCODE_CLOUD detected; skipping Flutter Run Script (already built in ci_post_clone).\"\n  exit 0\nfi\n\n/bin/sh \"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" build";
 		};
 		C0E0CD0402AB02276C98046C /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
