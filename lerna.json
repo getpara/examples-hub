@@ -4,6 +4,7 @@
     "sites/*",
     "packages/*",
     "examples/*",
+    "!examples-hub",
     "workers/*"
   ],
   "version": "independent",

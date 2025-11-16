@@ -62,14 +62,6 @@ jobs:
           echo "Checking PR title for docs link..."
           echo "PR Title: $PR_TITLE"
 
-          # Check for examples in PR body or comments
-          if echo "$PR_BODY" | grep -q -E 'NO EXAMPLES NEEDED|https://github.com/getpara/examples-hub/pull/' || echo "$COMMENTS" | grep -q -E 'NO EXAMPLES NEEDED|https://github.com/getpara/examples-hub/pull/'; then
-            echo "Valid comment or body found for examples ✅"
-          else
-            echo "❌ Link with https://github.com/getpara/examples-hub/pull/ or comment with \"NO EXAMPLES NEEDED\" needed for this PR."
-            exit 1
-          fi
-
           # Check for docs in PR title, body or NO DOCS NEEDED in comments/body
           if echo "$PR_TITLE" | grep -q 'https://github.com/capsule-org/docs-mintlify/pull/' || echo "$PR_BODY" | grep -q 'NO DOCS NEEDED' || echo "$COMMENTS" | grep -q 'NO DOCS NEEDED'; then
             echo "Valid docs link found in PR title or NO DOCS NEEDED in body/comment ✅"

@@ -51,6 +51,7 @@ module.exports = [
       '**/www/**',
       '**/public/**',
       '**/.cache-synpress/**',
+      '**/examples-hub/**',
     ],
   },
   {

@@ -31,8 +31,7 @@ interface CommandOptions {
 
 interface CLIArgs {
   framework?: string;
-  branch: string;
-  localPath?: string;
+  localPath: string;
   keepTemp: boolean;
   verbose: boolean;
   quiet: boolean;
@@ -232,27 +231,10 @@ class TestRunner {
     }
   }
 
+  // NOTE: This method is deprecated and no longer used since examples-hub is now
+  // a subtree in the repository. Kept for reference only.
   private async cloneRepository() {
-    this.startStep(`Cloning examples-hub repository (branch: ${this.args.branch})`, '📥');
-
-    try {
-      await this.runCommand(
-        `git clone --branch ${this.args.branch} --depth 1 https://github.com/getpara/examples-hub.git ${this.tempDir}`,
-        { silent: !isCI && !this.args.verbose },
-      );
-
-      const stats = await fs.stat(this.tempDir);
-      if (!stats.isDirectory()) {
-        throw new Error('Failed to clone repository');
-      }
-
-      this.log(`  Cloned to ${this.tempDir}`, { newline: true, verbose: true });
-
-      this.endStep(true);
-    } catch (error) {
-      this.endStep(false);
-      throw new Error(`Failed to clone repository: ${error instanceof Error ? error.message : String(error)}`);
-    }
+    throw new Error('Cloning is no longer supported. examples-hub is now a subtree in this repository.');
   }
 
   private async copyLocalRepository() {
@@ -397,53 +379,6 @@ class TestRunner {
     }
   }
 
-  private async buildWebSdkPackages() {
-    this.startStep('Building web-sdk packages', '🔨');
-
-    try {
-      // Log what we're about to build
-      this.log(`  Building from: ${process.cwd()}`, { newline: true, verbose: true });
-
-      // Check if package.json exists and has build:dev script
-      const rootPackageJson = path.join(process.cwd(), 'package.json');
-      if (await fs.pathExists(rootPackageJson)) {
-        const pkg = await fs.readJson(rootPackageJson);
-        if (pkg.scripts && pkg.scripts['build:dev']) {
-          this.log(`  Found build:dev script: ${pkg.scripts['build:dev']}`, { newline: true, verbose: true });
-        }
-      }
-
-      await this.runCommand('yarn build:dev', {
-        silent: !isCI && !this.args.verbose,
-      });
-
-      // Verify some packages were actually built
-      const packagesBuilt: string[] = [];
-      const packagesDir = path.join(process.cwd(), 'packages');
-      if (await fs.pathExists(packagesDir)) {
-        for (const pkgName of await fs.readdir(packagesDir)) {
-          const distPath = path.join(packagesDir, pkgName, 'dist');
-          if (await fs.pathExists(distPath)) {
-            packagesBuilt.push(pkgName);
-          }
-        }
-      }
-
-      if (packagesBuilt.length > 0) {
-        this.log(
-          `  Built ${packagesBuilt.length} packages: ${packagesBuilt.slice(0, 5).join(', ')}${packagesBuilt.length > 5 ? '...' : ''}`,
-          { newline: true, verbose: true },
-        );
-      } else {
-        this.log(`  ⚠️ WARNING: No dist directories found after build`, { newline: true, verbose: true });
-      }
-
-      this.endStep(true);
-    } catch (error) {
-      this.endStep(false);
-      throw new Error(`Failed to build packages: ${error instanceof Error ? error.message : String(error)}`);
-    }
-  }
 
   private async linkPackages() {
     this.startStep('Linking web-sdk packages', '🔗');
@@ -691,8 +626,8 @@ class TestRunner {
           continue;
         }
 
-        if (arg === '--branch' || arg === '--local-path') {
-          // These are web-sdk runner flags, not passed to examples-hub
+        if (arg === '--local-path') {
+          // This is a web-sdk runner flag, not passed to examples-hub
           i++; // Skip the value
           continue;
         }
@@ -879,18 +814,13 @@ class TestRunner {
     try {
       await this.validateEnvironment();
 
-      // Either copy local repository or clone from GitHub
-      if (this.args.localPath) {
-        await this.copyLocalRepository();
-      } else {
-        await this.cloneRepository();
-      }
+      // Copy local repository (examples-hub is now a subtree in the repo)
+      await this.copyLocalRepository();
 
       // Disable immutable installs to allow lockfile updates when linking packages
       await this.disableImmutableInstalls();
 
       await this.createEnvFile();
-      await this.buildWebSdkPackages();
       await this.linkPackages();
       await this.installDependencies();
       await this.installPlaywright();
@@ -992,7 +922,7 @@ class TestRunner {
 function parseArgs(): CLIArgs {
   const args: CLIArgs = {
     framework: undefined,
-    branch: '2.0.0-alpha', // Default branch
+    localPath: './examples-hub', // Default to local subtree
     keepTemp: false,
     verbose: false,
     quiet: false,
@@ -1013,8 +943,6 @@ function parseArgs(): CLIArgs {
       args.dryRun = true;
     } else if (arg === '--framework' && i + 1 < process.argv.length) {
       args.framework = process.argv[++i];
-    } else if (arg === '--branch' && i + 1 < process.argv.length) {
-      args.branch = process.argv[++i];
     } else if (arg === '--local-path' && i + 1 < process.argv.length) {
       args.localPath = process.argv[++i];
     } else if (arg.startsWith('--api-key-override=')) {
@@ -1031,8 +959,7 @@ Usage: yarn test:examples-hub [options]
 
 Options:
   --framework <name>      Run tests for a specific framework (react-vite, react-nextjs, vue, svelte, node)
-  --branch <name>        Clone from specific branch (default: 2.0.0-alpha)
-  --local-path <path>    Use local examples-hub repository instead of cloning from GitHub
+  --local-path <path>    Use different local examples-hub path (default: ./examples-hub)
   --keep-temp            Keep temporary directory after tests
   --verbose, -v          Show detailed output
   --quiet, -q            Show minimal output
@@ -1041,16 +968,15 @@ Options:
   --help, -h            Show this help message
 
 Examples:
-  yarn test:examples-hub                          # Run all tests
+  yarn test:examples-hub                          # Run all tests (uses ./examples-hub)
   yarn test:examples-hub --framework node         # Run only node tests
   yarn test:examples-hub --framework react-vite   # Run only react-vite tests
-  yarn test:examples-hub --branch main           # Test against main branch
-  yarn test:examples-hub --local-path ../examples-hub  # Use local examples-hub repo
-  yarn test:examples-hub --local-path ~/work/examples-hub --framework react-vite  # Test specific framework with local repo
+  yarn test:examples-hub --local-path ~/work/examples-hub  # Use different local path
+  yarn test:examples-hub --local-path ~/work/examples-hub --framework react-vite  # Test specific framework with custom path
   yarn test:examples-hub --verbose               # Run with detailed output
   yarn test:examples-hub --api-key-override=node=beta_custom_key  # Use custom API key for node
 
-Note: When using --local-path, node_modules and build artifacts are automatically excluded from copying.
+Note: examples-hub is now a subtree in this repository. Tests always run against a local copy.
 `);
       process.exit(0);
     }

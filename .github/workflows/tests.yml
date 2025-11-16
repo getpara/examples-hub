@@ -6,12 +6,6 @@ on:
       - main
       - 2.0.0-alpha
   workflow_dispatch:
-    inputs:
-      examples_hub_ref:
-        description: 'Examples Hub PR number or branch name (e.g., "123" or "my-branch"; defaults to "2.0.0-alpha")'
-        required: false
-        type: string
-        default: '2.0.0-alpha'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -364,45 +358,10 @@ jobs:
         run: yarn build
         working-directory: ./workers/server-mpc-worker
 
-      - name: Determine Examples Hub branch
-        id: get-branch
-        env:
-          PR_BODY: ${{ github.event.pull_request.body }}
-        run: |
-          # Check if this is a PR and extract branch from PR body
-          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            # Extract examples-hub-branch from PR body via environment variable (safer)
-            PR_BRANCH=$(echo "$PR_BODY" | grep -oP 'examples-hub-branch:\s*\K[^\s]+' | head -1 || echo "")
-            echo "DEBUG: Extracted PR_BRANCH='$PR_BRANCH'"
-
-            if [[ -n "$PR_BRANCH" ]]; then
-              REF="$PR_BRANCH"
-              echo "📝 Using Examples Hub branch from PR body: $REF"
-            else
-              REF="2.0.0-alpha"
-              echo "📦 Using default Examples Hub branch: 2.0.0-alpha"
-            fi
-          else
-            # Manual workflow dispatch
-            REF="${{ github.event.inputs.examples_hub_ref || '2.0.0-alpha' }}"
-            echo "🔧 Manual trigger with ref: $REF"
-          fi
-
-          # Handle PR numbers vs branch names (existing logic)
-          if [[ "$REF" =~ ^[0-9]+$ ]]; then
-            BRANCH="pull/$REF/head"
-            echo "📌 Using Examples Hub PR #$REF"
-          else
-            BRANCH="$REF"
-            echo "🌿 Using Examples Hub branch: $REF"
-          fi
-          echo "branch=$BRANCH" >> $GITHUB_OUTPUT
-          echo "::notice::Examples Hub branch resolved to: $BRANCH"
-
       - name: Run react-vite E2E tests
         run: |
           export PLAYWRIGHT_HTML_REPORT=./playwright-report
-          xvfb-run -a yarn e2e:examples-hub --branch "${{ steps.get-branch.outputs.branch }}" --framework react-vite --verbose
+          xvfb-run -a yarn e2e:examples-hub --framework react-vite --verbose
         env:
           CI: true
           SHELL: /bin/bash
@@ -500,45 +459,10 @@ jobs:
         run: yarn build
         working-directory: ./workers/server-mpc-worker
 
-      - name: Determine Examples Hub branch
-        id: get-branch
-        env:
-          PR_BODY: ${{ github.event.pull_request.body }}
-        run: |
-          # Check if this is a PR and extract branch from PR body
-          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            # Extract examples-hub-branch from PR body via environment variable (safer)
-            PR_BRANCH=$(echo "$PR_BODY" | grep -oP 'examples-hub-branch:\s*\K[^\s]+' | head -1 || echo "")
-            echo "DEBUG: Extracted PR_BRANCH='$PR_BRANCH'"
-
-            if [[ -n "$PR_BRANCH" ]]; then
-              REF="$PR_BRANCH"
-              echo "📝 Using Examples Hub branch from PR body: $REF"
-            else
-              REF="2.0.0-alpha"
-              echo "📦 Using default Examples Hub branch: 2.0.0-alpha"
-            fi
-          else
-            # Manual workflow dispatch
-            REF="${{ github.event.inputs.examples_hub_ref || '2.0.0-alpha' }}"
-            echo "🔧 Manual trigger with ref: $REF"
-          fi
-
-          # Handle PR numbers vs branch names (existing logic)
-          if [[ "$REF" =~ ^[0-9]+$ ]]; then
-            BRANCH="pull/$REF/head"
-            echo "📌 Using Examples Hub PR #$REF"
-          else
-            BRANCH="$REF"
-            echo "🌿 Using Examples Hub branch: $REF"
-          fi
-          echo "branch=$BRANCH" >> $GITHUB_OUTPUT
-          echo "::notice::Examples Hub branch resolved to: $BRANCH"
-
       - name: Run react-nextjs E2E tests
         run: |
           export PLAYWRIGHT_HTML_REPORT=./playwright-report
-          xvfb-run -a yarn e2e:examples-hub --branch "${{ steps.get-branch.outputs.branch }}" --framework react-nextjs --verbose
+          xvfb-run -a yarn e2e:examples-hub --framework react-nextjs --verbose
         env:
           CI: true
           SHELL: /bin/bash
@@ -636,45 +560,10 @@ jobs:
         run: yarn build
         working-directory: ./workers/server-mpc-worker
 
-      - name: Determine Examples Hub branch
-        id: get-branch
-        env:
-          PR_BODY: ${{ github.event.pull_request.body }}
-        run: |
-          # Check if this is a PR and extract branch from PR body
-          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            # Extract examples-hub-branch from PR body via environment variable (safer)
-            PR_BRANCH=$(echo "$PR_BODY" | grep -oP 'examples-hub-branch:\s*\K[^\s]+' | head -1 || echo "")
-            echo "DEBUG: Extracted PR_BRANCH='$PR_BRANCH'"
-
-            if [[ -n "$PR_BRANCH" ]]; then
-              REF="$PR_BRANCH"
-              echo "📝 Using Examples Hub branch from PR body: $REF"
-            else
-              REF="2.0.0-alpha"
-              echo "📦 Using default Examples Hub branch: 2.0.0-alpha"
-            fi
-          else
-            # Manual workflow dispatch
-            REF="${{ github.event.inputs.examples_hub_ref || '2.0.0-alpha' }}"
-            echo "🔧 Manual trigger with ref: $REF"
-          fi
-
-          # Handle PR numbers vs branch names (existing logic)
-          if [[ "$REF" =~ ^[0-9]+$ ]]; then
-            BRANCH="pull/$REF/head"
-            echo "📌 Using Examples Hub PR #$REF"
-          else
-            BRANCH="$REF"
-            echo "🌿 Using Examples Hub branch: $REF"
-          fi
-          echo "branch=$BRANCH" >> $GITHUB_OUTPUT
-          echo "::notice::Examples Hub branch resolved to: $BRANCH"
-
       - name: Run node E2E tests
         run: |
           export PLAYWRIGHT_HTML_REPORT=./playwright-report
-          xvfb-run -a yarn e2e:examples-hub --branch "${{ steps.get-branch.outputs.branch }}" --framework node --verbose
+          xvfb-run -a yarn e2e:examples-hub --framework node --verbose
         env:
           CI: true
           SHELL: /bin/bash

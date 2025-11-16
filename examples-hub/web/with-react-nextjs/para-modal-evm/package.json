@@ -1,0 +1,52 @@
+{
+  "name": "para-modal-evm-nextjs",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "next build",
+    "dev": "next dev",
+    "lint": "eslint .",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "postinstall": "npx setup-para"
+  },
+  "dependencies": {
+    "@cosmjs/cosmwasm-stargate": "^0.34.0",
+    "@cosmjs/launchpad": "^0.27.1",
+    "@cosmjs/proto-signing": "^0.34.0",
+    "@cosmjs/stargate": "^0.34.0",
+    "@cosmjs/tendermint-rpc": "^0.34.0",
+    "@getpara/react-sdk": "2.0.0-alpha.69",
+    "@solana-mobile/wallet-adapter-mobile": "^2.2.2",
+    "@solana/wallet-adapter-base": "^0.9.27",
+    "@solana/wallet-adapter-react": "^0.15.39",
+    "@solana/wallet-adapter-walletconnect": "^0.1.21",
+    "@solana/web3.js": "^1.98.2",
+    "@tanstack/react-query": "^5.83.0",
+    "graz": "^0.4.1",
+    "long": "^5.3.2",
+    "next": "15.1.5",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "starknet": "^7.6.4",
+    "viem": "^2.33.0",
+    "wagmi": "^2.16.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.29.0",
+    "@tailwindcss/postcss": "^4.1.10",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9.29.0",
+    "pino-pretty": "13.0.0",
+    "postcss": "^8",
+    "tailwindcss": "^4.1.10",
+    "typescript": "^5",
+    "typescript-eslint": "^8.29.0"
+  },
+  "resolutions": {
+    "@getpara/evm-wallet-connectors": "2.0.0-alpha.69"
+  }
+}

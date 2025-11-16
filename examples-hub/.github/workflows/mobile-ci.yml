@@ -1,0 +1,289 @@
+name: Mobile CI
+
+on:
+  pull_request:
+    branches: [2.0.0-alpha]
+    paths:
+      - "mobile/with-react-native/**"
+      - "mobile/with-expo/**"
+      - ".github/workflows/mobile-ci.yml"
+      - ".env.ci.example"
+      - "package.json"
+      - "yarn.lock"
+      - ".yarnrc.yml"
+      - ".yarn/**"
+
+  workflow_dispatch:
+    inputs:
+      skip_js_check:
+        description: "Skip JavaScript compilation check"
+        type: boolean
+        default: false
+
+concurrency:
+  group: mobile-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "20.19.0"
+  # Improve caching and performance
+  YARN_ENABLE_GLOBAL_CACHE: "false"
+  YARN_NM_MODE: "hardlinks-local"
+  NODE_OPTIONS: "--max-old-space-size=4096"
+
+jobs:
+  # Test mobile projects
+  test-project:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        project:
+          - { path: "mobile/with-react-native", name: "React Native" }
+          - { path: "mobile/with-expo", name: "Expo" }
+
+    name: Test ${{ matrix.project.name }}
+
+    env:
+      # Base environment variables
+      PARA_API_KEY_BETA: ${{ secrets.PARA_API_KEY_BETA }}
+      PARA_API_KEY_SANDBOX: ${{ secrets.PARA_API_KEY_SANDBOX }}
+      PARA_ENVIRONMENT: ${{ secrets.PARA_ENVIRONMENT }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            ${{ matrix.project.path }}
+            .github
+            package.json
+            yarn.lock
+            .yarnrc.yml
+            .yarn
+
+      - name: Clean Workspace
+        run: |
+          # Ensure we start with a clean workspace
+          echo "🧹 Pre-job cleanup..."
+          # Remove any artifacts that might exist from previous runs
+          find . -name "node_modules" -type d -prune -exec rm -rf '{}' + 2>/dev/null || true
+          find . -name ".yarn-cache-local" -type d -prune -exec rm -rf '{}' + 2>/dev/null || true
+          find . -name ".expo" -type d -prune -exec rm -rf '{}' + 2>/dev/null || true
+          find . -name ".metro-cache" -type d -prune -exec rm -rf '{}' + 2>/dev/null || true
+          echo "✅ Pre-cleanup complete"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Run Tests
+        id: test
+        run: |
+          cd ${{ matrix.project.path }}
+
+          # Initialize result tracking
+          PROJECT_NAME="${{ matrix.project.name }}"
+          LINT_STATUS="⏭️ skipped"
+          TYPECHECK_STATUS="⏭️ skipped"
+          JS_CHECK_STATUS="⏭️ skipped"
+          FAILED=false
+          START_TIME=$(date +%s)
+
+          # Create summary header for this project
+          echo "### Testing: $PROJECT_NAME" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Show initial disk usage
+          echo "💾 Initial disk usage:" >> $GITHUB_STEP_SUMMARY
+          df -h | grep -E "Filesystem|/$" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Install dependencies with optimizations
+          echo "📦 Installing dependencies..."
+          # Use project-specific yarn cache to avoid conflicts
+          export YARN_CACHE_FOLDER="$(pwd)/.yarn-cache-local"
+          if yarn install --immutable --network-timeout 60000; then
+            echo "✅ Dependencies installed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Failed to install dependencies" >> $GITHUB_STEP_SUMMARY
+            FAILED=true
+            exit 1
+          fi
+
+          # Lint
+          if grep -q '"lint"' package.json; then
+            echo ""
+            echo "🔍 Running lint..."
+            if timeout 300 yarn lint; then
+              LINT_STATUS="✅ passed"
+              echo "- Lint: ✅ passed" >> $GITHUB_STEP_SUMMARY
+            else
+              LINT_STATUS="❌ failed"
+              FAILED=true
+              echo "- Lint: ❌ failed" >> $GITHUB_STEP_SUMMARY
+            fi
+            
+            # Clean lint artifacts immediately
+            echo "🧹 Cleaning lint artifacts..."
+            rm -rf .eslintcache
+          else
+            echo "- Lint: ⏭️ no script" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          # Typecheck
+          if grep -q '"typecheck"' package.json; then
+            echo ""
+            echo "📝 Running typecheck..."
+            if timeout 300 yarn typecheck; then
+              TYPECHECK_STATUS="✅ passed"
+              echo "- Typecheck: ✅ passed" >> $GITHUB_STEP_SUMMARY
+            else
+              TYPECHECK_STATUS="❌ failed"
+              FAILED=true
+              echo "- Typecheck: ❌ failed" >> $GITHUB_STEP_SUMMARY
+            fi
+          elif [ -f "tsconfig.json" ]; then
+            # If no typecheck script but tsconfig exists, run tsc directly
+            echo ""
+            echo "📝 Running typecheck (tsc)..."
+            if timeout 300 npx tsc --noEmit; then
+              TYPECHECK_STATUS="✅ passed"
+              echo "- Typecheck: ✅ passed" >> $GITHUB_STEP_SUMMARY
+            else
+              TYPECHECK_STATUS="❌ failed"
+              FAILED=true
+              echo "- Typecheck: ❌ failed" >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            echo "- Typecheck: ⏭️ no tsconfig.json" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          # Clean TypeScript artifacts immediately
+          echo "🧹 Cleaning TypeScript artifacts..."
+          rm -rf tsconfig.tsbuildinfo
+
+          # JavaScript Compilation Check (instead of full build)
+          if [[ "${{ github.event.inputs.skip_js_check }}" != "true" ]]; then
+            echo ""
+            echo "🔨 Checking JavaScript compilation..."
+            
+            # For mobile projects, we check if the JS compiles without building native code
+            if [[ "$PROJECT_NAME" == "Expo" ]]; then
+              # Expo has a specific command to export JS bundle
+              if timeout 300 npx expo export --platform all --output-dir ./dist-test; then
+                JS_CHECK_STATUS="✅ passed"
+                echo "- JS Compilation: ✅ passed" >> $GITHUB_STEP_SUMMARY
+                # Clean up test export
+                rm -rf ./dist-test
+              else
+                JS_CHECK_STATUS="❌ failed"
+                FAILED=true
+                echo "- JS Compilation: ❌ failed" >> $GITHUB_STEP_SUMMARY
+              fi
+            else
+              # For React Native, use Metro bundler to check JS compilation
+              # Create a simple bundle command that doesn't require native builds
+              if timeout 300 npx react-native bundle \
+                --platform ios \
+                --dev false \
+                --entry-file index.js \
+                --bundle-output ./bundle-test.js \
+                --assets-dest ./assets-test; then
+                JS_CHECK_STATUS="✅ passed"
+                echo "- JS Compilation: ✅ passed" >> $GITHUB_STEP_SUMMARY
+                # Clean up test bundle
+                rm -rf ./bundle-test.js ./assets-test
+              else
+                JS_CHECK_STATUS="❌ failed"
+                FAILED=true
+                echo "- JS Compilation: ❌ failed" >> $GITHUB_STEP_SUMMARY
+              fi
+            fi
+          else
+            echo "- JS Compilation: ⏭️ skipped by input" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          # Calculate execution time
+          END_TIME=$(date +%s)
+          DURATION=$((END_TIME - START_TIME))
+          echo "- Duration: ${DURATION}s" >> $GITHUB_STEP_SUMMARY
+
+          # Comprehensive cleanup to prevent disk space issues
+          echo ""
+          echo "🧹 Performing comprehensive cleanup..."
+
+          # Clean node_modules
+          echo "  - Removing node_modules..."
+          rm -rf node_modules
+
+          # Clean yarn caches and artifacts
+          echo "  - Removing yarn caches..."
+          rm -rf .yarn-cache-local
+          rm -rf .yarn/cache
+          rm -rf .yarn/unplugged
+          rm -rf .yarn/build-state.yml
+          rm -rf .yarn/install-state.gz
+
+          # Clean mobile-specific artifacts
+          echo "  - Removing mobile artifacts..."
+          rm -rf .expo .metro-cache
+          rm -rf android/build ios/build
+          rm -rf android/.gradle ios/Pods
+
+          # Clean other common artifacts
+          echo "  - Removing other artifacts..."
+          rm -rf .eslintcache tsconfig.tsbuildinfo
+          rm -rf *.log
+
+          # Show final disk usage for this project
+          echo "💾 Final disk usage after cleanup:" >> $GITHUB_STEP_SUMMARY
+          df -h | grep -E "Filesystem|/$" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "✅ Cleanup complete"
+
+          # Set outputs for summary
+          echo "project_name=$PROJECT_NAME" >> $GITHUB_OUTPUT
+          echo "lint_status=$LINT_STATUS" >> $GITHUB_OUTPUT
+          echo "typecheck_status=$TYPECHECK_STATUS" >> $GITHUB_OUTPUT
+          echo "js_check_status=$JS_CHECK_STATUS" >> $GITHUB_OUTPUT
+          echo "duration=$DURATION" >> $GITHUB_OUTPUT
+
+          if [ "$FAILED" = true ]; then
+            echo "failed=true" >> $GITHUB_OUTPUT
+            exit 1
+          else
+            echo "failed=false" >> $GITHUB_OUTPUT
+          fi
+
+  # Summary job
+  summary:
+    if: always()
+    needs: [test-project]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate Report
+        run: |
+          echo "# 📊 Mobile CI Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Overall status
+          PROJECT_STATUS="${{ needs.test-project.result }}"
+
+          echo "## Overall Status" >> $GITHUB_STEP_SUMMARY
+          echo "| Component | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Mobile Tests | ${{ needs.test-project.result == 'success' && '✅ Passed' || needs.test-project.result == 'failure' && '❌ Failed' || '⏭️ Skipped' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Final result
+          if [ "$PROJECT_STATUS" = "success" ]; then
+            echo "## ✅ All checks passed!" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "## ❌ Some checks failed" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Please check the individual job logs for details." >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
