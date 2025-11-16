@@ -1,0 +1,87 @@
+#!/usr/bin/env dart
+
+import 'dart:io';
+
+/// Run a single test file
+void main(List<String> args) async {
+  if (args.isEmpty) {
+    print('Usage: dart run tool/run_single_test.dart <test-file>');
+    print('Available tests:');
+    print('  authentication - Run authentication tests');
+    print('  evm - Run EVM wallet tests');
+    print('  solana - Run Solana wallet tests');
+    print('  cosmos - Run Cosmos wallet tests');
+    exit(1);
+  }
+  
+  final testType = args[0];
+  String testFile;
+  
+  switch (testType) {
+    case 'authentication':
+    case 'auth':
+      testFile = 'authentication_test.dart';
+      break;
+    case 'evm':
+      testFile = 'evm_wallet_test.dart';
+      break;
+    case 'solana':
+      testFile = 'solana_wallet_test.dart';
+      break;
+    case 'cosmos':
+      testFile = 'cosmos_wallet_test.dart';
+      break;
+    default:
+      print('❌ Unknown test type: $testType');
+      exit(1);
+  }
+  
+  print('🧪 Running $testType tests ($testFile)...\n');
+
+  // Ensure Flutter app is built for iOS simulator
+  final appPath = '../build/ios/iphonesimulator/Runner.app';
+  if (!File(appPath).existsSync()) {
+    print('📦 iOS app not found at $appPath. Building...');
+    final build = await Process.run('flutter', ['build', 'ios', '--simulator'], workingDirectory: '..');
+    if (build.exitCode != 0) {
+      print('❌ Build failed:');
+      stderr.write(build.stderr);
+      exit(1);
+    }
+    print('✅ Build complete');
+  }
+  
+  // Start Appium server
+  print('🚀 Starting Appium server...');
+  final appiumProcess = await Process.start(
+    'appium',
+    ['--port', '4723'],
+    mode: ProcessStartMode.detached,
+  );
+  
+  await Future.delayed(Duration(seconds: 5));
+  
+  try {
+    // Run the specific test file with live log streaming
+    final proc = await Process.start(
+      'dart',
+      ['test', '-r', 'expanded', '--timeout', '300s', testFile],
+      mode: ProcessStartMode.normal,
+      workingDirectory: Directory.current.path,
+    );
+
+    proc.stdout.listen((data) => stdout.add(data));
+    proc.stderr.listen((data) => stderr.add(data));
+
+    final code = await proc.exitCode;
+    if (code == 0) {
+      print('\n✅ $testType tests PASSED');
+    } else {
+      print('\n❌ $testType tests FAILED (exit code $code)');
+    }
+
+  } finally {
+    print('\n🛑 Stopping Appium server...');
+    appiumProcess.kill();
+  }
+}

@@ -1,0 +1,1 @@
+{"root":["./src/app.tsx","./src/main.tsx","./src/vite-env.d.ts","./src/components/layout/header.tsx","./src/components/ui/connectwalletcard.tsx","./src/components/ui/signmessageform.tsx","./src/components/ui/signaturedisplay.tsx","./src/components/ui/statusalert.tsx","./src/config/constants.ts","./src/context/paraprovider.tsx","./src/context/queryprovider.tsx"],"version":"5.7.3"}

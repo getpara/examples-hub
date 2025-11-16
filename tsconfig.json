@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "moduleDetection": "force",
+    "module": "Preserve",
+    "esModuleInterop": true,
+    "allowJs": true,
+    "isolatedModules": true,
+    "skipLibCheck": true
+  }
+}

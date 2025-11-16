@@ -1,0 +1,37 @@
+{
+  "expo": {
+    "name": "Para Expo",
+    "slug": "para-expo",
+    "version": "1.0.0",
+    "scheme": "para-sdk-demo",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.getpara.example",
+      "associatedDomains": [
+        "webcredentials:app.beta.usecapsule.com",
+        "webcredentials:app.usecapsule.com"
+      ],
+      "appleTeamId": "FF9U73RS48"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "edgeToEdgeEnabled": true,
+      "package": "com.getpara.example"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}
