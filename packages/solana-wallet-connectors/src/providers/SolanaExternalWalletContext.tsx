@@ -198,7 +198,7 @@ export function SolanaExternalWalletProvider({
 
     const wallet = getWallet(adapter.name);
 
-    if (wallet.getQrUri) {
+    if (wallet?.getQrUri) {
       const qrUri = await wallet.getQrUri();
 
       window.dispatchEvent(new CustomEvent<string>('PARA_WALLETCONNECT_URI_READY', { detail: qrUri }));
