@@ -322,7 +322,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-            shellScript = "if [ \"${CI_XCODE_CLOUD:-}\" = \"TRUE\" ]; then\n  echo \"CI_XCODE_CLOUD detected - clearing DART_DEFINES for Flutter build\"\n  unset DART_DEFINES\nfi\n\n/bin/sh \"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" build";
+	            shellScript = "if [ \"${CI_XCODE_CLOUD:-}\" = \"TRUE\" ]; then\n  echo \"CI_XCODE_CLOUD detected - overriding DART_DEFINES for Flutter build\"\n\n  ci_dart_defines=()\n\n  if [ -n \"${CI_DART_DEFINES:-}\" ]; then\n    IFS=',' read -ra raw_defines <<< \"${CI_DART_DEFINES}\"\n    for define in \"${raw_defines[@]}\"; do\n      trimmed=\"$(printf '%s' \"$define\" | xargs)\"\n      if [ -n \"$trimmed\" ]; then\n        ci_dart_defines+=(\"$trimmed\")\n      fi\n    done\n  fi\n\n  if [ \"${#ci_dart_defines[@]}\" -eq 0 ]; then\n    ci_dart_defines=(\"XCODE_CLOUD_DUMMY_DART_DEFINE=1\")\n  fi\n\n  encoded=\"\"\n  for define in \"${ci_dart_defines[@]}\"; do\n    b64=\"$(printf '%s' \"$define\" | base64 | tr -d '\\n')\"\n    if [ -z \"$encoded\" ]; then\n      encoded=\"$b64\"\n    else\n      encoded=\"$encoded,$b64\"\n    fi\n  done\n\n  export DART_DEFINES=\"$encoded\"\nfi\n\n/bin/sh \"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" build";
 		};
 		C0E0CD0402AB02276C98046C /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
