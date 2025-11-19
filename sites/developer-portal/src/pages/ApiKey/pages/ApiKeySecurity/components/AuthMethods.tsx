@@ -4,18 +4,14 @@ import { ConfigCard } from '../../../components/ConfigCard';
 import { SecurityForm } from '../hooks/useSecurityForm';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
-import { AUTH_METHODS, AUTH_METHODS_DOCS_LINK, SUPPORT_URL } from '../../../../../utils/constants';
+import { AUTH_METHODS, AUTH_METHODS_DOCS_LINK } from '../../../../../utils/constants';
 import { SwitchCard } from '../../../components/SwitchCard';
+import { AuthMethod } from '@getpara/user-management-client';
 
 export const AuthMethods = () => {
   const form = useFormContext<SecurityForm>();
 
-  const selectedAuthMethods = form.watch('supportedAuthMethods');
-
-  // This is temporary until basic login is publicly available
-  const basicLoginAuthMethod = AUTH_METHODS[0];
-  const isUsingBasicLogin = selectedAuthMethods?.includes('BASIC_LOGIN');
-  const filteredAuthMethods = AUTH_METHODS.filter(m => m.value !== 'BASIC_LOGIN');
+  const filteredAuthMethods = AUTH_METHODS.filter(m => m.value !== AuthMethod.BASIC_LOGIN);
 
   const { errors } = form.formState;
   const error = errors.supportedAuthMethods?.message;
@@ -23,9 +19,14 @@ export const AuthMethods = () => {
   return (
     <ConfigCard
       title="Passkey, Password, and PIN Settings"
-      subtitle="You can prompt users to secure accounts using a passkey, password, or PIN. Enabling multiple options will allow the user to choose their method. At least one method must be selected"
+      subtitle={`Turning on any of these options will prompt users to add an additional authentication method to their account during account creation.\n\nUsers with previously created accounts or accounts created elsewhere will not be affected.\n\nEnabling both the passkeys and passwords will allow the user to choose their method and Passkeys will be preferenced to Passwords and PIN and PIN will preferenced to Passwords.`}
       ActionComponent={
-        <Link to={AUTH_METHODS_DOCS_LINK} className="para:flex para:gap-2 para:items-center">
+        <Link
+          to={AUTH_METHODS_DOCS_LINK}
+          className="para:flex para:gap-2 para:items-center"
+          target="_blank"
+          rel="noreferrer"
+        >
           <Button variant="outline">
             Learn More
             <ArrowRight />
@@ -34,44 +35,6 @@ export const AuthMethods = () => {
       }
       className="para:md:flex-col para:gap-4"
     >
-      {isUsingBasicLogin && (
-        <>
-          <FormField
-            key={basicLoginAuthMethod.value}
-            control={form.control}
-            name="supportedAuthMethods"
-            render={({ field: { ref: _, onChange, value, disabled } }) => (
-              <FormItem className="para:flex-1 para:h-full">
-                <FormControl>
-                  <SwitchCard
-                    disabled={disabled || isUsingBasicLogin}
-                    onCheckedChange={checked => {
-                      let newVal = value ?? [];
-                      if (checked) {
-                        newVal = [...newVal, basicLoginAuthMethod.value];
-                      } else {
-                        newVal = newVal.filter(v => v !== basicLoginAuthMethod.value);
-                      }
-
-                      onChange(newVal);
-                    }}
-                    label={basicLoginAuthMethod.label}
-                    checked={value?.includes(basicLoginAuthMethod.value)}
-                    value={undefined}
-                  />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-          <Typography color="secondary" className="para:text-sm para:font-medium">
-            Your account has basic login enabled. If you would like to turn it off,{' '}
-            <Link className="para:underline" to={SUPPORT_URL}>
-              Contact Us
-            </Link>
-            .
-          </Typography>
-        </>
-      )}
       <div className="para:flex para:flex-col para:gap-1">
         <div className="para:flex para:flex-col para:md:flex-row para:gap-4">
           {filteredAuthMethods.map(method => (
@@ -83,7 +46,7 @@ export const AuthMethods = () => {
                 <FormItem className="para:flex-1 para:h-full">
                   <FormControl>
                     <SwitchCard
-                      disabled={disabled || isUsingBasicLogin}
+                      disabled={disabled}
                       onCheckedChange={checked => {
                         let newVal = value ?? [];
                         if (checked) {

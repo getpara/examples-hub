@@ -13,6 +13,7 @@ import { AUTH_METHODS } from '../../../../../utils/constants';
 import { SubmitVars, useForm } from '../../../hooks/useForm';
 import { AxiosError } from 'axios';
 import { isValidCidrBlock, normalizeCidrEntries } from '../../../../../utils/ipAllowlist';
+import { AuthMethod } from '@getpara/user-management-client';
 
 export type SecurityForm = Pick<
   UpdateApiKeyFormData,
@@ -68,7 +69,11 @@ const formSchema = z.object({
   forceTransactionPopups: z.boolean().optional().nullable(),
 }) satisfies SchemaFromInterface<SecurityForm>;
 
-export const useSecurityForm = () => {
+export const useSecurityForm = ({
+  showConfirmationModal,
+}: {
+  showConfirmationModal: ({}: { onConfirm: () => void; onCancel: () => void }) => void;
+}) => {
   const { organizationId, apiKey, env, projectId } = useParams();
   const environment = env as Environment;
   const { data: apiKeyData } = useGetOrganizationKey(projectId ?? '', apiKey ?? '', environment);
@@ -102,8 +107,31 @@ export const useSecurityForm = () => {
   const defaultsSignature = useMemo(() => JSON.stringify(defaultData), [defaultData]);
   const previousDefaultsSignatureRef = useRef<string | null>(null);
 
+  const waitForUserConfirmation = async (): Promise<boolean> => {
+    return new Promise(resolve => {
+      // Show a modal/dialog and resolve when user clicks
+      showConfirmationModal({
+        onConfirm: () => resolve(true),
+        onCancel: () => resolve(false),
+      });
+    });
+  };
+
   const onSubmit = async (updateData: SecurityForm, { projectId, apiKey, env }: SubmitVars) => {
-    const { ipAllowlistCidrs, ...rest } = updateData;
+    const { ipAllowlistCidrs, supportedAuthMethods, ...rest } = updateData;
+
+    // If the submitted value includes anything, remove BASIC_LOGIN from the list so we only save the selected methods
+    const updatedAuthMethods = !!supportedAuthMethods?.length
+      ? supportedAuthMethods.filter(v => v !== AuthMethod.BASIC_LOGIN)
+      : [AuthMethod.BASIC_LOGIN];
+
+    if (updatedAuthMethods.includes(AuthMethod.BASIC_LOGIN)) {
+      const userConfirmed = await waitForUserConfirmation();
+
+      if (!userConfirmed) {
+        throw new Error('USER_CANCELLED');
+      }
+    }
 
     await updateKey({
       projectId,
@@ -119,6 +147,7 @@ export const useSecurityForm = () => {
                 .filter(Boolean),
             }
           : { origins: null }),
+        supportedAuthMethods: updatedAuthMethods,
         // Will add back after REST API launch
         // ...(updateData.allowedIps
         //   ? {

@@ -46,9 +46,14 @@ export const useForm = <T extends FieldValues>({
       try {
         sanitizeFormData(updateData);
         await onSubmit(updateData, { projectId, apiKey, env });
+
         form.reset(form.getValues());
         toast.success('Changes Saved!');
-      } catch {
+      } catch (e) {
+        if ((e as Error).message === 'USER_CANCELLED') {
+          return;
+        }
+
         toast.error('Failed to Save Changes', {
           description: 'Please correct any errors. If the problem persists, contact Para support.',
         });

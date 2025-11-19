@@ -14,7 +14,12 @@ export const Origins = () => {
       title="Allowed Origins"
       subtitle="This is the list of domains that are able to make requests on your Para instance. By default all domains are allowed. We recommend adding the domain’s of the apps where you will be integrating Para."
       ActionComponent={
-        <Link to={DOMAIN_SECURITY_DOCS_LINK} className="para:flex para:gap-2 para:items-center">
+        <Link
+          to={DOMAIN_SECURITY_DOCS_LINK}
+          className="para:flex para:gap-2 para:items-center"
+          target="_blank"
+          rel="noreferrer"
+        >
           <Button variant="outline">
             Learn More
             <ArrowRight />
