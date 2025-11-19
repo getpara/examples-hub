@@ -1,23 +1,12 @@
 {
   "$schema": "node_modules/lerna/schemas/lerna-schema.json",
-  "packages": [
-    "sites/*",
-    "packages/*",
-    "examples/*",
-    "!examples-hub",
-    "workers/*"
-  ],
+  "packages": ["sites/*", "packages/*", "examples/*", "!examples-hub", "workers/*"],
   "version": "independent",
   "npmClient": "yarn",
   "command": {
     "publish": {
       "exact": true,
-      "ignoreChanges": [
-        "sites/**",
-        "examples/**",
-        "workers/**",
-        "README.md"
-      ],
+      "ignoreChanges": ["sites/**", "examples/**", "workers/**", "README.md"],
       "noPrivate": true
     }
   }

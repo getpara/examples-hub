@@ -52,6 +52,8 @@ module.exports = [
       '**/public/**',
       '**/.cache-synpress/**',
       '**/examples-hub/**',
+      '**/yarn.lock',
+      '**/.DS_Store',
     ],
   },
   {
