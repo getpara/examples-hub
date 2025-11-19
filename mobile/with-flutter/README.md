@@ -117,6 +117,10 @@ For iOS passkey functionality:
 > only relies on Apple's standard encryption. When App Store Connect asks about encryption, you can answer "No"
 > (standard OS encryption only) and skip the extra documentation.
 
+> **Privacy Manifest:** `ios/Runner/PrivacyInfo.xcprivacy` declares that the app collects non-tracking device identifiers
+> (via `device_info_plus`) solely for core functionality. Keep this file in sync if you add SDKs or start collecting
+> additional data types.
+
 ### Android Setup
 
 For custom package names:
