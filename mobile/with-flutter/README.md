@@ -113,6 +113,10 @@ For iOS passkey functionality:
 > **Note**: iOS passkey functionality requires a valid Apple Developer Team ID registered with Para. Allow up to 24
 > hours for domain association propagation after registration.
 
+> **Export Compliance:** `ios/Runner/Info.plist` sets `ITSAppUsesNonExemptEncryption` to `false`, indicating the app
+> only relies on Apple's standard encryption. When App Store Connect asks about encryption, you can answer "No"
+> (standard OS encryption only) and skip the extra documentation.
+
 ### Android Setup
 
 For custom package names:
