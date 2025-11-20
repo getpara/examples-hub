@@ -9,7 +9,7 @@ app.use(express.json());
 
 const PORT = Number(process.env.PORT ?? 4000);
 const PARA_API_KEY = process.env.PARA_API_KEY;
-const PARA_REST_BASE_URL = process.env.PARA_REST_BASE_URL ?? 'https://api.beta.getpara.com';
+const PARA_REST_BASE_URL = process.env.PARA_REST_BASE_URL ?? 'https://api.sandbox.getpara.com';
 const PARA_POLL_INTERVAL_MS = Number(process.env.PARA_POLL_INTERVAL_MS ?? 2000);
 const PARA_POLL_TIMEOUT_MS = Number(process.env.PARA_POLL_TIMEOUT_MS ?? 20000);
 
@@ -50,6 +50,8 @@ type SignBody = {
   data: string;
 };
 
+const WALLET_STATUSES: WalletStatus[] = ['creating', 'ready', 'error'];
+
 class ParaError extends Error {
   status: number;
   body: unknown;
@@ -65,6 +67,36 @@ type ParaRequestOptions = {
   method?: 'GET' | 'POST';
   body?: unknown;
 };
+
+function isWallet(candidate: unknown): candidate is Wallet {
+  if (!candidate || typeof candidate !== 'object') {
+    return false;
+  }
+
+  const wallet = candidate as Partial<Wallet>;
+  return (
+    typeof wallet.id === 'string' &&
+    typeof wallet.type === 'string' &&
+    (WALLET_STATUSES as string[]).includes(wallet.status as string) &&
+    typeof wallet.createdAt === 'string'
+  );
+}
+
+function extractWallet(payload: unknown, context: string): { wallet: Wallet; scheme?: WalletResponse['scheme'] } {
+  if (payload && typeof payload === 'object') {
+    const maybeWrapped = payload as { wallet?: Wallet; scheme?: WalletResponse['scheme'] };
+    if (maybeWrapped.wallet && isWallet(maybeWrapped.wallet)) {
+      return { wallet: maybeWrapped.wallet, scheme: maybeWrapped.scheme };
+    }
+  }
+
+  if (isWallet(payload)) {
+    return { wallet: payload };
+  }
+
+  console.error(`[${context}] Unexpected Para response shape`, payload);
+  throw new Error(`Para ${context} response was missing a wallet. Check server logs for the raw body.`);
+}
 
 async function callPara<T>(path: string, options: ParaRequestOptions = {}): Promise<T> {
   if (!PARA_API_KEY) {
@@ -111,14 +143,17 @@ async function callPara<T>(path: string, options: ParaRequestOptions = {}): Prom
 
 async function waitUntilWalletReady(walletId: string): Promise<Wallet> {
   const startedAt = Date.now();
+  let lastPayload: unknown = undefined;
 
   while (Date.now() - startedAt < PARA_POLL_TIMEOUT_MS) {
-    const wallet = await callPara<Wallet>(`/v1/wallets/${walletId}`);
+    const pollResponse = await callPara<Wallet>(`/v1/wallets/${walletId}`);
+    lastPayload = pollResponse;
+    const { wallet } = extractWallet(pollResponse, 'poll wallet');
 
-    if (!wallet || !wallet.status) {
-      throw new Error('Para wallet response did not include status');
+    if (wallet.status === 'error') {
+      console.error('[waitUntilWalletReady] Wallet entered error status while polling', { walletId, wallet });
+      throw new Error(`Wallet ${walletId} reported status "error" while polling`);
     }
-
     if (wallet.status === 'ready') {
       return wallet;
     }
@@ -126,6 +161,7 @@ async function waitUntilWalletReady(walletId: string): Promise<Wallet> {
     await new Promise((resolve) => setTimeout(resolve, PARA_POLL_INTERVAL_MS));
   }
 
+  console.error('[waitUntilWalletReady] Timed out waiting for wallet', { walletId, lastPayload });
   throw new Error(`Timed out waiting for wallet ${walletId} to become ready`);
 }
 
@@ -155,7 +191,7 @@ app.post('/rest/wallets', async (req: Request<unknown, unknown, CreateWalletBody
   }
 
   try {
-    const response = await callPara<WalletResponse>('/v1/wallets', {
+    const creation = await callPara<WalletResponse | Wallet>('/v1/wallets', {
       method: 'POST',
       body: {
         type,
@@ -166,7 +202,12 @@ app.post('/rest/wallets', async (req: Request<unknown, unknown, CreateWalletBody
       },
     });
 
-    res.status(201).json(response);
+    const { wallet, scheme: returnedScheme } = extractWallet(creation, 'create wallet');
+
+    res.status(201).json({
+      wallet,
+      scheme: returnedScheme,
+    });
   } catch (error) {
     handleError(res, error);
   }
@@ -174,8 +215,9 @@ app.post('/rest/wallets', async (req: Request<unknown, unknown, CreateWalletBody
 
 app.get('/rest/wallets/:walletId', async (req: Request, res: Response) => {
   try {
-    const wallet = await callPara<Wallet>(`/v1/wallets/${req.params.walletId}`);
-    res.json({ wallet });
+    const walletResponse = await callPara<Wallet>(`/v1/wallets/${req.params.walletId}`);
+    const { wallet } = extractWallet(walletResponse, 'get wallet');
+    res.json(wallet);
   } catch (error) {
     handleError(res, error);
   }
@@ -220,23 +262,27 @@ app.post('/rest/example-flow', async (
   }
 
   try {
-    const creation = await callPara<WalletResponse>('/v1/wallets', {
+    const creation = await callPara<WalletResponse | Wallet>('/v1/wallets', {
       method: 'POST',
       body: { type, userIdentifier, userIdentifierType, scheme, cosmosPrefix },
     });
 
-    const { wallet: createdWallet, scheme: creationScheme } = creation;
+    console.log('[example-flow] create response from Para', creation);
 
-    if (!createdWallet || !createdWallet.status) {
-      throw new Error('Para response did not include a wallet');
-    }
+    const { wallet: createdWallet, scheme: creationScheme } = extractWallet(creation, 'create wallet');
 
-    const walletReady = createdWallet.status === 'ready' ? createdWallet : await waitUntilWalletReady(createdWallet.id);
+    const walletReady =
+      createdWallet.status === 'ready' ? createdWallet : await waitUntilWalletReady(createdWallet.id);
 
     const signed = await callPara<SignRawResponse>(`/v1/wallets/${walletReady.id}/sign-raw`, {
       method: 'POST',
       body: { data: dataToSign },
     });
+
+    if (!signed || typeof signed.signature !== 'string') {
+      console.error('[example-flow] Unexpected sign-raw response', signed);
+      throw new Error('Para sign-raw response did not include a signature');
+    }
 
     res.json({
       walletId: walletReady.id,
