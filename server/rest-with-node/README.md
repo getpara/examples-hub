@@ -37,7 +37,9 @@ curl -X POST http://localhost:4000/rest/example-flow \
       }'
 ```
 
-You should see a JSON response that includes the wallet id, address, and the signature returned by Para.
+You should see a JSON response that includes the wallet id, address, and the signature returned by Para. If you reuse
+the same identifier and type, Para will return a 409 conflict — pick a fresh identifier or handle the error in your
+app.
 
 ## Routes
 
@@ -46,7 +48,7 @@ All routes live under `/rest/*` to make them easy to spot:
 | Route | Description |
 | --- | --- |
 | `POST /rest/wallets` | Minimal wrapper around `POST /v1/wallets`. Body: `type`, `userIdentifier`, `userIdentifierType`. |
-| `GET /rest/wallets/:walletId` | Reads wallet metadata (status, address, etc). |
+| `GET /rest/wallets/:walletId` | Reads wallet metadata (status, address, etc). Returns the bare wallet object. |
 | `POST /rest/wallets/:walletId/sign-raw` | Signs raw bytes. Body: `{ "data": "0x..." }`. |
 | `POST /rest/example-flow` | Helper that chains the other routes: create → poll until `ready` → sign demo data. |
 

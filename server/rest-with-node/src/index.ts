@@ -113,7 +113,7 @@ async function waitUntilWalletReady(walletId: string): Promise<Wallet> {
   const startedAt = Date.now();
 
   while (Date.now() - startedAt < PARA_POLL_TIMEOUT_MS) {
-    const { wallet } = await callPara<WalletResponse>(`/v1/wallets/${walletId}`);
+    const wallet = await callPara<Wallet>(`/v1/wallets/${walletId}`);
 
     if (wallet.status === 'ready') {
       return wallet;
@@ -170,8 +170,8 @@ app.post('/rest/wallets', async (req: Request<unknown, unknown, CreateWalletBody
 
 app.get('/rest/wallets/:walletId', async (req: Request, res: Response) => {
   try {
-    const response = await callPara<{ wallet: Wallet }>(`/v1/wallets/${req.params.walletId}`);
-    res.json(response);
+    const wallet = await callPara<Wallet>(`/v1/wallets/${req.params.walletId}`);
+    res.json({ wallet });
   } catch (error) {
     handleError(res, error);
   }
@@ -237,6 +237,13 @@ app.post('/rest/example-flow', async (
       scheme: creation.scheme,
     });
   } catch (error) {
+    if (error instanceof ParaError && error.status === 409) {
+      return res.status(409).json({
+        error: 'A wallet for this identifier and type already exists.',
+        details: error.body,
+      });
+    }
+
     handleError(res, error);
   }
 });
