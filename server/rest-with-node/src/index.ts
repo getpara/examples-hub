@@ -115,6 +115,10 @@ async function waitUntilWalletReady(walletId: string): Promise<Wallet> {
   while (Date.now() - startedAt < PARA_POLL_TIMEOUT_MS) {
     const wallet = await callPara<Wallet>(`/v1/wallets/${walletId}`);
 
+    if (!wallet || !wallet.status) {
+      throw new Error('Para wallet response did not include status');
+    }
+
     if (wallet.status === 'ready') {
       return wallet;
     }
@@ -221,8 +225,13 @@ app.post('/rest/example-flow', async (
       body: { type, userIdentifier, userIdentifierType, scheme, cosmosPrefix },
     });
 
-    const walletReady =
-      creation.wallet.status === 'ready' ? creation.wallet : await waitUntilWalletReady(creation.wallet.id);
+    const { wallet: createdWallet, scheme: creationScheme } = creation;
+
+    if (!createdWallet || !createdWallet.status) {
+      throw new Error('Para response did not include a wallet');
+    }
+
+    const walletReady = createdWallet.status === 'ready' ? createdWallet : await waitUntilWalletReady(createdWallet.id);
 
     const signed = await callPara<SignRawResponse>(`/v1/wallets/${walletReady.id}/sign-raw`, {
       method: 'POST',
@@ -234,7 +243,7 @@ app.post('/rest/example-flow', async (
       address: walletReady.address,
       status: walletReady.status,
       signature: signed.signature,
-      scheme: creation.scheme,
+      scheme: creationScheme,
     });
   } catch (error) {
     if (error instanceof ParaError && error.status === 409) {
