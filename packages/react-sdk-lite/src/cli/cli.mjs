@@ -14,7 +14,32 @@ const PACKAGES_TO_STUB = [
 ];
 
 const checkForPackages = async () => {
-  const pathToNodeModules = path.resolve('node_modules');
+  let pathToNodeModules = path.resolve('node_modules');
+
+  // Check if pnpm-lock.yaml actually exists
+  const pnpmLockPath = path.resolve(process.cwd(), 'pnpm-lock.yaml');
+  let isPNPM = false;
+
+  try {
+    await fs.access(pnpmLockPath);
+    isPNPM = true;
+  } catch {
+    isPNPM = false;
+  }
+
+  // If it's a PNPM project, adjust the node_modules path accordingly to account for virtual store
+  // NODE_PATH is set by PNPM to include the correct paths
+  if (isPNPM && process.env.NODE_PATH) {
+    const endingNodePathString = '@getpara/node_modules';
+    const nodePathSplit = process.env.NODE_PATH.split(path.delimiter);
+    const fullPath = nodePathSplit.find(p => p.endsWith(endingNodePathString));
+    if (fullPath) {
+      const newPath = fullPath.replace(endingNodePathString, '');
+      if (newPath) {
+        pathToNodeModules = newPath;
+      }
+    }
+  }
 
   for (let i = 0; i < PACKAGES_TO_STUB.length; i++) {
     const packageName = PACKAGES_TO_STUB[i];
