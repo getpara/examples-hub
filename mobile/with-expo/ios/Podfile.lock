@@ -68,7 +68,7 @@ PODS:
     - hermes-engine/Pre-built (= 0.81.5)
   - hermes-engine/Pre-built (0.81.5)
   - OpenSSL-Universal (3.3.3001)
-  - para-react-native-wallet (2.0.0-alpha.71):
+  - para-react-native-wallet (2.0.0-alpha.72):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -2163,7 +2163,7 @@ SPEC CHECKSUMS:
   FBLazyVector: e95a291ad2dadb88e42b06e0c5fb8262de53ec12
   hermes-engine: 9f4dfe93326146a1c99eb535b1cb0b857a3cd172
   OpenSSL-Universal: 6082b0bf950e5636fe0d78def171184e2b3899c2
-  para-react-native-wallet: c3927cad7ff1588471e2c52f5f516be795e30ca3
+  para-react-native-wallet: 8a57b5680c7ea5cc9d6d309de26a0daf0ad3cd73
   RCTDeprecation: 943572d4be82d480a48f4884f670135ae30bf990
   RCTRequired: 8f3cfc90cc25cf6e420ddb3e7caaaabc57df6043
   RCTTypeSafety: 16a4144ca3f959583ab019b57d5633df10b5e97c
