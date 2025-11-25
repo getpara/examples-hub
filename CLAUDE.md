@@ -43,6 +43,73 @@
 - MPC issues: Verify worker thread execution
 - Auth failures: Confirm API keys in environment
 
+## Security & Supply Chain Protection
+
+### Dependency Management
+- **Always use `--frozen-lockfile`** in CI and production deployments
+- Never run `yarn install` without `--frozen-lockfile` in automated environments
+- Lockfile ensures only vetted dependencies are installed
+
+### Protection Against Supply Chain Attacks
+This repo implements multiple layers of defense against npm supply chain attacks (e.g., Shai-Hulud worm):
+
+1. **Frozen Lockfile Policy:**
+   - All CI workflows use `yarn install --frozen-lockfile`
+   - Prevents installation of packages not in committed `yarn.lock`
+   - See: `.github/workflows/tests.yml`, `bundle-size-check.yml`, `para-modal-stress-test.yml`
+
+2. **Automated Vulnerability Checking:**
+   - `.github/workflows/vulnerability-check.yml` runs on all PRs
+   - Compares vulnerability counts against main branch
+   - Blocks PRs that introduce new high/critical vulnerabilities
+   - Override with comment: `INCREASED VULNERABILITIES ACCEPTED`
+
+3. **Postinstall Scripts:**
+   - Current postinstall: `yarn graz -g && patch-package && bash scripts/setup-examples-hub.sh`
+   - **Security Note:** Postinstall scripts run automatically and can be exploited
+   - All scripts in this repo are audited and safe:
+     - `graz -g`: Generates Cosmos chain definitions (benign)
+     - `patch-package`: Applies local patches to dependencies
+     - `setup-examples-hub.sh`: Adds examples-hub git remote (idempotent)
+
+4. **Dependency Resolution Overrides:**
+   - Security patches defined in `resolutions` field in package.json
+   - Forces specific secure versions of transitive dependencies
+
+### Best Practices for Developers
+
+**When adding dependencies:**
+1. Research package reputation and maintainer history
+2. Check recent npm publish activity for suspicious patterns
+3. Review the package's postinstall scripts (if any)
+4. Use `yarn audit` to check for known vulnerabilities
+5. Always commit yarn.lock changes with dependency updates
+
+**When running yarn install locally:**
+- Use `yarn install --frozen-lockfile` when you want exact versions from lockfile
+- If adding new packages, review what postinstall scripts will run
+- Check for unexpected files created in your home directory after install
+
+**Warning Signs of Compromised Packages:**
+- Unexpected postinstall/preinstall scripts
+- Packages requesting network access during install
+- Newly created files outside node_modules
+- Unusual environment variable access
+- Git repositories created in your home directory
+
+### Incident Response
+If you suspect a compromised package was installed:
+1. **Isolate:** Stop using the affected environment
+2. **Audit:** Check `~/.npm`, `~/.config/yarn`, and `~/.local` for suspicious files
+3. **Rotate credentials:** GitHub tokens, npm tokens, API keys, SSH keys
+4. **Report:** Notify the security team immediately
+5. **Scan:** Run `git log` to check for unauthorized commits
+
+### Additional Resources
+- Vulnerability database: https://github.com/advisories
+- npm security best practices: https://docs.npmjs.com/about-security
+- Yarn security: https://yarnpkg.com/features/security
+
 ## MetaMask E2E Testing with Synpress
 
 ### Overview

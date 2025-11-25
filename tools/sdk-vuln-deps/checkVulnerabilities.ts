@@ -52,7 +52,7 @@ async function getVulnerabilities(branchName: string): Promise<VulnerabilityCoun
 
   try {
     console.log(`Installing dependencies for ${branchName}...`);
-    execSync('yarn install --force', {
+    execSync('yarn install --frozen-lockfile', {
       cwd: path.resolve(__dirname),
       stdio: 'inherit',
     });

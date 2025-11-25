@@ -42,7 +42,7 @@ jobs:
             ${{ runner.os }}-yarn-${{ env.CACHE_KEY_PREFIX }}
 
       - name: Install dependencies
-        run: yarn
+        run: yarn install --frozen-lockfile
 
       - name: Run Lint
         run: yarn lint
