@@ -82,10 +82,10 @@ export const ModalLayout = () => {
     const { backgroundColor, foregroundColor, accentColor, themeMode } = partner;
 
     // If not an iframe and the partner has theming set via dev portal use that, else use the url params
-    const _backgroundColor = !isIFramed && backgroundColor ? backgroundColor : portalBackgroundColor;
-    const _foregroundColor = !isIFramed && foregroundColor ? foregroundColor : portalForegroundColor;
-    const _accentColor = !isIFramed && accentColor ? accentColor : portalAccentColor;
-    const _mode = !isIFramed && themeMode ? themeMode : portalThemeMode;
+    const _backgroundColor = !isIFramed ? backgroundColor : portalBackgroundColor;
+    const _foregroundColor = !isIFramed ? foregroundColor : portalForegroundColor;
+    const _accentColor = !isIFramed ? accentColor : portalAccentColor;
+    const _mode = !isIFramed ? themeMode : portalThemeMode;
 
     para.portalBackgroundColor = _backgroundColor;
     para.portalPrimaryButtonColor = portalPrimaryButtonColor;
