@@ -3,6 +3,12 @@
 # Setup script for examples-hub git remote
 # This script is idempotent and safe to run multiple times
 
+# Check if we're in a git repository
+if ! git rev-parse --git-dir > /dev/null 2>&1; then
+  # Not a git repo (e.g., CI/CD environment), skip silently
+  exit 0
+fi
+
 # Check if examples-hub remote already exists
 if git remote | grep -q "^examples-hub$"; then
   # Remote exists, exit silently
