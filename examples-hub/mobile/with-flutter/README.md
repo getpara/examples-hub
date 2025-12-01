@@ -69,13 +69,37 @@ The project demonstrates comprehensive integration through these key components:
    cd ..
    ```
 
+### Xcode Cloud Workflow
+
+Xcode Cloud looks for optional automation hooks under `ci_scripts`. This project keeps the scripts inside
+`mobile/with-flutter/ios/ci_scripts`. Point the workflow's Post-Clone script location to that folder so
+`ci_post_clone.sh` runs before the archive step. The script:
+
+1. Ensures the Flutter SDK (matching `.metadata`) is installed on the runner, runs `flutter pub get`,
+   and precaches iOS artifacts so `ios/Flutter/Generated.xcconfig` and other ephemeral files exist.
+2. Installs CocoaPods (via Homebrew on the runner if needed) and executes `pod install --repo-update`
+   inside `mobile/with-flutter/ios`, generating the `Pods-Runner-frameworks-*.xcfilelist` files that
+   `[CP] Embed Pods Frameworks` expects.
+
+The script downloads Flutter `3.38.1` by default. Set `FLUTTER_VERSION` in your workflow if you need to pin CI to a
+different Flutter release.
+
+After enabling the script, rerun the workflow and Xcode Cloud will find the generated Flutter and Pods
+files before invoking `xcodebuild archive`.
+
 ### .env File
 
-Create a `.env` file (or rename `.env.example`) in your project root directory and add your Para API key:
+Create a `.env` file (or rename `.env.example`) in the project root with the values your environment needs:
 
 ```
-PARA_BETA_API_KEY=your_api_key_here
+PARA_API_KEY=your_api_key_here
+# options: beta or prod
+PARA_ENV=beta
 ```
+
+When running in CI (including Xcode Cloud), define `PARA_API_KEY` and `PARA_ENV` as workflow environment variables or
+secrets. The `ios/ci_scripts/ci_post_clone.sh` hook generates the `.env` file automatically using those variables and
+falls back to the checked-in `.env.example` so the Flutter asset bundler always finds something to package.
 
 ### iOS Setup
 
@@ -88,6 +112,14 @@ For iOS passkey functionality:
 
 > **Note**: iOS passkey functionality requires a valid Apple Developer Team ID registered with Para. Allow up to 24
 > hours for domain association propagation after registration.
+
+> **Export Compliance:** `ios/Runner/Info.plist` sets `ITSAppUsesNonExemptEncryption` to `false`, indicating the app
+> only relies on Apple's standard encryption. When App Store Connect asks about encryption, you can answer "No"
+> (standard OS encryption only) and skip the extra documentation.
+
+> **Privacy Manifest:** `ios/Runner/PrivacyInfo.xcprivacy` declares that the app collects non-tracking device identifiers
+> (via `device_info_plus`) solely for core functionality. Keep this file in sync if you add SDKs or start collecting
+> additional data types.
 
 ### Android Setup
 

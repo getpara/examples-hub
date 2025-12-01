@@ -38,8 +38,20 @@ target 'Runner' do
 end
 
 post_install do |installer|
+  device_info_manifest = File.join(__dir__, 'PrivacyManifests', 'device_info_plus', 'PrivacyInfo.xcprivacy')
+
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
+
+    # Ensure device_info_plus ships with a privacy manifest until the pod adds its own.
+    if target.name == 'device_info_plus' && File.exist?(device_info_manifest)
+      resources_phase = target.resources_build_phase
+      if resources_phase
+        file_ref = resources_phase.files_references.find { |ref| ref.path == device_info_manifest }
+        file_ref ||= target.project.main_group.new_file(device_info_manifest)
+        resources_phase.add_file_reference(file_ref, true) unless resources_phase.files_references.include?(file_ref)
+      end
+    end
     
     # Fix for libphonenumber_plugin PhoneNumberKit import issue
     if target.name == 'libphonenumber_plugin'
