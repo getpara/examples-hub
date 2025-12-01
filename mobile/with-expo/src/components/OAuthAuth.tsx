@@ -61,7 +61,7 @@ export const OAuthAuth: React.FC<OAuthAuthProps> = ({
 
   const finalizeLogin = useCallback(async () => {
     setStatus("Finishing login...");
-    const waitForLoginResult = await para.waitForLogin();
+    const waitForLoginResult = await para.waitForLogin({});
 
     if (
       waitForLoginResult?.needsWallet &&
