@@ -8,6 +8,9 @@ import { Wallet } from "@getpara/react-native-wallet";
 import { ethers } from "ethers";
 import { ParaEthersSigner } from "@getpara/ethers-v6-integration";
 
+// Toggle to switch wallet type for demos
+const WALLET_TYPE: "SOLANA" | "EVM" = "SOLANA";
+
 interface WalletSectionProps {
   onLogout: () => void;
 }
@@ -34,23 +37,23 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
   const loadWalletInfo = async () => {
     setLoadingWallet(true);
     setError("");
-    setStatus("Loading wallet information...");
+    setStatus(`Loading ${WALLET_TYPE} wallet information...`);
 
     try {
-      // Para manages multiple wallet types - here we fetch EVM wallets
-      const evmWallets = await para.getWalletsByType("EVM");
+      // Para manages multiple wallet types - fetch the configured type
+      const walletsByType = await para.getWalletsByType(WALLET_TYPE);
 
-      if (evmWallets && evmWallets.length > 0) {
+      if (walletsByType && walletsByType.length > 0) {
         // Use first wallet if exists
-        setWallet(evmWallets[0]);
+        setWallet(walletsByType[0]);
         setStatus("");
       } else {
         // Auto-create wallet for new users
-        setStatus("No wallet found. Creating new EVM wallet...");
-        await para.createWallet({ type: "EVM" });
+        setStatus(`No wallet found. Creating new ${WALLET_TYPE} wallet...`);
+        await para.createWallet({ type: WALLET_TYPE });
 
         // Get the newly created wallet
-        const newWallets = await para.getWalletsByType("EVM");
+        const newWallets = await para.getWalletsByType(WALLET_TYPE);
         if (newWallets && newWallets.length > 0) {
           setWallet(newWallets[0]);
           setStatus("");
@@ -59,11 +62,11 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
     } catch (_err) {
       // If getWalletsByType throws an error (no wallet), create one
       try {
-        setStatus("Creating new EVM wallet...");
-        await para.createWallet({ type: "EVM" });
+        setStatus(`Creating new ${WALLET_TYPE} wallet...`);
+        await para.createWallet({ type: WALLET_TYPE });
 
         // Get the newly created wallet
-        const newWallets = await para.getWalletsByType("EVM");
+        const newWallets = await para.getWalletsByType(WALLET_TYPE);
         if (newWallets && newWallets.length > 0) {
           setWallet(newWallets[0]);
           setStatus("");
@@ -121,6 +124,11 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
   };
 
   const signTransaction = async () => {
+    if (WALLET_TYPE !== "EVM") {
+      setError("Transaction signing demo is only available for EVM wallets");
+      return;
+    }
+
     if (!wallet) {
       setError("No wallet available");
       return;
@@ -187,10 +195,10 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
 
       {wallet && (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>EVM Wallet</Text>
+          <Text style={styles.sectionTitle}>{WALLET_TYPE} Wallet</Text>
           <Text style={styles.info}>ID: {wallet.id}</Text>
           <Text style={styles.info}>Address: {wallet.address}</Text>
-          <Text style={styles.info}>Type: EVM</Text>
+          <Text style={styles.info}>Type: {wallet.type}</Text>
         </View>
       )}
 
@@ -219,7 +227,7 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
         </View>
       )}
 
-      {wallet && (
+      {wallet && WALLET_TYPE === "EVM" && (
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Sign Transaction</Text>
           <Text style={styles.info}>
