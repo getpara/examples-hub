@@ -37,6 +37,7 @@ graph TD;
   cpsl-pagination --> cpsl-button
   cpsl-pagination --> cpsl-icon
   cpsl-pagination --> cpsl-text
+  cpsl-button --> cpsl-spinner
   style cpsl-pagination fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

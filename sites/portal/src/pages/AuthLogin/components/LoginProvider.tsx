@@ -8,11 +8,11 @@ import {
   AuthExtras,
   AuthInfo,
   AuthParams,
+  BalancesWallet,
   BiometricLocationHint,
   extractAuthInfo,
   ProfileBalance,
   TAuthMethod,
-  TWalletType,
 } from '@getpara/user-management-client';
 import { useExtractedParams } from '../../../hooks/useExtractedParams';
 import { checkIsEnclaveUser as checkIsEnclaveUserUtil } from '../../../utils/checkIsEnclaveUser';
@@ -331,15 +331,12 @@ export const LoginProvider = ({
           wallets:
             Object.values(wallets)
               .flat()
-              .reduce(
-                (acc, { type, address }) => {
-                  if (acc.some(w => w.type === type && w.address === address)) {
-                    return acc;
-                  }
-                  return [...acc, { type: type === 'COSMOS' ? 'EVM' : type, address }];
-                },
-                [] as { type: TWalletType; address: string }[],
-              ) ?? [],
+              .reduce((acc, { type, address }) => {
+                if (acc.some(w => w.type === type && w.address === address)) {
+                  return acc;
+                }
+                return [...acc, { type: type === 'COSMOS' ? 'EVM' : type, address }];
+              }, [] as BalancesWallet[]) ?? [],
         });
         return balance;
       }

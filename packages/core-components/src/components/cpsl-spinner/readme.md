@@ -19,11 +19,13 @@
 
 ### Used by
 
+ - [cpsl-button](../cpsl-button)
  - [cpsl-file-upload](../cpsl-file-upload)
 
 ### Graph
 ```mermaid
 graph TD;
+  cpsl-button --> cpsl-spinner
   cpsl-file-upload --> cpsl-spinner
   style cpsl-spinner fill:#f9f,stroke:#333,stroke-width:4px
 ```

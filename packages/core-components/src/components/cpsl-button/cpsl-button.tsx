@@ -20,6 +20,12 @@ export class CpslButton {
   @Prop({ reflect: true }) disabled?: boolean = false;
 
   /**
+   * If the button is pending.
+   * Default is: false.
+   */
+  @Prop() pending?: boolean = false;
+
+  /**
    * Whether the button takes the full width of it's container.
    * Default is: false.
    */
@@ -73,9 +79,9 @@ export class CpslButton {
           'medium': this.size === 'medium',
         }}
       >
-        <this.as href={this.href} target={this.target} part="button-native" class="button-native" type={this.type}>
+        <this.as href={this.href} target={this.target} part="button-native" class="button-native" type={this.type} disabled={this.disabled || this.pending}>
           <slot name="start"></slot>
-          <slot></slot>
+          {this.pending ? <cpsl-spinner size={19} /> : <slot></slot>}
           <slot name="end"></slot>
         </this.as>
       </Host>

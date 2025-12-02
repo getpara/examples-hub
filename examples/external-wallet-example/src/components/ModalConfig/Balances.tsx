@@ -1,6 +1,7 @@
 import styled from 'styled-components';
 import { CpslCard, CpslText, CpslInput, CpslButton, CpslIcon, CpslCheckbox } from '@getpara/react-components';
 import { NETWORKS, TNetwork, CustomAsset } from '@getpara/user-management-client';
+import { BalancesRequestType } from '@getpara/shared';
 import { useModalStateStore } from '../../stores/modalStateStore/useModalStateStore';
 import { LabelContainer, FlexRow, OptionRow } from './ModalConfig';
 import { useEffect, useState, useCallback } from 'react';
@@ -12,6 +13,7 @@ const useBalancesStore = () => {
   const balancesExcludeStandardAssets = useModalStateStore(state => state.balancesExcludeStandardAssets);
   const balancesAdditionalAssets = useModalStateStore(state => state.balancesAdditionalAssets);
   const balancesAsset = useModalStateStore(state => state.balancesAsset);
+  const balancesRequestType = useModalStateStore(state => state.balancesRequestType);
   const mode = useModalStateStore(state => state.mode);
   const updateState = useModalStateStore(state => state.updateState);
 
@@ -20,6 +22,7 @@ const useBalancesStore = () => {
     balancesExcludeStandardAssets,
     balancesAdditionalAssets,
     balancesAsset,
+    balancesRequestType,
     mode,
     updateState,
   };
@@ -448,8 +451,15 @@ const CustomAssetDisplay: React.FC<CustomAssetDisplayProps> = ({ mode, effective
 );
 
 export const Balances = () => {
-  const { balancesDisplayType, balancesExcludeStandardAssets, balancesAdditionalAssets, balancesAsset, mode, updateState } =
-    useBalancesStore();
+  const {
+    balancesDisplayType,
+    balancesExcludeStandardAssets,
+    balancesAdditionalAssets,
+    balancesAsset,
+    balancesRequestType,
+    mode,
+    updateState,
+  } = useBalancesStore();
 
   // Helper to get current config from store
   const getCurrentConfig = () => ({
@@ -462,6 +472,7 @@ export const Balances = () => {
       priceUrl: 'https://',
       implementations: [{ contractAddress: '', network: 'ETHEREUM' }],
     },
+    requestType: balancesRequestType || 'MAINNET_AND_TESTNET',
   });
 
   // Preset state for quick configurations
@@ -496,7 +507,8 @@ export const Balances = () => {
       currentConfig.displayType !== draftConfig.displayType ||
       currentConfig.excludeStandardAssets !== draftConfig.excludeStandardAssets ||
       JSON.stringify(currentConfig.additionalAssets) !== JSON.stringify(draftConfig.additionalAssets) ||
-      JSON.stringify(currentConfig.asset) !== JSON.stringify(draftConfig.asset)
+      JSON.stringify(currentConfig.asset) !== JSON.stringify(draftConfig.asset) ||
+      currentConfig.requestType !== draftConfig.requestType
     );
   })();
 
@@ -510,6 +522,7 @@ export const Balances = () => {
         displayType: 'AGGREGATED',
         excludeStandardAssets: false,
         additionalAssets: [],
+        requestType: prev.requestType,
       }));
     } else {
       setDraftConfig(prev => ({
@@ -521,8 +534,17 @@ export const Balances = () => {
           priceUrl: 'https://',
           implementations: [{ contractAddress: '', network: 'ETHEREUM' }],
         },
+        requestType: prev.requestType,
       }));
     }
+  };
+
+  const handleRequestTypeChange = (requestType: BalancesRequestType) => {
+    setPreset(null);
+    setDraftConfig(prev => ({
+      ...prev,
+      requestType,
+    }));
   };
 
   // Helper to check if preset is active
@@ -560,6 +582,7 @@ export const Balances = () => {
         excludeStandardAssets: false,
         additionalAssets: [campAsset],
         asset: undefined,
+        requestType: draftConfig.requestType,
       };
     } else if (targetPreset === 'camp_custom_token') {
       // Camp asset for CUSTOM_ASSET mode - use base asset without price
@@ -568,6 +591,7 @@ export const Balances = () => {
         excludeStandardAssets: false,
         additionalAssets: [],
         asset: baseCampAsset,
+        requestType: draftConfig.requestType,
       };
     }
 
@@ -593,6 +617,7 @@ export const Balances = () => {
           balancesExcludeStandardAssets: newConfig.excludeStandardAssets,
           balancesAdditionalAssets: newConfig.additionalAssets,
           balancesAsset: newConfig.asset,
+          balancesRequestType: newConfig.requestType ?? draftConfig.requestType,
         });
 
         // Store the preset and config in sessionStorage to avoid infinite reloads
@@ -709,6 +734,7 @@ export const Balances = () => {
       balancesExcludeStandardAssets: draftConfig.excludeStandardAssets,
       balancesAdditionalAssets: draftConfig.additionalAssets,
       balancesAsset: draftConfig.asset,
+      balancesRequestType: draftConfig.requestType,
     });
 
     // Store the draft config in sessionStorage to avoid infinite reloads
@@ -763,6 +789,28 @@ export const Balances = () => {
               Custom Asset
             </CpslButton>
           </FlexRow>
+        </LabelContainer>
+
+        <LabelContainer>
+          <CpslText variant="label" weight="semiBold">
+            Request Type
+          </CpslText>
+          <select
+            value={draftConfig.requestType}
+            onChange={e => handleRequestTypeChange(e.target.value as 'MAINNET' | 'TESTNET' | 'MAINNET_AND_TESTNET')}
+            style={{
+              padding: '8px',
+              borderRadius: '4px',
+              border: `1px solid ${mode === 'dark' ? '#6b7280' : '#ccc'}`,
+              width: '100%',
+              backgroundColor: mode === 'dark' ? '#374151' : 'white',
+              color: mode === 'dark' ? 'white' : 'black',
+            }}
+          >
+            <option value="MAINNET">Mainnet</option>
+            <option value="TESTNET">Testnet</option>
+            <option value="MAINNET_AND_TESTNET">Mainnet + Testnet</option>
+          </select>
         </LabelContainer>
 
         {effectiveDisplayType === 'AGGREGATED' && (

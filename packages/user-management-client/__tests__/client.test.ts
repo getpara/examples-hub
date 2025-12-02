@@ -1235,6 +1235,22 @@ describe('Client', () => {
       expect(mocks.get).toBeCalledWith(`/users/${userId}/wallets/${walletId}/refresh-done?partnerId=${partnerId}`);
     });
 
+    it('isRefreshDone with protocolId', async () => {
+      const protocolId = 'protocolId';
+      await client.isRefreshDone(userId, walletId, undefined, protocolId);
+
+      expect(mocks.get).toBeCalledWith(`/users/${userId}/wallets/${walletId}/refresh-done?protocolId=${protocolId}`);
+    });
+
+    it('isRefreshDone with both partnerId and protocolId', async () => {
+      const protocolId = 'protocolId';
+      await client.isRefreshDone(userId, walletId, partnerId, protocolId);
+
+      expect(mocks.get).toBeCalledWith(
+        `/users/${userId}/wallets/${walletId}/refresh-done?partnerId=${partnerId}&protocolId=${protocolId}`,
+      );
+    });
+
     it('deletePendingTransaction', async () => {
       const pendingTransactionId = 'pendingTransactionId';
 
@@ -1462,7 +1478,10 @@ describe('Client', () => {
       await client.getProfileBalance({ config, wallets, refetch });
 
       expect(mocks.post).toBeCalledWith('/assets/balances', {
-        config,
+        config: {
+          ...config,
+          isComprehensive: true,
+        },
         wallets,
         refetch,
       });
@@ -1528,6 +1547,45 @@ describe('Client', () => {
       await client.updateUserPreferences(userId, { theme: 'dark' });
 
       expect(mocks.patch).toBeCalledWith(`/users/${userId}/preferences`, { preferences: { theme: 'dark' } });
+    });
+
+    it('estimateSendTransaction', async () => {
+      const opts = {
+        type: 'EVM' as 'EVM' | 'SOLANA',
+        sourceAddress: '0x123',
+        destinationAddress: '0x456',
+        transferAmount: '1.0',
+        evmChainId: '1',
+        tokenSymbol: 'ETH',
+      };
+
+      await client.estimateSendTransaction({
+        userId,
+        walletId,
+        opts,
+      });
+
+      expect(mocks.post).toBeCalledWith(`/users/${userId}/wallets/${walletId}/transactions/estimate`, opts);
+    });
+
+    it('broadcastSendTransaction', async () => {
+      const opts = {
+        type: 'EVM' as 'EVM' | 'SOLANA',
+        evmChainId: '1',
+        isDevnet: false,
+        tx: '0x123',
+        signature: '0x456',
+        sourceAddress: '0x789',
+        txUrlFormat: 'https://etherscan.io/tx/{HASH}',
+      };
+
+      await client.broadcastSendTransaction({
+        userId,
+        walletId,
+        opts,
+      });
+
+      expect(mocks.post).toBeCalledWith(`/users/${userId}/wallets/${walletId}/transactions/broadcast`, opts);
     });
   });
 

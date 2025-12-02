@@ -11,6 +11,7 @@
 | `disabled`  | `disabled`   | If the button is disabled. Default is: false.                                                                                        | `boolean`                                                            | `false`     |
 | `fullWidth` | `full-width` | Whether the button takes the full width of it's container. Default is: false.                                                        | `boolean`                                                            | `false`     |
 | `href`      | `href`       | href to use when using a link.                                                                                                       | `string`                                                             | `undefined` |
+| `pending`   | `pending`    | If the button is pending. Default is: false.                                                                                         | `boolean`                                                            | `false`     |
 | `size`      | `size`       | The size of the button. Options are: `"small"`, `"medium". Default is: `"medium"`.                                                   | `"medium" \| "small" \| "xSmall"`                                    | `'medium'`  |
 | `target`    | `target`     | target to use when using a link.                                                                                                     | `string`                                                             | `undefined` |
 | `type`      | `type`       | The type of the button.                                                                                                              | `"button" \| "reset" \| "submit"`                                    | `'button'`  |
@@ -31,9 +32,14 @@
  - [cpsl-nav-button](../cpsl-nav-button)
  - [cpsl-pagination](../cpsl-pagination)
 
+### Depends on
+
+- [cpsl-spinner](../cpsl-spinner)
+
 ### Graph
 ```mermaid
 graph TD;
+  cpsl-button --> cpsl-spinner
   cpsl-nav-button --> cpsl-button
   cpsl-pagination --> cpsl-button
   style cpsl-button fill:#f9f,stroke:#333,stroke-width:4px

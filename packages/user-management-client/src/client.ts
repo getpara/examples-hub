@@ -61,6 +61,10 @@ import {
   ServerAuthStateLogin,
   ServerAuthStateDone,
   UserPreferences,
+  EstimateTransactionOpts,
+  EstimateTransactionResult,
+  BroadcastTransactionOpts,
+  BroadcastTransactionResult,
 } from '@getpara/shared';
 import { extractWalletRef, fromAccountMetadata, fromLinkedAccounts } from './utils.js';
 import { SESSION_COOKIE_HEADER_NAME, VERSION_HEADER_NAME, PARTNER_ID_HEADER_NAME, API_KEY_HEADER_NAME } from './consts.js';
@@ -1339,7 +1343,7 @@ class Client {
     refetch,
   }: GetProfileBalanceParams): Promise<{ balance: ProfileBalance }> => {
     const res = await this.baseRequest.post<{ balance: ProfileBalance }>(`/assets/balances`, {
-      config,
+      config: { ...(config ?? { displayType: 'AGGREGATED' }), isComprehensive: true },
       wallets,
       refetch,
     });
@@ -1427,6 +1431,38 @@ class Client {
 
   updateUserPreferences = async (userId: string, preferences: Partial<UserPreferences>): Promise<UserPreferences> => {
     const res = await this.baseRequest.patch<UserPreferences>(`/users/${userId}/preferences`, { preferences });
+    return res.data;
+  };
+
+  estimateSendTransaction = async ({
+    userId,
+    walletId,
+    opts,
+  }: {
+    userId: string;
+    walletId: string;
+    opts: EstimateTransactionOpts;
+  }): Promise<EstimateTransactionResult> => {
+    const res = await this.baseRequest.post<EstimateTransactionResult>(
+      `/users/${userId}/wallets/${walletId}/transactions/estimate`,
+      opts,
+    );
+    return res.data;
+  };
+
+  broadcastSendTransaction = async ({
+    userId,
+    walletId,
+    opts,
+  }: {
+    userId: string;
+    walletId: string;
+    opts: BroadcastTransactionOpts;
+  }): Promise<BroadcastTransactionResult> => {
+    const res = await this.baseRequest.post<BroadcastTransactionResult>(
+      `/users/${userId}/wallets/${walletId}/transactions/broadcast`,
+      opts,
+    );
     return res.data;
   };
 }

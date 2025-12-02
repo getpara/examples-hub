@@ -108,6 +108,10 @@ export namespace Components {
          */
         "href"?: string;
         /**
+          * If the button is pending. Default is: false.
+         */
+        "pending"?: boolean;
+        /**
           * The size of the button. Options are: `"small"`, `"medium". Default is: `"medium"`.
          */
         "size"?: 'xSmall' | 'small' | 'medium';
@@ -1668,6 +1672,10 @@ declare namespace LocalJSX {
           * href to use when using a link.
          */
         "href"?: string;
+        /**
+          * If the button is pending. Default is: false.
+         */
+        "pending"?: boolean;
         /**
           * The size of the button. Options are: `"small"`, `"medium". Default is: `"medium"`.
          */

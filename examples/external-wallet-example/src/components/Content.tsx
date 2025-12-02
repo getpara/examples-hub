@@ -114,7 +114,7 @@ const BalanceDisplayContainer = styled.div`
 `;
 
 const BalanceDisplay = () => {
-  const { data: profileBalance, isLoading, error, isSuccess } = useProfileBalance();
+  const { data: profileBalance, isLoading, error, isSuccess } = useProfileBalance({ isComprehensive: true });
 
   if (isLoading) {
     return (

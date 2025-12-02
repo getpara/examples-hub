@@ -46,6 +46,7 @@
   width: var(--computed-width, '100%');
   height: var(--computed-height, '100%');
   filter: var(--filter);
+  border-radius: var(--icon-border-radius, 0);
 
   & .background-16 {
     fill: var(--cpsl-color-background-16);

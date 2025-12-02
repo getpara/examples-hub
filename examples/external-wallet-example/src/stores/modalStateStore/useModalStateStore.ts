@@ -7,6 +7,7 @@ import {
   EXTERNAL_WALLET_TYPES,
 } from '@getpara/react-sdk';
 import { CustomAsset } from '@getpara/user-management-client';
+import { BalancesRequestType } from '@getpara/shared';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
@@ -28,6 +29,7 @@ interface ModalStateState {
   balancesExcludeStandardAssets?: boolean;
   balancesAdditionalAssets?: CustomAsset[];
   balancesAsset?: CustomAsset;
+  balancesRequestType?: BalancesRequestType;
   apiKey: string;
 }
 
@@ -53,6 +55,7 @@ const DEFAULT_STATE: ModalStateState = {
   isFullAuth: false,
   balancesDisplayType: 'AGGREGATED',
   balancesExcludeStandardAssets: false,
+  balancesRequestType: 'MAINNET_AND_TESTNET',
   apiKey: import.meta.env.VITE_PARA_API_KEY,
 };
 
@@ -83,6 +86,7 @@ export const useModalStateStore = create<ModalStateStore>()(
         balancesExcludeStandardAssets: state.balancesExcludeStandardAssets,
         balancesAdditionalAssets: state.balancesAdditionalAssets,
         balancesAsset: state.balancesAsset,
+        balancesRequestType: state.balancesRequestType,
       }),
     },
   ),

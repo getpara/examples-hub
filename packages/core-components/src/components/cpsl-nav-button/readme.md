@@ -35,6 +35,7 @@
 ```mermaid
 graph TD;
   cpsl-nav-button --> cpsl-button
+  cpsl-button --> cpsl-spinner
   style cpsl-nav-button fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

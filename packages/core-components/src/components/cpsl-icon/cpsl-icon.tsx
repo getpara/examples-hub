@@ -71,7 +71,7 @@ export class CpslIcon {
       >
         {this.src ? (
           <div>
-            <img src={this.src} />
+            <img src={this.src} style={{ borderRadius: this.radius === 'full' ? '1000px' : undefined }} />
           </div>
         ) : (
           <div innerHTML={Icons[this.icon]} />

@@ -69,6 +69,10 @@ export {
   COSMOS_WALLETS,
   formatAssetQuantity,
   formatCurrency,
+  type EstimateTransactionOpts,
+  type EstimateTransactionResult,
+  type BroadcastTransactionOpts,
+  type BroadcastTransactionResult,
 } from '@getpara/user-management-client';
 export {
   PopupType,

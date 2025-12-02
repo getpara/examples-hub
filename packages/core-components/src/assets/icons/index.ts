@@ -10,6 +10,7 @@ import ArrowCircleBrokenDownLeft from './arrow-circle-broken-down-left.svg';
 import ArrowCircleDownFilled from './arrow-circle-down-filled.svg';
 import ArrowCircleDown from './arrow-circle-down.svg';
 import ArrowNarrow from './arrow-narrow.svg';
+import ArrowUpDown from './arrow-up-down.svg';
 import Arrow from './arrow.svg';
 import Asterisk from './asterisk.svg';
 import Backpack from './backpack.svg';
@@ -33,6 +34,7 @@ import ClubhouseBrand from './clubhouse-brand.svg';
 import Clubhouse from './clubhouse.svg';
 import Code from './code.svg';
 import Coinbase from './coinbase.svg';
+import Coins from './coins.svg';
 import Copy07 from './copy-07.svg';
 import Copy from './copy.svg';
 import CosmosCircle from './cosmos-circle.svg';
@@ -61,6 +63,7 @@ import Edit02 from './edit-02.svg';
 import EmptyCircle from './empty-circle.svg';
 import EthCircle from './eth-circle.svg';
 import Ethereum from './ethereum.svg';
+import ExternalLink from './external-link.svg';
 import EyeOff from './eye-off.svg';
 import Eye from './eye.svg';
 import FacebookBrand from './facebook-brand.svg';
@@ -444,6 +447,7 @@ export const Icons = {
   arrowCircleDownFilled: ArrowCircleDownFilled,
   arrowCircleDown: ArrowCircleDown,
   arrowNarrow: ArrowNarrow,
+  arrowUpDown: ArrowUpDown,
   arrow: Arrow,
   asterisk: Asterisk,
   backpack: Backpack,
@@ -467,6 +471,7 @@ export const Icons = {
   clubhouse: Clubhouse,
   code: Code,
   coinbase: Coinbase,
+  coins: Coins,
   copy07: Copy07,
   copy: Copy,
   cosmosCircle: CosmosCircle,
@@ -495,6 +500,7 @@ export const Icons = {
   emptyCircle: EmptyCircle,
   ethCircle: EthCircle,
   ethereum: Ethereum,
+  externalLink: ExternalLink,
   eyeOff: EyeOff,
   eye: Eye,
   facebookBrand: FacebookBrand,

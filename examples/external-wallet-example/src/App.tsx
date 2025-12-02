@@ -32,6 +32,10 @@ const useModalConfig = () => {
       balances.asset = state.balancesAsset;
     }
 
+    if (state.balancesRequestType) {
+      balances.requestType = state.balancesRequestType;
+    }
+
     return {
       oAuthMethods: state.oAuthMethods,
       authLayout: state.authLayout,
@@ -49,14 +53,19 @@ const useModalConfig = () => {
 
 // Create a validated balances config that only updates when valid
 const useValidatedBalancesConfig = () => {
-  const { balancesDisplayType, balancesExcludeStandardAssets, balancesAdditionalAssets, balancesAsset } = useModalStateStore(
-    state => ({
-      balancesDisplayType: state.balancesDisplayType,
-      balancesExcludeStandardAssets: state.balancesExcludeStandardAssets,
-      balancesAdditionalAssets: state.balancesAdditionalAssets,
-      balancesAsset: state.balancesAsset,
-    }),
-  );
+  const {
+    balancesDisplayType,
+    balancesExcludeStandardAssets,
+    balancesAdditionalAssets,
+    balancesAsset,
+    balancesRequestType,
+  } = useModalStateStore(state => ({
+    balancesDisplayType: state.balancesDisplayType,
+    balancesExcludeStandardAssets: state.balancesExcludeStandardAssets,
+    balancesAdditionalAssets: state.balancesAdditionalAssets,
+    balancesAsset: state.balancesAsset,
+    balancesRequestType: state.balancesRequestType,
+  }));
 
   // Only return the config if it's valid, otherwise return undefined
   return useMemo(() => {
@@ -77,8 +86,12 @@ const useValidatedBalancesConfig = () => {
       }
     }
 
+    if (balancesRequestType) {
+      config.requestType = balancesRequestType;
+    }
+
     return validateBalancesConfig(config) ? config : undefined;
-  }, [balancesDisplayType, balancesExcludeStandardAssets, balancesAdditionalAssets, balancesAsset]);
+  }, [balancesDisplayType, balancesExcludeStandardAssets, balancesAdditionalAssets, balancesAsset, balancesRequestType]);
 };
 
 const useExternalWalletConfig = () => {

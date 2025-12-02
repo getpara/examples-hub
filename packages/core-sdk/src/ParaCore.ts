@@ -61,6 +61,7 @@ import {
   Theme,
   SignUpOrLogInResponse,
   ServerAuthStateDone,
+  BalancesWallet,
 } from '@getpara/user-management-client';
 import type { pki as pkiType, jsbn as jsbnType } from 'node-forge';
 import forge from 'node-forge';
@@ -5065,7 +5066,9 @@ Need help? Visit: https://docs.getpara.com or contact support
   protected async getProfileBalance({ config, refetch = false }: { config?: BalancesConfig; refetch?: boolean } = {}) {
     const { balance } = await this.ctx.client.getProfileBalance({
       config,
-      wallets: this.availableWallets.map(({ type, address }) => ({ type, address })),
+      wallets: this.availableWallets
+        .filter(({ type }) => type !== 'COSMOS')
+        .map(({ type, address }) => ({ type, address })) as BalancesWallet[],
       refetch,
     });
 
