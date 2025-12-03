@@ -93,12 +93,19 @@ export const LoginProvider = ({
   };
 
   const authMethod = useMemo(() => {
+    const routeMethod = (params.authMethod ?? (params as any).method)?.toString().toUpperCase();
+    const oauthMethods = ['GOOGLE', 'APPLE', 'DISCORD', 'FACEBOOK', 'TWITTER'] as const;
+
     if (propsAuthMethod) {
       return propsAuthMethod;
     }
 
+    if (routeMethod && [...oauthMethods, 'PASSKEY', 'PASSWORD', 'PIN', 'BASIC_LOGIN'].includes(routeMethod)) {
+      return routeMethod as TAuthMethod;
+    }
+
     return params.authMethod ?? 'BASIC_LOGIN';
-  }, [propsAuthMethod, params.authMethod]);
+  }, [propsAuthMethod, params.authMethod, (params as any).method]);
 
   const [loginRes, setLoginRes] = useState<Awaited<ReturnType<typeof utils.authLogin>> | undefined>();
   const [wallets, setWallets] = useState<GroupedWallets>();

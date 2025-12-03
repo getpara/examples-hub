@@ -17,6 +17,11 @@ import { getDefaultWalletIds } from '../../utils/getDefaultWalletIds';
 import { LoginRes } from '../../types';
 import { useSearchParams } from 'react-router-dom';
 import { useNavigateWithCurrentParams } from '../../hooks/useNavigateWithCurrentParams';
+import { TOAuthMethod } from '@getpara/user-management-client';
+
+const OAUTH_METHODS = ['GOOGLE', 'APPLE', 'DISCORD', 'FACEBOOK', 'TWITTER', 'FARCASTER', 'TELEGRAM'] as const;
+const isOAuthMethod = (method?: string | null): method is TOAuthMethod =>
+  !!method && (OAUTH_METHODS as readonly string[]).includes(method);
 
 const AuthLoginBase = ({ step: propsStep }: { step?: AuthLoginStep }) => {
   const para = usePara();
@@ -104,6 +109,11 @@ const AuthLoginBase = ({ step: propsStep }: { step?: AuthLoginStep }) => {
     const loginCallbackRoute = searchParams.get('loginCallbackRoute');
 
     if (nativeCallbackUrl && validateCallbackUrl(nativeCallbackUrl)) {
+      if (isOAuthMethod(authMethod)) {
+        await para.verifyOAuth({ method: authMethod }).catch(err => {
+          console.warn('verifyOAuth failed for native OAuth callback', err);
+        });
+      }
       await para.userSetupAfterLogin();
       const isEnclaveUser = await checkIsEnclaveUser();
       const shouldSkipUpgrade = await getSkipBasicLoginUpgradePromptPreference();
