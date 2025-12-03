@@ -65,6 +65,7 @@ import {
   EstimateTransactionResult,
   BroadcastTransactionOpts,
   BroadcastTransactionResult,
+  TExternalWalletType,
 } from '@getpara/shared';
 import { extractWalletRef, fromAccountMetadata, fromLinkedAccounts } from './utils.js';
 import { SESSION_COOKIE_HEADER_NAME, VERSION_HEADER_NAME, PARTNER_ID_HEADER_NAME, API_KEY_HEADER_NAME } from './consts.js';
@@ -1464,6 +1465,17 @@ class Client {
       opts,
     );
     return res.data;
+  };
+
+  trackExternalWalletConnections = async ({
+    wallets,
+  }: {
+    wallets: { address: string; type: TExternalWalletType; provider?: string }[];
+  }): Promise<{ success: boolean }> => {
+    const res = await this.baseRequest.post<{ success: boolean }>('/users/external-wallets/track-connections', {
+      wallets,
+    });
+    return { success: res.data.success };
   };
 }
 

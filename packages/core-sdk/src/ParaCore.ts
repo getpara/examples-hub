@@ -2282,6 +2282,18 @@ Need help? Visit: https://docs.getpara.com or contact support
   }: CoreMethodParams<'loginExternalWallet'>): CoreMethodResponse<'loginExternalWallet'> {
     const externalWallets = Array.isArray(externalWallet) ? externalWallet : [externalWallet];
 
+    try {
+      await this.ctx.client.trackExternalWalletConnections({
+        wallets: externalWallets.map(wallet => ({
+          address: wallet.address,
+          type: wallet.type,
+          provider: wallet.provider,
+        })),
+      });
+    } catch (err) {
+      console.error('Error tracking external wallet connections:', err);
+    }
+
     if (this.externalWalletConnectionOnly || externalWallets.every(wallet => wallet.isConnectionOnly)) {
       // withFullParaAuth cannot be used if using connection only wallets
       await this.addExternalWallets(

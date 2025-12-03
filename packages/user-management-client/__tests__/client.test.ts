@@ -1587,6 +1587,28 @@ describe('Client', () => {
 
       expect(mocks.post).toBeCalledWith(`/users/${userId}/wallets/${walletId}/transactions/broadcast`, opts);
     });
+
+    it('trackExternalWalletConnections', async () => {
+      await client.trackExternalWalletConnections({
+        wallets: [
+          {
+            address: '0x123',
+            type: 'EVM',
+          },
+          {
+            address: 'cosmos1abc',
+            type: 'COSMOS',
+          },
+        ],
+      });
+
+      expect(mocks.post).toBeCalledWith('/users/external-wallets/track-connections', {
+        wallets: [
+          { address: '0x123', type: 'EVM' },
+          { address: 'cosmos1abc', type: 'COSMOS' },
+        ],
+      });
+    });
   });
 
   it('should handle useFetchAdapter option', () => {
