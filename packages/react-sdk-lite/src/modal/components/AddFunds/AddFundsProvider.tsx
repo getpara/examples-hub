@@ -1,5 +1,5 @@
 import { safeStyled } from '@getpara/react-common';
-import { Heading, InnerStepContainer } from '../common.js';
+import { contentMotionProps, Heading, InnerStepContainer } from '../common.js';
 import { CpslText } from '@getpara/react-components';
 import { useAddFunds } from './AddFundsContext.js';
 import { useModalStore } from '../../stores/index.js';
@@ -8,7 +8,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { OnRampProviderButton } from '../OnRampComponents/OnRampProviderButton.js';
 import { useWallet } from '../../../provider/index.js';
 import { EnabledFlow, OnRampPurchaseType } from '@getpara/web-sdk';
-import { contentMotionProps } from './common.js';
 import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
 
 export function AddFundsProvider() {

@@ -1,12 +1,20 @@
 import { ReactNode, useEffect, useMemo, useState } from 'react';
 import { useAddFunds } from './AddFundsContext.js';
-import { CpslButton, CpslIcon, CpslInput, CpslRow, CpslText } from '@getpara/react-components';
-import { AssetIcon, HeaderSelect, HeaderSelectContainer, HeaderSelectItem, NetworkIcon } from '../common.js';
+import { CpslButton, CpslIcon, CpslRow, CpslText } from '@getpara/react-components';
+import {
+  AssetIcon,
+  contentMotionProps,
+  HeaderSelect,
+  HeaderSelectContainer,
+  HeaderSelectItem,
+  NetworkIcon,
+} from '../common.js';
+import { QuantityInput } from '../QuantityInput.js';
 import { EnabledFlow, getOnRampNetworks, TNetwork, TOnRampAsset, OnRampPurchaseType } from '@getpara/web-sdk';
 import { OnRampStep, useModalStore } from '../../stores/index.js';
 import { useStore } from '../../../provider/stores/useStore.js';
 import { safeStyled, getAssetCode, getNetworkName } from '@getpara/react-common';
-import { contentMotionProps, NoProviders } from './common.js';
+import { NoProviders } from './common.js';
 import { AnimatePresence, motion, useIsPresent } from 'framer-motion';
 import { AddFundsAsset } from './AddFundsAsset.js';
 
@@ -164,37 +172,7 @@ export function AddFundsSettings() {
               </HeaderSelectContainer>
             </CpslRow>
             <CpslRow col gap="16px">
-              <Input
-                value={value || ''}
-                key={value || ''}
-                fitContent
-                autoselect
-                onKeyDown={e => {
-                  if (!/^(\d|\.)$/.test(e.key) && !['Delete', 'Backspace', 'Tab', 'Shift'].includes(e.key)) {
-                    e.preventDefault();
-                  }
-                }}
-                onChange={e => {
-                  const numericValue = (e.currentTarget?.value || '').replace(/[^0-9.]/g, '');
-                  if (numericValue !== '') {
-                    const formattedValue = parseFloat(numericValue).toFixed(2);
-                    setValue(formattedValue);
-                  } else {
-                    setValue(null);
-                  }
-                }}
-                onBlur={e => {
-                  const numericValue = (e.currentTarget.value || '').replace(/[^0-9.]/g, '');
-                  if (numericValue === '') {
-                    setValue(null);
-                  } else {
-                    setValue(parseFloat(numericValue).toFixed(2));
-                  }
-                }}
-                placeholder="0"
-              >
-                <CurrencySign slot="start">$</CurrencySign>
-              </Input>
+              <QuantityInput value={value} onChange={setValue} symbol="$" />
               <CpslRow style={{ width: '100%' }}>
                 {['25', '50', '100'].map(quantity => {
                   return (
@@ -262,13 +240,6 @@ const AssetContainer = safeStyled(Container)`
   gap: 8px;
 `;
 
-const CurrencySign = safeStyled.div`
-  font-size: 72px;
-  color: var(--cpsl-color-text-primary);
-  position: relative;
-  right: -16px;
-`;
-
 const PresetButton = safeStyled(CpslButton)`
   --button-color: var(--cpsl-color-text-contrast);
   --button-font-size: 24px;
@@ -278,14 +249,4 @@ const PresetButton = safeStyled(CpslButton)`
   --button-secondary-hover-background-color: var(--cpsl-color-background-16);
   --button-secondary-hover-border-color: var(--cpsl-color-background-16);
   flex: 1;
-`;
-
-const Input = safeStyled(CpslInput)`
-  --container-background-color: transparent;
-  --container-height: 90px;
-  --container-border-width: 0;
-  --input-background-color: transparent;
-  --input-font-size: 72px;
-  --input-text-align: center;
-  --input-width: 100%;
 `;

@@ -5,9 +5,8 @@ import { useModalStore } from '../../stores/index.js';
 import { useState } from 'react';
 import { useAddFunds } from './AddFundsContext.js';
 import { useWallet } from '../../../provider/hooks/queries/useWallet.js';
-import { AssetIcon, GradientScroll } from '../common.js';
+import { AssetIcon, contentMotionProps, GradientScroll } from '../common.js';
 import { AnimatePresence, motion } from 'framer-motion';
-import { contentMotionProps } from './common.js';
 import { useAssets } from '../../../provider/providers/AssetsProvider.js';
 
 export function AddFundsAsset() {

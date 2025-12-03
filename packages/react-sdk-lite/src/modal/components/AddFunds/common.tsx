@@ -1,13 +1,6 @@
 import { CpslText } from '@getpara/react-components';
 import { safeStyled } from '@getpara/react-common';
 
-export const contentMotionProps = {
-  transition: { duration: 0.2 },
-  initial: { opacity: 0 },
-  animate: { opacity: 1 },
-  exit: { opacity: 0 },
-};
-
 export const NoProviders = safeStyled(CpslText)<{ isHidden?: boolean }>`
   width: 100%;
   text-align: center;

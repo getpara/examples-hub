@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
 import { useDropdownPosition } from '../AuthInput/hooks/useDropdownPosition.js';
 import { MOBILE_SIZE, safeStyled, useCopyToClipboard, WalletTypeIcon as WalletTypeIconBase } from '@getpara/react-common';
@@ -55,7 +55,17 @@ const Wallet = ({
   );
 };
 
-export const WalletSelectOld = () => {
+export const WalletSelectOld = ({
+  style,
+  noTitle,
+  types,
+  isEmbeddedOnly,
+}: {
+  style?: React.CSSProperties;
+  noTitle?: boolean;
+  types?: TWalletType[];
+  isEmbeddedOnly?: boolean;
+}) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const { dropdownMaxHeight, dropdownWidth, mobileAnchor, resize } = useDropdownPosition(containerRef);
 
@@ -63,7 +73,9 @@ export const WalletSelectOld = () => {
   const { data: activeWallet } = useWallet();
   const { embedded } = useAccount();
 
-  const availableWallets = embedded?.wallets;
+  const availableWallets = useMemo(() => {
+    return embedded?.wallets?.filter(wallet => !isEmbeddedOnly || !wallet.isExternal);
+  }, [embedded, isEmbeddedOnly]);
   const isMultiWallet = availableWallets && availableWallets.length > 1;
 
   const ActiveWalletNode = activeWallet ? <Wallet withCopy wallet={activeWallet} slot="selected-item" withIcon /> : null;
@@ -75,13 +87,13 @@ export const WalletSelectOld = () => {
   }, [activeWallet, availableWallets, dropdownMaxHeight]);
 
   return (
-    <Container>
-      {isMultiWallet && (
+    <Container style={style}>
+      {isMultiWallet && !noTitle && (
         <CpslText variant="bodyM" color="secondary" weight="semiBold">
           Select Wallet
         </CpslText>
       )}
-      <SelectContainer ref={containerRef} id="addressInputContainerOld">
+      <SelectContainer ref={containerRef} id="addressInputContainerOld" style={{ width: '100%' }}>
         <Select
           selectedValue={getValue(activeWallet?.id, activeWallet?.type)}
           onCpslSelectValueChange={e => {
@@ -98,16 +110,19 @@ export const WalletSelectOld = () => {
           selectedItemVariant="bodyXS"
           icon={isMultiWallet ? 'chevronUp' : null}
           disabled={!isMultiWallet}
+          style={{ width: '100%' }}
         >
           {activeWallet && ActiveWalletNode}
-          {(availableWallets || []).map(wallet => {
-            const key = getValue(wallet.id, wallet.type);
-            return (
-              <SelectItem key={key} slot="items" value={key}>
-                <Wallet wallet={wallet} withIcon />
-              </SelectItem>
-            );
-          })}
+          {(availableWallets || [])
+            .filter(wallet => !types || !wallet.type || types.includes(wallet.type))
+            .map(wallet => {
+              const key = getValue(wallet.id, wallet.type);
+              return (
+                <SelectItem key={key} slot="items" value={key}>
+                  <Wallet wallet={wallet} withIcon />
+                </SelectItem>
+              );
+            })}
         </Select>
       </SelectContainer>
     </Container>

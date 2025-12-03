@@ -14,6 +14,7 @@ import {
   Setup2faResponse,
   LINKED_ACCOUNT_TYPES,
   SupportedAccountLinks,
+  BroadcastTransactionResult,
 } from '@getpara/web-sdk';
 import { Tab as AddFundsTabType } from '../../components/AddFunds/AddFundsContext.js';
 import { AuthLayout, TAuthLayout } from '../../types/modalProps.js';
@@ -72,6 +73,7 @@ interface ModalState {
   isPasskeySupported: boolean;
   accountLinkOptions: SupportedAccountLinks;
   profileWallet?: AvailableWallet;
+  sendTx?: BroadcastTransactionResult;
 }
 
 export interface ModalActions {
@@ -109,6 +111,7 @@ export interface ModalActions {
   setIsPasskeySupported: (_: boolean) => void;
   setAccountLinkOptions: (_: SupportedAccountLinks) => void;
   setProfileWallet: (_?: AvailableWallet) => void;
+  setSendTx: (_?: BroadcastTransactionResult) => void;
 }
 
 export type ModalStore = ModalState & ModalActions;
@@ -147,6 +150,7 @@ export const DEFAULT_MODAL_STATE: Omit<ModalState, 'step' | 'onRampConfig'> = {
   isPasskeySupported: true,
   accountLinkOptions: [...LINKED_ACCOUNT_TYPES],
   profileWallet: undefined,
+  sendTx: undefined,
 };
 
 export const useModalStore = create<ModalStore>()(

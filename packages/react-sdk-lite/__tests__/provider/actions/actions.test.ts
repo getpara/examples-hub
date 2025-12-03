@@ -150,7 +150,7 @@ describe('actions', () => {
         });
         describe('fail', () => {
           it('no para', async () => {
-            expect(action(undefined, undefined)).rejects.toThrowError();
+            await expect(action(undefined, undefined)).rejects.toThrowError();
           });
         });
       });

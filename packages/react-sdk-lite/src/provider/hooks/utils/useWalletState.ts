@@ -47,6 +47,9 @@ export const useWalletState = () => {
     selectedWallet: {
       id: selectedWalletId,
       type: selectedWalletType,
+      address: selectedWalletId
+        ? client?.getDisplayAddress(selectedWalletId, { addressType: selectedWalletType })
+        : undefined,
     },
     setSelectedWallet,
     updateSelectedWallet,

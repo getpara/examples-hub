@@ -21,6 +21,7 @@ import { WALLET_BASE_KEY } from '../queries/useWallet.js';
 import { Callbacks } from '../../types/provider.js';
 import { WALLET_BALANCE_BASE_KEY } from '../queries/useWalletBalance.js';
 import { IS_FULLY_LOGGED_IN_BASE_KEY } from '../queries/useIsFullyLoggedIn.js';
+import { useModalStore } from '../../../modal/stores/index.js';
 
 export const useEventListeners = ({
   onLogin,
@@ -39,6 +40,7 @@ export const useEventListeners = ({
   const refs = useStore(state => state.refs);
   const clearSelectedWallet = useStore(state => state.clearSelectedWallet);
   const { updateSelectedWallet } = useWalletState();
+  const setSendTx = useModalStore(state => state.setSendTx);
 
   const loginOrSetupListener = useCallback(() => {
     queryClient.refetchQueries({ queryKey: [IS_FULLY_LOGGED_IN_BASE_KEY] });
@@ -78,9 +80,11 @@ export const useEventListeners = ({
       queryClient.invalidateQueries({ queryKey: [IS_FULLY_LOGGED_IN_BASE_KEY] });
       queryClient.invalidateQueries({ queryKey: [ACCOUNT_BASE_KEY] });
       clearSelectedWallet();
+      // Clear sendTx from modal store on logout
+      setSendTx(undefined);
       onLogout?.(event);
     },
-    [queryClient, clearSelectedWallet, onLogout],
+    [queryClient, clearSelectedWallet, setSendTx, onLogout],
   );
 
   const signMessageListener = useCallback(

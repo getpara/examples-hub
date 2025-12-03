@@ -84,6 +84,9 @@ export const useStepTitle = () => {
       [ModalStep.EXTERNAL_WALLET_VERIFICATION]: 'Verify Wallet',
       [ModalStep.AWAITING_ACCOUNT]: isLogin ? 'Login' : 'Sign Up',
       [ModalStep.ACCOUNT_WALLET]: profileWallet?.displayName ?? 'Wallet Settings',
+      [ModalStep.ACCOUNT_SEND]: 'Send',
+      [ModalStep.ACCOUNT_SEND_ASSET]: 'Send',
+      [ModalStep.ACCOUNT_SEND_NETWORK]: 'Send',
     }),
     [isLogin, chainId, hideWallets, authStepTitle],
   );

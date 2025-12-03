@@ -4,6 +4,7 @@ import { useStore } from '../../stores/useStore.js';
 import { useInternalClient } from '../utils/useInternalClient.js';
 import { useIsFullyLoggedIn } from './useIsFullyLoggedIn.js';
 import { ProfileBalance } from '@getpara/web-sdk';
+import { filterProfileBalance } from '@getpara/shared';
 
 /**
  * Options for the useProfileBalance hook.
@@ -17,6 +18,10 @@ type UseProfileBalanceOptions = {
    * When not provided, internal SDK events (like asset transfers) will still trigger refetches via React Query invalidation.
    */
   refetchTrigger?: number | string;
+  /**
+   * Whether to return the comprehensive balance set. If `false` or `undefined`, the results will be filtered and modified based on your `ParaProvider`'s balances configuration.
+   */
+  isComprehensive?: boolean;
 };
 
 /**
@@ -33,10 +38,13 @@ export const useProfileBalance = (options?: UseProfileBalanceOptions): UseQueryR
   const config = useStore(state => state.modalConfig?.balances);
   const refs = useStore(state => state.refs);
 
+  const isComprehensive = options?.isComprehensive ?? false;
+
   // Track the previous external trigger to detect changes
   const previousTriggerRef = useRef<number | string | undefined>(options?.refetchTrigger);
   const shouldRefetchRef = useRef(false);
   const lastQueryTimeRef = useRef<number>(0);
+  const isInitialLoadRef = useRef(true);
 
   // Detect when the external refetchTrigger changes
   useEffect(() => {
@@ -67,16 +75,22 @@ export const useProfileBalance = (options?: UseProfileBalanceOptions): UseQueryR
       // If the last invalidation was after our last query, this is an invalidation-triggered refetch
       const isInvalidationRefetch = (refs.balancesInvalidationTime.current ?? 0) > lastQueryTimeRef.current;
 
+      // Always refetch on initial page load to ensure fresh data
+      const isInitialLoad = isInitialLoadRef.current;
+
       const profileBalance = await client?.getProfileBalance({
         config,
-        refetch: shouldRefetchRef.current || isInvalidationRefetch,
+        refetch: shouldRefetchRef.current || isInvalidationRefetch || isInitialLoad,
       });
 
       // Update our last query time and reset flags
       lastQueryTimeRef.current = Date.now();
       shouldRefetchRef.current = false;
+      isInitialLoadRef.current = false;
 
-      return profileBalance;
+      return isComprehensive
+        ? profileBalance
+        : filterProfileBalance(profileBalance, config || { displayType: 'AGGREGATED' });
     },
     // We handle refetch manually
     refetchOnWindowFocus: false,

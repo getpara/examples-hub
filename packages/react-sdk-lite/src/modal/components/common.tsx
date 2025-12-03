@@ -237,7 +237,8 @@ export function GradientScroll({ height, gap, children }: PropsWithChildren<{ ga
   const onScroll = () => {
     if (ref.current) {
       const { scrollTop, scrollHeight, clientHeight } = ref.current;
-      if (height && scrollHeight <= parseInt(height)) {
+      // If all content is visible (scrollHeight <= clientHeight), no gradients needed
+      if (scrollHeight <= clientHeight) {
         setIsNotAtTop(false);
         setIsNotAtBottom(false);
       } else {
@@ -249,6 +250,16 @@ export function GradientScroll({ height, gap, children }: PropsWithChildren<{ ga
 
   useEffect(() => {
     onScroll();
+    // Also check on resize to catch when content height changes
+    const resizeObserver = new ResizeObserver(() => {
+      onScroll();
+    });
+    if (ref.current) {
+      resizeObserver.observe(ref.current);
+    }
+    return () => {
+      resizeObserver.disconnect();
+    };
   }, []);
 
   return (
@@ -308,3 +319,7 @@ const Avatar = safeStyled.div`
   justify-content: center;
   background-color: var(--cpsl-color-background-8);
 `;
+
+export * from './SearchableButtonList.js';
+export * from './QuantityInput.js';
+export { AnimatedHeightWrapper } from './Body/AnimatedHeightWrapper.js';

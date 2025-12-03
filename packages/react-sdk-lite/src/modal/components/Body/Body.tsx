@@ -43,6 +43,7 @@ import { SwitchWalletsStep } from '../SwitchWalletsStep/SwitchWalletsStep.js';
 import { Footer } from '../Footer/Footer.js';
 import { renderTextWithLinks } from '../../utils/renderTextWithLinks.js';
 import { AccountWallet } from '../Account/AccountWallet.js';
+import { AccountSend } from '../Account/AccountSend/index.js';
 
 interface BodyProps {
   oAuthMethods?: TOAuthMethod[];
@@ -221,6 +222,15 @@ export const Body = ({
       case ModalStep.SWITCH_WALLETS: {
         return <SwitchWalletsStep />;
       }
+      case ModalStep.ACCOUNT_SEND: {
+        return <AccountSend step="SEND_FORM" />;
+      }
+      case ModalStep.ACCOUNT_SEND_ASSET: {
+        return <AccountSend step="SEND_ASSET" />;
+      }
+      case ModalStep.ACCOUNT_SEND_NETWORK: {
+        return <AccountSend step="SEND_NETWORK" />;
+      }
       default: {
         if (IFrameSteps.includes(currentStep)) {
           return null;
@@ -270,7 +280,11 @@ export const Body = ({
         >
           <BodyContainer
             key={
-              ['ADD_FUNDS_BUY', 'ADD_FUNDS_RECEIVE', 'ADD_FUNDS_WITHDRAW'].includes(currentStep) ? 'ADD_FUNDS' : currentStep
+              ['ADD_FUNDS_BUY', 'ADD_FUNDS_RECEIVE', 'ADD_FUNDS_WITHDRAW'].includes(currentStep)
+                ? 'ADD_FUNDS'
+                : ['ACCOUNT_SEND', 'ACCOUNT_SEND_ASSET', 'ACCOUNT_SEND_NETWORK'].includes(currentStep)
+                  ? 'ACCOUNT_SEND'
+                  : currentStep
             }
             custom={stepDirection}
             variants={BODY_MOTION_VARIANTS}

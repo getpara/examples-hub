@@ -5,7 +5,7 @@ import { OnRampStep, useModalStore } from '../../stores/index.js';
 import { useEffect } from 'react';
 import { ModalStep } from '../../utils/steps.js';
 import { useInternalClient } from '../../../provider/hooks/utils/useInternalClient.js';
-import { useAccount } from '../../../provider/index.js';
+import { useAccount, useWalletState } from '../../../provider/index.js';
 import { EnabledFlow } from '@getpara/web-sdk';
 import { useAccountLinking } from '../../../provider/providers/AccountLinkProvider.js';
 import { useAssets } from '../../../provider/providers/AssetsProvider.js';
@@ -16,8 +16,10 @@ export const Account = () => {
   const setStep = useModalStore(state => state.setStep);
   const setGuestAddFundsTab = useModalStore(state => state.setGuestAddFundsTab);
   const setOnRampStep = useModalStore(state => state.setOnRampStep);
+  const sendTx = useModalStore(state => state.sendTx);
   const para = useInternalClient();
   const { embedded } = useAccount();
+  const { selectedWallet, setSelectedWallet } = useWalletState();
   const { isEnabled } = useAccountLinking();
   const { profileBalance } = useAssets();
 
@@ -28,6 +30,17 @@ export const Account = () => {
     (para.externalWalletConnectionType === 'CONNECTION_ONLY' || para.externalWalletConnectionType === 'VERIFICATION') &&
     !para.userId;
   const isOnRampLoaded = !!onRampConfig;
+
+  const handleSendClick = () => {
+    if (selectedWallet?.type === 'COSMOS' || embedded.wallets?.some(w => w.id === selectedWallet?.id && w.isExternal)) {
+      const validWallet = embedded.wallets?.find(({ type, isExternal }) => type !== 'COSMOS' && !isExternal);
+      if (!validWallet) {
+        return;
+      }
+      setSelectedWallet({ id: validWallet.id!, type: validWallet.type! });
+    }
+    setStep(ModalStep.ACCOUNT_SEND);
+  };
 
   const handleBuyClick = () => {
     if (isGuestMode) {
@@ -86,6 +99,12 @@ export const Account = () => {
               </CpslButton>
             </>
           )}
+          {!!sendTx?.explorerUrl && (
+            <MonitorLink target="_blank" href={sendTx.explorerUrl} rel="noopener noreferrer">
+              <span>Monitor Transaction</span>
+              <CpslIcon icon="externalLink" size="16px" style={{ marginLeft: '6px' }} />
+            </MonitorLink>
+          )}
           <ButtonContainer>
             {isOnRampLoaded ? (
               <>
@@ -96,6 +115,11 @@ export const Account = () => {
                     </CpslText>
                   </OptionButton>
                 )}
+                <OptionButton icon="send" onClick={handleSendClick} disabled={!profileBalance}>
+                  <CpslText variant="bodyXS" color="secondary" weight="medium">
+                    Send
+                  </CpslText>
+                </OptionButton>
                 {onRampConfig.isWithdrawEnabled && !cantBuyAndWithdraw && (
                   <OptionButton icon="arrowCircleDown" onClick={handleSellClick}>
                     <CpslText variant="bodyXS" color="secondary" weight="medium">
@@ -162,6 +186,26 @@ const Alert = safeStyled.div`
 const LowerContainer = safeStyled.div`
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 16px;
   width: 100%;
+`;
+
+const MonitorLink = safeStyled.a`
+  font-family: var(--cpsl-font-family);
+  font-size: 14px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--cpsl-color-text-primary);
+  --icon-color: var(--cpsl-color-text-primary);
+
+  &:hover {
+    color: var(--cpsl-color-text-contrast);
+    --icon-color: var(--cpsl-color-text-contrast);
+  }
 `;
