@@ -41,9 +41,11 @@
     "nth-check": "^2.1.1"
   },
   "scripts": {
-    "alpha-publish": "lerna publish from-package --no-private --dist-tag alpha",
+    "alpha-publish": "lerna publish from-package --no-private --dist-tag alpha && yarn update-examples-hub-lockfiles",
     "alpha-release": "node scripts/alpha-publish-workflow.mjs",
-    "alpha-version": "lerna version prerelease --preid alpha --no-push --no-git-tag-version && yarn gen-changelog-alpha",
+    "alpha-version": "lerna version prerelease --preid alpha --no-push --no-git-tag-version && yarn gen-changelog-alpha && yarn update-examples-hub-version",
+    "update-examples-hub-version": "node scripts/update-examples-hub-version.mjs",
+    "update-examples-hub-lockfiles": "node scripts/update-examples-hub-lockfiles.mjs",
     "build": "lerna run build --parallel --concurrency 2",
     "postinstall": "patch-package && bash scripts/setup-examples-hub.sh",
     "build:dev": "yarn link-shared-symlink && lerna run build --scope=@getpara/* --scope=capsule-mpc-worker --scope=capsule-mpc-worker-server --concurrency 4",

@@ -559,6 +559,37 @@ NO EXAMPLES NEEDED`;
       commandSummary,
       0,
     );
+
+    // Step 10: Commit examples-hub lockfile changes created by alpha-publish
+    // The alpha-publish script now chains update-examples-hub-lockfiles which updates yarn.lock files
+    try {
+      // Check if there are examples-hub changes to commit
+      const lockfileChanges = execSync('git diff --name-only examples-hub/', {
+        cwd: projectRoot,
+        encoding: 'utf8',
+      }).trim();
+
+      if (lockfileChanges) {
+        console.log('\n📋 Step 10: Committing examples-hub lockfile updates...');
+        runCommand('git add examples-hub/', 'Staging examples-hub lockfile changes', false, dryRun, false, commandSummary);
+
+        // Check if there are staged changes
+        try {
+          execSync('git diff --cached --quiet', { cwd: projectRoot });
+          console.log('ℹ️  No staged changes to commit');
+        } catch (stagedError) {
+          // There are staged changes - amend the commit
+          runCommand('git commit --amend --no-edit', 'Amending commit with examples-hub lockfiles', false, dryRun, false, commandSummary);
+          runCommand(`git push -f origin ${branchName}`, 'Force-pushing updated commit with lockfiles', false, dryRun, false, commandSummary);
+          console.log('✅ examples-hub lockfile changes committed and pushed');
+        }
+      } else {
+        console.log('\nℹ️  No examples-hub lockfile changes to commit');
+      }
+    } catch (error) {
+      console.log('⚠️  Could not check/commit examples-hub lockfile changes:', error.message);
+      console.log('ℹ️  This is non-blocking - lockfiles can be updated manually if needed.');
+    }
   } else {
     console.log('\n⚠️  Skipping yarn alpha-publish (SKIP_NPM_COMMANDS=true)');
   }
