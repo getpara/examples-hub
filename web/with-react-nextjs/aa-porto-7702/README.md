@@ -1,36 +1,55 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Smart Wallet Porto (EIP-7702)
 
-## Getting Started
+This example demonstrates how to integrate Para SDK with Porto to upgrade Para EOA wallets to smart accounts using EIP-7702. It showcases account upgrading, session keys, and transaction batching while preserving the original wallet address.
 
-First, run the development server:
+## Setup
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+### Environment Variables
+
+Create a `.env.local` file in the root directory:
+
+```env
+NEXT_PUBLIC_PARA_API_KEY=your_para_api_key
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Installation
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Install dependencies using your preferred package manager:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+# yarn
+yarn install
+
+# npm
+npm install
+
+# pnpm
+pnpm install
+```
+
+## Key Dependencies
+
+- `@getpara/react-sdk` (v2.0.0-alpha.72) - Para React SDK for wallet integration
+- `porto` (latest) - Porto smart account SDK
+- `viem` (v2.33.0) - TypeScript interface for Ethereum
+- `@tanstack/react-query` (v5.83.0) - Data fetching and state management
+- `next` (v15.1.5) - React framework
+
+## Key Files
+
+- `src/context/Providers.tsx` - Para provider setup with Base Sepolia chain
+- `src/hooks/usePortoAccount.ts` - Porto account upgrade and management hook
+- `src/components/PortoDemo.tsx` - Demo UI showing EOA vs Smart Account comparison
+
+## Important Notes
+
+- Porto requires raw signing (no EIP-191 prefix) - uses `para.signMessage()` directly
+- Must use Porto relay endpoint: `https://rpc.porto.sh`
+- Currently supports Base Sepolia testnet
 
 ## Learn More
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- [Para Documentation](https://docs.getpara.com)
+- [Para Developer Portal](https://developer.getpara.com)
+- [Porto Documentation](https://porto.sh/sdk)
+- [EIP-7702 Specification](https://eips.ethereum.org/EIPS/eip-7702)
