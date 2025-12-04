@@ -1,6 +1,8 @@
 # Smart Wallet Porto (EIP-7702)
 
-This example demonstrates how to integrate Para SDK with Porto to upgrade Para EOA wallets to smart accounts using EIP-7702. It showcases account upgrading, session keys, and transaction batching while preserving the original wallet address.
+This example demonstrates how to integrate Para SDK with Porto to upgrade Para EOA wallets to smart accounts using
+EIP-7702. It showcases account upgrading, session keys, and transaction batching while preserving the original wallet
+address.
 
 ## Setup
 
