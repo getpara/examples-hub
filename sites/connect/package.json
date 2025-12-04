@@ -14,8 +14,7 @@
     "deploy-sandbox": "yarn && NEXT_PUBLIC_PROJECT_ID=dc87c564a371d823d3795ae407391656 NEXT_PUBLIC_ENV=SANDBOX NEXT_PUBLIC_API_KEY=sandbox_54cfdd973167a3705c3940d5fdf9c716 yarn build && aws s3 sync out/ s3://capsule-walletconnect",
     "deploy-prod": "yarn && NEXT_PUBLIC_PROJECT_ID=dc87c564a371d823d3795ae407391656 NEXT_PUBLIC_ENV=PROD NEXT_PUBLIC_API_KEY=prod_2b244f348d798cb46c8ebd834d687c62 yarn build && aws s3 sync out/ s3://capsule-walletconnect-prod --profile prod",
     "build-sandbox": "NEXT_PUBLIC_PROJECT_ID=dc87c564a371d823d3795ae407391656 NEXT_PUBLIC_ENV=SANDBOX NEXT_PUBLIC_API_KEY=sandbox_54cfdd973167a3705c3940d5fdf9c716 yarn build-for-deploy",
-    "build-prod": "NEXT_PUBLIC_PROJECT_ID=dc87c564a371d823d3795ae407391656 NEXT_PUBLIC_ENV=PROD NEXT_PUBLIC_API_KEY=prod_2b244f348d798cb46c8ebd834d687c62 yarn build-for-deploy",
-    "postinstall": "yarn graz -g"
+    "build-prod": "NEXT_PUBLIC_PROJECT_ID=dc87c564a371d823d3795ae407391656 NEXT_PUBLIC_ENV=PROD NEXT_PUBLIC_API_KEY=prod_2b244f348d798cb46c8ebd834d687c62 yarn build-for-deploy"
   },
   "dependencies": {
     "@cosmjs/amino": "^0.32.4",

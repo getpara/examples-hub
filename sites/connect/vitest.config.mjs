@@ -22,7 +22,8 @@ export default defineConfig({
         '**/*.config.js',
         '**/*.config.ts',
         'next.config.js',
-        'next-env.d.ts'
+        'next-env.d.ts',
+        '**/chains.ts'
       ],
       thresholds: {
         statements: 11.08,

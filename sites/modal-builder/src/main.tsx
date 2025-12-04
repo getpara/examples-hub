@@ -8,7 +8,7 @@ import { defineCustomElements } from '@getpara/react-components';
 import { sepolia } from 'wagmi/chains';
 import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
 import { clusterApiUrl } from '@solana/web3.js';
-import { axelar, cosmoshub, osmosis, sommelier, stargaze } from 'graz/chains';
+import { axelar, cosmoshub, osmosis, sommelier, stargaze } from './chains';
 
 import { PARA_API_KEY, PARA_ENVIRONMENT, WALLET_CONNECT_PROJECT_ID } from './constants';
 import { ModalDesigner } from './components/ModalDesigner';

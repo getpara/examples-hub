@@ -2,7 +2,7 @@
 
 import ParaWeb, { EXTERNAL_WALLET_TYPES, ParaProvider as ParaSDKProvider } from '@getpara/react-sdk';
 import { mainnet } from 'wagmi/chains';
-import { cosmoshub } from 'graz/chains';
+import { cosmoshub } from '../chains';
 import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
 import { clusterApiUrl } from '@solana/web3.js';
 

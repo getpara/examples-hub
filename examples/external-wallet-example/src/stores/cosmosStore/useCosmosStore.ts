@@ -1,4 +1,4 @@
-import { cosmoshub } from 'graz/chains';
+import { cosmoshub } from '../../chains';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
