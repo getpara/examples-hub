@@ -392,22 +392,39 @@ function generateCommitMessage() {
 
 // Main execution
 async function main() {
-  const mode = process.argv[2];
-  
+  const args = process.argv.slice(2);
+
+  // Parse --version flag
+  const versionIndex = args.indexOf('--version');
+  const explicitVersion = versionIndex !== -1 && args[versionIndex + 1] && !args[versionIndex + 1].startsWith('--')
+    ? args[versionIndex + 1]
+    : null;
+
+  // Parse --skip-lockfile flag
+  const skipLockfile = args.includes('--skip-lockfile');
+
+  // Parse mode (--check-only, --diff-only, --help)
+  const mode = args.find(arg =>
+    ['--check-only', '--diff-only', '--help', '-h'].includes(arg)
+  );
+
   if (mode === "--help" || mode === "-h") {
     console.log(`
-Usage: node update-para-dependencies.js [mode]
+Usage: node update-para-dependencies.js [options]
 
-Modes:
-  (no args)    - Fetch latest alpha versions and update all @getpara/* dependencies
-  --check-only - Check for available updates without making changes
-  --diff-only  - Only process files where versions don't match target (faster incremental updates)
-  --help, -h   - Show this help message
+Options:
+  --version <ver>  - Use explicit version for all @getpara/* packages (instead of fetching from npm)
+  --skip-lockfile  - Skip yarn.lock updates (useful when npm packages aren't published yet)
+  --check-only     - Check for available updates without making changes
+  --diff-only      - Only process files where versions don't match target (faster incremental updates)
+  --help, -h       - Show this help message
 
 Examples:
-  node update-para-dependencies.js
-  node update-para-dependencies.js --check-only
-  node update-para-dependencies.js --diff-only
+  node update-para-dependencies.js                                    # Fetch latest from npm
+  node update-para-dependencies.js --version 2.0.0-alpha.73           # Use explicit version
+  node update-para-dependencies.js --version 2.0.0-alpha.73 --skip-lockfile  # Skip lockfile updates
+  node update-para-dependencies.js --check-only                       # Check without modifying
+  node update-para-dependencies.js --diff-only                        # Only update changed files
 `);
     process.exit(0);
   }
@@ -415,33 +432,49 @@ Examples:
   try {
     console.log("🔍 Discovering @getpara/* packages in the repository...");
     const discoveredPackages = discoverGetParaPackages(rootDir);
-    
+
     if (discoveredPackages.size === 0) {
       console.log("ℹ️  No @getpara/* packages found in the repository.");
       process.exit(0);
     }
-    
+
     console.log(`\n📦 Discovered ${discoveredPackages.size} unique @getpara/* packages:`);
     const packageList = Array.from(discoveredPackages).sort();
     packageList.forEach(pkg => console.log(`  - ${pkg}`));
-    
-    console.log("\n🔍 Fetching latest alpha versions for discovered packages...");
-    const versionMap = await fetchAllLatestAlphaVersions(packageList);
-    
-    if (Object.keys(versionMap).length === 0) {
-      console.error("❌ No alpha versions found for any of the discovered packages.");
-      console.log("ℹ️  This might mean the packages don't have alpha versions yet.");
-      process.exit(0);
+
+    // Build version map - either from explicit version or npm
+    let versionMap: Record<string, string>;
+
+    if (explicitVersion) {
+      console.log(`\n📌 Using explicit version: ${explicitVersion}`);
+      versionMap = {};
+      discoveredPackages.forEach(pkg => {
+        versionMap[pkg] = explicitVersion;
+      });
+      console.log(`📦 Will update ${discoveredPackages.size} packages to ${explicitVersion}`);
+    } else {
+      console.log("\n🔍 Fetching latest alpha versions for discovered packages...");
+      versionMap = await fetchAllLatestAlphaVersions(packageList);
+
+      if (Object.keys(versionMap).length === 0) {
+        console.error("❌ No alpha versions found for any of the discovered packages.");
+        console.log("ℹ️  This might mean the packages don't have alpha versions yet.");
+        process.exit(0);
+      }
+
+      console.log(`\n📦 Found alpha versions for ${Object.keys(versionMap).length} packages`);
     }
-    
-    console.log(`\n📦 Found alpha versions for ${Object.keys(versionMap).length} packages`);
-    
+
     if (mode === "--diff-only") {
       console.log("🚀 INCREMENTAL MODE - Only processing files with version differences");
     } else if (mode === "--check-only") {
       console.log("🔍 CHECK ONLY MODE - No files will be modified");
     } else {
       console.log("🔄 Scanning for package.json files to update...");
+    }
+
+    if (skipLockfile) {
+      console.log("⏭️  Lockfile updates will be skipped (--skip-lockfile)");
     }
     console.log("---------------------------------------------------");
 
@@ -453,17 +486,19 @@ Examples:
 
     const isDiffOnly = mode === "--diff-only";
     traverseDirectories(rootDir, versionMap, 0, isDiffOnly);
-    
+
     // Restore original function
     fs.writeFileSync = originalWriteFileSync;
 
     printUpdateSummary();
-    
-    // Update yarn.lock files if there were changes
-    if (filesUpdated > 0) {
+
+    // Update yarn.lock files if there were changes (unless --skip-lockfile)
+    if (filesUpdated > 0 && !skipLockfile) {
       updateYarnLockFiles(directoriesToUpdateLocks, mode === "--check-only");
+    } else if (filesUpdated > 0 && skipLockfile) {
+      console.log("\n⏭️  Skipping yarn.lock updates (--skip-lockfile flag set)");
     }
-    
+
     // Generate commit message
     const commitMessage = generateCommitMessage();
     if (commitMessage && mode !== "--check-only") {
@@ -472,7 +507,7 @@ Examples:
       console.log(commitMessage);
       console.log("---------------------------------------------------");
     }
-    
+
     if (mode === "--check-only") {
       console.log("\n🔍 Check complete. Run without --check-only to apply updates.");
       // Exit with error code if updates are needed
@@ -480,7 +515,8 @@ Examples:
         process.exit(1);
       }
     } else if (filesUpdated > 0) {
-      console.log("\n✅ Update complete! Package.json and yarn.lock files have been updated.");
+      const lockfileMsg = skipLockfile ? " Package.json files" : " Package.json and yarn.lock files";
+      console.log(`\n✅ Update complete!${lockfileMsg} have been updated.`);
     }
 
   } catch (error) {
