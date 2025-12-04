@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/lerna/schemas/lerna-schema.json",
-  "packages": ["sites/*", "packages/*", "examples/*", "!examples-hub", "workers/*"],
+  "packages": ["sites/*", "packages/*", "!packages/buildspecs", "examples/*", "!examples-hub", "workers/*"],
   "version": "independent",
   "npmClient": "yarn",
   "command": {

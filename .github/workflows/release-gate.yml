@@ -1,0 +1,32 @@
+name: Release Gate Check
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  release-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check for active release
+        run: |
+          PUBLISH_PR=$(gh pr list --state open --search "chore: Publish in:title" --json number --jq 'length')
+
+          if [[ "$PUBLISH_PR" -gt 0 ]]; then
+            gh api repos/${{ github.repository }}/statuses/${{ github.event.pull_request.head.sha }} \
+              -f state=failure \
+              -f context="release-gate" \
+              -f description="Release in progress - merging blocked"
+            echo "❌ Release in progress"
+          else
+            gh api repos/${{ github.repository }}/statuses/${{ github.event.pull_request.head.sha }} \
+              -f state=success \
+              -f context="release-gate" \
+              -f description="No release in progress"
+            echo "✅ No release in progress"
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

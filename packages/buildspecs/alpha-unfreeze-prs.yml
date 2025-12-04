@@ -1,0 +1,17 @@
+version: 0.2
+phases:
+  build:
+    commands:
+      - set -euo pipefail
+      - export CI=true
+      - echo "Unfreezing all PRs..."
+      - |
+        for PR in $(gh pr list --state open --json number --jq '.[].number'); do
+          SHA=$(gh pr view $PR --json headRefOid --jq '.headRefOid')
+          gh api repos/capsule-org/web-sdk/statuses/$SHA \
+            -f state=success \
+            -f context="release-gate" \
+            -f description="No release in progress" || true
+          echo "✅ Unblocked PR $PR"
+        done
+      - echo "✅ All PRs unfrozen - normal operations resumed"

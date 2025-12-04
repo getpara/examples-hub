@@ -48,7 +48,7 @@
     "update-examples-hub-lockfiles": "node scripts/update-examples-hub-lockfiles.mjs",
     "build": "lerna run build --parallel --concurrency 2",
     "postinstall": "patch-package && bash scripts/setup-examples-hub.sh",
-    "build:dev": "yarn link-shared-symlink && lerna run build --scope=@getpara/* --scope=capsule-mpc-worker --scope=capsule-mpc-worker-server --concurrency 4",
+    "build:dev": "yarn link-shared-symlink && yarn lerna run build --scope=@getpara/* --scope=capsule-mpc-worker --scope=capsule-mpc-worker-server --concurrency 4",
     "check-bundle-size": "node scripts/check-bundle-size.js",
     "clean": "find . \\( -name \"node_modules\" -o -name \"dist\" -o -name \"build\" -o -name \".nx\" \\) -type d -prune -exec rm -rf {} +",
     "dev": "yarn build:dev; concurrently \"yarn start\" \"yarn dev:external-wallet-example\" \"yarn watch:affected\"",
@@ -82,6 +82,7 @@
   },
   "workspaces": [
     "packages/*",
+    "!packages/buildspecs",
     "sites/*",
     "examples/*",
     "!examples-hub",

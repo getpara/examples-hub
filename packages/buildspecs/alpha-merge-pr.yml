@@ -1,0 +1,31 @@
+version: 0.2
+phases:
+  pre_build:
+    commands:
+      - set -euo pipefail
+      - export CI=true
+      - source version-info.txt
+      - echo "Waiting for manual merge of PR $PR_NUMBER for version $NEXT_VERSION"
+  build:
+    commands:
+      - echo "Waiting for PR to be manually merged..."
+      - 'echo "Please review and merge PR $PR_NUMBER at: $PR_URL"'
+      - |
+        for i in {1..120}; do  # Try for 60 minutes (120 * 30s)
+          MERGE_STATE=$(gh pr view $PR_NUMBER --json state,merged --jq '{state, merged}')
+          IS_MERGED=$(echo $MERGE_STATE | jq -r '.merged')
+
+          echo "PR merge status: $IS_MERGED (attempt $i/120)"
+
+          if [[ "$IS_MERGED" == "true" ]]; then
+            echo "✅ PR $PR_NUMBER has been merged successfully"
+            exit 0
+          fi
+
+          echo "Waiting 30s for PR to be merged..."
+          sleep 30
+        done
+
+        echo "❌ ERROR: PR was not merged after 60 minutes"
+        echo "❌ Please check PR: $PR_URL"
+        exit 1
