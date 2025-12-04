@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { useParaAccount } from "@/hooks/useParaAccount";
-import { useParaSignMessage } from "@/hooks/useParaSignMessage";
-import { useModal } from "@/context/ModalContext";
+import { useAccount } from "@getpara/react-sdk";
+import { useViemClient } from "@getpara/react-sdk/evm";
+import { http } from "viem";
+import { sepolia } from "viem/chains";
+import { useModal } from "@/context/CustomModalProvider";
 import { StatusAlert } from "@/components/ui/StatusAlert";
 import { ConnectWalletCard } from "@/components/ui/ConnectWalletCard";
 import { SignMessageForm } from "@/components/ui/SignMessageForm";
@@ -11,39 +13,42 @@ import { SignatureDisplay } from "@/components/ui/SignatureDisplay";
 
 export default function Home() {
   const [message, setMessage] = useState("Hello Para!");
+  const [signature, setSignature] = useState<string | null>(null);
+  const [isSigning, setIsSigning] = useState(false);
+  const [signError, setSignError] = useState<Error | null>(null);
+
   const { openModal } = useModal();
-  const { isConnected, address } = useParaAccount();
-  const {
-    signMessageAsync,
-    isSigning,
-    signError,
-    signature,
-    reset,
-  } = useParaSignMessage();
+  const { isConnected, isLoading, embedded } = useAccount();
+  const address = embedded?.wallets?.[0]?.address as `0x${string}` | undefined;
+  const { viemClient } = useViemClient({ address, walletClientConfig: { chain: sepolia, transport: http() } });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    try {
-      if (!isConnected) {
-        throw new Error("Please connect your wallet to sign a message.");
-      }
+    setSignError(null);
 
-      await signMessageAsync({ message });
+    if (!isConnected || !viemClient) {
+      setSignError(new Error("Please connect your wallet to sign a message."));
+      return;
+    }
+
+    setIsSigning(true);
+    try {
+      const sig = await viemClient.signMessage({ message });
+      setSignature(sig);
     } catch (error) {
-      console.error("Signing error:", error);
+      setSignError(error instanceof Error ? error : new Error("Failed to sign message"));
+    } finally {
+      setIsSigning(false);
     }
   };
 
-  // Reset signature when message changes
   const handleMessageChange = (value: string) => {
     setMessage(value);
     if (signature) {
-      reset();
+      setSignature(null);
     }
   };
 
-  // Derive status from signing state
   const status = {
     show: isSigning || !!signError || !!signature,
     type: isSigning ? ("info" as const) : signError ? ("error" as const) : ("success" as const),
@@ -64,9 +69,9 @@ export default function Home() {
         </p>
       </div>
 
-      {!isConnected ? (
+      {!isConnected && !isLoading ? (
         <ConnectWalletCard onConnect={openModal} />
-      ) : (
+      ) : isConnected ? (
         <div className="max-w-xl mx-auto">
           <div className="mb-8 rounded-none border border-gray-200">
             <div className="px-6 py-3 bg-gray-50 border-b border-gray-200">
@@ -93,9 +98,9 @@ export default function Home() {
             onSubmit={handleSubmit}
           />
 
-          {signature && "signature" in signature && <SignatureDisplay signature={signature.signature} />}
+          {signature && <SignatureDisplay signature={signature} />}
         </div>
-      )}
+      ) : null}
     </div>
   );
 }
