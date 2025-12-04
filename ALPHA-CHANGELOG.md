@@ -1,3 +1,59 @@
+# Release (Thu Dec 04 2025)
+
+## Package Versions
+- @getpara/web-sdk@2.0.0-alpha.73
+- @getpara/wagmi-v2-integration@2.0.0-alpha.73
+- @getpara/wagmi-v2-connector@2.0.0-alpha.73
+- @getpara/viem-v2-integration@2.0.0-alpha.73
+- @getpara/viem-v1-integration@2.0.0-alpha.73
+- @getpara/user-management-client@2.0.0-alpha.73
+- @getpara/solana-web3.js-v1-integration@2.0.0-alpha.73
+- @getpara/solana-wallet-connectors@2.0.0-alpha.73
+- @getpara/solana-signers-v2-integration@2.0.0-alpha.73
+- @getpara/server-sdk@2.0.0-alpha.73
+- @getpara/react-sdk-lite@2.0.0-alpha.73
+- @getpara/react-sdk@2.0.0-alpha.73
+- @getpara/react-native-wallet@2.0.0-alpha.73
+- @getpara/react-components@2.0.0-alpha.73
+- @getpara/react-component-library@1.0.0-alpha.68
+- @getpara/react-common@2.0.0-alpha.73
+- @getpara/graz-integration@2.0.0-alpha.73
+- @getpara/graz-connector@2.0.0-alpha.73
+- @getpara/evm-wallet-connectors@2.0.0-alpha.73
+- @getpara/ethers-v6-integration@2.0.0-alpha.73
+- @getpara/ethers-v5-integration@2.0.0-alpha.73
+- @getpara/cosmos-wallet-connectors@2.0.0-alpha.73
+- @getpara/cosmjs-v0-integration@2.0.0-alpha.73
+- @getpara/core-sdk@2.0.0-alpha.73
+- @getpara/core-components@2.0.0-alpha.73
+
+### Features
+- expo one click login example and cleanup (#1342) - 407bdbb5a
+- Send from account widget pt 2 (#1338) - 8121b550f
+- Send from account widget pt 1 (#1336) - 67eb08a07
+- New MetaMask E2E with Synpress and improved E2E structure (#1315) - e5c54e1ea
+
+### Fixes
+- track OAuth logins for native mobile callbacks (#1341) - 750a92098
+- Examples Hub Subtree Metadata & sync (#1335) - 8d08c2821
+- setup-para command for PNPM (#1332) - 963c709fc
+- solflare modal designer undefined check (#1329) - 6de6012f9
+- wrap network speed message in modal and portal (#1327) - 543d9f2e8
+- fix para connect deploy job (#1326) - 97b86538e
+- Para Connect - Para instance rebuilding on routing (#1323) - 5a81f84dc
+- use ref to stop multiple renders from sending multiple login codes (#1322) - 21d11f14f
+
+### Chores
+- version examples hub with package release (#1337) - 0639a7043
+- remove graz chain generation (#1345) - 922fa8dc8
+- Add external wallet connection tracking (#1343) - 862779b28
+- Improve portal popup theming (#1331) - db7c736d6
+- exclude more countries that are blocked in twilio from phone number country code dropdown (#1333) - d6c98829c
+- Add Para Prototypes (#1298) - c231bdc43
+- Dev Portal - allow for basic login enable (#1330) - 46a5f3e1f
+- Add examples-hub as git subtree (#1282) - 3b666fe2f
+- Portal - remove suspicious activity link (#1325) - 6e083aa39
+
 # Release (Thu Nov 13 2025)
 
 ## Package Versions
