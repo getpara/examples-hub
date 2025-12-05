@@ -502,6 +502,7 @@ export const SelectWallet = ({
               onClick={() => onSubmit(selectedWalletIds)}
               disabled={isConnecting || incompleteTypes.length > 0}
               isLoading={isConnecting}
+              data-testid="connect-wallet-button"
             >
               {!!incompleteTypes[0] ? (
                 <>

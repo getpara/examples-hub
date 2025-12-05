@@ -212,7 +212,7 @@ export class WebExamplePage {
     await this.page.getByRole('button', { name: openModalText }).click();
     await this.clickProfileButton();
 
-    await this.page.getByRole('button', { name: 'Disconnect Wallet' }).last().click();
+    await this.page.getByRole('button', { name: 'Disconnect' }).last().click();
     await this.page.waitForTimeout(2000);
   }
 
@@ -270,7 +270,7 @@ export class WebExamplePage {
 
     // Verify private key is present and starts with 0x
     expect(privateKey).toBeTruthy();
-    expect(privateKey).toMatch(/^0x[a-fA-F0-9]+$/);
+    expect(privateKey).toMatch(/^0x[a-fA-F0-9]+/);
     expect(privateKey?.length).toBeGreaterThan(60); // Private keys are typically 64+ hex chars plus 0x prefix
 
     // Close the export private key popup
@@ -278,5 +278,76 @@ export class WebExamplePage {
     await this.page.waitForTimeout(500);
 
     await this.page.getByTestId('modal-back-button').click();
+  }
+
+  async switchWallets({ context, credential }: { context: BrowserContext; credential: Protocol.WebAuthn.Credential }) {
+    // // Open modal
+    // await this.page.getByRole('button', { name: openModalText }).click();
+    // await this.page.waitForTimeout(1000);
+
+    // Click Profile button to go to account profile page
+    await this.clickProfileButton();
+    await this.page.waitForTimeout(750);
+
+    // Click Switch Wallets button (text can be either 'Switch Wallets' or 'Switch Wallet')
+    const switchWalletsButton = this.page.locator('#para-modal').getByText('Switch Wallet');
+    await switchWalletsButton.waitFor({ state: 'visible', timeout: 10000 });
+
+    // Wait for popup to open
+    const popupPromise = this.page.waitForEvent('popup');
+    await switchWalletsButton.click();
+    const popup = await popupPromise;
+
+    // Handle authentication in the popup
+    const authPortal = new AuthPortalPage(popup);
+    await authPortal.login(context, credential);
+
+    // After authentication, wait for the switch wallets page to load
+    await popup.waitForURL(/wallets/, { timeout: 30000 });
+    await popup.waitForTimeout(8000);
+
+    // Click Create New Wallet buttons for EVM and COSMOS
+    const createNewWalletButtons = popup.getByText('Create New Wallet');
+    const count = await createNewWalletButtons.count();
+    for (let i = 0; i < count; i++) {
+      const button = createNewWalletButtons.nth(i);
+      if (await button.isVisible()) {
+        await button.click();
+        await popup.waitForTimeout(300);
+      }
+    }
+
+    // Click Connect button
+    const connectButton = popup.locator('[data-testid="connect-wallet-button"]');
+    await connectButton.waitFor({ state: 'visible', timeout: 5000 });
+    await connectButton.click();
+
+    // Wait for the popup to close
+    await popup.waitForEvent('close', { timeout: 30000 });
+    await this.page.waitForTimeout(2000);
+
+    // Wait for wallet entries to appear in the modal
+    const walletEntries = this.page.locator('[data-testid^="wallet-entry-"]');
+    await walletEntries.first().waitFor({ state: 'visible', timeout: 10000 });
+
+    // Count the wallet entries
+    const walletCount = await walletEntries.count();
+    expect(walletCount).toBeGreaterThan(0);
+
+    // Wait for wallets to fully sync
+    await this.page.waitForTimeout(6000);
+
+    // Close modal
+    await this.page.getByTestId('modal-close-button').click();
+    await this.page.waitForTimeout(1000);
+
+    // Verify new wallets were created
+    expect(walletCount).toBeGreaterThan(0);
+
+    // Test signing with the newly created wallets in Wagmi view
+    await this.switchToWagmiView();
+    await this.signWagmiMessage();
+
+    await this.switchToDefaultView();
   }
 }

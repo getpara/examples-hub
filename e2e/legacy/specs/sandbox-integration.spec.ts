@@ -24,7 +24,10 @@ test.describe('web sandbox', () => {
     await webExamplePage.switchToDefaultView();
     await webExamplePage.exportPrivateKey({ context, credential });
 
-    await webExamplePage.page.getByRole('button', { name: 'Disconnect Wallet' }).last().click();
+    // Test switch wallets for newly created account
+    await webExamplePage.switchWallets({ context, credential });
+
+    await webExamplePage.page.getByRole('button', { name: 'Log Out' }).last().click();
     await webExamplePage.page.waitForTimeout(2000);
 
     await webExamplePage.login({ context, credential, emailOrPhone, is2FAEnabled: true });
@@ -32,8 +35,11 @@ test.describe('web sandbox', () => {
     await webExamplePage.switchToWagmiView();
     await webExamplePage.signWagmiMessage();
 
-    // Test private key export
+    // Test private key exportxw
     await webExamplePage.switchToDefaultView();
     await webExamplePage.exportPrivateKey({ context, credential });
+
+    // Test switch wallets for returning account (create more new wallets)
+    await webExamplePage.switchWallets({ context, credential });
   });
 });

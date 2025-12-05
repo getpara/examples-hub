@@ -35,7 +35,7 @@ import { defineConfig, devices } from '@playwright/test';
 export default defineConfig({
   testDir: './specs',
   testMatch: '**/*.spec.ts',
-  timeout: 120000,
+  timeout: 240000,
   fullyParallel: true,
   workers: undefined,
   retries: process.env.CI ? 2 : 0,
