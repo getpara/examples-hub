@@ -151,7 +151,7 @@ export async function createCredential(
         userVerification: 'required' as any,
       },
       rp: {
-        id: getPortalDomain(env, isE2E),
+        id: getPortalDomain(env, isE2E, true),
         name: 'Para',
       },
       user: {
@@ -195,7 +195,7 @@ export async function generateSignature(env: Environment, challenge: string, all
         type: 'public-key',
       })),
       userVerification: 'required',
-      rpId: getPortalDomain(env, isE2E),
+      rpId: getPortalDomain(env, isE2E, true),
     },
   } as CredentialRequestOptions;
 

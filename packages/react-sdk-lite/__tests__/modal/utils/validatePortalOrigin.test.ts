@@ -60,7 +60,7 @@ describe('validatePortalOrigin', () => {
   });
 
   it('should return true when origin matches portal base URL', () => {
-    const portalBase = 'https://app.usecapsule.com';
+    const portalBase = 'https://app.getpara.com';
     const portalLocalBase = 'http://localhost:3003';
 
     mockGetPortalBaseURL.mockReturnValueOnce(portalBase).mockReturnValueOnce(portalLocalBase);
@@ -75,7 +75,7 @@ describe('validatePortalOrigin', () => {
   });
 
   it('should return true when origin matches portal local base URL', () => {
-    const portalBase = 'https://app.usecapsule.com';
+    const portalBase = 'https://app.getpara.com';
     const portalLocalBase = 'http://localhost:3003';
 
     mockGetPortalBaseURL.mockReturnValueOnce(portalBase).mockReturnValueOnce(portalLocalBase);
@@ -90,7 +90,7 @@ describe('validatePortalOrigin', () => {
   });
 
   it('should return false when origin does not match either portal URL', () => {
-    const portalBase = 'https://app.usecapsule.com';
+    const portalBase = 'https://app.getpara.com';
     const portalLocalBase = 'http://localhost:3003';
     const untrustedOrigin = 'https://malicious.com';
 
@@ -111,7 +111,7 @@ describe('validatePortalOrigin', () => {
       env: Environment.PROD,
     };
 
-    const portalBase = 'https://app.usecapsule.com';
+    const portalBase = 'https://app.getpara.com';
     const portalLocalBase = 'http://127.0.0.1:3003';
 
     mockGetPortalBaseURL.mockReturnValueOnce(portalBase).mockReturnValueOnce(portalLocalBase);
@@ -130,7 +130,7 @@ describe('validatePortalOrigin', () => {
       env: Environment.SANDBOX,
     };
 
-    const portalBase = 'https://app.sandbox.usecapsule.com';
+    const portalBase = 'https://app.sandbox.getpara.com';
     const portalLocalBase = 'http://localhost:3003';
 
     mockGetPortalBaseURL.mockReturnValueOnce(portalBase).mockReturnValueOnce(portalLocalBase);
@@ -144,7 +144,7 @@ describe('validatePortalOrigin', () => {
   });
 
   it('should handle empty or null origin', () => {
-    const portalBase = 'https://app.usecapsule.com';
+    const portalBase = 'https://app.getpara.com';
     const portalLocalBase = 'http://localhost:3003';
 
     mockGetPortalBaseURL.mockReturnValueOnce(portalBase).mockReturnValueOnce(portalLocalBase);
@@ -156,13 +156,13 @@ describe('validatePortalOrigin', () => {
   });
 
   it('should be case sensitive for origin matching', () => {
-    const portalBase = 'https://app.usecapsule.com';
+    const portalBase = 'https://app.getpara.com';
     const portalLocalBase = 'http://localhost:3003';
 
     mockGetPortalBaseURL.mockReturnValueOnce(portalBase).mockReturnValueOnce(portalLocalBase);
 
     // Test with different case
-    const event = createMockMessageEvent('HTTPS://APP.USECAPSULE.COM');
+    const event = createMockMessageEvent('HTTPS://APP.GETPARA.COM');
     const result = validatePortalOrigin(event, mockCtx);
 
     expect(result).toBe(false);

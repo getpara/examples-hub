@@ -44,7 +44,7 @@ export const LoginFailedTroubleshootingStep = ({ setStep }: LoginFailedTroublesh
       </ListText>
       <InlineText variant="bodyS" color="contrast" weight="medium">
         If you think you have lost your Passkey, you can register a new one using the{' '}
-        <a href={getPortalBaseURL({ env: ENV })} target="_blank">
+        <a href={getPortalBaseURL({ env: ENV }, false, false, true)} target="_blank">
           <RecoveryText variant="bodyS" color="contrast" weight="medium">
             Recovery Portal
           </RecoveryText>

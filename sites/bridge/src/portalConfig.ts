@@ -5,11 +5,11 @@ export function getPortalDomain(env: Environment) {
     case Environment.DEV:
       return 'localhost';
     case Environment.SANDBOX:
-      return 'app.sandbox.usecapsule.com';
+      return 'app.sandbox.getpara.com';
     case Environment.BETA:
-      return 'app.beta.usecapsule.com';
+      return 'app.beta.getpara.com';
     case Environment.PROD:
-      return 'app.usecapsule.com';
+      return 'app.getpara.com';
     default:
       throw new Error(`env: ${env} not supported`);
   }

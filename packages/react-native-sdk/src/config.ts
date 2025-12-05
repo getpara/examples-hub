@@ -6,11 +6,11 @@ function getPortalBaseURL(env: Environment) {
     case Environment.DEV:
       return 'http://localhost:3003';
     case Environment.SANDBOX:
-      return 'https://app.sandbox.usecapsule.com';
+      return 'https://app.sandbox.getpara.com';
     case Environment.BETA:
-      return 'https://app.beta.usecapsule.com';
+      return 'https://app.beta.getpara.com';
     case Environment.PROD:
-      return 'https://app.usecapsule.com';
+      return 'https://app.getpara.com';
     default:
       throw new Error(`env: ${env} not supported`);
   }

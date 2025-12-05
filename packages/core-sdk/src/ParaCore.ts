@@ -816,8 +816,12 @@ export abstract class ParaCore implements CoreInterface {
       await this.setLoginEncryptionKeyPair();
     }
 
+    // Use legacy if possibly adding a passkey OR if logging in with passkey
+    const shouldUseLegacyPortalUrl = !!opts.addNewCredentialPasskeyId || type === 'loginAuth';
     const base =
-      type === 'onRamp' || isTelegramLogin ? getPortalBaseURL(this.ctx, isTelegramLogin) : await this.getPortalURL();
+      type === 'onRamp' || isTelegramLogin
+        ? getPortalBaseURL(this.ctx, isTelegramLogin, false, shouldUseLegacyPortalUrl)
+        : await this.getPortalURL(shouldUseLegacyPortalUrl);
 
     let path: string;
     switch (type) {
@@ -995,7 +999,7 @@ export abstract class ParaCore implements CoreInterface {
     const url = constructUrl({ base, path, params });
 
     if (opts.shorten) {
-      return shortenUrl(this.ctx, url);
+      return await shortenUrl(this.ctx, url, shouldUseLegacyPortalUrl);
     }
 
     return url;
@@ -2191,8 +2195,8 @@ Need help? Visit: https://docs.getpara.com or contact support
    * @param partnerId: string - id of the partner to get the portal URL for
    * @returns - portal URL
    */
-  protected async getPortalURL(): Promise<string> {
-    return (await this.getPartnerURL()) || getPortalBaseURL(this.ctx);
+  protected async getPortalURL(isLegacy?: boolean): Promise<string> {
+    return (await this.getPartnerURL()) || getPortalBaseURL(this.ctx, false, false, isLegacy);
   }
 
   /**

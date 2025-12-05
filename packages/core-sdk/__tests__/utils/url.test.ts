@@ -12,15 +12,20 @@ describe('url', () => {
     it('SANDBOX', () => {
       const resp = getPortalDomain(Environment.SANDBOX);
 
-      expect(resp).toBe('app.sandbox.usecapsule.com');
+      expect(resp).toBe('app.sandbox.getpara.com');
     });
     it('BETA', () => {
       const resp = getPortalDomain(Environment.BETA);
 
-      expect(resp).toBe('app.beta.usecapsule.com');
+      expect(resp).toBe('app.beta.getpara.com');
     });
     it('PROD', () => {
       const resp = getPortalDomain(Environment.PROD);
+
+      expect(resp).toBe('app.getpara.com');
+    });
+    it('PROD - legacy', () => {
+      const resp = getPortalDomain(Environment.PROD, false, true);
 
       expect(resp).toBe('app.usecapsule.com');
     });
@@ -47,15 +52,20 @@ describe('url', () => {
     it('SANDBOX', () => {
       const resp = getPortalBaseURL({ env: Environment.SANDBOX });
 
-      expect(resp).toBe('https://app.sandbox.usecapsule.com');
+      expect(resp).toBe('https://app.sandbox.getpara.com');
     });
     it('BETA', () => {
       const resp = getPortalBaseURL({ env: Environment.BETA });
 
-      expect(resp).toBe('https://app.beta.usecapsule.com');
+      expect(resp).toBe('https://app.beta.getpara.com');
     });
     it('PROD', () => {
       const resp = getPortalBaseURL({ env: Environment.PROD });
+
+      expect(resp).toBe('https://app.getpara.com');
+    });
+    it('PROD - legacy', () => {
+      const resp = getPortalBaseURL({ env: Environment.PROD }, false, false, true);
 
       expect(resp).toBe('https://app.usecapsule.com');
     });
@@ -67,7 +77,7 @@ describe('url', () => {
     it('E2E - WASM', () => {
       const resp = getPortalBaseURL({ env: Environment.DEV, isE2E: true }, false, true);
 
-      expect(resp).toBe('https://app.sandbox.usecapsule.com');
+      expect(resp).toBe('https://app.sandbox.getpara.com');
     });
   });
   describe('getParaConnectDomain', () => {

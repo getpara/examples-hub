@@ -1,11 +1,12 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useClient } from '../utils/index.js';
-import { CoreMethodResponse, CoreMethodParams, getPortalBaseURL } from '@getpara/web-sdk';
+import { CoreMethodResponse, CoreMethodParams } from '@getpara/web-sdk';
 import { renameMutations } from '../../utils/renameMutations.js';
 import { addCredential } from '../../actions/index.js';
 import { Compute } from '../../types/utils.js';
 import { openPopup as openPopupFn } from '../../../modal/index.js';
 import { ACCOUNT_BASE_KEY } from '../queries/useAccount.js';
+import { validatePortalOrigin } from '../../../modal/utils/validatePortalOrigin.js';
 
 export const ADD_CREDENTIAL_KEY = 'ADD_CREDENTIAL';
 
@@ -42,10 +43,7 @@ export const useAddAuthMethod = ({ openPopup }: { openPopup: boolean } = { openP
           // If we're opening the popup, start a listener to refetch the account once the flow completes, else the one opening the popup will need to handle this
           if (typeof window !== 'undefined' && para) {
             const handleMessage = (event: MessageEvent) => {
-              const portalBase = getPortalBaseURL(para.ctx);
-              const portalLocalBase = getPortalBaseURL(para.ctx, true);
-
-              if (!event.origin.startsWith(portalBase) && !event.origin.startsWith(portalLocalBase)) {
+              if (!validatePortalOrigin(event, para.ctx)) {
                 return; // Ignore messages from untrusted origins
               }
 

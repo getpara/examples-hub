@@ -5,7 +5,7 @@ export function isPortal(ctx: Ctx, env?: Environment) {
   if (typeof window === 'undefined') return false;
 
   // Check if we're running on the portal domain
-  const normalizedUrl = window.location?.host?.replace('getpara', 'usecapsule');
+  const normalizedUrl = window.location?.host?.replace('usecapsule', 'getpara');
   const isOnPortalDomain = getPortalBaseURL(env ? { env } : ctx).includes(normalizedUrl);
 
   if (!isOnPortalDomain) return false;

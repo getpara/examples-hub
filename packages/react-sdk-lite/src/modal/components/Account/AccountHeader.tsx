@@ -46,9 +46,9 @@ export const AccountHeader = ({ withBalance = false }: { withBalance?: boolean }
       {connectionType === 'both' ? (
         <AccountWalletSelect />
       ) : (
-        <CpslText variant="headingXS" weight="semiBold" color="contrast">
+        <StyledName variant="headingXS" weight="semiBold" color="contrast">
           {name}
-        </CpslText>
+        </StyledName>
       )}
       {withBalance && typeof totalBalance === 'string' && totalBalance !== '' && (
         <CpslText variant="bodyM" weight="medium" style={{ visibility: profileBalance ? 'visible' : 'hidden' }}>
@@ -65,4 +65,8 @@ const AccountContainer = safeStyled.div`
   flex-direction: column;
   gap: 8px;
   align-items: center;
+`;
+
+const StyledName = safeStyled(CpslText)`
+  text-align: center;
 `;

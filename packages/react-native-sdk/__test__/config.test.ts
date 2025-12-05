@@ -20,7 +20,7 @@ describe('config.ts', () => {
 
   it('should initialize default config for BETA environment', () => {
     expect(config.userManagementServer).toBe('https://api.beta.getpara.com/');
-    expect(config.portalBase).toBe('https://app.beta.usecapsule.com');
+    expect(config.portalBase).toBe('https://app.beta.getpara.com');
     expect(config.mpcNetworkWSServer).toBe('wss://mpc-network.beta.getpara.com');
 
     expect(NativeModules.ParaSignerModule.setServerUrl).toHaveBeenCalledWith('https://api.beta.getpara.com/');
@@ -40,7 +40,7 @@ describe('config.ts', () => {
       env: Environment.SANDBOX,
       expected: {
         userManagementServer: 'https://api.sandbox.getpara.com/',
-        portalBase: 'https://app.sandbox.usecapsule.com',
+        portalBase: 'https://app.sandbox.getpara.com',
         mpcNetworkWSServer: 'wss://mpc-network.sandbox.getpara.com',
       },
     },
@@ -48,7 +48,7 @@ describe('config.ts', () => {
       env: Environment.BETA,
       expected: {
         userManagementServer: 'https://api.beta.getpara.com/',
-        portalBase: 'https://app.beta.usecapsule.com',
+        portalBase: 'https://app.beta.getpara.com',
         mpcNetworkWSServer: 'wss://mpc-network.beta.getpara.com',
       },
     },
@@ -56,7 +56,7 @@ describe('config.ts', () => {
       env: Environment.PROD,
       expected: {
         userManagementServer: 'https://api.getpara.com/',
-        portalBase: 'https://app.usecapsule.com',
+        portalBase: 'https://app.getpara.com',
         mpcNetworkWSServer: 'wss://mpc-network.getpara.com',
       },
     },
