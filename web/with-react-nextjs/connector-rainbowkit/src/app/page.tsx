@@ -1,10 +1,10 @@
 "use client";
 
-import "@getpara/react-sdk/styles.css";
+import "@getpara/react-sdk-lite/styles.css";
+import "@rainbow-me/rainbowkit/styles.css";
 import { WalletDisplay } from "@/components/WalletDisplay";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useAccount } from "wagmi";
-import "@rainbow-me/rainbowkit/styles.css";
 
 export default function Home() {
   const { address, isConnected } = useAccount();

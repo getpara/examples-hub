@@ -3765,6 +3765,7 @@ __metadata:
   resolution: "connector-rainbowkit-nextjs@workspace:."
   dependencies:
     "@getpara/rainbowkit-wallet": "npm:2.0.0-dev.2"
+    "@getpara/react-sdk-lite": "npm:2.0.0"
     "@rainbow-me/rainbowkit": "npm:^2.2.2"
     "@tanstack/react-query": "npm:5.64.2"
     "@types/node": "npm:^20"

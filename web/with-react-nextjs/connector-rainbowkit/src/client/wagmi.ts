@@ -1,9 +1,9 @@
 import { QueryClient } from "@tanstack/react-query";
 import { connectorsForWallets } from "@rainbow-me/rainbowkit";
-import { getParaWallet, GetParaOpts, OAuthMethod, AuthLayout } from "@getpara/rainbowkit-wallet";
+import { getParaWallet, GetParaOpts, AuthLayout } from "@getpara/rainbowkit-wallet";
 import { Environment } from "@getpara/web-sdk";
 import { createConfig, http } from "wagmi";
-import { sepolia, mainnet } from "wagmi/chains";
+import { sepolia } from "wagmi/chains";
 
 const API_KEY = process.env.NEXT_PUBLIC_PARA_API_KEY || "";
 
@@ -13,21 +13,17 @@ if (!API_KEY) {
 
 const WALLET_CONNECT_PROJECT_ID = process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID || "";
 
+export const queryClient = new QueryClient();
+
 const paraWalletOpts: GetParaOpts = {
   para: {
     environment: Environment.BETA,
     apiKey: API_KEY,
   },
+  queryClient,
   appName: "Para RainbowKit Example",
   logo: "/para.svg",
-  oAuthMethods: [
-    OAuthMethod.APPLE,
-    OAuthMethod.DISCORD,
-    OAuthMethod.FACEBOOK,
-    OAuthMethod.FARCASTER,
-    OAuthMethod.GOOGLE,
-    OAuthMethod.TWITTER,
-  ],
+  oAuthMethods: ["APPLE", "DISCORD", "FACEBOOK", "FARCASTER", "GOOGLE", "TWITTER"],
   theme: {
     foregroundColor: "#2D3648",
     backgroundColor: "#FFFFFF",
@@ -42,7 +38,7 @@ const paraWalletOpts: GetParaOpts = {
   onRampTestMode: true,
   disableEmailLogin: false,
   disablePhoneLogin: false,
-  authLayout: [AuthLayout.AUTH_FULL],
+  authLayout: ["AUTH:FULL"],
   recoverySecretStepEnabled: true,
 };
 
@@ -68,9 +64,6 @@ export const wagmiConfig = createConfig({
   multiInjectedProviderDiscovery: false,
   transports: {
     [sepolia.id]: http(),
-    [mainnet.id]: http(),
   },
   ssr: true,
 });
-
-export const queryClient = new QueryClient();
