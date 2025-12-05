@@ -85,6 +85,7 @@ export const AccountWallet = () => {
             variant="destructive"
             fullWidth
             onClick={() => exportPrivateKey({ walletId: profileWallet.id, shouldOpenPopup: true })}
+            data-testid="export-private-key-button"
           >
             <CpslIcon icon="key" slot="start" />
             Export private key

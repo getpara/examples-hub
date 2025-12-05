@@ -29,6 +29,7 @@ export const Controls = ({ onClose }: ControlsProps) => {
           visibility: hasPreviousStep ? 'visible' : 'hidden',
         }}
         onClick={handleBackClick}
+        data-testid="modal-back-button"
       >
         <CpslIcon icon="arrow" />
       </BackButton>
@@ -39,7 +40,7 @@ export const Controls = ({ onClose }: ControlsProps) => {
           </>
         )}
       </MiddleContainer>
-      <CloseButton bareModal={bareModal} variant="ghost" onClick={onClose}>
+      <CloseButton bareModal={bareModal} variant="ghost" onClick={onClose} data-testid="modal-close-button">
         <CpslIcon icon="close" />
       </CloseButton>
     </Container>

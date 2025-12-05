@@ -45,6 +45,7 @@ export const PrivateKey = ({ value, walletId }: { value: string; walletId: strin
           value={view}
           onChange={setView}
           options={availableViews}
+          data-testid="wallet-address-display"
           getEntryProps={({ id, type }) => {
             const address = para.getDisplayAddress(id, { addressType: type });
             return {
@@ -62,7 +63,7 @@ export const PrivateKey = ({ value, walletId }: { value: string; walletId: strin
         <CpslText variant="bodyS" color="contrast" style={{ width: '100%' }}>
           Private Key
         </CpslText>
-        <PrivateKeyContainer>
+        <PrivateKeyContainer data-testid="private-key-display">
           {value}
           <CopyButtonContainer>
             <CopyButton
@@ -85,6 +86,7 @@ export const PrivateKey = ({ value, walletId }: { value: string; walletId: strin
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.5 }}
                 onClick={() => setIsObscured(false)}
+                data-testid="private-key-overlay"
               >
                 Click to reveal
               </Overlay>

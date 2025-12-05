@@ -29,6 +29,7 @@ const AccountProfileEntry = ({
   style,
   className,
   onSelect,
+  dataTestId,
 }: {
   icon: ReactNode;
   key: string;
@@ -40,6 +41,7 @@ const AccountProfileEntry = ({
   style?: CSSProperties;
   className?: string;
   onSelect?: () => void;
+  dataTestId?: string;
 }) => {
   const [isCopied, copy] = useCopyToClipboard();
 
@@ -58,7 +60,7 @@ const AccountProfileEntry = ({
   ) : null;
 
   return (
-    <EntryContainer key={key} onClick={onSelect} className={className} style={style}>
+    <EntryContainer key={key} onClick={onSelect} className={className} style={style} data-testid={dataTestId}>
       {icon}
       <EntryDisplayName variant="bodyM" color="contrast">
         {text}
@@ -143,7 +145,7 @@ export const WalletEntry = ({
       textSecondary={withAddressShort ? wallet.addressShort : undefined}
       textTertiary={balance}
       copyString={wallet.address!}
-      style={style}
+      style={{ ...(style || {}), zIndex: 2 }}
       className={className}
       onSelect={
         isSelectable
@@ -153,6 +155,7 @@ export const WalletEntry = ({
             }
           : undefined
       }
+      dataTestId={`wallet-entry-${wallet.type}-${wallet.address}`}
     />
   );
 };
@@ -229,13 +232,16 @@ export const AccountLinkEntry = ({
   );
 };
 
-const EntryContainer = safeStyled.div<{ onClick }>`
+const EntryContainer = safeStyled.button<{ onClick }>`
   overflow: hidden;
   position: relative;
   width: 100%;
   display: flex;
   gap: 8px;
   align-items: center;
+  background: transparent;
+  border: none;
+  padding: 0;
   ${({ onClick }) => (onClick ? 'cursor: pointer;' : '')}
 `;
 

@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test } from '@playwright/test';
 
 import { WebExamplePage } from '../pages/sdkSandbox';
 import * as webauthn from '../helpers/webAuthn';
@@ -12,23 +12,28 @@ test.describe('web sandbox', () => {
     await webauthn.setIsUserVerifyingPlatformAuthenticatorAvailable(page);
     const webExamplePage = new WebExamplePage(page);
     await webExamplePage.visit();
-    await page
-      .locator('div:nth-child(3) > .chakra-select__wrapper > .chakra-select')
-      .selectOption('sandbox_dfb222ff8b602eb492974a6ed68c35b2');
+    await page.getByTestId('environment-select').selectOption('SANDBOX');
+    await page.getByTestId('partner-select').selectOption('sandbox_dfb222ff8b602eb492974a6ed68c35b2');
 
     const { emailOrPhone, credential } = await webExamplePage.createUser({ context, is2FAEnabled: true });
 
     await webExamplePage.switchToWagmiView();
-    const { address, recoveredAddress } = await webExamplePage.signWagmiMessage();
-    expect(recoveredAddress).toBe(address);
+    await webExamplePage.signWagmiMessage();
 
+    // Test private key export for newly created account
     await webExamplePage.switchToDefaultView();
-    await webExamplePage.logout({});
+    await webExamplePage.exportPrivateKey({ context, credential });
+
+    await webExamplePage.page.getByRole('button', { name: 'Disconnect Wallet' }).last().click();
+    await webExamplePage.page.waitForTimeout(2000);
 
     await webExamplePage.login({ context, credential, emailOrPhone, is2FAEnabled: true });
 
     await webExamplePage.switchToWagmiView();
-    const { address: address2, recoveredAddress: recoveredAddress2 } = await webExamplePage.signWagmiMessage();
-    expect(recoveredAddress2).toBe(address2);
+    await webExamplePage.signWagmiMessage();
+
+    // Test private key export
+    await webExamplePage.switchToDefaultView();
+    await webExamplePage.exportPrivateKey({ context, credential });
   });
 });

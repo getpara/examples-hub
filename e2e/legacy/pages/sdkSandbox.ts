@@ -1,5 +1,5 @@
 import * as crypto from 'node:crypto';
-import { BrowserContext, Page } from '@playwright/test';
+import { BrowserContext, Page, expect } from '@playwright/test';
 import { Protocol } from 'playwright-core/types/protocol';
 import { verifyMessage } from 'ethers';
 
@@ -26,6 +26,17 @@ export class WebExamplePage {
 
   async visit() {
     await this.page.goto('/');
+  }
+
+  async clickProfileButton() {
+    // Wait for the modal content to fully load (onRampConfig needs to load first)
+    await this.page.waitForTimeout(500);
+
+    // Use getByText which works better with web components
+    const profileButton = this.page.locator('#para-modal').getByText('Profile', { exact: true });
+    await profileButton.waitFor({ state: 'visible', timeout: 10000 });
+    await profileButton.click();
+    await this.page.waitForTimeout(250);
   }
 
   async createUser({
@@ -194,19 +205,78 @@ export class WebExamplePage {
     const address = (await this.page.getByText('Address is:').textContent())?.split('Address is:')[1].trim();
     const signature = (await this.page.getByText('Message Signature:').textContent())?.split('Message Signature:')[1].trim();
     const recoveredAddress = verifyMessage(MESSAGE_TO_SIGN, signature!);
-    return {
-      address,
-      recoveredAddress,
-    };
+    expect(recoveredAddress).toBe(address);
   }
 
   async logout({ openModalText = 'Open Modal' }: { openModalText?: string }) {
     await this.page.getByRole('button', { name: openModalText }).click();
-
-    await this.page.locator('#para-modal').getByRole('button', { name: 'Profile' }).click();
-    await this.page.waitForTimeout(250);
+    await this.clickProfileButton();
 
     await this.page.getByRole('button', { name: 'Disconnect Wallet' }).last().click();
     await this.page.waitForTimeout(2000);
+  }
+
+  async exportPrivateKey({
+    context,
+    credential,
+    openModalText = 'Open Modal',
+  }: {
+    context: BrowserContext;
+    credential: Protocol.WebAuthn.Credential;
+    openModalText?: string;
+  }) {
+    // Open modal
+    await this.page.getByRole('button', { name: openModalText }).click();
+    await this.page.waitForTimeout(5000);
+
+    // Click Profile button to go to account profile page
+    await this.clickProfileButton();
+    await this.page.waitForTimeout(750);
+
+    // Click the first embedded wallet entry (EVM or COSMOS)
+    const walletEntry = this.page.locator('[data-testid^="wallet-entry-EVM"], [data-testid^="wallet-entry-COSMOS"]').first();
+    await walletEntry.waitFor({ state: 'visible', timeout: 10000 });
+    await walletEntry.click();
+    await this.page.waitForTimeout(500);
+
+    // Click Export Private Key button
+    const exportButton = this.page.locator('[data-testid="export-private-key-button"]').first();
+
+    // Wait for popup to open (authentication + private key export in same popup)
+    const popupPromise = this.page.waitForEvent('popup');
+    await exportButton.click();
+    const popup = await popupPromise;
+
+    // Handle authentication in the popup
+    const authPortal = new AuthPortalPage(popup);
+    await authPortal.login(context, credential);
+
+    // After authentication, wait for the private key export screen to load
+    // Wait for the private key display element to be present (indicates page is ready)
+    const privateKeyDisplay = popup.locator('[data-testid="private-key-display"]');
+    await privateKeyDisplay.waitFor({ state: 'attached', timeout: 30000 });
+    await this.page.waitForTimeout(1000);
+
+    // Click to reveal the private key (remove blur overlay)
+    const overlay = popup.locator('[data-testid="private-key-overlay"]');
+    const isOverlayVisible = await overlay.isVisible().catch(() => false);
+    if (isOverlayVisible) {
+      await overlay.click();
+      await this.page.waitForTimeout(500);
+    }
+
+    // Get the private key
+    const privateKey = await privateKeyDisplay.textContent();
+
+    // Verify private key is present and starts with 0x
+    expect(privateKey).toBeTruthy();
+    expect(privateKey).toMatch(/^0x[a-fA-F0-9]+$/);
+    expect(privateKey?.length).toBeGreaterThan(60); // Private keys are typically 64+ hex chars plus 0x prefix
+
+    // Close the export private key popup
+    await popup.close();
+    await this.page.waitForTimeout(500);
+
+    await this.page.getByTestId('modal-back-button').click();
   }
 }

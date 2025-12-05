@@ -795,7 +795,11 @@ function AppInner({
             <Text width={'15%'}>
               <strong>Select Environment:</strong>
             </Text>
-            <Select defaultValue={selectedEnv} onChange={e => setSelectedEnv(e.target.value as Environment)}>
+            <Select
+              data-testid="environment-select"
+              defaultValue={selectedEnv}
+              onChange={e => setSelectedEnv(e.target.value as Environment)}
+            >
               <option value={Environment.DEV}>Dev</option>
               <option value={Environment.SANDBOX}>Sandbox</option>
               <option value={Environment.BETA}>Beta</option>
@@ -818,7 +822,7 @@ function AppInner({
               <Text width={'15%'}>
                 <strong>Set Partner:</strong>
               </Text>
-              <Select value={selectedApiKey} onChange={e => setSelectedApiKey(e.target.value)}>
+              <Select data-testid="partner-select" value={selectedApiKey} onChange={e => setSelectedApiKey(e.target.value)}>
                 {(partners || []).map(partner => (
                   <option key={partner.id} value={partner.apiKey}>
                     {partner.displayName} ({partner.apiKey})
