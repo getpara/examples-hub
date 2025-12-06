@@ -521,9 +521,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@getpara/rainbowkit-wallet@npm:2.0.0-dev.2":
-  version: 2.0.0-dev.2
-  resolution: "@getpara/rainbowkit-wallet@npm:2.0.0-dev.2"
+"@getpara/rainbowkit-wallet@npm:2.0.0":
+  version: 2.0.0
+  resolution: "@getpara/rainbowkit-wallet@npm:2.0.0"
   dependencies:
     "@getpara/react-sdk-lite": "npm:2.0.0"
     "@getpara/wagmi-v2-integration": "npm:2.0.0"
@@ -532,7 +532,7 @@ __metadata:
     "@tanstack/react-query": ">=5.0.0"
     viem: 2.x
     wagmi: 2.x
-  checksum: 10/6e4f9e443f5425d063e38a4e0991ccaaa8cf527043a90f75040e8d3f175c17b4145d3c7d0390ac6862b9dd80ee85896a410b2e653f15b2165aaafae161342b40
+  checksum: 10/df5caa983ddf52015cd04b03cb6301eee0c5a6f6190353f16d7fc258c2eb08093df07ffd2f19c99159f18a2e6530d4606b4e998c55cf11cf69f8b123055505d1
   languageName: node
   linkType: hard
 
@@ -3764,7 +3764,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "connector-rainbowkit-nextjs@workspace:."
   dependencies:
-    "@getpara/rainbowkit-wallet": "npm:2.0.0-dev.2"
+    "@getpara/rainbowkit-wallet": "npm:2.0.0"
     "@getpara/react-sdk-lite": "npm:2.0.0"
     "@rainbow-me/rainbowkit": "npm:^2.2.2"
     "@tanstack/react-query": "npm:5.64.2"
