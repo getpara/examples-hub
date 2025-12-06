@@ -54,6 +54,7 @@ module.exports = [
       '**/examples-hub/**',
       '**/yarn.lock',
       '**/.DS_Store',
+      '**/paraWalletImage.js',
     ],
   },
   {

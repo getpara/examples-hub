@@ -1,0 +1,5 @@
+@import url('@getpara/react-sdk-lite/styles.css');
+
+#para-modal > cpsl-auth-modal {
+  z-index: 9999999999;
+}
