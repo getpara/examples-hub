@@ -1,0 +1,47 @@
+name: para_flutter
+description: "A demo app for using Para SDK in Flutter"
+publish_to: "none"
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.5.3
+
+dependencies:
+  flutter:
+    sdk: flutter
+  para: ^2.5.0
+  flutter_dotenv: ^5.2.1
+  flutter_inappwebview: ^6.1.5
+  font_awesome_flutter: ^10.8.0
+  web3dart: ^2.7.3
+  flutter_svg: ^2.0.16
+  solana: ^0.31.0+1
+  qr_flutter: ^4.1.0
+  url_launcher: ^6.3.1
+  http: ^1.4.0
+  shared_preferences: ^2.3.0
+  app_links: ^6.3.2
+  country_code_picker: ^3.0.0
+dependency_overrides:
+  pinenacl: 0.6.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  test: ^1.25.0
+  appium_driver: ^0.7.1
+  dotenv: ^4.2.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - .env
+    - lib/assets/app_icon.png
+    - lib/assets/para.png
+    - lib/assets/google.png
+    - lib/assets/apple.png
+    - lib/assets/discord.png
+    - lib/assets/farcaster.svg
+    - lib/assets/metamask_icon.svg
+    - lib/assets/phantom_icon.svg

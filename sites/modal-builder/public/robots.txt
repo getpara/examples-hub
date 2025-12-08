@@ -1,6 +1,0 @@
-# This file is for production builds only
-# All non-production environments blocked via noindex meta tag
-User-agent: *
-Allow: /
-
-Sitemap: https://demo.getpara.com/sitemap.xml
