@@ -1,5 +1,5 @@
 // Auth types
-export type AuthMethod = 'email' | 'phone' | 'google' | 'apple';
+export type AuthMethod = 'email' | 'phone' | 'google';
 
 export type AuthStatus = 'idle' | 'loading' | 'verifying' | 'completing' | 'success' | 'error';
 

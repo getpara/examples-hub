@@ -9,7 +9,6 @@ interface UseOneClickLoginResult {
   loginWithEmail: (email: string) => Promise<boolean>;
   loginWithPhone: (phone: string) => Promise<boolean>;
   loginWithGoogle: () => Promise<boolean>;
-  loginWithApple: () => Promise<boolean>;
   reset: () => void;
 }
 
@@ -133,48 +132,12 @@ export function useOneClickLogin(onSuccess: () => void): UseOneClickLoginResult 
     }
   }, [reset, onSuccess]);
 
-  const loginWithApple = useCallback(async (): Promise<boolean> => {
-    try {
-      reset();
-      setStatus('loading');
-
-      const oauthUrl = await para.getOAuthUrl({ method: 'APPLE' });
-      const result = await openAuthUrl(oauthUrl);
-
-      if (!result.success) {
-        throw new Error('Authentication was cancelled');
-      }
-
-      const authState = await para.verifyOAuth({ method: 'APPLE' });
-
-      if (authState.stage === 'done') {
-        if (authState.isNewUser) {
-          await para.waitForWalletCreation({});
-        } else {
-          await para.waitForLogin({});
-        }
-
-        setStatus('success');
-        onSuccess();
-        return true;
-      }
-
-      throw new Error('Unexpected OAuth state');
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Apple login failed';
-      setError(message);
-      setStatus('error');
-      return false;
-    }
-  }, [reset, onSuccess]);
-
   return {
     status,
     error,
     loginWithEmail,
     loginWithPhone,
     loginWithGoogle,
-    loginWithApple,
     reset,
   };
 }
