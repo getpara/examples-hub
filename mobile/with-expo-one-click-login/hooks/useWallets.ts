@@ -20,13 +20,7 @@ export function useWallets(): UseWalletsResult {
     setError(null);
 
     try {
-      let evmWallets = await para.getWalletsByType('EVM');
-
-      // If no wallets exist, create one
-      if (!evmWallets || Object.keys(evmWallets).length === 0) {
-        await para.createWallet({ type: 'EVM' });
-        evmWallets = await para.getWalletsByType('EVM');
-      }
+      const evmWallets = await para.getWalletsByType('EVM');
 
       const walletList: Wallet[] = Object.values(evmWallets || {}).map((w) => ({
         id: w.id,
