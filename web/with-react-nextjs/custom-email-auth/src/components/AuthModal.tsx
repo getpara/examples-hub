@@ -1,229 +1,284 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
+import {
+  AuthState,
+  useAccount,
+  useWaitForWalletCreation,
+  useLogout,
+  useSignUpOrLogIn,
+  useWaitForLogin,
+  getPortalBaseURL,
+  useClient,
+} from "@getpara/react-sdk";
 import { Modal } from "@/components/ui/Modal";
-import { StatusAlert } from "@/components/ui/StatusAlert";
-import { useModal } from "@/context/ModalContext";
-import { useParaAuth } from "@/hooks/useParaAuth";
-import { useParaWallet } from "@/hooks/useParaWallet";
-import { useParaAccount } from "@/hooks/useParaAccount";
+import { useModal } from "@/context/CustomModalProvider";
 import { EmailInput } from "@/components/EmailInput";
-import { OTPInput } from "@/components/OTPInput";
 import { AuthButton } from "@/components/AuthButton";
-import { queryClient } from "@/context/QueryProvider";
-
-type AuthStep = "email" | "verify" | "login";
 
 export function AuthModal() {
   const { isOpen, closeModal } = useModal();
-  const { isConnected, address } = useParaAccount();
-  const [step, setStep] = useState<AuthStep>("email");
+  const { signUpOrLogIn, isPending: isSigningUpOrLoggingIn } = useSignUpOrLogIn();
+  const { waitForLogin } = useWaitForLogin();
+  const { waitForWalletCreation } = useWaitForWalletCreation();
+  const { isConnected, embedded } = useAccount();
+  const address = embedded?.wallets?.[0]?.address;
+  const { logout, isPending: isLoggingOut } = useLogout();
   const [email, setEmail] = useState("");
-  const [verificationCode, setVerificationCode] = useState("");
-  const [error, setError] = useState("");
-  
-  const popupWindow = useRef<Window | null>(null);
-  
-  const {
-    signUpOrLoginAsync,
-    isSigningUpOrLoggingIn,
-    verifyAccountAsync,
-    isVerifying,
-    waitForLoginAsync,
-    isWaitingForLogin,
-    logoutAsync,
-    isLoggingOut,
-  } = useParaAuth();
-  
-  const {
-    createWalletAsync,
-    waitForWalletCreationAsync,
-  } = useParaWallet();
+  const [authState, setAuthState] = useState<AuthState>();
+  const [iFrameState, setIFrameState] = useState("closed");
+  const paraClient = useClient();
 
-  // Reset state when modal closes
-  useEffect(() => {
-    if (!isOpen) {
-      setStep("email");
-      setEmail("");
-      setVerificationCode("");
-      setError("");
-      popupWindow.current?.close();
-    }
-  }, [isOpen]);
+  const shouldCancelPolling = useRef(false);
 
-  // Close modal after successful authentication (but not when already connected)
-  const [wasConnected, setWasConnected] = useState(isConnected);
-  
-  useEffect(() => {
-    // If we transitioned from not connected to connected, close the modal
-    if (!wasConnected && isConnected && isOpen) {
-      closeModal();
-    }
-    setWasConnected(isConnected);
-  }, [isConnected, wasConnected, isOpen, closeModal]);
+  const isIframeLoading = iFrameState === "loading";
 
-  const openPopup = (...args: Parameters<typeof window.open>) => {
-    popupWindow.current?.close();
-    return (popupWindow.current = window?.open(...args));
+  const resetState = () => {
+    shouldCancelPolling.current = true;
+    setAuthState(undefined);
+    setEmail("");
+    setIFrameState("closed");
   };
 
-  const handleEmailSubmit = async () => {
-    setError("");
-    
-    try {
-      const authState = await signUpOrLoginAsync({ email });
-      
-      if (authState.stage === "verify") {
-        setStep("verify");
-      } else if (authState.stage === "login") {
-        setStep("login");
-        openPopup(authState.passkeyUrl, "loginPopup", "popup=true");
-        
-        const { needsWallet } = await waitForLoginAsync({
-          isCanceled: () => popupWindow.current?.closed ?? true,
-        });
-        
-        if (needsWallet) {
-          await createWalletAsync({ skipDistribute: false });
-        }
-        
-        // Force immediate query refresh
-        await queryClient.invalidateQueries({ queryKey: ["paraAccount"] });
-        
-        // The connection state change will close the modal
+  // Reset auth flow state when modal closes (only if not connected)
+  useEffect(() => {
+    if (!isOpen && !isConnected) {
+      resetState();
+    }
+  }, [isOpen, isConnected]);
+
+  const pollLogin = () => {
+    shouldCancelPolling.current = false;
+    waitForLogin(
+      { isCanceled: () => shouldCancelPolling.current },
+      {
+        onSuccess: ({ needsWallet }) => {
+          if (needsWallet) {
+            waitForWalletCreation({ isCanceled: () => shouldCancelPolling.current }, { onSuccess: () => {} });
+          }
+        },
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Authentication failed");
-    }
+    );
   };
 
-  const handleVerification = async () => {
-    setError("");
-    
-    try {
-      const authState = await verifyAccountAsync({ verificationCode });
-      openPopup(authState.passkeyUrl, "signUpPopup", "popup=true");
-      
-      await waitForWalletCreationAsync({
-        isCanceled: () => Boolean(popupWindow.current?.closed),
-      });
-      
-      // Force immediate query refresh
-      await queryClient.invalidateQueries({ queryKey: ["paraAccount"] });
-      
-      // The connection state change will close the modal
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Verification failed";
-      setError(
-        errorMessage === "Invalid verification code"
-          ? "Verification code incorrect or expired"
-          : errorMessage
-      );
+  const pollSignUp = () => {
+    shouldCancelPolling.current = false;
+    waitForWalletCreation({ isCanceled: () => shouldCancelPolling.current }, { onSuccess: () => {} });
+  };
+
+  const setupIframeListener = () => {
+    const handleMessage = (event: MessageEvent) => {
+      if (!paraClient) return;
+
+      const portalBase = getPortalBaseURL(paraClient.ctx);
+      if (!event.origin.startsWith(portalBase)) return;
+
+      if (event.data) {
+        if (event.data.type === "LOADED") {
+          setIFrameState("loaded");
+        }
+        if (event.data?.type === "CLOSE_WINDOW") {
+          if (event.data.success) {
+            setIFrameState("closed");
+          }
+          window.removeEventListener("message", handleMessage);
+        }
+      }
+    };
+    window.addEventListener("message", handleMessage);
+  };
+
+  const onSubmitEmail = () => {
+    signUpOrLogIn(
+      { auth: { email } },
+      {
+        onSuccess: (authState) => {
+          switch (authState?.stage) {
+            case "verify":
+              if (authState.loginUrl) {
+                setIFrameState("loading");
+                setupIframeListener();
+
+                if (authState.nextStage === "signup") {
+                  pollSignUp();
+                } else if (authState.nextStage === "login") {
+                  pollLogin();
+                }
+              }
+              break;
+          }
+          setAuthState(authState);
+        },
+        onError: (error) => {
+          console.error("Auth error:", error);
+        },
+      }
+    );
+  };
+
+  const handleOpenWindowClick = (url: string) => () => {
+    window.open(url, "_blank", "noopener,noreferrer");
+
+    switch (authState?.stage) {
+      case "signup":
+        pollSignUp();
+        break;
+      case "login":
+        pollLogin();
+        break;
     }
   };
 
   const handleLogout = async () => {
-    setError("");
-    
-    try {
-      await logoutAsync();
-      closeModal();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to logout");
-    }
+    shouldCancelPolling.current = true;
+    await logout();
+    setAuthState(undefined);
+    closeModal();
   };
 
-  const isLoading = isSigningUpOrLoggingIn || isVerifying || isWaitingForLogin || isLoggingOut;
+  const handleCancel = () => {
+    resetState();
+    closeModal();
+  };
 
-  return (
-    <Modal isOpen={isOpen} onClose={closeModal} data-testid="auth-modal">
-      <div className="space-y-4">
-        <h2 className="text-xl font-bold">
-          {isConnected ? "Account Settings" : 
-            step === "email" ? "Connect with Email" :
-            step === "verify" ? "Verify Your Email" :
-            "Logging In..."
-          }
-        </h2>
-
-        {isConnected ? (
-          <div className="space-y-4">
-            <div className="bg-gray-50 p-4 rounded-none border border-gray-200">
-              <p className="text-sm text-gray-600 mb-1">Connected Account</p>
-              <p className="text-sm font-mono text-gray-900">
-                {address?.slice(0, 6)}...{address?.slice(-4)}
-              </p>
-            </div>
-            <button
-              onClick={handleLogout}
-              disabled={isLoggingOut}
-              data-testid="auth-logout-button"
-              className="w-full px-4 py-2 bg-gray-800 text-white rounded-none hover:bg-gray-900 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed font-medium">
-              {isLoggingOut ? "Logging out..." : "Logout"}
-            </button>
+  if (isConnected) {
+    return (
+      <Modal isOpen={isOpen} onClose={closeModal} data-testid="auth-modal">
+        <div className="space-y-4">
+          <h2 className="text-xl font-bold">Account Settings</h2>
+          <div className="bg-gray-50 p-4 rounded-none border border-gray-200">
+            <p className="text-sm text-gray-600 mb-1">Connected Account</p>
+            <p className="text-sm font-mono text-gray-900">
+              {address?.slice(0, 6)}...{address?.slice(-4)}
+            </p>
           </div>
-        ) : (
-          <>
-            {step === "email" && (
-              <>
-                <EmailInput
-                  disabled={isLoading}
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  data-testid="auth-email-input"
-                />
-                <AuthButton
-                  isLoading={isLoading}
-                  disabled={!email}
-                  onClick={handleEmailSubmit}
-                  data-testid="auth-submit-button">
-                  Continue
-                </AuthButton>
-              </>
-            )}
+          <button
+            onClick={handleLogout}
+            disabled={isLoggingOut}
+            data-testid="auth-logout-button"
+            className="w-full px-4 py-2 bg-gray-800 text-white rounded-none hover:bg-gray-900 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed font-medium">
+            {isLoggingOut ? "Logging out..." : "Logout"}
+          </button>
+        </div>
+      </Modal>
+    );
+  }
 
-            {step === "verify" && (
-              <>
-                <p className="text-sm text-gray-600">
-                  We sent a verification code to {email}
-                </p>
-                <OTPInput
-                  disabled={isLoading}
-                  value={verificationCode}
-                  onChange={setVerificationCode}
-                />
-                <AuthButton
-                  isLoading={isLoading}
-                  disabled={!verificationCode}
-                  onClick={handleVerification}
-                  loadingText="Verifying..."
-                  data-testid="auth-verify-button">
-                  Verify & Create Wallet
-                </AuthButton>
-              </>
-            )}
-
-            {step === "login" && (
-              <div className="text-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
-                <p className="text-gray-600">Completing login...</p>
+  // Verify step - clean iframe view with just back button
+  if (authState?.stage === "verify" && authState.loginUrl) {
+    return (
+      <Modal isOpen={isOpen} onClose={handleCancel} data-testid="auth-modal">
+        <div className="space-y-4">
+          <button
+            onClick={resetState}
+            className="flex items-center text-gray-600 hover:text-gray-900 transition-colors text-sm">
+            ← Back
+          </button>
+          <div className="relative" style={{ height: 400 }}>
+            {isIframeLoading && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
               </div>
             )}
-
-            <StatusAlert
-              show={!!error}
-              type="error"
-              message={error}
+            <iframe
+              src={authState.loginUrl}
+              className="absolute inset-0"
+              style={{
+                border: "none",
+                width: "100%",
+                height: "100%",
+                opacity: isIframeLoading ? 0 : 1,
+                transition: "opacity 150ms ease-in-out",
+              }}
+              title="Para Verification"
+              allow="publickey-credentials-get *; publickey-credentials-create *"
             />
-          </>
-        )}
+          </div>
+        </div>
+      </Modal>
+    );
+  }
 
-        <button
-          onClick={closeModal}
-          data-testid="modal-close-button"
-          className="w-full px-4 py-2 text-gray-600 hover:text-gray-900 transition-colors text-sm">
-          Cancel
-        </button>
+  return (
+    <Modal isOpen={isOpen} onClose={handleCancel} data-testid="auth-modal">
+      <div className="space-y-4">
+        <h2 className="text-xl font-bold">
+          {!authState
+            ? "Connect with Email"
+            : authState.stage === "login"
+              ? "Welcome Back"
+              : authState.stage === "signup"
+                ? "Complete Signup"
+                : "Connect with Email"}
+        </h2>
+
+        {!authState ? (
+          <>
+            <EmailInput
+              disabled={isSigningUpOrLoggingIn}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              data-testid="auth-email-input"
+            />
+            <AuthButton
+              isLoading={isSigningUpOrLoggingIn}
+              disabled={!email}
+              onClick={onSubmitEmail}
+              data-testid="auth-submit-button">
+              Continue
+            </AuthButton>
+          </>
+        ) : authState.stage === "login" ? (
+          <div className="space-y-3">
+            <p className="text-sm text-gray-600">Choose how to log in:</p>
+            {authState.passkeyUrl && (
+              <button
+                onClick={handleOpenWindowClick(authState.passkeyUrl)}
+                className="w-full px-4 py-2 bg-gray-800 text-white rounded-none hover:bg-gray-900 transition-colors font-medium">
+                Login with Passkey
+              </button>
+            )}
+            {authState.passwordUrl && (
+              <button
+                onClick={handleOpenWindowClick(authState.passwordUrl)}
+                className="w-full px-4 py-2 bg-gray-800 text-white rounded-none hover:bg-gray-900 transition-colors font-medium">
+                Login with Password
+              </button>
+            )}
+            {authState.pinUrl && (
+              <button
+                onClick={handleOpenWindowClick(authState.pinUrl)}
+                className="w-full px-4 py-2 bg-gray-800 text-white rounded-none hover:bg-gray-900 transition-colors font-medium">
+                Login with PIN
+              </button>
+            )}
+          </div>
+        ) : authState.stage === "signup" ? (
+          <div className="space-y-3">
+            <p className="text-sm text-gray-600">Choose how to sign up:</p>
+            {authState.passkeyUrl && (
+              <button
+                onClick={handleOpenWindowClick(authState.passkeyUrl)}
+                className="w-full px-4 py-2 bg-gray-800 text-white rounded-none hover:bg-gray-900 transition-colors font-medium">
+                Signup with Passkey
+              </button>
+            )}
+            {authState.passwordUrl && (
+              <button
+                onClick={handleOpenWindowClick(authState.passwordUrl)}
+                className="w-full px-4 py-2 bg-gray-800 text-white rounded-none hover:bg-gray-900 transition-colors font-medium">
+                Signup with Password
+              </button>
+            )}
+            {authState.pinUrl && (
+              <button
+                onClick={handleOpenWindowClick(authState.pinUrl)}
+                className="w-full px-4 py-2 bg-gray-800 text-white rounded-none hover:bg-gray-900 transition-colors font-medium">
+                Signup with PIN
+              </button>
+            )}
+          </div>
+        ) : null}
       </div>
     </Modal>
   );
