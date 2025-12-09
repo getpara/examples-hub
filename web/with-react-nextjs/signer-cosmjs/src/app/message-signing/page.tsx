@@ -1,9 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useAccount } from "@getpara/react-sdk";
 import { useParaSigner } from "@/hooks/useParaSigner";
-import { useAccountAddress } from "@/hooks/useAccountAddress";
 
 export default function MessageSigningPage() {
   const [message, setMessage] = useState("Hello from Para + CosmJS!");
@@ -15,9 +13,7 @@ export default function MessageSigningPage() {
     message: string;
   }>({ show: false, type: "success", message: "" });
 
-  const account = useAccount();
-  const { signingClient } = useParaSigner();
-  const address = useAccountAddress();
+  const { signingClient, address, isLoading: isSignerLoading } = useParaSigner();
 
   const signMessage = async () => {
     setIsLoading(true);
@@ -25,7 +21,7 @@ export default function MessageSigningPage() {
     setSignature(null);
 
     try {
-      if (!account?.isConnected || !address) {
+      if (!address) {
         throw new Error("Please connect your wallet to sign a message.");
       }
 
@@ -33,29 +29,23 @@ export default function MessageSigningPage() {
         throw new Error("Signing client not initialized. Please try reconnecting.");
       }
 
-      setStatus({
-        show: true,
-        type: "info",
-        message: "Please sign the message in your wallet...",
-      });
-
       // Create a transaction with just a memo to sign
       const msgs: never[] = [];
       const fee = {
         amount: [{ denom: "uatom", amount: "0" }],
         gas: "0",
       };
-      
+
       // Sign and broadcast with simulation mode (won't actually send)
       const txRaw = await signingClient.sign(address, msgs, fee, message);
-      
+
       // Extract the signature from the transaction
       const result = {
         signature: {
           signature: Buffer.from(txRaw.signatures[0]).toString('base64')
         }
       };
-      
+
       setSignature(result.signature.signature);
       setStatus({
         show: true,
@@ -73,6 +63,8 @@ export default function MessageSigningPage() {
       setIsLoading(false);
     }
   };
+
+  const isClientReady = !!signingClient && !!address;
 
   return (
     <div className="container mx-auto px-4">
@@ -117,8 +109,14 @@ export default function MessageSigningPage() {
           <button
             onClick={signMessage}
             className="w-full rounded-none bg-gray-900 px-6 py-3 text-sm font-medium text-white hover:bg-gray-950 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={isLoading || !account?.isConnected || !message.trim()}>
-            {isLoading ? "Signing Message..." : "Sign Message"}
+            disabled={isLoading || isSignerLoading || !isClientReady || !message.trim()}>
+            {isLoading
+              ? "Signing Message..."
+              : isSignerLoading
+              ? "Initializing Signer..."
+              : !isClientReady
+              ? "Connect Wallet"
+              : "Sign Message"}
           </button>
 
           {signature && (
