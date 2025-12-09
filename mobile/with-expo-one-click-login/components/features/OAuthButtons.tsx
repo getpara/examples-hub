@@ -3,10 +3,11 @@ import { AntDesign } from '@expo/vector-icons';
 
 interface OAuthButtonsProps {
   onGooglePress: () => void;
+  onApplePress: () => void;
   disabled?: boolean;
 }
 
-export function OAuthButtons({ onGooglePress, disabled }: OAuthButtonsProps) {
+export function OAuthButtons({ onGooglePress, onApplePress, disabled }: OAuthButtonsProps) {
   return (
     <View className="gap-3">
       <TouchableOpacity
@@ -17,6 +18,15 @@ export function OAuthButtons({ onGooglePress, disabled }: OAuthButtonsProps) {
           <AntDesign name="google" size={20} color="#4285F4" />
         </View>
         <Text className="text-base font-semibold text-gray-900">Continue with Google</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        onPress={onApplePress}
+        disabled={disabled}
+        className={`flex-row items-center justify-center rounded-xl border border-gray-200 bg-black px-6 py-4 active:opacity-80 ${disabled ? 'opacity-50' : ''}`}>
+        <View className="mr-3">
+          <AntDesign name="apple" size={20} color="#FFFFFF" />
+        </View>
+        <Text className="text-base font-semibold text-white">Continue with Apple</Text>
       </TouchableOpacity>
     </View>
   );

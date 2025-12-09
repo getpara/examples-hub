@@ -1,9 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useAccount } from "@getpara/react-sdk";
 import { useParaSigner } from "@/hooks/useParaSigner";
-import { useAccountAddress } from "@/hooks/useAccountAddress";
 import { DEFAULT_CHAIN } from "@/config/chains";
 import { IBC_TRANSFER_PORT, IBC_TRANSFER_CHANNEL } from "@/config/constants";
 import { coins, MsgTransferEncodeObject } from "@cosmjs/stargate";
@@ -21,9 +19,7 @@ export default function IBCTransferPage() {
     message: string;
   }>({ show: false, type: "success", message: "" });
 
-  const account = useAccount();
-  const { signingClient } = useParaSigner();
-  const address = useAccountAddress();
+  const { signingClient, address } = useParaSigner();
 
   const sendIBCTransfer = async () => {
     setIsLoading(true);
@@ -31,7 +27,7 @@ export default function IBCTransferPage() {
     setTxHash(null);
 
     try {
-      if (!account?.isConnected || !address) {
+      if (!address) {
         throw new Error("Please connect your wallet to send an IBC transfer.");
       }
 
@@ -47,12 +43,6 @@ export default function IBCTransferPage() {
       if (isNaN(amountInMinimalDenom) || amountInMinimalDenom <= 0) {
         throw new Error("Invalid amount. Please enter a valid positive number.");
       }
-
-      setStatus({
-        show: true,
-        type: "info",
-        message: "Please confirm the IBC transfer in your wallet...",
-      });
 
       // Create timeout timestamp (1 hour from now) in nanoseconds
       const timeoutTimestamp = BigInt(Date.now() + 3600000) * BigInt(1000000);
@@ -192,7 +182,7 @@ export default function IBCTransferPage() {
           <button
             onClick={sendIBCTransfer}
             className="w-full rounded-none bg-gray-900 px-6 py-3 text-sm font-medium text-white hover:bg-gray-950 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={isLoading || !account?.isConnected || !recipientAddress || !amount || !destinationChannel}>
+            disabled={isLoading || !address || !recipientAddress || !amount || !destinationChannel}>
             {isLoading ? "Sending IBC Transfer..." : "Send IBC Transfer"}
           </button>
 

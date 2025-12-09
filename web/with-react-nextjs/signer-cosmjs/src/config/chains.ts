@@ -23,10 +23,10 @@ export const COSMOS_MAINNET: CosmosChain = {
 };
 
 export const COSMOS_TESTNET: CosmosChain = {
-  chainId: "theta-testnet-001",
-  chainName: "Cosmos Testnet",
-  rpc: "https://rpc.sentry-01.theta-testnet.polypore.xyz",
-  rest: "https://rest.sentry-01.theta-testnet.polypore.xyz",
+  chainId: "provider",
+  chainName: "Cosmos ICS Provider Testnet",
+  rpc: "https://rpc.provider-sentry-01.ics-testnet.polypore.xyz",
+  rest: "https://rest.provider-sentry-01.ics-testnet.polypore.xyz",
   bech32Prefix: "cosmos",
   coinDenom: "ATOM",
   coinMinimalDenom: "uatom",

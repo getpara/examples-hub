@@ -1,10 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useAccount } from "@getpara/react-sdk";
 import { useParaSigner } from "@/hooks/useParaSigner";
 import { useCosmosQueryClient } from "@/hooks/useCosmosQueryClient";
-import { useAccountAddress } from "@/hooks/useAccountAddress";
 import { DEFAULT_CHAIN } from "@/config/chains";
 import { MsgDelegateEncodeObject, StargateClient, coins } from "@cosmjs/stargate";
 import { MsgDelegate } from "cosmjs-types/cosmos/staking/v1beta1/tx";
@@ -43,10 +41,8 @@ export default function StakingPage() {
     message: string;
   }>({ show: false, type: "success", message: "" });
 
-  const account = useAccount();
-  const { signingClient } = useParaSigner();
+  const { signingClient, address } = useParaSigner();
   const { queryClient } = useCosmosQueryClient();
-  const address = useAccountAddress();
 
   const fetchValidators = async () => {
     if (!queryClient) return;
@@ -106,7 +102,7 @@ export default function StakingPage() {
     setTxHash(null);
 
     try {
-      if (!account?.isConnected || !address) {
+      if (!address) {
         throw new Error("Please connect your wallet to delegate.");
       }
 
@@ -122,12 +118,6 @@ export default function StakingPage() {
       if (isNaN(amountInMinimalDenom) || amountInMinimalDenom <= 0) {
         throw new Error("Invalid amount. Please enter a valid positive number.");
       }
-
-      setStatus({
-        show: true,
-        type: "info",
-        message: "Please confirm the delegation in your wallet...",
-      });
 
       const delegateMsg: MsgDelegateEncodeObject = {
         typeUrl: "/cosmos.staking.v1beta1.MsgDelegate",
@@ -179,7 +169,7 @@ export default function StakingPage() {
         <div className="grid gap-6 md:grid-cols-2">
           <div>
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Delegate to Validator</h2>
-            
+
             {status.show && (
               <div
                 className={`mb-4 rounded-none border ${
@@ -238,7 +228,7 @@ export default function StakingPage() {
               <button
                 onClick={delegate}
                 className="w-full rounded-none bg-gray-900 px-6 py-3 text-sm font-medium text-white hover:bg-gray-950 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={isLoading || !account?.isConnected || !selectedValidator || !amount}>
+                disabled={isLoading || !address || !selectedValidator || !amount}>
                 {isLoading ? "Delegating..." : "Delegate ATOM"}
               </button>
 

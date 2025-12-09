@@ -17,7 +17,7 @@ export default function LoginScreen() {
     router.replace('/(tabs)');
   };
 
-  const { loginWithEmail, loginWithPhone, loginWithGoogle, status, error } =
+  const { loginWithEmail, loginWithPhone, loginWithGoogle, loginWithApple, status, error } =
     useOneClickLogin(handleSuccess);
 
   const isLoading = status === 'loading' || status === 'verifying' || status === 'completing';
@@ -49,7 +49,7 @@ export default function LoginScreen() {
             </View>
             <AuthForm onSubmit={handleAuthSubmit} loading={isLoading} error={error} />
             <Divider text="or continue with" />
-            <OAuthButtons onGooglePress={loginWithGoogle} disabled={isLoading} />
+            <OAuthButtons onGooglePress={loginWithGoogle} onApplePress={loginWithApple} disabled={isLoading} />
           </View>
           <View className="px-6 pb-4">
             <Text className="text-center text-xs text-gray-400">

@@ -1,12 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { useAccount } from "@getpara/react-sdk";
 import { useParaCosmWasmSigner } from "@/hooks/useParaCosmWasmSigner";
-import { useAccountAddress } from "@/hooks/useAccountAddress";
 import { CosmWasmClient } from "@cosmjs/cosmwasm-stargate";
 import { DEFAULT_CHAIN } from "@/config/chains";
-
 
 export default function CosmWasmInteractionPage() {
   const [contractAddress, setContractAddress] = useState("");
@@ -21,9 +18,7 @@ export default function CosmWasmInteractionPage() {
     message: string;
   }>({ show: false, type: "success", message: "" });
 
-  const account = useAccount();
-  const { signingClient } = useParaCosmWasmSigner();
-  const address = useAccountAddress();
+  const { signingClient, address } = useParaCosmWasmSigner();
 
   const queryContract = async () => {
     setIsLoading(true);
@@ -69,7 +64,7 @@ export default function CosmWasmInteractionPage() {
     setTxHash(null);
 
     try {
-      if (!account?.isConnected || !address) {
+      if (!address) {
         throw new Error("Please connect your wallet to execute contract.");
       }
 
@@ -87,12 +82,6 @@ export default function CosmWasmInteractionPage() {
       } catch {
         throw new Error("Invalid JSON in execute message.");
       }
-
-      setStatus({
-        show: true,
-        type: "info",
-        message: "Please confirm the transaction in your wallet...",
-      });
 
       const result = await signingClient.execute(
         address,
@@ -133,7 +122,7 @@ export default function CosmWasmInteractionPage() {
         <div className="grid gap-6 md:grid-cols-2">
           <div>
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Query Contract</h2>
-            
+
             <div className="space-y-4">
               <div className="space-y-3">
                 <label
@@ -191,7 +180,7 @@ export default function CosmWasmInteractionPage() {
 
           <div>
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Execute Contract</h2>
-            
+
             {status.show && status.type !== "success" && (
               <div
                 className={`mb-4 rounded-none border ${
@@ -223,7 +212,7 @@ export default function CosmWasmInteractionPage() {
               <button
                 onClick={executeContract}
                 className="w-full rounded-none bg-gray-900 px-6 py-3 text-sm font-medium text-white hover:bg-gray-950 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={isLoading || !account?.isConnected || !contractAddress}>
+                disabled={isLoading || !address || !contractAddress}>
                 {isLoading ? "Executing..." : "Execute Contract"}
               </button>
 

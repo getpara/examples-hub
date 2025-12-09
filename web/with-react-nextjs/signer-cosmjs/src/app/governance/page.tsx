@@ -1,10 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useAccount } from "@getpara/react-sdk";
 import { useParaSigner } from "@/hooks/useParaSigner";
 import { useCosmosQueryClient } from "@/hooks/useCosmosQueryClient";
-import { useAccountAddress } from "@/hooks/useAccountAddress";
 import { MsgVoteEncodeObject, StargateClient } from "@cosmjs/stargate";
 import { MsgVote } from "cosmjs-types/cosmos/gov/v1beta1/tx";
 import { VoteOption } from "cosmjs-types/cosmos/gov/v1beta1/gov";
@@ -32,10 +30,8 @@ export default function GovernancePage() {
     message: string;
   }>({ show: false, type: "success", message: "" });
 
-  const account = useAccount();
-  const { signingClient } = useParaSigner();
+  const { signingClient, address } = useParaSigner();
   const { queryClient } = useCosmosQueryClient();
-  const address = useAccountAddress();
 
   const fetchProposals = async () => {
     if (!queryClient) return;
@@ -85,7 +81,7 @@ export default function GovernancePage() {
     setTxHash(null);
 
     try {
-      if (!account?.isConnected || !address) {
+      if (!address) {
         throw new Error("Please connect your wallet to vote.");
       }
 
@@ -96,12 +92,6 @@ export default function GovernancePage() {
       if (!selectedProposal) {
         throw new Error("Please select a proposal to vote on.");
       }
-
-      setStatus({
-        show: true,
-        type: "info",
-        message: "Please confirm your vote in your wallet...",
-      });
 
       const voteMsg: MsgVoteEncodeObject = {
         typeUrl: "/cosmos.gov.v1beta1.MsgVote",
@@ -263,7 +253,7 @@ export default function GovernancePage() {
           <button
             onClick={vote}
             className="w-full rounded-none bg-gray-900 px-6 py-3 text-sm font-medium text-white hover:bg-gray-950 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={isLoading || !account?.isConnected || !selectedProposal}>
+            disabled={isLoading || !address || !selectedProposal}>
             {isLoading ? "Submitting Vote..." : "Submit Vote"}
           </button>
 
