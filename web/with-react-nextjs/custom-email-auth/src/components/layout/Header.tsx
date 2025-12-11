@@ -2,15 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useParaAccount } from "@/hooks/useParaAccount";
+import { useAccount } from "@getpara/react-sdk";
+import { useModal } from "@/context/CustomModalProvider";
 
-interface HeaderProps {
-  onConnectClick: () => void;
-}
-
-export default function Header({ onConnectClick }: HeaderProps) {
+export default function Header() {
   const pathname = usePathname();
-  const { address, isConnected } = useParaAccount();
+  const { isConnected, embedded } = useAccount();
+  const address = embedded?.wallets?.[0]?.address;
+  const { openModal } = useModal();
 
   return (
     <header className="border-b border-gray-200">
@@ -27,14 +26,14 @@ export default function Header({ onConnectClick }: HeaderProps) {
         <div>
           {isConnected ? (
             <button
-              onClick={onConnectClick}
+              onClick={openModal}
               className="px-4 py-2 bg-gray-700 text-white rounded-none hover:bg-gray-800 transition-colors text-sm font-medium cursor-pointer">
               Connected: {address?.slice(0, 6)}...
               {address?.slice(-4)}
             </button>
           ) : (
             <button
-              onClick={onConnectClick}
+              onClick={openModal}
               className="px-4 py-2 bg-gray-900 text-white rounded-none hover:bg-gray-950 transition-colors text-sm font-medium cursor-pointer">
               Connect Wallet
             </button>

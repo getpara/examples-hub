@@ -1,10 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useAccount } from "@getpara/react-sdk";
 import { useParaSigner } from "@/hooks/useParaSigner";
 import { useCosmosQueryClient } from "@/hooks/useCosmosQueryClient";
-import { useAccountAddress } from "@/hooks/useAccountAddress";
 import { DEFAULT_CHAIN } from "@/config/chains";
 import { coins } from "@cosmjs/stargate";
 
@@ -21,10 +19,8 @@ export default function AtomTransferPage() {
     message: string;
   }>({ show: false, type: "success", message: "" });
 
-  const account = useAccount();
-  const { signingClient } = useParaSigner();
+  const { signingClient, address } = useParaSigner();
   const { queryClient } = useCosmosQueryClient();
-  const address = useAccountAddress();
 
   const fetchBalance = async () => {
     if (!address || !queryClient) return;
@@ -52,7 +48,7 @@ export default function AtomTransferPage() {
     setTxHash(null);
 
     try {
-      if (!account?.isConnected || !address) {
+      if (!address) {
         throw new Error("Please connect your wallet to send a transaction.");
       }
 
@@ -68,12 +64,6 @@ export default function AtomTransferPage() {
       if (isNaN(amountInMinimalDenom) || amountInMinimalDenom <= 0) {
         throw new Error("Invalid amount. Please enter a valid positive number.");
       }
-
-      setStatus({
-        show: true,
-        type: "info",
-        message: "Please confirm the transaction in your wallet...",
-      });
 
       const result = await signingClient.sendTokens(
         address,
@@ -194,7 +184,7 @@ export default function AtomTransferPage() {
           <button
             onClick={sendTransaction}
             className="w-full rounded-none bg-gray-900 px-6 py-3 text-sm font-medium text-white hover:bg-gray-950 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={isLoading || !account?.isConnected || !recipientAddress || !amount}>
+            disabled={isLoading || !address || !recipientAddress || !amount}>
             {isLoading ? "Sending Transaction..." : "Send ATOM"}
           </button>
 

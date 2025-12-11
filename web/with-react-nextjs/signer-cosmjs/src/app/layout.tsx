@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Providers } from "./Providers";
 import "./globals.css";
-
+import "@getpara/react-sdk/styles.css";
 export const metadata: Metadata = {
   title: "Para + CosmJS Demo",
   description: "Sign Cosmos transactions with Para SDK",

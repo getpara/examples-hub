@@ -2,15 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useModal, useAccount, useWallet } from "@getpara/react-sdk";
+import { useModal } from "@getpara/react-sdk";
+import { useParaSigner } from "@/hooks/useParaSigner";
 
 export default function Header() {
   const pathname = usePathname();
   const { openModal } = useModal();
-  const { isConnected } = useAccount();
-  const { data: wallet } = useWallet();
-
-  const address = wallet?.address;
+  const { address } = useParaSigner();
 
   return (
     <header className="border-b border-gray-200">
@@ -25,7 +23,7 @@ export default function Header() {
           )}
         </nav>
         <div>
-          {isConnected && address ? (
+          {address ? (
             <button
               onClick={() => openModal()}
               className="px-4 py-2 bg-green-700 text-white rounded-none hover:bg-green-800 transition-colors">
