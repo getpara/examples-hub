@@ -7,7 +7,7 @@ covers the three core operations exposed by the REST surface:
 2. Poll a wallet until it becomes `ready` (so it has an address and public key).
 3. Ask Para to sign raw bytes for that wallet.
 
-It defaults to the Sandbox environment (`https://api.sandbox.getpara.com`) so you can try it safely. For additional REST
+It defaults to the Beta environment (`https://api.beta.getpara.com`) so you can try it safely. For additional REST
 endpoints, check the docs—this sample intentionally sticks to the minimal create/read/sign flow.
 
 Use this when you want to learn the HTTP integration without installing any Para SDK packages.
@@ -27,22 +27,34 @@ yarn install                        # Install express + types
 yarn dev                            # Starts http://localhost:4000
 ```
 
-Now try the example flow from a second terminal (replace the email with any identifier you like):
+From a second terminal, create a wallet. Replace `your-unique-id@example.com` with a unique identifier each time you run this demo.
+Reusing an identifier will return HTTP 409 because a wallet already exists for that user.
+
+```bash
+curl -X POST http://localhost:4000/rest/wallets \
+  -H "Content-Type: application/json" \
+  -d '{
+        "userIdentifier": "your-unique-id@example.com",
+        "userIdentifierType": "EMAIL",
+        "type": "EVM"
+      }'
+```
+
+You should see a JSON response with a wallet id and status. If the wallet is still `creating`, you can poll it with
+`GET /rest/wallets/:walletId` until it becomes `ready`.
+
+Want to see the full create → poll → sign demo in one call? Try:
 
 ```bash
 curl -X POST http://localhost:4000/rest/example-flow \
   -H "Content-Type: application/json" \
   -d '{
-        "userIdentifier": "rest-demo@example.com",
+        "userIdentifier": "your-unique-id-02@example.com",
         "userIdentifierType": "EMAIL",
         "type": "EVM",
         "dataToSign": "0xdeadbeef"
       }'
 ```
-
-You should see a JSON response that includes the wallet id, address, and the signature returned by Para. If you reuse
-the same identifier and type, Para will return a 409 conflict — pick a fresh identifier or handle the error in your
-app.
 
 ## Routes
 
@@ -65,7 +77,7 @@ All settings live in `.env`:
 | Key | Required | Default | Notes |
 | --- | --- | --- | --- |
 | `PARA_API_KEY` | ✅ | — | Your REST API key (keep it server-side). |
-| `PARA_REST_BASE_URL` | | `https://api.sandbox.getpara.com` | Use `https://api.getpara.com` for production. |
+| `PARA_REST_BASE_URL` | | `https://api.beta.getpara.com` | Use `https://api.getpara.com` for production. |
 | `PARA_POLL_INTERVAL_MS` | | `2000` | How often `example-flow` polls `GET /v1/wallets/:walletId`. |
 | `PARA_POLL_TIMEOUT_MS` | | `20000` | Max time (ms) before the poll aborts. |
 
