@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:para/para.dart';
 import '../../../client/para.dart';
@@ -27,6 +29,7 @@ class _WalletsScreenState extends State<WalletsScreen> {
   WalletType? _creatingWalletType;
   bool _isDeletingAccount = false;
   String? _error;
+  bool _isFetchingJwt = false;
 
   @override
   void initState() {
@@ -148,6 +151,173 @@ class _WalletsScreenState extends State<WalletsScreen> {
     }
   }
 
+  Future<void> _showJwtDemo() async {
+    setState(() => _isFetchingJwt = true);
+
+    try {
+      final response = await para.issueJwt();
+      if (!mounted) return;
+      setState(() => _isFetchingJwt = false);
+
+      // Decode the JWT payload for display
+      final parts = response.token.split('.');
+      String? decodedPayload;
+      if (parts.length == 3) {
+        try {
+          // Add padding if needed for base64 decoding
+          var payload = parts[1];
+          final remainder = payload.length % 4;
+          if (remainder > 0) {
+            payload += '=' * (4 - remainder);
+          }
+          final bytes = base64Url.decode(payload);
+          final json = utf8.decode(bytes);
+          // Pretty print the JSON
+          final parsed = jsonDecode(json);
+          const encoder = JsonEncoder.withIndent('  ');
+          decodedPayload = encoder.convert(parsed);
+        } catch (_) {
+          decodedPayload = 'Unable to decode payload';
+        }
+      }
+
+      if (!mounted) return;
+      showModalBottomSheet(
+        context: context,
+        backgroundColor: Colors.white,
+        isScrollControlled: true,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+        ),
+        builder: (context) => SafeArea(
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.7,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'JWT Demo',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                  ],
+                ),
+                const Divider(),
+                const Text(
+                  'Key ID',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  response.keyId,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontFamily: 'monospace',
+                    color: Colors.black87,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Token (truncated)',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '${response.token.substring(0, 50)}...',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontFamily: 'monospace',
+                    color: Colors.black87,
+                  ),
+                ),
+                if (decodedPayload != null) ...[
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Decoded Payload',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Flexible(
+                    child: SingleChildScrollView(
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[100],
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          decodedPayload,
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontFamily: 'monospace',
+                            color: Colors.black87,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.blue[50],
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Row(
+                    children: [
+                      Icon(Icons.info_outline, size: 16, color: Colors.blue),
+                      SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Verify this JWT server-side using Para\'s JWKS endpoint.',
+                          style: TextStyle(fontSize: 12, color: Colors.blue),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isFetchingJwt = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to fetch JWT: ${e.toString()}')),
+      );
+    }
+  }
+
   void _showCreateWalletSheet() {
     showModalBottomSheet(
       context: context,
@@ -262,6 +432,17 @@ class _WalletsScreenState extends State<WalletsScreen> {
           ),
         ),
         actions: [
+          IconButton(
+            icon: _isFetchingJwt
+                ? const SizedBox(
+                    height: 16,
+                    width: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.key, color: Colors.black),
+            onPressed: _isFetchingJwt ? null : _showJwtDemo,
+            tooltip: 'JWT Demo',
+          ),
           TextButton(
             key: const ValueKey('wallets_screen_logout_button'),
             onPressed: _isDeletingAccount ? null : widget.onLogout,
