@@ -15,7 +15,7 @@
   "dependencies": {
     "@craftzdog/react-native-buffer": "^6.1.0",
     "@expo/vector-icons": "^15.0.2",
-    "@getpara/react-native-wallet": "2.0.0",
+    "@getpara/react-native-wallet": "2.1.0",
     "@getpara/viem-v2-integration": "2.0.0",
     "@peculiar/webcrypto": "^1.5.0",
     "@react-native-async-storage/async-storage": "^2.2.0",
