@@ -148,7 +148,6 @@ Package.resolved
 
 # CocoaPods
 Pods/
-*.xcworkspace
 
 # Carthage
 Carthage/Build/
