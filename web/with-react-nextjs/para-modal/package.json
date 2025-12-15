@@ -6,7 +6,6 @@
   "scripts": {
     "build": "next build",
     "dev": "next dev",
-    "postinstall": "npx setup-para",
     "lint": "eslint .",
     "start": "next start",
     "typecheck": "tsc --noEmit"
@@ -20,6 +19,9 @@
     "@cosmjs/proto-signing": "0.37.0",
     "@cosmjs/stargate": "0.37.0",
     "@cosmjs/tendermint-rpc": "0.37.0",
+    "@farcaster/mini-app-solana": "1.1.1",
+    "@farcaster/miniapp-sdk": "0.2.1",
+    "@farcaster/miniapp-wagmi-connector": "1.1.0",
     "@gemini-wallet/core": "^0.3.2",
     "@getpara/react-sdk": "2.1.0",
     "@metamask/sdk": "^0.34.0",
