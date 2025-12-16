@@ -5,18 +5,8 @@ import { useViemAccount } from "@getpara/react-sdk/evm";
 import { createModularAccountV2Client } from "@account-kit/smart-contracts";
 import { alchemy, sepolia } from "@account-kit/infra";
 import { WalletClientSigner } from "@aa-sdk/core";
-import { createWalletClient, http, parseSignature, serializeSignature, type Hash, type Hex } from "viem";
+import { createWalletClient, http, type Hash } from "viem";
 import { ALCHEMY_API_KEY, GAS_POLICY_ID, CHAIN } from "@/lib/alchemy";
-
-// Normalize signature to ensure proper v byte recovery for on-chain verification
-function normalizeSignature(signature: Hex): Hex {
-  const parsed = parseSignature(signature);
-  return serializeSignature({
-    r: parsed.r,
-    s: parsed.s,
-    yParity: parsed.yParity,
-  });
-}
 
 export interface SmartAccountState {
   smartAccountAddress: string | null;
@@ -46,13 +36,6 @@ export function useAlchemySmartAccount() {
       setState((prev) => ({ ...prev, isInitializing: true, error: null }));
 
       try {
-        // Override signMessage to normalize signature for on-chain verification
-        const originalSignMessage = viemAccount.signMessage.bind(viemAccount);
-        viemAccount.signMessage = async (args) => {
-          const signature = await originalSignMessage(args);
-          return normalizeSignature(signature);
-        };
-
         // Create wallet client from Para's viem account
         const walletClient = createWalletClient({
           account: viemAccount,
@@ -99,14 +82,7 @@ export function useAlchemySmartAccount() {
     setTxHash(null);
 
     try {
-      // Override signMessage to normalize signature for on-chain verification
-      const originalSignMessage = viemAccount.signMessage.bind(viemAccount);
-      viemAccount.signMessage = async (args) => {
-        const signature = await originalSignMessage(args);
-        return normalizeSignature(signature);
-      };
-
-      // Create fresh client for transaction
+      // Create wallet client from Para's viem account
       const walletClient = createWalletClient({
         account: viemAccount,
         chain: CHAIN,

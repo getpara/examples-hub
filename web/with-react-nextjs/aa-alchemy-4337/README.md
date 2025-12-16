@@ -6,7 +6,6 @@ A minimal Next.js example demonstrating Para SDK integration with Alchemy Accoun
 
 - Setting up `ParaProvider` for Para SDK authentication
 - Using `useViemAccount` hook from `@getpara/react-sdk/evm` for the Viem signer
-- Normalizing signatures for on-chain verification compatibility
 - Creating Alchemy modular smart accounts with Para as the signer
 - Sending gas-sponsored UserOperations via Alchemy's paymaster
 
@@ -61,29 +60,12 @@ import { useViemAccount } from "@getpara/react-sdk/evm";
 import { createModularAccountV2Client } from "@account-kit/smart-contracts";
 import { alchemy, sepolia } from "@account-kit/infra";
 import { WalletClientSigner } from "@aa-sdk/core";
-import { createWalletClient, http, parseSignature, serializeSignature } from "viem";
+import { createWalletClient, http } from "viem";
 
-// Normalize signature for proper on-chain ecrecover verification
-function normalizeSignature(signature) {
-  const parsed = parseSignature(signature);
-  return serializeSignature({
-    r: parsed.r,
-    s: parsed.s,
-    yParity: parsed.yParity,
-  });
-}
-
-// Get Viem account from Para SDK
+// Get Viem account from Para SDK (handles signing internally)
 const { viemAccount } = useViemAccount();
 
-// Override signMessage to normalize signatures
-const originalSignMessage = viemAccount.signMessage.bind(viemAccount);
-viemAccount.signMessage = async (args) => {
-  const signature = await originalSignMessage(args);
-  return normalizeSignature(signature);
-};
-
-// Create wallet client and wrap as signer
+// Create wallet client and wrap as signer for Alchemy SDK
 const walletClient = createWalletClient({
   account: viemAccount,
   chain: sepolia,

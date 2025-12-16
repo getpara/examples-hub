@@ -1497,14 +1497,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@getpara/viem-v2-integration@npm:2.1.0":
-  version: 2.1.0
-  resolution: "@getpara/viem-v2-integration@npm:2.1.0"
+"@getpara/viem-v2-integration@npm:2.2.0-dev.0":
+  version: 2.2.0-dev.0
+  resolution: "@getpara/viem-v2-integration@npm:2.2.0-dev.0"
   dependencies:
     "@getpara/core-sdk": "npm:2.1.0"
   peerDependencies:
     viem: 2.x
-  checksum: 10/f3bd405a954b4b6adef8be3f5a150dcaccdd9239e7a52c3da2de6af3fa8a6a1f73928b01bf8e9b8bf0444c0da382ca0696f11562b46bdfe7a829a017ce5d711d
+  checksum: 10/ff4073fab0fe4577d1ac1f34fa6f5baf46ad2b2d117b1d4b30428eb7f6bb57b153027b8bc0655685075edccb7bfa5b2e1a12ca244b6fec6d18f05ec4fd4b29da
   languageName: node
   linkType: hard
 
