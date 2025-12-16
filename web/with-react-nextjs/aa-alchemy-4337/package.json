@@ -57,8 +57,5 @@
     "tailwindcss": "^4.1.10",
     "typescript": "^5",
     "typescript-eslint": "^8.22.0"
-  },
-  "resolutions": {
-    "@getpara/viem-v2-integration": "2.2.0-dev.0"
   }
 }

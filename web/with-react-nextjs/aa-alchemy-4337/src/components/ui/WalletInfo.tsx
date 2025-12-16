@@ -2,11 +2,11 @@ import { useWallet } from "@getpara/react-sdk";
 
 interface WalletInfoProps {
   smartAccountAddress: string | null;
-  isInitializing: boolean;
+  isLoading: boolean;
   error: Error | null;
 }
 
-export function WalletInfo({ smartAccountAddress, isInitializing, error }: WalletInfoProps) {
+export function WalletInfo({ smartAccountAddress, isLoading, error }: WalletInfoProps) {
   const { data: wallet } = useWallet();
   const eoaAddress = wallet?.address;
 
@@ -25,8 +25,8 @@ export function WalletInfo({ smartAccountAddress, isInitializing, error }: Walle
 
       <div className="px-6 py-3">
         <p className="text-sm text-gray-500">Smart Account (Alchemy Modular Account)</p>
-        {isInitializing ? (
-          <p className="text-lg font-medium text-gray-400">Initializing...</p>
+        {isLoading ? (
+          <p className="text-lg font-medium text-gray-400">Loading...</p>
         ) : error ? (
           <p className="text-sm font-medium text-red-600 break-words">{error.message}</p>
         ) : smartAccountAddress ? (

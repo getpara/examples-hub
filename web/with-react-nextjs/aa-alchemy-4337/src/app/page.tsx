@@ -1,25 +1,24 @@
 "use client";
 
 import { useModal, useAccount } from "@getpara/react-sdk";
-import { useAlchemySmartAccount } from "@/hooks/useAlchemySmartAccount";
+import { useSmartAccountClient } from "@/hooks/useSmartAccountClient";
+import { useSendUserOperation } from "@/hooks/useSendUserOperation";
 import { ConnectCard } from "@/components/ui/ConnectCard";
 import { WalletInfo } from "@/components/ui/WalletInfo";
 import { SendTransaction } from "@/components/ui/SendTransaction";
+
+const BURN_ADDRESS = "0x000000000000000000000000000000000000dEaD";
 
 export default function Home() {
   const { openModal } = useModal();
   const { isConnected } = useAccount();
 
-  const {
-    smartAccountAddress,
-    isInitializing,
-    isReady,
-    error: smartAccountError,
-    sendSponsoredTransaction,
-    isPending,
-    txHash,
-    txError,
-  } = useAlchemySmartAccount();
+  const { client, address, isLoading, error: clientError } = useSmartAccountClient();
+  const { sendUserOperation, isPending, txHash, error: txError } = useSendUserOperation(client);
+
+  const handleSendTransaction = () => {
+    sendUserOperation({ target: BURN_ADDRESS });
+  };
 
   return (
     <div className="container mx-auto px-4 py-12">
@@ -36,16 +35,16 @@ export default function Home() {
       ) : (
         <div className="max-w-xl mx-auto">
           <WalletInfo
-            smartAccountAddress={smartAccountAddress}
-            isInitializing={isInitializing}
-            error={smartAccountError}
+            smartAccountAddress={address}
+            isLoading={isLoading}
+            error={clientError}
           />
           <SendTransaction
-            onSend={sendSponsoredTransaction}
+            onSend={handleSendTransaction}
             isPending={isPending}
             error={txError}
             txHash={txHash}
-            isReady={isReady}
+            isReady={!!client}
           />
         </div>
       )}
