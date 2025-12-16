@@ -1,17 +1,15 @@
-import type React from "react";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "@/styles/globals.css";
-import { Providers } from "@/context/para-providers";
-import Navbar from "@/components/navbar";
-import BackgroundPattern from "@/components/background-pattern";
 import "@getpara/react-sdk/styles.css";
+import { ParaProvider } from "@/components/ParaProvider";
+import { Header } from "@/components/layout/Header";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Alchemy Account Kit Demo - Smart Wallets",
-  description: "Create and manage ERC-4337 smart accounts with Alchemy Account Kit. Experience gasless transactions and modular smart accounts on Sepolia testnet.",
+  title: "Alchemy AA Example",
+  description: "Para SDK with Alchemy Account Abstraction for gas-sponsored transactions",
 };
 
 export default function RootLayout({
@@ -20,17 +18,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      suppressHydrationWarning>
-      <body className={`${inter.className} min-h-screen flex flex-col bg-background text-foreground`}>
-        <Providers>
-          <Navbar />
-          <main className="flex-1 flex flex-col items-center justify-center relative overflow-hidden p-4">
-            <BackgroundPattern />
-            {children}
-          </main>
-        </Providers>
+    <html lang="en">
+      <body className={inter.className}>
+        <ParaProvider>
+          <Header />
+          {children}
+        </ParaProvider>
       </body>
     </html>
   );
