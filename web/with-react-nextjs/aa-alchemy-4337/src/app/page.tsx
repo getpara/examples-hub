@@ -16,10 +16,6 @@ export default function Home() {
   const { client, address, isLoading, error: clientError } = useSmartAccountClient();
   const { sendUserOperation, isPending, txHash, error: txError } = useSendUserOperation(client);
 
-  const handleSendTransaction = () => {
-    sendUserOperation({ target: BURN_ADDRESS });
-  };
-
   return (
     <div className="container mx-auto px-4 py-12">
       <div className="text-center mb-12">
@@ -40,7 +36,7 @@ export default function Home() {
             error={clientError}
           />
           <SendTransaction
-            onSend={handleSendTransaction}
+            onSend={() => sendUserOperation({ target: BURN_ADDRESS })}
             isPending={isPending}
             error={txError}
             txHash={txHash}
