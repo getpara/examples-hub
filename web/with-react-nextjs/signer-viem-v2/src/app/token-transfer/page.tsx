@@ -1,154 +1,94 @@
 "use client";
 
-import { useModal } from "@getpara/react-sdk";
-import { useParaSigner } from "@/hooks/useParaSigner";
-import { useState, useEffect } from "react";
-import { PARA_TEST_TOKEN_CONTRACT_ADDRESS } from "@/config/contracts";
+import { useState, useEffect, useCallback } from "react";
+import { useModal, useAccount } from "@getpara/react-sdk";
 import { formatEther, getContract, parseEther } from "viem";
-
-const ERC20_ABI = [
-  "function transfer(address to, uint256 amount) returns (bool)",
-  "function balanceOf(address account) view returns (uint256)",
-  "function decimals() view returns (uint8)",
-  "function symbol() view returns (string)",
-];
+import { useWriteContract } from "@/hooks/useWriteContract";
+import { useBalance } from "@/hooks/useBalance";
+import { publicClient } from "@/lib/viem";
+import { PARA_TEST_TOKEN_ADDRESS, ERC20_ABI } from "@/lib/contracts";
+import { StatusMessage } from "@/components/ui/StatusMessage";
+import { TransactionResult } from "@/components/ui/TransactionResult";
 
 export default function TokenTransferPage() {
   const [to, setTo] = useState("");
   const [amount, setAmount] = useState("");
-  const [contractAddress, setContractAddress] = useState<string>(PARA_TEST_TOKEN_CONTRACT_ADDRESS);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isBalanceLoading, setIsBalanceLoading] = useState(false);
-  const [ethBalance, setEthBalance] = useState<string | null>(null);
+  const [contractAddress, setContractAddress] = useState<string>(PARA_TEST_TOKEN_ADDRESS);
+  const [isTokenLoading, setIsTokenLoading] = useState(false);
   const [tokenBalance, setTokenBalance] = useState<string | null>(null);
   const [tokenSymbol, setTokenSymbol] = useState<string>("CTT");
-  const [txHash, setTxHash] = useState("");
-  const [status, setStatus] = useState<{
-    show: boolean;
-    type: "success" | "error" | "info";
-    message: string;
-  }>({ show: false, type: "success", message: "" });
+  const [status, setStatus] = useState<{ show: boolean; type: "success" | "error" | "info"; message: string }>({
+    show: false,
+    type: "success",
+    message: "",
+  });
 
-  const { isConnected, address, walletClient, publicClient, walletId } = useParaSigner();
+  const { isConnected, embedded } = useAccount();
+  const address = embedded?.wallets?.[0]?.address as `0x${string}` | undefined;
+  const { writeContract, isPending, txHash, error } = useWriteContract();
+  const { balance: ethBalance, isLoading: isEthLoading, refetch: refetchEthBalance } = useBalance();
   const { openModal } = useModal();
 
-  const fetchBalances = async () => {
-    if (!address || !publicClient) return;
+  const fetchTokenData = useCallback(async () => {
+    if (!address || !contractAddress) return;
 
-    setIsBalanceLoading(true);
+    setIsTokenLoading(true);
     try {
-      // Fetch ETH balance
-      const ethBalanceWei = await publicClient.getBalance({
-        address: address,
-      });
-      setEthBalance(formatEther(ethBalanceWei));
-
-      // Fetch token balance
-      const tokenContract = getContract({
+      const contract = getContract({
         address: contractAddress as `0x${string}`,
         abi: ERC20_ABI,
         client: publicClient,
       });
 
-      const balance = await tokenContract.read.balanceOf([address]);
-      const symbol = await tokenContract.read.symbol();
+      const balance = await contract.read.balanceOf([address]);
+      const symbol = await contract.read.symbol();
 
       setTokenSymbol(symbol as string);
       setTokenBalance(formatEther(balance as bigint));
-    } catch (error) {
-      console.error("Error fetching balances:", error);
-      setEthBalance(null);
+    } catch (err) {
+      console.error("Error fetching token data:", err);
       setTokenBalance(null);
     } finally {
-      setIsBalanceLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (address && contractAddress) {
-      fetchBalances();
+      setIsTokenLoading(false);
     }
   }, [address, contractAddress]);
 
+  useEffect(() => {
+    if (address && contractAddress) {
+      fetchTokenData();
+    }
+  }, [address, contractAddress, fetchTokenData]);
+
+  const handleRefresh = () => {
+    refetchEthBalance();
+    fetchTokenData();
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     setStatus({ show: false, type: "success", message: "" });
-    setTxHash("");
+
+    if (!/^0x[a-fA-F0-9]{40}$/.test(to)) {
+      setStatus({ show: true, type: "error", message: "Invalid recipient address format." });
+      return;
+    }
 
     try {
-      if (!isConnected) {
-        throw new Error("Please connect your wallet to send tokens.");
-      }
+      setStatus({ show: true, type: "info", message: "Please confirm the transaction in your wallet..." });
 
-      if (!walletId) {
-        throw new Error("No wallet ID found. Please reconnect your wallet.");
-      }
-
-      // Validate address format
-      if (!to.match(/^0x[a-fA-F0-9]{40}$/)) {
-        throw new Error("Invalid recipient address format.");
-      }
-
-      // Validate amount
-      const amountFloat = parseFloat(amount);
-      if (isNaN(amountFloat) || amountFloat <= 0) {
-        throw new Error("Please enter a valid amount greater than 0.");
-      }
-
-      if (!walletClient || !publicClient) {
-        throw new Error("Wallet client not available.");
-      }
-
-      setStatus({
-        show: true,
-        type: "info",
-        message: "Please confirm the transaction in your wallet...",
-      });
-
-      const hash = await walletClient.writeContract({
+      await writeContract({
         address: contractAddress as `0x${string}`,
         abi: ERC20_ABI,
-        functionName: 'transfer',
+        functionName: "transfer",
         args: [to as `0x${string}`, parseEther(amount)],
-        account: address as `0x${string}`,
-        chain: walletClient.chain,
       });
 
-      console.log("Transaction submitted:", hash);
-
-      setTxHash(hash);
-      setStatus({
-        show: true,
-        type: "info",
-        message: "Transaction submitted. Waiting for confirmation...",
-      });
-
-      await publicClient.waitForTransactionReceipt({
-        hash,
-      });
-
-
-      setStatus({
-        show: true,
-        type: "success",
-        message: "Tokens transferred successfully!",
-      });
-
-      // Refresh balances after confirmed transaction
-      await fetchBalances();
-
+      setStatus({ show: true, type: "success", message: "Tokens transferred successfully!" });
       setTo("");
       setAmount("");
-    } catch (error) {
-      console.error("Error transferring tokens:", error);
-      setStatus({
-        show: true,
-        type: "error",
-        message: error instanceof Error ? error.message : "Failed to transfer tokens. Please try again.",
-      });
-    } finally {
-      setIsLoading(false);
+      handleRefresh();
+    } catch {
+      setStatus({ show: true, type: "error", message: error?.message || "Failed to transfer tokens. Please try again." });
     }
   };
 
@@ -160,13 +100,15 @@ export default function TokenTransferPage() {
           <p className="text-gray-600 mb-6">Please connect your wallet to view this demo.</p>
           <button
             onClick={() => openModal()}
-            className="inline-flex items-center justify-center rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-950 transition-colors">
+            className="inline-flex items-center justify-center rounded-none bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-950 transition-colors">
             Connect Wallet
           </button>
         </div>
       </div>
     );
   }
+
+  const isBalanceLoading = isEthLoading || isTokenLoading;
 
   return (
     <div className="container mx-auto px-4">
@@ -175,7 +117,9 @@ export default function TokenTransferPage() {
         <p className="text-xl text-gray-600 max-w-2xl mx-auto">
           Transfer{" "}
           <code className="font-mono text-sm bg-gray-50 text-gray-700 px-2 py-1 rounded-none">ParaTestToken (CTT)</code>{" "}
-          from your connected wallet to any address on the Holesky testnet.
+          using the{" "}
+          <code className="font-mono text-sm bg-gray-50 text-gray-700 px-2 py-1 rounded-none">useWriteContract</code>{" "}
+          hook.
         </p>
       </div>
 
@@ -184,50 +128,35 @@ export default function TokenTransferPage() {
           <div className="flex justify-between items-center px-6 py-3 bg-gray-50 border-b border-gray-200">
             <h3 className="text-sm font-medium text-gray-900">Balances:</h3>
             <button
-              onClick={fetchBalances}
+              onClick={handleRefresh}
               disabled={isBalanceLoading || !address}
               className="p-1 text-gray-500 hover:text-gray-700 transition-colors disabled:opacity-50"
               title="Refresh balances">
-              <span className={`inline-block ${isBalanceLoading ? "animate-spin" : ""}`}>🔄</span>
+              <span className={`inline-block ${isBalanceLoading ? "animate-spin" : ""}`}>&#x1f504;</span>
             </button>
           </div>
           <div className="px-6 py-3 space-y-2">
-            <p className="text-sm text-gray-500 bg-gray-100 p-2 rounded-md">Network: Holesky</p>
+            <p className="text-sm text-gray-500 bg-gray-100 p-2 rounded-md">Network: Sepolia</p>
             <p className="text-sm font-medium text-gray-900">
               <span className="text-gray-600">ETH:</span>{" "}
-              {!address
-                ? "Please connect your wallet"
-                : isBalanceLoading
+              {isEthLoading
                 ? "Loading..."
-                : ethBalance
-                ? `${parseFloat(ethBalance).toFixed(4)} ETH`
-                : "Unable to fetch balance"}
+                : ethBalance !== null
+                  ? `${parseFloat(formatEther(ethBalance)).toFixed(4)} ETH`
+                  : "Unable to fetch balance"}
             </p>
             <p className="text-sm font-medium text-gray-900">
               <span className="text-gray-600">{tokenSymbol}:</span>{" "}
-              {!address
-                ? "Please connect your wallet"
-                : isBalanceLoading
+              {isTokenLoading
                 ? "Loading..."
                 : tokenBalance
-                ? `${parseFloat(tokenBalance).toFixed(4)} ${tokenSymbol}`
-                : "Unable to fetch balance"}
+                  ? `${parseFloat(tokenBalance).toFixed(4)} ${tokenSymbol}`
+                  : "Unable to fetch balance"}
             </p>
           </div>
         </div>
 
-        {status.show && (
-          <div
-            className={`mb-4 rounded-none border ${
-              status.type === "success"
-                ? "bg-green-50 border-green-500 text-green-700"
-                : status.type === "error"
-                ? "bg-red-50 border-red-500 text-red-700"
-                : "bg-gray-50 border-gray-500 text-gray-700"
-            }`}>
-            <p className="px-6 py-4 break-words">{status.message}</p>
-          </div>
-        )}
+        <StatusMessage type={status.type} message={status.message} show={status.show} />
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-3">
@@ -237,7 +166,7 @@ export default function TokenTransferPage() {
               value={contractAddress}
               onChange={(e) => setContractAddress(e.target.value)}
               placeholder="0x..."
-              disabled={isLoading}
+              disabled={isPending}
               className="block w-full px-4 py-3 border border-gray-300 rounded-none focus:border-gray-500 focus:ring-1 focus:ring-gray-500"
             />
           </div>
@@ -249,7 +178,7 @@ export default function TokenTransferPage() {
               value={to}
               onChange={(e) => setTo(e.target.value)}
               placeholder="0x..."
-              disabled={isLoading}
+              disabled={isPending}
               className="block w-full px-4 py-3 border border-gray-300 rounded-none focus:border-gray-500 focus:ring-1 focus:ring-gray-500"
             />
           </div>
@@ -262,38 +191,20 @@ export default function TokenTransferPage() {
               onChange={(e) => setAmount(e.target.value)}
               placeholder="0.0"
               step="0.01"
-              disabled={isLoading}
+              disabled={isPending}
               className="block w-full px-4 py-3 border border-gray-300 rounded-none focus:border-gray-500 focus:ring-1 focus:ring-gray-500"
             />
           </div>
 
           <button
             type="submit"
-            disabled={!isConnected || isLoading || !to || !amount || !contractAddress}
+            disabled={!isConnected || isPending || !to || !amount || !contractAddress}
             className="w-full rounded-none bg-gray-900 px-6 py-3 text-sm font-medium text-white hover:bg-gray-950 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-            {isLoading ? "Sending Transaction..." : "Send Tokens"}
+            {isPending ? "Sending Transaction..." : "Send Tokens"}
           </button>
         </form>
 
-        {txHash && (
-          <div className="mt-8 rounded-none border border-gray-200">
-            <div className="flex justify-between items-center px-6 py-4 bg-gray-50 border-b border-gray-200">
-              <h3 className="text-sm font-medium text-gray-900">Transaction Hash:</h3>
-              <a
-                href={`https://holesky.etherscan.io/tx/${txHash}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-3 py-1 text-sm bg-gray-900 text-white hover:bg-gray-950 transition-colors rounded-none">
-                View on Etherscan
-              </a>
-            </div>
-            <div className="p-6">
-              <p className="text-sm font-mono break-all text-gray-600 bg-white p-4 border border-gray-200">
-                {txHash}
-              </p>
-            </div>
-          </div>
-        )}
+        {txHash && <TransactionResult txHash={txHash} />}
       </div>
     </div>
   );

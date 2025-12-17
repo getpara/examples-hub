@@ -1,91 +1,55 @@
 "use client";
 
-import { useModal } from "@getpara/react-sdk";
-import { useParaSigner } from "@/hooks/useParaSigner";
 import { useState } from "react";
+import { useModal, useAccount } from "@getpara/react-sdk";
 import { verifyMessage } from "viem";
+import { useSignMessage } from "@/hooks/useSignMessage";
+import { StatusMessage } from "@/components/ui/StatusMessage";
 
 export default function MessageSigningPage() {
   const [message, setMessage] = useState("");
-  const [signature, setSignature] = useState("");
-  const [recovered, setRecovered] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [status, setStatus] = useState<{
-    show: boolean;
-    type: "success" | "error";
-    message: string;
-  }>({ show: false, type: "success", message: "" });
+  const [verified, setVerified] = useState(false);
+  const [status, setStatus] = useState<{ show: boolean; type: "success" | "error" | "info"; message: string }>({
+    show: false,
+    type: "success",
+    message: "",
+  });
 
-  const { isConnected, address, walletClient, walletId } = useParaSigner();
+  const { isConnected, embedded } = useAccount();
+  const address = embedded?.wallets?.[0]?.address as `0x${string}` | undefined;
+  const { signMessage, isPending, signature, error } = useSignMessage();
   const { openModal } = useModal();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    setRecovered(false);
-
-    if (!walletClient) return;
+    setVerified(false);
+    setStatus({ show: false, type: "success", message: "" });
 
     try {
-      if (!isConnected) {
-        setStatus({
-          show: true,
-          type: "error",
-          message: "Please connect your wallet to sign a message.",
-        });
-        return;
-      }
-
-      if (!walletId) {
-        setStatus({
-          show: true,
-          type: "error",
-          message: "No wallet ID found. Please reconnect your wallet.",
-        });
-        return;
-      }
-
-      const messageToSign = message.trim();
-
-      const signature = await walletClient.signMessage({ account: address as `0x${string}`, message: messageToSign });
-
-      setSignature(`${signature}`);
-
-      setStatus({
-        show: true,
-        type: "success",
-        message: "Message signed successfully!",
-      });
-    } catch (error) {
-      setStatus({
-        show: true,
-        type: "error",
-        message: "Failed to sign message. Please try again.",
-      });
-      console.error("Error signing message:", error);
-    } finally {
-      setIsLoading(false);
+      await signMessage(message.trim());
+      setStatus({ show: true, type: "success", message: "Message signed successfully!" });
+    } catch {
+      setStatus({ show: true, type: "error", message: error?.message || "Failed to sign message. Please try again." });
     }
   };
 
   const handleVerify = async () => {
-    try {
-      if (!message || !signature) return;
+    if (!message || !signature || !address) return;
 
-      const recovered = await verifyMessage({ address: address as `0x${string}`, message, signature: signature as `0x${string}` });
-      setRecovered(recovered);
+    try {
+      const isValid = await verifyMessage({
+        address,
+        message,
+        signature,
+      });
+      setVerified(isValid);
       setStatus({
         show: true,
-        type: "success",
-        message: "Signature verified successfully!",
+        type: isValid ? "success" : "error",
+        message: isValid ? "Signature verified successfully!" : "Signature verification failed.",
       });
-    } catch (error) {
-      setStatus({
-        show: true,
-        type: "error",
-        message: "Failed to verify signature. Please try again.",
-      });
-      console.error("Error verifying signature:", error);
+    } catch {
+      setStatus({ show: true, type: "error", message: "Failed to verify signature." });
     }
   };
 
@@ -97,7 +61,7 @@ export default function MessageSigningPage() {
           <p className="text-gray-600 mb-6">Please connect your wallet to view this demo.</p>
           <button
             onClick={() => openModal()}
-            className="inline-flex items-center justify-center rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-950 transition-colors">
+            className="inline-flex items-center justify-center rounded-none bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-950 transition-colors">
             Connect Wallet
           </button>
         </div>
@@ -110,24 +74,13 @@ export default function MessageSigningPage() {
       <div className="text-center mb-8">
         <h1 className="text-4xl font-bold tracking-tight mb-6">Sign Message Demo</h1>
         <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-          Sign a message with your connected wallet. This demonstrates a basic message signing interaction with the Para
-          SDK using the{" "}
-          <code className="font-mono text-sm bg-gray-50 text-gray-700 px-2 py-1 rounded-none">para.signMessage()</code>
-          method.
+          Sign a message with your connected wallet using the{" "}
+          <code className="font-mono text-sm bg-gray-50 text-gray-700 px-2 py-1 rounded-none">useSignMessage</code> hook.
         </p>
       </div>
 
       <div className="max-w-xl mx-auto">
-        {status.show && (
-          <div
-            className={`mb-6 px-6 py-4 rounded-none border ${
-              status.type === "success"
-                ? "bg-green-50 border-green-500 text-green-700"
-                : "bg-red-50 border-red-500 text-red-700"
-            }`}>
-            <p>{status.message}</p>
-          </div>
-        )}
+        <StatusMessage type={status.type} message={status.message} show={status.show} />
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-3">
@@ -147,9 +100,9 @@ export default function MessageSigningPage() {
 
           <button
             type="submit"
-            disabled={!isConnected || isLoading || !message}
+            disabled={!isConnected || isPending || !message}
             className="w-full rounded-none bg-gray-900 px-6 py-3 text-sm font-medium text-white hover:bg-gray-950 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-            {isLoading ? "Signing..." : "Sign Message"}
+            {isPending ? "Signing..." : "Sign Message"}
           </button>
         </form>
 
@@ -172,9 +125,9 @@ export default function MessageSigningPage() {
               Verify Signature
             </button>
 
-            {recovered && (
+            {verified && (
               <div className="mt-4 px-6 py-4 bg-green-50 border border-green-500 text-green-700 rounded-none">
-                <p className="text-sm">✓ Signature verified successfully!</p>
+                <p className="text-sm">Signature verified successfully!</p>
               </div>
             )}
           </>

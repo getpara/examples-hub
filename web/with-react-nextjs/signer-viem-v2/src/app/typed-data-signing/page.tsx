@@ -1,11 +1,12 @@
 "use client";
 
-import { useModal } from "@getpara/react-sdk";
-import { useParaSigner } from "@/hooks/useParaSigner";
-import { useState, useEffect } from "react";
-import { PARA_TEST_TOKEN_CONTRACT_ADDRESS } from "@/config/contracts";
-import ParaTestToken from "@/contracts/artifacts/contracts/ParaTestToken.sol/ParaTestToken.json";
+import { useState, useEffect, useCallback } from "react";
+import { useModal, useAccount } from "@getpara/react-sdk";
 import { formatEther, getContract } from "viem";
+import { useSignTypedData } from "@/hooks/useSignTypedData";
+import { publicClient, CHAIN } from "@/lib/viem";
+import { PARA_TEST_TOKEN_ADDRESS, PARA_TEST_TOKEN_ABI } from "@/lib/contracts";
+import { StatusMessage } from "@/components/ui/StatusMessage";
 
 type TokenAttestation = {
   holder: string;
@@ -24,139 +25,107 @@ const ATTESTATION_PURPOSES = [
 
 export default function TypedDataSigningPage() {
   const [purpose, setPurpose] = useState<(typeof ATTESTATION_PURPOSES)[number]>(ATTESTATION_PURPOSES[0]);
-  const [isLoading, setIsLoading] = useState(false);
   const [isBalanceLoading, setIsBalanceLoading] = useState(false);
   const [tokenBalance, setTokenBalance] = useState<string | null>(null);
-  const [signature, setSignature] = useState<string | null>(null);
   const [attestation, setAttestation] = useState<TokenAttestation | null>(null);
-  const [status, setStatus] = useState<{
-    show: boolean;
-    type: "success" | "error" | "info";
-    message: string;
-  }>({ show: false, type: "success", message: "" });
+  const [status, setStatus] = useState<{ show: boolean; type: "success" | "error" | "info"; message: string }>({
+    show: false,
+    type: "success",
+    message: "",
+  });
 
-  const { isConnected, address, publicClient, walletClient } = useParaSigner();
+  const { isConnected, embedded } = useAccount();
+  const address = embedded?.wallets?.[0]?.address as `0x${string}` | undefined;
+  const { signTypedData, isPending, signature, error } = useSignTypedData();
   const { openModal } = useModal();
 
-  const fetchTokenData = async () => {
-    if (!address || !publicClient) return;
+  const fetchTokenData = useCallback(async () => {
+    if (!address) return;
 
     setIsBalanceLoading(true);
     try {
       const contract = getContract({
-        address: PARA_TEST_TOKEN_CONTRACT_ADDRESS,
-        abi: ParaTestToken.abi,
+        address: PARA_TEST_TOKEN_ADDRESS,
+        abi: PARA_TEST_TOKEN_ABI,
         client: publicClient,
       });
 
       const balance = await contract.read.balanceOf([address]);
       setTokenBalance(formatEther(balance as bigint));
-    } catch (error) {
-      console.error("Error fetching token data:", error);
+    } catch (err) {
+      console.error("Error fetching token data:", err);
       setTokenBalance(null);
     } finally {
       setIsBalanceLoading(false);
     }
-  };
+  }, [address]);
 
   useEffect(() => {
     if (address) {
       fetchTokenData();
     }
-  }, [address]);
+  }, [address, fetchTokenData]);
 
-  const signAttestation = async () => {
-    setIsLoading(true);
+  const handleSignAttestation = async () => {
     setStatus({ show: false, type: "success", message: "" });
-    setSignature(null);
     setAttestation(null);
 
+    if (!tokenBalance || !address) {
+      setStatus({ show: true, type: "error", message: "Unable to fetch token balance." });
+      return;
+    }
+
     try {
-      if (!isConnected || !address) {
-        throw new Error("Please connect your wallet.");
-      }
-
-      if (!tokenBalance) {
-        throw new Error("Unable to fetch token balance.");
-      }
-
-      if (!publicClient || !walletClient) {
-        throw new Error("Client not available.");
-      }
-
       const contract = getContract({
-        address: PARA_TEST_TOKEN_CONTRACT_ADDRESS,
-        abi: ParaTestToken.abi,
+        address: PARA_TEST_TOKEN_ADDRESS,
+        abi: PARA_TEST_TOKEN_ABI,
         client: publicClient,
       });
 
-      const name = await contract.read.name();
-      const nonce = await contract.read.nonces([address]);
+      const name = (await contract.read.name()) as string;
+      const nonce = (await contract.read.nonces([address])) as bigint;
+      const timestamp = Math.floor(Date.now() / 1000);
 
       const newAttestation: TokenAttestation = {
         holder: address,
         balance: tokenBalance,
         purpose,
-        timestamp: Math.floor(Date.now() / 1000),
+        timestamp,
         nonce: Number(nonce),
       };
 
-      const domain = {
-        name: name as string,
-        version: "1",
-        chainId: publicClient?.chain?.id || 17000,
-        verifyingContract: PARA_TEST_TOKEN_CONTRACT_ADDRESS,
-      } as const;
+      setStatus({ show: true, type: "info", message: "Please sign the typed data in your wallet..." });
 
-      const types = {
-        TokenAttestation: [
-          { name: "holder", type: "address" },
-          { name: "balance", type: "string" },
-          { name: "purpose", type: "string" },
-          { name: "timestamp", type: "uint256" },
-          { name: "nonce", type: "uint256" },
-        ],
-      } as const;
-
-      setStatus({
-        show: true,
-        type: "info",
-        message: "Please sign the typed data in your wallet...",
-      });
-
-      const messageToSign = {
-        holder: address as `0x${string}`,
-        balance: tokenBalance,
-        purpose: purpose,
-        timestamp: BigInt(Math.floor(Date.now() / 1000)),
-        nonce: nonce as bigint,
-      };
-
-      const sig = await walletClient.signTypedData({
-        account: address as `0x${string}`,
-        domain,
-        types,
+      await signTypedData({
+        domain: {
+          name,
+          version: "1",
+          chainId: CHAIN.id,
+          verifyingContract: PARA_TEST_TOKEN_ADDRESS,
+        },
+        types: {
+          TokenAttestation: [
+            { name: "holder", type: "address" },
+            { name: "balance", type: "string" },
+            { name: "purpose", type: "string" },
+            { name: "timestamp", type: "uint256" },
+            { name: "nonce", type: "uint256" },
+          ],
+        },
         primaryType: "TokenAttestation",
-        message: messageToSign,
+        message: {
+          holder: address,
+          balance: tokenBalance,
+          purpose,
+          timestamp: BigInt(timestamp),
+          nonce,
+        },
       });
 
-      setSignature(sig);
       setAttestation(newAttestation);
-
-      setStatus({
-        show: true,
-        type: "success",
-        message: "Typed data signed successfully!",
-      });
-    } catch (error) {
-      console.error("Error signing typed data:", error);
-      setStatus({
-        show: true,
-        type: "error",
-        message: error instanceof Error ? error.message : "Failed to sign typed data. Please try again.",
-      });
-    } finally {
-      setIsLoading(false);
+      setStatus({ show: true, type: "success", message: "Typed data signed successfully!" });
+    } catch {
+      setStatus({ show: true, type: "error", message: error?.message || "Failed to sign typed data." });
     }
   };
 
@@ -168,7 +137,7 @@ export default function TypedDataSigningPage() {
           <p className="text-gray-600 mb-6">Please connect your wallet to view this demo.</p>
           <button
             onClick={() => openModal()}
-            className="inline-flex items-center justify-center rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-950 transition-colors">
+            className="inline-flex items-center justify-center rounded-none bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-950 transition-colors">
             Connect Wallet
           </button>
         </div>
@@ -181,8 +150,9 @@ export default function TypedDataSigningPage() {
       <div className="text-center mb-8">
         <h1 className="text-4xl font-bold tracking-tight mb-6">Typed Data Signing Demo</h1>
         <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-          Sign structured data using EIP-712. This example creates a token holder attestation with your current CTT
-          balance, which can be used for off-chain verification of token ownership.
+          Sign structured data using EIP-712 with the{" "}
+          <code className="font-mono text-sm bg-gray-50 text-gray-700 px-2 py-1 rounded-none">useSignTypedData</code>{" "}
+          hook.
         </p>
       </div>
 
@@ -195,40 +165,27 @@ export default function TypedDataSigningPage() {
               disabled={isBalanceLoading || !address}
               className="p-1 text-gray-500 hover:text-gray-700 transition-colors disabled:opacity-50"
               title="Refresh balance">
-              <span className={`inline-block ${isBalanceLoading ? "animate-spin" : ""}`}>🔄</span>
+              <span className={`inline-block ${isBalanceLoading ? "animate-spin" : ""}`}>&#x1f504;</span>
             </button>
           </div>
           <div className="px-6 py-3">
-            <p className="text-sm text-gray-500 bg-gray-100 p-2 rounded-md">Network: Holesky</p>
+            <p className="text-sm text-gray-500 bg-gray-100 p-2 rounded-md">Network: Sepolia</p>
             <p className="text-lg font-medium text-gray-900">
-              {!address
-                ? "Please connect your wallet"
-                : isBalanceLoading
+              {isBalanceLoading
                 ? "Loading..."
                 : tokenBalance
-                ? `${parseFloat(tokenBalance).toFixed(4)} CTT`
-                : "Unable to fetch balance"}
+                  ? `${parseFloat(tokenBalance).toFixed(4)} CTT`
+                  : "Unable to fetch balance"}
             </p>
           </div>
         </div>
 
-        {status.show && (
-          <div
-            className={`mb-4 rounded-none border ${
-              status.type === "success"
-                ? "bg-green-50 border-green-500 text-green-700"
-                : status.type === "error"
-                ? "bg-red-50 border-red-500 text-red-700"
-                : "bg-gray-50 border-gray-500 text-gray-700"
-            }`}>
-            <p className="px-6 py-4 break-words">{status.message}</p>
-          </div>
-        )}
+        <StatusMessage type={status.type} message={status.message} show={status.show} />
 
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            signAttestation();
+            handleSignAttestation();
           }}
           className="space-y-6">
           <div className="space-y-3">
@@ -236,7 +193,7 @@ export default function TypedDataSigningPage() {
             <select
               value={purpose}
               onChange={(e) => setPurpose(e.target.value as typeof purpose)}
-              disabled={isLoading}
+              disabled={isPending}
               className="block w-full px-4 py-3 border border-gray-300 bg-white rounded-none focus:border-gray-500 focus:ring-1 focus:ring-gray-500">
               {ATTESTATION_PURPOSES.map((p) => (
                 <option key={p} value={p}>
@@ -251,9 +208,9 @@ export default function TypedDataSigningPage() {
 
           <button
             type="submit"
-            disabled={!isConnected || isLoading || !tokenBalance}
+            disabled={!isConnected || isPending || !tokenBalance}
             className="w-full rounded-none bg-gray-900 px-6 py-3 text-sm font-medium text-white hover:bg-gray-950 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-            {isLoading ? "Signing..." : "Sign Token Attestation"}
+            {isPending ? "Signing..." : "Sign Token Attestation"}
           </button>
         </form>
 
