@@ -2,24 +2,23 @@
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ParaProvider as ParaSDKProvider } from "@getpara/react-sdk";
-import { API_KEY, ENVIRONMENT } from "@/config/constants";
-import { GelatoProvider } from "./GelatoProvider";
+
+const API_KEY = process.env.NEXT_PUBLIC_PARA_API_KEY ?? "";
+
+if (!API_KEY) {
+  throw new Error("API key is not defined. Please set NEXT_PUBLIC_PARA_API_KEY in your environment variables.");
+}
 
 const queryClient = new QueryClient();
 
-export function Providers({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export function ParaProvider({ children }: { children: React.ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       <ParaSDKProvider
         paraClientConfig={{
           apiKey: API_KEY,
-          env: ENVIRONMENT,
         }}
-        config={{ appName: "Para Modal Example" }}
+        config={{ appName: "Gelato AA 7702 Example" }}
         paraModalConfig={{
           disableEmailLogin: false,
           disablePhoneLogin: false,
@@ -41,7 +40,7 @@ export function Providers({
           recoverySecretStepEnabled: true,
           twoFactorAuthEnabled: false,
         }}>
-        <GelatoProvider>{children}</GelatoProvider>
+        {children}
       </ParaSDKProvider>
     </QueryClientProvider>
   );

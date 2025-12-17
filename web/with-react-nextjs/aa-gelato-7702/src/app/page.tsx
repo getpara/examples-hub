@@ -1,28 +1,47 @@
 "use client";
 
-import { useAccount, useModal } from "@getpara/react-sdk";
-import { ConnectWalletCard } from "@/components/ui/ConnectWalletCard";
-import { SponsoredTransaction } from "@/components/SponsoredTransaction";
+import { useModal, useAccount } from "@getpara/react-sdk";
+import { useSmartAccountClient } from "@/hooks/useSmartAccountClient";
+import { useSendUserOperation } from "@/hooks/useSendUserOperation";
+import { ConnectCard } from "@/components/ui/ConnectCard";
+import { WalletInfo } from "@/components/ui/WalletInfo";
+import { SendTransaction } from "@/components/ui/SendTransaction";
+
+const BURN_ADDRESS = "0x000000000000000000000000000000000000dEaD";
 
 export default function Home() {
   const { openModal } = useModal();
   const { isConnected } = useAccount();
 
+  const { client, address, isLoading, error: clientError } = useSmartAccountClient();
+  const { sendUserOperation, isPending, txHash, error: txError } = useSendUserOperation(client);
+
   return (
     <div className="container mx-auto px-4 py-12">
-      <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold tracking-tight mb-4">Gelato EIP-7702 Demo</h1>
+      <div className="text-center mb-12">
+        <h1 className="text-4xl font-bold tracking-tight mb-4">Gelato Account Abstraction (EIP-7702)</h1>
         <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-          Experience gasless transactions with Gelato&apos;s smart account and EIP-7702.
-          Connect your wallet to delegate execution and send sponsored transactions without ETH.
+          Send gas-sponsored transactions using Para wallet with Gelato&apos;s EIP-7702 infrastructure. This example
+          demonstrates Gelato smart accounts with relay gas sponsorship on Sepolia testnet.
         </p>
       </div>
 
       {!isConnected ? (
-        <ConnectWalletCard onConnect={openModal} />
+        <ConnectCard onConnect={openModal} />
       ) : (
         <div className="max-w-xl mx-auto">
-          <SponsoredTransaction />
+          <WalletInfo
+            smartAccountAddress={address}
+            isLoading={isLoading}
+            error={clientError}
+          />
+          <SendTransaction
+            onSend={() => sendUserOperation({ target: BURN_ADDRESS })}
+            isPending={isPending}
+            error={txError}
+            txHash={txHash}
+            isReady={!!client}
+          />
         </div>
       )}
     </div>
