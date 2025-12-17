@@ -3,9 +3,6 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "resolutions": {
-    "@getpara/viem-v2-integration": "2.2.0-dev.0"
-  },
   "scripts": {
     "build": "next build",
     "dev": "next dev",
