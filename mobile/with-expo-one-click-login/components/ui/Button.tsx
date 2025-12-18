@@ -80,6 +80,8 @@ export const Button = forwardRef<View, ButtonProps>(
       <TouchableOpacity
         ref={ref}
         disabled={isDisabled}
+        accessibilityRole="button"
+        accessibilityLabel={title}
         {...touchableProps}
         className={`flex-row items-center justify-center ${sizeStyle.button} ${variantStyle.button} ${isDisabled ? 'opacity-50' : ''} ${className || ''}`}>
         {loading ? (

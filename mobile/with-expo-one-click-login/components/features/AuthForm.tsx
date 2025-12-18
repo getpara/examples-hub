@@ -68,6 +68,7 @@ export function AuthForm({ onSubmit, loading, error }: AuthFormProps) {
 
       {/* Input */}
       <Input
+        testID="authInput"
         placeholder={method === 'email' ? 'Enter your email' : '+1 (555) 000-0000'}
         value={value}
         onChangeText={setValue}
@@ -80,6 +81,7 @@ export function AuthForm({ onSubmit, loading, error }: AuthFormProps) {
 
       {/* Submit Button */}
       <Button
+        testID="continueButton"
         title="Continue"
         onPress={handleSubmit}
         loading={loading}
