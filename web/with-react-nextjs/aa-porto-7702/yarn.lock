@@ -26,9 +26,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@base-org/account@npm:^2.5.0":
-  version: 2.5.1
-  resolution: "@base-org/account@npm:2.5.1"
+"@base-org/account@npm:2.5.0":
+  version: 2.5.0
+  resolution: "@base-org/account@npm:2.5.0"
   dependencies:
     "@coinbase/cdp-sdk": "npm:^1.0.0"
     brotli-wasm: "npm:^3.0.0"
@@ -39,7 +39,7 @@ __metadata:
     preact: "npm:10.24.2"
     viem: "npm:^2.31.7"
     zustand: "npm:5.0.3"
-  checksum: 10/6d0423e22c11092b5a2326a6ea863dd43def89bfc069a019b9bbf4189a05b3fd51d782b4eefaa56735318d2b2b94d99cc7e89b8bb7b743bc3a080344cd172d71
+  checksum: 10/1c30d40c8e90d06551792a9afe9a5014307eefdb818cb5d72055a736300d657fbbeb640339d2913e97280f199a9564eae303cc73826af8db0d40eda3909dfee3
   languageName: node
   linkType: hard
 
@@ -1024,7 +1024,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@gemini-wallet/core@npm:^0.3.2":
+"@gemini-wallet/core@npm:0.3.2":
   version: 0.3.2
   resolution: "@gemini-wallet/core@npm:0.3.2"
   dependencies:
@@ -1888,7 +1888,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@metamask/sdk@npm:^0.34.0":
+"@metamask/sdk@npm:0.34.0":
   version: 0.34.0
   resolution: "@metamask/sdk@npm:0.34.0"
   dependencies:
@@ -2726,7 +2726,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@safe-global/safe-apps-provider@npm:^0.18.6":
+"@safe-global/safe-apps-provider@npm:0.18.6":
   version: 0.18.6
   resolution: "@safe-global/safe-apps-provider@npm:0.18.6"
   dependencies:
@@ -2736,7 +2736,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@safe-global/safe-apps-sdk@npm:^9.1.0":
+"@safe-global/safe-apps-sdk@npm:9.1.0, @safe-global/safe-apps-sdk@npm:^9.1.0":
   version: 9.1.0
   resolution: "@safe-global/safe-apps-sdk@npm:9.1.0"
   dependencies:
@@ -5278,7 +5278,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "aa-porto-7702@workspace:."
   dependencies:
-    "@base-org/account": "npm:^2.5.0"
+    "@base-org/account": "npm:2.5.0"
     "@cosmjs/amino": "npm:0.37.0"
     "@cosmjs/cosmwasm-stargate": "npm:0.37.0"
     "@cosmjs/encoding": "npm:0.37.0"
@@ -5290,11 +5290,11 @@ __metadata:
     "@farcaster/mini-app-solana": "npm:1.1.1"
     "@farcaster/miniapp-sdk": "npm:0.2.1"
     "@farcaster/miniapp-wagmi-connector": "npm:1.1.0"
-    "@gemini-wallet/core": "npm:^0.3.2"
+    "@gemini-wallet/core": "npm:0.3.2"
     "@getpara/react-sdk": "npm:2.1.0"
-    "@metamask/sdk": "npm:^0.34.0"
-    "@safe-global/safe-apps-provider": "npm:^0.18.6"
-    "@safe-global/safe-apps-sdk": "npm:^9.1.0"
+    "@metamask/sdk": "npm:0.34.0"
+    "@safe-global/safe-apps-provider": "npm:0.18.6"
+    "@safe-global/safe-apps-sdk": "npm:9.1.0"
     "@solana-mobile/wallet-adapter-mobile": "npm:2.2.5"
     "@solana/wallet-adapter-base": "npm:0.9.27"
     "@solana/wallet-adapter-react": "npm:0.15.39"
@@ -5310,7 +5310,7 @@ __metadata:
     lucide-react: "npm:^0.517.0"
     next: "npm:15.1.5"
     pino-pretty: "npm:13.0.0"
-    porto: "npm:^0.2.37"
+    porto: "npm:0.2.37"
     postcss: "npm:^8"
     react: "npm:^19.0.0"
     react-dom: "npm:^19.0.0"
@@ -9363,7 +9363,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"porto@npm:^0.2.37":
+"porto@npm:0.2.37":
   version: 0.2.37
   resolution: "porto@npm:0.2.37"
   dependencies:

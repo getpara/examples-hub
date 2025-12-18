@@ -26,7 +26,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@base-org/account@npm:^2.5.0":
+"@base-org/account@npm:2.5.0":
   version: 2.5.0
   resolution: "@base-org/account@npm:2.5.0"
   dependencies:
@@ -1033,24 +1033,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@gelatonetwork/smartwallet@npm:^0.0.21":
-  version: 0.0.21
-  resolution: "@gelatonetwork/smartwallet@npm:0.0.21"
+"@gelatonetwork/smartwallet@npm:0.0.28":
+  version: 0.0.28
+  resolution: "@gelatonetwork/smartwallet@npm:0.0.28"
   dependencies:
     isomorphic-ws: "npm:5.0.0"
-    viem: "npm:~2.29"
-    ws: "npm:8.18.2"
+    ws: "npm:8.18.3"
   peerDependencies:
-    typescript: ^5.3
-    viem: ~2.29
+    typescript: ^5.9.2
+    viem: ~2.36.0
   peerDependenciesMeta:
     typescript:
       optional: true
-  checksum: 10/1f06fa2596506264a2f584b5ff39829cf3c66ec65b58791caa21fe5407221e6e09c7625e61c88aacdb926337b7fc0866f3dcbf8a4dc27d8603e2bfbcc03c2615
+  checksum: 10/2dc061f70d11c93a5cdfbee5b28d279b05ae121a55d0d049e307acadbb3663898c48fc711bf8937d845a6d1e9b75c7e52adac0d270232aac8a8a582637ea743c
   languageName: node
   linkType: hard
 
-"@gemini-wallet/core@npm:^0.3.2":
+"@gemini-wallet/core@npm:0.3.2":
   version: 0.3.2
   resolution: "@gemini-wallet/core@npm:0.3.2"
   dependencies:
@@ -1294,14 +1293,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@getpara/viem-v2-integration@npm:2.2.0-dev.0":
-  version: 2.2.0-dev.0
-  resolution: "@getpara/viem-v2-integration@npm:2.2.0-dev.0"
+"@getpara/viem-v2-integration@npm:2.1.0":
+  version: 2.1.0
+  resolution: "@getpara/viem-v2-integration@npm:2.1.0"
   dependencies:
     "@getpara/core-sdk": "npm:2.1.0"
   peerDependencies:
     viem: 2.x
-  checksum: 10/ff4073fab0fe4577d1ac1f34fa6f5baf46ad2b2d117b1d4b30428eb7f6bb57b153027b8bc0655685075edccb7bfa5b2e1a12ca244b6fec6d18f05ec4fd4b29da
+  checksum: 10/f3bd405a954b4b6adef8be3f5a150dcaccdd9239e7a52c3da2de6af3fa8a6a1f73928b01bf8e9b8bf0444c0da382ca0696f11562b46bdfe7a829a017ce5d711d
   languageName: node
   linkType: hard
 
@@ -1912,7 +1911,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@metamask/sdk@npm:^0.34.0":
+"@metamask/sdk@npm:0.34.0":
   version: 0.34.0
   resolution: "@metamask/sdk@npm:0.34.0"
   dependencies:
@@ -2232,15 +2231,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@noble/curves@npm:1.8.2, @noble/curves@npm:~1.8.1":
-  version: 1.8.2
-  resolution: "@noble/curves@npm:1.8.2"
-  dependencies:
-    "@noble/hashes": "npm:1.7.2"
-  checksum: 10/540e7b7a8fe92ecd5cef846f84d07180662eb7fd7d8e9172b8960c31827e74f148fe4630da962138a6be093ae9f8992d14ab23d3682a2cc32be839aa57c03a46
-  languageName: node
-  linkType: hard
-
 "@noble/curves@npm:1.9.1":
   version: 1.9.1
   resolution: "@noble/curves@npm:1.9.1"
@@ -2256,6 +2246,15 @@ __metadata:
   dependencies:
     "@noble/hashes": "npm:1.8.0"
   checksum: 10/3cfe2735ea94972988ca9e217e0ebb2044372a7160b2079bf885da789492a6291fc8bf76ca3d8bf8dee477847ee2d6fac267d1e6c4f555054059f5e8c4865d44
+  languageName: node
+  linkType: hard
+
+"@noble/curves@npm:~1.8.1":
+  version: 1.8.2
+  resolution: "@noble/curves@npm:1.8.2"
+  dependencies:
+    "@noble/hashes": "npm:1.7.2"
+  checksum: 10/540e7b7a8fe92ecd5cef846f84d07180662eb7fd7d8e9172b8960c31827e74f148fe4630da962138a6be093ae9f8992d14ab23d3682a2cc32be839aa57c03a46
   languageName: node
   linkType: hard
 
@@ -2757,7 +2756,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@safe-global/safe-apps-provider@npm:^0.18.6":
+"@safe-global/safe-apps-provider@npm:0.18.6":
   version: 0.18.6
   resolution: "@safe-global/safe-apps-provider@npm:0.18.6"
   dependencies:
@@ -2767,7 +2766,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@safe-global/safe-apps-sdk@npm:^9.1.0":
+"@safe-global/safe-apps-sdk@npm:9.1.0, @safe-global/safe-apps-sdk@npm:^9.1.0":
   version: 9.1.0
   resolution: "@safe-global/safe-apps-sdk@npm:9.1.0"
   dependencies:
@@ -5371,7 +5370,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "aa-gelato-4337@workspace:."
   dependencies:
-    "@base-org/account": "npm:^2.5.0"
+    "@base-org/account": "npm:2.5.0"
     "@cosmjs/amino": "npm:0.37.0"
     "@cosmjs/cosmwasm-stargate": "npm:0.37.0"
     "@cosmjs/encoding": "npm:0.37.0"
@@ -5383,12 +5382,12 @@ __metadata:
     "@farcaster/mini-app-solana": "npm:1.1.1"
     "@farcaster/miniapp-sdk": "npm:0.2.1"
     "@farcaster/miniapp-wagmi-connector": "npm:1.1.0"
-    "@gelatonetwork/smartwallet": "npm:^0.0.21"
-    "@gemini-wallet/core": "npm:^0.3.2"
+    "@gelatonetwork/smartwallet": "npm:0.0.28"
+    "@gemini-wallet/core": "npm:0.3.2"
     "@getpara/react-sdk": "npm:2.1.0"
-    "@metamask/sdk": "npm:^0.34.0"
-    "@safe-global/safe-apps-provider": "npm:^0.18.6"
-    "@safe-global/safe-apps-sdk": "npm:^9.1.0"
+    "@metamask/sdk": "npm:0.34.0"
+    "@safe-global/safe-apps-provider": "npm:0.18.6"
+    "@safe-global/safe-apps-sdk": "npm:9.1.0"
     "@solana-mobile/wallet-adapter-mobile": "npm:2.2.5"
     "@solana/wallet-adapter-base": "npm:0.9.27"
     "@solana/wallet-adapter-react": "npm:0.15.39"
@@ -11242,27 +11241,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"viem@npm:~2.29":
-  version: 2.29.4
-  resolution: "viem@npm:2.29.4"
-  dependencies:
-    "@noble/curves": "npm:1.8.2"
-    "@noble/hashes": "npm:1.7.2"
-    "@scure/bip32": "npm:1.6.2"
-    "@scure/bip39": "npm:1.5.4"
-    abitype: "npm:1.0.8"
-    isows: "npm:1.0.7"
-    ox: "npm:0.6.9"
-    ws: "npm:8.18.1"
-  peerDependencies:
-    typescript: ">=5.0.4"
-  peerDependenciesMeta:
-    typescript:
-      optional: true
-  checksum: 10/0a4b07e008c329e86c1b7d3343ca19e13b179a8be913f2a0f2686e9993f71e256c4db4a8032b47f147431e757c2f359a336abd6c25c9fb00376938b68228fbd2
-  languageName: node
-  linkType: hard
-
 "wagmi@npm:3.1.0":
   version: 3.1.0
   resolution: "wagmi@npm:3.1.0"
@@ -11478,36 +11456,6 @@ __metadata:
     utf-8-validate:
       optional: true
   checksum: 10/70dfe53f23ff4368d46e4c0b1d4ca734db2c4149c6f68bc62cb16fc21f753c47b35fcc6e582f3bdfba0eaeb1c488cddab3c2255755a5c3eecb251431e42b3ff6
-  languageName: node
-  linkType: hard
-
-"ws@npm:8.18.1":
-  version: 8.18.1
-  resolution: "ws@npm:8.18.1"
-  peerDependencies:
-    bufferutil: ^4.0.1
-    utf-8-validate: ">=5.0.2"
-  peerDependenciesMeta:
-    bufferutil:
-      optional: true
-    utf-8-validate:
-      optional: true
-  checksum: 10/3f38e9594f2af5b6324138e86b74df7d77bbb8e310bf8188679dd80bac0d1f47e51536a1923ac3365f31f3d8b25ea0b03e4ade466aa8292a86cd5defca64b19b
-  languageName: node
-  linkType: hard
-
-"ws@npm:8.18.2":
-  version: 8.18.2
-  resolution: "ws@npm:8.18.2"
-  peerDependencies:
-    bufferutil: ^4.0.1
-    utf-8-validate: ">=5.0.2"
-  peerDependenciesMeta:
-    bufferutil:
-      optional: true
-    utf-8-validate:
-      optional: true
-  checksum: 10/018e04ec95561d88248d53a2eaf094b4ae131e9b062f2679e6e8a62f04649bc543448f1e038125225ac6bbb25f54c1e65d7a2cc9dbc1e28b43e5e6b7162ad88e
   languageName: node
   linkType: hard
 
