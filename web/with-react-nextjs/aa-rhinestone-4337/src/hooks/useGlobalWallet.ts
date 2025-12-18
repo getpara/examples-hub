@@ -3,8 +3,9 @@
 import { useState, useEffect, useCallback } from "react";
 import { useWallet, useClient } from "@getpara/react-sdk";
 import { useViemAccount } from "@getpara/react-sdk/evm/hooks";
-import { RhinestoneSDK, wrapParaAccount } from "@rhinestone/sdk";
+import { RhinestoneSDK } from "@rhinestone/sdk";
 import { formatUnits, type Account } from "viem";
+import { getChainName } from "@/lib/rhinestone";
 
 export interface TokenBalance {
   symbol: string;
@@ -47,18 +48,6 @@ export function useGlobalWallet() {
     isLoading: false,
     error: null,
   });
-
-  const getChainName = (chainId: number): string => {
-    const chainNames: { [key: number]: string } = {
-      1: "Ethereum",
-      42161: "Arbitrum",
-      8453: "Base",
-      137: "Polygon",
-      10: "Optimism",
-      1868: "Autonomys",
-    };
-    return chainNames[chainId] || `Chain ${chainId}`;
-  };
 
   const fetchPortfolio = useCallback(
     async (account?: any) => {
@@ -200,19 +189,15 @@ export function useGlobalWallet() {
         endpointUrl: `${baseUrl}/api/orchestrator`,
       });
 
-      const walletId = wallet?.id;
-      const wrappedAccount = wrapParaAccount(viemAccount, walletId);
-
-      console.log("Creating Rhinestone account with wrapped Para signer...", {
-        walletId,
+      console.log("Creating Rhinestone account with Para signer...", {
         accountAddress: viemAccount?.address,
       });
 
-      // Use the wrapped account for Rhinestone SDK
+      // Use viemAccount directly - Para SDK handles v-byte normalization
       const rhinestoneAccount = await rhinestone.createAccount({
         owners: {
           type: "ecdsa" as const,
-          accounts: [wrappedAccount as Account],
+          accounts: [viemAccount as Account],
         },
       });
 

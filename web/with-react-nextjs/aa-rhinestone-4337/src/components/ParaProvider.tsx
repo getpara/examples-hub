@@ -1,26 +1,31 @@
 "use client";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ParaProvider } from "@getpara/react-sdk";
+import {
+  Environment,
+  ParaProvider as ParaSDKProvider,
+} from "@getpara/react-sdk";
 import "@getpara/react-sdk/styles.css";
-import React, { type ReactNode } from "react";
 
-// Set up queryClient
+const API_KEY = process.env.NEXT_PUBLIC_PARA_API_KEY ?? "";
+const ENVIRONMENT =
+  (process.env.NEXT_PUBLIC_PARA_ENVIRONMENT as Environment) || Environment.BETA;
+
+if (!API_KEY) {
+  throw new Error(
+    "NEXT_PUBLIC_PARA_API_KEY is not defined. Please set it in your .env file."
+  );
+}
+
 const queryClient = new QueryClient();
 
-function ContextProvider({
-  children,
-  cookies,
-}: {
-  children: ReactNode;
-  cookies: string | null;
-}) {
+export function ParaProvider({ children }: { children: React.ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
-      <ParaProvider
+      <ParaSDKProvider
         paraClientConfig={{
-          apiKey: process.env.NEXT_PUBLIC_PARA_API_KEY as string,
-          env: "BETA" as any,
+          apiKey: API_KEY,
+          env: ENVIRONMENT,
         }}
         config={{
           appName: "Global Wallet Demo",
@@ -47,9 +52,7 @@ function ContextProvider({
         }}
       >
         {children}
-      </ParaProvider>
+      </ParaSDKProvider>
     </QueryClientProvider>
   );
 }
-
-export default ContextProvider;
