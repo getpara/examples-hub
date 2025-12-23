@@ -33,7 +33,7 @@ export function useSendUserOperation(
 
   const sendUserOperation = useCallback(
     async (calls: UserOperationCall | UserOperationCall[]): Promise<Hash> => {
-      if (!client) {
+      if (!client || !client.account) {
         throw new Error("Smart account client not initialized");
       }
 

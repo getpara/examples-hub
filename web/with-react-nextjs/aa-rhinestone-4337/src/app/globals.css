@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@import "tw-animate-css";
 
 /* Ensure Para modal is visible with high z-index */
 [data-para-modal],

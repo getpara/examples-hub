@@ -45,8 +45,9 @@ export function useSmartAccountClient(): UseSmartAccountClientResult {
           transport: http(),
         });
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const paraWallet = viemAdapter.walletClient.fromViem({
-          walletClient,
+          walletClient: walletClient as any,
         });
 
         const wallet = smartWallet({
