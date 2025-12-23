@@ -4,9 +4,8 @@ import { createModularAccountV2Client } from "@account-kit/smart-contracts";
 import { BatchUserOperationCallData, WalletClientSigner } from "@aa-sdk/core";
 import { Para as ParaServer, Environment } from "@getpara/server-sdk";
 import { createParaAccount, createParaViemClient } from "@getpara/viem-v2-integration";
+import { encodeFunctionData, http } from "viem";
 import Example from "../contracts/Example.json" with { type: "json" };
-import { encodeFunctionData, http, LocalAccount, WalletClient } from "viem";
-import { customSignAuthorization, customSignMessage } from "../utils/signature-utils.ts";
 
 const EXAMPLE_CONTRACT_ADDRESS = "0x7920b6d8b07f0b9a3b96f238c64e022278db1419";
 const EXAMPLE_ABI = Example["contracts"]["contracts/Example.sol:Example"]["abi"];
@@ -45,15 +44,10 @@ export const signWithAlchemyEIP7702: Handler = async (req: Request): Promise<Res
 
     await para.importSession(session);
 
-    const viemParaAccount: LocalAccount = createParaAccount(para);
-
-    viemParaAccount.signMessage = ({ message }) => customSignMessage(para, message);
-    viemParaAccount.signAuthorization = (authorization) => {
-      return customSignAuthorization(para, authorization);
-    };
+    const viemParaAccount = createParaAccount(para);
 
     // @ts-ignore - Deno npm module duplication issue with viem types
-    const viemClient: WalletClient = createParaViemClient(para, {
+    const viemClient = createParaViemClient(para, {
       account: viemParaAccount,
       chain: arbitrumSepolia,
       transport: http(ALCHEMY_RPC_URL),
