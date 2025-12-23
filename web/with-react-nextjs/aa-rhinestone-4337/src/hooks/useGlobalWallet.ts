@@ -158,13 +158,6 @@ export function useGlobalWallet() {
   );
 
   const initializeRhinestoneAccount = useCallback(async () => {
-    console.log("Attempting to initialize Rhinestone:", {
-      hasAddress: !!address,
-      hasViemAccount: !!viemAccount,
-      hasPara: !!para,
-      isConnected,
-    });
-
     if (!address || !viemAccount || !para || !isConnected) {
       setState((prev) => ({
         ...prev,
@@ -189,10 +182,6 @@ export function useGlobalWallet() {
         endpointUrl: `${baseUrl}/api/orchestrator`,
       });
 
-      console.log("Creating Rhinestone account with Para signer...", {
-        accountAddress: viemAccount?.address,
-      });
-
       // Use viemAccount directly - Para SDK handles v-byte normalization
       const rhinestoneAccount = await rhinestone.createAccount({
         owners: {
@@ -202,8 +191,6 @@ export function useGlobalWallet() {
       });
 
       const accountAddress = rhinestoneAccount.getAddress();
-
-      console.log("Rhinestone account created successfully:", accountAddress);
 
       setState((prev) => ({
         ...prev,

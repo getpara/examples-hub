@@ -35,7 +35,6 @@ export function MainContent() {
   // Check if user has available (unlocked) USDC on Arbitrum
   const hasAvailableUSDC =
     arbitrumBalance && parseFloat(arbitrumBalance.formattedUnlockedBalance) > 0;
-  console.log("Arbitrum balance:", arbitrumBalance || "No balance found");
 
   const handleTransfer = async () => {
     if (!accountAddress || !recipient || !amount) {

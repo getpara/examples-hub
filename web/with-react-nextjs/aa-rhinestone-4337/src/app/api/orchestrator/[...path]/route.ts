@@ -31,7 +31,7 @@ const validateDestinationOps = (body: any): boolean => {
   for (const op of destinationOps) {
     const address = op.to?.toLowerCase();
     if (!address || !WHITELISTED_CONTRACTS.has(address)) {
-      console.log(`Blocked non-whitelisted contract: ${address}`);
+      console.warn(`Blocked non-whitelisted contract: ${address}`);
       return false;
     }
   }
