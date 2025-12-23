@@ -10,10 +10,10 @@ export default function App() {
       <div className="w-64 bg-slate-50 border-r border-slate-200 p-6">
         <div className="mb-8">
           <h1 className="text-xl font-bold text-slate-900">
-            Global Wallet Demo
+            Rhinestone Account Abstraction
           </h1>
           <p className="text-sm text-slate-600 mt-2">
-            One address, all chains. Cross-chain transfers made simple.
+            Cross-chain smart accounts with Rhinestone&apos;s EIP-4337 infrastructure. One address, all chains.
           </p>
         </div>
 
