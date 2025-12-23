@@ -9,7 +9,9 @@ import { thirdwebClient, CHAIN } from "@/lib/thirdweb";
 import { sepolia } from "thirdweb/chains";
 
 // Infer the WalletClient type that thirdweb expects from its bundled viem
-type ThirdwebWalletClient = Parameters<typeof viemAdapter.wallet.fromViem>[0]['walletClient'];
+// Note: walletClient.fromViem returns Account directly (with sendTransaction),
+// while wallet.fromViem returns Wallet requiring a separate connect step
+type ThirdwebWalletClient = Parameters<typeof viemAdapter.walletClient.fromViem>[0]["walletClient"];
 
 export interface UseSmartAccountClientResult {
   client: Account | null;
@@ -48,15 +50,10 @@ export function useSmartAccountClient(): UseSmartAccountClientResult {
           transport: http(),
         });
 
-        // Bridge viem version differences - types are structurally identical
-        const paraWallet = viemAdapter.wallet.fromViem({
+        // Convert viem wallet client to thirdweb Account (returns Account directly with sendTransaction)
+        const personalAccount = viemAdapter.walletClient.fromViem({
           walletClient: walletClient as ThirdwebWalletClient,
         });
-
-        const personalAccount = paraWallet.getAccount();
-        if (!personalAccount) {
-          throw new Error("Failed to get account from Para wallet");
-        }
 
         const wallet = smartWallet({
           chain: sepolia,
