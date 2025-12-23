@@ -24,7 +24,7 @@ export function WalletInfo({ smartAccountAddress, isLoading, error }: WalletInfo
       </div>
 
       <div className="px-6 py-3">
-        <p className="text-sm text-gray-500">Smart Account (Gelato EIP-7702)</p>
+        <p className="text-sm text-gray-500">7702-Enabled EOA (Gelato)</p>
         {isLoading ? (
           <p className="text-lg font-medium text-gray-400">Loading...</p>
         ) : error ? (

@@ -19,7 +19,7 @@ export default function Home() {
   return (
     <div className="container mx-auto px-4 py-12">
       <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold tracking-tight mb-4">Gelato Account Abstraction (EIP-7702)</h1>
+        <h1 className="text-4xl font-bold tracking-tight mb-4">Gelato EIP-7702</h1>
         <p className="text-lg text-gray-600 max-w-3xl mx-auto">
           Send gas-sponsored transactions using Para wallet with Gelato&apos;s EIP-7702 infrastructure. This example
           demonstrates Gelato smart accounts with relay gas sponsorship on Sepolia testnet.

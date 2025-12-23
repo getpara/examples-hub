@@ -39,9 +39,9 @@ export function SendTransaction({ onSend, isPending, error, txHash, isReady }: S
         <div className="space-y-4">
           <div className="p-4 bg-gray-50 border border-gray-200 rounded-none">
             <p className="text-sm text-gray-600 mb-1">Transaction type:</p>
-            <p className="text-lg font-mono font-semibold">Gas-Sponsored UserOperation</p>
+            <p className="text-lg font-mono font-semibold">7702 Sponsored Transaction</p>
             <p className="text-sm text-gray-500 mt-2">
-              This sends a zero-value transaction to demonstrate EIP-4337 gas sponsorship via Alchemy&apos;s paymaster.
+              This sends a zero-value transaction to demonstrate EIP-7702 gas sponsorship via Alchemy&apos;s paymaster.
             </p>
           </div>
           <button
