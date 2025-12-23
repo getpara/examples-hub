@@ -8,6 +8,9 @@ import { viemAdapter } from "thirdweb/adapters/viem";
 import { thirdwebClient, CHAIN } from "@/lib/thirdweb";
 import { sepolia } from "thirdweb/chains";
 
+// Infer the WalletClient type that thirdweb expects from its bundled viem
+type ThirdwebWalletClient = Parameters<typeof viemAdapter.wallet.fromViem>[0]['walletClient'];
+
 export interface UseSmartAccountClientResult {
   client: Account | null;
   address: Address | null;
@@ -45,10 +48,15 @@ export function useSmartAccountClient(): UseSmartAccountClientResult {
           transport: http(),
         });
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const paraWallet = viemAdapter.walletClient.fromViem({
-          walletClient: walletClient as any,
+        // Bridge viem version differences - types are structurally identical
+        const paraWallet = viemAdapter.wallet.fromViem({
+          walletClient: walletClient as ThirdwebWalletClient,
         });
+
+        const personalAccount = paraWallet.getAccount();
+        if (!personalAccount) {
+          throw new Error("Failed to get account from Para wallet");
+        }
 
         const wallet = smartWallet({
           chain: sepolia,
@@ -57,7 +65,7 @@ export function useSmartAccountClient(): UseSmartAccountClientResult {
 
         const smartAccount = await wallet.connect({
           client: thirdwebClient,
-          personalAccount: paraWallet,
+          personalAccount,
         });
 
         setClient(smartAccount);
