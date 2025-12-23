@@ -11,7 +11,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@base-org/account": "2.5.0",
+    "@base-org/account": "^2.5.0",
     "@cosmjs/amino": "0.37.0",
     "@cosmjs/cosmwasm-stargate": "0.37.0",
     "@cosmjs/encoding": "0.37.0",

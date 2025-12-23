@@ -1,108 +1,103 @@
-# Global Wallet Demo - Para + Rhinestone
+# Rhinestone Global Wallet Example
 
-This demo showcases how users can deposit tokens on any supported chain and spend them on any other supported chain, all with a single account address. Users can authenticate with Para Wallet and leverage Rhinestone's global wallet functionality for seamless cross-chain transactions.
+A Next.js example demonstrating Para SDK integration with Rhinestone for EIP-4337 cross-chain global wallets. Users can deposit tokens on any supported chain and spend them on any other chain with a single account address.
 
-## 🏗️ Tech Stack
+## What This Example Shows
 
-- **Frontend**: Next.js 15 with TypeScript
-- **Wallet**: Para Wallet SDK
-- **Wallet Management**: Para React SDK with Wagmi integration
-- **Cross-Chain**: Rhinestone SDK
-- **UI Components**: shadcn/ui with Tailwind CSS
-- **Supported Chains**: Ethereum, Arbitrum, Base, Polygon, Optimism
+- Setting up `ParaProvider` for Para SDK authentication
+- Using `useViemAccount` hook from `@getpara/react-sdk/evm` for the Viem signer
+- Creating Rhinestone global wallets with Para as the signer
+- Executing cross-chain transactions with automatic bridging
 
-## 🚀 Quick Start
+## Setup
 
-### Prerequisites
-
-1. **Para API Key**: Get one from [Para Dashboard](https://getpara.com)
-2. **Rhinestone API Key**: Contact Rhinestone team for access
-3. **Node.js**: Version 18 or higher
-
-### Installation
-
-1. Clone the repository:
-
-```bash
-git clone <your-repo-url>
-cd para
-```
-
-2. Install dependencies:
-
-```bash
-pnpm install
-```
-
-3. Set up environment variables:
-
-```bash
-cp env.example .env.local
-```
-
-Edit `.env.local` with your actual values:
+1. Create a `.env` file:
 
 ```env
-# Get your Para API key from https://getpara.com
-NEXT_PUBLIC_PARA_API_KEY=""
-
-# Get your API key from Rhinestone for orchestrator
-RHINESTONE_API_KEY=your_rhinestone_api_key_here
+NEXT_PUBLIC_PARA_API_KEY=your_para_api_key
+NEXT_PUBLIC_PARA_ENVIRONMENT=BETA
+RHINESTONE_API_KEY=your_rhinestone_api_key
 ```
 
-4. Run the development server:
+2. Install dependencies and run:
 
 ```bash
-pnpm run dev
+yarn install
+yarn dev
 ```
 
-5. Open [http://localhost:3000](http://localhost:3000) in your browser.
+## Getting API Keys
 
+- **Para API Key**: Get from [Para Developer Portal](https://developer.getpara.com)
+- **Rhinestone API Key**: Contact Rhinestone team for access
 
-### Authentication Flow
-- Para Wallet SDK provides seamless wallet connection with `usePara()` hook
-- Uses `openParaModal()` to open the wallet connection modal
-- Integrates with standard Wagmi hooks for wallet state management
+## Project Structure
 
-### Wallet Detection
-- Direct Wagmi `useAccount()` hook for wallet state
-- Para provider wraps the application for wallet functionality
+```
+src/
+├── app/
+│   ├── api/orchestrator/[...path]/route.ts  # Rhinestone API proxy
+│   ├── layout.tsx                            # Root layout with ParaProvider
+│   └── page.tsx                              # Main page
+├── components/
+│   ├── ParaProvider.tsx                      # Para SDK provider setup
+│   ├── MainContent.tsx                       # Transaction UI
+│   ├── WalletSidebar.tsx                     # Wallet info sidebar
+│   └── ui/                                   # UI components
+├── hooks/
+│   └── useGlobalWallet.ts                    # Rhinestone account hook
+└── lib/
+    └── rhinestone.ts                         # Rhinestone configuration
+```
 
-## 🎯 How It Works
-
-### The Global Wallet Flow
-
-1. **Authenticate**: Users connect via Para Wallet (supports multiple wallet types)
-2. **Create Account**: Generate a Rhinestone account (works across all chains)
-3. **User Deposits**: User sends tokens to the account on any chain
-4. **Cross-Chain Spending**: Spend those tokens on any other chain
-
-### Example Scenario
+## Key Integration Pattern
 
 ```typescript
-// User deposits 10 USDC to global wallet address on Arbitrum
-// Later, user wants to send 5 USDC to someone on Base
+import { useViemAccount } from "@getpara/react-sdk/evm";
+import { RhinestoneSDK } from "@rhinestone/sdk";
 
-const transaction = await rhinestoneAccount.sendTransaction({
-  sourceChains: [arbitrum], // Look for tokens on Arbitrum
-  targetChain: base, // Execute transaction on Base
-  calls: [
-    /* USDC transfer on Base */
-  ],
-  tokenRequests: [{ address: usdcOnBase, amount: 5000000n }],
+// Get Viem account from Para SDK (handles signing internally)
+const { viemAccount } = useViemAccount();
+
+// Create Rhinestone SDK instance (uses API proxy for auth)
+const rhinestone = new RhinestoneSDK({
+  apiKey: "proxy",
+  endpointUrl: `${window.location.origin}/api/orchestrator`,
 });
 
-// Rhinestone automatically:
-// 1. Uses USDC from Arbitrum
-// 2. Bridges it to Base
-// 3. Executes the transfer
-// All in a single transaction!
+// Create global wallet with Para signer
+const rhinestoneAccount = await rhinestone.createAccount({
+  owners: {
+    type: "ecdsa",
+    accounts: [viemAccount],
+  },
+});
+
+// Get global wallet address (same across all chains)
+const globalAddress = rhinestoneAccount.getAddress();
+
+// Execute cross-chain transaction
+const transaction = await rhinestoneAccount.sendTransaction({
+  sourceChains: [arbitrum],  // Look for tokens on Arbitrum
+  targetChain: base,          // Execute on Base
+  calls: [{ to, data, value }],
+  tokenRequests: [{ address: usdcOnBase, amount: 5000000n }],
+  sponsored: true,
+});
+
+await rhinestoneAccount.waitForExecution(transaction);
 ```
 
-### Resources
+## Supported Chains
+
+- Ethereum
+- Arbitrum
+- Base
+- Polygon
+- Optimism
+
+## Learn More
 
 - [Para Documentation](https://docs.getpara.com)
 - [Rhinestone Documentation](https://docs.rhinestone.dev)
-- [Wagmi Documentation](https://wagmi.sh)
-- [shadcn/ui Documentation](https://ui.shadcn.com)
----
+- [EIP-4337 Specification](https://eips.ethereum.org/EIPS/eip-4337)

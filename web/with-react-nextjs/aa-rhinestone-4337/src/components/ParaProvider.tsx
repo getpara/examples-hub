@@ -1,20 +1,13 @@
 "use client";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import {
-  Environment,
-  ParaProvider as ParaSDKProvider,
-} from "@getpara/react-sdk";
-import "@getpara/react-sdk/styles.css";
+import { Environment, ParaProvider as ParaSDKProvider } from "@getpara/react-sdk";
 
 const API_KEY = process.env.NEXT_PUBLIC_PARA_API_KEY ?? "";
-const ENVIRONMENT =
-  (process.env.NEXT_PUBLIC_PARA_ENVIRONMENT as Environment) || Environment.BETA;
+const ENVIRONMENT = (process.env.NEXT_PUBLIC_PARA_ENVIRONMENT as Environment) || Environment.BETA;
 
 if (!API_KEY) {
-  throw new Error(
-    "NEXT_PUBLIC_PARA_API_KEY is not defined. Please set it in your .env file."
-  );
+  throw new Error("API key is not defined. Please set NEXT_PUBLIC_PARA_API_KEY in your environment variables.");
 }
 
 const queryClient = new QueryClient();
@@ -27,30 +20,28 @@ export function ParaProvider({ children }: { children: React.ReactNode }) {
           apiKey: API_KEY,
           env: ENVIRONMENT,
         }}
-        config={{
-          appName: "Global Wallet Demo",
-        }}
+        config={{ appName: "Rhinestone Global Wallet Example" }}
         paraModalConfig={{
           disableEmailLogin: false,
-          disablePhoneLogin: true,
-          authLayout: ["AUTH:FULL"],
-          oAuthMethods: [],
+          disablePhoneLogin: false,
+          authLayout: ["AUTH:FULL", "EXTERNAL:FULL"],
+          oAuthMethods: ["APPLE", "DISCORD", "FACEBOOK", "FARCASTER", "GOOGLE", "TWITTER"],
           onRampTestMode: true,
           theme: {
-            foregroundColor: "#2D3648",
+            foregroundColor: "#222222",
             backgroundColor: "#FFFFFF",
-            accentColor: "#0066CC",
-            darkForegroundColor: "#E8EBF2",
-            darkBackgroundColor: "#1A1F2B",
-            darkAccentColor: "#4D9FFF",
+            accentColor: "#888888",
+            darkForegroundColor: "#EEEEEE",
+            darkBackgroundColor: "#111111",
+            darkAccentColor: "#AAAAAA",
             mode: "light",
-            borderRadius: "lg",
+            borderRadius: "none",
             font: "Inter",
           },
+          logo: "/para.svg",
           recoverySecretStepEnabled: true,
           twoFactorAuthEnabled: false,
-        }}
-      >
+        }}>
         {children}
       </ParaSDKProvider>
     </QueryClientProvider>
