@@ -1,6 +1,13 @@
 # Custom Email Auth
 
-This example demonstrates how to implement custom email authentication with Para SDK in a Next.js application. It showcases a multi-step authentication flow with OTP verification using Para's web SDK directly, without relying on wallet connector libraries.
+This example demonstrates how to implement custom email authentication with Para SDK in a Next.js application. It shows the minimal setup needed to build your own email auth UI using Para's React SDK hooks directly, without using the built-in ParaModal.
+
+## Features
+
+- Custom email input and verification flow
+- Embedded iframe for seamless OTP verification
+- Automatic polling for login/wallet creation completion
+- Message signing with "Hello World!" example
 
 ## Setup
 
@@ -14,41 +21,47 @@ NEXT_PUBLIC_PARA_API_KEY=your_para_api_key
 
 ### Installation
 
-Install dependencies using your preferred package manager:
-
 ```bash
-# npm
-npm install
-
-# yarn
 yarn install
-
-# pnpm
-pnpm install
+yarn dev
 ```
-
-## Key Dependencies
-
-- `@getpara/web-sdk` (v2.0.0-alpha.26) - Para Web SDK for authentication
-- `@tanstack/react-query` (v5.81.2) - Data fetching and state management
-- `next` (v15.1.5) - React framework
-- `react` (v19.0.0) - React library
-- `react-dom` (v19.0.0) - React DOM library
 
 ## Key Files
 
-- `src/components/AuthModal.tsx` - Multi-step email authentication modal
-- `src/components/EmailInput.tsx` - Email input component
-- `src/components/OTPInput.tsx` - OTP verification component
-- `src/hooks/useParaAuth.ts` - Custom hook for authentication operations
-- `src/hooks/useParaAccount.ts` - Custom hook for account management
-- `src/hooks/useParaWallet.ts` - Custom hook for wallet operations
-- `src/lib/para/client.ts` - Para client initialization
+```
+src/
+├── app/
+│   ├── layout.tsx          # Root layout with ParaProvider
+│   └── page.tsx            # Main page with auth flow
+├── components/
+│   ├── ParaProvider.tsx    # Para SDK provider setup
+│   ├── layout/Header.tsx   # Header with wallet display
+│   └── ui/
+│       ├── EmailAuth.tsx   # Email authentication component
+│       ├── WalletInfo.tsx  # Connected wallet info
+│       └── SignMessage.tsx # Message signing UI
+├── hooks/
+│   └── useSignHelloWorld.ts
+└── lib/
+    └── e2e-helpers.ts
+```
+
+## How It Works
+
+1. **EmailAuth Component** - Uses Para's `useSignUpOrLogIn` hook to initiate email auth
+2. **Verification Popup** - Opens the Para verification URL in a popup window
+3. **Polling** - Uses `useWaitForLogin` and `useWaitForWalletCreation` to detect completion
+4. **Connected State** - Once authenticated, displays wallet info and signing functionality
+
+## Key Hooks Used
+
+- `useSignUpOrLogIn` - Initiates email authentication
+- `useWaitForLogin` - Polls for login completion
+- `useWaitForWalletCreation` - Polls for wallet creation (new users)
+- `useAccount` - Gets connection state
+- `useSignMessage` - Signs messages with the wallet
 
 ## Learn More
 
 - [Para Documentation](https://docs.getpara.com)
-- [Para Website](https://getpara.com)
-- [Para Developer Portal](https://developer.getpara.com)
-- [React Query Documentation](https://tanstack.com/query/latest)
-- [Next.js Documentation](https://nextjs.org/docs)
+- [Para React SDK](https://docs.getpara.com/sdk/react)
