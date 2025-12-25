@@ -2,6 +2,7 @@
 
 import { useAppKitAccount, useAppKitNetwork, useDisconnect } from "@reown/appkit/react";
 import { useBalance } from "wagmi";
+import { formatUnits } from "viem";
 import { formatAddress, formatBalance } from "@/utils/format";
 
 export function WalletDisplay() {
@@ -34,7 +35,7 @@ export function WalletDisplay() {
         <div>
           <label className="text-sm text-gray-600">Balance</label>
           <p className="text-sm mt-1">
-            {balanceData ? formatBalance(balanceData.formatted) : "0"} {balanceData?.symbol}
+            {balanceData ? formatBalance(formatUnits(balanceData.value, balanceData.decimals)) : "0"} {balanceData?.symbol}
           </p>
         </div>
       </div>

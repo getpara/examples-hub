@@ -1,55 +1,62 @@
-# Connector Wagmi
+# Para + Wagmi Example
 
-This example demonstrates how to integrate Para SDK as a Wagmi connector in a Next.js application. It shows how Para can work alongside traditional wallet options like MetaMask and WalletConnect in a custom wallet connection interface.
+A Next.js example demonstrating Para integration with Wagmi for wallet connection and ETH transfers.
+
+## What This Example Shows
+
+- Setting up wagmi providers with Para as a wallet connector
+- Custom wallet connection modal with Para and other wallet options
+- Checking connection state with wagmi's `useAccount`
+- Sending ETH transactions with wagmi's `useSendTransaction`
 
 ## Setup
 
-### Environment Variables
-
-Create a `.env.local` file in the root directory:
+1. Create a `.env` file:
 
 ```env
-NEXT_PUBLIC_PARA_API_KEY=your_para_api_key
-NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID=your_wallet_connect_project_id
+NEXT_PUBLIC_PARA_API_KEY=your_api_key_here
+NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID=your_walletconnect_project_id
+NEXT_PUBLIC_SEPOLIA_RPC_URL=your_sepolia_rpc_url
 ```
 
-### Installation
-
-Install dependencies using your preferred package manager:
+2. Install dependencies and run:
 
 ```bash
-# npm
-npm install
-
-# yarn
 yarn install
-
-# pnpm
-pnpm install
+yarn dev
 ```
 
-## Key Dependencies
+## Project Structure
 
-- `@getpara/react-sdk` (v2.0.0-alpha.26) - Para React SDK for wallet integration
-- `@getpara/wagmi-v2-integration` (v2.0.0-alpha.26) - Para Wagmi v2 connector
-- `@tanstack/react-query` (v5.81.2) - Data fetching and state management
-- `wagmi` (v2.15.6) - React hooks for Ethereum
-- `viem` (v2.31.4) - TypeScript interface for Ethereum
-- `next` (v15.1.5) - React framework
-
-## Key Files
-
-- `src/config/wagmi.ts` - Wagmi configuration with Para connector
-- `src/lib/para/client.ts` - Para client initialization
-- `src/context/WagmiProvider.tsx` - Wagmi context provider
-- `src/components/ConnectWalletModal.tsx` - Custom wallet connection modal
-- `src/components/ui/TransferForm.tsx` - ETH transfer form component
+```
+src/
+├── app/
+│   ├── layout.tsx              # Root layout with providers
+│   └── page.tsx                # Main page with transfer flow
+├── components/
+│   ├── ConnectWalletModal.tsx  # Custom wallet connection modal
+│   ├── layout/
+│   │   ├── AppWrapper.tsx      # Modal context wrapper
+│   │   └── Header.tsx          # Header with connect button
+│   └── ui/
+│       ├── BalanceCard.tsx     # Wallet balance display
+│       ├── ConnectWalletCard.tsx
+│       ├── TransferForm.tsx    # ETH transfer form
+│       └── TransactionHash.tsx # Transaction result display
+├── config/
+│   ├── constants.ts            # Environment config
+│   └── wagmi.ts                # wagmi + Para connector config
+├── context/
+│   ├── ModalContext.tsx        # Modal state management
+│   ├── QueryProvider.tsx       # React Query provider
+│   └── WagmiProvider.tsx       # wagmi provider setup
+└── lib/
+    └── para/client.ts          # Para client initialization
+```
 
 ## Learn More
 
 - [Para Documentation](https://docs.getpara.com)
 - [Para Website](https://getpara.com)
 - [Para Developer Portal](https://developer.getpara.com)
-- [Wagmi Documentation](https://wagmi.sh)
-- [Viem Documentation](https://viem.sh)
-- [Next.js Documentation](https://nextjs.org/docs)
+- [wagmi Documentation](https://wagmi.sh)

@@ -40,3 +40,8 @@ body {
   background: var(--background);
   font-family: "Inter", Arial, Helvetica, sans-serif;
 }
+
+/* Para modal z-index override to appear above other modals */
+#para-modal > cpsl-auth-modal {
+  z-index: 9999999999;
+}

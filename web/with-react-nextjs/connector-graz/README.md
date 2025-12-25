@@ -1,48 +1,54 @@
-# Connector Graz
+# Para + Graz Example
 
-This example demonstrates how to integrate Para SDK as a Graz connector in a Next.js application. It shows how Para can work alongside traditional wallet options like Keplr and Leap in a custom wallet connection interface for Cosmos ecosystem.
+A Next.js example demonstrating Para integration with Graz for Cosmos wallet connection and token transfers.
+
+## What This Example Shows
+
+- Setting up Graz providers with Para as a wallet connector
+- Custom wallet connection modal with Para and other Cosmos wallets
+- Checking connection state with graz's `useAccount`
+- Sending Cosmos token transfers with graz's `useSendTokens`
 
 ## Setup
 
-### Environment Variables
-
-Create a `.env.local` file in the root directory:
+1. Create a `.env` file:
 
 ```env
-NEXT_PUBLIC_PARA_API_KEY=your_para_api_key
+NEXT_PUBLIC_PARA_API_KEY=your_api_key_here
 ```
 
-### Installation
-
-Install dependencies using your preferred package manager:
+2. Install dependencies and run:
 
 ```bash
-# npm
-npm install
-
-# yarn
 yarn install
-
-# pnpm
-pnpm install
+yarn dev
 ```
 
-## Key Dependencies
+## Project Structure
 
-- `@getpara/react-sdk-lite` (v2.0.0-alpha.51) - Para React SDK Lite for wallet integration
-- `@getpara/graz-integration` (v2.0.0-alpha.51) - Para Graz connector
-- `@tanstack/react-query` (v5.85.3) - Data fetching and state management
-- `graz` (v0.3.4-alpha.0) - React hooks for Cosmos ecosystem
-- `@cosmjs/stargate` (v0.36.0) - TypeScript interface for Cosmos
-- `next` (v15.1.5) - React framework
-
-## Key Files
-
-- `src/config/graz.ts` - Graz configuration with Para connector
-- `src/lib/para/client.ts` - Para client initialization
-- `src/context/Providers.tsx` - Graz and QueryClient providers
-- `src/components/ConnectWalletModal.tsx` - Custom wallet connection modal
-- `src/components/ui/TransferForm.tsx` - Token transfer form component
+```
+src/
+├── app/
+│   ├── layout.tsx              # Root layout with providers
+│   └── page.tsx                # Main page with transfer flow
+├── components/
+│   ├── ConnectWalletModal.tsx  # Custom wallet connection modal
+│   ├── layout/
+│   │   ├── AppWrapper.tsx      # Modal context wrapper
+│   │   └── Header.tsx          # Header with connect button
+│   └── ui/
+│       ├── BalanceCard.tsx     # Wallet balance display
+│       ├── ConnectWalletCard.tsx
+│       ├── TransferForm.tsx    # Token transfer form
+│       └── TransactionHash.tsx # Transaction result display
+├── config/
+│   └── constants.ts            # Environment config
+├── context/
+│   ├── ModalContext.tsx        # Modal state management
+│   └── Provider.tsx            # Graz provider setup
+└── lib/
+    └── para/client.ts          # Para client initialization
+```
 
 ## Learn More
 
@@ -51,4 +57,3 @@ pnpm install
 - [Para Developer Portal](https://developer.getpara.com)
 - [Graz Documentation](https://graz.sh)
 - [Cosmos SDK Documentation](https://docs.cosmos.network)
-- [Next.js Documentation](https://nextjs.org/docs)

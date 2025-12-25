@@ -3,7 +3,9 @@
 import { useConnect, useDisconnect, useAccount, getAvailableWallets, WalletType } from "graz";
 import { Modal } from "./ui/Modal";
 import { useEffect } from "react";
-import { cosmosicsprovidertestnet } from "graz/chains";
+
+// Chain ID for Cosmos ICS Provider Testnet (defined in Provider.tsx)
+const CHAIN_ID = "provider";
 
 interface ConnectWalletModalProps {
   isOpen: boolean;
@@ -71,9 +73,7 @@ export function ConnectWalletModal({ isOpen, onClose }: ConnectWalletModalProps)
               <h3 className="text-sm font-medium text-gray-500 mb-3">Social Login</h3>
               {paraWallet && (
                 <button
-                  onClick={() =>
-                    connect({ walletType: paraWallet.walletType, chainId: cosmosicsprovidertestnet.chainId })
-                  }
+                  onClick={() => connect({ walletType: paraWallet.walletType, chainId: CHAIN_ID })}
                   data-testid="auth-oauth-para"
                   className="w-full px-4 py-2 bg-gray-900 text-white rounded-none hover:bg-gray-950 transition-colors cursor-pointer">
                   Connect with {paraWallet.name}
@@ -89,9 +89,7 @@ export function ConnectWalletModal({ isOpen, onClose }: ConnectWalletModalProps)
                   {otherWallets.map((wallet) => (
                     <button
                       key={wallet.walletType}
-                      onClick={() =>
-                        connect({ walletType: wallet.walletType, chainId: cosmosicsprovidertestnet.chainId })
-                      }
+                      onClick={() => connect({ walletType: wallet.walletType, chainId: CHAIN_ID })}
                       data-testid={`wallet-option-${wallet.walletType}`}
                       className="w-full px-4 py-2 bg-gray-100 text-gray-900 rounded-none hover:bg-gray-200 transition-colors cursor-pointer">
                       Connect with {wallet.name}
