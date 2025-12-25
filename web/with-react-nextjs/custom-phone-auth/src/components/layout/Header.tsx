@@ -1,22 +1,21 @@
 "use client";
 
-import { useModal } from "@/context/ModalContext";
-import { useParaAccount } from "@/hooks/useParaAccount";
-import { formatAddress } from "@/utils/format";
+import { useAccount, useWallet } from "@getpara/react-sdk";
 
 export function Header() {
-  const { openModal } = useModal();
-  const { isConnected, address } = useParaAccount();
+  const { data: wallet } = useWallet();
+  const { isConnected } = useAccount();
 
   return (
     <header className="border-b border-gray-200">
-      <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-        <h1 className="text-lg font-semibold">Para Phone Auth</h1>
-        <button
-          onClick={openModal}
-          className="px-4 py-2 text-sm font-medium bg-gray-800 text-white rounded-none hover:bg-gray-900 transition-colors">
-          {isConnected ? formatAddress(address) : "Connect Wallet"}
-        </button>
+      <div className="container mx-auto px-4 py-4 flex justify-end">
+        {isConnected && wallet?.address && (
+          <span
+            data-testid="account-address-display"
+            className="px-4 py-2 text-gray-700 text-sm font-medium font-mono">
+            {wallet.address.slice(0, 6)}...{wallet.address.slice(-4)}
+          </span>
+        )}
       </div>
     </header>
   );
