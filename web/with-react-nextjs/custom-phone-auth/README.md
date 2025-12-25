@@ -8,6 +8,7 @@ This example demonstrates how to implement custom phone authentication with Para
 - Embedded iframe for seamless SMS verification
 - Automatic polling for login/wallet creation completion
 - Message signing with "Hello World!" example
+- **Clean separation of logic (hooks) and presentation (components)**
 
 ## Setup
 
@@ -26,40 +27,95 @@ yarn install
 yarn dev
 ```
 
+## Architecture
+
+This example follows the **Smart/Dumb Component Pattern** for clean separation of concerns:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  HOOKS (Logic Layer - Reusable)                             │
+│  ┌─────────────────────────────────────────────────────┐    │
+│  │ usePhoneAuth                                        │    │
+│  │ - Manages phone/country state, verification flow    │    │
+│  │ - Handles Para SDK interactions                     │    │
+│  │ - Returns state + actions                           │    │
+│  └─────────────────────────────────────────────────────┘    │
+└─────────────────────────────────────────────────────────────┘
+                        │
+                        ▼
+┌─────────────────────────────────────────────────────────────┐
+│  COMPONENTS (Presentation Layer - UI Only)                  │
+│  ┌─────────────┐ ┌─────────────┐ ┌─────────────────────┐    │
+│  │ PhoneForm   │ │VerifyIframe│ │ AuthCard            │    │
+│  │ (props only)│ │(props only) │ │ (layout wrapper)    │    │
+│  └─────────────┘ └─────────────┘ └─────────────────────┘    │
+└─────────────────────────────────────────────────────────────┘
+```
+
 ## Key Files
 
 ```
 src/
-├── app/
-│   ├── layout.tsx          # Root layout with ParaProvider
-│   └── page.tsx            # Main page with auth flow
-├── components/
-│   ├── ParaProvider.tsx    # Para SDK provider setup
-│   ├── layout/Header.tsx   # Header with wallet display
-│   └── ui/
-│       ├── PhoneAuth.tsx   # Phone authentication component
-│       ├── WalletInfo.tsx  # Connected wallet info
-│       └── SignMessage.tsx # Message signing UI
 ├── hooks/
-│   └── useSignHelloWorld.ts
-└── lib/
-    └── e2e-helpers.ts
+│   ├── usePhoneAuth.ts       # Phone auth logic (copy this for your own UI)
+│   └── useSignHelloWorld.ts  # Message signing logic
+├── constants/
+│   └── auth.ts               # Country codes configuration
+├── components/
+│   ├── ParaProvider.tsx      # Para SDK provider setup
+│   ├── layout/Header.tsx     # Header with wallet display
+│   └── ui/
+│       ├── PhoneAuth.tsx     # Container (connects hook to UI)
+│       ├── PhoneForm.tsx     # Presentational (phone input form)
+│       ├── VerifyIframe.tsx  # Presentational (OTP verification)
+│       ├── AuthCard.tsx      # Presentational (layout wrapper)
+│       ├── WalletInfo.tsx    # Connected wallet info
+│       └── SignMessage.tsx   # Message signing UI
+└── app/
+    ├── layout.tsx            # Root layout with ParaProvider
+    └── page.tsx              # Main page with auth flow
 ```
+
+## usePhoneAuth Hook
+
+The `usePhoneAuth` hook encapsulates all phone authentication logic:
+
+```tsx
+const {
+  // State
+  countryCode,     // Current country code (e.g., "+1")
+  phoneNumber,     // Current phone number
+  step,            // "input" | "verify"
+  verifyUrl,       // URL for OTP iframe
+  error,           // Error message if any
+  isPending,       // Loading state
+
+  // Actions
+  setCountryCode,  // Update country code
+  setPhoneNumber,  // Update phone number
+  submit,          // Start auth flow
+  cancel,          // Cancel verification
+} = usePhoneAuth();
+```
+
+**Copy this hook** to implement phone auth with your own UI components.
 
 ## How It Works
 
-1. **PhoneAuth Component** - Uses Para's `useSignUpOrLogIn` hook to initiate phone auth
-2. **Verification Iframe** - Embeds the Para verification URL in an iframe for SMS code entry
-3. **Polling** - Uses `useWaitForLogin` and `useWaitForWalletCreation` to detect completion
-4. **Connected State** - Once authenticated, displays wallet info and signing functionality
+1. **PhoneAuth Container** - Connects `usePhoneAuth` hook to presentational components
+2. **PhoneForm** - Renders phone input with country selector, calls `onSubmit` when user submits
+3. **Verification Iframe** - Embeds Para verification URL for SMS code entry
+4. **Polling** - Hook uses `useWaitForLogin` and `useWaitForWalletCreation` internally
 
-## Key Hooks Used
+## Para SDK Hooks Used
 
-- `useSignUpOrLogIn` - Initiates phone authentication
-- `useWaitForLogin` - Polls for login completion
-- `useWaitForWalletCreation` - Polls for wallet creation (new users)
-- `useAccount` - Gets connection state
-- `useSignMessage` - Signs messages with the wallet
+| Hook | Purpose |
+|------|---------|
+| `useSignUpOrLogIn` | Initiates phone authentication |
+| `useWaitForLogin` | Polls for login completion |
+| `useWaitForWalletCreation` | Polls for wallet creation (new users) |
+| `useAccount` | Gets connection state |
+| `useSignMessage` | Signs messages with the wallet |
 
 ## Learn More
 

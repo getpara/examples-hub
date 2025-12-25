@@ -10,6 +10,7 @@ This example demonstrates how to implement a unified authentication flow combini
 - **OAuth Login** - Google, Apple, Discord, and X (Twitter)
 - **Automatic wallet creation** for new users
 - **Message signing** with "Hello World!" example
+- **Clean separation of logic (hooks) and presentation (components)**
 
 ## Setup
 
@@ -28,25 +29,97 @@ yarn install
 yarn dev
 ```
 
+## Architecture
+
+This example follows the **Smart/Dumb Component Pattern** for clean separation of concerns:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  HOOKS (Logic Layer - Reusable)                             │
+│  ┌─────────────────┐ ┌─────────────────┐ ┌───────────────┐  │
+│  │ useEmailAuth    │ │ usePhoneAuth    │ │ useOAuthAuth  │  │
+│  │ - email state   │ │ - phone state   │ │ - provider    │  │
+│  │ - verify flow   │ │ - verify flow   │ │ - popup flow  │  │
+│  └────────┬────────┘ └────────┬────────┘ └───────┬───────┘  │
+│           │                   │                  │          │
+│           └───────────┬───────┴──────────────────┘          │
+│                       ▼                                     │
+│           ┌─────────────────────┐                           │
+│           │ useCombinedAuth     │ (composes all three)      │
+│           │ - tab state         │                           │
+│           │ - unified error     │                           │
+│           └─────────────────────┘                           │
+└─────────────────────────────────────────────────────────────┘
+                        │
+                        ▼
+┌─────────────────────────────────────────────────────────────┐
+│  COMPONENTS (Presentation Layer - UI Only)                  │
+│  ┌───────────┐ ┌───────────┐ ┌─────────────┐ ┌───────────┐  │
+│  │ EmailForm │ │ PhoneForm │ │ OAuthButtons│ │ AuthTabs  │  │
+│  │(props only│ │(props only│ │ (props only)│ │(props only│  │
+│  └───────────┘ └───────────┘ └─────────────┘ └───────────┘  │
+│  ┌─────────────────┐ ┌─────────────────────────────────┐    │
+│  │ VerifyIframe    │ │ AuthCard                        │    │
+│  │ (props only)    │ │ (layout wrapper)                │    │
+│  └─────────────────┘ └─────────────────────────────────┘    │
+└─────────────────────────────────────────────────────────────┘
+```
+
 ## Key Files
 
 ```
 src/
-├── app/
-│   ├── layout.tsx          # Root layout with ParaProvider
-│   └── page.tsx            # Main page with auth flow
-├── components/
-│   ├── ParaProvider.tsx    # Para SDK provider setup
-│   ├── layout/Header.tsx   # Header with wallet display
-│   └── ui/
-│       ├── CombinedAuth.tsx # Unified auth component (Email/Phone/OAuth)
-│       ├── WalletInfo.tsx   # Connected wallet info
-│       └── SignMessage.tsx  # Message signing UI
 ├── hooks/
-│   └── useSignHelloWorld.ts
-└── lib/
-    └── e2e-helpers.ts
+│   ├── useEmailAuth.ts       # Email auth logic
+│   ├── usePhoneAuth.ts       # Phone auth logic
+│   ├── useOAuthAuth.ts       # OAuth auth logic
+│   ├── useCombinedAuth.ts    # Composes all three (copy for multi-auth)
+│   └── useSignHelloWorld.ts  # Message signing logic
+├── constants/
+│   └── auth.ts               # Country codes + OAuth providers config
+├── components/
+│   ├── ParaProvider.tsx      # Para SDK provider setup
+│   ├── layout/Header.tsx     # Header with wallet display
+│   └── ui/
+│       ├── CombinedAuth.tsx  # Container (connects hook to UI)
+│       ├── AuthTabs.tsx      # Presentational (tab switcher)
+│       ├── EmailForm.tsx     # Presentational (email input)
+│       ├── PhoneForm.tsx     # Presentational (phone input)
+│       ├── OAuthButtons.tsx  # Presentational (provider buttons)
+│       ├── VerifyIframe.tsx  # Presentational (OTP verification)
+│       ├── AuthCard.tsx      # Presentational (layout wrapper)
+│       ├── WalletInfo.tsx    # Connected wallet info
+│       └── SignMessage.tsx   # Message signing UI
+└── app/
+    ├── layout.tsx            # Root layout with ParaProvider
+    └── page.tsx              # Main page with auth flow
 ```
+
+## useCombinedAuth Hook
+
+The `useCombinedAuth` hook composes all three auth hooks:
+
+```tsx
+const {
+  // Tab state
+  activeTab,       // "email" | "phone" | "social"
+  setActiveTab,    // Switch tabs
+
+  // Individual auth hooks (each has its own state + actions)
+  email,           // useEmailAuth return value
+  phone,           // usePhoneAuth return value
+  oauth,           // useOAuthAuth return value
+
+  // Unified state (derived from active tab)
+  step,            // "input" | "verify"
+  verifyUrl,       // URL for OTP iframe (email/phone)
+  error,           // Error from active auth method
+  isPending,       // Loading state from active auth method
+  cancel,          // Cancel active auth method
+} = useCombinedAuth();
+```
+
+**Copy this hook** (or individual auth hooks) to implement your own multi-auth flow.
 
 ## How It Works
 
@@ -54,7 +127,7 @@ src/
 ```
 User enters email/phone → signUpOrLogIn({ auth })
        ↓
-AuthStateVerify → Show iframe with loginUrl
+step: "verify" → Show iframe with loginUrl
        ↓
 User enters OTP in iframe
        ↓
@@ -71,7 +144,7 @@ User clicks OAuth button → verifyOAuth({ method, onOAuthUrl })
        ↓
 Popup opens → User authenticates with provider
        ↓
-AuthStateDone (stage: "done")
+stage: "done"
        ↓
 Check isNewUser:
   - true  → waitForWalletCreation()
@@ -80,7 +153,7 @@ Check isNewUser:
 Done - user authenticated
 ```
 
-## Key Hooks Used
+## Para SDK Hooks Used
 
 | Hook | Purpose |
 |------|---------|
@@ -92,14 +165,11 @@ Done - user authenticated
 | `useAccount` | Connection state |
 | `useSignMessage` | Signs messages with the wallet |
 
-## Key Patterns Demonstrated
+## What Developers Can Copy
 
-1. **Tabbed Auth UI** - Clean switching between auth methods in one card
-2. **Unified Verification** - Single iframe area for Email/Phone OTP
-3. **OAuth Popup Flow** - One-click social login without iframe
-4. **Shared Post-Auth Logic** - `handleAuthComplete` works for all auth types
-5. **Centralized Error Handling** - Single error state for all methods
-6. **Cancellation** - Clean cancel handler for all auth types
+1. **Just the hooks** - If you have your own UI
+2. **Hooks + Presentational components** - If you want the UI pattern too
+3. **Full container** - If you want a drop-in solution
 
 ## Learn More
 
