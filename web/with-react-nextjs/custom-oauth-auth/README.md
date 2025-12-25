@@ -1,6 +1,13 @@
 # Custom OAuth Auth
 
-This example demonstrates how to implement custom OAuth authentication with Para SDK in a Next.js application. It showcases integration with multiple OAuth providers including Google, Twitter, Apple, Discord, Facebook, and Farcaster through Para's web SDK.
+This example demonstrates how to implement custom OAuth authentication with Para SDK in a Next.js application. It shows the minimal setup needed to build your own OAuth auth UI using Para's React SDK hooks directly, without using the built-in ParaModal.
+
+## Features
+
+- One-click OAuth login (no passkeys required)
+- Support for Google, Apple, Discord, X (Twitter), Facebook, and Farcaster
+- Automatic wallet creation for new users
+- Message signing with "Hello World!" example
 
 ## Setup
 
@@ -14,41 +21,67 @@ NEXT_PUBLIC_PARA_API_KEY=your_para_api_key
 
 ### Installation
 
-Install dependencies using your preferred package manager:
-
 ```bash
-# npm
-npm install
-
-# yarn
 yarn install
-
-# pnpm
-pnpm install
+yarn dev
 ```
-
-## Key Dependencies
-
-- `@getpara/web-sdk` (v2.0.0-alpha.26) - Para Web SDK for authentication
-- `@tanstack/react-query` (v5.81.2) - Data fetching and state management
-- `next` (v15.1.5) - React framework
-- `react` (v19.0.0) - React library
-- `react-dom` (v19.0.0) - React DOM library
 
 ## Key Files
 
-- `src/components/OAuthModal.tsx` - OAuth provider selection modal
-- `src/components/OAuthButtons.tsx` - OAuth provider button components
-- `src/hooks/useParaOAuth.ts` - Custom hook for OAuth operations
-- `src/hooks/useParaAccount.ts` - Custom hook for account management
-- `src/hooks/useParaWallet.ts` - Custom hook for wallet operations
-- `src/lib/para/client.ts` - Para client initialization
-- `public/` - OAuth provider icons (google.svg, twitter.svg, etc.)
+```
+src/
+├── app/
+│   ├── layout.tsx          # Root layout with ParaProvider
+│   └── page.tsx            # Main page with auth flow
+├── components/
+│   ├── ParaProvider.tsx    # Para SDK provider setup
+│   ├── layout/Header.tsx   # Header with wallet display
+│   └── ui/
+│       ├── OAuthAuth.tsx   # OAuth provider buttons with auth flow
+│       ├── WalletInfo.tsx  # Connected wallet info
+│       └── SignMessage.tsx # Message signing UI
+├── hooks/
+│   └── useSignHelloWorld.ts
+└── lib/
+    └── e2e-helpers.ts
+```
+
+## How It Works
+
+1. **OAuthAuth Component** - Displays OAuth provider buttons (Google, Apple, etc.)
+2. **OAuth Popup** - Uses `useVerifyOAuth` hook to open OAuth provider popup
+3. **One-Click Login** - After OAuth, stage is `"done"` - no passkey needed
+4. **Wallet Creation** - If `isNewUser`, calls `waitForWalletCreation`; otherwise `waitForLogin`
+5. **Connected State** - Once authenticated, displays wallet info and signing functionality
+
+## Key Hooks Used
+
+- `useVerifyOAuth` - Initiates OAuth authentication (Google, Apple, Discord, X, Facebook)
+- `useVerifyFarcaster` - Initiates Farcaster authentication
+- `useWaitForWalletCreation` - Polls for wallet creation (new users)
+- `useWaitForLogin` - Polls for login completion (returning users)
+- `useAccount` - Gets connection state
+- `useSignMessage` - Signs messages with the wallet
+
+## OAuth Flow (One-Click)
+
+```
+User clicks "Continue with Google"
+         ↓
+verifyOAuth({ method: "GOOGLE", onOAuthUrl })
+         ↓
+Popup opens → User authenticates with Google
+         ↓
+authState.stage === "done"
+         ↓
+Check authState.isNewUser:
+  - true  → waitForWalletCreation()
+  - false → waitForLogin()
+         ↓
+User authenticated, wallet ready
+```
 
 ## Learn More
 
 - [Para Documentation](https://docs.getpara.com)
-- [Para Website](https://getpara.com)
-- [Para Developer Portal](https://developer.getpara.com)
-- [React Query Documentation](https://tanstack.com/query/latest)
-- [Next.js Documentation](https://nextjs.org/docs)
+- [Para React SDK](https://docs.getpara.com/sdk/react)
