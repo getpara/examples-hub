@@ -1,8 +1,9 @@
-interface ConnectedWalletProps {
-  address?: string;
-}
+import { useWallet } from "@getpara/react-sdk";
 
-export function ConnectedWallet({ address }: ConnectedWalletProps) {
+export function WalletInfo() {
+  const { data: wallet } = useWallet();
+  const address = wallet?.address;
+
   return (
     <div className="mb-8 rounded-none border border-gray-200">
       <div className="px-6 py-3 bg-gray-50 border-b border-gray-200">
