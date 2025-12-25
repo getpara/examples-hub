@@ -14,7 +14,7 @@ const rainbowkitTheme = lightTheme({
   overlayBlur: "large",
 });
 
-export const ParaProviders: React.FC<PropsWithChildren> = ({ children }) => {
+export function Providers({ children }: PropsWithChildren) {
   return (
     <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>
@@ -22,4 +22,4 @@ export const ParaProviders: React.FC<PropsWithChildren> = ({ children }) => {
       </QueryClientProvider>
     </WagmiProvider>
   );
-};
+}
