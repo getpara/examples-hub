@@ -1,5 +1,8 @@
 import { writable, derived, get } from "svelte/store";
 import { para } from "@/lib/para";
+import { createParaViemClient } from "@getpara/viem-v2-integration";
+import { http } from "viem";
+import { sepolia } from "viem/chains";
 
 interface AccountState {
   isConnected: boolean;
@@ -74,20 +77,17 @@ export async function signMessage(message: string): Promise<string> {
     throw new Error("Not connected");
   }
 
-  if (!currentState.walletId) {
+  if (!currentState.address) {
     throw new Error("No wallet found");
   }
 
-  const result = await para.signMessage({
-    walletId: currentState.walletId,
-    messageBase64: btoa(message),
+  const walletClient = createParaViemClient(para, {
+    chain: sepolia,
+    transport: http(),
   });
 
-  if ("signature" in result) {
-    return result.signature as string;
-  }
-
-  throw new Error("Failed to sign message");
+  const signature = await walletClient.signMessage({ message });
+  return signature;
 }
 
 // Logout
