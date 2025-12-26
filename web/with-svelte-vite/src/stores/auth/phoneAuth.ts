@@ -47,8 +47,8 @@ export async function submit(
     });
 
     if (authState.stage === "verify" && authState.loginUrl) {
-      // Check if this is a new user (verify stage means new user)
-      const isNewUser = true;
+      // Check nextStage to determine if user needs signup (new) or login (returning)
+      const isNewUser = authState.nextStage === "signup";
 
       phoneAuthStore.update((s) => ({
         ...s,

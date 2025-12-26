@@ -41,6 +41,7 @@ async function handleSubmit(e: Event) {
           placeholder="123-456-7890"
           :disabled="isPending"
           required
+          data-testid="phone-input"
           class="flex-1 px-3 py-2 border border-gray-300 text-sm focus:outline-none focus:ring-1 focus:ring-gray-900 focus:border-gray-900 disabled:bg-gray-100 disabled:cursor-not-allowed"
         />
       </div>
@@ -49,6 +50,7 @@ async function handleSubmit(e: Event) {
     <button
       type="submit"
       :disabled="!phoneNumber.trim() || isPending"
+      data-testid="continue-phone-button"
       class="w-full py-2 px-4 bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
     >
       {{ isPending ? "Signing in..." : "Continue with Phone" }}

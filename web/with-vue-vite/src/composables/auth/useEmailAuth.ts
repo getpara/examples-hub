@@ -63,8 +63,8 @@ async function submit(email: string): Promise<void> {
     const authState = await para.signUpOrLogIn({ auth: { email } });
 
     if (authState.stage === "verify" && authState.loginUrl) {
-      // verify stage means new user
-      const isNewUser = true;
+      // Check nextStage to determine if user needs signup (new) or login (returning)
+      const isNewUser = authState.nextStage === "signup";
 
       state.value = {
         ...state.value,

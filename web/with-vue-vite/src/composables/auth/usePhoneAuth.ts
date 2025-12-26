@@ -72,8 +72,8 @@ async function submit(phoneNumber: string, countryCode: string): Promise<void> {
     });
 
     if (authState.stage === "verify" && authState.loginUrl) {
-      // verify stage means new user
-      const isNewUser = true;
+      // Check nextStage to determine if user needs signup (new) or login (returning)
+      const isNewUser = authState.nextStage === "signup";
 
       state.value = {
         ...state.value,
