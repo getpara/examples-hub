@@ -1,84 +1,51 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useState } from 'react'
-import { useAccount, useWallet, useSignMessage, useModal } from '@getpara/react-sdk'
-import { ConnectWalletCard } from '~/components/ui/ConnectWalletCard'
-import { SignMessageForm } from '~/components/ui/SignMessageForm'
-import { SignatureDisplay } from '~/components/ui/SignatureDisplay'
-import { StatusAlert } from '~/components/ui/StatusAlert'
+import { useModal, useAccount, useClient } from '@getpara/react-sdk'
+import { useE2ECleanup } from '~/lib/e2e-helpers'
+import { useSignHelloWorld } from '~/hooks/useSignHelloWorld'
+import { ConnectCard } from '~/components/ui/ConnectCard'
+import { WalletInfo } from '~/components/ui/WalletInfo'
+import { SignMessage } from '~/components/ui/SignMessage'
 
 export const Route = createFileRoute('/')({
   component: Home,
 })
 
 function Home() {
-  const [message, setMessage] = useState('')
-
-  const { isConnected } = useAccount()
-  const { data: wallet } = useWallet()
+  // Para SDK hooks
   const { openModal } = useModal()
-  const signMessageHook = useSignMessage()
+  const { isConnected } = useAccount()
+  const para = useClient()
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    
-    if (!wallet?.id) {
-      return
-    }
+  // Sign message hook
+  const { sign, message, isPending, error, signature } = useSignHelloWorld()
 
-    signMessageHook.signMessage({
-      walletId: wallet.id,
-      messageBase64: btoa(message),
-    })
-  }
-
-  // Reset signature when message changes
-  const handleMessageChange = (value: string) => {
-    setMessage(value)
-    if (signMessageHook.data) {
-      signMessageHook.reset()
-    }
-  }
-
-  // Derive status from signing state
-  const status = {
-    show: signMessageHook.isPending || !!signMessageHook.error || !!signMessageHook.data,
-    type: signMessageHook.isPending ? ("info" as const) : signMessageHook.error ? ("error" as const) : ("success" as const),
-    message: signMessageHook.isPending
-      ? "Signing message..."
-      : signMessageHook.error
-      ? signMessageHook.error.message || "Failed to sign message. Please try again."
-      : "Message signed successfully!",
-  }
+  // E2E testing cleanup (internal only - safe to remove)
+  useE2ECleanup(para)
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-2xl mx-auto space-y-8">
-        <div className="text-center space-y-2">
-          <h1 className="text-3xl font-bold text-gray-900">Para Wallet Integration</h1>
-          <p className="text-gray-600">Connect your wallet and sign messages</p>
-        </div>
-
-        <StatusAlert show={status.show} type={status.type} message={status.message} />
-
-        {!isConnected ? (
-          <ConnectWalletCard onConnect={openModal} />
-        ) : (
-          <>
-            <StatusAlert
-              show={true}
-              type="success"
-              message={`Connected - ${wallet?.address?.slice(0, 6)}...${wallet?.address?.slice(-4)}`}
-            />
-            <SignMessageForm
-              message={message}
-              onMessageChange={handleMessageChange}
-              onSubmit={handleSubmit}
-              isLoading={signMessageHook.isPending}
-            />
-            {signMessageHook.data && "signature" in signMessageHook.data && <SignatureDisplay signature={signMessageHook.data.signature} />}
-          </>
-        )}
+    <div className="container mx-auto px-4 py-12">
+      <div className="text-center mb-12">
+        <h1 className="text-4xl font-bold tracking-tight mb-4">Para Modal + Multichain Demo</h1>
+        <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+          Sign messages with your Para wallet using multichain external wallets. This example supports EVM chains
+          (Ethereum, Polygon), Cosmos chains (CosmosHub, Osmosis, Noble), and Solana.
+        </p>
       </div>
+
+      {!isConnected ? (
+        <ConnectCard onConnect={openModal} />
+      ) : (
+        <div className="max-w-xl mx-auto">
+          <WalletInfo />
+          <SignMessage
+            message={message}
+            onSign={sign}
+            isPending={isPending}
+            error={error}
+            signature={signature}
+          />
+        </div>
+      )}
     </div>
   )
 }

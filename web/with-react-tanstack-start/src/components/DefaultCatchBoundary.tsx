@@ -39,7 +39,7 @@ export function DefaultCatchBoundary({ error }: ErrorComponentProps) {
           <Link
             to="/"
             className={`px-2 py-1 bg-gray-600 dark:bg-gray-700 rounded text-white uppercase font-extrabold`}
-            onClick={(e) => {
+            onClick={(e: React.MouseEvent) => {
               e.preventDefault()
               window.history.back()
             }}

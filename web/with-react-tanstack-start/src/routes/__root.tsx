@@ -8,14 +8,14 @@ import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 import * as React from 'react'
 import { DefaultCatchBoundary } from '~/components/DefaultCatchBoundary'
 import { NotFound } from '~/components/NotFound'
-import { QueryProvider } from '~/context/QueryProvider'
-import { ParaProvider } from '~/context/ParaProvider'
+import { ParaProvider } from '~/components/ParaProvider'
 import { Header } from '~/components/layout/Header'
 import appCss from '~/styles/app.css?url'
+import '@getpara/react-sdk/styles.css'
 
 export const Route = createRootRoute({
   head: () => ({
-    title: 'Para Modal TanStack Start Example',
+    title: 'Para Modal + Multichain Example',
     meta: [
       {
         charSet: 'utf-8',
@@ -42,14 +42,12 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        <QueryProvider>
-          <ParaProvider>
-            <Header />
-            <main>
-              {children}
-            </main>
-          </ParaProvider>
-        </QueryProvider>
+        <ParaProvider>
+          <Header />
+          <main>
+            {children}
+          </main>
+        </ParaProvider>
         <TanStackRouterDevtools position="bottom-right" />
         <Scripts />
       </body>
