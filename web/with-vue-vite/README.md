@@ -1,65 +1,98 @@
-# Para Web SDK + Vue + Vite Example
+# Para Custom Auth + Vue + Vite Example
 
-This example demonstrates how to integrate the Para Web SDK within a Vue.js application built with Vite. The example showcases wallet authentication, connection management, and message signing functionality using Para's web SDK which provides a framework-agnostic approach to wallet integration.
+A Vue + Vite example demonstrating custom UI authentication with Para's web-sdk. Uses direct Para client methods (equivalent to React SDK hooks) for email, phone, and OAuth authentication flows.
 
-## Setup/Installation
+## What This Example Shows
 
-### Environment Variables
-Create a `.env` file in the project root and add your Para API key:
+- Setting up Para web-sdk client singleton
+- Custom authentication UI with three methods:
+  - Email with OTP verification (iframe)
+  - Phone with OTP verification (iframe)
+  - OAuth (Google, Apple, Discord, X)
+- Using Para portal iframe for OTP verification
+- Handling new vs returning users with `waitForLogin`/`waitForWalletCreation`
+- Vue composables for auth state management
+- Message signing with connected wallet
+
+## Para Client Methods Used
+
+| Method | Purpose |
+|--------|---------|
+| `para.signUpOrLogIn()` | Initiate email/phone auth |
+| `para.verifyOAuth()` | OAuth provider auth |
+| `para.verifyFarcaster()` | Farcaster auth |
+| `para.waitForLogin()` | Wait for returning user login |
+| `para.waitForWalletCreation()` | Wait for new user wallet |
+| `para.isFullyLoggedIn()` | Check auth status |
+| `para.getWallets()` | Get user wallets |
+| `para.signMessage()` | Sign messages |
+| `para.logout()` | Logout user |
+
+## Setup
+
+1. Create a `.env` file:
+
 ```env
 VITE_PARA_API_KEY=your_api_key_here
-VITE_PARA_ENVIRONMENT=beta
+VITE_PARA_ENVIRONMENT=BETA
 ```
 
-### Installation
-Install dependencies using your preferred package manager:
-```bash
-# npm
-npm install
+2. Install dependencies and run:
 
-# yarn
+```bash
 yarn install
-
-# pnpm
-pnpm install
-```
-
-### Running the Development Server
-```bash
-# npm
-npm run dev
-
-# yarn
 yarn dev
-
-# pnpm
-pnpm dev
 ```
 
-## Key Dependencies
+## Project Structure
 
-- `@getpara/web-sdk`: 2.0.0-alpha.26
-- `vue`: ^3.5.13
-- `@vitejs/plugin-vue`: ^5.2.1
-- `vite`: ^6.1.0
-- `tailwindcss`: 4.0.6
-- `typescript`: ~5.7.2
-- `vite-plugin-node-polyfills`: 0.23.0
+```
+src/
+├── components/
+│   ├── layout/
+│   │   └── Header.vue               # Header with logout
+│   └── ui/
+│       ├── CombinedAuth.vue         # Main auth orchestrator
+│       ├── AuthCard.vue             # Card wrapper
+│       ├── AuthTabs.vue             # Tab navigation
+│       ├── EmailForm.vue            # Email input
+│       ├── PhoneForm.vue            # Phone input
+│       ├── OAuthButtons.vue         # OAuth provider buttons
+│       ├── VerifyIframe.vue         # OTP verification iframe
+│       ├── WalletInfo.vue           # Connected wallet display
+│       └── SignMessage.vue          # Message signing UI
+├── composables/
+│   ├── auth/
+│   │   ├── useEmailAuth.ts          # Email auth flow
+│   │   ├── usePhoneAuth.ts          # Phone auth flow
+│   │   ├── useOAuthAuth.ts          # OAuth auth flow
+│   │   └── useCombinedAuth.ts       # Auth orchestrator
+│   └── useAccount.ts                # Account/wallet state
+├── lib/
+│   ├── para.ts                      # Para client singleton
+│   └── e2e-helpers.ts               # E2E testing utilities
+├── constants/
+│   └── auth.ts                      # Country codes, OAuth providers
+├── App.vue                          # Main app component
+├── style.css                        # Global styles
+└── main.ts                          # Entry point
+```
 
-## Key Files
+## Key Implementation Pattern
 
-- `/src/lib/para/client.ts` - Para Web SDK client initialization
-- `/src/composables/useParaAccount.ts` - Vue composable for account management
-- `/src/composables/useParaAuth.ts` - Vue composable for authentication
-- `/src/components/AuthModal.vue` - Authentication modal component
-- `/src/components/WalletDisplay.vue` - Wallet information display component
-- `/src/components/auth/` - Authentication UI components (email, phone, social auth)
+This example uses Vue composables to replicate the React hook patterns from `custom-combined-auth`:
+
+- **useEmailAuth.ts** → equivalent to `useEmailAuth` hook
+- **usePhoneAuth.ts** → equivalent to `usePhoneAuth` hook
+- **useOAuthAuth.ts** → equivalent to `useOAuthAuth` hook
+- **useCombinedAuth.ts** → equivalent to `useCombinedAuth` hook
+
+The composables use `ref` for state and `computed` for derived values, providing the same separation of concerns as React hooks.
 
 ## Learn More
 
-- [Para SDK Documentation](https://docs.getpara.com)
+- [Para Documentation](https://docs.getpara.com)
 - [Para Website](https://getpara.com)
 - [Para Developer Portal](https://developer.getpara.com)
 - [Vue.js Documentation](https://vuejs.org)
 - [Vite Documentation](https://vite.dev)
-- [Tailwind CSS Documentation](https://tailwindcss.com)
