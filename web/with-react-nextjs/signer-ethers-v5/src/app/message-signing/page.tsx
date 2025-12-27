@@ -1,82 +1,28 @@
 "use client";
 
 import { useState } from "react";
-import { ethers } from "ethers";
 import { useAccount } from "@getpara/react-sdk";
 import { Card } from "@/components/ui/Card";
-import { useParaSigner } from "@/hooks/useParaSigner";
+import { StatusAlert } from "@/components/ui/StatusAlert";
+import { ActionButton } from "@/components/ui/ActionButton";
+import { DataField } from "@/components/ui/DataField";
+import { useMessageSigning } from "@/hooks/useMessageSigning";
 
 export default function MessageSigningPage() {
   const [message, setMessage] = useState("");
-  const [signature, setSignature] = useState("");
-  const [recoveredAddress, setRecoveredAddress] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [status, setStatus] = useState<{
-    show: boolean;
-    type: "success" | "error";
-    message: string;
-  }>({ show: false, type: "success", message: "" });
 
   const account = useAccount();
-  const { signer } = useParaSigner();
+  const { signMessage, verifySignature, signature, recoveredAddress, isLoading, isReady, error, reset } =
+    useMessageSigning();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setRecoveredAddress("");
-
-    if (!signer) return;
-
-    try {
-      if (!account?.isConnected) {
-        setStatus({
-          show: true,
-          type: "error",
-          message: "Please connect your wallet to sign a message.",
-        });
-        return;
-      }
-
-      const messageToSign = message.trim();
-
-      const signature = await signer.signMessage(messageToSign);
-      setSignature(`${signature}`);
-
-      setStatus({
-        show: true,
-        type: "success",
-        message: "Message signed successfully!",
-      });
-    } catch (error) {
-      setStatus({
-        show: true,
-        type: "error",
-        message: "Failed to sign message. Please try again.",
-      });
-      console.error("Error signing message:", error);
-    } finally {
-      setIsLoading(false);
-    }
+  const handleSign = async () => {
+    reset();
+    await signMessage(message);
   };
 
   const handleVerify = async () => {
-    try {
-      if (!message || !signature) return;
-
-      const recovered = ethers.utils.verifyMessage(message, signature);
-      setRecoveredAddress(recovered);
-      setStatus({
-        show: true,
-        type: "success",
-        message: "Signature verified successfully!",
-      });
-    } catch (error) {
-      setStatus({
-        show: true,
-        type: "error",
-        message: "Failed to verify signature. Please try again.",
-      });
-      console.error("Error verifying signature:", error);
+    if (signature) {
+      await verifySignature(message, signature);
     }
   };
 
@@ -91,24 +37,13 @@ export default function MessageSigningPage() {
       </div>
 
       <div className="max-w-xl mx-auto">
-        {status.show && (
-          <div
-            className={`mb-4 rounded-none border ${
-              status.type === "success"
-                ? "bg-green-50 border-green-500 text-green-700"
-                : "bg-red-50 border-red-500 text-red-700"
-            }`}>
-            <p className="px-6 py-4">{status.message}</p>
-          </div>
-        )}
+        {error && <StatusAlert type="error" message={error.message} />}
+        {signature && !error && <StatusAlert type="success" message="Message signed successfully!" />}
+        {recoveredAddress && <StatusAlert type="success" message="Signature verified successfully!" />}
 
-        <form
-          onSubmit={handleSubmit}
-          className="space-y-4">
+        <div className="space-y-4">
           <div className="space-y-3">
-            <label
-              htmlFor="message"
-              className="block text-sm font-medium text-gray-700">
+            <label htmlFor="message" className="block text-sm font-medium text-gray-700">
               Message to Sign
             </label>
             <input
@@ -123,12 +58,13 @@ export default function MessageSigningPage() {
             />
           </div>
 
-          <button
-            type="submit"
-            className="w-full rounded-none bg-gray-900 px-6 py-3 text-sm font-medium text-white hover:bg-gray-950 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={!message || isLoading}>
-            {isLoading ? "Signing Message..." : "Sign Message"}
-          </button>
+          <ActionButton
+            onClick={handleSign}
+            isLoading={isLoading}
+            disabled={!message || !isReady || !account?.isConnected}
+            loadingText="Signing Message...">
+            Sign Message
+          </ActionButton>
 
           {signature && (
             <Card title="Signature">
@@ -143,15 +79,12 @@ export default function MessageSigningPage() {
               </button>
               {recoveredAddress && (
                 <div className="mt-4">
-                  <p className="text-sm font-medium text-gray-900 mb-2">Recovered Address:</p>
-                  <p className="text-sm font-mono break-all text-gray-600 bg-gray-50 p-4 border border-gray-200">
-                    {recoveredAddress}
-                  </p>
+                  <DataField label="Recovered Address:" value={recoveredAddress} mono />
                 </div>
               )}
             </Card>
           )}
-        </form>
+        </div>
       </div>
     </div>
   );

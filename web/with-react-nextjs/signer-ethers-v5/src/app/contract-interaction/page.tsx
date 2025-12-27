@@ -1,133 +1,37 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { ethers } from "ethers";
-import { useAccount, useWallet } from "@getpara/react-sdk";
+import { useState } from "react";
+import { useAccount } from "@getpara/react-sdk";
 import { Card } from "@/components/ui/Card";
-import { useParaSigner } from "@/hooks/useParaSigner";
-import ParaTestToken from "@/contracts/artifacts/contracts/ParaTestToken.sol/ParaTestToken.json";
-
-const PARA_TEST_TOKEN_CONTRACT_ADDRESS = "0x83cC70475A0d71EF1F2F61FeDE625c8C7E90C3f2";
+import { StatusAlert } from "@/components/ui/StatusAlert";
+import { TxResult } from "@/components/ui/TxResult";
+import { ActionButton } from "@/components/ui/ActionButton";
+import { useContractInteraction } from "@/hooks/useContractInteraction";
 
 export default function ContractInteractionPage() {
   const [amount, setAmount] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [isBalanceLoading, setIsBalanceLoading] = useState(false);
-  const [tokenBalance, setTokenBalance] = useState<string | null>(null);
-  const [mintedAmount, setMintedAmount] = useState<string | null>(null);
-  const [mintLimit, setMintLimit] = useState<string | null>(null);
-  const [txHash, setTxHash] = useState("");
-  const [status, setStatus] = useState<{
-    show: boolean;
-    type: "success" | "error" | "info";
-    message: string;
-  }>({ show: false, type: "success", message: "" });
 
   const account = useAccount();
-  const { data: wallet } = useWallet();
-  const { signer, provider } = useParaSigner();
-
-  const fetchContractData = async () => {
-    if (!wallet?.address || !provider) return;
-
-    setIsBalanceLoading(true);
-    try {
-      const contract = new ethers.Contract(PARA_TEST_TOKEN_CONTRACT_ADDRESS, ParaTestToken.abi, provider);
-
-      // Get token balance
-      const balance = await contract.balanceOf(wallet.address);
-      setTokenBalance(ethers.utils.formatEther(balance));
-
-      // Get minted amount for address
-      const minted = await contract.mintedAmount(wallet.address);
-      setMintedAmount(ethers.utils.formatEther(minted));
-
-      // Get mint limit
-      const limit = await contract.MINT_LIMIT();
-      setMintLimit(ethers.utils.formatEther(limit));
-    } catch (error) {
-      console.error("Error fetching contract data:", error);
-      setTokenBalance(null);
-      setMintedAmount(null);
-      setMintLimit(null);
-    } finally {
-      setIsBalanceLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (wallet?.address) {
-      fetchContractData();
-    }
-  }, [wallet?.address]);
+  const {
+    mint,
+    fetchContractData,
+    tokenBalance,
+    mintedAmount,
+    mintLimit,
+    txHash,
+    isLoading,
+    isDataLoading,
+    isReady,
+    hasReachedLimit,
+    error,
+    reset,
+  } = useContractInteraction();
 
   const handleMint = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    setStatus({ show: false, type: "success", message: "" });
-    setTxHash("");
-
-    if (!signer) return;
-
-    try {
-      if (!account?.isConnected) {
-        throw new Error("Please connect your wallet to mint tokens.");
-      }
-
-      if (!wallet?.id) {
-        throw new Error("No wallet ID found. Please reconnect your wallet.");
-      }
-
-      // Validate amount
-      const amountFloat = parseFloat(amount);
-      if (isNaN(amountFloat) || amountFloat <= 0) {
-        throw new Error("Please enter a valid amount greater than 0.");
-      }
-
-      // Check if mint would exceed limit
-      if (mintedAmount && mintLimit) {
-        const currentMinted = parseFloat(mintedAmount);
-        const limit = parseFloat(mintLimit);
-        const requestedAmount = amountFloat;
-
-        if (currentMinted + requestedAmount > limit) {
-          throw new Error(`Minting ${requestedAmount} tokens would exceed your limit of ${limit} tokens.`);
-        }
-      }
-
-      const contract = new ethers.Contract(PARA_TEST_TOKEN_CONTRACT_ADDRESS, ParaTestToken.abi, signer);
-      const tx = await contract.mint(ethers.utils.parseEther(amount));
-
-      setTxHash(tx.hash);
-
-      setStatus({
-        show: true,
-        type: "info",
-        message: "Transaction submitted. Waiting for confirmation...",
-      });
-
-      // Wait for transaction to be mined
-      await tx.wait();
-
-      setStatus({
-        show: true,
-        type: "success",
-        message: `Successfully minted ${amount} CTT tokens!`,
-      });
-
-      await fetchContractData();
-
-      setAmount("");
-    } catch (error) {
-      console.error("Error minting tokens:", error);
-      setStatus({
-        show: true,
-        type: "error",
-        message: error instanceof Error ? error.message : "Failed to mint tokens. Please try again.",
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    reset();
+    await mint(amount);
+    setAmount("");
   };
 
   return (
@@ -147,58 +51,44 @@ export default function ContractInteractionPage() {
               <div className="flex-1">
                 <p className="text-sm text-gray-600">Current Balance:</p>
                 <p className="text-lg font-medium text-gray-900">
-                  {!wallet?.address
+                  {!account?.isConnected
                     ? "Please connect your wallet"
-                    : isBalanceLoading
-                    ? "Loading..."
-                    : tokenBalance
-                    ? `${parseFloat(tokenBalance).toFixed(4)} CTT`
-                    : "Unable to fetch balance"}
+                    : isDataLoading
+                      ? "Loading..."
+                      : tokenBalance
+                        ? `${parseFloat(tokenBalance).toFixed(4)} CTT`
+                        : "Unable to fetch balance"}
                 </p>
               </div>
               <button
                 onClick={fetchContractData}
-                disabled={isBalanceLoading || !wallet?.address}
+                disabled={isDataLoading || !account?.isConnected}
                 className="p-1 text-gray-500 hover:text-gray-700 transition-colors disabled:opacity-50"
                 title="Refresh data">
-                <span className={`inline-block ${isBalanceLoading ? "animate-spin" : ""}`}>🔄</span>
+                <span className={`inline-block ${isDataLoading ? "animate-spin" : ""}`}>&#8635;</span>
               </button>
             </div>
             <div>
               <p className="text-sm text-gray-600">Amount Minted:</p>
               <p className="text-lg font-medium text-gray-900">
-                {!wallet?.address
+                {!account?.isConnected
                   ? "Please connect your wallet"
-                  : isBalanceLoading
-                  ? "Loading..."
-                  : mintedAmount && mintLimit
-                  ? `${parseFloat(mintedAmount).toFixed(4)} / ${parseFloat(mintLimit).toFixed(4)} CTT`
-                  : "Unable to fetch minted amount"}
+                  : isDataLoading
+                    ? "Loading..."
+                    : mintedAmount && mintLimit
+                      ? `${parseFloat(mintedAmount).toFixed(4)} / ${parseFloat(mintLimit).toFixed(4)} CTT`
+                      : "Unable to fetch minted amount"}
               </p>
             </div>
           </div>
         </Card>
 
-        {status.show && (
-          <div
-            className={`mb-4 rounded-none border ${
-              status.type === "success"
-                ? "bg-green-50 border-green-500 text-green-700"
-                : status.type === "error"
-                ? "bg-red-50 border-red-500 text-red-700"
-                : "bg-blue-50 border-blue-500 text-blue-700"
-            }`}>
-            <p className="px-6 py-4 break-words">{status.message}</p>
-          </div>
-        )}
+        {error && <StatusAlert type="error" message={error.message} />}
+        {txHash && <StatusAlert type="success" message={`Successfully minted ${amount || "tokens"} CTT!`} />}
 
-        <form
-          onSubmit={handleMint}
-          className="space-y-4">
+        <form onSubmit={handleMint} className="space-y-4">
           <div className="space-y-3">
-            <label
-              htmlFor="amount"
-              className="block text-sm font-medium text-gray-700">
+            <label htmlFor="amount" className="block text-sm font-medium text-gray-700">
               Amount to Mint (CTT)
             </label>
             <input
@@ -214,29 +104,17 @@ export default function ContractInteractionPage() {
             />
           </div>
 
-          <button
-            type="submit"
-            className="w-full rounded-none bg-gray-900 px-6 py-3 text-sm font-medium text-white hover:bg-gray-950 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={!amount || isLoading || !account?.isConnected}>
-            {isLoading ? "Minting Tokens..." : "Mint Tokens"}
-          </button>
+          <ActionButton
+            onClick={() => {}}
+            isLoading={isLoading}
+            disabled={!amount || !isReady || !account?.isConnected}
+            loadingText="Minting Tokens...">
+            Mint Tokens
+          </ActionButton>
 
-          {txHash && (
-            <Card title="Transaction Hash">
-              <p className="text-sm font-mono break-all text-gray-600 bg-gray-50 p-4 border border-gray-200">
-                {txHash}
-              </p>
-              <a
-                href={`https://holesky.etherscan.io/tx/${txHash}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-4 inline-block px-3 py-1 text-sm bg-gray-900 text-white hover:bg-gray-950 transition-colors rounded-none">
-                View on Etherscan
-              </a>
-            </Card>
-          )}
+          {txHash && <TxResult hash={txHash} />}
 
-          {mintedAmount && mintLimit && parseFloat(mintedAmount) >= parseFloat(mintLimit) && (
+          {hasReachedLimit && (
             <div className="mt-4 bg-yellow-50 border border-yellow-200 p-4 text-yellow-800">
               <p>You have reached your minting limit. No more tokens can be minted to this address.</p>
             </div>
@@ -244,9 +122,7 @@ export default function ContractInteractionPage() {
         </form>
 
         <div className="mt-8 text-center">
-          <a
-            href="/token-transfer"
-            className="text-gray-900 hover:text-gray-950 text-sm font-medium">
+          <a href="/token-transfer" className="text-gray-900 hover:text-gray-950 text-sm font-medium">
             → Go to Token Transfer Demo
           </a>
         </div>
