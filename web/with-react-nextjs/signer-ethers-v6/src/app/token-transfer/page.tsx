@@ -1,145 +1,47 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { formatEther, parseEther, Contract } from "ethers";
-import { PARA_TEST_TOKEN_CONTRACT_ADDRESS } from "@/config/contracts";
-import { useParaSigner } from "@/hooks/useParaSigner";
-import { useAccount, useWallet } from "@getpara/react-sdk";
+import { useState } from "react";
+import { useAccount } from "@getpara/react-sdk";
 import { Card } from "@/components/ui/Card";
+import { StatusAlert } from "@/components/ui/StatusAlert";
+import { TxResult } from "@/components/ui/TxResult";
+import { ActionButton } from "@/components/ui/ActionButton";
+import { useTokenTransfer } from "@/hooks/useTokenTransfer";
 
-// ERC20 minimal ABI for transfer function
-const ERC20_ABI = [
-  "function transfer(address to, uint256 amount) returns (bool)",
-  "function balanceOf(address account) view returns (uint256)",
-  "function decimals() view returns (uint8)",
-  "function symbol() view returns (string)",
-];
+const DEFAULT_CONTRACT = "0x83cC70475A0d71EF1F2F61FeDE625c8C7E90C3f2";
 
 export default function TokenTransferPage() {
   const [to, setTo] = useState("");
   const [amount, setAmount] = useState("");
-  const [contractAddress, setContractAddress] = useState(PARA_TEST_TOKEN_CONTRACT_ADDRESS);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isBalanceLoading, setIsBalanceLoading] = useState(false);
-  const [ethBalance, setEthBalance] = useState<string | null>(null);
-  const [tokenBalance, setTokenBalance] = useState<string | null>(null);
-  const [tokenSymbol, setTokenSymbol] = useState<string>("CTT");
-  const [txHash, setTxHash] = useState("");
-  const [status, setStatus] = useState<{
-    show: boolean;
-    type: "success" | "error" | "info";
-    message: string;
-  }>({ show: false, type: "success", message: "" });
+  const [contractAddress, setContractAddress] = useState(DEFAULT_CONTRACT);
 
-  const { signer, provider } = useParaSigner();
   const account = useAccount();
-  const { data: wallet } = useWallet();
-
-  const address = wallet?.address;
-  const walletId = wallet?.id;
-  const isConnected = account?.isConnected;
-
-  const fetchBalances = async () => {
-    if (!address || provider === null) return;
-
-    setIsBalanceLoading(true);
-    try {
-      const ethBalanceWei = await provider.getBalance(address);
-      setEthBalance(formatEther(ethBalanceWei));
-
-      const tokenContract = new Contract(contractAddress, ERC20_ABI, provider);
-      const balance = await tokenContract.balanceOf(address);
-      const symbol = await tokenContract.symbol();
-
-      setTokenSymbol(symbol);
-      setTokenBalance(formatEther(balance));
-    } catch (error) {
-      console.error("Error fetching balances:", error);
-      setEthBalance(null);
-      setTokenBalance(null);
-    } finally {
-      setIsBalanceLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (address && contractAddress) {
-      fetchBalances();
-    }
-  }, [address, contractAddress]);
+  const {
+    transfer,
+    fetchBalances,
+    ethBalance,
+    tokenBalance,
+    tokenSymbol,
+    txHash,
+    isLoading,
+    isBalanceLoading,
+    isReady,
+    error,
+    reset,
+  } = useTokenTransfer(contractAddress);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    setStatus({ show: false, type: "success", message: "" });
-    setTxHash("");
-
-    if (!signer) return;
-
-    try {
-      if (!isConnected) {
-        throw new Error("Please connect your wallet to send tokens.");
-      }
-
-      if (!walletId) {
-        throw new Error("No wallet ID found. Please reconnect your wallet.");
-      }
-
-      if (!to.match(/^0x[a-fA-F0-9]{40}$/)) {
-        throw new Error("Invalid recipient address format.");
-      }
-
-      const amountFloat = parseFloat(amount);
-      if (isNaN(amountFloat) || amountFloat <= 0) {
-        throw new Error("Please enter a valid amount greater than 0.");
-      }
-
-      const tokenContract = new Contract(contractAddress, ERC20_ABI, signer);
-
-      setStatus({
-        show: true,
-        type: "info",
-        message: "Please confirm the transaction in your wallet...",
-      });
-
-      const tx = await tokenContract.transfer(to, parseEther(amount));
-      console.log("Transaction submitted:", tx);
-
-      setTxHash(tx.hash);
-      setStatus({
-        show: true,
-        type: "info",
-        message: "Transaction submitted. Waiting for confirmation...",
-      });
-
-      await tx.wait();
-
-      setStatus({
-        show: true,
-        type: "success",
-        message: "Tokens transferred successfully!",
-      });
-
-      await fetchBalances();
-
-      setTo("");
-      setAmount("");
-    } catch (error) {
-      console.error("Error transferring tokens:", error);
-      setStatus({
-        show: true,
-        type: "error",
-        message: error instanceof Error ? error.message : "Failed to transfer tokens. Please try again.",
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    reset();
+    await transfer(to, amount);
+    setTo("");
+    setAmount("");
   };
 
   return (
-    <div className="container mx-auto px-4">
+    <div className="container mx-auto px-4 py-8">
       <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold tracking-tight mb-6">Token Transfer Demo</h1>
+        <h1 className="text-4xl font-bold tracking-tight mb-6">Token Transfer</h1>
         <p className="text-xl text-gray-600 max-w-2xl mx-auto">
           Transfer {tokenSymbol} tokens using the Para SDK with ethers.js integration. The example shows querying for
           ERC20 token data directly from contract and submitting a transfer transaction.
@@ -148,52 +50,50 @@ export default function TokenTransferPage() {
 
       <div className="max-w-xl mx-auto">
         <div className="mb-8 space-y-4">
-          <Card title="Current Balances">
-            <div className="flex justify-between items-center px-6 py-3 bg-gray-100 border-b border-gray-200">
-              <h3 className="text-sm font-medium text-gray-900">Current Balances:</h3>
-              <button
-                onClick={fetchBalances}
-                disabled={isBalanceLoading || !address}
-                className="p-1 text-gray-500 hover:text-gray-700 transition-colors disabled:opacity-50"
-                title="Refresh balances">
-                <span className={`inline-block ${isBalanceLoading ? "animate-spin" : ""}`}>🔄</span>
-              </button>
-            </div>
-            <div className="px-6 py-3 space-y-2">
-              <p className="text-sm text-gray-500 bg-gray-100 p-2 rounded-md">Network: Holesky</p>
-              <div>
-                <p className="text-sm text-gray-600">ETH Balance (for gas fees):</p>
-                <p className="text-lg font-medium text-gray-900">
-                  {!address
-                    ? "Please connect your wallet"
-                    : isBalanceLoading
-                    ? "Loading..."
-                    : ethBalance
-                    ? `${parseFloat(ethBalance).toFixed(4)} ETH`
-                    : "Unable to fetch balance"}
-                </p>
+          <Card title="Current Balances" description="Network: Holesky">
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <div className="flex-1">
+                  <p className="text-sm text-gray-600">ETH Balance (for gas fees):</p>
+                  <p className="text-lg font-medium text-gray-900">
+                    {!account?.isConnected
+                      ? "Please connect your wallet"
+                      : isBalanceLoading
+                        ? "Loading..."
+                        : ethBalance
+                          ? `${parseFloat(ethBalance).toFixed(4)} ETH`
+                          : "Unable to fetch balance"}
+                  </p>
+                </div>
+                <button
+                  onClick={fetchBalances}
+                  disabled={isBalanceLoading || !account?.isConnected}
+                  className="p-1 text-gray-500 hover:text-gray-700 transition-colors disabled:opacity-50"
+                  title="Refresh balances">
+                  <span className={`inline-block ${isBalanceLoading ? "animate-spin" : ""}`}>&#8635;</span>
+                </button>
               </div>
               <div>
                 <p className="text-sm text-gray-600">{tokenSymbol} Balance:</p>
                 <div className="space-y-2">
                   <p className="text-lg font-medium text-gray-900">
-                    {!address
+                    {!account?.isConnected
                       ? "Please connect your wallet"
                       : isBalanceLoading
-                      ? "Loading..."
-                      : tokenBalance
-                      ? `${parseFloat(tokenBalance).toFixed(4)} ${tokenSymbol}`
-                      : "Unable to fetch balance"}
+                        ? "Loading..."
+                        : tokenBalance
+                          ? `${parseFloat(tokenBalance).toFixed(4)} ${tokenSymbol}`
+                          : "Unable to fetch balance"}
                   </p>
                   {tokenBalance === "0.0" && (
-                    <div className="bg-gray-100 border border-gray-200 p-3 text-sm">
-                      <p className="text-gray-700 mb-2">
-                        You don&apos;t have any {tokenSymbol} tokens yet. You&apos;ll need some tokens before you can make
-                        transfers.
+                    <div className="bg-blue-50 border border-blue-200 p-3 text-sm">
+                      <p className="text-blue-700 mb-2">
+                        You don&apos;t have any {tokenSymbol} tokens yet. You&apos;ll need some tokens before you can
+                        make transfers.
                       </p>
                       <a
                         href="/contract-interaction"
-                        className="text-gray-900 hover:text-gray-950 font-medium underline">
+                        className="text-blue-900 hover:text-blue-950 font-medium underline">
                         Click here to mint some {tokenSymbol} tokens →
                       </a>
                     </div>
@@ -204,26 +104,12 @@ export default function TokenTransferPage() {
           </Card>
         </div>
 
-        {status.show && (
-          <div
-            className={`mb-4 rounded-none border ${
-              status.type === "success"
-                ? "bg-green-50 border-green-500 text-green-700"
-                : status.type === "error"
-                ? "bg-red-50 border-red-500 text-red-700"
-                : "bg-gray-100 border-gray-500 text-gray-700"
-            }`}>
-            <p className="px-6 py-4 break-words">{status.message}</p>
-          </div>
-        )}
+        {error && <StatusAlert type="error" message={error.message} />}
+        {txHash && <StatusAlert type="success" message="Tokens transferred successfully!" />}
 
-        <form
-          onSubmit={handleSubmit}
-          className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-3">
-            <label
-              htmlFor="contractAddress"
-              className="block text-sm font-medium text-gray-700">
+            <label htmlFor="contractAddress" className="block text-sm font-medium text-gray-700">
               Token Contract Address
             </label>
             <input
@@ -234,14 +120,12 @@ export default function TokenTransferPage() {
               placeholder="0x..."
               required
               disabled={isLoading}
-              className="block w-full px-4 py-3 border border-gray-300 focus:border-gray-500 focus:ring-1 focus:ring-gray-500 outline-hidden transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
+              className="block w-full px-4 py-3 border border-gray-300 focus:border-gray-500 focus:ring-1 focus:ring-gray-500 outline-none transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
             />
           </div>
 
           <div className="space-y-3">
-            <label
-              htmlFor="to"
-              className="block text-sm font-medium text-gray-700">
+            <label htmlFor="to" className="block text-sm font-medium text-gray-700">
               Recipient Address
             </label>
             <input
@@ -252,14 +136,12 @@ export default function TokenTransferPage() {
               placeholder="0x..."
               required
               disabled={isLoading}
-              className="block w-full px-4 py-3 border border-gray-300 focus:border-gray-500 focus:ring-1 focus:ring-gray-500 outline-hidden transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
+              className="block w-full px-4 py-3 border border-gray-300 focus:border-gray-500 focus:ring-1 focus:ring-gray-500 outline-none transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
             />
           </div>
 
           <div className="space-y-3">
-            <label
-              htmlFor="amount"
-              className="block text-sm font-medium text-gray-700">
+            <label htmlFor="amount" className="block text-sm font-medium text-gray-700">
               Amount ({tokenSymbol})
             </label>
             <input
@@ -271,36 +153,19 @@ export default function TokenTransferPage() {
               step="0.01"
               required
               disabled={isLoading}
-              className="block w-full px-4 py-3 border border-gray-300 focus:border-gray-500 focus:ring-1 focus:ring-gray-500 outline-hidden transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
+              className="block w-full px-4 py-3 border border-gray-300 focus:border-gray-500 focus:ring-1 focus:ring-gray-500 outline-none transition-colors rounded-none disabled:bg-gray-50 disabled:text-gray-500"
             />
           </div>
 
-          <button
-            type="submit"
-            className="w-full rounded-none bg-gray-900 px-6 py-3 text-sm font-medium text-white hover:bg-gray-950 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={!to || !amount || isLoading}>
-            {isLoading ? "Sending Tokens..." : "Send Tokens"}
-          </button>
+          <ActionButton
+            onClick={() => {}}
+            isLoading={isLoading}
+            disabled={!to || !amount || !isReady || !account?.isConnected}
+            loadingText="Sending Tokens...">
+            Send Tokens
+          </ActionButton>
 
-          {txHash && (
-            <Card title="Transaction Hash">
-              <div className="flex justify-between items-center px-6 py-4 bg-gray-100 border-b border-gray-200">
-                <h3 className="text-sm font-medium text-gray-900">Transaction Hash:</h3>
-                <a
-                  href={`https://holesky.etherscan.io/tx/${txHash}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-3 py-1 text-sm bg-gray-900 text-white hover:bg-gray-950 transition-colors rounded-none">
-                  View on Etherscan
-                </a>
-              </div>
-              <div className="p-6">
-                <p className="text-sm font-mono break-all text-gray-600 bg-white p-4 border border-gray-200">
-                  {txHash}
-                </p>
-              </div>
-            </Card>
-          )}
+          {txHash && <TxResult hash={txHash} />}
         </form>
       </div>
     </div>
