@@ -1,8 +1,3 @@
-import { Environment } from "@getpara/react-sdk";
-
-export const API_KEY = process.env.NEXT_PUBLIC_PARA_API_KEY;
-export const ENVIRONMENT = Environment.BETA;
-
 // Cosmos chain configuration (mainnet - not used in this demo)
 export const COSMOS_CHAIN_ID = "cosmoshub-4";
 export const COSMOS_RPC_URL = "https://cosmos-rpc.polkachu.com";
