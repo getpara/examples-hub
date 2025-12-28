@@ -13,7 +13,7 @@ export function useParaSigner() {
   const { isConnected } = useAccount();
   const client = useClient();
   const { connection } = useSolana();
-  
+
   const [signer, setSigner] = useState<ParaSolanaWeb3Signer | null>(null);
   const [anchorProvider, setAnchorProvider] = useState<anchor.AnchorProvider | null>(null);
 
@@ -72,11 +72,14 @@ export function useParaSigner() {
     }
   }, [isConnected, connection, client, createWalletAdapter]);
 
+  const isReady = Boolean(signer && anchorProvider && connection && isConnected);
+
   return {
     signer,
     connection,
     anchorProvider,
     isConnected: isConnected || false,
+    isReady,
     address: signer?.sender?.toBase58() || null,
   };
 }

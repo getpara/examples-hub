@@ -1,8 +1,7 @@
 import Header from "@/components/layout/Header";
 import "@/styles/globals.css";
 import "@getpara/react-sdk/styles.css";
-import { QueryProvider } from "@/context/QueryProvider";
-import { ParaProvider } from "@/context/ParaProvider";
+import { ParaProvider } from "@/components/ParaProvider";
 
 export default function RootLayout({
   children,
@@ -12,12 +11,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <QueryProvider>
-          <ParaProvider>
-            <Header />
-            <main>{children}</main>
-          </ParaProvider>
-        </QueryProvider>
+        <ParaProvider>
+          <Header />
+          <main>{children}</main>
+        </ParaProvider>
       </body>
     </html>
   );
