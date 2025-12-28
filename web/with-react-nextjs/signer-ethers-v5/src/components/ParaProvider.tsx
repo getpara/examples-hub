@@ -2,6 +2,7 @@
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Environment, ParaProvider as ParaSDKProvider } from "@getpara/react-sdk";
+import { sepolia } from "wagmi/chains";
 
 const API_KEY = process.env.NEXT_PUBLIC_PARA_API_KEY ?? "";
 const ENVIRONMENT = (process.env.NEXT_PUBLIC_PARA_ENVIRONMENT as Environment) || Environment.BETA;
@@ -19,6 +20,18 @@ export function ParaProvider({ children }: { children: React.ReactNode }) {
         paraClientConfig={{
           apiKey: API_KEY,
           env: ENVIRONMENT,
+        }}
+        externalWalletConfig={{
+          wallets: ["METAMASK"],
+          includeWalletVerification: true,
+          evmConnector: {
+            config: {
+              chains: [sepolia],
+            },
+          },
+          walletConnect: {
+            projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID || "",
+          },
         }}
         config={{ appName: "Para Ethers v5 Signer Example" }}
         paraModalConfig={{

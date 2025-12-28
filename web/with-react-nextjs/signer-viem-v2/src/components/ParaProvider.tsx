@@ -2,6 +2,7 @@
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ParaProvider as ParaSDKProvider } from "@getpara/react-sdk";
+import { sepolia } from "wagmi/chains";
 import { API_KEY, ENVIRONMENT } from "@/config/constants";
 import "@getpara/react-sdk/styles.css";
 
@@ -21,6 +22,18 @@ export function ParaProvider({ children }: { children: React.ReactNode }) {
           apiKey,
           env: ENVIRONMENT,
         }}
+        externalWalletConfig={{
+          wallets: ["METAMASK"],
+          includeWalletVerification: true,
+          evmConnector: {
+            config: {
+              chains: [sepolia],
+            },
+          },
+          walletConnect: {
+            projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID || "",
+          },
+        }}
         config={{ appName: "Para Viem v2 Demo" }}
         paraModalConfig={{
           disableEmailLogin: false,
@@ -29,16 +42,17 @@ export function ParaProvider({ children }: { children: React.ReactNode }) {
           oAuthMethods: ["APPLE", "DISCORD", "FACEBOOK", "FARCASTER", "GOOGLE", "TWITTER"],
           onRampTestMode: true,
           theme: {
-            foregroundColor: "#2D3648",
+            foregroundColor: "#222222",
             backgroundColor: "#FFFFFF",
-            accentColor: "#6B7280",
-            darkForegroundColor: "#E8EBF2",
-            darkBackgroundColor: "#1A1F2B",
-            darkAccentColor: "#9CA3AF",
+            accentColor: "#888888",
+            darkForegroundColor: "#EEEEEE",
+            darkBackgroundColor: "#111111",
+            darkAccentColor: "#AAAAAA",
             mode: "light",
             borderRadius: "none",
             font: "Inter",
           },
+          logo: "/para.svg",
           recoverySecretStepEnabled: true,
           twoFactorAuthEnabled: false,
         }}>
