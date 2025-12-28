@@ -7,8 +7,8 @@ import { useWriteContract } from "@/hooks/useWriteContract";
 import { useBalance } from "@/hooks/useBalance";
 import { publicClient } from "@/lib/viem";
 import { PARA_TEST_TOKEN_ADDRESS, ERC20_ABI } from "@/lib/contracts";
-import { StatusMessage } from "@/components/ui/StatusMessage";
-import { TransactionResult } from "@/components/ui/TransactionResult";
+import { StatusAlert } from "@/components/ui/StatusAlert";
+import { TxResult } from "@/components/ui/TxResult";
 
 export default function TokenTransferPage() {
   const [to, setTo] = useState("");
@@ -156,7 +156,7 @@ export default function TokenTransferPage() {
           </div>
         </div>
 
-        <StatusMessage type={status.type} message={status.message} show={status.show} />
+        {status.show && <StatusAlert type={status.type} message={status.message} />}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-3">
@@ -204,7 +204,7 @@ export default function TokenTransferPage() {
           </button>
         </form>
 
-        {txHash && <TransactionResult txHash={txHash} />}
+        {txHash && <TxResult hash={txHash} />}
       </div>
     </div>
   );

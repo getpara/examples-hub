@@ -6,8 +6,8 @@ import { formatEther, getContract, parseEther } from "viem";
 import { useWriteContract } from "@/hooks/useWriteContract";
 import { publicClient } from "@/lib/viem";
 import { PARA_TEST_TOKEN_ADDRESS, PARA_TEST_TOKEN_ABI } from "@/lib/contracts";
-import { StatusMessage } from "@/components/ui/StatusMessage";
-import { TransactionResult } from "@/components/ui/TransactionResult";
+import { StatusAlert } from "@/components/ui/StatusAlert";
+import { TxResult } from "@/components/ui/TxResult";
 
 export default function ContractInteractionPage() {
   const [amount, setAmount] = useState("");
@@ -177,7 +177,7 @@ export default function ContractInteractionPage() {
           </div>
         </div>
 
-        <StatusMessage type={status.type} message={status.message} show={status.show} />
+        {status.show && <StatusAlert type={status.type} message={status.message} />}
 
         <form onSubmit={handleMint} className="space-y-6">
           <div className="space-y-3">
@@ -201,7 +201,7 @@ export default function ContractInteractionPage() {
           </button>
         </form>
 
-        {txHash && <TransactionResult txHash={txHash} />}
+        {txHash && <TxResult hash={txHash} />}
       </div>
     </div>
   );

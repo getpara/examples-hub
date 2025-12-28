@@ -6,8 +6,8 @@ import { formatEther } from "viem";
 import { useDeployContract } from "@/hooks/useDeployContract";
 import { useBalance } from "@/hooks/useBalance";
 import { PARA_TEST_TOKEN_ABI, PARA_TEST_TOKEN_BYTECODE } from "@/lib/contracts";
-import { StatusMessage } from "@/components/ui/StatusMessage";
-import { TransactionResult } from "@/components/ui/TransactionResult";
+import { StatusAlert } from "@/components/ui/StatusAlert";
+import { TxResult } from "@/components/ui/TxResult";
 
 export default function ContractDeploymentPage() {
   const [status, setStatus] = useState<{ show: boolean; type: "success" | "error" | "info"; message: string }>({
@@ -97,7 +97,7 @@ export default function ContractDeploymentPage() {
           </div>
         </div>
 
-        <StatusMessage type={status.type} message={status.message} show={status.show} />
+        {status.show && <StatusAlert type={status.type} message={status.message} />}
 
         <button
           onClick={handleDeploy}
@@ -119,7 +119,7 @@ export default function ContractDeploymentPage() {
               </div>
             </div>
 
-            {txHash && <TransactionResult txHash={txHash} />}
+            {txHash && <TxResult hash={txHash} />}
 
             <div className="rounded-none border border-gray-200">
               <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">

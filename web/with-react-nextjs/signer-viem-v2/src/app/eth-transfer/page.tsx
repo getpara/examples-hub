@@ -5,8 +5,8 @@ import { useModal, useAccount } from "@getpara/react-sdk";
 import { formatEther, parseEther } from "viem";
 import { useSendTransaction } from "@/hooks/useSendTransaction";
 import { useBalance } from "@/hooks/useBalance";
-import { StatusMessage } from "@/components/ui/StatusMessage";
-import { TransactionResult } from "@/components/ui/TransactionResult";
+import { StatusAlert } from "@/components/ui/StatusAlert";
+import { TxResult } from "@/components/ui/TxResult";
 
 export default function EthTransferPage() {
   const [to, setTo] = useState("");
@@ -102,7 +102,7 @@ export default function EthTransferPage() {
           </div>
         </div>
 
-        <StatusMessage type={status.type} message={status.message} show={status.show} />
+        {status.show && <StatusAlert type={status.type} message={status.message} />}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-3">
@@ -138,7 +138,7 @@ export default function EthTransferPage() {
           </button>
         </form>
 
-        {txHash && <TransactionResult txHash={txHash} />}
+        {txHash && <TxResult hash={txHash} />}
       </div>
     </div>
   );

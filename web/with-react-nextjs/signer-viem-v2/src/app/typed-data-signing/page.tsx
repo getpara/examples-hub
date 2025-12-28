@@ -6,7 +6,7 @@ import { formatEther, getContract } from "viem";
 import { useSignTypedData } from "@/hooks/useSignTypedData";
 import { publicClient, CHAIN } from "@/lib/viem";
 import { PARA_TEST_TOKEN_ADDRESS, PARA_TEST_TOKEN_ABI } from "@/lib/contracts";
-import { StatusMessage } from "@/components/ui/StatusMessage";
+import { StatusAlert } from "@/components/ui/StatusAlert";
 
 type TokenAttestation = {
   holder: string;
@@ -180,7 +180,7 @@ export default function TypedDataSigningPage() {
           </div>
         </div>
 
-        <StatusMessage type={status.type} message={status.message} show={status.show} />
+        {status.show && <StatusAlert type={status.type} message={status.message} />}
 
         <form
           onSubmit={(e) => {

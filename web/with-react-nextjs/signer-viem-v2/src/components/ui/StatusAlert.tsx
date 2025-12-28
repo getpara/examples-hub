@@ -1,12 +1,9 @@
-interface StatusMessageProps {
+interface StatusAlertProps {
   type: "success" | "error" | "info";
   message: string;
-  show: boolean;
 }
 
-export function StatusMessage({ type, message, show }: StatusMessageProps) {
-  if (!show) return null;
-
+export function StatusAlert({ type, message }: StatusAlertProps) {
   const styles = {
     success: "bg-green-50 border-green-500 text-green-700",
     error: "bg-red-50 border-red-500 text-red-700",

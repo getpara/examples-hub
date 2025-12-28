@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useModal, useAccount } from "@getpara/react-sdk";
 import { verifyMessage } from "viem";
 import { useSignMessage } from "@/hooks/useSignMessage";
-import { StatusMessage } from "@/components/ui/StatusMessage";
+import { StatusAlert } from "@/components/ui/StatusAlert";
 
 export default function MessageSigningPage() {
   const [message, setMessage] = useState("");
@@ -80,7 +80,7 @@ export default function MessageSigningPage() {
       </div>
 
       <div className="max-w-xl mx-auto">
-        <StatusMessage type={status.type} message={status.message} show={status.show} />
+        {status.show && <StatusAlert type={status.type} message={status.message} />}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-3">

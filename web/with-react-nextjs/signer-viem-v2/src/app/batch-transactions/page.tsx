@@ -6,8 +6,8 @@ import { encodeFunctionData, formatEther, getContract, parseEther } from "viem";
 import { useWriteContract } from "@/hooks/useWriteContract";
 import { publicClient } from "@/lib/viem";
 import { PARA_TEST_TOKEN_ADDRESS, PARA_TEST_TOKEN_ABI } from "@/lib/contracts";
-import { StatusMessage } from "@/components/ui/StatusMessage";
-import { TransactionResult } from "@/components/ui/TransactionResult";
+import { StatusAlert } from "@/components/ui/StatusAlert";
+import { TxResult } from "@/components/ui/TxResult";
 
 type Operation = {
   type: "mint" | "transfer";
@@ -174,7 +174,7 @@ export default function BatchTransactionsPage() {
           </div>
         </div>
 
-        <StatusMessage type={status.type} message={status.message} show={status.show} />
+        {status.show && <StatusAlert type={status.type} message={status.message} />}
 
         <div className="space-y-6">
           {operations.map((operation, index) => (
@@ -245,7 +245,7 @@ export default function BatchTransactionsPage() {
             {isPending ? "Executing Operations..." : "Execute Batch"}
           </button>
 
-          {txHash && <TransactionResult txHash={txHash} />}
+          {txHash && <TxResult hash={txHash} />}
         </div>
       </div>
     </div>
