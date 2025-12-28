@@ -1,206 +1,36 @@
 "use client";
 
-import { useParaSigner } from "@/hooks/useParaSigner";
-import { useAccount, useWallet } from "@getpara/react-sdk";
-import { LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useBalance } from "@/hooks/useBalance";
+import { useSolTransfer } from "@/hooks/useSolTransfer";
+import { StatusAlert } from "@/components/ui/StatusAlert";
+import { TxResult } from "@/components/ui/TxResult";
+import { ActionButton } from "@/components/ui/ActionButton";
+import { DataField } from "@/components/ui/DataField";
 
 export default function SolTransferPage() {
-  const [to, setTo] = useState("devwuNsNYACyiEYxRNqMNseBpNnGfnd4ZwNHL7sphqv"); // default send back to faucet
+  const [to, setTo] = useState("devwuNsNYACyiEYxRNqMNseBpNnGfnd4ZwNHL7sphqv");
   const [amount, setAmount] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [isBalanceLoading, setIsBalanceLoading] = useState(false);
-  const [balance, setBalance] = useState<string | null>(null);
-  const [txSignature, setTxSignature] = useState("");
-  const [status, setStatus] = useState<{
-    show: boolean;
-    type: "success" | "error" | "info";
-    message: string;
-  }>({ show: false, type: "success", message: "" });
 
-  const { signer, connection } = useParaSigner();
-  const account = useAccount();
-  const { data: wallet } = useWallet();
-
-  const address = wallet?.address;
-  const isConnected = account?.isConnected;
-
-  const fetchBalance = async () => {
-    if (!address || !connection) return;
-
-    setIsBalanceLoading(true);
-    try {
-      if (!signer?.sender) {
-        console.error("No signer sender available");
-        setBalance(null);
-        return;
-      }
-      const balanceLamports = await connection.getBalance(signer.sender);
-      setBalance((balanceLamports / LAMPORTS_PER_SOL).toFixed(4));
-    } catch (error) {
-      console.error("Error fetching balance:", error);
-      setBalance(null);
-    } finally {
-      setIsBalanceLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (address && signer) {
-      fetchBalance();
-    }
-  }, [address, signer, connection]);
-
-  const constructTransaction = async (toAddress: string, solAmount: string): Promise<Transaction> => {
-    if (!address || !connection) throw new Error("No sender address or connection available");
-
-    try {
-      const fromPubKey = signer?.sender;
-      const toPubKey = new PublicKey(toAddress);
-      const amountLamports = parseFloat(solAmount) * LAMPORTS_PER_SOL;
-
-      const transaction = new Transaction();
-
-      transaction.add(
-        SystemProgram.transfer({
-          fromPubkey: fromPubKey as PublicKey,
-          toPubkey: toPubKey,
-          lamports: BigInt(amountLamports),
-        })
-      );
-
-      transaction.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
-      transaction.feePayer = fromPubKey as PublicKey;
-
-      return transaction;
-    } catch (error) {
-      console.error("Error constructing transaction:", error);
-      throw error;
-    }
-  };
-
-  const validateTransaction = async (toAddress: string, solAmount: string): Promise<boolean> => {
-    if (!address || !connection) throw new Error("No sender address or provider available");
-
-    try {
-      if (!signer?.sender) {
-        throw new Error("No signer sender available");
-      }
-      const balanceLamports = await connection.getBalance(signer.sender);
-      const transaction = await constructTransaction(toAddress, solAmount);
-      const estimatedGas = await transaction.getEstimatedFee(connection);
-      if (estimatedGas === null) {
-        throw new Error("Failed to estimate transaction fee");
-      }
-      const totalCost = parseFloat(solAmount) * LAMPORTS_PER_SOL + estimatedGas;
-
-      if (totalCost > balanceLamports) {
-        const requiredSol = (totalCost / LAMPORTS_PER_SOL).toFixed(4);
-        const availableSol = (balanceLamports / LAMPORTS_PER_SOL).toFixed(4);
-        throw new Error(
-          `Insufficient balance. Transaction requires approximately ${requiredSol} SOL, but you have only ${availableSol} SOL available.`
-        );
-      }
-
-      return true;
-    } catch (error) {
-      console.error("Error validating transaction:", error);
-      throw error;
-    }
-  };
+  const { balance, isLoading: isBalanceLoading, refetch, isReady: isBalanceReady, address } = useBalance();
+  const { transfer, txSignature, isLoading, error, isReady, status } = useSolTransfer();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    setStatus({ show: false, type: "success", message: "" });
-    setTxSignature("");
-
-    try {
-      if (!isConnected) {
-        setStatus({
-          show: true,
-          type: "error",
-          message: "Please connect your wallet to send a transaction.",
-        });
-        return;
-      }
-
-      if (!signer) {
-        setStatus({
-          show: true,
-          type: "error",
-          message: "No signer found. Please reconnect your wallet.",
-        });
-        return;
-      }
-
-      if (!to || !PublicKey.isOnCurve(to)) {
-        setStatus({
-          show: true,
-          type: "error",
-          message: "Invalid recipient address format.",
-        });
-        return;
-      }
-
-      const amountFloat = parseFloat(amount);
-      if (isNaN(amountFloat) || amountFloat <= 0) {
-        setStatus({
-          show: true,
-          type: "error",
-          message: "Please enter a valid amount greater than 0.",
-        });
-        return;
-      }
-
-      await validateTransaction(to, amount);
-
-      const tx = await constructTransaction(to, amount);
-      console.log("Constructed transaction:", tx);
-
-      const txResponse = await signer.sendTransaction(tx);
-      console.log("Transaction submitted:", txResponse);
-
-      setTxSignature(txResponse);
-      setStatus({
-        show: true,
-        type: "info",
-        message: "Transaction submitted. Waiting for confirmation...",
-      });
-
-      let receipt = null;
-
-      while (!receipt) {
-        receipt = await connection?.getSignatureStatus(txResponse, {
-          searchTransactionHistory: true,
-        });
-        if (receipt?.value?.confirmationStatus === "confirmed" || receipt?.value?.confirmationStatus === "finalized") {
-          break;
-        }
-        await new Promise((resolve) => setTimeout(resolve, 500));
-      }
-      console.log("Transaction confirmed:", receipt);
-
-      setStatus({
-        show: true,
-        type: "success",
-        message: "Transaction confirmed and executed successfully!",
-      });
-
-      await fetchBalance();
-
+    if (!isReady || !to || !amount) return;
+    await transfer(to, amount);
+    if (status === "success") {
+      refetch();
       setTo("");
       setAmount("");
-    } catch (error) {
-      console.error("Error sending transaction:", error);
-      setStatus({
-        show: true,
-        type: "error",
-        message: error instanceof Error ? error.message : "Failed to send transaction. Please try again.",
-      });
-    } finally {
-      setIsLoading(false);
     }
+  };
+
+  const getBalanceDisplay = () => {
+    if (!address) return "Please connect your wallet";
+    if (isBalanceLoading) return "Loading...";
+    if (balance) return `${parseFloat(balance).toFixed(4)} SOL`;
+    return "Unable to fetch balance";
   };
 
   return (
@@ -216,51 +46,24 @@ export default function SolTransferPage() {
       </div>
 
       <div className="max-w-xl mx-auto">
-        <div className="mb-8 rounded-none border border-gray-200">
-          <div className="flex justify-between items-center px-6 py-3 bg-gray-50 border-b border-gray-200">
-            <h3 className="text-sm font-medium text-gray-900">Current Balance:</h3>
-            <button
-              onClick={fetchBalance}
-              disabled={isBalanceLoading || !address}
-              className="p-1 text-gray-500 hover:text-gray-700 transition-colors disabled:opacity-50"
-              title="Refresh balance">
-              <span className={`inline-block ${isBalanceLoading ? "animate-spin" : ""}`}>🔄</span>
-            </button>
-          </div>
-          <div className="px-6 py-3">
-            <p className="text-sm text-gray-500 bg-gray-100 p-2 rounded-none">Network: Devnet</p>
-            <p className="text-lg font-medium text-gray-900">
-              {!address
-                ? "Please connect your wallet"
-                : isBalanceLoading
-                ? "Loading..."
-                : balance
-                ? `${parseFloat(balance).toFixed(4)} SOL`
-                : "Unable to fetch balance"}
-            </p>
-          </div>
-        </div>
+        <DataField
+          label="Current Balance:"
+          value={getBalanceDisplay()}
+          isLoading={isBalanceLoading}
+          onRefresh={refetch}
+          refreshDisabled={!isBalanceReady}
+          subLabel="Network: Devnet"
+        />
 
-        {status.show && (
-          <div
-            className={`mb-4 rounded-none border ${
-              status.type === "success"
-                ? "bg-green-50 border-green-500 text-green-700"
-                : status.type === "error"
-                ? "bg-red-50 border-red-500 text-red-700"
-                : "bg-gray-50 border-gray-500 text-gray-700"
-            }`}>
-            <p className="px-6 py-4 break-words">{status.message}</p>
-          </div>
-        )}
+        {error && <StatusAlert type="error" message={error.message} />}
 
-        <form
-          onSubmit={handleSubmit}
-          className="space-y-4">
+        {status === "confirming" && <StatusAlert type="info" message="Transaction submitted. Waiting for confirmation..." />}
+
+        {status === "success" && <StatusAlert type="success" message="Transaction confirmed and executed successfully!" />}
+
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-3">
-            <label
-              htmlFor="to"
-              className="block text-sm font-medium text-gray-700">
+            <label htmlFor="to" className="block text-sm font-medium text-gray-700">
               Recipient Address
             </label>
             <input
@@ -276,9 +79,7 @@ export default function SolTransferPage() {
           </div>
 
           <div className="space-y-3">
-            <label
-              htmlFor="amount"
-              className="block text-sm font-medium text-gray-700">
+            <label htmlFor="amount" className="block text-sm font-medium text-gray-700">
               Amount (SOL)
             </label>
             <input
@@ -294,32 +95,15 @@ export default function SolTransferPage() {
             />
           </div>
 
-          <button
+          <ActionButton
             type="submit"
-            className="w-full rounded-none bg-gray-900 px-6 py-3 text-sm font-medium text-white hover:bg-gray-950 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={!to || !amount || isLoading}>
-            {isLoading ? "Sending Transaction..." : "Send Transaction"}
-          </button>
+            disabled={!to || !amount || !isReady}
+            isLoading={isLoading}
+            loadingText="Sending Transaction...">
+            Send Transaction
+          </ActionButton>
 
-          {txSignature && (
-            <div className="mt-8 rounded-none border border-gray-200">
-              <div className="flex justify-between items-center px-6 py-4 bg-gray-50 border-b border-gray-200">
-                <h3 className="text-sm font-medium text-gray-900">Transaction Signature:</h3>
-                <a
-                  href={`https://solscan.io/tx/${txSignature}?cluster=devnet`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-3 py-1 text-sm bg-gray-900 text-white hover:bg-gray-950 transition-colors rounded-none">
-                  View on Solscan
-                </a>
-              </div>
-              <div className="p-6">
-                <p className="text-sm font-mono break-all text-gray-600 bg-white p-4 border border-gray-200">
-                  {txSignature}
-                </p>
-              </div>
-            </div>
-          )}
+          {txSignature && <TxResult signature={txSignature} />}
         </form>
       </div>
     </div>

@@ -25,8 +25,13 @@ export function useParaSigner() {
     }
   }, [isConnected, connection, client]);
 
+  const isReady = Boolean(signer && isConnected);
+  const address = signer?.sender?.toBase58() ?? null;
+
   return {
     signer,
     connection,
+    isReady,
+    address,
   };
 }

@@ -1,140 +1,24 @@
 "use client";
 
 import { useState } from "react";
-import { getBase58Decoder, getBase58Encoder, getUtf8Encoder } from "@solana/kit";
-import nacl from "tweetnacl";
-import { useAccount, useWallet } from "@getpara/react-sdk";
-import { useParaSigner } from "@/hooks/useParaSigner";
+import { useMessageSigning } from "@/hooks/useMessageSigning";
+import { StatusAlert } from "@/components/ui/StatusAlert";
+import { TxResult } from "@/components/ui/TxResult";
+import { ActionButton } from "@/components/ui/ActionButton";
 
 export default function MessageSigningPage() {
   const [message, setMessage] = useState("");
-  const [signature, setSignature] = useState("");
-  const [_, setRecoveredAddress] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [status, setStatus] = useState<{
-    show: boolean;
-    type: "success" | "error";
-    message: string;
-  }>({ show: false, type: "success", message: "" });
-
-  const { signer } = useParaSigner();
-  const account = useAccount();
-  const { data: wallet } = useWallet();
-
-  const walletId = wallet?.id;
-  const isConnected = account?.isConnected;
+  const { signMessage, verifySignature, signature, isLoading, error, isReady, isVerified } = useMessageSigning();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    setRecoveredAddress(false);
-
-    if (!signer) return;
-
-    try {
-      if (!isConnected) {
-        setStatus({
-          show: true,
-          type: "error",
-          message: "Please connect your wallet to sign a message.",
-        });
-        return;
-      }
-
-      if (!walletId) {
-        setStatus({
-          show: true,
-          type: "error",
-          message: "No wallet ID found. Please reconnect your wallet.",
-        });
-        return;
-      }
-
-      const messageToSign = message.trim();
-      const messageBytes = getUtf8Encoder().encode(messageToSign);
-      const signedBytes = await signer.signBytes(Buffer.from(messageBytes));
-      const signature = getBase58Decoder().decode(signedBytes);
-
-      setSignature(`${signature}`);
-
-      setStatus({
-        show: true,
-        type: "success",
-        message: "Message signed successfully!",
-      });
-    } catch (error) {
-      setStatus({
-        show: true,
-        type: "error",
-        message: "Failed to sign message. Please try again.",
-      });
-      console.error("Error signing message:", error);
-    } finally {
-      setIsLoading(false);
-    }
+    if (!isReady || !message.trim()) return;
+    await signMessage(message);
   };
 
-  // Verify signature on Firefox that has support for Ed25519 subtle
-  // const handleVerify = async () => {
-  //   try {
-  //     if (!message || !signature) return;
-
-  //     const messageBytes = getUtf8Encoder().encode(message);
-  //     const signatureBytes = new Uint8Array(getBase58Encoder().encode(signature)) as SignatureBytes;
-  //     const publicKeyBuffer = new Uint8Array(signer?.sender!.toBuffer()!);
-  //     const cryptoKey = await crypto.subtle.importKey("raw", publicKeyBuffer, "Ed25519", true, ["verify"]);
-  //     const isValid = await verifySignature(cryptoKey, signatureBytes, messageBytes);
-
-  //     setRecoveredAddress(isValid);
-
-  //     setStatus({
-  //       show: true,
-  //       type: isValid ? "success" : "error",
-  //       message: isValid ? "Signature verified successfully!" : "Invalid signature for this message and public key.",
-  //     });
-  //   } catch (error) {
-  //     setStatus({
-  //       show: true,
-  //       type: "error",
-  //       message: "Failed to verify signature. Please try again.",
-  //     });
-  //     console.error("Error verifying signature:", error);
-  //   }
-  // };
-
-  // Verify signature on all browsers using tweetnacl
-  const handleVerify2 = async () => {
-    try {
-      if (!message || !signature) return;
-
-      const messageBytes = new Uint8Array(getUtf8Encoder().encode(message));
-      const signatureBytes = new Uint8Array(getBase58Encoder().encode(signature));
-      if (!signer?.sender) {
-        setStatus({
-          show: true,
-          type: "error",
-          message: "No signer found. Please reconnect your wallet.",
-        });
-        return;
-      }
-      const publicKeyBuffer = signer.sender.toBytes();
-      const isValid = nacl.sign.detached.verify(messageBytes, signatureBytes, publicKeyBuffer);
-
-      setRecoveredAddress(isValid);
-
-      setStatus({
-        show: true,
-        type: isValid ? "success" : "error",
-        message: isValid ? "Signature verified successfully!" : "Invalid signature for this message and public key.",
-      });
-    } catch (error) {
-      setStatus({
-        show: true,
-        type: "error",
-        message: "Failed to verify signature. Please try again.",
-      });
-      console.error("Error verifying signature:", error);
-    }
+  const handleVerify = async () => {
+    if (!signature || !message) return;
+    await verifySignature(message);
   };
 
   return (
@@ -150,24 +34,21 @@ export default function MessageSigningPage() {
       </div>
 
       <div className="max-w-xl mx-auto">
-        {status.show && (
-          <div
-            className={`mb-4 rounded-none border ${
-              status.type === "success"
-                ? "bg-green-50 border-green-500 text-green-700"
-                : "bg-red-50 border-red-500 text-red-700"
-            }`}>
-            <p className="px-6 py-4">{status.message}</p>
-          </div>
+        {error && <StatusAlert type="error" message={error.message} />}
+
+        {isVerified === true && <StatusAlert type="success" message="Signature verified successfully!" />}
+
+        {isVerified === false && !error && (
+          <StatusAlert type="error" message="Invalid signature for this message and public key." />
         )}
 
-        <form
-          onSubmit={handleSubmit}
-          className="space-y-4">
+        {signature && !error && isVerified === null && (
+          <StatusAlert type="success" message="Message signed successfully!" />
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-3">
-            <label
-              htmlFor="message"
-              className="block text-sm font-medium text-gray-700">
+            <label htmlFor="message" className="block text-sm font-medium text-gray-700">
               Message to Sign
             </label>
             <input
@@ -182,30 +63,12 @@ export default function MessageSigningPage() {
             />
           </div>
 
-          <button
-            type="submit"
-            className="w-full rounded-none bg-gray-900 px-6 py-3 text-sm font-medium text-white hover:bg-gray-950 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={!message || isLoading}>
-            {isLoading ? "Signing Message..." : "Sign Message"}
-          </button>
+          <ActionButton type="submit" disabled={!message || !isReady} isLoading={isLoading} loadingText="Signing...">
+            Sign Message
+          </ActionButton>
 
           {signature && (
-            <div className="mt-8 rounded-none border border-gray-200">
-              <div className="flex justify-between items-center px-6 py-4 bg-gray-50 border-b border-gray-200">
-                <h3 className="text-sm font-medium text-gray-900">Signature:</h3>
-                <button
-                  type="button"
-                  onClick={handleVerify2}
-                  className="px-3 py-1 text-sm bg-gray-900 text-white hover:bg-gray-950 transition-colors rounded-none">
-                  Verify
-                </button>
-              </div>
-              <div className="p-6">
-                <p className="text-sm font-mono break-all text-gray-600 bg-white p-4 border border-gray-200">
-                  {signature}
-                </p>
-              </div>
-            </div>
+            <TxResult signature={signature} label="Signature:" actionLabel="Verify" onAction={handleVerify} />
           )}
         </form>
       </div>
