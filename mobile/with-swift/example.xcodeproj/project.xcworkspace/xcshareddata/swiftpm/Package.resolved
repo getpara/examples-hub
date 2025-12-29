@@ -24,8 +24,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/marmelroy/PhoneNumberKit",
       "state" : {
-        "revision" : "ae822f82625ea00b3fff2498eb0d94904a92371d",
-        "version" : "4.1.8"
+        "revision" : "f158939f66f4ef94512b7e6cd1e56057070a05e4",
+        "version" : "4.2.1"
       }
     },
     {
@@ -51,8 +51,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/getpara/swift-sdk",
       "state" : {
-        "branch" : "2.0.0-alpha",
-        "revision" : "8abaebfe7bb6f9d3c5eba5115389d4aa60fa2133"
+        "revision" : "dd6648bfd24b5bbc871a549bdbfee977eb4189b0",
+        "version" : "2.6.0"
       }
     },
     {
