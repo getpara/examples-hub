@@ -1,13 +1,12 @@
 import { alchemy, arbitrumSepolia } from "@account-kit/infra";
 import { BatchUserOperationCallData, WalletClientSigner } from "@aa-sdk/core";
+import { createModularAccountAlchemyClient } from "@account-kit/smart-contracts";
 import ParaServer, { Environment } from "@getpara/server-sdk";
 import { createParaAccount, createParaViemClient } from "@getpara/viem-v2-integration";
+import { encodeFunctionData, http } from "viem";
 import Example from "../contracts/Example.json";
-import { encodeFunctionData, http, LocalAccount, WalletClient } from "viem";
 import { getKeyShareInDB } from "../db/keySharesDB.js";
 import { decrypt } from "../utils/encryption-utils.js";
-import { customSignMessage } from "../utils/signature-utils.js";
-import { createModularAccountAlchemyClient } from "@account-kit/smart-contracts";
 
 const EXAMPLE_CONTRACT_ADDRESS = "0x7920b6d8b07f0b9a3b96f238c64e022278db1419";
 const EXAMPLE_ABI = Example["contracts"]["contracts/Example.sol:Example"]["abi"];
@@ -57,10 +56,9 @@ export async function signWithAlchemy(req: Request): Promise<Response> {
     const decryptedKeyShare = await decrypt(keyShare);
     await para.setUserShare(decryptedKeyShare);
 
-    const viemParaAccount: LocalAccount = createParaAccount(para);
-    viemParaAccount.signMessage = async ({ message }) => customSignMessage(para, message);
+    const viemParaAccount = createParaAccount(para);
 
-    const viemClient: WalletClient = createParaViemClient(para, {
+    const viemClient = createParaViemClient(para, {
       account: viemParaAccount,
       chain: arbitrumSepolia,
       transport: http(ALCHEMY_RPC_URL),

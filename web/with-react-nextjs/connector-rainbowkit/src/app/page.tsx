@@ -1,23 +1,39 @@
 "use client";
 
-import "@getpara/react-sdk-lite/styles.css";
-import "@rainbow-me/rainbowkit/styles.css";
-import { WalletDisplay } from "@/components/WalletDisplay";
-import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useAccount } from "wagmi";
+import { useSignHelloWorld } from "@/hooks/useSignHelloWorld";
+import { ConnectCard } from "@/components/ui/ConnectCard";
+import { WalletInfo } from "@/components/ui/WalletInfo";
+import { SignMessage } from "@/components/ui/SignMessage";
 
 export default function Home() {
-  const { address, isConnected } = useAccount();
+  const { isConnected } = useAccount();
+  const { sign, message, isPending, error, signature } = useSignHelloWorld();
 
   return (
-    <main className="flex flex-col items-center justify-center min-h-screen gap-6 p-8">
-      <h1 className="text-2xl font-bold">Para + Rainbowkit Wallet Connector Example</h1>
-      <p className="max-w-md text-center">
-        This minimal example demonstrates how to integrate the Para Modal with Rainbowkit Wallet Connector in a Next.js
-        (App Router) project.
-      </p>
-      {isConnected ? <WalletDisplay walletAddress={address} /> : <p className="text-center">You are not logged in.</p>}
-      <ConnectButton />
-    </main>
+    <div className="container mx-auto px-4 py-12">
+      <div className="text-center mb-12">
+        <h1 className="text-4xl font-bold tracking-tight mb-4">Para + RainbowKit Demo</h1>
+        <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+          Sign messages with your wallet via RainbowKit. This example demonstrates Para integration as a RainbowKit
+          wallet connector.
+        </p>
+      </div>
+
+      {!isConnected ? (
+        <ConnectCard />
+      ) : (
+        <div className="max-w-xl mx-auto">
+          <WalletInfo />
+          <SignMessage
+            message={message}
+            onSign={sign}
+            isPending={isPending}
+            error={error}
+            signature={signature}
+          />
+        </div>
+      )}
+    </div>
   );
 }

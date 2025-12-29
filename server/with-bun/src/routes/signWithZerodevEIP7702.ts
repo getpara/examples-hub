@@ -4,9 +4,8 @@ import { getEntryPoint, KERNEL_V3_3 } from "@zerodev/sdk/constants";
 import { Para as ParaServer, Environment } from "@getpara/server-sdk";
 import { createParaAccount } from "@getpara/viem-v2-integration";
 import { arbitrumSepolia } from "viem/chains";
-import { createPublicClient, encodeFunctionData, http, parseGwei, LocalAccount } from "viem";
+import { createPublicClient, encodeFunctionData, http, parseGwei } from "viem";
 import Example from "../contracts/Example.json";
-import { customSignAuthorization, customSignMessage } from "../utils/signature-utils.js";
 
 // Environment variables
 const PARA_API_KEY = Bun.env.PARA_API_KEY;
@@ -39,9 +38,7 @@ export const signWithZerodevEIP7702 = async (req: Request): Promise<Response> =>
     const para = new ParaServer(PARA_ENVIRONMENT, PARA_API_KEY);
     await para.importSession(session);
 
-    const viemParaAccount: LocalAccount = createParaAccount(para);
-    viemParaAccount.signMessage = async ({ message }) => customSignMessage(para, message);
-    viemParaAccount.signAuthorization = async (authorization) => customSignAuthorization(para, authorization);
+    const viemParaAccount = createParaAccount(para);
 
     const publicClient = createPublicClient({
       chain: arbitrumSepolia,

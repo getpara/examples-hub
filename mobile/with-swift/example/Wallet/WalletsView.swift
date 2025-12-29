@@ -24,7 +24,7 @@ extension Color {
         default:
             (a, r, g, b) = (1, 1, 1, 0)
         }
-
+        
         self.init(
             .sRGB,
             red: Double(r) / 255,
@@ -38,7 +38,7 @@ extension Color {
 struct WalletsView: View {
     @EnvironmentObject var paraManager: ParaManager
     @EnvironmentObject var appRootManager: AppRootManager
-
+    
     @State private var showCreateWalletSheet = false
     @State private var isRefreshing = false
     @State private var refreshError: Error?
@@ -51,14 +51,64 @@ struct WalletsView: View {
     @State private var deleteAccountError: Error?
     @State private var showDeleteAccountError = false
     @State private var hasPerformedInitialRefresh = false
-
+    @State private var showJwtSheet = false
+    @State private var jwtToken: String?
+    @State private var jwtPayload: [String: Any]?
+    @State private var jwtError: Error?
+    @State private var isLoadingJwt = false
+    
+    private func fetchJwt() {
+        isLoadingJwt = true
+        jwtError = nil
+        
+        Task {
+            do {
+                let response = try await paraManager.issueJwt()
+                let decoded = decodeJwtPayload(response.token)
+                
+                await MainActor.run {
+                    jwtToken = response.token
+                    jwtPayload = decoded
+                    isLoadingJwt = false
+                    showJwtSheet = true
+                }
+            } catch {
+                await MainActor.run {
+                    jwtError = error
+                    isLoadingJwt = false
+                    showJwtSheet = true
+                }
+            }
+        }
+    }
+    
+    private func decodeJwtPayload(_ token: String) -> [String: Any]? {
+        let parts = token.split(separator: ".")
+        guard parts.count == 3 else { return nil }
+        
+        var base64 = String(parts[1])
+        // Pad to multiple of 4
+        while base64.count % 4 != 0 {
+            base64 += "="
+        }
+        // Replace URL-safe characters
+        base64 = base64.replacingOccurrences(of: "-", with: "+")
+        base64 = base64.replacingOccurrences(of: "_", with: "/")
+        
+        guard let data = Data(base64Encoded: base64),
+              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
+        else { return nil }
+        
+        return json
+    }
+    
     private func createWallet(type: WalletType) {
         isCreatingWallet = true
-
+        
         Task {
             do {
                 try await paraManager.createWallet(type: type, skipDistributable: false)
-
+                
                 await MainActor.run {
                     isCreatingWallet = false
                     showCreateWalletSheet = false
@@ -72,12 +122,12 @@ struct WalletsView: View {
             }
         }
     }
-
+    
     private func refreshWallets() {
         guard !isRefreshing else { return }
         isRefreshing = true
         refreshError = nil
-
+        
         Task {
             do {
                 let wallets = try await paraManager.fetchWallets()
@@ -94,22 +144,22 @@ struct WalletsView: View {
             }
         }
     }
-
+    
     private func triggerInitialRefreshIfNeeded() {
         guard !hasPerformedInitialRefresh else { return }
         hasPerformedInitialRefresh = true
         refreshWallets()
     }
-
+    
     private func performDeleteAccount() {
         guard !isDeletingAccount else { return }
         isDeletingAccount = true
         deleteAccountError = nil
-
+        
         Task {
             do {
                 try await paraManager.deleteAccount()
-
+                
                 await MainActor.run {
                     appRootManager.setAuthenticated(false)
                     isDeletingAccount = false
@@ -123,7 +173,7 @@ struct WalletsView: View {
             }
         }
     }
-
+    
     @ViewBuilder
     private var createWalletButtonIcon: some View {
         if isCreatingWallet {
@@ -137,7 +187,7 @@ struct WalletsView: View {
                 .foregroundColor(.blue)
         }
     }
-
+    
     @ViewBuilder
     private var createWalletButton: some View {
         Button(action: {
@@ -147,7 +197,7 @@ struct WalletsView: View {
                 createWalletButtonIcon
                     .frame(width: 60, height: 60)
                     .animation(.easeInOut(duration: 0.3), value: isCreatingWallet)
-
+                
                 Text("Create Your First Wallet")
                     .font(.title2)
                     .fontWeight(.semibold)
@@ -163,7 +213,7 @@ struct WalletsView: View {
         .padding(.horizontal, 20)
         .accessibilityIdentifier("createFirstWalletButton")
     }
-
+    
     private func chainColor(for type: WalletType) -> Color {
         switch type {
         case .evm:
@@ -174,7 +224,7 @@ struct WalletsView: View {
             Color(hex: "502D82") // Cosmic Purple
         }
     }
-
+    
     private func chainGradient(for type: WalletType) -> LinearGradient {
         switch type {
         case .evm:
@@ -200,7 +250,7 @@ struct WalletsView: View {
             )
         }
     }
-
+    
     @ViewBuilder
     private func walletCard(for wallet: Wallet) -> some View {
         NavigationLink {
@@ -212,22 +262,22 @@ struct WalletsView: View {
                     VStack(alignment: .leading, spacing: 8) {
                         let address = wallet.type == .cosmos ? (wallet.addressSecondary ?? "unknown") : (wallet.address ?? "unknown")
                         let displayAddress = formatAddress(address)
-
+                        
                         Text(displayAddress)
                             .font(.system(.title3, design: .monospaced))
                             .fontWeight(.semibold)
                             .foregroundStyle(.white)
                             .lineLimit(1)
                             .minimumScaleFactor(0.7)
-
+                        
                         Text(wallet.type?.rawValue ?? "unknown")
                             .font(.subheadline)
                             .fontWeight(.medium)
                             .foregroundStyle(.white.opacity(0.9))
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 16),
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 16),
                 )
                 .frame(height: 150)
                 .shadow(color: chainColor(for: wallet.type ?? .evm).opacity(0.3), radius: 8, x: 0, y: 4)
@@ -235,14 +285,14 @@ struct WalletsView: View {
         .buttonStyle(PlainButtonStyle())
         .accessibilityIdentifier("walletCell_\(wallet.type?.rawValue.uppercased() ?? "UNKNOWN")")
     }
-
+    
     private func formatAddress(_ address: String) -> String {
         guard address.count > 12 else { return address }
         let prefix = address.prefix(8)
         let suffix = address.suffix(6)
         return "\(prefix)...\(suffix)"
     }
-
+    
     @ViewBuilder
     private var addWalletCard: some View {
         Button(action: {
@@ -256,7 +306,7 @@ struct WalletsView: View {
                         Image(systemName: "plus.circle")
                             .font(.body)
                             .foregroundStyle(.secondary)
-
+                        
                         Text("Add Wallet")
                             .font(.body)
                             .foregroundStyle(.secondary)
@@ -267,7 +317,7 @@ struct WalletsView: View {
         .buttonStyle(PlainButtonStyle())
         .accessibilityIdentifier("addWalletButton")
     }
-
+    
     @ViewBuilder
     private func walletDetailView(for wallet: Wallet) -> some View {
         switch wallet.type! {
@@ -279,7 +329,7 @@ struct WalletsView: View {
             CosmosWalletView(selectedWallet: wallet)
         }
     }
-
+    
     @ViewBuilder
     private var refreshButton: some View {
         Button {
@@ -295,7 +345,102 @@ struct WalletsView: View {
         .disabled(isRefreshing)
         .accessibilityIdentifier("refreshButton")
     }
-
+    
+    @ViewBuilder
+    private var jwtSheetContent: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    if let error = jwtError {
+                        Text("Error: \(error.localizedDescription)")
+                            .foregroundStyle(.red)
+                            .padding()
+                    } else if let token = jwtToken {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Token")
+                                .font(.headline)
+                            Text(token)
+                                .font(.system(.caption, design: .monospaced))
+                                .textSelection(.enabled)
+                                .padding(8)
+                                .background(Color.gray.opacity(0.1))
+                                .cornerRadius(8)
+                        }
+                        
+                        if let payload = jwtPayload {
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Decoded Payload")
+                                    .font(.headline)
+                                
+                                if let sub = payload["sub"] as? String {
+                                    HStack {
+                                        Text("User ID:")
+                                            .fontWeight(.medium)
+                                        Text(sub)
+                                            .font(.system(.body, design: .monospaced))
+                                    }
+                                }
+                                
+                                if let aud = payload["aud"] as? String {
+                                    HStack {
+                                        Text("Partner ID:")
+                                            .fontWeight(.medium)
+                                        Text(aud)
+                                            .font(.system(.body, design: .monospaced))
+                                    }
+                                }
+                                
+                                if let exp = payload["exp"] as? TimeInterval {
+                                    HStack {
+                                        Text("Expires:")
+                                            .fontWeight(.medium)
+                                        Text(Date(timeIntervalSince1970: exp).formatted())
+                                    }
+                                }
+                                
+                                if let data = payload["data"] as? [String: Any] {
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        Text("Session Data:")
+                                            .fontWeight(.medium)
+                                        
+                                        if let authType = data["authType"] as? String {
+                                            Text("  Auth: \(authType)")
+                                        }
+                                        if let identifier = data["identifier"] as? String {
+                                            Text("  Identifier: \(identifier)")
+                                        }
+                                        if let wallets = data["wallets"] as? [[String: Any]] {
+                                            Text("  Wallets: \(wallets.count)")
+                                        }
+                                    }
+                                }
+                            }
+                            .padding(8)
+                            .background(Color.gray.opacity(0.1))
+                            .cornerRadius(8)
+                        }
+                        
+                        Text("Send this token to your server and verify it using Para's JWKS endpoint.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .padding(.top, 8)
+                    }
+                }
+                .padding()
+            }
+            .navigationTitle("JWT Token")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") {
+                        showJwtSheet = false
+                    }
+                }
+            }
+        }
+        .presentationDetents([.medium, .large])
+    }
+    
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -303,7 +448,7 @@ struct WalletsView: View {
                     ForEach(paraManager.wallets, id: \.id) { wallet in
                         walletCard(for: wallet)
                     }
-
+                    
                     if paraManager.wallets.isEmpty {
                         VStack(spacing: 20) {
                             Spacer()
@@ -323,6 +468,19 @@ struct WalletsView: View {
                     refreshButton
                 }
                 ToolbarItemGroup(placement: .navigationBarTrailing) {
+                    Button {
+                        fetchJwt()
+                    } label: {
+                        if isLoadingJwt {
+                            ProgressView()
+                                .progressViewStyle(.circular)
+                        } else {
+                            Image(systemName: "key.fill")
+                        }
+                    }
+                    .disabled(isLoadingJwt)
+                    .accessibilityIdentifier("jwtButton")
+                    
                     Button("Logout") {
                         Task {
                             do {
@@ -338,7 +496,7 @@ struct WalletsView: View {
                     }
                     .disabled(isDeletingAccount)
                     .accessibilityIdentifier("logoutButton")
-
+                    
                     Button(role: .destructive) {
                         showDeleteConfirmation = true
                     } label: {
@@ -358,7 +516,7 @@ struct WalletsView: View {
                     Text("Select Wallet Type")
                         .font(.headline)
                         .padding(.top, 24)
-
+                    
                     VStack(spacing: 8) {
                         // Only enable EVM for now
                         ForEach([WalletType.evm], id: \.self) { type in
@@ -410,6 +568,9 @@ struct WalletsView: View {
             } message: {
                 Text(deleteAccountError?.localizedDescription ?? "An unknown error occurred")
             }
+            .sheet(isPresented: $showJwtSheet) {
+                jwtSheetContent
+            }
             .onAppear {
                 triggerInitialRefreshIfNeeded()
             }
@@ -427,7 +588,7 @@ struct WalletsView: View {
 
 #Preview("With Wallets") {
     let mockParaManager = ParaManager(environment: .sandbox, apiKey: "preview-key")
-
+    
     // Create mock wallets
     mockParaManager.wallets = [
         Wallet(
@@ -449,7 +610,7 @@ struct WalletsView: View {
             publicKey: "publicKey3",
         ),
     ]
-
+    
     // Manually set wallet types since the init doesn't include them
     var evmWallet = mockParaManager.wallets[0]
     evmWallet = Wallet(result: [
@@ -459,7 +620,7 @@ struct WalletsView: View {
         "signer": "signer1",
         "publicKey": "publicKey1",
     ])
-
+    
     var solanaWallet = mockParaManager.wallets[1]
     solanaWallet = Wallet(result: [
         "id": "2",
@@ -468,7 +629,7 @@ struct WalletsView: View {
         "signer": "signer2",
         "publicKey": "publicKey2",
     ])
-
+    
     var cosmosWallet = mockParaManager.wallets[2]
     cosmosWallet = Wallet(result: [
         "id": "3",
@@ -478,9 +639,9 @@ struct WalletsView: View {
         "signer": "signer3",
         "publicKey": "publicKey3",
     ])
-
+    
     mockParaManager.wallets = [evmWallet, solanaWallet, cosmosWallet]
-
+    
     return WalletsView()
         .environmentObject(mockParaManager)
         .environmentObject(AppRootManager())

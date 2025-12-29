@@ -1,57 +1,120 @@
-# Smart Wallet Porto (EIP-7702)
+# Porto EIP-7702 Example
 
-This example demonstrates how to integrate Para SDK with Porto to upgrade Para EOA wallets to smart accounts using
-EIP-7702. It showcases account upgrading, session keys, and transaction batching while preserving the original wallet
-address.
+A minimal Next.js example demonstrating Para SDK integration with Porto for EIP-7702 account upgrades. This allows Para EOA wallets to be upgraded to smart accounts while preserving the original wallet address.
+
+## What This Example Shows
+
+- Setting up `ParaProvider` for Para SDK authentication
+- Using `useViemAccount` hook from `@getpara/react-sdk/evm` for the Viem signer
+- Upgrading EOA to Porto smart account via EIP-7702
+- Using session keys for gasless transactions
+
+## EIP-7702 vs EIP-4337
+
+| Feature | EIP-4337 | EIP-7702 |
+|---------|----------|----------|
+| Account type | Separate smart contract | EOA upgraded in-place |
+| Address | New address | Same as EOA |
+| Deployment | Requires factory | No deployment needed |
+| Gas efficiency | Higher overhead | Lower overhead |
 
 ## Setup
 
-### Environment Variables
-
-Create a `.env.local` file in the root directory:
+1. Create a `.env` file:
 
 ```env
 NEXT_PUBLIC_PARA_API_KEY=your_para_api_key
+NEXT_PUBLIC_PARA_ENVIRONMENT=BETA
 ```
 
-### Installation
-
-Install dependencies using your preferred package manager:
+2. Install dependencies and run:
 
 ```bash
-# yarn
 yarn install
-
-# npm
-npm install
-
-# pnpm
-pnpm install
+yarn dev
 ```
 
-## Key Dependencies
+## Getting API Keys
 
-- `@getpara/react-sdk` (v2.0.0-alpha.72) - Para React SDK for wallet integration
-- `porto` (latest) - Porto smart account SDK
-- `viem` (v2.33.0) - TypeScript interface for Ethereum
-- `@tanstack/react-query` (v5.83.0) - Data fetching and state management
-- `next` (v15.1.5) - React framework
+- **Para API Key**: Get from [Para Developer Portal](https://developer.getpara.com)
 
-## Key Files
+## Project Structure
 
-- `src/context/Providers.tsx` - Para provider setup with Base Sepolia chain
-- `src/hooks/usePortoAccount.ts` - Porto account upgrade and management hook
-- `src/components/PortoDemo.tsx` - Demo UI showing EOA vs Smart Account comparison
+```
+src/
+├── app/
+│   ├── layout.tsx                  # Root layout with ParaProvider
+│   └── page.tsx                    # Main page with upgrade demo
+├── components/
+│   ├── ParaProvider.tsx            # Para SDK provider setup
+│   ├── layout/Header.tsx           # Header with connect button
+│   └── PortoDemo.tsx               # EOA vs Smart Account comparison
+├── hooks/
+│   └── usePortoAccount.ts          # Porto upgrade and account hook
+└── lib/
+    └── porto.ts                    # Porto configuration
+```
+
+## Key Integration Pattern
+
+```typescript
+import { useViemAccount } from "@getpara/react-sdk/evm";
+import { Chains, Account, Key, RelayActions } from "porto/viem";
+import { createClient, http, type Hex } from "viem";
+
+// Get Viem account from Para SDK (handles signing internally)
+const { viemAccount } = useViemAccount();
+
+// Create Porto client for Base Sepolia
+const portoClient = createClient({
+  chain: Chains.baseSepolia,
+  transport: http("https://rpc.porto.sh"),
+});
+
+// Porto requires raw hash signing (no EIP-191 prefix)
+const signRawHash = async (hash: Hex): Promise<Hex> => {
+  return viemAccount.sign({ hash });
+};
+
+// Create account wrapper with raw signing
+const customAccount = Account.from({
+  address: viemAccount.address,
+  async sign({ hash }) {
+    return signRawHash(hash as Hex);
+  },
+});
+
+// Generate admin key and prepare upgrade
+const adminKey = Key.createSecp256k1({ role: "admin" });
+const prepared = await RelayActions.prepareUpgradeAccount(portoClient, {
+  address: customAccount.address,
+  authorizeKeys: [adminKey],
+});
+
+// Sign both authorization and execution digests
+const signatures = {
+  auth: await signRawHash(prepared.digests.auth as Hex),
+  exec: await signRawHash(prepared.digests.exec as Hex),
+};
+
+// Upgrade account to Porto smart account
+const upgradedAccount = await RelayActions.upgradeAccount(portoClient, {
+  ...prepared,
+  signatures,
+});
+
+// Now you can use session keys, batch transactions, etc.
+```
 
 ## Important Notes
 
-- Porto requires raw signing (no EIP-191 prefix) - uses `para.signMessage()` directly
-- Must use Porto relay endpoint: `https://rpc.porto.sh`
+- Porto requires raw hash signing (no EIP-191 prefix) - uses `viemAccount.sign({ hash })` directly
+- The smart account address remains the same as the original EOA
 - Currently supports Base Sepolia testnet
+- Uses Porto relay endpoint: `https://rpc.porto.sh`
 
 ## Learn More
 
 - [Para Documentation](https://docs.getpara.com)
-- [Para Developer Portal](https://developer.getpara.com)
 - [Porto Documentation](https://porto.sh/sdk)
 - [EIP-7702 Specification](https://eips.ethereum.org/EIPS/eip-7702)

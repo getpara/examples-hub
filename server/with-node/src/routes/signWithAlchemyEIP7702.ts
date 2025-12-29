@@ -4,11 +4,10 @@ import { BatchUserOperationCallData, SmartAccountSigner } from "@aa-sdk/core";
 import { Para as ParaServer, Environment } from "@getpara/server-sdk";
 import { createParaAccount } from "@getpara/viem-v2-integration";
 import { Request, Response } from "express";
+import { encodeFunctionData, type LocalAccount, type SignableMessage } from "viem";
 import Example from "../contracts/Example.json";
-import { encodeFunctionData, LocalAccount, SignableMessage } from "viem";
 import { getKeyShareInDB } from "../db/keySharesDB";
 import { decrypt } from "../utils/encryption-utils";
-import { customSignAuthorization, customSignMessage } from "../utils/signature-utils.js";
 
 export async function alchemyEip7702SignHandler(req: Request, res: Response): Promise<void> {
   const EXAMPLE_CONTRACT_ADDRESS = "0x7920b6d8b07f0b9a3b96f238c64e022278db1419";
@@ -62,9 +61,7 @@ export async function alchemyEip7702SignHandler(req: Request, res: Response): Pr
     const decryptedKeyShare = await decrypt(keyShare);
     await para.setUserShare(decryptedKeyShare);
 
-    const viemParaAccount: LocalAccount = createParaAccount(para);
-    viemParaAccount.signMessage = async ({ message }) => customSignMessage(para, message);
-    viemParaAccount.signAuthorization = async (authorization) => customSignAuthorization(para, authorization);
+    const viemParaAccount = createParaAccount(para);
 
     const paraSigner: SmartAccountSigner<LocalAccount> = {
       signerType: "para",

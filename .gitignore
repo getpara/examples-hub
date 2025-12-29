@@ -38,6 +38,9 @@ jspm_packages/
 .env.beta
 .env.sandbox
 
+# TypeScript
+*.tsbuildinfo
+
 # Next.js
 .next/
 out/
@@ -148,7 +151,6 @@ Package.resolved
 
 # CocoaPods
 Pods/
-*.xcworkspace
 
 # Carthage
 Carthage/Build/

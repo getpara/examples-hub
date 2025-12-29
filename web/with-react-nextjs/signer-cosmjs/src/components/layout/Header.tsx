@@ -2,15 +2,16 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useModal, useAccount, useWallet } from "@getpara/react-sdk";
+import { useAccount, useModal } from "@getpara/react-sdk";
+import { useCosmjsProtoSigner } from "@getpara/react-sdk/cosmos";
 
 export default function Header() {
   const pathname = usePathname();
   const { openModal } = useModal();
   const { isConnected } = useAccount();
-  const { data: wallet } = useWallet();
+  const { protoSigner } = useCosmjsProtoSigner();
 
-  const address = wallet?.address;
+  const address = protoSigner?.address;
 
   return (
     <header className="border-b border-gray-200">
@@ -25,16 +26,18 @@ export default function Header() {
           )}
         </nav>
         <div>
-          {isConnected && address ? (
+          {isConnected ? (
             <button
               onClick={() => openModal()}
-              className="px-4 py-2 bg-green-700 text-white rounded-none hover:bg-green-800 transition-colors">
-              Connected: {address.slice(0, 10)}...{address.slice(-6)}
+              data-testid="account-address-display"
+              className="px-4 py-2 bg-gray-700 text-white rounded-none hover:bg-gray-800 transition-colors text-sm font-medium cursor-pointer">
+              {address ? `${address.slice(0, 10)}...${address.slice(-4)}` : "Loading..."}
             </button>
           ) : (
             <button
               onClick={() => openModal()}
-              className="px-4 py-2 bg-gray-900 text-white rounded-none hover:bg-gray-950 transition-colors">
+              data-testid="header-connect-button"
+              className="px-4 py-2 bg-gray-900 text-white rounded-none hover:bg-gray-950 transition-colors text-sm font-medium cursor-pointer">
               Connect Wallet
             </button>
           )}

@@ -5,9 +5,8 @@ import { getEntryPoint, KERNEL_V3_3 } from "@zerodev/sdk/constants";
 import { Para as ParaServer, Environment } from "@getpara/server-sdk";
 import { createParaAccount } from "@getpara/viem-v2-integration";
 import { arbitrumSepolia } from "viem/chains";
-import { createPublicClient, encodeFunctionData, http, parseGwei, LocalAccount } from "viem";
+import { createPublicClient, encodeFunctionData, http, parseGwei } from "viem";
 import Example from "../contracts/Example.json" with { type: "json" };
-import { customSignAuthorization, customSignMessage } from "../utils/signature-utils.ts";
 
 // Environment variables
 const PARA_API_KEY = Deno.env.get("PARA_API_KEY");
@@ -46,9 +45,7 @@ export const signWithZerodevEIP7702: Handler = async (req: Request): Promise<Res
     const para = new ParaServer(PARA_ENVIRONMENT, PARA_API_KEY);
     await para.importSession(session);
 
-    const viemParaAccount: LocalAccount = createParaAccount(para);
-    viemParaAccount.signMessage = ({ message }) => customSignMessage(para, message);
-    viemParaAccount.signAuthorization = (authorization) => customSignAuthorization(para, authorization);
+    const viemParaAccount = createParaAccount(para);
 
     // @ts-ignore - Deno npm module duplication issue with viem types
     const publicClient = createPublicClient({

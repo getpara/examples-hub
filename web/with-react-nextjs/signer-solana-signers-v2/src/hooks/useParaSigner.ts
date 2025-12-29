@@ -1,36 +1,21 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useAccount, useClient } from "@getpara/react-sdk";
-import { createParaSolanaSigner, ParaSolanaSigner } from "@getpara/solana-signers-v2-integration";
+import { useAccount } from "@getpara/react-sdk";
+import { useSolanaSigner } from "@getpara/react-sdk/solana";
 import { useSolana } from "./useSolana";
 
 export function useParaSigner() {
   const account = useAccount();
-  const client = useClient();
   const { rpc, paraRpc } = useSolana();
-  const [signer, setSigner] = useState<ParaSolanaSigner | null>(null);
+  const { solanaSigner, isLoading } = useSolanaSigner({ rpc: paraRpc });
 
-  useEffect(() => {
-    if (account?.isConnected && rpc && client) {
-      try {
-        const newSigner = createParaSolanaSigner({
-          para: client as unknown as Parameters<typeof createParaSolanaSigner>[0]['para'],
-          rpc: paraRpc, // Pass the Para-compatible RPC client instance
-        });
-        
-        setSigner(newSigner);
-      } catch (error) {
-        console.error("Failed to initialize Para signer:", error);
-        setSigner(null);
-      }
-    } else {
-      setSigner(null);
-    }
-  }, [account?.isConnected, rpc, client, paraRpc]);
+  const isReady = Boolean(solanaSigner && account?.isConnected && !isLoading);
 
   return {
-    signer,
+    signer: solanaSigner,
     rpc,
+    isLoading,
+    isReady,
+    address: solanaSigner?.address?.toString() ?? null,
   };
 }

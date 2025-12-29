@@ -1,23 +1,24 @@
 "use client";
 
-import { useModal } from "@getpara/react-sdk";
-import { useParaSigner } from "@/hooks/useParaSigner";
-import { useState, useEffect } from "react";
-import { PARA_TEST_TOKEN_CONTRACT_ADDRESS, PARA_TEST_TOKEN_CONTRACT_OWNER } from "@/config/contracts";
-import ParaTestToken from "@/contracts/artifacts/contracts/ParaTestToken.sol/ParaTestToken.json";
+import { useState, useEffect, useCallback } from "react";
+import { useModal, useAccount } from "@getpara/react-sdk";
 import { formatEther, getContract, maxUint256 } from "viem";
+import { useSignTypedData } from "@/hooks/useSignTypedData";
+import { publicClient, CHAIN } from "@/lib/viem";
+import { PARA_TEST_TOKEN_ADDRESS, PARA_TEST_TOKEN_ABI } from "@/lib/contracts";
+import { StatusAlert } from "@/components/ui/StatusAlert";
+
+const SPENDER_ADDRESS = "0x0f35268de976323e06f5aed6f366b490d9b17750" as const;
 
 export default function PermitSigningPage() {
-  const [isLoading, setIsLoading] = useState(false);
   const [isBalanceLoading, setIsBalanceLoading] = useState(false);
   const [tokenBalance, setTokenBalance] = useState<string | null>(null);
   const [currentAllowance, setCurrentAllowance] = useState<string | null>(null);
-  const [permitStatus, setPermitStatus] = useState<{
-    show: boolean;
-    type: "success" | "error" | "info";
-    message: string;
-  }>({ show: false, type: "success", message: "" });
-
+  const [status, setStatus] = useState<{ show: boolean; type: "success" | "error" | "info"; message: string }>({
+    show: false,
+    type: "success",
+    message: "",
+  });
   const [signedPermit, setSignedPermit] = useState<{
     deadline: string;
     v: number;
@@ -25,144 +26,118 @@ export default function PermitSigningPage() {
     s: string;
   } | null>(null);
 
-  const { isConnected, address, walletClient, publicClient, walletId } = useParaSigner();
+  const { isConnected, embedded } = useAccount();
+  const address = embedded?.wallets?.[0]?.address as `0x${string}` | undefined;
+  const { signTypedData, isPending, signature, error } = useSignTypedData();
   const { openModal } = useModal();
 
-  const fetchTokenData = async () => {
-    if (!address || !publicClient) return;
+  const fetchTokenData = useCallback(async () => {
+    if (!address) return;
 
     setIsBalanceLoading(true);
     try {
       const contract = getContract({
-        address: PARA_TEST_TOKEN_CONTRACT_ADDRESS as `0x${string}`,
-        abi: ParaTestToken.abi,
+        address: PARA_TEST_TOKEN_ADDRESS,
+        abi: PARA_TEST_TOKEN_ABI,
         client: publicClient,
       });
 
       const balance = await contract.read.balanceOf([address]);
       setTokenBalance(formatEther(balance as bigint));
 
-      const allowance = await contract.read.allowance([address, PARA_TEST_TOKEN_CONTRACT_OWNER]);
+      const allowance = await contract.read.allowance([address, SPENDER_ADDRESS]);
       setCurrentAllowance(formatEther(allowance as bigint));
-    } catch (error) {
-      console.error("Error fetching token data:", error);
+    } catch (err) {
+      console.error("Error fetching token data:", err);
       setTokenBalance(null);
       setCurrentAllowance(null);
     } finally {
       setIsBalanceLoading(false);
     }
-  };
+  }, [address]);
 
   useEffect(() => {
     if (address) {
       fetchTokenData();
     }
-  }, [address]);
+  }, [address, fetchTokenData]);
 
-  const signPermit = async () => {
-    setIsLoading(true);
-    setPermitStatus({ show: false, type: "success", message: "" });
+  const handleSignPermit = async () => {
+    setStatus({ show: false, type: "success", message: "" });
     setSignedPermit(null);
 
+    if (!address) return;
+
     try {
-      if (!isConnected || !address) {
-        throw new Error("Please connect your wallet to sign the permit.");
-      }
-
-      if (!walletId) {
-        throw new Error("No wallet ID found. Please reconnect your wallet.");
-      }
-
-      if (!publicClient || !walletClient) {
-        throw new Error("Client not available.");
-      }
-
       const contract = getContract({
-        address: PARA_TEST_TOKEN_CONTRACT_ADDRESS,
-        abi: ParaTestToken.abi,
+        address: PARA_TEST_TOKEN_ADDRESS,
+        abi: PARA_TEST_TOKEN_ABI,
         client: publicClient,
       });
 
-      const nonce = await contract.read.nonces([address]);
-
+      const nonce = (await contract.read.nonces([address])) as bigint;
+      const name = (await contract.read.name()) as string;
       const deadline = Math.floor(Date.now() / 1000) + 3600;
 
+      setStatus({ show: true, type: "info", message: "Please sign the permit message in your wallet..." });
 
-      const name = await contract.read.name();
-
-      const domain = {
-        name: name as string,
-        version: "1",
-        chainId: 17000, // Holesky
-        verifyingContract: PARA_TEST_TOKEN_CONTRACT_ADDRESS as `0x${string}`,
-      };
-
-      const types = {
-        Permit: [
-          { name: "owner", type: "address" },
-          { name: "spender", type: "address" },
-          { name: "value", type: "uint256" },
-          { name: "nonce", type: "uint256" },
-          { name: "deadline", type: "uint256" },
-        ],
-      };
-
-      const value = {
-        owner: address,
-        spender: PARA_TEST_TOKEN_CONTRACT_OWNER,
-        value: maxUint256,
-        nonce,
-        deadline,
-      };
-
-      setPermitStatus({
-        show: true,
-        type: "info",
-        message: "Please sign the permit message in your wallet...",
-      });
-
-      // Sign the permit with viem's signTypedData
-      const signature = await walletClient.signTypedData({
-        account: address as `0x${string}`,
-        domain,
-        types,
+      await signTypedData({
+        domain: {
+          name,
+          version: "1",
+          chainId: CHAIN.id,
+          verifyingContract: PARA_TEST_TOKEN_ADDRESS,
+        },
+        types: {
+          Permit: [
+            { name: "owner", type: "address" },
+            { name: "spender", type: "address" },
+            { name: "value", type: "uint256" },
+            { name: "nonce", type: "uint256" },
+            { name: "deadline", type: "uint256" },
+          ],
+        },
         primaryType: "Permit",
-        message: value,
+        message: {
+          owner: address,
+          spender: SPENDER_ADDRESS,
+          value: maxUint256,
+          nonce,
+          deadline: BigInt(deadline),
+        },
       });
 
       // Split signature into v, r, s components
-      // In viem, we can get r, s, v using tools provided
+      if (signature) {
+        const r = signature.slice(0, 66);
+        const s = "0x" + signature.slice(66, 130);
+        const v = parseInt(signature.slice(130, 132), 16);
+
+        setSignedPermit({ deadline: deadline.toString(), v, r, s });
+      }
+
+      setStatus({
+        show: true,
+        type: "success",
+        message: "Permit signed successfully! The spender can now use this signature to approve token transfers.",
+      });
+
+      await fetchTokenData();
+    } catch {
+      setStatus({ show: true, type: "error", message: error?.message || "Failed to sign permit." });
+    }
+  };
+
+  // Update signedPermit when signature changes
+  useEffect(() => {
+    if (signature && !signedPermit) {
       const r = signature.slice(0, 66);
       const s = "0x" + signature.slice(66, 130);
       const v = parseInt(signature.slice(130, 132), 16);
-
-      setSignedPermit({
-        deadline: deadline.toString(),
-        v,
-        r,
-        s,
-      });
-
-      setPermitStatus({
-        show: true,
-        type: "success",
-        message:
-          "Permit signed successfully! The contract owner can now use this signature to approve token transfers.",
-      });
-
-      // Refresh token data
-      await fetchTokenData();
-    } catch (error) {
-      console.error("Error signing permit:", error);
-      setPermitStatus({
-        show: true,
-        type: "error",
-        message: error instanceof Error ? error.message : "Failed to sign permit. Please try again.",
-      });
-    } finally {
-      setIsLoading(false);
+      const deadline = Math.floor(Date.now() / 1000) + 3600;
+      setSignedPermit({ deadline: deadline.toString(), v, r, s });
     }
-  };
+  }, [signature, signedPermit]);
 
   if (!isConnected) {
     return (
@@ -172,7 +147,7 @@ export default function PermitSigningPage() {
           <p className="text-gray-600 mb-6">Please connect your wallet to view this demo.</p>
           <button
             onClick={() => openModal()}
-            className="inline-flex items-center justify-center rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-950 transition-colors">
+            className="inline-flex items-center justify-center rounded-none bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-950 transition-colors">
             Connect Wallet
           </button>
         </div>
@@ -185,8 +160,9 @@ export default function PermitSigningPage() {
       <div className="text-center mb-8">
         <h1 className="text-4xl font-bold tracking-tight mb-6">Permit Signing Demo</h1>
         <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-          Sign an EIP-2612 permit that allows the contract owner to spend your tokens without requiring a separate
-          approval transaction. This enables gasless token transfers.
+          Sign an EIP-2612 permit using the{" "}
+          <code className="font-mono text-sm bg-gray-50 text-gray-700 px-2 py-1 rounded-none">useSignTypedData</code>{" "}
+          hook for gasless token approvals.
         </p>
       </div>
 
@@ -199,34 +175,30 @@ export default function PermitSigningPage() {
               disabled={isBalanceLoading || !address}
               className="p-1 text-gray-500 hover:text-gray-700 transition-colors disabled:opacity-50"
               title="Refresh data">
-              <span className={`inline-block ${isBalanceLoading ? "animate-spin" : ""}`}>🔄</span>
+              <span className={`inline-block ${isBalanceLoading ? "animate-spin" : ""}`}>&#x1f504;</span>
             </button>
           </div>
           <div className="px-6 py-3 space-y-2">
-            <p className="text-sm text-gray-500 bg-gray-100 p-2 rounded-md">Network: Holesky</p>
+            <p className="text-sm text-gray-500 bg-gray-100 p-2 rounded-md">Network: Sepolia</p>
             <div className="space-y-1">
               <p className="text-sm">
                 <span className="font-medium text-gray-700">Token Balance:</span>{" "}
                 <span className="text-gray-600">
-                  {!address
-                    ? "N/A"
-                    : isBalanceLoading
+                  {isBalanceLoading
                     ? "Loading..."
                     : tokenBalance
-                    ? `${parseFloat(tokenBalance).toFixed(4)} CTT`
-                    : "0 CTT"}
+                      ? `${parseFloat(tokenBalance).toFixed(4)} CTT`
+                      : "0 CTT"}
                 </span>
               </p>
               <p className="text-sm">
                 <span className="font-medium text-gray-700">Current Allowance:</span>{" "}
                 <span className="text-gray-600">
-                  {!address
-                    ? "N/A"
-                    : isBalanceLoading
+                  {isBalanceLoading
                     ? "Loading..."
                     : currentAllowance
-                    ? `${parseFloat(currentAllowance).toFixed(4)} CTT`
-                    : "0 CTT"}
+                      ? `${parseFloat(currentAllowance).toFixed(4)} CTT`
+                      : "0 CTT"}
                 </span>
               </p>
             </div>
@@ -235,33 +207,22 @@ export default function PermitSigningPage() {
 
         <div className="mb-6 rounded-none border border-gray-200">
           <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
-            <h3 className="text-sm font-medium text-gray-900">Spender Address (Contract Owner):</h3>
+            <h3 className="text-sm font-medium text-gray-900">Spender Address:</h3>
           </div>
           <div className="p-6">
             <p className="text-sm font-mono break-all text-gray-600 bg-white p-4 border border-gray-200">
-              {PARA_TEST_TOKEN_CONTRACT_OWNER}
+              {SPENDER_ADDRESS}
             </p>
           </div>
         </div>
 
-        {permitStatus.show && (
-          <div
-            className={`mb-4 rounded-none border ${
-              permitStatus.type === "success"
-                ? "bg-green-50 border-green-500 text-green-700"
-                : permitStatus.type === "error"
-                ? "bg-red-50 border-red-500 text-red-700"
-                : "bg-gray-50 border-gray-500 text-gray-700"
-            }`}>
-            <p className="px-6 py-4 break-words">{permitStatus.message}</p>
-          </div>
-        )}
+        {status.show && <StatusAlert type={status.type} message={status.message} />}
 
         <button
-          onClick={signPermit}
-          disabled={!isConnected || isLoading}
+          onClick={handleSignPermit}
+          disabled={!isConnected || isPending}
           className="w-full rounded-none bg-gray-900 px-6 py-3 text-sm font-medium text-white hover:bg-gray-950 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-          {isLoading ? "Signing Permit..." : "Sign Unlimited Permit"}
+          {isPending ? "Signing Permit..." : "Sign Unlimited Permit"}
         </button>
 
         {signedPermit && (
@@ -295,7 +256,7 @@ export default function PermitSigningPage() {
             <div className="rounded-none border border-yellow-200 bg-yellow-50">
               <div className="p-4">
                 <p className="text-sm text-yellow-800">
-                  <strong>Note:</strong> This permit signature can be used by the contract owner to call the{" "}
+                  <strong>Note:</strong> This permit signature can be used by the spender to call the{" "}
                   <code className="font-mono text-xs bg-yellow-100 px-1 py-0.5 rounded">permit()</code> function on the
                   token contract, which will approve them to spend your tokens without requiring a transaction from you.
                 </p>

@@ -1,11 +1,14 @@
 "use client";
 
-import { useAccount, useModal, useWallet } from "@getpara/react-sdk";
+import { useAccount, useModal } from "@getpara/react-sdk";
+import { useCosmjsAminoSigner } from "@getpara/react-sdk/cosmos";
 
 export function Header() {
   const { openModal } = useModal();
-  const { data: wallet } = useWallet();
   const { isConnected } = useAccount();
+  const { aminoSigner } = useCosmjsAminoSigner();
+
+  const address = aminoSigner?.address;
 
   return (
     <header className="border-b border-gray-200">
@@ -16,8 +19,7 @@ export function Header() {
               onClick={() => openModal()}
               data-testid="account-address-display"
               className="px-4 py-2 bg-gray-700 text-white rounded-none hover:bg-gray-800 transition-colors text-sm font-medium cursor-pointer">
-              Connected: {wallet?.address?.slice(0, 6)}...
-              {wallet?.address?.slice(-4)}
+              {address ? `${address.slice(0, 10)}...${address.slice(-4)}` : "Loading..."}
             </button>
           ) : (
             <button

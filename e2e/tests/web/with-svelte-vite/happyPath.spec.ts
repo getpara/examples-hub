@@ -41,7 +41,7 @@ test.describe('Svelte custom auth example', () => {
     const testMessage = 'Hello Para from Svelte!';
     const signature = await createAuthPage.signMessage(testMessage);
     expect(signature).toBeTruthy();
-    expect(signature).toMatch(/^[a-fA-F0-9]+$/);
+    expect(signature).toMatch(/^0x[a-fA-F0-9]+$/);
     
     // Test logout
     logger.logStep('Testing logout...');

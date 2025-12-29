@@ -55,7 +55,7 @@ export default function HomeScreen() {
   const displayBalance = balance ? `${parseFloat(balance).toFixed(6)} ETH` : 'Loading...';
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
+    <SafeAreaView testID="walletsView" className="flex-1 bg-gray-50">
       <ScrollView
         className="flex-1"
         contentContainerStyle={{ padding: 24 }}

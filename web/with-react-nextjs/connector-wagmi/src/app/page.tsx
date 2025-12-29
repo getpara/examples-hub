@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useAccount, useSendTransaction, useWaitForTransactionReceipt } from "wagmi";
 import { parseEther } from "viem";
-import "@getpara/react-sdk/styles.css";
 import { BalanceCard } from "@/components/ui/BalanceCard";
 import { StatusAlert } from "@/components/ui/StatusAlert";
 import { TransactionHash } from "@/components/ui/TransactionHash";

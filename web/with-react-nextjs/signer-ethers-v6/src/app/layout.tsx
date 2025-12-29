@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import { QueryProvider } from "@/context/QueryProvider";
-import { ParaProvider } from "@/context/ParaProvider";
+import { ParaProvider } from "@/components/ParaProvider";
 import Header from "@/components/layout/Header";
 import "@getpara/react-sdk/styles.css";
 import "@/styles/globals.css";
@@ -18,12 +17,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="antialiased">
-        <QueryProvider>
-          <ParaProvider>
-            <Header />
-            <main>{children}</main>
-          </ParaProvider>
-        </QueryProvider>
+        <ParaProvider>
+          <Header />
+          <main>{children}</main>
+        </ParaProvider>
       </body>
     </html>
   );

@@ -21,24 +21,6 @@ export function useOneClickLogin(onSuccess: () => void): UseOneClickLoginResult 
     setError(null);
   }, []);
 
-  const touchSession = useCallback(async () => {
-    await para.touchSession();
-  }, []);
-
-  const waitForLoginAndFinish = useCallback(async () => {
-    await para.waitForLogin({});
-    await touchSession();
-    setStatus('success');
-    onSuccess();
-  }, [touchSession, onSuccess]);
-
-  const waitForSignupAndFinish = useCallback(async () => {
-    await para.waitForSignup({});
-    await touchSession();
-    setStatus('success');
-    onSuccess();
-  }, [touchSession, onSuccess]);
-
   const loginWithEmail = useCallback(
     async (email: string): Promise<boolean> => {
       try {
@@ -48,20 +30,20 @@ export function useOneClickLogin(onSuccess: () => void): UseOneClickLoginResult 
         const authState = await para.signUpOrLogIn({ auth: { email } });
 
         if (authState?.stage === 'verify' && 'loginUrl' in authState && authState.loginUrl) {
-          const isOneClickLogin = authState.nextStage === 'login';
-
           const result = await openAuthUrl(authState.loginUrl);
 
           if (!result.success) {
             throw new Error('Authentication was cancelled');
           }
 
-          if (isOneClickLogin) {
-            await waitForLoginAndFinish();
+          if (authState.nextStage === 'login') {
+            await para.waitForLogin({});
           } else {
-            await waitForSignupAndFinish();
+            await para.waitForWalletCreation({});
           }
 
+          setStatus('success');
+          onSuccess();
           return true;
         }
 
@@ -73,7 +55,7 @@ export function useOneClickLogin(onSuccess: () => void): UseOneClickLoginResult 
         return false;
       }
     },
-    [reset, waitForLoginAndFinish, waitForSignupAndFinish]
+    [reset, onSuccess]
   );
 
   const loginWithPhone = useCallback(
@@ -87,20 +69,20 @@ export function useOneClickLogin(onSuccess: () => void): UseOneClickLoginResult 
         });
 
         if (authState?.stage === 'verify' && 'loginUrl' in authState && authState.loginUrl) {
-          const isOneClickLogin = authState.nextStage === 'login';
-
           const result = await openAuthUrl(authState.loginUrl);
 
           if (!result.success) {
             throw new Error('Authentication was cancelled');
           }
 
-          if (isOneClickLogin) {
-            await waitForLoginAndFinish();
+          if (authState.nextStage === 'login') {
+            await para.waitForLogin({});
           } else {
-            await waitForSignupAndFinish();
+            await para.waitForWalletCreation({});
           }
 
+          setStatus('success');
+          onSuccess();
           return true;
         }
 
@@ -112,7 +94,7 @@ export function useOneClickLogin(onSuccess: () => void): UseOneClickLoginResult 
         return false;
       }
     },
-    [reset, waitForLoginAndFinish, waitForSignupAndFinish]
+    [reset, onSuccess]
   );
 
   const loginWithGoogle = useCallback(async (): Promise<boolean> => {
@@ -121,22 +103,34 @@ export function useOneClickLogin(onSuccess: () => void): UseOneClickLoginResult 
       setStatus('loading');
 
       const oauthUrl = await para.getOAuthUrl({ method: 'GOOGLE' });
-
       const result = await openAuthUrl(oauthUrl);
 
       if (!result.success) {
         throw new Error('Authentication was cancelled');
       }
 
-      await waitForLoginAndFinish();
-      return true;
+      const authState = await para.verifyOAuth({ method: 'GOOGLE' });
+
+      if (authState.stage === 'done') {
+        if (authState.isNewUser) {
+          await para.waitForWalletCreation({});
+        } else {
+          await para.waitForLogin({});
+        }
+
+        setStatus('success');
+        onSuccess();
+        return true;
+      }
+
+      throw new Error('Unexpected OAuth state');
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Google login failed';
       setError(message);
       setStatus('error');
       return false;
     }
-  }, [reset, waitForLoginAndFinish]);
+  }, [reset, onSuccess]);
 
   return {
     status,

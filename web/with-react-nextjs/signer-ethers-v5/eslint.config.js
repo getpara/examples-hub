@@ -1,40 +1,22 @@
-import js from '@eslint/js';
-import tseslint from 'typescript-eslint';
+import js from "@eslint/js";
+import tseslint from "typescript-eslint";
 
 export default tseslint.config(
-  js.configs.recommended,
-  ...tseslint.configs.recommended,
+  { ignores: ["dist", "build", ".next", "out", "node_modules", "hardhat.config.js"] },
   {
-    languageOptions: {
-      parserOptions: {
-        projectService: true,
-        tsconfigRootDir: import.meta.dirname,
-      },
-    },
-  },
-  {
-    ignores: [
-      '.next/**',
-      'node_modules/**',
-      'out/**',
-      'build/**',
-      'dist/**',
-      '*.config.js',
-      '*.config.ts',
-      '*.config.mjs',
-    ],
-  },
-  {
+    extends: [js.configs.recommended, ...tseslint.configs.recommended],
+    files: ["**/*.{ts,tsx,js,jsx}"],
     rules: {
-      '@typescript-eslint/no-unused-vars': [
-        'error',
+      "@typescript-eslint/no-unused-vars": [
+        "error",
         {
-          argsIgnorePattern: '^_',
-          varsIgnorePattern: '^_',
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
         },
       ],
-      '@typescript-eslint/no-explicit-any': 'warn',
-      '@typescript-eslint/no-non-null-assertion': 'warn',
+      "@typescript-eslint/no-explicit-any": "warn",
+      "no-console": ["warn", { allow: ["warn", "error"] }],
     },
   }
 );

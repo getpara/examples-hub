@@ -5,11 +5,10 @@ import { getEntryPoint, KERNEL_V3_1 } from "@zerodev/sdk/constants";
 import { Para as ParaServer, Environment } from "@getpara/server-sdk";
 import { createParaAccount, createParaViemClient } from "@getpara/viem-v2-integration";
 import { arbitrumSepolia } from "viem/chains";
-import { createPublicClient, encodeFunctionData, http, parseGwei, LocalAccount, WalletClient } from "viem";
+import { createPublicClient, encodeFunctionData, http, parseGwei } from "viem";
 import Example from "../contracts/Example.json" with { type: "json" };
 import { getKeyShareInDB } from "../db/keySharesDB.ts";
 import { decrypt } from "../utils/encryption-utils.ts";
-import { customSignMessage } from "../utils/signature-utils.ts";
 
 const PARA_API_KEY = Deno.env.get("PARA_API_KEY");
 const PARA_ENVIRONMENT = (Deno.env.get("PARA_ENVIRONMENT") as Environment) || Environment.BETA;
@@ -65,11 +64,10 @@ export const signWithZerodev: Handler = async (req: Request): Promise<Response> 
     const decryptedKeyShare = await decrypt(keyShare);
     await para.setUserShare(decryptedKeyShare);
 
-    const viemParaAccount: LocalAccount = createParaAccount(para);
-    viemParaAccount.signMessage = ({ message }) => customSignMessage(para, message);
+    const viemParaAccount = createParaAccount(para);
 
     // @ts-ignore - Deno npm module duplication issue with viem types
-    const viemClient: WalletClient = createParaViemClient(para, {
+    const viemClient = createParaViemClient(para, {
       account: viemParaAccount,
       chain: arbitrumSepolia,
       transport: http(ZERODEV_RPC_URL),

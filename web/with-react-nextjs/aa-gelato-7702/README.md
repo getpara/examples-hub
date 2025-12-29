@@ -1,142 +1,119 @@
-# Gelato EIP-7702 + Para Embedded Wallet Demo
+# Gelato EIP-7702 Example
 
-This example demonstrates the integration of Gelato's smart account with EIP-7702 gas sponsorship and Para's embedded
-wallet in a Next.js application. Users can execute gasless transactions on Ethereum Sepolia using Para's wallet for
-authentication and Gelato for transaction sponsorship.
+A minimal Next.js example demonstrating Para SDK integration with Gelato for EIP-7702 gas-sponsored transactions.
 
-## Overview
+## What This Example Shows
 
-This demo showcases:
+- Setting up `ParaProvider` for Para SDK authentication
+- Using `useViemAccount` hook from `@getpara/react-sdk/evm` for the Viem signer
+- Creating Gelato smart accounts with EIP-7702 using Para as the signer
+- Sending gas-sponsored transactions via Gelato's relay infrastructure
 
-- **Para Embedded Wallet**: Non-custodial wallet solution with social login
-- **Gelato Smart Account**: EIP-7702 enabled account for gas sponsorship
-- **Custom Signature Handling**: Override Para's default signing to handle v-byte recovery for EIP-7702 compatibility
-- **Gasless Transactions**: Execute transactions without holding ETH through Gelato's paymaster
+## EIP-7702 vs EIP-4337
 
-## Technical Architecture
-
-### EIP-7702 & Gas Sponsorship
-
-EIP-7702 allows EOAs (Externally Owned Accounts) to temporarily delegate execution to smart contracts. This enables:
-
-- Gas sponsorship without deploying a smart contract wallet
-- Temporary code delegation from EOA to Gelato's smart contract
-- Seamless gasless transactions while maintaining EOA ownership
-
-### Signature Handling
-
-Para's embedded wallet returns signatures with v-bytes of 0/1, while Ethereum typically expects 27/28. This
-implementation includes custom signature handlers that:
-
-- Convert Para's v-byte format (0/1) to Ethereum format (27/28) for regular messages
-- Handle EIP-7702 authorization signatures with proper v-byte values (0/1)
-- Support typed data signing required by Gelato's smart wallet
+| Feature | EIP-4337 | EIP-7702 |
+|---------|----------|----------|
+| Account type | Separate smart contract | EOA upgraded in-place |
+| Address | New address | Same as EOA |
+| Deployment | Requires factory | No deployment needed |
+| Gas efficiency | Higher overhead | Lower overhead |
 
 ## Setup
 
-### Prerequisites
-
-- Node.js 18+ and npm/yarn/pnpm
-- Para API key from [Para Dashboard](https://developer.getpara.com)
-- Gelato API key from [Gelato Dashboard](https://app.gelato.cloud/dashboard)
-
-### Environment Variables
-
-Create a `.env.local` file in the root directory:
+1. Create a `.env` file:
 
 ```env
-# Para Configuration
 NEXT_PUBLIC_PARA_API_KEY=your_para_api_key
-NEXT_PUBLIC_PARA_ENVIRONMENT=BETA  # or SANDBOX for testing
-
-# Gelato Configuration
+NEXT_PUBLIC_PARA_ENVIRONMENT=BETA
 NEXT_PUBLIC_GELATO_API_KEY=your_gelato_api_key
 ```
 
-### Installation
-
-Install dependencies:
+2. Install dependencies and run:
 
 ```bash
-# npm
-npm install
-
-# yarn
 yarn install
-
-# pnpm
-pnpm install
+yarn dev
 ```
 
-### Running the Application
+## Getting API Keys
 
-```bash
-npm run dev
+- **Para API Key**: Get from [Para Developer Portal](https://developer.getpara.com)
+- **Gelato API Key**: Get from [Gelato Dashboard](https://app.gelato.network)
+
+## Project Structure
+
+```
+src/
+├── app/
+│   ├── layout.tsx                  # Root layout with ParaProvider
+│   └── page.tsx                    # Main page with wallet + transaction UI
+├── components/
+│   ├── ParaProvider.tsx            # Para SDK provider setup
+│   ├── layout/Header.tsx           # Header with connect button
+│   └── ui/
+│       ├── ConnectCard.tsx         # Connect wallet card
+│       ├── WalletInfo.tsx          # Upgraded EOA display
+│       └── SendTransaction.tsx     # Sponsored transaction UI
+├── hooks/
+│   ├── useSmartAccountClient.ts    # Gelato 7702 account setup
+│   └── useSendUserOperation.ts     # Transaction sending hook
+└── lib/
+    └── gelato.ts                   # Gelato configuration
 ```
 
-Visit `http://localhost:3000` to see the application.
+## Key Integration Pattern
 
-## Implementation Details
+```typescript
+import { useViemAccount } from "@getpara/react-sdk/evm";
+import { gelato, createGelatoSmartWalletClient } from "@gelatonetwork/smartwallet";
+import { createWalletClient, createPublicClient, http } from "viem";
+import { sepolia } from "viem/chains";
 
-### Custom Signature Utilities (`src/utils/paraSignature.ts`)
+// Get Viem account from Para SDK (handles signing internally)
+const { viemAccount } = useViemAccount();
 
-Handles the conversion between Para's signature format and Ethereum standards:
+// Create public client for chain interaction
+const publicClient = createPublicClient({
+  chain: sepolia,
+  transport: http(),
+});
 
-- `customSignMessage`: Signs messages with v-byte adjustment (0/1 → 27/28)
-- `customSignAuthorization`: Signs EIP-7702 authorizations with proper v-byte (0/1)
-- `customSignTypedData`: Signs typed data for Gelato smart wallet operations
+// Create Gelato account (EIP-7702)
+// The smart account address is the same as the EOA address
+const smartAccount = await gelato({
+  owner: viemAccount,
+  client: publicClient,
+});
 
-### Gelato Smart Wallet Hook (`src/hooks/useGelatoSmartWallet.ts`)
+// Create wallet client with Gelato account
+const walletClient = createWalletClient({
+  account: smartAccount,
+  chain: sepolia,
+  transport: http(),
+});
 
-Initializes and manages the Gelato smart wallet:
+// Create Gelato smart wallet client
+const smartWalletClient = await createGelatoSmartWalletClient(walletClient, {
+  apiKey: GELATO_API_KEY,
+});
 
-1. Gets Para's Viem account from the embedded wallet
-2. Overrides signing methods with custom implementations
-3. Creates Gelato smart account with EIP-7702 support
-4. Provides sponsored transaction execution
+// Send sponsored transaction
+const result = await smartWalletClient.execute({
+  payment: { type: "sponsored" },
+  calls: [
+    {
+      to: "0x...",
+      data: "0x",
+      value: BigInt(0),
+    },
+  ],
+});
 
-### Key Components
-
-- `src/context/GelatoProvider.tsx` - Gelato wallet context provider
-- `src/components/SponsoredTransaction.tsx` - UI for executing gasless transactions
-- `src/config/constants.ts` - Configuration constants for Para and Gelato
-
-## How It Works
-
-1. **User Connection**: User connects via Para's embedded wallet (social login or email)
-2. **Account Creation**: Para provides a Viem account object with the user's EOA
-3. **Smart Account Setup**: Gelato creates a smart account using the Para EOA as owner
-4. **Signature Override**: Custom signing methods handle Para's v-byte format
-5. **Transaction Execution**: User can execute transactions without holding ETH
-6. **Gas Sponsorship**: Gelato's paymaster covers gas fees through EIP-7702 delegation
-
-## Network Support
-
-Currently configured for **Ethereum Sepolia** testnet. To change networks:
-
-1. Update the chain import in `src/hooks/useGelatoSmartWallet.ts`
-2. Ensure your Gelato API key supports the target network
-3. Update any hardcoded contract addresses
-
-## Troubleshooting
-
-### Signature Validation Errors
-
-If you encounter signature validation errors, ensure:
-
-- The custom signature utilities are properly imported
-- Para client is initialized before attempting to sign
-- V-byte conversion is applied correctly for the transaction type
-
-### Gas Sponsorship Issues
-
-- Verify your Gelato API key is valid and has sufficient credits
-- Check that the target network is supported by your Gelato configuration
-- Ensure the transaction is within Gelato's sponsorship limits
+const txHash = await result.wait();
+```
 
 ## Learn More
 
 - [Para Documentation](https://docs.getpara.com)
-- [Gelato Documentation](https://docs.gelato.cloud)
+- [Gelato Documentation](https://docs.gelato.network)
 - [EIP-7702 Specification](https://eips.ethereum.org/EIPS/eip-7702)
-- [Viem Documentation](https://viem.sh)

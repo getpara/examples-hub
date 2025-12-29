@@ -3,9 +3,8 @@ import { createModularAccountV2Client } from "@account-kit/smart-contracts";
 import { BatchUserOperationCallData, WalletClientSigner } from "@aa-sdk/core";
 import ParaServer, { Environment } from "@getpara/server-sdk";
 import { createParaAccount, createParaViemClient } from "@getpara/viem-v2-integration";
+import { encodeFunctionData, http } from "viem";
 import Example from "../contracts/Example.json";
-import { encodeFunctionData, http, LocalAccount, WalletClient } from "viem";
-import { customSignAuthorization, customSignMessage } from "../utils/signature-utils.js";
 
 const EXAMPLE_CONTRACT_ADDRESS = "0x7920b6d8b07f0b9a3b96f238c64e022278db1419";
 const EXAMPLE_ABI = Example["contracts"]["contracts/Example.sol:Example"]["abi"];
@@ -38,14 +37,9 @@ export const signWithAlchemyEIP7702 = async (req: Request): Promise<Response> =>
 
     await para.importSession(session);
 
-    const viemParaAccount: LocalAccount = createParaAccount(para);
+    const viemParaAccount = createParaAccount(para);
 
-    viemParaAccount.signMessage = async ({ message }) => customSignMessage(para, message);
-    viemParaAccount.signAuthorization = async (authorization) => {
-      return customSignAuthorization(para, authorization);
-    };
-
-    const viemClient: WalletClient = createParaViemClient(para, {
+    const viemClient = createParaViemClient(para, {
       account: viemParaAccount,
       chain: arbitrumSepolia,
       transport: http(ALCHEMY_RPC_URL),

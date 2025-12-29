@@ -1,5 +1,5 @@
 {
-  "name": "para-modal-svelte",
+  "name": "with-svelte-vite",
   "private": true,
   "version": "1.0.0",
   "type": "module",
@@ -12,8 +12,9 @@
     "lint": "eslint ."
   },
   "dependencies": {
+    "@getpara/viem-v2-integration": "2.2.0",
     "@getpara/web-sdk": "2.2.0",
-    "graz": "^0.4.1"
+    "viem": "^2.27.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.29.0",

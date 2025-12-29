@@ -2,32 +2,14 @@
 
 import { useState, useCallback, useMemo, useEffect } from "react";
 import { useViemAccount } from "@getpara/react-sdk/evm";
-import { useClient, useWallet } from "@getpara/react-sdk";
 import { useAccount } from "@getpara/react-sdk";
 import { Chains } from "porto";
 import { Account, Key, RelayActions } from "porto/viem";
-import { createClient, http, parseSignature, serializeSignature, type Hex } from "viem";
-
-function hexToBase64(hex: string): string {
-  const cleanHex = hex.startsWith("0x") ? hex.slice(2) : hex;
-  const bytes = new Uint8Array(cleanHex.match(/.{1,2}/g)!.map((byte) => parseInt(byte, 16)));
-  return btoa(String.fromCharCode(...bytes));
-}
-
-function normalizeSignature(signature: Hex): Hex {
-  const parsed = parseSignature(signature);
-  return serializeSignature({
-    r: parsed.r,
-    s: parsed.s,
-    yParity: parsed.yParity,
-  });
-}
+import { createClient, http, type Hex } from "viem";
 
 export function usePortoAccount() {
   const { viemAccount, isLoading: isViemLoading } = useViemAccount();
   const { isConnected } = useAccount();
-  const para = useClient();
-  const { data: wallet } = useWallet();
 
   const [portoAccount, setPortoAccount] = useState<any>(null);
   const [isUpgrading, setIsUpgrading] = useState(false);
@@ -45,20 +27,12 @@ export function usePortoAccount() {
 
   const signRawHash = useCallback(
     async (hash: Hex): Promise<Hex> => {
-      if (!para || !wallet?.id) {
-        throw new Error("Para client or wallet not available");
+      if (!viemAccount?.sign) {
+        throw new Error("Viem account not available");
       }
-
-      const hashBase64 = hexToBase64(hash);
-      const res = await para.signMessage({
-        walletId: wallet.id,
-        messageBase64: hashBase64,
-      });
-
-      const signature = (res as { signature: string }).signature;
-      return normalizeSignature(`0x${signature}` as Hex);
+      return viemAccount.sign({ hash });
     },
-    [para, wallet]
+    [viemAccount]
   );
 
   useEffect(() => {
@@ -93,8 +67,8 @@ export function usePortoAccount() {
   }, [viemAccount?.address, isConnected, portoClient, signRawHash]);
 
   const upgradeToPorto = useCallback(async () => {
-    if (!viemAccount || !isConnected || !para || !wallet?.id) {
-      setError("Para client or wallet not available");
+    if (!viemAccount || !isConnected) {
+      setError("Wallet not connected");
       return;
     }
 
@@ -132,7 +106,7 @@ export function usePortoAccount() {
     } finally {
       setIsUpgrading(false);
     }
-  }, [viemAccount, isConnected, para, wallet, portoClient, signRawHash]);
+  }, [viemAccount, isConnected, portoClient, signRawHash]);
 
   return {
     viemAccount,

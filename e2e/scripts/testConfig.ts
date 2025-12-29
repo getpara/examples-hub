@@ -193,20 +193,20 @@ export const APP_CONFIGS: Record<string, TestAppConfig> = {
     startCommand: "yarn dev",
     envVars: {},
   },
-  // vue: {
-  //   path: "web/with-vue-vite",
-  //   framework: "vue",
-  //   port: parseInt(getEnvVar("VITE_PORT", "5173")),
-  //   startCommand: "rm -rf node_modules/.vite && yarn dev --force",
-  //   envVars: {},
-  // },
-  // svelte: {
-  //   path: "web/with-svelte-vite",
-  //   framework: "svelte",
-  //   port: parseInt(getEnvVar("VITE_PORT", "5173")),
-  //   startCommand: "rm -rf node_modules/.vite && yarn dev --force",
-  //   envVars: {},
-  // },
+  vue: {
+    path: "web/with-vue-vite",
+    framework: "vue",
+    port: parseInt(getEnvVar("VITE_PORT", "5173")),
+    startCommand: "rm -rf node_modules/.vite && yarn dev --force",
+    envVars: {},
+  },
+  svelte: {
+    path: "web/with-svelte-vite",
+    framework: "svelte",
+    port: parseInt(getEnvVar("VITE_PORT", "5173")),
+    startCommand: "rm -rf node_modules/.vite && yarn dev --force",
+    envVars: {},
+  },
   node: {
     path: "server/with-node",
     framework: "node",
@@ -403,8 +403,8 @@ export const FRAMEWORK_PATHS: Record<string, string[]> = {
     "web/",
     "e2e/tests/web/with-react-nextjs/",
   ],
-  // vue: ["web/with-vue-vite/", "web/", "e2e/tests/web/with-vue-vite/"],
-  // svelte: ["web/with-svelte-vite/", "web/", "e2e/tests/web/with-svelte-vite/"],
+  vue: ["web/with-vue-vite/", "web/", "e2e/tests/web/with-vue-vite/"],
+  svelte: ["web/with-svelte-vite/", "web/", "e2e/tests/web/with-svelte-vite/"],
   node: ["server/with-node/", "server/", "e2e/tests/server/with-node/"],
 };
 

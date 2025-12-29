@@ -1,81 +1,99 @@
-# Para SDK + React + TanStack Start Example
+# Para Modal + Multichain + TanStack Start Example
 
-This example demonstrates how to integrate the Para React SDK with TanStack Start for server-side rendering capabilities. It showcases wallet connection, message signing, and authentication flows while leveraging TanStack Start's powerful routing and SSR features for optimal performance and SEO.
+A minimal TanStack Start example demonstrating Para Modal integration with multichain wallets (EVM, Cosmos, Solana) for wallet connection and message signing.
 
-## Setup/Installation
+## What This Example Shows
 
-### Environment Variables
-Create a `.env` file in the project root and add your Para API key:
+- Setting up `ParaProvider` with TanStack Start SSR
+- Configuring external wallets for EVM (MetaMask, Coinbase, Rainbow), Cosmos (Keplr, Leap), and Solana (Phantom, Glow, Backpack, Solflare)
+- Opening the Para modal via the `useModal` hook
+- Checking authentication state with `useAccount`
+- Retrieving wallet address with `useWallet`
+- Signing messages with `useSignMessage`
+- Custom hooks pattern with `useSignHelloWorld`
+- TanStack Router file-based routing
+
+## Setup
+
+1. Create a `.env` file:
+
 ```env
 VITE_PARA_API_KEY=your_api_key_here
-VITE_PARA_ENVIRONMENT=beta
+VITE_PARA_ENVIRONMENT=BETA
 ```
 
-### Installation
-Install dependencies using your preferred package manager:
-```bash
-# npm
-npm install
+2. Install dependencies and run:
 
-# yarn
+```bash
 yarn install
-
-# pnpm
-pnpm install
-```
-
-### Running the Development Server
-```bash
-# npm
-npm run dev
-
-# yarn
 yarn dev
-
-# pnpm
-pnpm dev
 ```
 
-### Building for Production
-```bash
-# npm
-npm run build
+## Project Structure
 
-# yarn
-yarn build
-
-# pnpm
-pnpm build
+```
+src/
+├── routes/
+│   ├── __root.tsx                # Root layout with ParaProvider
+│   └── index.tsx                 # Main route with auth flow
+├── components/
+│   ├── ParaProvider.tsx          # Para SDK provider with multichain config
+│   ├── DefaultCatchBoundary.tsx  # TanStack error boundary
+│   ├── NotFound.tsx              # 404 component
+│   ├── layout/Header.tsx         # Header with connect button
+│   └── ui/
+│       ├── ConnectCard.tsx       # Connect wallet card
+│       ├── WalletInfo.tsx        # Connected wallet display
+│       └── SignMessage.tsx       # Sign message UI
+├── hooks/
+│   └── useSignHelloWorld.ts      # Custom hook for signing
+├── lib/
+│   └── e2e-helpers.ts            # E2E testing utilities
+├── styles/
+│   └── app.css                   # Tailwind CSS styles
+└── router.tsx                    # TanStack Router configuration
 ```
 
-## Key Dependencies
+## Multichain Configuration
 
-- `@getpara/react-sdk`: 2.0.0-alpha.26
-- `@tanstack/react-query`: 5.81.2
-- `@tanstack/react-router`: ^1.122.0
-- `@tanstack/react-start`: ^1.122.0
-- `react`: ^19.0.0
-- `react-dom`: ^19.0.0
-- `vite`: ^6.3.5
-- `tailwindcss`: ^3.4.17
-- `zod`: ^3.24.2
+This example configures Para to work with wallets across multiple chains:
 
-## Key Files
+```typescript
+externalWalletConfig={{
+  wallets: [
+    "METAMASK", "COINBASE", "WALLETCONNECT", "RAINBOW", "ZERION",  // EVM
+    "KEPLR", "LEAP",  // Cosmos
+    "GLOW", "PHANTOM", "BACKPACK", "SOLFLARE",  // Solana
+  ],
+  evmConnector: {
+    config: { chains: [mainnet, polygon, sepolia, celo] },
+  },
+  cosmosConnector: {
+    config: {
+      chains: [cosmoshub, osmosis, noble],
+      selectedChainId: cosmoshub.chainId,
+    },
+  },
+  solanaConnector: {
+    config: {
+      endpoint: clusterApiUrl(WalletAdapterNetwork.Devnet),
+      chain: WalletAdapterNetwork.Devnet,
+    },
+  },
+}}
+```
 
-- `/src/context/ParaProvider.tsx` - Para SDK provider configuration
-- `/src/context/QueryProvider.tsx` - React Query provider setup
-- `/src/routes/index.tsx` - Main route with wallet connection functionality
-- `/src/components/ui/ConnectWalletCard.tsx` - Wallet connection UI component
-- `/src/components/ui/SignMessageForm.tsx` - Message signing functionality
-- `/src/router.tsx` - TanStack Router configuration
-- `/src/config/constants.ts` - Environment configuration and constants
+## SSR Considerations
+
+This example uses TanStack Start's SSR shell component pattern. The Para SDK provider is SSR-safe because:
+- Provider configuration is static (API key, theme)
+- Para SDK hooks are only used in client-side components
+- Header component uses `"use client"` directive for hook usage
 
 ## Learn More
 
-- [Para SDK Documentation](https://docs.getpara.com)
+- [Para Documentation](https://docs.getpara.com)
 - [Para Website](https://getpara.com)
 - [Para Developer Portal](https://developer.getpara.com)
 - [TanStack Router Documentation](https://tanstack.com/router)
 - [TanStack Start Documentation](https://tanstack.com/start)
-- [React Documentation](https://react.dev)
-- [Vite Documentation](https://vite.dev)

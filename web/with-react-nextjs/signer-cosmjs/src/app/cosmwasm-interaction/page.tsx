@@ -1,122 +1,44 @@
 "use client";
 
 import { useState } from "react";
-import { useAccount } from "@getpara/react-sdk";
-import { useParaCosmWasmSigner } from "@/hooks/useParaCosmWasmSigner";
-import { useAccountAddress } from "@/hooks/useAccountAddress";
-import { CosmWasmClient } from "@cosmjs/cosmwasm-stargate";
-import { DEFAULT_CHAIN } from "@/config/chains";
-
+import { useCosmWasmContract } from "@/hooks/useCosmWasmContract";
+import { StatusAlert } from "@/components/ui/StatusAlert";
+import { ActionButton } from "@/components/ui/ActionButton";
+import { DataField } from "@/components/ui/DataField";
 
 export default function CosmWasmInteractionPage() {
   const [contractAddress, setContractAddress] = useState("");
   const [queryMsg, setQueryMsg] = useState('{"balance": {"address": "YOUR_ADDRESS_HERE"}}');
-  const [executeMsg, setExecuteMsg] = useState('{"transfer": {"recipient": "cosmos1...", "amount": "1000000"}}');
-  const [queryResult, setQueryResult] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [txHash, setTxHash] = useState<string | null>(null);
-  const [status, setStatus] = useState<{
-    show: boolean;
-    type: "success" | "error" | "info";
-    message: string;
-  }>({ show: false, type: "success", message: "" });
+  const [executeMsg, setExecuteMsg] = useState(
+    '{"transfer": {"recipient": "cosmos1...", "amount": "1000000"}}'
+  );
 
-  const account = useAccount();
-  const { signingClient } = useParaCosmWasmSigner();
-  const address = useAccountAddress();
+  const { queryContract, executeContract, queryResult, txHash, gasUsed, isLoading, isReady, error, reset } =
+    useCosmWasmContract();
 
-  const queryContract = async () => {
-    setIsLoading(true);
-    setStatus({ show: false, type: "success", message: "" });
-    setQueryResult(null);
-
+  const handleQuery = async () => {
+    reset();
     try {
-      if (!contractAddress) {
-        throw new Error("Please enter a contract address.");
-      }
-
-      let parsedQuery;
-      try {
-        parsedQuery = JSON.parse(queryMsg);
-      } catch {
+      const parsedQuery = JSON.parse(queryMsg);
+      await queryContract(contractAddress, parsedQuery);
+    } catch (err) {
+      if (err instanceof SyntaxError) {
         throw new Error("Invalid JSON in query message.");
       }
-
-      const client = await CosmWasmClient.connect(DEFAULT_CHAIN.rpc);
-      const result = await client.queryContractSmart(contractAddress, parsedQuery);
-
-      setQueryResult(JSON.stringify(result, null, 2));
-      setStatus({
-        show: true,
-        type: "success",
-        message: "Query executed successfully!",
-      });
-    } catch (error) {
-      console.error("Error querying contract:", error);
-      setStatus({
-        show: true,
-        type: "error",
-        message: error instanceof Error ? error.message : "Failed to query contract. Please try again.",
-      });
-    } finally {
-      setIsLoading(false);
+      throw err;
     }
   };
 
-  const executeContract = async () => {
-    setIsLoading(true);
-    setStatus({ show: false, type: "success", message: "" });
-    setTxHash(null);
-
+  const handleExecute = async () => {
+    reset();
     try {
-      if (!account?.isConnected || !address) {
-        throw new Error("Please connect your wallet to execute contract.");
-      }
-
-      if (!signingClient) {
-        throw new Error("Signing client not initialized. Please try reconnecting.");
-      }
-
-      if (!contractAddress) {
-        throw new Error("Please enter a contract address.");
-      }
-
-      let parsedMsg;
-      try {
-        parsedMsg = JSON.parse(executeMsg);
-      } catch {
+      const parsedMsg = JSON.parse(executeMsg);
+      await executeContract(contractAddress, parsedMsg);
+    } catch (err) {
+      if (err instanceof SyntaxError) {
         throw new Error("Invalid JSON in execute message.");
       }
-
-      setStatus({
-        show: true,
-        type: "info",
-        message: "Please confirm the transaction in your wallet...",
-      });
-
-      const result = await signingClient.execute(
-        address,
-        contractAddress,
-        parsedMsg,
-        "auto",
-        "CosmWasm execution via Para + CosmJS"
-      );
-
-      setTxHash(result.transactionHash);
-      setStatus({
-        show: true,
-        type: "success",
-        message: `Contract executed successfully! Gas used: ${result.gasUsed}`,
-      });
-    } catch (error) {
-      console.error("Error executing contract:", error);
-      setStatus({
-        show: true,
-        type: "error",
-        message: error instanceof Error ? error.message : "Failed to execute contract. Please try again.",
-      });
-    } finally {
-      setIsLoading(false);
+      throw err;
     }
   };
 
@@ -125,20 +47,20 @@ export default function CosmWasmInteractionPage() {
       <div className="text-center mb-8">
         <h1 className="text-4xl font-bold tracking-tight mb-6">CosmWasm Contract Demo</h1>
         <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-          Interact with CosmWasm smart contracts. Query contract state and execute contract methods directly from your wallet.
+          Interact with CosmWasm smart contracts. Query contract state and execute contract methods
+          directly from your wallet.
         </p>
       </div>
 
       <div className="max-w-4xl mx-auto">
         <div className="grid gap-6 md:grid-cols-2">
+          {/* Query Section */}
           <div>
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Query Contract</h2>
-            
+
             <div className="space-y-4">
               <div className="space-y-3">
-                <label
-                  htmlFor="contract-query"
-                  className="block text-sm font-medium text-gray-700">
+                <label htmlFor="contract-query" className="block text-sm font-medium text-gray-700">
                   Contract Address
                 </label>
                 <input
@@ -152,9 +74,7 @@ export default function CosmWasmInteractionPage() {
               </div>
 
               <div className="space-y-3">
-                <label
-                  htmlFor="query-msg"
-                  className="block text-sm font-medium text-gray-700">
+                <label htmlFor="query-msg" className="block text-sm font-medium text-gray-700">
                   Query Message (JSON)
                 </label>
                 <textarea
@@ -167,21 +87,22 @@ export default function CosmWasmInteractionPage() {
                 />
               </div>
 
-              <button
-                onClick={queryContract}
-                className="w-full rounded-none bg-gray-900 px-6 py-3 text-sm font-medium text-white hover:bg-gray-950 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={isLoading || !contractAddress}>
-                {isLoading ? "Querying..." : "Query Contract"}
-              </button>
+              <ActionButton
+                onClick={handleQuery}
+                isLoading={isLoading}
+                disabled={!contractAddress}
+                loadingText="Querying...">
+                Query Contract
+              </ActionButton>
 
-              {queryResult && (
+              {queryResult !== null && (
                 <div className="mt-4 rounded-none border border-gray-200">
                   <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
                     <h3 className="text-sm font-medium text-gray-900">Query Result:</h3>
                   </div>
                   <div className="p-6">
                     <pre className="text-sm font-mono bg-white p-4 border border-gray-200 overflow-auto">
-                      {queryResult}
+                      {JSON.stringify(queryResult, null, 2)}
                     </pre>
                   </div>
                 </div>
@@ -189,25 +110,21 @@ export default function CosmWasmInteractionPage() {
             </div>
           </div>
 
+          {/* Execute Section */}
           <div>
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Execute Contract</h2>
-            
-            {status.show && status.type !== "success" && (
-              <div
-                className={`mb-4 rounded-none border ${
-                  status.type === "error"
-                    ? "bg-red-50 border-red-500 text-red-700"
-                    : "bg-gray-50 border-gray-500 text-gray-700"
-                }`}>
-                <p className="px-6 py-4 break-words">{status.message}</p>
-              </div>
+
+            {error && <StatusAlert type="error" message={error.message} />}
+            {txHash && (
+              <StatusAlert
+                type="success"
+                message={`Contract executed successfully! Gas used: ${gasUsed}`}
+              />
             )}
 
             <div className="space-y-4">
               <div className="space-y-3">
-                <label
-                  htmlFor="execute-msg"
-                  className="block text-sm font-medium text-gray-700">
+                <label htmlFor="execute-msg" className="block text-sm font-medium text-gray-700">
                   Execute Message (JSON)
                 </label>
                 <textarea
@@ -220,12 +137,13 @@ export default function CosmWasmInteractionPage() {
                 />
               </div>
 
-              <button
-                onClick={executeContract}
-                className="w-full rounded-none bg-gray-900 px-6 py-3 text-sm font-medium text-white hover:bg-gray-950 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={isLoading || !account?.isConnected || !contractAddress}>
-                {isLoading ? "Executing..." : "Execute Contract"}
-              </button>
+              <ActionButton
+                onClick={handleExecute}
+                isLoading={isLoading}
+                disabled={!isReady || !contractAddress}
+                loadingText="Executing...">
+                Execute Contract
+              </ActionButton>
 
               {txHash && (
                 <div className="mt-4 rounded-none border border-gray-200">
@@ -233,19 +151,13 @@ export default function CosmWasmInteractionPage() {
                     <h3 className="text-sm font-medium text-gray-900">Transaction Details:</h3>
                   </div>
                   <div className="p-6">
-                    <div className="space-y-4">
-                      <div>
-                        <p className="text-sm text-gray-600 mb-2">Transaction Hash:</p>
-                        <p className="text-sm font-mono bg-white p-4 border border-gray-200 break-all">
-                          {txHash}
-                        </p>
-                      </div>
-                    </div>
+                    <DataField label="Transaction Hash:" value={txHash} mono />
                   </div>
                 </div>
               )}
             </div>
 
+            {/* Example Messages */}
             <div className="mt-6 rounded-none border border-gray-200 bg-gray-50">
               <div className="px-6 py-4">
                 <h3 className="text-sm font-medium text-gray-900 mb-2">Example Messages</h3>

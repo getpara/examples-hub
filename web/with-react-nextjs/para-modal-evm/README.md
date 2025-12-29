@@ -1,54 +1,70 @@
-# Para Modal EVM
+# Para Modal + EVM Example
 
-This example demonstrates how to integrate Para Modal with EVM-compatible wallets in a Next.js application. It showcases wallet connection and message signing capabilities for popular EVM wallets like MetaMask and Rainbow through Para's React SDK.
+A minimal Next.js example demonstrating Para Modal integration with EVM wallets (MetaMask) for wallet connection and message signing.
+
+## What This Example Shows
+
+- Setting up `ParaProvider` with EVM wallet configuration
+- Configuring external wallets (MetaMask) via `externalWalletConfig`
+- Opening the Para modal via the `useModal` hook
+- Checking authentication state with `useAccount`
+- Retrieving wallet address with `useWallet`
+- Signing messages with `useSignMessage`
 
 ## Setup
 
-### Environment Variables
-
-Create a `.env.local` file in the root directory:
+1. Create a `.env` file:
 
 ```env
-NEXT_PUBLIC_PARA_API_KEY=your_para_api_key
+NEXT_PUBLIC_PARA_API_KEY=your_api_key_here
+NEXT_PUBLIC_PARA_ENVIRONMENT=BETA
 ```
 
-### Installation
-
-Install dependencies using your preferred package manager:
+2. Install dependencies and run:
 
 ```bash
-# npm
-npm install
-
-# yarn
 yarn install
-
-# pnpm
-pnpm install
+yarn dev
 ```
 
-## Key Dependencies
+## Project Structure
 
-- `@getpara/evm-wallet-connectors` (v2.0.0-alpha.26) - EVM wallet connectors for Para
-- `@getpara/react-sdk` (v2.0.0-alpha.26) - Para React SDK for wallet integration
-- `@tanstack/react-query` (v5.81.2) - Data fetching and state management
-- `viem` (v2.31.4) - TypeScript interface for Ethereum
-- `wagmi` (v2.15.6) - React hooks for Ethereum
-- `next` (v15.1.5) - React framework
-- `react` (v19.0.0) - React library
+```
+src/
+├── app/
+│   ├── layout.tsx              # Root layout with ParaProvider
+│   └── page.tsx                # Main page with auth flow
+├── components/
+│   ├── ParaProvider.tsx        # Para SDK provider with EVM config
+│   ├── layout/Header.tsx       # Header with connect button
+│   └── ui/
+│       ├── ConnectCard.tsx     # Connect wallet card
+│       ├── WalletInfo.tsx      # Connected wallet display
+│       └── SignMessage.tsx     # Sign message UI
+├── hooks/
+│   └── useSignHelloWorld.ts    # Custom hook for signing
+└── lib/
+    └── e2e-helpers.ts          # E2E testing utilities
+```
 
-## Key Files
+## EVM Configuration
 
-- `src/context/ParaProvider.tsx` - Para SDK React context provider
-- `src/components/ui/ConnectWalletCard.tsx` - Wallet connection interface
-- `src/components/ui/SignMessageForm.tsx` - Message signing form component
-- `src/config/constants.ts` - Configuration constants
+This example configures Para to work with EVM wallets:
+
+```typescript
+externalWalletConfig={{
+  wallets: ["METAMASK"],
+  evmConnector: {
+    config: {
+      chains: [sepolia],
+    },
+  },
+}}
+```
 
 ## Learn More
 
 - [Para Documentation](https://docs.getpara.com)
 - [Para Website](https://getpara.com)
 - [Para Developer Portal](https://developer.getpara.com)
-- [Wagmi Documentation](https://wagmi.sh)
-- [Viem Documentation](https://viem.sh)
 - [Next.js Documentation](https://nextjs.org/docs)
