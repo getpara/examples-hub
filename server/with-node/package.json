@@ -9,16 +9,16 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@aa-sdk/core": "4.52.2",
-    "@account-kit/infra": "4.52.2",
-    "@account-kit/smart-contracts": "4.52.2",
+    "@aa-sdk/core": "4.81.3",
+    "@account-kit/infra": "4.81.3",
+    "@account-kit/smart-contracts": "4.81.3",
     "@cosmjs/stargate": "0.34.0",
     "@ethereumjs/rlp": "5.0.2",
-    "@getpara/cosmjs-v0-integration": "2.0.0",
-    "@getpara/ethers-v6-integration": "2.0.0",
-    "@getpara/server-sdk": "2.0.0",
-    "@getpara/solana-web3.js-v1-integration": "2.0.0",
-    "@getpara/viem-v2-integration": "2.0.0",
+    "@getpara/cosmjs-v0-integration": "2.2.0",
+    "@getpara/ethers-v6-integration": "2.2.0",
+    "@getpara/server-sdk": "2.2.0",
+    "@getpara/solana-web3.js-v1-integration": "2.2.0",
+    "@getpara/viem-v2-integration": "2.2.0",
     "@solana/web3.js": "1.98.2",
     "@zerodev/ecdsa-validator": "5.4.9",
     "@zerodev/sdk": "5.4.41",
@@ -28,7 +28,7 @@
     "express": "5.1.0",
     "sqlite": "5.1.1",
     "sqlite3": "5.1.7",
-    "viem": "2.33.0"
+    "viem": "2.42.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.29.0",

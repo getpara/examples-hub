@@ -1,83 +1,22 @@
-import { useState, useEffect } from "react";
-import { useAccount, useModal, useWallet, useSignMessage, useClient } from "@getpara/react-sdk";
-import { Header } from "@/components/layout/Header";
-import { StatusAlert } from "@/components/ui/StatusAlert";
-import { ConnectWalletCard } from "@/components/ui/ConnectWalletCard";
-import { SignMessageForm } from "@/components/ui/SignMessageForm";
-import { SignatureDisplay } from "@/components/ui/SignatureDisplay";
+import { useModal, useAccount, useClient } from "@getpara/react-sdk";
+import { useE2ECleanup } from "./lib/e2e-helpers";
+import { useSignHelloWorld } from "./hooks/useSignHelloWorld";
+import { Header } from "./components/layout/Header";
+import { ConnectCard } from "./components/ui/ConnectCard";
+import { WalletInfo } from "./components/ui/WalletInfo";
+import { SignMessage } from "./components/ui/SignMessage";
 
-export default function Home() {
-  const para = useClient();
-
-  // Expose cleanup function and para client for E2E tests (development only)
-  useEffect(() => {
-    if (import.meta.env.DEV && para) {
-      // Expose para client for test verification
-      (window as any).para = para;
-
-      // Expose cleanup function
-      (window as any).__deleteTestUser = async () => {
-        if (para?.userId) {
-          try {
-            await para.ctx.client.deleteSelf(para.userId);
-            console.log('[E2E Cleanup] Test user deleted:', para.userId);
-          } catch (error: any) {
-            console.error('[E2E Cleanup] Failed to delete test user:', error.message);
-            throw error;
-          }
-        }
-      };
-    }
-
-    return () => {
-      if (import.meta.env.DEV) {
-        delete (window as any).__deleteTestUser;
-        delete (window as any).para;
-      }
-    };
-  }, [para]);
-
-  const [message, setMessage] = useState("Hello Para!");
+export default function App() {
+  // Para SDK hooks
   const { openModal } = useModal();
   const { isConnected } = useAccount();
-  const { data: wallet } = useWallet();
-  const signMessageHook = useSignMessage();
+  const para = useClient();
 
-  const address = wallet?.address;
+  // Sign message hook
+  const { sign, message, isPending, error, signature } = useSignHelloWorld();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!isConnected || !wallet?.id) {
-      return;
-    }
-
-    signMessageHook.signMessage({
-      walletId: wallet.id,
-      messageBase64: btoa(message),
-    });
-  };
-
-  const handleMessageChange = (value: string) => {
-    setMessage(value);
-    if (signMessageHook.data) {
-      signMessageHook.reset();
-    }
-  };
-
-  const status = {
-    show: signMessageHook.isPending || !!signMessageHook.error || !!signMessageHook.data,
-    type: signMessageHook.isPending
-      ? ("info" as const)
-      : signMessageHook.error
-      ? ("error" as const)
-      : ("success" as const),
-    message: signMessageHook.isPending
-      ? "Signing message..."
-      : signMessageHook.error
-      ? signMessageHook.error.message || "Failed to sign message. Please try again."
-      : "Message signed successfully!",
-  };
+  // E2E testing cleanup (internal only - safe to remove)
+  useE2ECleanup(para);
 
   return (
     <>
@@ -85,51 +24,25 @@ export default function Home() {
 
       <div className="container mx-auto px-4 py-12">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold tracking-tight mb-4">Para Custom Auth Demo</h1>
+          <h1 className="text-4xl font-bold tracking-tight mb-4">Para Modal + Multichain Demo</h1>
           <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-            Sign messages with your Para wallet using email, phone, or social authentication. This demonstrates using
-            Para's web-sdk with native React components and a unified authentication flow.
+            Sign messages with your Para wallet using multichain external wallets. This example supports EVM chains
+            (Ethereum, Polygon), Cosmos chains (CosmosHub, Osmosis, Noble), and Solana.
           </p>
         </div>
 
         {!isConnected ? (
-          <div data-testid="not-logged-in">
-            <ConnectWalletCard onConnect={openModal} />
-          </div>
+          <ConnectCard onConnect={openModal} />
         ) : (
-          <div
-            className="max-w-xl mx-auto"
-            data-testid="wallet-connected">
-            <div className="mb-8 rounded-none border border-gray-200">
-              <div className="px-6 py-3 bg-gray-50 border-b border-gray-200">
-                <h3 className="text-sm font-medium text-gray-900">Connected Wallet</h3>
-              </div>
-              <div className="px-6 py-3">
-                <p className="text-sm text-gray-500">Address</p>
-                <p
-                  className="text-lg font-medium text-gray-900 font-mono"
-                  data-testid="wallet-address">
-                  {address?.slice(0, 6)}...{address?.slice(-4)}
-                </p>
-              </div>
-            </div>
-
-            <StatusAlert
-              show={status.show}
-              type={status.type}
-              message={status.message}
-            />
-
-            <SignMessageForm
+          <div className="max-w-xl mx-auto">
+            <WalletInfo />
+            <SignMessage
               message={message}
-              isLoading={signMessageHook.isPending}
-              onMessageChange={handleMessageChange}
-              onSubmit={handleSubmit}
+              onSign={sign}
+              isPending={isPending}
+              error={error}
+              signature={signature}
             />
-
-            {signMessageHook.data && "signature" in signMessageHook.data && (
-              <SignatureDisplay signature={signMessageHook.data.signature} />
-            )}
           </div>
         )}
       </div>

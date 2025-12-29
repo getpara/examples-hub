@@ -1,4 +1,4 @@
-import { Environment } from "@getpara/react-sdk";
+import { Environment } from "@getpara/react-sdk-lite";
 
 export const API_KEY = process.env.NEXT_PUBLIC_PARA_API_KEY ?? "";
 

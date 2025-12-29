@@ -1,159 +1,32 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useParaSigner } from "@/hooks/useParaSigner";
-import { useCosmosQueryClient } from "@/hooks/useCosmosQueryClient";
+import { useState } from "react";
+import { useStaking } from "@/hooks/useStaking";
+import { StatusAlert } from "@/components/ui/StatusAlert";
+import { TxResult } from "@/components/ui/TxResult";
+import { ActionButton } from "@/components/ui/ActionButton";
 import { DEFAULT_CHAIN } from "@/config/chains";
-import { MsgDelegateEncodeObject, StargateClient, coins } from "@cosmjs/stargate";
-import { MsgDelegate } from "cosmjs-types/cosmos/staking/v1beta1/tx";
-
-interface Validator {
-  operatorAddress: string;
-  description: {
-    moniker: string;
-  };
-  commission: {
-    commissionRates: {
-      rate: string;
-    };
-  };
-  status: string;
-}
 
 export default function StakingPage() {
-  const [validators, setValidators] = useState<Validator[]>([]);
   const [selectedValidator, setSelectedValidator] = useState("");
   const [amount, setAmount] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [isValidatorsLoading, setIsValidatorsLoading] = useState(false);
-  const [delegations, setDelegations] = useState<Array<{
-    delegation: {
-      validatorAddress: string;
-    };
-    balance: {
-      amount: string;
-    };
-  }>>([]);
-  const [txHash, setTxHash] = useState<string | null>(null);
-  const [status, setStatus] = useState<{
-    show: boolean;
-    type: "success" | "error" | "info";
-    message: string;
-  }>({ show: false, type: "success", message: "" });
 
-  const { signingClient, address } = useParaSigner();
-  const { queryClient } = useCosmosQueryClient();
+  const {
+    delegate,
+    validators,
+    delegations,
+    txHash,
+    gasUsed,
+    isLoading,
+    isValidatorsLoading,
+    isReady,
+    error,
+    reset,
+  } = useStaking();
 
-  const fetchValidators = async () => {
-    if (!queryClient) return;
-
-    setIsValidatorsLoading(true);
-    try {
-      // Using a type assertion for the extended query client
-      const extendedClient = queryClient as StargateClient & {
-        staking: {
-          validators: (status: string) => Promise<{ validators: Validator[] }>;
-        };
-      };
-      const response = await extendedClient.staking.validators("BOND_STATUS_BONDED");
-      setValidators(response.validators.slice(0, 10)); // Show top 10 validators
-    } catch (error) {
-      console.error("Error fetching validators:", error);
-    } finally {
-      setIsValidatorsLoading(false);
-    }
-  };
-
-  const fetchDelegations = async () => {
-    if (!queryClient || !address) return;
-
-    try {
-      // Using a type assertion for the extended query client
-      const extendedClient = queryClient as StargateClient & {
-        staking: {
-          delegatorDelegations: (address: string) => Promise<{ delegationResponses: Array<{
-            delegation: {
-              validatorAddress: string;
-            };
-            balance: {
-              amount: string;
-            };
-          }> }>;
-        };
-      };
-      const response = await extendedClient.staking.delegatorDelegations(address);
-      setDelegations(response.delegationResponses);
-    } catch (error) {
-      console.error("Error fetching delegations:", error);
-    }
-  };
-
-  useEffect(() => {
-    fetchValidators();
-  }, [queryClient]);
-
-  useEffect(() => {
-    fetchDelegations();
-  }, [queryClient, address]);
-
-  const delegate = async () => {
-    setIsLoading(true);
-    setStatus({ show: false, type: "success", message: "" });
-    setTxHash(null);
-
-    try {
-      if (!address) {
-        throw new Error("Please connect your wallet to delegate.");
-      }
-
-      if (!signingClient) {
-        throw new Error("Signing client not initialized. Please try reconnecting.");
-      }
-
-      if (!selectedValidator) {
-        throw new Error("Please select a validator.");
-      }
-
-      const amountInMinimalDenom = Math.floor(parseFloat(amount) * Math.pow(10, DEFAULT_CHAIN.coinDecimals));
-      if (isNaN(amountInMinimalDenom) || amountInMinimalDenom <= 0) {
-        throw new Error("Invalid amount. Please enter a valid positive number.");
-      }
-
-      const delegateMsg: MsgDelegateEncodeObject = {
-        typeUrl: "/cosmos.staking.v1beta1.MsgDelegate",
-        value: MsgDelegate.fromPartial({
-          delegatorAddress: address,
-          validatorAddress: selectedValidator,
-          amount: coins(amountInMinimalDenom, DEFAULT_CHAIN.coinMinimalDenom)[0],
-        }),
-      };
-
-      const result = await signingClient.signAndBroadcast(
-        address,
-        [delegateMsg],
-        "auto",
-        "Delegation via Para + CosmJS"
-      );
-
-      setTxHash(result.transactionHash);
-      setStatus({
-        show: true,
-        type: "success",
-        message: `Delegation successful! Gas used: ${result.gasUsed}`,
-      });
-
-      // Refresh delegations
-      await fetchDelegations();
-    } catch (error) {
-      console.error("Error delegating:", error);
-      setStatus({
-        show: true,
-        type: "error",
-        message: error instanceof Error ? error.message : "Failed to delegate. Please try again.",
-      });
-    } finally {
-      setIsLoading(false);
-    }
+  const handleDelegate = async () => {
+    reset();
+    await delegate(selectedValidator, amount);
   };
 
   return (
@@ -161,7 +34,8 @@ export default function StakingPage() {
       <div className="text-center mb-8">
         <h1 className="text-4xl font-bold tracking-tight mb-6">Staking & Delegation Demo</h1>
         <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-          Delegate your ATOM to validators and participate in network security. Earn staking rewards while supporting the Cosmos ecosystem.
+          Delegate your ATOM to validators and participate in network security. Earn staking
+          rewards while supporting the Cosmos ecosystem.
         </p>
       </div>
 
@@ -170,24 +44,17 @@ export default function StakingPage() {
           <div>
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Delegate to Validator</h2>
 
-            {status.show && (
-              <div
-                className={`mb-4 rounded-none border ${
-                  status.type === "success"
-                    ? "bg-green-50 border-green-500 text-green-700"
-                    : status.type === "error"
-                    ? "bg-red-50 border-red-500 text-red-700"
-                    : "bg-gray-50 border-gray-500 text-gray-700"
-                }`}>
-                <p className="px-6 py-4 break-words">{status.message}</p>
-              </div>
+            {error && <StatusAlert type="error" message={error.message} />}
+            {txHash && (
+              <StatusAlert
+                type="success"
+                message={`Delegation successful! Gas used: ${gasUsed}`}
+              />
             )}
 
             <div className="space-y-4">
               <div className="space-y-3">
-                <label
-                  htmlFor="validator"
-                  className="block text-sm font-medium text-gray-700">
+                <label htmlFor="validator" className="block text-sm font-medium text-gray-700">
                   Select Validator
                 </label>
                 <select
@@ -201,16 +68,16 @@ export default function StakingPage() {
                   </option>
                   {validators.map((validator) => (
                     <option key={validator.operatorAddress} value={validator.operatorAddress}>
-                      {validator.description.moniker} ({(parseFloat(validator.commission.commissionRates.rate) * 100).toFixed(2)}% commission)
+                      {validator.description.moniker} (
+                      {(parseFloat(validator.commission.commissionRates.rate) * 100).toFixed(2)}%
+                      commission)
                     </option>
                   ))}
                 </select>
               </div>
 
               <div className="space-y-3">
-                <label
-                  htmlFor="amount"
-                  className="block text-sm font-medium text-gray-700">
+                <label htmlFor="amount" className="block text-sm font-medium text-gray-700">
                   Amount ({DEFAULT_CHAIN.coinDenom})
                 </label>
                 <input
@@ -225,39 +92,27 @@ export default function StakingPage() {
                 />
               </div>
 
-              <button
-                onClick={delegate}
-                className="w-full rounded-none bg-gray-900 px-6 py-3 text-sm font-medium text-white hover:bg-gray-950 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={isLoading || !address || !selectedValidator || !amount}>
-                {isLoading ? "Delegating..." : "Delegate ATOM"}
-              </button>
+              <ActionButton
+                onClick={handleDelegate}
+                isLoading={isLoading}
+                disabled={!isReady || !selectedValidator || !amount}
+                loadingText="Delegating...">
+                Delegate ATOM
+              </ActionButton>
 
-              {txHash && (
-                <div className="mt-4 rounded-none border border-gray-200">
-                  <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
-                    <h3 className="text-sm font-medium text-gray-900">Transaction Hash:</h3>
-                  </div>
-                  <div className="p-6">
-                    <p className="text-sm font-mono bg-white p-4 border border-gray-200 break-all">
-                      {txHash}
-                    </p>
-                  </div>
-                </div>
-              )}
+              {txHash && <TxResult hash={txHash} />}
             </div>
           </div>
 
           <div>
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Your Delegations</h2>
             <div className="rounded-none border border-gray-200">
-              {!address ? (
+              {!isReady ? (
                 <div className="p-6 text-center text-gray-500">
                   Connect wallet to view delegations
                 </div>
               ) : delegations.length === 0 ? (
-                <div className="p-6 text-center text-gray-500">
-                  No delegations found
-                </div>
+                <div className="p-6 text-center text-gray-500">No delegations found</div>
               ) : (
                 <div className="divide-y divide-gray-200">
                   {delegations.map((delegation, index) => (
@@ -267,7 +122,12 @@ export default function StakingPage() {
                           Validator: {delegation.delegation.validatorAddress.slice(0, 20)}...
                         </p>
                         <p className="text-gray-600 mt-1">
-                          Amount: {(Number(delegation.balance.amount) / Math.pow(10, DEFAULT_CHAIN.coinDecimals)).toFixed(6)} {DEFAULT_CHAIN.coinDenom}
+                          Amount:{" "}
+                          {(
+                            Number(delegation.balance.amount) /
+                            Math.pow(10, DEFAULT_CHAIN.coinDecimals)
+                          ).toFixed(6)}{" "}
+                          {DEFAULT_CHAIN.coinDenom}
                         </p>
                       </div>
                     </div>

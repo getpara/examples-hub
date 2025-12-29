@@ -38,6 +38,14 @@ export function PortoDemo() {
 
   return (
     <div className="max-w-3xl mx-auto p-8 space-y-6">
+      <div className="text-center mb-8">
+        <h1 className="text-4xl font-bold tracking-tight mb-4">Porto EIP-7702</h1>
+        <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+          Upgrade your EOA to a smart account using Porto&apos;s EIP-7702 infrastructure. This example
+          demonstrates in-place account upgrades with programmable permissions and session keys.
+        </p>
+      </div>
+
       <div className="border border-gray-200 p-6">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-3 h-3 rounded-full bg-gray-400" />

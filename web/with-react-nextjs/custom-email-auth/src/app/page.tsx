@@ -1,106 +1,51 @@
 "use client";
 
-import { useState } from "react";
-import { useAccount } from "@getpara/react-sdk";
-import { useViemClient } from "@getpara/react-sdk/evm";
-import { http } from "viem";
-import { sepolia } from "viem/chains";
-import { useModal } from "@/context/CustomModalProvider";
-import { StatusAlert } from "@/components/ui/StatusAlert";
-import { ConnectWalletCard } from "@/components/ui/ConnectWalletCard";
-import { SignMessageForm } from "@/components/ui/SignMessageForm";
-import { SignatureDisplay } from "@/components/ui/SignatureDisplay";
+import { useAccount, useClient, useLogout } from "@getpara/react-sdk";
+import { useE2ECleanup } from "@/lib/e2e-helpers";
+import { useSignHelloWorld } from "@/hooks/useSignHelloWorld";
+import { EmailAuth } from "@/components/ui/EmailAuth";
+import { WalletInfo } from "@/components/ui/WalletInfo";
+import { SignMessage } from "@/components/ui/SignMessage";
 
 export default function Home() {
-  const [message, setMessage] = useState("Hello Para!");
-  const [signature, setSignature] = useState<string | null>(null);
-  const [isSigning, setIsSigning] = useState(false);
-  const [signError, setSignError] = useState<Error | null>(null);
+  const { isConnected } = useAccount();
+  const para = useClient();
+  const { logout } = useLogout();
 
-  const { openModal } = useModal();
-  const { isConnected, isLoading, embedded } = useAccount();
-  const address = embedded?.wallets?.[0]?.address as `0x${string}` | undefined;
-  const { viemClient } = useViemClient({ address, walletClientConfig: { chain: sepolia, transport: http() } });
+  const { sign, message, isPending, error, signature } = useSignHelloWorld();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSignError(null);
-
-    if (!isConnected || !viemClient) {
-      setSignError(new Error("Please connect your wallet to sign a message."));
-      return;
-    }
-
-    setIsSigning(true);
-    try {
-      const sig = await viemClient.signMessage({ message });
-      setSignature(sig);
-    } catch (error) {
-      setSignError(error instanceof Error ? error : new Error("Failed to sign message"));
-    } finally {
-      setIsSigning(false);
-    }
-  };
-
-  const handleMessageChange = (value: string) => {
-    setMessage(value);
-    if (signature) {
-      setSignature(null);
-    }
-  };
-
-  const status = {
-    show: isSigning || !!signError || !!signature,
-    type: isSigning ? ("info" as const) : signError ? ("error" as const) : ("success" as const),
-    message: isSigning
-      ? "Signing message..."
-      : signError
-      ? signError.message || "Failed to sign message. Please try again."
-      : "Message signed successfully!",
-  };
+  // E2E testing cleanup (internal only - safe to remove)
+  useE2ECleanup(para);
 
   return (
     <div className="container mx-auto px-4 py-12">
       <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold tracking-tight mb-4">Para Custom Email Auth Demo</h1>
+        <h1 className="text-4xl font-bold tracking-tight mb-4">Custom Email Auth Demo</h1>
         <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-          Sign messages with your Para wallet using email authentication. This demonstrates using Para&apos;s web-sdk
-          with custom React Query hooks and a multi-step authentication flow.
+          Sign messages with your Para wallet using custom email authentication. This demonstrates building your own
+          auth UI with Para SDK hooks instead of using the built-in modal.
         </p>
       </div>
 
-      {!isConnected && !isLoading ? (
-        <ConnectWalletCard onConnect={openModal} />
-      ) : isConnected ? (
+      {!isConnected ? (
+        <EmailAuth />
+      ) : (
         <div className="max-w-xl mx-auto">
-          <div className="mb-8 rounded-none border border-gray-200">
-            <div className="px-6 py-3 bg-gray-50 border-b border-gray-200">
-              <h3 className="text-sm font-medium text-gray-900">Connected Wallet</h3>
-            </div>
-            <div className="px-6 py-3">
-              <p className="text-sm text-gray-500">Address</p>
-              <p className="text-lg font-medium text-gray-900 font-mono">
-                {address?.slice(0, 6)}...{address?.slice(-4)}
-              </p>
-            </div>
-          </div>
-
-          <StatusAlert
-            show={status.show}
-            type={status.type}
-            message={status.message}
-          />
-
-          <SignMessageForm
+          <WalletInfo />
+          <SignMessage
             message={message}
-            isLoading={isSigning}
-            onMessageChange={handleMessageChange}
-            onSubmit={handleSubmit}
+            onSign={sign}
+            isPending={isPending}
+            error={error}
+            signature={signature}
           />
-
-          {signature && <SignatureDisplay signature={signature} />}
+          <button
+            onClick={() => logout()}
+            className="mt-4 w-full px-4 py-2 border border-gray-300 text-gray-700 rounded-none hover:bg-gray-50 transition-colors font-medium">
+            Disconnect
+          </button>
         </div>
-      ) : null}
+      )}
     </div>
   );
 }

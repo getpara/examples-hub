@@ -15,6 +15,11 @@ export function createRouter() {
   return router
 }
 
+// Required by TanStack Start for SSR hydration
+export async function getRouter() {
+  return createRouter()
+}
+
 declare module '@tanstack/react-router' {
   interface Register {
     router: ReturnType<typeof createRouter>

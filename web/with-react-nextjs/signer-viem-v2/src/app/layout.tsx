@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
-import { QueryProvider } from "@/context/QueryProvider";
-import { ParaProvider } from "@/context/ParaProvider";
+import { ParaProvider } from "@/components/ParaProvider";
 import Header from "@/components/layout/Header";
 import "@/styles/globals.css";
+import "@getpara/react-sdk/styles.css";
 
 export const metadata: Metadata = {
-  title: "Para Signing",
-  description: "An example showcasing how to sign with the Para SDK",
+  title: "Para Viem v2 Demo",
+  description: "Examples of signing and transactions with Para SDK using Viem v2",
 };
 
 export default function RootLayout({
@@ -17,12 +17,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="antialiased">
-        <QueryProvider>
-          <ParaProvider>
-            <Header />
-            <main>{children}</main>
-          </ParaProvider>
-        </QueryProvider>
+        <ParaProvider>
+          <Header />
+          <main>{children}</main>
+        </ParaProvider>
       </body>
     </html>
   );

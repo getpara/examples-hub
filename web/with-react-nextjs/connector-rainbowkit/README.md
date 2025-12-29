@@ -1,38 +1,54 @@
-# Para with Rainbowkit Example
+# Para + RainbowKit Example
 
-This project is a simple example of using the Para Rainbowkit Wallet SDK with the Rainbowkit wallet connector.
+A minimal Next.js example demonstrating Para integration with RainbowKit for wallet connection and message signing.
 
-## Prerequisites
+## What This Example Shows
 
-- **Para API Key**: Obtain your API key from the Para developer portal. Create a `.env.local` file in the project root
-  (you can copy `.env.example`) and add your key, prefixing with `NEXT_PUBLIC_` to expose it to the browser:
-  ```env
-  NEXT_PUBLIC_PARA_API_KEY=your_api_key_here
-  ```
+- Setting up wagmi + RainbowKit providers with Para wallet connector
+- Using RainbowKit's `ConnectButton` for authentication
+- Checking connection state with wagmi's `useAccount`
+- Signing messages with wagmi's `useSignMessage`
 
-## Installation
+## Setup
 
-1.  Install project dependencies using your preferred package manager:
-    ```bash
-    npm install
-    # or
-    yarn install
-    ```
+1. Create a `.env` file:
 
-## Running the Example
+```env
+NEXT_PUBLIC_PARA_API_KEY=your_api_key_here
+NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID=your_walletconnect_project_id
+```
 
-1.  Start the Next.js development server:
-    ```bash
-    npm run dev
-    # or
-    yarn dev
-    ```
-2.  Open [http://localhost:3000](https://www.google.com/search?q=http://localhost:3000) (or the port specified) with
-    your browser to see the result.
+2. Install dependencies and run:
+
+```bash
+yarn install
+yarn dev
+```
+
+## Project Structure
+
+```
+src/
+├── app/
+│   ├── layout.tsx              # Root layout with Providers + Header
+│   └── page.tsx                # Main page with auth flow
+├── client/
+│   └── wagmi.ts                # wagmi + Para connector config
+├── components/
+│   ├── Providers.tsx           # wagmi + RainbowKit providers
+│   ├── layout/Header.tsx       # Header with ConnectButton
+│   └── ui/
+│       ├── ConnectCard.tsx     # Connect wallet card
+│       ├── WalletInfo.tsx      # Connected wallet display
+│       └── SignMessage.tsx     # Sign message UI
+└── hooks/
+    └── useSignHelloWorld.ts    # Custom hook for signing
+```
 
 ## Learn More
 
-For comprehensive guidance on using the Para SDK, setup details, and advanced features, please refer to the official
-documentation:
-
-[Para SDK documentation](https://docs.usepara.com/welcome)
+- [Para Documentation](https://docs.getpara.com)
+- [Para Website](https://getpara.com)
+- [Para Developer Portal](https://developer.getpara.com)
+- [RainbowKit Documentation](https://rainbowkit.com/docs)
+- [wagmi Documentation](https://wagmi.sh)

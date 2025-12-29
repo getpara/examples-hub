@@ -1,6 +1,6 @@
 import { QueryClient } from "@tanstack/react-query";
 import { connectorsForWallets } from "@rainbow-me/rainbowkit";
-import { getParaWallet, GetParaOpts, AuthLayout } from "@getpara/rainbowkit-wallet";
+import { getParaWallet, GetParaOpts } from "@getpara/rainbowkit-wallet";
 import { Environment } from "@getpara/web-sdk";
 import { createConfig, http } from "wagmi";
 import { sepolia } from "wagmi/chains";

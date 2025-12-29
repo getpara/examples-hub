@@ -3,20 +3,27 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --background: #ffffff;
+    --foreground: #171717;
+  }
+
   html {
     color-scheme: light dark;
   }
 
   * {
-    @apply border-gray-200 dark:border-gray-800;
+    @apply border-gray-200;
   }
 
   html,
   body {
-    @apply text-gray-900 bg-gray-50 dark:bg-gray-950 dark:text-gray-200;
+    @apply bg-white text-gray-900;
+    font-family: "Inter", Arial, Helvetica, sans-serif;
   }
+}
 
-  .using-mouse * {
-    outline: none !important;
-  }
+/* Para modal z-index fix */
+#para-modal > cpsl-auth-modal {
+  z-index: 9999999999;
 }

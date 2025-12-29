@@ -1,51 +1,52 @@
-# Para Modal
+# Para Modal Example
 
-This example demonstrates the simplest integration of Para Modal in a Next.js application. It showcases the basic setup for wallet connection and message signing using Para's built-in modal interface with minimal configuration.
+A minimal Next.js example demonstrating Para Modal integration for wallet connection and message signing.
+
+## What This Example Shows
+
+- Setting up `ParaProvider` as a client component
+- Opening the Para modal via the `useModal` hook
+- Checking authentication state with `useAccount`
+- Retrieving wallet address with `useWallet`
+- Signing messages with `useSignMessage`
 
 ## Setup
 
-### Environment Variables
-
-Create a `.env.local` file in the root directory:
+1. Create a `.env` file:
 
 ```env
-NEXT_PUBLIC_PARA_API_KEY=your_para_api_key
+NEXT_PUBLIC_PARA_API_KEY=your_api_key_here
+NEXT_PUBLIC_PARA_ENVIRONMENT=BETA
 ```
 
-### Installation
-
-Install dependencies using your preferred package manager:
+2. Install dependencies and run:
 
 ```bash
-# npm
-npm install
-
-# yarn
 yarn install
-
-# pnpm
-pnpm install
+yarn dev
 ```
 
-## Key Dependencies
+## Project Structure
 
-- `@getpara/react-sdk` (v2.0.0-alpha.26) - Para React SDK for wallet integration
-- `@tanstack/react-query` (v5.81.2) - Data fetching and state management
-- `next` (v15.1.5) - React framework
-- `react` (v19.0.0) - React library
-- `react-dom` (v19.0.0) - React DOM library
-
-## Key Files
-
-- `src/context/ParaProvider.tsx` - Para SDK React context provider
-- `src/components/ui/ConnectWalletCard.tsx` - Wallet connection interface
-- `src/components/ui/SignMessageForm.tsx` - Message signing form component
-- `src/config/constants.ts` - Configuration constants
+```
+src/
+├── app/
+│   ├── layout.tsx              # Root layout with ParaProvider
+│   └── page.tsx                # Main page with auth flow
+├── components/
+│   ├── ParaProvider.tsx        # Para SDK provider setup
+│   ├── layout/Header.tsx       # Header with connect button
+│   └── ui/
+│       ├── ConnectCard.tsx     # Connect wallet card
+│       ├── WalletInfo.tsx      # Connected wallet display
+│       └── SignMessage.tsx     # Sign message UI
+└── hooks/
+    └── useSignHelloWorld.ts    # Custom hook for signing
+```
 
 ## Learn More
 
 - [Para Documentation](https://docs.getpara.com)
 - [Para Website](https://getpara.com)
 - [Para Developer Portal](https://developer.getpara.com)
-- [React Query Documentation](https://tanstack.com/query/latest)
 - [Next.js Documentation](https://nextjs.org/docs)

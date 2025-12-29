@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "@/styles/globals.css";
-import "@getpara/react-sdk/styles.css";
+import "@getpara/react-sdk-lite/styles.css";
 import { AppKitProvider } from "@/context/AppKitProvider";
 import { AppWrapper } from "@/components/layout/AppWrapper";
 

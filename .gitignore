@@ -38,6 +38,9 @@ jspm_packages/
 .env.beta
 .env.sandbox
 
+# TypeScript
+*.tsbuildinfo
+
 # Next.js
 .next/
 out/

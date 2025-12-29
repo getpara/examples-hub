@@ -1,38 +1,117 @@
-## Deno Server Example
+# Para Server Integration with Deno
 
-This example demonstrates how to integrate the Para SDK with a Deno server. The server includes routes for wallet
-creation and signing using different libraries.
+A minimal Deno server example demonstrating Para SDK server-side integration for wallet management and transaction signing with various Web3 libraries and Account Abstraction providers.
 
-### Running the Example
+## What This Example Shows
 
-1. Install dependencies (optional):
-   ```bash
-   deno cache --reload server.ts
-   ```
-2. Start the server:
-   ```bash
-   deno task dev
-   ```
+- Creating and managing pre-generated wallets server-side
+- Signing transactions with multiple libraries: Ethers, Viem, CosmJS, Solana Web3
+- Integrating with Account Abstraction providers: Alchemy and ZeroDev
+- Supporting both EIP-4337 and EIP-7702 smart account patterns
 
-Alternatively, you can run directly:
+## Setup
 
-```bash
-deno run --watch -R server.ts
+1. Create a `.env` file:
+
+```env
+# Required for all examples
+PARA_API_KEY=your_para_api_key
+PARA_ENVIRONMENT=BETA
+ENCRYPTION_KEY=your_32_byte_encryption_key
+
+# For Alchemy AA examples
+ALCHEMY_API_KEY=your_alchemy_api_key
+ALCHEMY_GAS_POLICY_ID=your_gas_policy_id
+ALCHEMY_RPC_URL=your_alchemy_rpc_url
+
+# For ZeroDev AA examples
+ZERODEV_PROJECT_ID=your_zerodev_project_id
+ZERODEV_BUNDLER_RPC=your_bundler_rpc
+ZERODEV_PAYMASTER_RPC=your_paymaster_rpc
+ZERODEV_ARBITRUM_SEPOLIA_RPC=your_rpc_url
 ```
 
-Ensure that you configure the \***\*`.env`\*\*** file using \***\*`.env.example`\*\***.
+2. Run the server:
 
-### Available Routes
+```bash
+deno task dev
+```
 
-The server starts on port `8000`, and the following routes are available for interacting with the wallet functionality.
-Each route requires an `email` in the body of the request.
+The server runs at `http://localhost:8000`.
 
-#### Example Requests
+## API Endpoints
 
-- **Create Wallet**
+| Endpoint | Description |
+|----------|-------------|
+| `POST /wallets/pregen/create` | Create pre-generated wallets for an email |
+| `POST /ethers/pregen` | Sign transaction with Ethers.js |
+| `POST /viem/pregen` | Sign transaction with Viem |
+| `POST /cosmjs/pregen` | Sign Cosmos transaction with CosmJS |
+| `POST /solana-web3/pregen` | Sign Solana transaction |
+| `POST /alchemy/pregen` | Send UserOperation via Alchemy (EIP-4337) |
+| `POST /alchemy/eip7702` | Send transaction via Alchemy (EIP-7702) |
+| `POST /zerodev/pregen` | Send UserOperation via ZeroDev (EIP-4337) |
+| `POST /zerodev/eip7702` | Send transaction via ZeroDev (EIP-7702) |
 
-  ```bash
-  curl -X POST http://localhost:8000/wallets/create -H "Content-Type: application/json" -d '{"email": "user@example.com"}'
-  ```
+## Project Structure
 
-For more details, visit the [Para SDK documentation](https://docs.usepara.com/welcome).
+```
+src/
+├── index.ts              # Deno server setup
+├── routes/
+│   ├── createWallet.ts   # Wallet creation handler
+│   ├── signWithEthers.ts # Ethers.js signing
+│   ├── signWithViem.ts   # Viem signing
+│   ├── signWithCosmJS.ts # CosmJS signing
+│   ├── signWithSolanaWeb3.ts # Solana signing
+│   ├── signWithAlchemy.ts    # Alchemy 4337
+│   ├── signWithAlchemyEIP7702.ts # Alchemy 7702
+│   ├── signWithZerodev.ts    # ZeroDev 4337
+│   └── signWithZerodevEIP7702.ts # ZeroDev 7702
+├── db/
+│   └── keySharesDB.ts    # Key share storage
+├── utils/
+│   └── encryption-utils.ts # AES-GCM encryption
+└── contracts/
+    └── Example.json      # Demo contract ABI
+```
+
+## Key Integration Pattern
+
+```typescript
+import { Para as ParaServer, Environment } from "@getpara/server-sdk";
+import { createParaAccount, createParaViemClient } from "@getpara/viem-v2-integration";
+import { http } from "viem";
+import { sepolia } from "viem/chains";
+
+// Initialize Para server client
+const para = new ParaServer(Environment.BETA, PARA_API_KEY);
+
+// Set user's key share (retrieved from your secure storage)
+await para.setUserShare(decryptedKeyShare);
+
+// Create Viem account - handles signing internally
+const viemParaAccount = createParaAccount(para);
+
+// Create Viem client for transactions
+const viemClient = createParaViemClient(para, {
+  account: viemParaAccount,
+  chain: sepolia,
+  transport: http(RPC_URL),
+});
+
+// Sign and send transactions
+const signedTx = await viemClient.signTransaction(request);
+```
+
+## Getting API Keys
+
+- **Para API Key**: Get from [Para Developer Portal](https://developer.getpara.com)
+- **Alchemy API Key**: Get from [Alchemy Dashboard](https://dashboard.alchemy.com)
+- **ZeroDev Project ID**: Get from [ZeroDev Dashboard](https://dashboard.zerodev.app)
+
+## Learn More
+
+- [Para Documentation](https://docs.getpara.com)
+- [Alchemy Account Kit](https://docs.alchemy.com/docs/account-kit-overview)
+- [ZeroDev Documentation](https://docs.zerodev.app)
