@@ -23,7 +23,7 @@
     "@farcaster/miniapp-sdk": "0.2.1",
     "@farcaster/miniapp-wagmi-connector": "1.1.0",
     "@gemini-wallet/core": "0.3.2",
-    "@getpara/react-sdk": "2.2.0",
+    "@getpara/react-sdk": "2.3.0",
     "@metamask/sdk": "0.34.0",
     "@radix-ui/react-slot": "^1.2.3",
     "@rhinestone/sdk": "^1.0.9",
