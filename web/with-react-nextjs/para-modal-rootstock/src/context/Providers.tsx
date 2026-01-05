@@ -40,15 +40,20 @@ export function Providers({
               {
                 name: 'tRBTC',
                 symbol: 'tRBTC',
-                logoUrl: "https://assets.coingecko.com/coins/images/3794/large/rsk_logo.png?1645471916",
+                logoUrl: 'https://raw.githubusercontent.com/rsksmart/rsk-contract-metadata/refs/heads/master/images/rootstock-orange.png',
                 implementations: [
                   {
                     network: {
                       name: 'Rootstock Testnet',
                       evmChainId: '31',
-                      logoUrl: "https://assets.coingecko.com/coins/images/3794/large/rsk_logo.png?1645471916",
-                      rpcUrl: 'https://public-node.testnet.rsk.co',
+                      nativeTokenSymbol: 'tRBTC',                      
+                      rpcUrl: 'https://public-node.testnet.rsk.co',                      
                       isTestnet: true,
+                      explorer: {
+                        name: 'Rootstock Explorer',
+                        url: 'https://explorer.testnet.rootstock.io/',
+                        txUrlFormat: 'https://explorer.testnet.rootstock.io/tx/{HASH}',
+                      },
                     },
                   },
                 ],
