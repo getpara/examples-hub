@@ -2023,47 +2023,30 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@getpara/core-sdk@npm:2.0.0":
-  version: 2.0.0
-  resolution: "@getpara/core-sdk@npm:2.0.0"
+"@getpara/core-sdk@npm:2.2.0":
+  version: 2.2.0
+  resolution: "@getpara/core-sdk@npm:2.2.0"
   dependencies:
     "@celo/utils": "npm:^8.0.2"
     "@cosmjs/encoding": "npm:^0.32.4"
     "@ethereumjs/util": "npm:^9.1.0"
-    "@getpara/user-management-client": "npm:2.0.0"
+    "@getpara/user-management-client": "npm:2.2.0"
     "@noble/hashes": "npm:^1.5.0"
     base64url: "npm:^3.0.1"
     libphonenumber-js: "npm:^1.11.7"
     node-forge: "npm:^1.3.1"
     uuid: "npm:^11.1.0"
-  checksum: 10/22c06fbce539ce18bfc0ea401dee076649e7b14000c4c90fcd8d858ccb363efe24c14137a899151c8af6662dbe383471e50f4052b9011745597b8fca13001e3b
+  checksum: 10/7435cb9f9f45adb21a036e3d3eb76550d90c27c025acee053711c5dc9a51f9f2fa1163bffe1d8b63a0de278b99f2caca5a0cf016ee38222d3d58967777fc8f0a
   languageName: node
   linkType: hard
 
-"@getpara/core-sdk@npm:2.1.0":
-  version: 2.1.0
-  resolution: "@getpara/core-sdk@npm:2.1.0"
+"@getpara/react-native-wallet@npm:2.2.0":
+  version: 2.2.0
+  resolution: "@getpara/react-native-wallet@npm:2.2.0"
   dependencies:
-    "@celo/utils": "npm:^8.0.2"
-    "@cosmjs/encoding": "npm:^0.32.4"
-    "@ethereumjs/util": "npm:^9.1.0"
-    "@getpara/user-management-client": "npm:2.1.0"
-    "@noble/hashes": "npm:^1.5.0"
-    base64url: "npm:^3.0.1"
-    libphonenumber-js: "npm:^1.11.7"
-    node-forge: "npm:^1.3.1"
-    uuid: "npm:^11.1.0"
-  checksum: 10/f956826ec20897c8eb0cd0264fd2267f7cf4a9705f7e3a48f3acff0fb1ca894615b6af19473c8855b1a1171bd031693cdaac5fb4c978809d2e73d071b8093273
-  languageName: node
-  linkType: hard
-
-"@getpara/react-native-wallet@npm:2.1.0":
-  version: 2.1.0
-  resolution: "@getpara/react-native-wallet@npm:2.1.0"
-  dependencies:
-    "@getpara/core-sdk": "npm:2.1.0"
-    "@getpara/user-management-client": "npm:2.1.0"
-    "@getpara/web-sdk": "npm:2.1.0"
+    "@getpara/core-sdk": "npm:2.2.0"
+    "@getpara/user-management-client": "npm:2.2.0"
+    "@getpara/web-sdk": "npm:2.2.0"
     "@peculiar/webcrypto": "npm:^1.5.0"
     "@ungap/structured-clone": "npm:1.3.0"
     react-native-url-polyfill: "npm:2.0.0"
@@ -2079,7 +2062,7 @@ __metadata:
     react-native-quick-base64: "*"
     react-native-quick-crypto: "*"
     readable-stream: "*"
-  checksum: 10/94c035d47b895ec3c22e6372f37e1ca9080216ca25cfda15fa00e597663d2256a63bd0382de7cb00e40bbedd9b5d330b0d350ad08da0240f0ea37c17a646e7be
+  checksum: 10/d073a36d5ae9db4490f38b7644ea354fc10fbfdeb07f95526fd59137fc67d4a566436d4e9b81a60bcca57a185e63fd47effe1f57a5abbc36ad6c87a7e4158c8d
   languageName: node
   linkType: hard
 
@@ -2090,45 +2073,34 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@getpara/user-management-client@npm:2.0.0":
-  version: 2.0.0
-  resolution: "@getpara/user-management-client@npm:2.0.0"
+"@getpara/user-management-client@npm:2.2.0":
+  version: 2.2.0
+  resolution: "@getpara/user-management-client@npm:2.2.0"
   dependencies:
     "@getpara/shared": "npm:1.8.0"
     axios: "npm:^1.8.4"
     libphonenumber-js: "npm:^1.11.7"
-  checksum: 10/57d3dc57b0e91dff133a6893ffe237a7b341bbc951b6c32240eb732a2c2c3f9844643912e264a007399353803f19a9e1b94b9cc4506f827bbc39283786a64893
+  checksum: 10/281a707d087efdb5e4b311a62393b5c7508b2b86fb058ec9af2fde5720289f32c32a6cf22f2004e32c44ea0002eb52d2a5d7ba84c45ad899e443ffbaf5397e23
   languageName: node
   linkType: hard
 
-"@getpara/user-management-client@npm:2.1.0":
-  version: 2.1.0
-  resolution: "@getpara/user-management-client@npm:2.1.0"
+"@getpara/viem-v2-integration@npm:2.2.0":
+  version: 2.2.0
+  resolution: "@getpara/viem-v2-integration@npm:2.2.0"
   dependencies:
-    "@getpara/shared": "npm:1.8.0"
-    axios: "npm:^1.8.4"
-    libphonenumber-js: "npm:^1.11.7"
-  checksum: 10/f5ad6b51e2c2286c123661cc7620fd031d6c4d83a98cb6419c9fc9b4ec67d0f9d99615339b4574b153bb5b7b402f2e39714e56097a928a7be00614f82c7dd64c
-  languageName: node
-  linkType: hard
-
-"@getpara/viem-v2-integration@npm:2.0.0":
-  version: 2.0.0
-  resolution: "@getpara/viem-v2-integration@npm:2.0.0"
-  dependencies:
-    "@getpara/core-sdk": "npm:2.0.0"
+    "@getpara/core-sdk": "npm:2.2.0"
   peerDependencies:
     viem: 2.x
-  checksum: 10/19a464bc1feab479987583f1a32e758aa8dcda3860139b7d9e647fdc289f3e63b611c6c20130969accadeade69cfba4985d1016256e7b951ee8a69f25e93ec89
+  checksum: 10/b0d4f02253b5f3cc7f258c01000b62a70e6e5bf4f0ed642e1e8cdcb9c55473c14d42eda9d568bfd6ff5708fd3f74c143c369fd9b4cb49941b38380b6cbe6168d
   languageName: node
   linkType: hard
 
-"@getpara/web-sdk@npm:2.1.0":
-  version: 2.1.0
-  resolution: "@getpara/web-sdk@npm:2.1.0"
+"@getpara/web-sdk@npm:2.2.0":
+  version: 2.2.0
+  resolution: "@getpara/web-sdk@npm:2.2.0"
   dependencies:
-    "@getpara/core-sdk": "npm:2.1.0"
-    "@getpara/user-management-client": "npm:2.1.0"
+    "@getpara/core-sdk": "npm:2.2.0"
+    "@getpara/user-management-client": "npm:2.2.0"
     base64url: "npm:^3.0.1"
     buffer: "npm:6.0.3"
     cbor-web: "npm:^9.0.2"
@@ -2139,7 +2111,7 @@ __metadata:
   peerDependenciesMeta:
     "@farcaster/miniapp-sdk":
       optional: true
-  checksum: 10/5305da390adac3ef63d7957b7246103afe991d18581cd3851cb384dcc0db856771ca36af8515477bda0b1c94939469c5e953320c642353ea211d9df2f2392d58
+  checksum: 10/ce379579b5ef307e74891913a2a6f3808a80c69471fba7d1f1555c37be2fdd99f4796fac33262f593e811bf6568020253cd703258b353a90a55b88aeabc05c22
   languageName: node
   linkType: hard
 
@@ -12057,8 +12029,8 @@ __metadata:
     "@babel/core": "npm:^7.20.0"
     "@craftzdog/react-native-buffer": "npm:^6.1.0"
     "@expo/vector-icons": "npm:^15.0.2"
-    "@getpara/react-native-wallet": "npm:2.1.0"
-    "@getpara/viem-v2-integration": "npm:2.0.0"
+    "@getpara/react-native-wallet": "npm:2.2.0"
+    "@getpara/viem-v2-integration": "npm:2.2.0"
     "@peculiar/webcrypto": "npm:^1.5.0"
     "@react-native-async-storage/async-storage": "npm:^2.2.0"
     "@react-navigation/native": "npm:^7.1.6"
