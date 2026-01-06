@@ -12,7 +12,8 @@ cd "$CI_PRIMARY_REPOSITORY_PATH/mobile/with-expo-one-click-login"
 yarn install
 
 # Install CocoaPods via gem (Homebrew version doesn't support Xcode 26)
-sudo gem install cocoapods
+gem install cocoapods --user-install
+export PATH="$(ruby -r rubygems -e 'puts Gem.user_dir')/bin:$PATH"
 
 # Install pods
 cd ios
