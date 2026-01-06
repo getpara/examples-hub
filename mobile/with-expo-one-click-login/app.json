@@ -33,7 +33,8 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.getpara.oneclickexample"
+      "bundleIdentifier": "com.getpara.oneclickexample",
+      "appleTeamId": "FF9U73RS48"
     },
     "android": {
       "package": "com.getpara.oneclickexample",
@@ -41,6 +42,13 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       }
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "3b19a0ec-9f43-4239-b136-4cc15c17061d"
+      }
+    },
+    "owner": "getpara"
   }
 }
