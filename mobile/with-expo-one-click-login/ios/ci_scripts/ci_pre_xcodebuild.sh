@@ -1,10 +1,14 @@
 #!/bin/sh
 set -e
 
-# Add Homebrew node to PATH (installed in ci_post_clone.sh)
+# Add Homebrew paths (installed in ci_post_clone.sh)
+eval "$(/usr/local/bin/brew shellenv 2>/dev/null || /opt/homebrew/bin/brew shellenv 2>/dev/null || true)"
 export PATH="/usr/local/bin:/opt/homebrew/bin:$PATH"
 
 echo "==> Bundling JavaScript for Xcode Cloud..."
+echo "==> PATH: $PATH"
+echo "==> node location: $(which node || echo 'not found')"
+echo "==> npx location: $(which npx || echo 'not found')"
 
 # Use CI_PRIMARY_REPOSITORY_PATH if set, otherwise calculate from script location
 if [ -n "$CI_PRIMARY_REPOSITORY_PATH" ]; then
