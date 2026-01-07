@@ -1,28 +1,34 @@
 #!/bin/sh
 set -e
 
+# Disable Homebrew auto-update to save time and avoid hanging
+export HOMEBREW_NO_AUTO_UPDATE=1
+export HOMEBREW_NO_INSTALL_CLEANUP=1
+
+echo "==> Installing Node.js and Ruby via Homebrew..."
 # Install Node.js and Ruby 3.x (system Ruby 2.6 is too old for latest CocoaPods)
-brew install node ruby
+brew install --verbose node ruby
 
 # Use Homebrew Ruby instead of system Ruby 2.6
 export PATH="/usr/local/opt/ruby/bin:$PATH"
 export PATH="/usr/local/lib/ruby/gems/4.0.0/bin:$PATH"
 
-# Install yarn
+echo "==> Installing yarn..."
 npm install -g yarn
 
-# Install JS dependencies
+echo "==> Installing JS dependencies..."
 cd "$CI_PRIMARY_REPOSITORY_PATH/mobile/with-expo-one-click-login"
 yarn install
 
-# Install xcodeproj from git main (has Xcode 26 object version 70 support)
-# Released xcodeproj 1.27.0 doesn't support Xcode 26 yet
+echo "==> Installing xcodeproj from git (Xcode 26 support)..."
 gem install specific_install
 gem specific_install https://github.com/CocoaPods/Xcodeproj.git
 
-# Install CocoaPods (will use the git-installed xcodeproj)
+echo "==> Installing CocoaPods..."
 gem install cocoapods
 
-# Install pods (with retry for CDN flakiness)
+echo "==> Installing pods..."
 cd ios
 pod install || pod install || pod install
+
+echo "==> Post-clone complete!"
