@@ -1,6 +1,9 @@
 #!/bin/sh
 set -e
 
+# Add Homebrew node to PATH (installed in ci_post_clone.sh)
+export PATH="/usr/local/bin:/opt/homebrew/bin:$PATH"
+
 echo "==> Bundling JavaScript for Xcode Cloud..."
 
 # Use CI_PRIMARY_REPOSITORY_PATH if set, otherwise calculate from script location
