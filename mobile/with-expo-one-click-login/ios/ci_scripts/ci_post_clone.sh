@@ -23,6 +23,6 @@ gem specific_install https://github.com/CocoaPods/Xcodeproj.git
 # Install CocoaPods (will use the git-installed xcodeproj)
 gem install cocoapods
 
-# Install pods
+# Install pods (with retry for CDN flakiness)
 cd ios
-pod install
+pod install || pod install || pod install
