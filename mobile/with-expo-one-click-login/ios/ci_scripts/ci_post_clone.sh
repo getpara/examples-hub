@@ -20,6 +20,13 @@ echo "==> Installing JS dependencies..."
 cd "$CI_PRIMARY_REPOSITORY_PATH/mobile/with-expo-one-click-login"
 yarn install
 
+echo "==> Bundling JavaScript..."
+npx expo export:embed \
+  --platform ios \
+  --entry-file node_modules/expo-router/entry.js \
+  --bundle-output ios/ParaOneClickLogin/main.jsbundle \
+  --assets-dest ios/ParaOneClickLogin
+
 echo "==> Installing xcodeproj from git (Xcode 26 support)..."
 gem install specific_install
 gem specific_install https://github.com/CocoaPods/Xcodeproj.git
