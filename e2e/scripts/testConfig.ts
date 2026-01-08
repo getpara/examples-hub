@@ -20,7 +20,8 @@ export interface TestAppConfig {
     | "svelte"
     | "node"
     | "deno"
-    | "bun";
+    | "bun"
+    | "rest-with-node";
 }
 
 export interface CLIArgs {
@@ -145,6 +146,12 @@ export function getFrameworkEnvVars(
         ZERODEV_SECRET_KEY: getEnvVar("ZERODEV_SECRET_KEY"),
       };
 
+    case "rest-with-node":
+      return {
+        ...baseEnvVars,
+        PARA_API_KEY: apiKey,
+      };
+
     default:
       return baseEnvVars;
   }
@@ -217,6 +224,16 @@ export const APP_CONFIGS: Record<string, TestAppConfig> = {
       PORT: getEnvVar("NODE_PORT", "8080"),
     },
   },
+  "rest-with-node": {
+    path: "server/rest-with-node",
+    framework: "rest-with-node",
+    port: parseInt(getEnvVar("REST_PORT", "4000")),
+    startCommand: "yarn dev",
+    installCommand: "yarn install",
+    envVars: {
+      PORT: getEnvVar("REST_PORT", "4000"),
+    },
+  },
 };
 
 export const TEST_PATTERNS = {
@@ -268,6 +285,9 @@ export function getTestConfig(appName: string): TestAppConfig {
           missingVars.push(varName);
         }
       }
+      break;
+    case "rest-with-node":
+      // REST API example only needs PARA_API_KEY (no Alchemy/ZeroDev)
       break;
   }
 
@@ -406,6 +426,7 @@ export const FRAMEWORK_PATHS: Record<string, string[]> = {
   vue: ["web/with-vue-vite/", "web/", "e2e/tests/web/with-vue-vite/"],
   svelte: ["web/with-svelte-vite/", "web/", "e2e/tests/web/with-svelte-vite/"],
   node: ["server/with-node/", "server/", "e2e/tests/server/with-node/"],
+  "rest-with-node": ["server/rest-with-node/", "e2e/tests/server/rest-with-node/"],
 };
 
 export function detectChangedFrameworks(isDiffOnly: boolean): string[] {
@@ -462,7 +483,7 @@ export function detectChangedFrameworks(isDiffOnly: boolean): string[] {
   }
 }
 
-export function validateEnvironment(): void {
+export function validateEnvironment(framework?: string): void {
   try {
     const hasBetaKey = !!process.env.PARA_API_KEY_BETA;
     const hasSandboxKey = !!process.env.PARA_API_KEY_SANDBOX;
@@ -471,6 +492,16 @@ export function validateEnvironment(): void {
       throw new Error(
         "No API keys found. Please set PARA_API_KEY_BETA or PARA_API_KEY_SANDBOX in your .env file."
       );
+    }
+
+    // REST API tests only need the base API key
+    if (framework === "rest-with-node") {
+      const testEnv = getTestEnvironment();
+      logger.logStep(
+        `✓ Test environment validated: ${testEnv.environment}`,
+        true
+      );
+      return;
     }
 
     // Check for both passkey/password, PIN & basic login keys

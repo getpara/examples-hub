@@ -20,12 +20,13 @@ import { ensurePlaywrightBrowsers } from "./ensure-playwright-browsers";
 
 dotenv.config();
 
-validateEnvironment();
-
 const EXAMPLES_REPO_PATH = process.env.GITHUB_WORKSPACE || process.cwd();
 
 const args = process.argv.slice(2);
 const cliArgs: CLIArgs = parseCliArgs(args);
+
+// Validate environment with framework context (rest-with-node only needs PARA_API_KEY)
+validateEnvironment(cliArgs.framework);
 
 const isSingleTestMode = !!(cliArgs.framework && cliArgs.testType);
 const isAllTestsMode =
@@ -179,7 +180,8 @@ const appsToTest = candidateFrameworks.filter((appName) => {
     );
   }
   if (cliArgs.framework) {
-    return appName.includes(cliArgs.framework);
+    // Use exact match to avoid "node" matching "rest-with-node"
+    return appName === cliArgs.framework;
   }
   return true;
 });

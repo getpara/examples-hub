@@ -58,6 +58,7 @@
     "test:react-nextjs:email-password": "tsx e2e/scripts/runAllTests.ts react-nextjs email-password",
     "test:react-nextjs:email-passkey": "tsx e2e/scripts/runAllTests.ts react-nextjs email-passkey",
     "test:node": "tsx e2e/scripts/runAllTests.ts node",
+    "test:rest-with-node": "tsx e2e/scripts/runAllTests.ts rest-with-node",
     "test:web": "tsx e2e/scripts/runAllTests.ts --web",
     "dev:setup": "yarn clean && yarn install:all && yarn build:all",
     "ci:local": "yarn install:all && yarn lint:all && yarn typecheck:all && yarn build:all && yarn test:all:parallel",
