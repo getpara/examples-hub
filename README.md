@@ -1,99 +1,87 @@
 # Para Examples Hub
 
-A collection of example applications demonstrating how to integrate `@getpara/*` SDKs across platforms and frameworks.
+Welcome! This repository is a central collection of example applications demonstrating various ways to integrate and use
+the `@getpara/*` suite of SDKs and packages across different platforms and frameworks.
 
-> **Note:** All examples use the **2.0.0-alpha** version of `@getpara/*` SDKs.
+> **Important:** All examples in this repository use the **2.0.0-alpha** version of `@getpara/*` SDKs. This is the recommended approach for ALL projects - whether migrating existing projects or starting new ones. The 2.0.0-alpha release contains most major improvements and is the actively developed version.
 
-## Folder Index
+Whether you're building a web app, mobile app, backend service, or something more specialized, you can browse these
+examples to find patterns and integration guides.
 
-```
-examples-hub/
-├── web/                          # Web application examples
-│   ├── with-react-nextjs/        # React + Next.js (comprehensive examples)
-│   │   ├── para-modal            # Basic Para Modal integration
-│   │   ├── para-modal-evm        # EVM-focused modal
-│   │   ├── para-modal-solana     # Solana-focused modal
-│   │   ├── para-modal-cosmos     # Cosmos-focused modal
-│   │   ├── para-modal-multichain # Multi-chain modal
-│   │   ├── para-pregen-claim     # Pre-generated wallet claiming
-│   │   ├── custom-email-auth     # Custom email authentication UI
-│   │   ├── custom-phone-auth     # Custom phone authentication UI
-│   │   ├── custom-oauth-auth     # Custom OAuth authentication UI
-│   │   ├── custom-combined-auth  # Combined auth methods
-│   │   ├── signer-ethers-v5      # Ethers.js v5 signing
-│   │   ├── signer-ethers-v6      # Ethers.js v6 signing
-│   │   ├── signer-viem-v2        # Viem v2 signing
-│   │   ├── signer-cosmjs         # CosmJS signing
-│   │   ├── signer-solana-web3    # Solana Web3.js signing
-│   │   ├── signer-solana-signers-v2  # Solana Signers v2
-│   │   ├── signer-solana-anchor  # Solana Anchor framework
-│   │   ├── connector-wagmi       # Wagmi connector
-│   │   ├── connector-rainbowkit  # RainbowKit connector
-│   │   ├── connector-reown-appkit # Reown AppKit connector
-│   │   ├── connector-graz        # Graz (Cosmos) connector
-│   │   ├── aa-alchemy-4337       # Alchemy Account Abstraction (ERC-4337)
-│   │   ├── aa-alchemy-7702       # Alchemy Account Abstraction (EIP-7702)
-│   │   ├── aa-zerodev-4337       # ZeroDev (ERC-4337)
-│   │   ├── aa-zerodev-7702       # ZeroDev (EIP-7702)
-│   │   ├── aa-gelato-4337        # Gelato (ERC-4337)
-│   │   ├── aa-gelato-7702        # Gelato (EIP-7702)
-│   │   ├── aa-porto-7702         # Porto (EIP-7702)
-│   │   ├── aa-rhinestone-4337    # Rhinestone (ERC-4337)
-│   │   └── aa-thirdweb-4337      # Thirdweb (ERC-4337)
-│   ├── with-react-vite/          # React + Vite (Para Modal)
-│   ├── with-react-tanstack-start/ # React + TanStack Start
-│   ├── with-svelte-vite/         # Svelte + Vite (custom UI)
-│   ├── with-vue-vite/            # Vue + Vite (custom UI)
-│   ├── with-chrome-extension/    # Chrome browser extension
-│   └── with-pwa/                 # Progressive Web App
-│
-├── mobile/                       # Mobile application examples
-│   ├── with-expo-one-click-login/ # Expo with one-click login
-│   ├── with-react-native/        # React Native
-│   ├── with-flutter/             # Flutter
-│   └── with-swift/               # Native Swift (iOS)
-│
-├── server/                       # Server-side examples
-│   ├── rest-with-node/           # REST API with Node.js
-│   ├── with-node/                # Node.js
-│   ├── with-bun/                 # Bun runtime
-│   └── with-deno/                # Deno runtime
-│
-├── defi-integrations/            # DeFi protocol integrations
-│   ├── with-jupiter-dex-api/     # Jupiter DEX (Solana swaps)
-│   ├── with-squid-router-api/    # Squid Router (cross-chain swaps)
-│   └── with-relay-bridge-api/    # Relay Bridge (bridging)
-│
-└── advanced-patterns/            # Advanced architectural patterns
-    ├── client-auth-server-sign/  # Client auth + server-side signing
-    └── with-bulk-pregen/         # Bulk wallet pre-generation
-```
+## Repository Structure
 
-## Getting Started
+The examples are organized into top-level directories based on the primary platform or environment:
 
-1. Navigate to an example:
-   ```bash
-   cd web/with-react-nextjs/para-modal
-   ```
+- **`/web`**: Contains examples for web application frontends.
+  - These are further subdivided by framework and/or bundler (e.g., `/web/with-react-nextjs`, `/web/with-react-vite`,
+    `/web/with-svelte-vite`).
+- **`/mobile`**: Contains examples for mobile applications.
+  - These are further subdivided by platform or framework (e.g., `/mobile/with-expo`, `/mobile/with-react-native`,
+    `/mobile/with-flutter`).
+- **`/server`**: Contains examples for server-side or backend applications.
+  - These are further subdivided by runtime or framework (e.g., `/server/with-node`, `/server/with-bun`,
+    `/server/with-deno`).
+- **`/specialized`**: Contains examples for specific use cases, integrations, or less common platforms.
+  - Examples include integrations with Electron.js, Telegram Web Apps, specific DeFi protocols, etc. (e.g.,
+    `/specialized/with-electronjs`, `/specialized/with-jupiter-dex-api`).
 
-2. Install dependencies:
-   ```bash
-   yarn install
-   ```
+Each specific example (e.g., `/web/with-react-nextjs/para-modal`) lives within its own directory and aims to be
+self-contained with its own dependencies and configuration.
 
-3. Configure environment:
-   ```bash
-   cp .env.example .env
-   # Edit .env with your API keys
-   ```
+> **Note:** The root-level `.env.ci.example` and `package.json` files are strictly for CI/CD purposes and are not related to individual example apps. Each example has its own `.env.example` and README with specific setup instructions.
 
-4. Run the example (check individual README for specific commands):
-   ```bash
-   yarn dev
-   ```
+## Getting Started with an Example
+
+Most examples are designed to be run independently. Follow these general steps:
+
+1.  **Clone the Repository:**
+
+    ```bash
+    git clone [https://github.com/getpara/examples-hub.git](https://github.com/getpara/examples-hub.git)
+    cd examples-hub
+    ```
+
+2.  **Navigate to an Example:** Change directory into the specific example you are interested in:
+
+    ```bash
+    # Example: Navigate to the Para Modal example using React + Next.js
+    cd web/with-react-nextjs/para-modal
+    ```
+
+3.  **Install Dependencies:** Use Yarn (which is primarily used in this repository) to install the example's specific
+    dependencies. Check the example's own README if a different package manager is required (e.g., `flutter pub get` for
+    Flutter).
+
+    ```bash
+    yarn install
+    ```
+
+4.  **Configure Environment Variables:** Many examples require API keys, RPC URLs, or other configuration settings. Look
+    for a `.env.example`, `config.example.ts`, or similar file within the example's directory. Copy it to a new file
+    (e.g., `.env`) and populate it with your specific values.
+
+    ```bash
+    # Example using .env
+    cp .env.example .env
+    # Now edit .env with your values using your preferred editor
+    nano .env
+    ```
+
+    > **Need API Keys?** Visit [developer.getpara.com](https://developer.getpara.com) to configure and manage your API keys.
+
+5.  **Run the Example:** Each example directory should contain its own `README.md` with specific instructions on how to
+    run it (e.g., `yarn dev`, `yarn start`, `expo start`, `flutter run`). Please refer to those instructions.
 
 ## Resources
 
-- **Docs:** [docs.getpara.com](https://docs.getpara.com)
-- **API Keys:** [developer.getpara.com](https://developer.getpara.com)
-- **Support:** [support@getpara.com](mailto:support@getpara.com)
+- **Documentation:** Visit [docs.getpara.com](https://docs.getpara.com) to learn more about package usage and integration guides.
+- **Developer Portal:** Visit [developer.getpara.com](https://developer.getpara.com) to configure and manage your API keys.
+
+## Support
+
+If you encounter issues with a specific example or have questions about using the `@getpara/*` SDKs demonstrated here,
+please reach out to us directly at [support@getpara.com](mailto:support@getpara.com).
+
+---
+
+Happy Building!
