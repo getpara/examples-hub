@@ -3,7 +3,9 @@ import { Para as ParaServer, Environment } from "@getpara/server-sdk";
 import { getKeyShareInDB } from "../db/keySharesDB.js";
 import { decrypt } from "../utils/encryption-utils.js";
 import { ParaSolanaWeb3Signer } from "@getpara/solana-web3.js-v1-integration";
-import { Connection, clusterApiUrl, Transaction, SystemProgram, LAMPORTS_PER_SOL } from "@solana/web3.js";
+import { Connection, Transaction, SystemProgram, LAMPORTS_PER_SOL } from "@solana/web3.js";
+
+const ALCHEMY_SOLANA_TESTNET_RPC_URL = 'https://api.testnet.solana.com';
 
 export async function solanaPregenSignHandler(req: Request, res: Response): Promise<void> {
   const PARA_API_KEY = process.env.PARA_API_KEY;
@@ -37,7 +39,7 @@ export async function solanaPregenSignHandler(req: Request, res: Response): Prom
     const decryptedKeyShare = await decrypt(keyShare);
     await para.setUserShare(decryptedKeyShare);
 
-    const connection = new Connection(clusterApiUrl("testnet"));
+    const connection = new Connection(ALCHEMY_SOLANA_TESTNET_RPC_URL);
     const solanaSigner = new ParaSolanaWeb3Signer(para, connection);
 
     if (!solanaSigner.sender) {
