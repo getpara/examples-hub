@@ -24,7 +24,7 @@
     "@farcaster/miniapp-wagmi-connector": "1.1.0",
     "@gelatonetwork/smartwallet": "0.0.28",
     "@gemini-wallet/core": "0.3.2",
-    "@getpara/react-sdk": "2.5.0",
+    "@getpara/react-sdk": "2.8.0",
     "@metamask/sdk": "0.34.0",
     "@safe-global/safe-apps-provider": "0.18.6",
     "@safe-global/safe-apps-sdk": "9.1.0",
