@@ -17,25 +17,23 @@ if (!PARA_API_KEY) {
 
 type WalletType = 'EVM' | 'SOLANA' | 'COSMOS';
 
+type WalletScheme = 'DKLS' | 'CGGMP' | 'ED25519';
+
 type Wallet = {
   id: string;
   type: WalletType;
+  scheme: WalletScheme;
   status: 'creating' | 'ready' | 'error';
   address?: string;
   publicKey?: string;
   createdAt: string;
 };
 
-type CreateWalletResponse = {
-  wallet: Wallet;
-  scheme: 'DKLS' | 'CGGMP' | 'ED25519';
-};
-
 type CreateWalletBody = {
   type: WalletType;
   userIdentifier: string;
   userIdentifierType: string;
-  scheme?: CreateWalletResponse['scheme'];
+  scheme?: WalletScheme;
   cosmosPrefix?: string;
 };
 
@@ -108,11 +106,11 @@ app.post('/rest/wallets', async (req: Request<unknown, unknown, CreateWalletBody
   }
 
   try {
-    const result = await callPara<CreateWalletResponse>('/v1/wallets', {
+    const wallet = await callPara<Wallet>('/v1/wallets', {
       method: 'POST',
       body: { type, userIdentifier, userIdentifierType, scheme, cosmosPrefix },
     });
-    res.status(201).json(result);
+    res.status(201).json(wallet);
   } catch (error) {
     handleError(res, error);
   }
