@@ -62,7 +62,7 @@ curl -X POST http://localhost:4000/rest/wallets/wal_123/sign-transaction \
   -H "Content-Type: application/json" \
   -d '{
         "transaction": {
-          "to": "0xRecipientAddress",
+          "to": "0x000000000000000000000000000000000000dEaD",
           "chainId": "11155111",
           "value": "0x2386f26fc10000",
           "type": 2,

@@ -148,7 +148,7 @@ app.post(
   async (req: Request<{ walletId: string }>, res: Response) => {
     const { transaction } = req.body;
 
-    if (!transaction || typeof transaction !== 'object') {
+    if (!transaction || typeof transaction !== 'object' || Array.isArray(transaction)) {
       return res.status(400).json({ error: 'transaction object is required' });
     }
 
