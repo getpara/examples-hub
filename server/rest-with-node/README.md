@@ -1,11 +1,12 @@
 # Para REST API with Node
 
 This is a deliberately tiny Express server that shows how to call Para's REST API using nothing more than `fetch`. It
-covers the three core operations exposed by the REST surface:
+covers the core operations exposed by the REST surface:
 
 1. Create a wallet.
 2. Poll a wallet until it becomes `ready` (so it has an address and public key).
 3. Ask Para to sign raw bytes for that wallet.
+4. Sign a full EVM transaction (EIP-1559) and get a broadcast-ready hex string.
 
 It defaults to the Beta environment (`https://api.beta.getpara.com`) so you can try it safely. For additional REST
 endpoints, check the docs—this sample intentionally sticks to the minimal create/read/sign flow.
@@ -54,6 +55,23 @@ curl -X POST http://localhost:4000/rest/wallets/wal_123/sign-raw \
   -d '{ "data": "0xdeadbeef" }'
 ```
 
+Or sign a full EVM transaction (EIP-1559):
+
+```bash
+curl -X POST http://localhost:4000/rest/wallets/wal_123/sign-transaction \
+  -H "Content-Type: application/json" \
+  -d '{
+        "transaction": {
+          "to": "0xRecipientAddress",
+          "chainId": "11155111",
+          "value": "0x2386f26fc10000",
+          "type": 2,
+          "maxFeePerGas": "0x59682f00",
+          "maxPriorityFeePerGas": "0x3b9aca00"
+        }
+      }'
+```
+
 ## Routes
 
 All routes live under `/rest/*` to make them easy to spot:
@@ -63,6 +81,7 @@ All routes live under `/rest/*` to make them easy to spot:
 | `POST /rest/wallets` | Minimal wrapper around `POST /v1/wallets`. Body: `type`, `userIdentifier`, `userIdentifierType`. |
 | `GET /rest/wallets/:walletId` | Reads wallet metadata (status, address, etc). Returns the bare wallet object (no wrapping). |
 | `POST /rest/wallets/:walletId/sign-raw` | Signs raw bytes. Body: `{ "data": "0x..." }`. |
+| `POST /rest/wallets/:walletId/sign-transaction` | Signs an EVM transaction. Body: `{ "transaction": { "to", "chainId", ... } }`. Returns `{ "signedTransaction": "0x..." }`. |
 
 Every handler calls the same helper (`callPara`) so you can inspect one tiny function to understand the HTTP wiring
 (headers, base URL, JSON parsing, and error handling).

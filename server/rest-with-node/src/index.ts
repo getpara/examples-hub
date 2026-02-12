@@ -143,6 +143,31 @@ app.post('/rest/wallets/:walletId/sign-raw', async (req: Request<{ walletId: str
   }
 });
 
+app.post(
+  '/rest/wallets/:walletId/sign-transaction',
+  async (req: Request<{ walletId: string }>, res: Response) => {
+    const { transaction } = req.body;
+
+    if (!transaction || typeof transaction !== 'object') {
+      return res.status(400).json({ error: 'transaction object is required' });
+    }
+
+    if (!transaction.to || !transaction.chainId) {
+      return res.status(400).json({ error: 'transaction.to and transaction.chainId are required' });
+    }
+
+    try {
+      const result = await callPara<{ signedTransaction: string }>(
+        `/v1/wallets/${req.params.walletId}/sign-transaction`,
+        { method: 'POST', body: { transaction } },
+      );
+      res.json(result);
+    } catch (error) {
+      handleError(res, error);
+    }
+  },
+);
+
 app.listen(PORT, () => {
   console.log(`Para REST example listening on http://localhost:${PORT}`);
 });
