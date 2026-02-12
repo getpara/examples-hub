@@ -116,6 +116,23 @@ app.post('/rest/wallets', async (req: Request<unknown, unknown, CreateWalletBody
   }
 });
 
+app.get('/rest/wallets', async (req: Request, res: Response) => {
+  const { userIdentifier, userIdentifierType } = req.query;
+
+  if (!userIdentifier || !userIdentifierType) {
+    return res.status(400).json({ error: 'userIdentifier and userIdentifierType query params are required' });
+  }
+
+  try {
+    const result = await callPara<{ data: Wallet[] }>(
+      `/v1/wallets?userIdentifier=${encodeURIComponent(String(userIdentifier))}&userIdentifierType=${encodeURIComponent(String(userIdentifierType))}`,
+    );
+    res.json(result);
+  } catch (error) {
+    handleError(res, error);
+  }
+});
+
 app.get('/rest/wallets/:walletId', async (req: Request, res: Response) => {
   try {
     const wallet = await callPara<Wallet>(`/v1/wallets/${req.params.walletId}`);
