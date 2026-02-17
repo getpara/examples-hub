@@ -47,7 +47,7 @@ class ParaError extends Error {
   }
 }
 
-async function callPara<T>(path: string, options: { method?: 'GET' | 'POST'; body?: unknown } = {}): Promise<T> {
+async function callPara<T>(path: string, options: { method?: 'GET' | 'POST' | 'PATCH'; body?: unknown } = {}): Promise<T> {
   if (!PARA_API_KEY) {
     throw new Error('Set PARA_API_KEY in your .env first.');
   }
@@ -136,6 +136,24 @@ app.get('/rest/wallets', async (req: Request, res: Response) => {
 app.get('/rest/wallets/:walletId', async (req: Request, res: Response) => {
   try {
     const wallet = await callPara<Wallet>(`/v1/wallets/${req.params.walletId}`);
+    res.json(wallet);
+  } catch (error) {
+    handleError(res, error);
+  }
+});
+
+app.patch('/rest/wallets/:walletId', async (req: Request<{ walletId: string }>, res: Response) => {
+  const { userIdentifier, userIdentifierType } = req.body;
+
+  if (!userIdentifier || !userIdentifierType) {
+    return res.status(400).json({ error: 'userIdentifier and userIdentifierType are required' });
+  }
+
+  try {
+    const wallet = await callPara<Wallet>(`/v1/wallets/${req.params.walletId}`, {
+      method: 'PATCH',
+      body: { userIdentifier, userIdentifierType },
+    });
     res.json(wallet);
   } catch (error) {
     handleError(res, error);
