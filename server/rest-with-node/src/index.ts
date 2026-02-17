@@ -119,7 +119,7 @@ app.post('/rest/wallets', async (req: Request<unknown, unknown, CreateWalletBody
 app.get('/rest/wallets', async (req: Request, res: Response) => {
   const params = new URLSearchParams();
   for (const key of ['userIdentifier', 'userIdentifierType', 'type', 'status', 'address', 'limit', 'cursor']) {
-    if (req.query[key]) params.set(key, String(req.query[key]));
+    if (req.query[key] != null) params.set(key, String(req.query[key]));
   }
 
   try {
