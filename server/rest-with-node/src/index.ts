@@ -117,15 +117,15 @@ app.post('/rest/wallets', async (req: Request<unknown, unknown, CreateWalletBody
 });
 
 app.get('/rest/wallets', async (req: Request, res: Response) => {
-  const params = new URLSearchParams();
-  for (const key of ['userIdentifier', 'userIdentifierType', 'type', 'status', 'address', 'limit', 'cursor']) {
-    if (req.query[key] != null) params.set(key, String(req.query[key]));
+  const { userIdentifier, userIdentifierType } = req.query;
+
+  if (!userIdentifier || !userIdentifierType) {
+    return res.status(400).json({ error: 'userIdentifier and userIdentifierType query params are required' });
   }
 
   try {
-    const qs = params.toString();
-    const result = await callPara<{ data: Wallet[]; pagination: { cursor: string | null; hasMore: boolean; limit: number } }>(
-      `/v1/wallets${qs ? `?${qs}` : ''}`,
+    const result = await callPara<{ data: Wallet[] }>(
+      `/v1/wallets?userIdentifier=${encodeURIComponent(String(userIdentifier))}&userIdentifierType=${encodeURIComponent(String(userIdentifierType))}`,
     );
     res.json(result);
   } catch (error) {

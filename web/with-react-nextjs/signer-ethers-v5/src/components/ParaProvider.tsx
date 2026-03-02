@@ -43,10 +43,7 @@ export function ParaProvider({ children }: { children: React.ReactNode }) {
           theme: {
             foregroundColor: "#222222",
             backgroundColor: "#FFFFFF",
-            accentColor: "#888888",
-            darkForegroundColor: "#EEEEEE",
-            darkBackgroundColor: "#111111",
-            darkAccentColor: "#AAAAAA",
+          accentColor: "#888888",
             mode: "light",
             borderRadius: "none",
             font: "Inter",
