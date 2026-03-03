@@ -43,7 +43,6 @@ export function ParaProvider({ children }: { children: React.ReactNode }) {
             "BACKPACK",
             "SOLFLARE",
           ],
-          createLinkedEmbeddedForExternalWallets: ["METAMASK", "PHANTOM", "KEPLR"],
           evmConnector: {
             config: {
               chains: [mainnet, polygon, sepolia, celo],
@@ -83,9 +82,6 @@ export function ParaProvider({ children }: { children: React.ReactNode }) {
             foregroundColor: "#222222",
             backgroundColor: "#FFFFFF",
             accentColor: "#888888",
-            darkForegroundColor: "#EEEEEE",
-            darkBackgroundColor: "#111111",
-            darkAccentColor: "#AAAAAA",
             mode: "light",
             borderRadius: "none",
             font: "Inter",

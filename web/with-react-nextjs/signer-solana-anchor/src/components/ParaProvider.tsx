@@ -33,7 +33,6 @@ export function ParaProvider({
         }}
         externalWalletConfig={{
           wallets: ["GLOW", "PHANTOM", "BACKPACK", "SOLFLARE"],
-          createLinkedEmbeddedForExternalWallets: ["GLOW", "PHANTOM", "BACKPACK", "SOLFLARE"],
           solanaConnector: {
             config: {
               endpoint,
@@ -58,9 +57,6 @@ export function ParaProvider({
             foregroundColor: "#222222",
             backgroundColor: "#FFFFFF",
             accentColor: "#888888",
-            darkForegroundColor: "#EEEEEE",
-            darkBackgroundColor: "#111111",
-            darkAccentColor: "#AAAAAA",
             mode: "light",
             borderRadius: "none",
             font: "Inter",

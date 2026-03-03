@@ -40,6 +40,7 @@ jspm_packages/
 
 # TypeScript
 *.tsbuildinfo
+next-env.d.ts
 
 # Next.js
 .next/
@@ -65,6 +66,18 @@ dist/
 # React Native
 .expo/
 .expo-shared/
+
+# Flutter
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+**/android/local.properties
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/flutter_export_environment.sh
+**/ios/Runner/GeneratedPluginRegistrant.*
+
+# SQLite
+*.db
 
 # Miscellaneous
 .DS_Store
