@@ -1,5 +1,7 @@
 # Signer Solana Web3
 
+[![Live Demo](https://img.shields.io/badge/▶_Live_Demo-black?style=for-the-badge&logo=vercel)](https://para-example-signer-solana-web3.vercel.app)
+
 This example demonstrates how to integrate Para SDK with Solana's web3.js library in a Next.js application. It showcases core Solana operations like message signing and SOL transfers using Para's signer integration without the Anchor framework.
 
 ## Setup

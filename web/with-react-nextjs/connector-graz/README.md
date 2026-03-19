@@ -1,5 +1,7 @@
 # Para + Graz Example
 
+[![Live Demo](https://img.shields.io/badge/▶_Live_Demo-black?style=for-the-badge&logo=vercel)](https://para-example-connector-graz.vercel.app)
+
 A Next.js example demonstrating Para integration with Graz for Cosmos wallet connection and token transfers.
 
 ## What This Example Shows

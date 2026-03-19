@@ -1,5 +1,7 @@
 # Para Modal + Solana Example
 
+[![Live Demo](https://img.shields.io/badge/▶_Live_Demo-black?style=for-the-badge&logo=vercel)](https://para-example-para-modal-solana.vercel.app)
+
 A minimal Next.js example demonstrating Para Modal integration with Solana wallets (Phantom, Glow, Backpack, Solflare) for wallet connection and message signing.
 
 ## What This Example Shows

@@ -1,5 +1,7 @@
 # Signer Solana Signers V2
 
+[![Live Demo](https://img.shields.io/badge/▶_Live_Demo-black?style=for-the-badge&logo=vercel)](https://para-example-signer-solana-signers-v2.vercel.app)
+
 This example demonstrates how to integrate Para SDK with Solana's new v2 signers specification in a Next.js application. It showcases core Solana operations like message signing and SOL transfers using Para's v2 signer integration with the modern Solana JavaScript SDK.
 
 ## Setup

@@ -1,5 +1,7 @@
 # Para Modal + Cosmos Example
 
+[![Live Demo](https://img.shields.io/badge/▶_Live_Demo-black?style=for-the-badge&logo=vercel)](https://para-example-para-modal-cosmos.vercel.app)
+
 A minimal Next.js example demonstrating Para Modal integration with Cosmos wallets (Keplr/Leap) for wallet connection and ADR-036 message signing.
 
 ## What This Example Shows

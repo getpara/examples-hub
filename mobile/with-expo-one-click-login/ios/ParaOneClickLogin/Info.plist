@@ -2,8 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
   <dict>
-    <key>ITSAppUsesNonExemptEncryption</key>
-    <false/>
     <key>CADisableMinimumFrameDurationOnPhone</key>
     <true/>
     <key>CFBundleDevelopmentRegion</key>
@@ -31,12 +29,6 @@
         <array>
           <string>para-one-click</string>
           <string>com.getpara.oneclickexample</string>
-        </array>
-      </dict>
-      <dict>
-        <key>CFBundleURLSchemes</key>
-        <array>
-          <string>exp+para-one-click-login</string>
         </array>
       </dict>
     </array>

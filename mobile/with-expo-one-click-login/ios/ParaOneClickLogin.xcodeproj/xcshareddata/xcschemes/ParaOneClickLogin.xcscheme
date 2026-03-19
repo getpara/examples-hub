@@ -38,17 +38,6 @@
                ReferencedContainer = "container:ParaOneClickLogin.xcodeproj">
             </BuildableReference>
          </TestableReference>
-         <TestableReference
-            skipped = "NO"
-            parallelizable = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "8F661D342EF47D0500F782E5"
-               BuildableName = "ParaOneClickLoginUITests.xctest"
-               BlueprintName = "ParaOneClickLoginUITests"
-               ReferencedContainer = "container:ParaOneClickLogin.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
       </Testables>
    </TestAction>
    <LaunchAction

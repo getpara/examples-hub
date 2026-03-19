@@ -183,13 +183,5 @@ Claude.md
 .github/workflows/event.json
 .act/
 
-# Yarn install state (machine-specific cache)
-**/.yarn/install-state.gz
-
-# Yarn cache (not needed in git) - all subdirectories
-**/.yarn/cache
-**/.yarn/unplugged
-**/.yarn/build-state.yml
-
-# Keep yarn releases directory for the binary in all subdirectories
-!**/.yarn/releases
+# Yarn v4 artifacts (corepack manages the binary via packageManager field)
+**/.yarn/

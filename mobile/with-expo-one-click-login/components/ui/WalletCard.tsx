@@ -10,6 +10,8 @@ interface WalletCardProps {
   balance?: string;
   network?: string;
   onSend?: () => void;
+  onSign?: () => void;
+  signing?: boolean;
 }
 
 export function WalletCard({
@@ -17,6 +19,8 @@ export function WalletCard({
   balance = '$0.00',
   network = 'Ethereum',
   onSend,
+  onSign,
+  signing,
 }: WalletCardProps) {
   const [copied, setCopied] = useState(false);
 
@@ -57,12 +61,20 @@ export function WalletCard({
       </View>
 
       {/* Quick Actions */}
-      <View className="mt-4">
+      <View className="mt-4 flex-row gap-3">
         <TouchableOpacity
           onPress={onSend}
-          className="items-center rounded-xl bg-brand-500 py-3 active:bg-brand-600">
+          className="flex-1 items-center rounded-xl bg-brand-500 py-3 active:bg-brand-600">
           <Ionicons name="arrow-up" size={20} color="#fff" />
           <Text className="mt-1 text-sm font-medium text-white">Send</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          testID="sign-button"
+          onPress={onSign}
+          disabled={signing}
+          className="flex-1 items-center rounded-xl bg-brand-500 py-3 active:bg-brand-600">
+          <Ionicons name="pencil-outline" size={20} color="#fff" />
+          <Text className="mt-1 text-sm font-medium text-white">{signing ? 'Signing...' : 'Sign'}</Text>
         </TouchableOpacity>
       </View>
     </Card>

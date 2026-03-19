@@ -1,5 +1,7 @@
 # Para + Reown AppKit Example
 
+[![Live Demo](https://img.shields.io/badge/▶_Live_Demo-black?style=for-the-badge&logo=vercel)](https://para-example-connector-reown-appkit.vercel.app)
+
 A Next.js example demonstrating Para integration with Reown AppKit for wallet connection.
 
 ## What This Example Shows

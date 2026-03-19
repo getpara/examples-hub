@@ -1,5 +1,7 @@
 # Custom Phone Auth
 
+[![Live Demo](https://img.shields.io/badge/▶_Live_Demo-black?style=for-the-badge&logo=vercel)](https://para-example-custom-phone-auth.vercel.app)
+
 This example demonstrates how to implement custom phone authentication with Para SDK in a Next.js application. It shows the minimal setup needed to build your own phone auth UI using Para's React SDK hooks directly, without using the built-in ParaModal.
 
 ## Features

@@ -11,9 +11,10 @@ import { useViemClient } from '@/hooks/useViemClient';
 export default function HomeScreen() {
   const router = useRouter();
   const { wallets, refreshAuth, logout } = usePara();
-  const { isReady, getBalance } = useViemClient();
+  const { isReady, getBalance, signMessage, isLoading } = useViemClient();
   const [refreshing, setRefreshing] = useState(false);
   const [balance, setBalance] = useState<string | null>(null);
+  const [signature, setSignature] = useState<string | null>(null);
 
   const fetchBalance = useCallback(async () => {
     if (isReady) {
@@ -51,6 +52,14 @@ export default function HomeScreen() {
     router.push('/(tabs)/send');
   };
 
+  const handleSign = async () => {
+    setSignature(null);
+    const sig = await signMessage('Hello from Para!');
+    if (sig) {
+      setSignature(sig);
+    }
+  };
+
   const primaryWallet = wallets[0];
   const displayBalance = balance ? `${parseFloat(balance).toFixed(6)} ETH` : 'Loading...';
 
@@ -70,12 +79,23 @@ export default function HomeScreen() {
             balance={displayBalance}
             network="Sepolia"
             onSend={handleSend}
+            onSign={handleSign}
+            signing={isLoading}
           />
         ) : (
           <View className="items-center rounded-2xl bg-white p-6">
             <Text className="text-center text-gray-500">No wallet found. Pull to refresh.</Text>
           </View>
         )}
+        {signature && (
+          <View className="mt-4 rounded-xl bg-white p-4">
+            <Text className="mb-1 text-xs font-semibold text-gray-500">SIGNATURE</Text>
+            <Text className="font-mono text-xs text-gray-600" selectable>
+              {signature.slice(0, 20)}...{signature.slice(-20)}
+            </Text>
+          </View>
+        )}
+
         {wallets.length > 1 && (
           <View className="mt-6">
             <Text className="mb-3 text-lg font-semibold text-gray-900">Other Wallets</Text>
