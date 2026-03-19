@@ -1,5 +1,7 @@
 # Porto EIP-7702 Example
 
+[![Live Demo](https://img.shields.io/badge/▶_Live_Demo-black?style=for-the-badge&logo=vercel)](https://para-example-aa-porto-7702.vercel.app)
+
 A minimal Next.js example demonstrating Para SDK integration with Porto for EIP-7702 account upgrades. This allows Para EOA wallets to be upgraded to smart accounts while preserving the original wallet address.
 
 ## What This Example Shows

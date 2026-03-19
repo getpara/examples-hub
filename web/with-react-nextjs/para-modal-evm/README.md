@@ -1,5 +1,7 @@
 # Para Modal + EVM Example
 
+[![Live Demo](https://img.shields.io/badge/▶_Live_Demo-black?style=for-the-badge&logo=vercel)](https://para-example-para-modal-evm.vercel.app)
+
 A minimal Next.js example demonstrating Para Modal integration with EVM wallets (MetaMask) for wallet connection and message signing.
 
 ## What This Example Shows

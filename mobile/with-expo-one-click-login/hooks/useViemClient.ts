@@ -5,6 +5,7 @@ import {
   http,
   formatEther,
   parseEther,
+  hashMessage,
   type WalletClient,
   type PublicClient,
   type LocalAccount,
@@ -12,9 +13,17 @@ import {
 } from 'viem';
 import { sepolia } from 'viem/chains';
 import { createParaAccount } from '@getpara/viem-v2-integration';
+import { openBrowserAsync } from 'expo-web-browser';
+import type { SuccessfulSignatureRes } from '@getpara/react-native-wallet';
 
 import { para } from '@/lib/para';
 import { usePara } from '@/providers/ParaProvider';
+
+function hexToBase64(hex: string): string {
+  const clean = hex.startsWith('0x') ? hex.slice(2) : hex;
+  const bytes = new Uint8Array(clean.match(/.{1,2}/g)!.map((b) => parseInt(b, 16)));
+  return btoa(String.fromCharCode(...bytes));
+}
 
 interface UseViemClientResult {
   account: LocalAccount | null;
@@ -23,6 +32,7 @@ interface UseViemClientResult {
   isReady: boolean;
   getBalance: () => Promise<string | null>;
   sendTransaction: (to: Hex, amount: string) => Promise<Hex | null>;
+  signMessage: (message: string) => Promise<Hex | null>;
   isLoading: boolean;
   error: string | null;
 }
@@ -33,7 +43,7 @@ export function useViemClient(): UseViemClientResult {
   const [error, setError] = useState<string | null>(null);
 
   const { account, walletClient, publicClient } = useMemo(() => {
-    if (!isAuthenticated || wallets.length === 0) {
+    if (!isAuthenticated || wallets.length === 0 || !wallets[0].address) {
       return { account: null, walletClient: null, publicClient: null };
     }
 
@@ -64,9 +74,7 @@ export function useViemClient(): UseViemClientResult {
       setError(null);
 
       const balance = await publicClient.getBalance({ address: account.address });
-      const formatted = formatEther(balance);
-
-      return formatted;
+      return formatEther(balance);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to get balance';
       setError(message);
@@ -85,11 +93,10 @@ export function useViemClient(): UseViemClientResult {
       try {
         setIsLoading(true);
         setError(null);
-        const value = parseEther(amount);
 
         const hash = await walletClient.sendTransaction({
           to,
-          value,
+          value: parseEther(amount),
           chain: sepolia,
         });
 
@@ -102,7 +109,44 @@ export function useViemClient(): UseViemClientResult {
         setIsLoading(false);
       }
     },
-    [walletClient, account]
+    [walletClient, account],
+  );
+
+  const walletId = useMemo(() => Object.keys(para.getWallets())[0], [wallets]);
+
+  // Uses para.signMessage directly (instead of viem's walletClient.signMessage) so we can
+  // pass onTransactionReviewUrl for transaction popup support on React Native.
+  const signMessage = useCallback(
+    async (message: string): Promise<Hex | null> => {
+      if (!account || !walletId) {
+        return null;
+      }
+
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        const messageBase64 = hexToBase64(hashMessage(message));
+
+        const res = await para.signMessage({
+          walletId,
+          messageBase64,
+          onTransactionReviewUrl: (url) => {
+            openBrowserAsync(url);
+          },
+        });
+
+        const signature = (res as SuccessfulSignatureRes).signature;
+        return `0x${signature}` as Hex;
+      } catch (err) {
+        const message_ = err instanceof Error ? err.message : 'Failed to sign message';
+        setError(message_);
+        return null;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [account, walletId],
   );
 
   return {
@@ -112,6 +156,7 @@ export function useViemClient(): UseViemClientResult {
     isReady: account !== null && walletClient !== null && publicClient !== null,
     getBalance,
     sendTransaction,
+    signMessage,
     isLoading,
     error,
   };

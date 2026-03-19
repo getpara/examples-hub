@@ -1,5 +1,7 @@
 # Custom Combined Auth
 
+[![Live Demo](https://img.shields.io/badge/▶_Live_Demo-black?style=for-the-badge&logo=vercel)](https://para-example-custom-combined-auth.vercel.app)
+
 This example demonstrates how to implement a unified authentication flow combining email, phone, and OAuth with Para SDK in a Next.js application. It shows the pattern for building your own multi-method auth UI using Para's React SDK hooks directly, without using the built-in ParaModal.
 
 ## Features

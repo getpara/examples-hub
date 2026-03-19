@@ -1,11 +1,11 @@
 "use client";
 
-import { useModal, useAccount } from "@getpara/react-sdk";
-import { useSmartAccountClient } from "@/hooks/useSmartAccountClient";
-import { useSendUserOperation } from "@/hooks/useSendUserOperation";
+import { useModal, useAccount, useAlchemySmartAccount } from "@getpara/react-sdk";
+import { useMutation } from "@tanstack/react-query";
 import { ConnectCard } from "@/components/ui/ConnectCard";
 import { WalletInfo } from "@/components/ui/WalletInfo";
 import { SendTransaction } from "@/components/ui/SendTransaction";
+import { ALCHEMY_API_KEY, GAS_POLICY_ID, CHAIN } from "@/lib/alchemy";
 
 const BURN_ADDRESS = "0x000000000000000000000000000000000000dEaD";
 
@@ -13,8 +13,22 @@ export default function Home() {
   const { openModal } = useModal();
   const { isConnected } = useAccount();
 
-  const { client, address, isLoading, error: clientError } = useSmartAccountClient();
-  const { sendUserOperation, isPending, txHash, error: txError } = useSendUserOperation(client);
+  const { smartAccount, isLoading, error: clientError } = useAlchemySmartAccount({
+    apiKey: ALCHEMY_API_KEY,
+    chain: CHAIN,
+    gasPolicyId: GAS_POLICY_ID,
+  });
+  const {
+    mutateAsync: sendTx,
+    isPending,
+    data: txHash,
+    error: txError,
+  } = useMutation({
+    mutationFn: async (params: { to: `0x${string}`; data?: `0x${string}`; value?: bigint }) => {
+      const receipt = await smartAccount!.sendTransaction(params);
+      return receipt.transactionHash;
+    },
+  });
 
   return (
     <div className="container mx-auto px-4 py-12">
@@ -31,16 +45,16 @@ export default function Home() {
       ) : (
         <div className="max-w-xl mx-auto">
           <WalletInfo
-            smartAccountAddress={address}
+            smartAccountAddress={smartAccount?.smartAccountAddress ?? null}
             isLoading={isLoading}
             error={clientError}
           />
           <SendTransaction
-            onSend={() => sendUserOperation({ target: BURN_ADDRESS })}
+            onSend={() => sendTx({ to: BURN_ADDRESS })}
             isPending={isPending}
             error={txError}
-            txHash={txHash}
-            isReady={!!client}
+            txHash={txHash ?? null}
+            isReady={!!smartAccount}
           />
         </div>
       )}

@@ -1,5 +1,7 @@
 # Para SDK Viem v2 Signer Example
 
+[![Live Demo](https://img.shields.io/badge/▶_Live_Demo-black?style=for-the-badge&logo=vercel)](https://para-example-signer-viem-v2.vercel.app)
+
 This Next.js application demonstrates how to integrate the Para SDK with Viem v2 for Ethereum wallet interactions. The example showcases various blockchain operations including ETH transfers, token transfers, contract deployment, message signing, and typed data signing using Para's wallet infrastructure with the latest Viem v2 features and improvements.
 
 ## Setup/Installation

@@ -1,5 +1,7 @@
 # Para + Wagmi Example
 
+[![Live Demo](https://img.shields.io/badge/▶_Live_Demo-black?style=for-the-badge&logo=vercel)](https://para-example-connector-wagmi.vercel.app)
+
 A Next.js example demonstrating Para integration with Wagmi for wallet connection and ETH transfers.
 
 ## What This Example Shows

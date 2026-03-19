@@ -1,0 +1,91 @@
+appId: com.usecapsule.example.flutter
+---
+- clearState
+- launchApp
+- waitForAnimationToEnd
+
+# Logout if already signed in
+- tapOn:
+    text: "Logout"
+    optional: true
+- waitForAnimationToEnd
+
+# Wait for auth screen
+- extendedWaitUntil:
+    visible: "Sign Up or Log In"
+    timeout: 10000
+
+# Generate random test email
+- evalScript: ${output.email = 'maestro-' + Date.now() + '@test.getpara.com'}
+
+# Switch to email tab and enter email
+- tapOn: "Email"
+- tapOn: "Email address"
+- inputText: "${output.email}"
+- pressKey: "Enter"
+
+# Tap continue to trigger ASWebAuth
+- tapOn: "Continue"
+
+# Handle ASWebAuth consent dialog
+- extendedWaitUntil:
+    visible: "Cancel"
+    timeout: 10000
+- tapOn: "Continue"
+
+# Wait for OTP page
+- extendedWaitUntil:
+    visible: "Verify"
+    timeout: 15000
+
+# Tap on OTP input field for keyboard focus
+- tapOn:
+    point: "20%,58%"
+- waitForAnimationToEnd
+
+# Enter OTP digits
+- inputText: "1"
+- waitForAnimationToEnd
+- inputText: "2"
+- waitForAnimationToEnd
+- inputText: "3"
+- waitForAnimationToEnd
+- inputText: "4"
+- waitForAnimationToEnd
+- inputText: "5"
+- waitForAnimationToEnd
+- inputText: "6"
+
+# Wait for wallets screen
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible: "Wallets"
+    timeout: 30000
+- assertVisible: "Wallets"
+
+# Create an EVM wallet
+- tapOn: "Create Your First Wallet"
+- extendedWaitUntil:
+    visible: "Select Wallet Type"
+    timeout: 10000
+- tapOn: "evm"
+
+# Wait for wallet creation
+- extendedWaitUntil:
+    visible: "0x.*"
+    timeout: 30000
+- tapOn:
+    text: "0x.*"
+- waitForAnimationToEnd
+
+# Sign a message
+- tapOn: "Enter a message to sign"
+- inputText: "Hello from Para!"
+- pressKey: "Enter"
+- tapOn: "Sign Message (EIP-191)"
+
+# Wait for signature result
+- extendedWaitUntil:
+    visible: "Message Signed"
+    timeout: 15000
+- assertVisible: "Message Signed"

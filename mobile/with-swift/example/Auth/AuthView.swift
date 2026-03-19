@@ -210,17 +210,14 @@ struct AuthView: View {
                     showOTP = true
 
                 case .login:
-                    // Existing user - log them in with automatic method selection
-                    try await paraManager.handleLogin(
-                        authState: state,
-                        authorizationController: authorizationController
-                    )
+                    // Existing user - wait for login to complete (polling, no passkey)
+                    _ = try await paraManager.waitForLogin()
                     appRootManager.setAuthenticated(true)
 
                 case .signup:
-                    // This shouldn't happen directly
-                    errorMessage = "Unexpected authentication state"
-                    showErrorAlert = true
+                    // New user signup - wait for wallet creation (polling, no passkey)
+                    _ = try await paraManager.waitForSignup()
+                    appRootManager.setAuthenticated(true)
                 }
             } catch {
                 // Handle any errors

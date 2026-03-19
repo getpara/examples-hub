@@ -1,5 +1,7 @@
 # Para + RainbowKit Example
 
+[![Live Demo](https://img.shields.io/badge/▶_Live_Demo-black?style=for-the-badge&logo=vercel)](https://para-example-connector-rainbowkit.vercel.app)
+
 A minimal Next.js example demonstrating Para integration with RainbowKit for wallet connection and message signing.
 
 ## What This Example Shows

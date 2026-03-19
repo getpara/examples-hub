@@ -1,5 +1,7 @@
 # Para SDK CosmJS Signer Example
 
+[![Live Demo](https://img.shields.io/badge/▶_Live_Demo-black?style=for-the-badge&logo=vercel)](https://para-example-signer-cosmjs.vercel.app)
+
 This Next.js application demonstrates how to integrate the Para SDK with CosmJS for Cosmos blockchain interactions. The example showcases various blockchain operations including ATOM transfers, IBC transfers, staking, governance, CosmWasm smart contract interactions, and message signing using Para's wallet infrastructure for the Cosmos ecosystem.
 
 ## Setup/Installation

@@ -1,7 +1,7 @@
 "use client";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Environment, ParaProvider as ParaSDKProvider } from "@getpara/react-sdk";
+import ParaWeb, { Environment, ParaProvider as ParaSDKProvider } from "@getpara/react-sdk";
 
 // Para API configuration - set these in your .env file
 const API_KEY = process.env.NEXT_PUBLIC_PARA_API_KEY ?? "";
@@ -13,14 +13,13 @@ if (!API_KEY) {
 
 const queryClient = new QueryClient();
 
+const para = new ParaWeb(ENVIRONMENT, API_KEY);
+
 export function ParaProvider({ children }: { children: React.ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       <ParaSDKProvider
-        paraClientConfig={{
-          apiKey: API_KEY,
-          env: ENVIRONMENT,
-        }}
+        paraClientConfig={para}
         config={{ appName: "Para Modal Example" }}
         paraModalConfig={{
           disableEmailLogin: false,

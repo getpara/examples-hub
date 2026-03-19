@@ -1,0 +1,70 @@
+appId: com.usecapsule.example.swift
+---
+- clearState
+- launchApp
+- waitForAnimationToEnd
+
+# Wait for auth screen
+- assertVisible: "Sign Up or Log In"
+
+# Generate random test email
+- evalScript: ${output.email = 'maestro-' + Date.now() + '@test.getpara.com'}
+
+# Enter email
+- tapOn: "Enter email or phone"
+- inputText: "${output.email}"
+
+# Tap continue to trigger ASWebAuth
+- tapOn: "Continue"
+
+# Handle ASWebAuth consent dialog
+- extendedWaitUntil:
+    visible: "Cancel"
+    timeout: 10000
+- tapOn: "Continue"
+
+# Wait for OTP page
+- extendedWaitUntil:
+    visible: "Verify"
+    timeout: 15000
+
+# Tap on OTP input field for keyboard focus
+- tapOn:
+    point: "20%,58%"
+- waitForAnimationToEnd
+
+# Enter OTP digits
+- inputText: "1"
+- waitForAnimationToEnd
+- inputText: "2"
+- waitForAnimationToEnd
+- inputText: "3"
+- waitForAnimationToEnd
+- inputText: "4"
+- waitForAnimationToEnd
+- inputText: "5"
+- waitForAnimationToEnd
+- inputText: "6"
+
+# Wait for wallets screen
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible: "Wallets"
+    timeout: 30000
+- assertVisible: "Wallets"
+
+# Tap on EVM wallet card
+- tapOn: "EVM"
+- waitForAnimationToEnd
+
+# Sign a message
+- tapOn: "Enter a message to sign"
+- inputText: "Hello from Para!"
+- pressKey: "Enter"
+- tapOn: "Sign Message (EIP-191)"
+
+# Wait for signature result
+- extendedWaitUntil:
+    visible: "Message Signed"
+    timeout: 15000
+- assertVisible: "Message Signed"
