@@ -20,6 +20,7 @@ appId: com.usecapsule.example.flutter
 
 # Switch to email tab and enter email
 - tapOn: "Email"
+- waitForAnimationToEnd
 - tapOn: "Email address"
 - inputText: "${output.email}"
 - pressKey: "Enter"

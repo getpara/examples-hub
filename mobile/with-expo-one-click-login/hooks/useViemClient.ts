@@ -17,7 +17,7 @@ import { openBrowserAsync } from 'expo-web-browser';
 import type { SuccessfulSignatureRes } from '@getpara/react-native-wallet';
 
 import { para } from '@/lib/para';
-import { usePara } from '@/providers/ParaProvider';
+import { useWallet, useIsFullyLoggedIn } from '@getpara/react-native-wallet';
 
 function hexToBase64(hex: string): string {
   const clean = hex.startsWith('0x') ? hex.slice(2) : hex;
@@ -38,16 +38,27 @@ interface UseViemClientResult {
 }
 
 export function useViemClient(): UseViemClientResult {
-  const { isAuthenticated, wallets } = usePara();
+  const { data: isAuthenticated } = useIsFullyLoggedIn();
+  const { data: paraWallet } = useWallet();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const { account, walletClient, publicClient } = useMemo(() => {
-    if (!isAuthenticated || wallets.length === 0 || !wallets[0].address) {
+    if (!isAuthenticated || !paraWallet?.address) {
       return { account: null, walletClient: null, publicClient: null };
     }
 
-    const walletAddress = wallets[0].address as Hex;
+    // Verify the wallet exists in the current session before creating the account.
+    // After logout + re-login, paraWallet may briefly hold a stale address.
+    const currentWallets = para.getWallets() ?? {};
+    const walletAddress = paraWallet.address as Hex;
+    const hasWallet = Object.values(currentWallets).some(
+      (w) => w.address?.toLowerCase() === walletAddress.toLowerCase(),
+    );
+    if (!hasWallet) {
+      return { account: null, walletClient: null, publicClient: null };
+    }
+
     const paraAccount = createParaAccount(para, walletAddress);
 
     const wallet = createWalletClient({
@@ -62,7 +73,7 @@ export function useViemClient(): UseViemClientResult {
     });
 
     return { account: paraAccount, walletClient: wallet, publicClient: public_ };
-  }, [isAuthenticated, wallets]);
+  }, [isAuthenticated, paraWallet]);
 
   const getBalance = useCallback(async (): Promise<string | null> => {
     if (!publicClient || !account) {
@@ -112,7 +123,7 @@ export function useViemClient(): UseViemClientResult {
     [walletClient, account],
   );
 
-  const walletId = useMemo(() => Object.keys(para.getWallets())[0], [wallets]);
+  const walletId = useMemo(() => Object.keys(para.getWallets() ?? {})[0], [paraWallet]);
 
   // Uses para.signMessage directly (instead of viem's walletClient.signMessage) so we can
   // pass onTransactionReviewUrl for transaction popup support on React Native.

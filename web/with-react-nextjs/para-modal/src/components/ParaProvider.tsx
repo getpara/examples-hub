@@ -24,6 +24,7 @@ export function ParaProvider({ children }: { children: React.ReactNode }) {
         paraModalConfig={{
           disableEmailLogin: false,
           disablePhoneLogin: false,
+          isGuestModeEnabled: true,
           authLayout: ["AUTH:FULL", "EXTERNAL:FULL"],
           oAuthMethods: ["APPLE", "DISCORD", "FACEBOOK", "FARCASTER", "GOOGLE", "TWITTER"],
           onRampTestMode: true,

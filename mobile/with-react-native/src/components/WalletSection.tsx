@@ -1,18 +1,19 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
-import { para } from "../para";
+import { useWallet, useSignMessage, useLogout, useCreateWallet } from "@getpara/react-native-wallet";
 import { Button } from "./common/Button";
 import { StatusDisplay } from "./common/StatusDisplay";
 import { Input } from "./common/Input";
-import { Wallet } from "@getpara/react-native-wallet";
 
 interface WalletSectionProps {
   onLogout: () => void;
 }
 
-export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
-  const [wallet, setWallet] = useState<Wallet | null>(null);
-  const [_loadingWallet, setLoadingWallet] = useState(false);
+export const WalletSection: React.FC<WalletSectionProps> = () => {
+  const { data: wallet } = useWallet();
+  const { mutateAsync: createWallet } = useCreateWallet();
+  const { mutateAsync: signMessageMutation } = useSignMessage();
+  const { mutateAsync: logout } = useLogout();
   const [signingMessage, setSigningMessage] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
   const [status, setStatus] = useState("");
@@ -20,54 +21,14 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
   const [messageToSign, setMessageToSign] = useState("Hello from Para SDK Demo!");
   const [signature, setSignature] = useState("");
 
-  useEffect(() => {
-    // Load or create wallet on component mount
-    loadWalletInfo();
-  }, []);
-
-  const loadWalletInfo = async () => {
-    setLoadingWallet(true);
+  const handleCreateWallet = async () => {
+    setStatus("Creating new EVM wallet...");
     setError("");
-    setStatus("Loading wallet information...");
-
     try {
-      // Get existing EVM wallets
-      const evmWallets = await para.getWalletsByType("EVM");
-
-      if (evmWallets && evmWallets.length > 0) {
-        // Use first wallet
-        setWallet(evmWallets[0]);
-        setStatus("");
-      } else {
-        // Create new wallet if none exists
-        setStatus("No wallet found. Creating new EVM wallet...");
-        await para.createWallet({ type: "EVM" });
-
-        // Retrieve newly created wallet
-        const newWallets = await para.getWalletsByType("EVM");
-        if (newWallets && newWallets.length > 0) {
-          setWallet(newWallets[0]);
-          setStatus("");
-        }
-      }
-    } catch (_err) {
-      // Handle error by creating new wallet
-      try {
-        setStatus("Creating new EVM wallet...");
-        await para.createWallet({ type: "EVM" });
-
-        // Retrieve newly created wallet
-        const newWallets = await para.getWalletsByType("EVM");
-        if (newWallets && newWallets.length > 0) {
-          setWallet(newWallets[0]);
-          setStatus("");
-        }
-      } catch (createErr) {
-        console.error(createErr);
-        setError(createErr instanceof Error ? createErr.message : "Failed to create wallet");
-      }
-    } finally {
-      setLoadingWallet(false);
+      await createWallet({ type: "EVM" });
+      setStatus("");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to create wallet");
     }
   };
 
@@ -84,23 +45,14 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
 
     setSigningMessage(true);
     setError("");
-    setStatus("");  // Clear status since button shows loading
+    setStatus("");
     setSignature("");
 
     try {
-      // Convert message to base64 format
       const messageBase64 = btoa(messageToSign);
-
-      // Sign with wallet's private key
-      const sig = await para.signMessage({
-        walletId: wallet.id,
-        messageBase64,
-      });
-
-      // Display signature result
+      const sig = await signMessageMutation({ walletId: wallet.id, messageBase64 });
       if ("signature" in sig) {
         setSignature(sig.signature);
-        setStatus("");
       } else {
         setError("Failed to get signature");
       }
@@ -118,9 +70,7 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
     setStatus("Logging out...");
 
     try {
-      // Clear Para session
-      await para.logout();
-      onLogout();
+      await logout({});
     } catch (err) {
       console.error(err);
       setError(err instanceof Error ? err.message : "Failed to logout");
@@ -133,12 +83,18 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
     <ScrollView style={styles.container}>
       <Text style={styles.title}>Wallet Management</Text>
 
-      {wallet && (
+      {wallet ? (
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>EVM Wallet</Text>
           <Text style={styles.info}>ID: {wallet.id}</Text>
           <Text style={styles.info}>Address: {wallet.address}</Text>
           <Text style={styles.info}>Type: EVM</Text>
+        </View>
+      ) : (
+        <View style={styles.section}>
+          <Text style={styles.info}>No wallet found.</Text>
+          <View style={{ height: 16 }} />
+          <Button title="Create Wallet" onPress={handleCreateWallet} />
         </View>
       )}
 
@@ -157,7 +113,7 @@ export const WalletSection: React.FC<WalletSectionProps> = ({ onLogout }) => {
             onPress={signMessage}
             loading={signingMessage}
           />
-          
+
           {signature && (
             <View style={styles.signatureContainer}>
               <Text style={styles.resultLabel}>Signature Result</Text>

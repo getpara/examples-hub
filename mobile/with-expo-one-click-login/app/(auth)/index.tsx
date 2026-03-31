@@ -6,14 +6,11 @@ import { useRouter } from 'expo-router';
 import { Divider } from '@/components/ui';
 import { AuthForm, OAuthButtons } from '@/components/features';
 import { useOneClickLogin } from '@/hooks/useOneClickLogin';
-import { usePara } from '@/providers/ParaProvider';
 
 export default function LoginScreen() {
   const router = useRouter();
-  const { setAuthenticated } = usePara();
 
   const handleSuccess = () => {
-    setAuthenticated(true);
     router.replace('/(tabs)');
   };
 

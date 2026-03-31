@@ -203,6 +203,70 @@ app.post(
   },
 );
 
+app.post(
+  '/rest/wallets/:walletId/sign-typed-data',
+  async (req: Request<{ walletId: string }>, res: Response) => {
+    const { typedData } = req.body;
+
+    if (!typedData || typeof typedData !== 'object') {
+      return res.status(400).json({ error: 'typedData object is required' });
+    }
+
+    if (!typedData.domain || !typedData.types || !typedData.primaryType || !typedData.message) {
+      return res.status(400).json({ error: 'typedData must include domain, types, primaryType, and message' });
+    }
+
+    try {
+      const result = await callPara<{ signature: string }>(
+        `/v1/wallets/${req.params.walletId}/sign-typed-data`,
+        { method: 'POST', body: { typedData } },
+      );
+      res.json(result);
+    } catch (error) {
+      handleError(res, error);
+    }
+  },
+);
+
+app.post(
+  '/rest/wallets/:walletId/sign-authorization',
+  async (req: Request<{ walletId: string }>, res: Response) => {
+    const { authorization } = req.body;
+
+    if (!authorization || typeof authorization !== 'object') {
+      return res.status(400).json({ error: 'authorization object is required' });
+    }
+
+    const address = authorization.contractAddress ?? authorization.address;
+    if (!address || typeof address !== 'string') {
+      return res.status(400).json({ error: 'authorization.address (or contractAddress) is required' });
+    }
+
+    if (authorization.chainId == null || authorization.nonce == null) {
+      return res.status(400).json({ error: 'authorization.chainId and authorization.nonce are required' });
+    }
+
+    try {
+      const result = await callPara<{
+        address: string;
+        chainId: number;
+        nonce: number;
+        r: string;
+        s: string;
+        yParity: number;
+        signature: string;
+      }>(`/v1/wallets/${req.params.walletId}/sign-authorization`, {
+        method: 'POST',
+        body: { authorization },
+      });
+      res.json(result);
+    } catch (error) {
+      handleError(res, error);
+    }
+  },
+);
+
+
 app.listen(PORT, () => {
   console.log(`Para REST example listening on http://localhost:${PORT}`);
 });
