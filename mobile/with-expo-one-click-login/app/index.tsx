@@ -1,9 +1,9 @@
 import { Redirect } from 'expo-router';
 import { View, ActivityIndicator } from 'react-native';
-import { usePara } from '@/providers/ParaProvider';
+import { useIsFullyLoggedIn } from '@getpara/react-native-wallet';
 
 export default function Index() {
-  const { isAuthenticated, isLoading } = usePara();
+  const { data: isAuthenticated, isLoading } = useIsFullyLoggedIn();
 
   if (isLoading) {
     return (

@@ -11,6 +11,13 @@ export default function TabsLayout() {
           headerBackTitle: 'Back',
         }}
       />
+      <Stack.Screen
+        name="account"
+        options={{
+          title: 'Account',
+          headerBackTitle: 'Back',
+        }}
+      />
     </Stack>
   );
 }

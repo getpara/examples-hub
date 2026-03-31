@@ -5,13 +5,17 @@ import { useRouter } from 'expo-router';
 import { useState, useCallback, useEffect } from 'react';
 
 import { WalletCard, Button } from '@/components/ui';
-import { usePara } from '@/providers/ParaProvider';
+import { useWallet, useLogout, useIsFullyLoggedIn, useSignMessage } from '@getpara/react-native-wallet';
 import { useViemClient } from '@/hooks/useViemClient';
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { wallets, refreshAuth, logout } = usePara();
-  const { isReady, getBalance, signMessage, isLoading } = useViemClient();
+  const { data: wallet } = useWallet();
+  const { logoutAsync: logout } = useLogout();
+  const { refetch: refreshAuth } = useIsFullyLoggedIn();
+  const { isReady, getBalance, isLoading: isViemLoading } = useViemClient();
+  const { signMessageAsync, isPending: isSigning } = useSignMessage();
+
   const [refreshing, setRefreshing] = useState(false);
   const [balance, setBalance] = useState<string | null>(null);
   const [signature, setSignature] = useState<string | null>(null);
@@ -41,7 +45,7 @@ export default function HomeScreen() {
         text: 'Sign Out',
         style: 'destructive',
         onPress: async () => {
-          await logout();
+          await logout({});
           router.replace('/(auth)');
         },
       },
@@ -52,15 +56,26 @@ export default function HomeScreen() {
     router.push('/(tabs)/send');
   };
 
+  const handleAccount = () => {
+    router.push('/(tabs)/account');
+  };
+
   const handleSign = async () => {
     setSignature(null);
-    const sig = await signMessage('Hello from Para!');
-    if (sig) {
-      setSignature(sig);
+    if (!wallet?.id) return;
+
+    try {
+      // useSignMessage wraps para.signMessage — pass walletId + base64-encoded message
+      const messageBase64 = btoa('Hello from Para!');
+      const res = await signMessageAsync({ walletId: wallet.id, messageBase64 });
+      if (res && 'signature' in res) {
+        setSignature(`0x${res.signature}`);
+      }
+    } catch {
+      // signing cancelled or failed — nothing to surface here
     }
   };
 
-  const primaryWallet = wallets[0];
   const displayBalance = balance ? `${parseFloat(balance).toFixed(6)} ETH` : 'Loading...';
 
   return (
@@ -73,20 +88,22 @@ export default function HomeScreen() {
           <Text className="text-2xl font-bold text-gray-900">Your Wallet</Text>
           <Text className="mt-1 text-gray-500">Manage your assets</Text>
         </View>
-        {primaryWallet ? (
+
+        {wallet ? (
           <WalletCard
-            address={primaryWallet.address}
+            address={wallet.address ?? ''}
             balance={displayBalance}
             network="Sepolia"
             onSend={handleSend}
             onSign={handleSign}
-            signing={isLoading}
+            signing={isSigning || isViemLoading}
           />
         ) : (
           <View className="items-center rounded-2xl bg-white p-6">
             <Text className="text-center text-gray-500">No wallet found. Pull to refresh.</Text>
           </View>
         )}
+
         {signature && (
           <View className="mt-4 rounded-xl bg-white p-4">
             <Text className="mb-1 text-xs font-semibold text-gray-500">SIGNATURE</Text>
@@ -96,25 +113,14 @@ export default function HomeScreen() {
           </View>
         )}
 
-        {wallets.length > 1 && (
-          <View className="mt-6">
-            <Text className="mb-3 text-lg font-semibold text-gray-900">Other Wallets</Text>
-            {wallets.slice(1).map((wallet) => (
-              <View
-                key={wallet.id}
-                className="mb-2 flex-row items-center justify-between rounded-xl bg-white p-4">
-                <Text className="font-mono text-sm text-gray-600">
-                  {wallet.address.slice(0, 10)}...{wallet.address.slice(-8)}
-                </Text>
-                <View className="rounded bg-gray-100 px-2 py-1">
-                  <Text className="text-xs text-gray-600">{wallet.type}</Text>
-                </View>
-              </View>
-            ))}
-          </View>
-        )}
-
-        <View className="mt-8">
+        <View className="mt-6 gap-3">
+          <Button
+            title="Account &amp; Security"
+            testID="account-button"
+            variant="secondary"
+            onPress={handleAccount}
+            icon={<Ionicons name="person-outline" size={20} color="#374151" />}
+          />
           <Button
             title="Sign Out"
             variant="danger"
