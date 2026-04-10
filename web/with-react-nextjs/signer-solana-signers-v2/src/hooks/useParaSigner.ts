@@ -1,13 +1,13 @@
 "use client";
 
 import { useAccount } from "@getpara/react-sdk";
-import { useSolanaSigner } from "@getpara/react-sdk/solana";
+import { useParaSolanaSigner } from "@getpara/react-sdk/solana";
 import { useSolana } from "./useSolana";
 
 export function useParaSigner() {
   const account = useAccount();
   const { rpc, paraRpc } = useSolana();
-  const { solanaSigner, isLoading } = useSolanaSigner({ rpc: paraRpc });
+  const { solanaSigner, isLoading } = useParaSolanaSigner({ rpc: paraRpc });
 
   const isReady = Boolean(solanaSigner && account?.isConnected && !isLoading);
 

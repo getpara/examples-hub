@@ -3,7 +3,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { ethers } from "ethers";
 import { useWallet } from "@getpara/react-sdk";
-import { useParaSigner } from "./useParaSigner";
+import { useParaEthersSigner } from "@getpara/react-sdk/evm";
+import { provider } from "@/lib/provider";
 
 const ERC20_ABI = [
   "function transfer(address to, uint256 amount) returns (bool)",
@@ -24,7 +25,7 @@ export function useTokenTransfer(contractAddress: string = DEFAULT_CONTRACT_ADDR
   const [error, setError] = useState<Error | null>(null);
 
   const { data: wallet } = useWallet();
-  const { signer, provider } = useParaSigner();
+  const { ethersSigner: signer } = useParaEthersSigner({ provider });
 
   const fetchBalances = useCallback(async () => {
     if (!wallet?.address || !provider || !contractAddress) return;

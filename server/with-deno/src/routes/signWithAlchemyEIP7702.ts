@@ -3,7 +3,7 @@ import { alchemy, arbitrumSepolia } from "@account-kit/infra";
 import { createModularAccountV2Client } from "@account-kit/smart-contracts";
 import { BatchUserOperationCallData, WalletClientSigner } from "@aa-sdk/core";
 import { Para as ParaServer, Environment } from "@getpara/server-sdk";
-import { createParaAccount, createParaViemClient } from "@getpara/viem-v2-integration";
+import { createParaViemAccount, createParaViemClient } from "@getpara/viem-v2-integration";
 import { encodeFunctionData, http } from "viem";
 import Example from "../contracts/Example.json" with { type: "json" };
 
@@ -44,14 +44,14 @@ export const signWithAlchemyEIP7702: Handler = async (req: Request): Promise<Res
 
     await para.importSession(session);
 
-    const viemParaAccount = createParaAccount(para);
+    const viemParaAccount = createParaViemAccount({ para });
 
     // @ts-ignore - Deno npm module duplication issue with viem types
-    const viemClient = createParaViemClient(para, {
+    const viemClient = createParaViemClient({ para, walletClientConfig: {
       account: viemParaAccount,
       chain: arbitrumSepolia,
       transport: http(ALCHEMY_RPC_URL),
-    });
+    } });
 
     // @ts-ignore - Deno npm module duplication issue with viem types
     const walletClientSigner = new WalletClientSigner(viemClient, "para");

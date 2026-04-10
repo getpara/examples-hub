@@ -12,7 +12,7 @@ function truncateAddr(address: string, chars = 8): string {
 }
 
 export const AccountSection: React.FC = () => {
-  const account = useAccount();
+  const { embedded, isConnected } = useAccount();
   const client = useClient();
   const { data: wallet } = useWallet();
   const { mutateAsync: exportKey, isPending: isExporting } = useExportPrivateKey();
@@ -20,7 +20,7 @@ export const AccountSection: React.FC = () => {
   const [error, setError] = useState("");
   const [selectedType, setSelectedType] = useState<WalletType>("EVM");
 
-  const authMethods = account.authMethods ? Array.from(account.authMethods) : [];
+  const authMethods = embedded?.authMethods ? Array.from(embedded.authMethods) : [];
 
   // Build address views from supported wallet types — mirrors portal page logic
   const addressViews = useMemo<{ type: WalletType; address: string }[]>(() => {
@@ -71,15 +71,15 @@ export const AccountSection: React.FC = () => {
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Account Status</Text>
-          <View style={[styles.badge, account.isConnected ? styles.badgeConnected : styles.badgeDisconnected]}>
-            <Text style={[styles.badgeText, account.isConnected ? styles.badgeTextConnected : styles.badgeTextDisconnected]}>
-              {account.isConnected ? "Connected" : "Disconnected"}
+          <View style={[styles.badge, isConnected ? styles.badgeConnected : styles.badgeDisconnected]}>
+            <Text style={[styles.badgeText, isConnected ? styles.badgeTextConnected : styles.badgeTextDisconnected]}>
+              {isConnected ? "Connected" : "Disconnected"}
             </Text>
           </View>
         </View>
 
         <Text style={styles.label}>User ID</Text>
-        <Text style={styles.mono}>{account.userId ?? "—"}</Text>
+        <Text style={styles.mono}>{embedded?.userId ?? "—"}</Text>
       </View>
 
       {/* ── Auth Methods ── */}

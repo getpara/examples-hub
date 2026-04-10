@@ -2,7 +2,7 @@ import type { Request, Response } from "express";
 import { Para as ParaServer, Environment } from "@getpara/server-sdk";
 import { getKeyShareInDB } from "../db/keySharesDB.js";
 import { decrypt } from "../utils/encryption-utils.js";
-import { createParaAccount, createParaViemClient } from "@getpara/viem-v2-integration";
+import { createParaViemAccount, createParaViemClient } from "@getpara/viem-v2-integration";
 import { http, parseEther, parseGwei } from "viem";
 import { sepolia } from "viem/chains";
 
@@ -38,12 +38,12 @@ export async function viemPregenSignHandler(req: Request, res: Response): Promis
     const decryptedKeyShare = await decrypt(keyShare);
     await para.setUserShare(decryptedKeyShare);
 
-    const viemParaAccount = createParaAccount(para);
-    const viemClient = createParaViemClient(para, {
+    const viemParaAccount = createParaViemAccount({ para });
+    const viemClient = createParaViemClient({ para, walletClientConfig: {
       account: viemParaAccount,
       chain: sepolia,
       transport: http("https://ethereum-sepolia-rpc.publicnode.com"),
-    });
+    } });
 
     const request = await viemClient.prepareTransactionRequest({
       account: viemParaAccount,

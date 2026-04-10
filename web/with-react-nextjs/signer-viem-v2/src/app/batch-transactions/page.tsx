@@ -3,7 +3,9 @@
 import { useState, useEffect, useCallback } from "react";
 import { useModal, useAccount } from "@getpara/react-sdk";
 import { encodeFunctionData, formatEther, getContract, parseEther } from "viem";
-import { useWriteContract } from "@/hooks/useWriteContract";
+import { useParaViemClient, useParaViemWriteContract } from "@getpara/react-sdk/evm";
+import { http } from "viem";
+import { CHAIN } from "@/lib/viem";
 import { publicClient } from "@/lib/viem";
 import { PARA_TEST_TOKEN_ADDRESS, PARA_TEST_TOKEN_ABI } from "@/lib/contracts";
 import { StatusAlert } from "@/components/ui/StatusAlert";
@@ -27,7 +29,8 @@ export default function BatchTransactionsPage() {
 
   const { isConnected, embedded } = useAccount();
   const address = embedded?.wallets?.[0]?.address as `0x${string}` | undefined;
-  const { writeContract, isPending, txHash, error } = useWriteContract();
+  const { viemClient } = useParaViemClient({ walletClientConfig: { chain: CHAIN, transport: http() } });
+  const { writeContractAsync, isPending, data: txHash, error } = useParaViemWriteContract(viemClient);
   const { openModal } = useModal();
 
   const fetchTokenData = useCallback(async () => {
@@ -104,7 +107,7 @@ export default function BatchTransactionsPage() {
 
       setStatus({ show: true, type: "info", message: "Please confirm the batched transaction in your wallet..." });
 
-      await writeContract({
+      await writeContractAsync({
         address: PARA_TEST_TOKEN_ADDRESS,
         abi: PARA_TEST_TOKEN_ABI,
         functionName: "multicall",

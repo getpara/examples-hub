@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useWallet, useClient } from "@getpara/react-sdk";
-import { useViemAccount } from "@getpara/react-sdk/evm/hooks";
+import { useParaViemAccount } from "@getpara/react-sdk/evm/hooks";
 import { RhinestoneSDK } from "@rhinestone/sdk";
 import { formatUnits, type Account } from "viem";
 import { getChainName } from "@/lib/rhinestone";
@@ -35,7 +35,7 @@ export interface GlobalWalletState {
 
 export function useGlobalWallet() {
   const { data: wallet } = useWallet();
-  const { viemAccount, isLoading: viemLoading } = useViemAccount();
+  const { viemAccount, isLoading: viemLoading } = useParaViemAccount();
   const para = useClient();
   const address = wallet?.address;
   // Connection is determined by having both wallet and viemAccount

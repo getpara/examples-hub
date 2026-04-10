@@ -1,0 +1,21 @@
+{
+  "expo": {
+    "name": "Para PIN",
+    "slug": "para-expo-pin",
+    "version": "1.0.0",
+    "scheme": "para-expo-pin",
+    "platforms": ["ios", "android"],
+    "plugins": ["expo-router", "expo-web-browser"],
+    "experiments": { "typedRoutes": true, "tsconfigPaths": true },
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.getpara.expopin"
+    },
+    "android": {
+      "package": "com.getpara.expopin",
+      "adaptiveIcon": { "backgroundColor": "#0A0A0A" }
+    }
+  }
+}

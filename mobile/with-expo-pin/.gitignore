@@ -1,0 +1,32 @@
+node_modules/
+.expo/
+dist/
+npm-debug.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+web-build/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Expo router
+expo-env.d.ts
+
+# Native builds
+ios/
+android/
+
+# macOS
+.DS_Store
+
+# Metro health checks
+.metro-health-check*
+
+# TypeScript
+*.tsbuildinfo

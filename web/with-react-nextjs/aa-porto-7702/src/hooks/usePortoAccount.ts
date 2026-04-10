@@ -1,14 +1,14 @@
 "use client";
 
 import { useState, useCallback, useMemo, useEffect } from "react";
-import { useViemAccount } from "@getpara/react-sdk/evm";
+import { useParaViemAccount } from "@getpara/react-sdk/evm";
 import { useAccount } from "@getpara/react-sdk";
 import { Chains } from "porto";
 import { Account, Key, RelayActions } from "porto/viem";
 import { createClient, http, type Hex } from "viem";
 
 export function usePortoAccount() {
-  const { viemAccount, isLoading: isViemLoading } = useViemAccount();
+  const { viemAccount, isLoading: isViemLoading } = useParaViemAccount();
   const { isConnected } = useAccount();
 
   const [portoAccount, setPortoAccount] = useState<any>(null);

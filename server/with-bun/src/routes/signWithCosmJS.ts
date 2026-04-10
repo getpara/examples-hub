@@ -1,7 +1,7 @@
 import { Para as ParaServer, Environment } from "@getpara/server-sdk";
 import { SigningStargateClient } from "@cosmjs/stargate";
 import type { StdFee, Coin, MsgSendEncodeObject } from "@cosmjs/stargate";
-import { ParaProtoSigner } from "@getpara/cosmjs-v0-integration";
+import { createParaProtoSigner } from "@getpara/cosmjs-v0-integration";
 import { getKeyShareInDB } from "../db/keySharesDB.js";
 import { decrypt } from "../utils/encryption-utils.js";
 
@@ -48,7 +48,7 @@ export const signWithCosmJS = async (req: Request): Promise<Response> => {
     const decryptedKeyShare = await decrypt(keyShare);
     await para.setUserShare(decryptedKeyShare);
 
-    const paraProtoSigner = new ParaProtoSigner(para, "cosmos");
+    const paraProtoSigner = createParaProtoSigner({ para, prefix: "cosmos" });
 
     const stargateClient = await SigningStargateClient.connectWithSigner(
       "https://rpc-t.cosmos.nodestake.top",

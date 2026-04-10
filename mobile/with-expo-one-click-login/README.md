@@ -55,7 +55,9 @@ with-expo-one-click-login/
 │   └── (tabs)/                 # Authenticated routes
 │       ├── _layout.tsx         # Stack navigator
 │       ├── index.tsx           # Home/Wallet screen
-│       └── send.tsx            # Send transaction screen
+│       ├── send.tsx            # Send transaction screen
+│       ├── smart-account.tsx   # Account Abstraction screen
+│       └── account.tsx         # Account & Security screen
 ├── components/
 │   ├── ui/                     # Presentational components
 │   │   ├── Button.tsx
@@ -75,6 +77,7 @@ with-expo-one-click-login/
 ├── lib/
 │   ├── para.ts                 # Para SDK singleton
 │   ├── auth.ts                 # Auth utilities
+│   ├── alchemy.ts              # Alchemy AA configuration
 │   └── constants.ts            # App constants
 └── types/
     └── index.ts                # TypeScript types
@@ -88,8 +91,9 @@ The key Para-related packages:
 
 ```json
 {
-  "@getpara/react-native-wallet": "2.0.0-alpha.72",
-  "@getpara/viem-v2-integration": "2.0.0-alpha.72"
+  "@getpara/react-native-wallet": "2.21.0",
+  "@getpara/viem-v2-integration": "2.21.0",
+  "@getpara/aa-alchemy": "2.21.0"
 }
 ```
 
@@ -236,6 +240,27 @@ const walletClient = createWalletClient({
 // Sign and send transactions
 await walletClient.sendTransaction({ to, value });
 ```
+
+## Account Abstraction (Alchemy)
+
+The app includes an Account Abstraction screen demonstrating EIP-4337 smart accounts with gas-sponsored transactions via Alchemy.
+
+### Setup
+
+1. **Get an Alchemy API key** from [dashboard.alchemy.com](https://dashboard.alchemy.com) — create an app on Sepolia
+2. **Create a gas policy** in the Alchemy Dashboard under Gas Manager > Create Policy (select Sepolia)
+3. **Add to `.env`:**
+   ```
+   EXPO_PUBLIC_ALCHEMY_API_KEY=your_alchemy_api_key
+   EXPO_PUBLIC_ALCHEMY_GAS_POLICY_ID=your_gas_policy_id
+   ```
+
+### What it demonstrates
+
+- Creating an Alchemy Modular Account (EIP-4337) with Para as the signer
+- Displaying both EOA and smart account addresses
+- Sending a gas-sponsored (gasless) transaction on Sepolia
+- Using the `useAlchemySmartAccount` hook from `@getpara/react-native-wallet/aa/alchemy`
 
 ## Authentication Flow
 

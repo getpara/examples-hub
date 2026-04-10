@@ -1,12 +1,12 @@
 "use client";
 
 import { useAccount, useModal } from "@getpara/react-sdk";
-import { useCosmjsAminoSigner } from "@getpara/react-sdk/cosmos";
+import { useParaCosmjsAminoSigner } from "@getpara/react-sdk/cosmos";
 
 export function Header() {
   const { openModal } = useModal();
   const { isConnected } = useAccount();
-  const { aminoSigner } = useCosmjsAminoSigner();
+  const { aminoSigner } = useParaCosmjsAminoSigner();
 
   const address = aminoSigner?.address;
 

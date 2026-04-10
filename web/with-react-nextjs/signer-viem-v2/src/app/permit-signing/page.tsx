@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useModal, useAccount } from "@getpara/react-sdk";
-import { formatEther, getContract, maxUint256 } from "viem";
-import { useSignTypedData } from "@/hooks/useSignTypedData";
+import { useParaViemClient, useParaViemSignTypedData } from "@getpara/react-sdk/evm";
+import { formatEther, getContract, maxUint256, http } from "viem";
 import { publicClient, CHAIN } from "@/lib/viem";
 import { PARA_TEST_TOKEN_ADDRESS, PARA_TEST_TOKEN_ABI } from "@/lib/contracts";
 import { StatusAlert } from "@/components/ui/StatusAlert";
@@ -28,7 +28,8 @@ export default function PermitSigningPage() {
 
   const { isConnected, embedded } = useAccount();
   const address = embedded?.wallets?.[0]?.address as `0x${string}` | undefined;
-  const { signTypedData, isPending, signature, error } = useSignTypedData();
+  const { viemClient } = useParaViemClient({ walletClientConfig: { chain: CHAIN, transport: http() } });
+  const { signTypedDataAsync, isPending, data: signature, error } = useParaViemSignTypedData(viemClient);
   const { openModal } = useModal();
 
   const fetchTokenData = useCallback(async () => {
@@ -81,7 +82,7 @@ export default function PermitSigningPage() {
 
       setStatus({ show: true, type: "info", message: "Please sign the permit message in your wallet..." });
 
-      await signTypedData({
+      await signTypedDataAsync({
         domain: {
           name,
           version: "1",

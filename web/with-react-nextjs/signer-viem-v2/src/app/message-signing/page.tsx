@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import { useModal, useAccount } from "@getpara/react-sdk";
-import { verifyMessage } from "viem";
-import { useSignMessage } from "@/hooks/useSignMessage";
+import { useParaViemClient, useParaViemSignMessage } from "@getpara/react-sdk/evm";
+import { verifyMessage, http } from "viem";
+import type { Hash } from "viem";
+import { CHAIN } from "@/lib/viem";
 import { StatusAlert } from "@/components/ui/StatusAlert";
 
 export default function MessageSigningPage() {
@@ -17,7 +19,8 @@ export default function MessageSigningPage() {
 
   const { isConnected, embedded } = useAccount();
   const address = embedded?.wallets?.[0]?.address as `0x${string}` | undefined;
-  const { signMessage, isPending, signature, error } = useSignMessage();
+  const { viemClient } = useParaViemClient({ walletClientConfig: { chain: CHAIN, transport: http() } });
+  const { signMessageAsync, isPending, data: signature, error } = useParaViemSignMessage(viemClient);
   const { openModal } = useModal();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -26,10 +29,14 @@ export default function MessageSigningPage() {
     setStatus({ show: false, type: "success", message: "" });
 
     try {
-      await signMessage(message.trim());
+      await signMessageAsync({ message: message.trim() });
       setStatus({ show: true, type: "success", message: "Message signed successfully!" });
     } catch {
-      setStatus({ show: true, type: "error", message: error?.message || "Failed to sign message. Please try again." });
+      setStatus({
+        show: true,
+        type: "error",
+        message: error?.message || "Failed to sign message. Please try again.",
+      });
     }
   };
 
@@ -40,7 +47,7 @@ export default function MessageSigningPage() {
       const isValid = await verifyMessage({
         address,
         message,
-        signature,
+        signature: signature as Hash,
       });
       setVerified(isValid);
       setStatus({
@@ -75,7 +82,10 @@ export default function MessageSigningPage() {
         <h1 className="text-4xl font-bold tracking-tight mb-6">Sign Message Demo</h1>
         <p className="text-xl text-gray-600 max-w-2xl mx-auto">
           Sign a message with your connected wallet using the{" "}
-          <code className="font-mono text-sm bg-gray-50 text-gray-700 px-2 py-1 rounded-none">useSignMessage</code> hook.
+          <code className="font-mono text-sm bg-gray-50 text-gray-700 px-2 py-1 rounded-none">
+            useParaViemSignMessage
+          </code>{" "}
+          hook.
         </p>
       </div>
 

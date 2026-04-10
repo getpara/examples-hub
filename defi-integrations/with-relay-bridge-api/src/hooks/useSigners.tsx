@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import { useMemo, useEffect, useState } from "react";
-import { useAccount, useClient } from "@getpara/react-sdk";
-import { createParaAccount, createParaViemClient } from "@getpara/viem-v2-integration";
-import { createPublicClient, http, PublicClient } from "viem";
-import { sepolia, baseSepolia } from "viem/chains";
-import { ParaSolanaWeb3Signer } from "@getpara/solana-web3.js-v1-integration";
-import { Connection } from "@solana/web3.js";
-import { NETWORK_CONFIG } from "@/config/constants";
+import { useMemo, useEffect, useState } from 'react';
+import { useAccount, useClient } from '@getpara/react-sdk';
+import { createParaViemAccount, createParaViemClient } from '@getpara/viem-v2-integration';
+import { createPublicClient, http, PublicClient } from 'viem';
+import { sepolia, baseSepolia } from 'viem/chains';
+import { ParaSolanaWeb3Signer } from '@getpara/solana-web3.js-v1-integration';
+import { Connection } from '@solana/web3.js';
+import { NETWORK_CONFIG } from '@/config/constants';
 
 export function useSigners() {
   const client = useClient();
@@ -22,11 +22,14 @@ export function useSigners() {
     try {
       const ethereumChain = sepolia;
       const ethereumConfig = NETWORK_CONFIG.ethereum;
-      const ethereumAccount = createParaAccount(client);
-      const ethereumWalletClient = createParaViemClient(client, {
-        account: ethereumAccount,
-        chain: ethereumChain,
-        transport: http(ethereumConfig.rpcUrl),
+      const ethereumAccount = createParaViemAccount({ para: client });
+      const ethereumWalletClient = createParaViemClient({
+        para: client,
+        walletClientConfig: {
+          account: ethereumAccount,
+          chain: ethereumChain,
+          transport: http(ethereumConfig.rpcUrl),
+        },
       });
       const ethereumPublicClient = createPublicClient({
         chain: ethereumChain,
@@ -40,7 +43,7 @@ export function useSigners() {
         isInitialized: true,
       };
     } catch (error) {
-      console.error("[Ethereum Signer] Initialization error:", error);
+      console.error('[Ethereum Signer] Initialization error:', error);
       return { publicClient: null, walletClient: null, address: null, isInitialized: false };
     }
   }, [client, isConnected]);
@@ -54,11 +57,14 @@ export function useSigners() {
     try {
       const baseChain = baseSepolia;
       const baseConfig = NETWORK_CONFIG.base;
-      const baseAccount = createParaAccount(client);
-      const baseWalletClient = createParaViemClient(client, {
-        account: baseAccount,
-        chain: baseChain,
-        transport: http(baseConfig.rpcUrl),
+      const baseAccount = createParaViemAccount({ para: client });
+      const baseWalletClient = createParaViemClient({
+        para: client,
+        walletClientConfig: {
+          account: baseAccount,
+          chain: baseChain,
+          transport: http(baseConfig.rpcUrl),
+        },
       });
       const basePublicClient = createPublicClient({
         chain: baseChain,
@@ -72,7 +78,7 @@ export function useSigners() {
         isInitialized: true,
       };
     } catch (error) {
-      console.error("[Base Signer] Initialization error:", error);
+      console.error('[Base Signer] Initialization error:', error);
       return { publicClient: null, walletClient: null, address: null, isInitialized: false };
     }
   }, [client, isConnected]);
@@ -88,7 +94,7 @@ export function useSigners() {
 
     try {
       const solanaConfig = NETWORK_CONFIG.solana;
-      const solanaConnection = new Connection(solanaConfig.rpcUrl, "confirmed");
+      const solanaConnection = new Connection(solanaConfig.rpcUrl, 'confirmed');
       const solanaSigner = new ParaSolanaWeb3Signer(client, solanaConnection);
 
       return {
@@ -98,7 +104,7 @@ export function useSigners() {
         isInitialized: true,
       };
     } catch (error) {
-      console.error("[Solana Signer] Initialization error:", error);
+      console.error('[Solana Signer] Initialization error:', error);
       return { signer: null, connection: null, address: null, isInitialized: false };
     }
   }, [client, isConnected, solanaAddress]);
@@ -113,7 +119,7 @@ export function useSigners() {
             setSolanaAddress(publicKey.toBase58());
           }
         } catch (error) {
-          console.error("[Solana Signer] Error getting address:", error);
+          console.error('[Solana Signer] Error getting address:', error);
         }
       };
       getSolanaAddress();

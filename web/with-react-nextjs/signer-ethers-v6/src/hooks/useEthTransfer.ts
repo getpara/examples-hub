@@ -3,7 +3,8 @@
 import { useState, useCallback } from "react";
 import { ethers } from "ethers";
 import { useWallet } from "@getpara/react-sdk";
-import { useParaSigner } from "./useParaSigner";
+import { useParaEthersSigner } from "@getpara/react-sdk/evm";
+import { provider } from "@/lib/provider";
 
 const HOLESKY_CHAIN_ID = 17000;
 
@@ -13,7 +14,7 @@ export function useEthTransfer() {
   const [error, setError] = useState<Error | null>(null);
 
   const { data: wallet } = useWallet();
-  const { signer, provider } = useParaSigner();
+  const { ethersSigner: signer } = useParaEthersSigner({ provider });
 
   const sendTransaction = useCallback(
     async (to: string, amount: string) => {

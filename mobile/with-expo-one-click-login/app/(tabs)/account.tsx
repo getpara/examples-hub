@@ -11,12 +11,12 @@ import { useAccount, useClient, useExportPrivateKey, useWallet } from '@getpara/
 type WalletType = 'EVM' | 'COSMOS';
 
 export default function AccountScreen() {
-  const account = useAccount();
+  const { embedded, isConnected } = useAccount();
   const client = useClient();
   const { data: wallet } = useWallet();
   const { exportPrivateKeyAsync, isPending: isExporting } = useExportPrivateKey();
 
-  const authMethods = account.authMethods ? Array.from(account.authMethods) : [];
+  const authMethods = embedded?.authMethods ? Array.from(embedded.authMethods) : [];
 
   // Build the list of supported address types for this wallet (mirrors portal page logic)
   const addressViews = useMemo<{ type: WalletType; address: string }[]>(() => {
@@ -74,10 +74,10 @@ export default function AccountScreen() {
               Account Status
             </Text>
             <View
-              className={`rounded-full px-3 py-1 ${account.isConnected ? 'bg-emerald-100' : 'bg-gray-100'}`}>
+              className={`rounded-full px-3 py-1 ${isConnected ? 'bg-emerald-100' : 'bg-gray-100'}`}>
               <Text
-                className={`text-xs font-medium ${account.isConnected ? 'text-emerald-700' : 'text-gray-500'}`}>
-                {account.isConnected ? 'Connected' : 'Disconnected'}
+                className={`text-xs font-medium ${isConnected ? 'text-emerald-700' : 'text-gray-500'}`}>
+                {isConnected ? 'Connected' : 'Disconnected'}
               </Text>
             </View>
           </View>
@@ -85,7 +85,7 @@ export default function AccountScreen() {
           <View className="rounded-xl bg-gray-50 p-4">
             <Text className="mb-1 text-xs text-gray-500">User ID</Text>
             <Text className="font-mono text-sm text-gray-900">
-              {account.userId ? truncateAddress(account.userId, 10) : '—'}
+              {embedded?.userId ? truncateAddress(embedded?.userId, 10) : '—'}
             </Text>
           </View>
         </Card>

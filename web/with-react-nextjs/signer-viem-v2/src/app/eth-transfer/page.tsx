@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import { useModal, useAccount } from "@getpara/react-sdk";
-import { formatEther, parseEther } from "viem";
-import { useSendTransaction } from "@/hooks/useSendTransaction";
+import { useParaViemClient, useParaViemSendTransaction } from "@getpara/react-sdk/evm";
+import { formatEther, parseEther, http } from "viem";
+import type { Hash } from "viem";
+import { CHAIN } from "@/lib/viem";
 import { useBalance } from "@/hooks/useBalance";
 import { StatusAlert } from "@/components/ui/StatusAlert";
 import { TxResult } from "@/components/ui/TxResult";
@@ -19,7 +21,8 @@ export default function EthTransferPage() {
 
   const { isConnected, embedded } = useAccount();
   const address = embedded?.wallets?.[0]?.address as `0x${string}` | undefined;
-  const { sendTransaction, isPending, txHash, error } = useSendTransaction();
+  const { viemClient } = useParaViemClient({ walletClientConfig: { chain: CHAIN, transport: http() } });
+  const { sendTransactionAsync, isPending, data: txHash, error } = useParaViemSendTransaction(viemClient);
   const { balance, isLoading: isBalanceLoading, refetch: refetchBalance } = useBalance();
   const { openModal } = useModal();
 
@@ -35,7 +38,7 @@ export default function EthTransferPage() {
     try {
       setStatus({ show: true, type: "info", message: "Please confirm the transaction in your wallet..." });
 
-      await sendTransaction({
+      await sendTransactionAsync({
         to: to as `0x${string}`,
         value: parseEther(amount),
       });
@@ -45,7 +48,11 @@ export default function EthTransferPage() {
       setAmount("");
       refetchBalance();
     } catch {
-      setStatus({ show: true, type: "error", message: error?.message || "Transaction failed. Please try again." });
+      setStatus({
+        show: true,
+        type: "error",
+        message: error?.message || "Transaction failed. Please try again.",
+      });
     }
   };
 
@@ -71,7 +78,9 @@ export default function EthTransferPage() {
         <h1 className="text-4xl font-bold tracking-tight mb-6">ETH Transfer Demo</h1>
         <p className="text-xl text-gray-600 max-w-2xl mx-auto">
           Transfer ETH using the{" "}
-          <code className="font-mono text-sm bg-gray-50 text-gray-700 px-2 py-1 rounded-none">useSendTransaction</code>{" "}
+          <code className="font-mono text-sm bg-gray-50 text-gray-700 px-2 py-1 rounded-none">
+            useParaViemSendTransaction
+          </code>{" "}
           hook.
         </p>
       </div>
@@ -138,7 +147,7 @@ export default function EthTransferPage() {
           </button>
         </form>
 
-        {txHash && <TxResult hash={txHash} />}
+        {txHash && <TxResult hash={txHash as Hash} />}
       </div>
     </div>
   );
