@@ -2,7 +2,7 @@ import type { Request, Response } from "express";
 import { Para as ParaServer, Environment } from "@getpara/server-sdk";
 import { SigningStargateClient } from "@cosmjs/stargate";
 import type { StdFee, Coin, MsgSendEncodeObject } from "@cosmjs/stargate";
-import { ParaProtoSigner } from "@getpara/cosmjs-v0-integration";
+import { createParaProtoSigner } from "@getpara/cosmjs-v0-integration";
 import { getKeyShareInDB } from "../db/keySharesDB.js";
 import { decrypt } from "../utils/encryption-utils.js";
 
@@ -51,11 +51,11 @@ export async function cosmjsPregenSignHandler(req: Request, res: Response): Prom
     const decryptedKeyShare = await decrypt(keyShare);
     await para.setUserShare(decryptedKeyShare);
 
-    const paraProtoSigner = new ParaProtoSigner(para, "cosmos");
+    const paraProtoSigner = createParaProtoSigner({ para, prefix: "cosmos" });
 
     console.log("Connecting to Cosmos RPC...");
     const stargateClient = await SigningStargateClient.connectWithSigner(
-      "https://rpc-rs.cosmos.nodestake.top/", // Example RPC endpoint, replace with your desired one
+      "https://rpc.cosmos.directory/cosmoshub",
       paraProtoSigner
     );
     console.log("Connected to Cosmos RPC");

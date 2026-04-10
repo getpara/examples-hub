@@ -1,0 +1,21 @@
+{
+  "expo": {
+    "name": "Para Password",
+    "slug": "para-expo-password",
+    "version": "1.0.0",
+    "scheme": "para-expo-password",
+    "platforms": ["ios", "android"],
+    "plugins": ["expo-router", "expo-web-browser"],
+    "experiments": { "typedRoutes": true, "tsconfigPaths": true },
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.getpara.expopassword"
+    },
+    "android": {
+      "package": "com.getpara.expopassword",
+      "adaptiveIcon": { "backgroundColor": "#0A0A0A" }
+    }
+  }
+}

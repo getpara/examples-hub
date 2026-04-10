@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { SigningStargateClient, GasPrice } from "@cosmjs/stargate";
-import { useCosmjsProtoSigner } from "@getpara/react-sdk/cosmos";
+import { useParaCosmjsProtoSigner } from "@getpara/react-sdk/cosmos";
 import { useAccount } from "@getpara/react-sdk";
 import { DEFAULT_CHAIN } from "@/config/chains";
 import { DEFAULT_GAS_PRICE } from "@/config/constants";
@@ -13,7 +13,7 @@ export function useParaSigner() {
   const [error, setError] = useState<Error | null>(null);
 
   const { isConnected } = useAccount();
-  const { protoSigner, isLoading: isSignerLoading } = useCosmjsProtoSigner();
+  const { protoSigner, isLoading: isSignerLoading } = useParaCosmjsProtoSigner();
 
   // Get the Cosmos address directly from the signer
   const address = isConnected && protoSigner ? protoSigner.address : null;

@@ -2,7 +2,8 @@
 
 import { useState, useCallback } from "react";
 import { ethers } from "ethers";
-import { useParaSigner } from "./useParaSigner";
+import { useParaEthersSigner } from "@getpara/react-sdk/evm";
+import { provider } from "@/lib/provider";
 
 export function useMessageSigning() {
   const [signature, setSignature] = useState<string | null>(null);
@@ -10,7 +11,7 @@ export function useMessageSigning() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  const { signer } = useParaSigner();
+  const { ethersSigner: signer } = useParaEthersSigner({ provider });
 
   const signMessage = useCallback(
     async (message: string) => {

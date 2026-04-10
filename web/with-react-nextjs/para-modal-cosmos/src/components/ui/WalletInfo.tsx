@@ -1,7 +1,7 @@
-import { useCosmjsAminoSigner } from "@getpara/react-sdk/cosmos";
+import { useParaCosmjsAminoSigner } from "@getpara/react-sdk/cosmos";
 
 export function WalletInfo() {
-  const { aminoSigner } = useCosmjsAminoSigner();
+  const { aminoSigner } = useParaCosmjsAminoSigner();
   const address = aminoSigner?.address;
 
   return (

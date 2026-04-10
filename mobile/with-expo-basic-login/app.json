@@ -1,0 +1,21 @@
+{
+  "expo": {
+    "name": "Para Basic Login",
+    "slug": "para-expo-basic-login",
+    "version": "1.0.0",
+    "scheme": "para-expo-basic-login",
+    "platforms": ["ios", "android"],
+    "plugins": ["expo-router", "expo-web-browser"],
+    "experiments": { "typedRoutes": true, "tsconfigPaths": true },
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.getpara.expobasiclogin"
+    },
+    "android": {
+      "package": "com.getpara.expobasiclogin",
+      "adaptiveIcon": { "backgroundColor": "#0A0A0A" }
+    }
+  }
+}

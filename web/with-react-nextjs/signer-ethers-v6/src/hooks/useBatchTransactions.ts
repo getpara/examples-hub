@@ -3,7 +3,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { ethers } from "ethers";
 import { useWallet } from "@getpara/react-sdk";
-import { useParaSigner } from "./useParaSigner";
+import { useParaEthersSigner } from "@getpara/react-sdk/evm";
+import { provider } from "@/lib/provider";
 import ParaTestToken from "@/contracts/artifacts/contracts/ParaTestToken.sol/ParaTestToken.json";
 
 export type Operation = {
@@ -22,7 +23,7 @@ export function useBatchTransactions(contractAddress: string = DEFAULT_CONTRACT_
   const [error, setError] = useState<Error | null>(null);
 
   const { data: wallet } = useWallet();
-  const { signer, provider } = useParaSigner();
+  const { ethersSigner: signer } = useParaEthersSigner({ provider });
 
   const fetchTokenData = useCallback(async () => {
     if (!wallet?.address || !provider) return;

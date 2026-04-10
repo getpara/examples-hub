@@ -56,6 +56,10 @@ export default function HomeScreen() {
     router.push('/(tabs)/send');
   };
 
+  const handleSmartAccount = () => {
+    router.push('/(tabs)/smart-account');
+  };
+
   const handleAccount = () => {
     router.push('/(tabs)/account');
   };
@@ -114,6 +118,13 @@ export default function HomeScreen() {
         )}
 
         <View className="mt-6 gap-3">
+          <Button
+            title="Smart Account (AA)"
+            testID="smart-account-button"
+            variant="secondary"
+            onPress={handleSmartAccount}
+            icon={<Ionicons name="flash-outline" size={20} color="#374151" />}
+          />
           <Button
             title="Account &amp; Security"
             testID="account-button"

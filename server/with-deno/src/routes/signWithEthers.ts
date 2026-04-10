@@ -1,6 +1,6 @@
 import { Handler } from "@std/http";
 import { Para as ParaServer, Environment } from "@getpara/server-sdk";
-import { ParaEthersSigner } from "@getpara/ethers-v6-integration";
+import { createParaEthersSigner } from "@getpara/ethers-v6-integration";
 import { ethers } from "ethers";
 import { getKeyShareInDB } from "../db/keySharesDB.ts";
 import { decrypt } from "../utils/encryption-utils.ts";
@@ -49,7 +49,7 @@ export const signWithEthers: Handler = async (req: Request): Promise<Response> =
 
     const ethersProvider = new ethers.JsonRpcProvider("https://ethereum-sepolia-rpc.publicnode.com");
     // @ts-ignore - Deno npm module duplication issue with ethers types
-    const paraEthersSigner = new ParaEthersSigner(para, ethersProvider as ethers.Provider);
+    const paraEthersSigner = createParaEthersSigner({ para, provider: ethersProvider as ethers.Provider });
 
     const address = await paraEthersSigner.getAddress();
     const feeData = await ethersProvider.getFeeData();

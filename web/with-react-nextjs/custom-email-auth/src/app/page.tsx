@@ -1,18 +1,23 @@
 "use client";
 
 import { useAccount, useClient, useLogout } from "@getpara/react-sdk";
+import { useParaViemClient, useParaViemSignMessage } from "@getpara/react-sdk/evm";
+import { http } from "viem";
+import { sepolia } from "viem/chains";
 import { useE2ECleanup } from "@/lib/e2e-helpers";
-import { useSignHelloWorld } from "@/hooks/useSignHelloWorld";
 import { EmailAuth } from "@/components/ui/EmailAuth";
 import { WalletInfo } from "@/components/ui/WalletInfo";
 import { SignMessage } from "@/components/ui/SignMessage";
+
+const HELLO_WORLD_MESSAGE = "Hello World!";
 
 export default function Home() {
   const { isConnected } = useAccount();
   const para = useClient();
   const { logout } = useLogout();
 
-  const { sign, message, isPending, error, signature } = useSignHelloWorld();
+  const { viemClient } = useParaViemClient({ walletClientConfig: { chain: sepolia, transport: http() } });
+  const { signMessage, isPending, error, data: signature } = useParaViemSignMessage(viemClient);
 
   // E2E testing cleanup (internal only - safe to remove)
   useE2ECleanup(para);
@@ -33,8 +38,8 @@ export default function Home() {
         <div className="max-w-xl mx-auto">
           <WalletInfo />
           <SignMessage
-            message={message}
-            onSign={sign}
+            message={HELLO_WORLD_MESSAGE}
+            onSign={() => signMessage({ message: HELLO_WORLD_MESSAGE })}
             isPending={isPending}
             error={error}
             signature={signature}

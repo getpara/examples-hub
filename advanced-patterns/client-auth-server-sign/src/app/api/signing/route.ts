@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Para as ParaServer, Environment } from "@getpara/server-sdk";
-import { ParaEthersSigner } from "@getpara/ethers-v6-integration";
+import { createParaEthersSigner } from "@getpara/ethers-v6-integration";
 import { ethers } from "ethers";
 
 type RequestBody = {
@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
 
     const ethersProvider = new ethers.JsonRpcProvider("https://ethereum-sepolia-rpc.publicnode.com");
 
-    const paraEthersSigner = new ParaEthersSigner(para, ethersProvider);
+    const paraEthersSigner = createParaEthersSigner({ para, provider: ethersProvider });
 
     const signedTx = await paraEthersSigner.signTransaction(tx);
 

@@ -3,7 +3,9 @@
 import { useState, useEffect, useCallback } from "react";
 import { useModal, useAccount } from "@getpara/react-sdk";
 import { formatEther, getContract, parseEther } from "viem";
-import { useWriteContract } from "@/hooks/useWriteContract";
+import { useParaViemClient, useParaViemWriteContract } from "@getpara/react-sdk/evm";
+import { http } from "viem";
+import { CHAIN } from "@/lib/viem";
 import { useBalance } from "@/hooks/useBalance";
 import { publicClient } from "@/lib/viem";
 import { PARA_TEST_TOKEN_ADDRESS, ERC20_ABI } from "@/lib/contracts";
@@ -25,7 +27,8 @@ export default function TokenTransferPage() {
 
   const { isConnected, embedded } = useAccount();
   const address = embedded?.wallets?.[0]?.address as `0x${string}` | undefined;
-  const { writeContract, isPending, txHash, error } = useWriteContract();
+  const { viemClient } = useParaViemClient({ walletClientConfig: { chain: CHAIN, transport: http() } });
+  const { writeContractAsync, isPending, data: txHash, error } = useParaViemWriteContract(viemClient);
   const { balance: ethBalance, isLoading: isEthLoading, refetch: refetchEthBalance } = useBalance();
   const { openModal } = useModal();
 
@@ -76,7 +79,7 @@ export default function TokenTransferPage() {
     try {
       setStatus({ show: true, type: "info", message: "Please confirm the transaction in your wallet..." });
 
-      await writeContract({
+      await writeContractAsync({
         address: contractAddress as `0x${string}`,
         abi: ERC20_ABI,
         functionName: "transfer",

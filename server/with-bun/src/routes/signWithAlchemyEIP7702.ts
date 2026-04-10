@@ -2,7 +2,7 @@ import { alchemy, arbitrumSepolia } from "@account-kit/infra";
 import { createModularAccountV2Client } from "@account-kit/smart-contracts";
 import { BatchUserOperationCallData, WalletClientSigner } from "@aa-sdk/core";
 import ParaServer, { Environment } from "@getpara/server-sdk";
-import { createParaAccount, createParaViemClient } from "@getpara/viem-v2-integration";
+import { createParaViemAccount, createParaViemClient } from "@getpara/viem-v2-integration";
 import { encodeFunctionData, http } from "viem";
 import Example from "../contracts/Example.json";
 
@@ -37,13 +37,13 @@ export const signWithAlchemyEIP7702 = async (req: Request): Promise<Response> =>
 
     await para.importSession(session);
 
-    const viemParaAccount = createParaAccount(para);
+    const viemParaAccount = createParaViemAccount({ para });
 
-    const viemClient = createParaViemClient(para, {
+    const viemClient = createParaViemClient({ para, walletClientConfig: {
       account: viemParaAccount,
       chain: arbitrumSepolia,
       transport: http(ALCHEMY_RPC_URL),
-    });
+    } });
 
     const walletClientSigner = new WalletClientSigner(viemClient, "para");
 

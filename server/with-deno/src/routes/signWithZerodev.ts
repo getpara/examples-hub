@@ -3,7 +3,7 @@ import { signerToEcdsaValidator } from "@zerodev/ecdsa-validator";
 import { createKernelAccount, createKernelAccountClient, createZeroDevPaymasterClient } from "@zerodev/sdk";
 import { getEntryPoint, KERNEL_V3_1 } from "@zerodev/sdk/constants";
 import { Para as ParaServer, Environment } from "@getpara/server-sdk";
-import { createParaAccount, createParaViemClient } from "@getpara/viem-v2-integration";
+import { createParaViemAccount, createParaViemClient } from "@getpara/viem-v2-integration";
 import { arbitrumSepolia } from "viem/chains";
 import { createPublicClient, encodeFunctionData, http, parseGwei } from "viem";
 import Example from "../contracts/Example.json" with { type: "json" };
@@ -64,14 +64,14 @@ export const signWithZerodev: Handler = async (req: Request): Promise<Response> 
     const decryptedKeyShare = await decrypt(keyShare);
     await para.setUserShare(decryptedKeyShare);
 
-    const viemParaAccount = createParaAccount(para);
+    const viemParaAccount = createParaViemAccount({ para });
 
     // @ts-ignore - Deno npm module duplication issue with viem types
-    const viemClient = createParaViemClient(para, {
+    const viemClient = createParaViemClient({ para, walletClientConfig: {
       account: viemParaAccount,
       chain: arbitrumSepolia,
       transport: http(ZERODEV_RPC_URL),
-    });
+    } });
 
     // @ts-ignore - Deno npm module duplication issue with viem types
     const publicClient = createPublicClient({

@@ -2,7 +2,7 @@ import { create7702KernelAccount, create7702KernelAccountClient } from "@zerodev
 import { createZeroDevPaymasterClient } from "@zerodev/sdk";
 import { getEntryPoint, KERNEL_V3_3 } from "@zerodev/sdk/constants";
 import { Para as ParaServer, Environment } from "@getpara/server-sdk";
-import { createParaAccount } from "@getpara/viem-v2-integration";
+import { createParaViemAccount } from "@getpara/viem-v2-integration";
 import { arbitrumSepolia } from "viem/chains";
 import { createPublicClient, encodeFunctionData, http, parseGwei } from "viem";
 import Example from "../contracts/Example.json";
@@ -38,7 +38,7 @@ export const signWithZerodevEIP7702 = async (req: Request): Promise<Response> =>
     const para = new ParaServer(PARA_ENVIRONMENT, PARA_API_KEY);
     await para.importSession(session);
 
-    const viemParaAccount = createParaAccount(para);
+    const viemParaAccount = createParaViemAccount({ para });
 
     const publicClient = createPublicClient({
       chain: arbitrumSepolia,

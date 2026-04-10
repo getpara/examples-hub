@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import ParaWeb, { useAccount, useClient } from "@getpara/react-sdk";
-import { ParaEthersSigner } from "@getpara/ethers-v6-integration";
+import { createParaEthersSigner } from "@getpara/ethers-v6-integration";
 import { ethers } from "ethers";
 import { ParaSolanaWeb3Signer } from "@getpara/solana-web3.js-v1-integration";
 import { Connection } from "@solana/web3.js";
@@ -43,7 +43,7 @@ async function initializeSigners(para: ParaWeb): Promise<SignerData> {
   try {
     const ethereumConfig = NETWORK_CONFIG.ethereum;
     const ethereumProvider = new ethers.JsonRpcProvider(ethereumConfig.rpcUrl);
-    const ethereumSigner = new ParaEthersSigner(para, ethereumProvider);
+    const ethereumSigner = createParaEthersSigner({ para, provider: ethereumProvider });
     const ethereumAddress = await ethereumSigner.getAddress();
 
     signerData.ethereumEthers = {
@@ -59,7 +59,7 @@ async function initializeSigners(para: ParaWeb): Promise<SignerData> {
   try {
     const baseConfig = NETWORK_CONFIG.base;
     const baseProvider = new ethers.JsonRpcProvider(baseConfig.rpcUrl);
-    const baseSigner = new ParaEthersSigner(para, baseProvider);
+    const baseSigner = createParaEthersSigner({ para, provider: baseProvider });
     const baseAddress = await baseSigner.getAddress();
 
     signerData.baseEthers = {

@@ -1,0 +1,41 @@
+# Signer Stellar SDK
+
+This example demonstrates how to use the [Para SDK](https://docs.getpara.com) with the [Stellar SDK](https://stellar.github.io/js-stellar-sdk/) (v14) to sign Stellar transactions and Soroban authorization entries.
+
+## Setup
+
+1. Copy `.env.example` to `.env.local` and fill in your Para API key:
+
+```bash
+cp .env.example .env.local
+```
+
+2. Install dependencies:
+
+```bash
+yarn install
+```
+
+3. Run the development server:
+
+```bash
+yarn dev
+```
+
+## Key Dependencies
+
+- `@getpara/react-sdk` - React SDK for Para wallet integration
+- `@getpara/stellar-sdk-v14-integration` - Stellar signer integration for Para
+- `@stellar/stellar-sdk` - Stellar SDK for building and submitting transactions
+
+## Key Files
+
+- `src/hooks/useParaSigner.ts` - Main hook wrapping `useStellarSigner` from Para's React SDK
+- `src/hooks/useXlmTransfer.ts` - Build, sign, and submit a classic Stellar payment
+- `src/hooks/useSignAuthEntry.ts` - Sign a Soroban authorization entry
+- `src/components/ParaProvider.tsx` - Para SDK provider configuration
+
+## Learn More
+
+- [Para Documentation](https://docs.getpara.com)
+- [Stellar SDK Documentation](https://stellar.github.io/js-stellar-sdk/)

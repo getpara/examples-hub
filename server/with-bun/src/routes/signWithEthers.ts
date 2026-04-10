@@ -1,7 +1,7 @@
 import { Para as ParaServer, Environment } from "@getpara/server-sdk";
 import { getKeyShareInDB } from "../db/keySharesDB.js";
 import { decrypt } from "../utils/encryption-utils.js";
-import { ParaEthersSigner } from "@getpara/ethers-v6-integration";
+import { createParaEthersSigner } from "@getpara/ethers-v6-integration";
 import { ethers } from "ethers";
 
 const PARA_API_KEY = Bun.env.PARA_API_KEY;
@@ -36,7 +36,7 @@ export const signWithEthers = async (req: Request): Promise<Response> => {
     await para.setUserShare(decryptedKeyShare);
 
     const ethersProvider = new ethers.JsonRpcProvider("https://ethereum-sepolia-rpc.publicnode.com");
-    const paraEthersSigner = new ParaEthersSigner(para, ethersProvider as ethers.Provider);
+    const paraEthersSigner = createParaEthersSigner({ para, provider: ethersProvider as ethers.Provider });
 
     const address = await paraEthersSigner.getAddress();
     const feeData = await ethersProvider.getFeeData();

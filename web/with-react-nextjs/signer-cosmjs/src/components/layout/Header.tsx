@@ -3,13 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAccount, useModal } from "@getpara/react-sdk";
-import { useCosmjsProtoSigner } from "@getpara/react-sdk/cosmos";
+import { useParaCosmjsProtoSigner } from "@getpara/react-sdk/cosmos";
 
 export default function Header() {
   const pathname = usePathname();
   const { openModal } = useModal();
   const { isConnected } = useAccount();
-  const { protoSigner } = useCosmjsProtoSigner();
+  const { protoSigner } = useParaCosmjsProtoSigner();
 
   const address = protoSigner?.address;
 

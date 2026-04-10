@@ -2,7 +2,7 @@ import { alchemy, arbitrumSepolia } from "@account-kit/infra";
 import { createModularAccountV2Client } from "@account-kit/smart-contracts";
 import { BatchUserOperationCallData, SmartAccountSigner } from "@aa-sdk/core";
 import { Para as ParaServer, Environment } from "@getpara/server-sdk";
-import { createParaAccount } from "@getpara/viem-v2-integration";
+import { createParaViemAccount } from "@getpara/viem-v2-integration";
 import { Request, Response } from "express";
 import { encodeFunctionData, type LocalAccount, type SignableMessage } from "viem";
 import Example from "../contracts/Example.json";
@@ -61,7 +61,7 @@ export async function alchemyEip7702SignHandler(req: Request, res: Response): Pr
     const decryptedKeyShare = await decrypt(keyShare);
     await para.setUserShare(decryptedKeyShare);
 
-    const viemParaAccount = createParaAccount(para);
+    const viemParaAccount = createParaViemAccount({ para });
 
     const paraSigner: SmartAccountSigner<LocalAccount> = {
       signerType: "para",

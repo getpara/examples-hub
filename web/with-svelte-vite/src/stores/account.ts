@@ -81,10 +81,10 @@ export async function signMessage(message: string): Promise<string> {
     throw new Error("No wallet found");
   }
 
-  const walletClient = createParaViemClient(para, {
+  const walletClient = createParaViemClient({ para, walletClientConfig: {
     chain: sepolia,
     transport: http(),
-  });
+  } });
 
   const signature = await walletClient.signMessage({ message });
   return signature;

@@ -64,12 +64,9 @@ export default function Home() {
       <div className="text-center mb-12">
         <h1 className="text-4xl font-bold tracking-tight mb-4">Para + Ethers v6 Demo</h1>
         <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-          Explore signing different transaction types using Para with Ethers.js v6. Reference the{" "}
-          <code className="font-mono text-sm bg-gray-100 text-gray-700 px-2 py-1 rounded-md">
-            /src/hooks/useParaSigner.ts
-          </code>{" "}
-          file to see how we create the{" "}
-          <code className="font-mono text-sm bg-gray-100 text-gray-700 px-2 py-1 rounded-md">ParaEthersSigner</code>.
+          Explore signing different transaction types using Para with Ethers.js v6 via the{" "}
+          <code className="font-mono text-sm bg-gray-100 text-gray-700 px-2 py-1 rounded-md">useParaEthersSigner</code>{" "}
+          hook.
         </p>
       </div>
 

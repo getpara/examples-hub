@@ -1,14 +1,14 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { useCosmjsAminoSigner } from "@getpara/react-sdk/cosmos";
+import { useParaCosmjsAminoSigner } from "@getpara/react-sdk/cosmos";
 import { makeSignDoc } from "@cosmjs/amino";
 
 const HELLO_WORLD_MESSAGE = "Hello World!";
 const CHAIN_ID = "cosmoshub-4";
 
 export function useSignHelloWorld() {
-  const { aminoSigner, isLoading } = useCosmjsAminoSigner();
+  const { aminoSigner, isLoading } = useParaCosmjsAminoSigner();
   const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [signature, setSignature] = useState<string | undefined>();

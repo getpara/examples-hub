@@ -1,0 +1,35 @@
+{
+  "expo": {
+    "name": "Para Passkey",
+    "slug": "para-expo-passkey",
+    "version": "1.0.0",
+    "scheme": "para-expo-passkey",
+    "platforms": [
+      "ios",
+      "android"
+    ],
+    "plugins": [
+      "expo-router",
+      "expo-web-browser"
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "tsconfigPaths": true
+    },
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.getpara.expopasskey",
+      "associatedDomains": [
+        "webcredentials:app.beta.usecapsule.com"
+      ]
+    },
+    "android": {
+      "package": "com.getpara.expopasskey",
+      "adaptiveIcon": {
+        "backgroundColor": "#0A0A0A"
+      }
+    }
+  }
+}
