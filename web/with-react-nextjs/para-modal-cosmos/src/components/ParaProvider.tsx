@@ -1,7 +1,7 @@
 "use client";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Environment, ParaProvider as ParaSDKProvider } from "@getpara/react-sdk";
+import ParaWeb, { Environment, ParaProvider as ParaSDKProvider } from "@getpara/react-sdk";
 import { cosmoshub, osmosis, noble } from "graz/chains";
 
 // Para API configuration - set these in your .env file
@@ -13,6 +13,7 @@ if (!API_KEY) {
 }
 
 const queryClient = new QueryClient();
+const para = new ParaWeb(ENVIRONMENT, API_KEY);
 
 // Cosmos chains supported by this example
 const cosmosChains = [cosmoshub, osmosis, noble];
@@ -21,10 +22,7 @@ export function ParaProvider({ children }: { children: React.ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       <ParaSDKProvider
-        paraClientConfig={{
-          apiKey: API_KEY,
-          env: ENVIRONMENT,
-        }}
+        paraClientConfig={para}
         externalWalletConfig={{
           wallets: ["KEPLR", "LEAP"],
           cosmosConnector: {
@@ -42,15 +40,15 @@ export function ParaProvider({ children }: { children: React.ReactNode }) {
         paraModalConfig={{
           disableEmailLogin: false,
           disablePhoneLogin: false,
-          authLayout: ["AUTH:FULL", "EXTERNAL:FULL"],
-          oAuthMethods: ["APPLE", "DISCORD", "FACEBOOK", "FARCASTER", "GOOGLE", "TWITTER"],
+          authLayout: ["EXTERNAL:FULL"],
+          oAuthMethods: [],
           onRampTestMode: true,
           theme: {
-            foregroundColor: "#222222",
+            foregroundColor: "#2E2926",
             backgroundColor: "#FFFFFF",
-            accentColor: "#888888",
+            accentColor: "#E8642B",
             mode: "light",
-            borderRadius: "none",
+            borderRadius: "md",
             font: "Inter",
           },
           logo: "/para.svg",

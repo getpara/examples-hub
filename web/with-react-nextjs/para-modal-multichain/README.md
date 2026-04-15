@@ -11,7 +11,7 @@ A minimal Next.js example demonstrating Para Modal integration with multichain w
 - Opening the Para modal via the `useModal` hook
 - Checking authentication state with `useAccount`
 - Retrieving wallet address with `useWallet`
-- Signing messages with `useSignMessage`
+- Per-chain signing with wagmi, Cosmos amino signer, and Solana signer
 
 ## Setup
 
@@ -44,9 +44,7 @@ src/
 │       ├── WalletInfo.tsx      # Connected wallet display
 │       └── SignMessage.tsx     # Sign message UI
 ├── hooks/
-│   └── useSignHelloWorld.ts    # Custom hook for signing
-└── lib/
-    └── e2e-helpers.ts          # E2E testing utilities
+│   └── useMultichainSign.ts    # Custom hook for signing
 ```
 
 ## Multichain Configuration

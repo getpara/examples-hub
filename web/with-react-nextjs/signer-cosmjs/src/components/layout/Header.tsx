@@ -30,6 +30,7 @@ export default function Header() {
             <button
               onClick={() => openModal()}
               data-testid="account-address-display"
+              data-address={address}
               className="px-4 py-2 bg-gray-700 text-white rounded-none hover:bg-gray-800 transition-colors text-sm font-medium cursor-pointer">
               {address ? `${address.slice(0, 10)}...${address.slice(-4)}` : "Loading..."}
             </button>

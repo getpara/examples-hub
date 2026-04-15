@@ -1,48 +1,45 @@
 "use client";
 
-import { useModal, useAccount, useClient } from "@getpara/react-sdk";
-import { useE2ECleanup } from "@/lib/e2e-helpers";
+import { useModal, useAccount, useWallet } from "@getpara/react-sdk";
 import { useSignHelloWorld } from "@/hooks/useSignHelloWorld";
+import { Header } from "@/components/layout/Header";
 import { ConnectCard } from "@/components/ui/ConnectCard";
 import { WalletInfo } from "@/components/ui/WalletInfo";
 import { SignMessage } from "@/components/ui/SignMessage";
 
 export default function Home() {
-  // Para SDK hooks
   const { openModal } = useModal();
   const { isConnected } = useAccount();
-  const para = useClient();
-
-  // Sign message hook
+  const { data: wallet } = useWallet();
   const { sign, message, isPending, error, signature } = useSignHelloWorld();
 
-  // E2E testing cleanup (internal only - safe to remove)
-  useE2ECleanup(para);
+  const address = wallet?.address ?? "";
 
   return (
-    <div className="container mx-auto px-4 py-12">
-      <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold tracking-tight mb-4">Para Modal + Solana Demo</h1>
-        <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-          Sign messages with your Solana wallet through Para. This example demonstrates integration with Glow, Phantom,
-          Backpack, and Solflare wallets using Para&apos;s built-in modal and React SDK hooks.
-        </p>
-      </div>
+    <div className="min-h-screen flex flex-col">
+      <Header isConnected={isConnected} address={address} onConnect={openModal} />
 
-      {!isConnected ? (
-        <ConnectCard onConnect={openModal} />
-      ) : (
-        <div className="max-w-xl mx-auto">
-          <WalletInfo />
-          <SignMessage
-            message={message}
-            onSign={sign}
-            isPending={isPending}
-            error={error}
-            signature={signature}
-          />
-        </div>
-      )}
+      <main
+        className={
+          isConnected
+            ? "mx-auto w-full max-w-xl px-4 py-10"
+            : "flex-1 flex items-center justify-center px-4 pb-16"
+        }>
+        {!isConnected ? (
+          <ConnectCard onConnect={openModal} />
+        ) : (
+          <div className="space-y-4">
+            <WalletInfo address={address} />
+            <SignMessage
+              message={message}
+              onSign={sign}
+              isPending={isPending}
+              error={error}
+              signature={signature}
+            />
+          </div>
+        )}
+      </main>
     </div>
   );
 }

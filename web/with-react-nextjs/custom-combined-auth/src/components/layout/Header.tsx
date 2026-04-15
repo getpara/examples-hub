@@ -12,6 +12,7 @@ export function Header() {
         {isConnected && wallet?.address && (
           <span
             data-testid="account-address-display"
+            data-address={wallet.address}
             className="px-4 py-2 text-gray-700 text-sm font-medium font-mono">
             {wallet.address.slice(0, 6)}...{wallet.address.slice(-4)}
           </span>

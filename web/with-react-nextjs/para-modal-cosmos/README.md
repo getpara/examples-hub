@@ -10,7 +10,7 @@ A minimal Next.js example demonstrating Para Modal integration with Cosmos walle
 - Configuring external wallets (Keplr, Leap) via `externalWalletConfig`
 - Opening the Para modal via the `useModal` hook
 - Checking authentication state with `useAccount`
-- Retrieving Cosmos wallet address with `useCosmjsAminoSigner`
+- Retrieving Cosmos wallet address with `useParaCosmjsAminoSigner`
 - Signing arbitrary messages using ADR-036 standard with Amino encoding
 
 ## Setup
@@ -44,9 +44,7 @@ src/
 │       ├── WalletInfo.tsx      # Connected Cosmos wallet display
 │       └── SignMessage.tsx     # ADR-036 sign message UI
 ├── hooks/
-│   └── useSignHelloWorld.ts    # ADR-036 signing with useCosmjsAminoSigner
-└── lib/
-    └── e2e-helpers.ts          # E2E testing utilities
+│   └── useSignHelloWorld.ts    # ADR-036 signing with useParaCosmjsAminoSigner
 ```
 
 ## Cosmos Configuration
@@ -70,10 +68,10 @@ externalWalletConfig={{
 This example uses the Cosmos ADR-036 standard for arbitrary message signing:
 
 ```typescript
-import { useCosmjsAminoSigner } from "@getpara/react-sdk/cosmos";
+import { useParaCosmjsAminoSigner } from "@getpara/react-sdk/cosmos";
 import { makeSignDoc } from "@cosmjs/amino";
 
-const { aminoSigner } = useCosmjsAminoSigner();
+const { aminoSigner } = useParaCosmjsAminoSigner();
 
 // Create ADR-036 sign doc
 const signDoc = makeSignDoc(

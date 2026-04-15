@@ -2004,14 +2004,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@getpara/core-sdk@npm:2.19.0":
-  version: 2.19.0
-  resolution: "@getpara/core-sdk@npm:2.19.0"
+"@getpara/core-sdk@npm:2.23.0":
+  version: 2.23.0
+  resolution: "@getpara/core-sdk@npm:2.23.0"
   dependencies:
     "@celo/utils": "npm:^8.0.2"
     "@cosmjs/encoding": "npm:^0.32.4"
     "@ethereumjs/util": "npm:^9.1.0"
-    "@getpara/user-management-client": "npm:2.19.0"
+    "@getpara/user-management-client": "npm:2.23.0"
     "@noble/hashes": "npm:^1.5.0"
     axios: "npm:^1.8.4"
     base64url: "npm:^3.0.1"
@@ -2020,33 +2020,49 @@ __metadata:
     node-forge: "npm:^1.3.1"
     uuid: "npm:^11.1.0"
     xstate: "npm:^5.24.0"
-  checksum: 10c0/a1fdca534045dc72ad3861ac1222e581ee1b7cfae5cfc19fe3a5485b0343101981e5bcad1b2f0fa8bdf6ffb35efb795b5928a4ec24f48e1a0f55612cf972fde3
+  checksum: 10c0/067e3f0ce1b4516baad6ca61f35893c62a5f216b7ac292820f28c70837f9ae7ab58582bb8e31e8de2b87f4c513ba7d5c09805edea5da854895fa333f8a87594d
   languageName: node
   linkType: hard
 
-"@getpara/react-core@npm:2.19.0":
-  version: 2.19.0
-  resolution: "@getpara/react-core@npm:2.19.0"
+"@getpara/react-core@npm:2.23.0":
+  version: 2.23.0
+  resolution: "@getpara/react-core@npm:2.23.0"
   dependencies:
-    "@getpara/core-sdk": "npm:2.19.0"
+    "@getpara/core-sdk": "npm:2.23.0"
     zustand: "npm:^5.0.0"
   peerDependencies:
+    "@getpara/cosmjs-v0-integration": ">=2"
+    "@getpara/ethers-v6-integration": ">=2"
+    "@getpara/solana-signers-v2-integration": ">=2"
+    "@getpara/stellar-sdk-v14-integration": ">=2"
+    "@getpara/viem-v2-integration": ">=2"
     "@tanstack/react-query": ">=5"
     react: ">=18"
     viem: ">=2"
-  checksum: 10c0/6778e8d9d3d2c7c4dc2f70ac57b611cdce360782148dcd23b70af3acbb32b333abb7049303d9e17f4bea11b59376af2a65de4e7a984f48651aa3881576a9d9a5
+  peerDependenciesMeta:
+    "@getpara/cosmjs-v0-integration":
+      optional: true
+    "@getpara/ethers-v6-integration":
+      optional: true
+    "@getpara/solana-signers-v2-integration":
+      optional: true
+    "@getpara/stellar-sdk-v14-integration":
+      optional: true
+    "@getpara/viem-v2-integration":
+      optional: true
+  checksum: 10c0/7725b9176a2e37e22d4c498a5c02d35c0223ec06269c3daa10725b53f0076ac9291dfaaa1e50a20e2cd2982e16cd83e500026916600c45ff8b9b19b4eaa52c94
   languageName: node
   linkType: hard
 
-"@getpara/react-native-wallet@npm:2.19.0":
-  version: 2.19.0
-  resolution: "@getpara/react-native-wallet@npm:2.19.0"
+"@getpara/react-native-wallet@npm:2.23.0":
+  version: 2.23.0
+  resolution: "@getpara/react-native-wallet@npm:2.23.0"
   dependencies:
-    "@getpara/core-sdk": "npm:2.19.0"
-    "@getpara/react-core": "npm:2.19.0"
-    "@getpara/user-management-client": "npm:2.19.0"
-    "@getpara/viem-v2-integration": "npm:2.19.0"
-    "@getpara/web-sdk": "npm:2.19.0"
+    "@getpara/core-sdk": "npm:2.23.0"
+    "@getpara/react-core": "npm:2.23.0"
+    "@getpara/user-management-client": "npm:2.23.0"
+    "@getpara/viem-v2-integration": "npm:2.23.0"
+    "@getpara/web-sdk": "npm:2.23.0"
     "@peculiar/webcrypto": "npm:^1.5.0"
     "@ungap/structured-clone": "npm:1.3.0"
     react-native-url-polyfill: "npm:2.0.0"
@@ -2054,6 +2070,7 @@ __metadata:
     text-encoding: "npm:0.7.0"
   peerDependencies:
     "@craftzdog/react-native-buffer": ">=6.0.0"
+    "@getpara/viem-v2-integration": ">=2.18.0"
     "@react-native-async-storage/async-storage": ">=2.0.0"
     "@tanstack/react-query": ">=5"
     react: ">=18"
@@ -2064,46 +2081,49 @@ __metadata:
     react-native-passkey: ">=3.0.0"
     react-native-quick-base64: ">=2.0.0"
     react-native-quick-crypto: ">=1.0.0"
-  checksum: 10c0/7253149bfff15535b0ad2b264eb9f9bb3f920ad67ef868cdbbd65b4f4d8f1b9c824836373769c92bc96bd5cba4278205f19fd06a9359adf001a5b1b837bfc80d
+  peerDependenciesMeta:
+    "@getpara/viem-v2-integration":
+      optional: true
+  checksum: 10c0/391046df3d048b32fb739e0adddc660594bffd0a3d887bcbde0426e6def9f72f4fdc3741d2d4c3e2b4c6816deabde9c8e315b067f8c94e9aeee00ab2e0c029c9
   languageName: node
   linkType: hard
 
-"@getpara/shared@npm:^1.12.0":
+"@getpara/shared@npm:^1.14.0":
   version: 1.14.0
   resolution: "@getpara/shared@npm:1.14.0"
   checksum: 10c0/836de972325bbcb6e6a28e7e9c8a2a77d58815fefe4104f1f5161f110cfd2f819fb5330e18797050d3c56970ed447ec87842f96154a000aafc5754b571864a85
   languageName: node
   linkType: hard
 
-"@getpara/user-management-client@npm:2.19.0":
-  version: 2.19.0
-  resolution: "@getpara/user-management-client@npm:2.19.0"
+"@getpara/user-management-client@npm:2.23.0":
+  version: 2.23.0
+  resolution: "@getpara/user-management-client@npm:2.23.0"
   dependencies:
-    "@getpara/shared": "npm:^1.12.0"
+    "@getpara/shared": "npm:^1.14.0"
     axios: "npm:^1.8.4"
     axios-retry: "npm:^4.5.0"
     libphonenumber-js: "npm:^1.11.7"
-  checksum: 10c0/73d8bb634679f934e52ef9d158289150bca9a45b330a3879caaecb528faa95d2119aa9040cd35b76d1370247edcf17789ae723462ee4c20ccaf42b782d705c84
+  checksum: 10c0/bbc5766e1a01e7d0ec13bc1f33c8062425da56200f06489e11f27f80bf4dfb7dbda10597dc61ab2291e7022b24fad58e50f6d3c84ce5afe47e9295fda5f39ddc
   languageName: node
   linkType: hard
 
-"@getpara/viem-v2-integration@npm:2.19.0":
-  version: 2.19.0
-  resolution: "@getpara/viem-v2-integration@npm:2.19.0"
+"@getpara/viem-v2-integration@npm:2.23.0":
+  version: 2.23.0
+  resolution: "@getpara/viem-v2-integration@npm:2.23.0"
   dependencies:
-    "@getpara/core-sdk": "npm:2.19.0"
+    "@getpara/core-sdk": "npm:2.23.0"
   peerDependencies:
     viem: ^2.39.0
-  checksum: 10c0/6770832981e0ba79dddd92b1671a31df8ca28457a9644247453d857fc8b23362d4c095573d0c240b9b7d871c30d3d6b3d0a479e685eed3510a3f7965a280c456
+  checksum: 10c0/0eb4a509f3feed034ea28029ce94b31938e0faab87ec8b8be0a434f664d2c5eb8f0d9184c54b2e244c85c8cdbac651d6b401c1d355fae51baaa03b449bd79b89
   languageName: node
   linkType: hard
 
-"@getpara/web-sdk@npm:2.19.0":
-  version: 2.19.0
-  resolution: "@getpara/web-sdk@npm:2.19.0"
+"@getpara/web-sdk@npm:2.23.0":
+  version: 2.23.0
+  resolution: "@getpara/web-sdk@npm:2.23.0"
   dependencies:
-    "@getpara/core-sdk": "npm:2.19.0"
-    "@getpara/user-management-client": "npm:2.19.0"
+    "@getpara/core-sdk": "npm:2.23.0"
+    "@getpara/user-management-client": "npm:2.23.0"
     base64url: "npm:^3.0.1"
     buffer: "npm:6.0.3"
     cbor-web: "npm:^9.0.2"
@@ -2115,7 +2135,7 @@ __metadata:
   peerDependenciesMeta:
     "@farcaster/miniapp-sdk":
       optional: true
-  checksum: 10c0/a5d4839b7a314f8dedf6941fa558b07d456747f7487fc8747820f46b8a9817f14a81725e9e968cae98ba8fadf83f34f48d2f49f7fa3f8b25529b1828f7750ad2
+  checksum: 10c0/aa06608fc258a13ce4ccf2fb1e08258f88e4cce1146d2a821f928fd7df65be1ccbb5d3fe4b2632146f4d6447a1ec3f8906224c7f3d70dccbf6470ed7ec021694
   languageName: node
   linkType: hard
 
@@ -9087,8 +9107,8 @@ __metadata:
   dependencies:
     "@babel/core": "npm:^7.20.0"
     "@craftzdog/react-native-buffer": "npm:^6.1.0"
-    "@getpara/react-native-wallet": "npm:2.19.0"
-    "@getpara/viem-v2-integration": "npm:2.19.0"
+    "@getpara/react-native-wallet": "npm:2.23.0"
+    "@getpara/viem-v2-integration": "npm:2.23.0"
     "@peculiar/webcrypto": "npm:^1.5.0"
     "@react-native-async-storage/async-storage": "npm:^2.2.0"
     "@tanstack/react-query": "npm:^5.95.2"

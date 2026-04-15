@@ -45,8 +45,6 @@ src/
 │       └── SignMessage.tsx     # Sign message UI
 ├── hooks/
 │   └── useSignHelloWorld.ts    # Custom hook for signing
-└── lib/
-    └── e2e-helpers.ts          # E2E testing utilities
 ```
 
 ## EVM Configuration
