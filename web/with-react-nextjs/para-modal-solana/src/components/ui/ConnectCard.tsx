@@ -4,15 +4,24 @@ interface ConnectCardProps {
 
 export function ConnectCard({ onConnect }: ConnectCardProps) {
   return (
-    <div className="max-w-md mx-auto bg-white rounded-none border border-gray-200 p-8">
-      <h2 className="text-2xl font-bold mb-4 text-center">Connect Wallet</h2>
-      <p className="text-gray-600 text-center mb-6">Connect your wallet to sign messages with Para.</p>
-      <button
-        onClick={onConnect}
-        data-testid="auth-connect-button"
-        className="w-full px-6 py-3 bg-gray-900 text-white rounded-none hover:bg-gray-950 transition-colors font-medium">
-        Connect with Para
-      </button>
+    <div className="w-full max-w-sm animate-fade-in-up">
+      <div className="rounded-2xl border border-border bg-card p-10 shadow-xl shadow-black/[0.04] text-center">
+        <img src="/para.svg" alt="Para" className="h-7 mx-auto mb-8 opacity-80" />
+
+        <h1 className="text-xl font-semibold tracking-tight text-card-foreground mb-3">
+          Connect your wallet
+        </h1>
+        <p className="text-[13px] font-mono text-muted-foreground leading-relaxed mb-8">
+          Sign messages using the built-in modal and React SDK hooks.
+        </p>
+
+        <button
+          onClick={onConnect}
+          data-testid="auth-connect-button"
+          className="btn-primary w-full px-4 py-2.5">
+          Connect with Para
+        </button>
+      </div>
     </div>
   );
 }

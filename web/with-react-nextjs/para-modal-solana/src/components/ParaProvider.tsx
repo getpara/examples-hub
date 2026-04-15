@@ -1,7 +1,7 @@
 "use client";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Environment, ParaProvider as ParaSDKProvider } from "@getpara/react-sdk";
+import ParaWeb, { Environment, ParaProvider as ParaSDKProvider } from "@getpara/react-sdk";
 import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
 import { clusterApiUrl } from "@solana/web3.js";
 
@@ -14,6 +14,7 @@ if (!API_KEY) {
 }
 
 const queryClient = new QueryClient();
+const para = new ParaWeb(ENVIRONMENT, API_KEY);
 
 // Solana network configuration
 const solanaNetwork = WalletAdapterNetwork.Devnet;
@@ -23,10 +24,7 @@ export function ParaProvider({ children }: { children: React.ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       <ParaSDKProvider
-        paraClientConfig={{
-          apiKey: API_KEY,
-          env: ENVIRONMENT,
-        }}
+        paraClientConfig={para}
         externalWalletConfig={{
           wallets: ["GLOW", "PHANTOM", "BACKPACK", "SOLFLARE"],
           solanaConnector: {
@@ -46,15 +44,15 @@ export function ParaProvider({ children }: { children: React.ReactNode }) {
         paraModalConfig={{
           disableEmailLogin: false,
           disablePhoneLogin: false,
-          authLayout: ["AUTH:FULL", "EXTERNAL:FULL"],
-          oAuthMethods: ["APPLE", "DISCORD", "FACEBOOK", "FARCASTER", "GOOGLE", "TWITTER"],
+          authLayout: ["EXTERNAL:FULL"],
+          oAuthMethods: [],
           onRampTestMode: true,
           theme: {
-            foregroundColor: "#222222",
+            foregroundColor: "#2E2926",
             backgroundColor: "#FFFFFF",
-            accentColor: "#888888",
+            accentColor: "#E8642B",
             mode: "light",
-            borderRadius: "none",
+            borderRadius: "md",
             font: "Inter",
           },
           logo: "/para.svg",

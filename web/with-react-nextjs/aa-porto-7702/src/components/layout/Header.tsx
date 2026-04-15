@@ -21,6 +21,7 @@ export function Header() {
         <button
           onClick={handleConnectClick}
           data-testid={isConnected ? "account-address-display" : "header-connect-button"}
+          data-address={isConnected ? wallet?.address : undefined}
           className="px-4 py-2 text-white rounded-none transition-colors text-sm font-medium cursor-pointer bg-gray-900 hover:bg-gray-950">
           {buttonText}
         </button>

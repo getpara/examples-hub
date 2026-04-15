@@ -1,28 +1,37 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import { useAccount } from "@getpara/react-sdk";
 import { useParaCosmjsAminoSigner } from "@getpara/react-sdk/cosmos";
-import { makeSignDoc } from "@cosmjs/amino";
+import { useOfflineSigners } from "graz";
+import { makeSignDoc, type OfflineAminoSigner } from "@cosmjs/amino";
 
 const HELLO_WORLD_MESSAGE = "Hello World!";
 const CHAIN_ID = "cosmoshub-4";
 
 export function useSignHelloWorld() {
-  const { aminoSigner, isLoading } = useParaCosmjsAminoSigner();
+  const { connectionType } = useAccount();
+  const { aminoSigner: embeddedSigner } = useParaCosmjsAminoSigner();
+  const { data: grazSigners } = useOfflineSigners();
+
   const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [signature, setSignature] = useState<string | undefined>();
 
-  const address = aminoSigner?.address;
+  const isExternal = connectionType === "external";
+  const externalSigner = grazSigners?.offlineSignerAmino as OfflineAminoSigner | undefined;
+  const signer: OfflineAminoSigner | null | undefined = isExternal ? externalSigner : embeddedSigner;
 
   const sign = useCallback(async () => {
-    if (!aminoSigner || !address) return;
-
+    if (!signer) return;
     setIsPending(true);
     setError(null);
 
     try {
-      // ADR-036: Arbitrary message signing using Amino
+      const accounts = await signer.getAccounts();
+      if (!accounts.length) throw new Error("No Cosmos accounts found");
+      const address = accounts[0].address;
+
       const signDoc = makeSignDoc(
         [{ type: "sign/MsgSignData", value: { signer: address, data: btoa(HELLO_WORLD_MESSAGE) } }],
         { amount: [], gas: "0" },
@@ -32,20 +41,19 @@ export function useSignHelloWorld() {
         0
       );
 
-      const { signature: sig } = await aminoSigner.signAmino(address, signDoc);
+      const { signature: sig } = await signer.signAmino(address, signDoc);
       setSignature(sig.signature);
     } catch (err) {
       setError(err instanceof Error ? err : new Error("Failed to sign message"));
     } finally {
       setIsPending(false);
     }
-  }, [aminoSigner, address]);
+  }, [signer]);
 
   return {
     sign,
     message: HELLO_WORLD_MESSAGE,
-    address,
-    isPending: isLoading || isPending,
+    isPending,
     error,
     signature,
   };

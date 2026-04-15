@@ -3,13 +3,12 @@ import { Inter } from "next/font/google";
 import "@/styles/globals.css";
 import "@getpara/react-sdk/styles.css";
 import { ParaProvider } from "@/components/ParaProvider";
-import { Header } from "@/components/layout/Header";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Para Modal + Cosmos Example",
-  description: "Para Modal integration with Cosmos wallet connectors",
+  description: "Para Modal integration with Cosmos wallet support",
 };
 
 export default function RootLayout({
@@ -19,11 +18,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>
-        <ParaProvider>
-          <Header />
-          {children}
-        </ParaProvider>
+      <body className={`${inter.className} antialiased`}>
+        <ParaProvider>{children}</ParaProvider>
       </body>
     </html>
   );

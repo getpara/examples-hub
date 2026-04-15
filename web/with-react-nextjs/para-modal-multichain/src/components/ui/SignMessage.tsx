@@ -1,4 +1,5 @@
 interface SignMessageProps {
+  title?: string;
   message: string;
   onSign: () => void;
   isPending: boolean;
@@ -6,47 +7,55 @@ interface SignMessageProps {
   signature?: string;
 }
 
-export function SignMessage({ message, onSign, isPending, error, signature }: SignMessageProps) {
-  const showStatus = isPending || !!error || !!signature;
-
-  const statusConfig = isPending
-    ? { bg: "bg-gray-100 border-gray-300", text: "text-gray-700", message: `Signing '${message}'...` }
-    : error
-    ? { bg: "bg-gray-200 border-gray-400", text: "text-gray-900", message: error.message || `Failed to sign '${message}'. Please try again.` }
-    : { bg: "bg-gray-50 border-gray-200", text: "text-gray-800", message: `'${message}' signed successfully!` };
-
+export function SignMessage({ title = "Sign Message", message, onSign, isPending, error, signature }: SignMessageProps) {
   return (
-    <>
-      {showStatus && (
-        <div className={`mb-4 p-4 rounded-none border ${statusConfig.bg}`}>
-          <p className={`text-sm ${statusConfig.text}`}>{statusConfig.message}</p>
-        </div>
-      )}
-
-      <div className="bg-white rounded-none border border-gray-200 p-6 mb-4">
-        <h3 className="text-lg font-medium mb-4">Sign Message</h3>
-        <div className="space-y-4">
-          <div className="p-4 bg-gray-50 border border-gray-200 rounded-none">
-            <p className="text-sm text-gray-600 mb-1">Message to sign:</p>
-            <p className="text-lg font-mono font-semibold">{message}</p>
-          </div>
-          <button
-            onClick={onSign}
-            disabled={isPending}
-            className="w-full px-4 py-2 bg-gray-900 text-white rounded-none hover:bg-gray-950 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed font-medium">
-            {isPending ? "Signing..." : `Sign ${message}`}
-          </button>
-        </div>
+    <div
+      className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden animate-fade-in-up-delayed">
+      <div className="px-6 py-4 border-b border-border/60">
+        <h2 className="text-sm font-semibold">{title}</h2>
       </div>
 
-      {signature && (
-        <div className="bg-white rounded-none border border-gray-200 p-6">
-          <h3 className="text-lg font-medium mb-2">Signature</h3>
-          <div className="bg-gray-50 p-4 rounded-none border border-gray-200 break-all" data-testid="sign-signature-display">
-            <code className="text-sm text-gray-800 font-mono">{signature}</code>
+      <div className="p-6 space-y-4">
+        {error && (
+          <div className="rounded-xl bg-destructive/8 border border-destructive/15 px-4 py-3 animate-fade-in">
+            <p className="text-sm text-destructive">
+              {error.message || "Signing failed. Please try again."}
+            </p>
           </div>
+        )}
+
+        {signature && !error && (
+          <div className="rounded-xl bg-success/8 border border-success/15 px-4 py-3 animate-fade-in">
+            <p className="text-sm text-success-foreground">Message signed successfully!</p>
+          </div>
+        )}
+
+        <div className="rounded-xl bg-muted/60 px-4 py-3">
+          <p className="text-xs text-muted-foreground mb-1">Message</p>
+          <p className="text-sm font-mono font-medium">{message}</p>
         </div>
-      )}
-    </>
+
+        <button
+          onClick={onSign}
+          data-testid="sign-submit-button"
+          disabled={isPending}
+          className="btn-primary w-full px-4 py-2.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none">
+          {isPending ? "Signing..." : `Sign ${message}`}
+        </button>
+
+        {signature && (
+          <div className="animate-fade-in">
+            <p className="text-xs text-muted-foreground mb-2">Signature</p>
+            <div
+              className="rounded-xl bg-muted/60 px-4 py-3 break-all"
+              data-testid="sign-signature-display">
+              <code className="text-xs font-mono text-muted-foreground leading-relaxed">
+                {signature}
+              </code>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }

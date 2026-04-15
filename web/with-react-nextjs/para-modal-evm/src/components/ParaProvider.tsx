@@ -1,7 +1,7 @@
 "use client";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Environment, ParaProvider as ParaSDKProvider } from "@getpara/react-sdk";
+import ParaWeb, { Environment, ParaProvider as ParaSDKProvider } from "@getpara/react-sdk";
 import { sepolia } from "wagmi/chains";
 
 // Para API configuration - set these in your .env file
@@ -13,15 +13,13 @@ if (!API_KEY) {
 }
 
 const queryClient = new QueryClient();
+const para = new ParaWeb(ENVIRONMENT, API_KEY);
 
 export function ParaProvider({ children }: { children: React.ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       <ParaSDKProvider
-        paraClientConfig={{
-          apiKey: API_KEY,
-          env: ENVIRONMENT,
-        }}
+        paraClientConfig={para}
         externalWalletConfig={{
           wallets: ["METAMASK"],
           includeWalletVerification: true,
@@ -42,11 +40,11 @@ export function ParaProvider({ children }: { children: React.ReactNode }) {
           oAuthMethods: [],
           onRampTestMode: true,
           theme: {
-            foregroundColor: "#222222",
+            foregroundColor: "#2E2926",
             backgroundColor: "#FFFFFF",
-            accentColor: "#888888",
+            accentColor: "#E8642B",
             mode: "light",
-            borderRadius: "none",
+            borderRadius: "md",
             font: "Inter",
           },
           logo: "/para.svg",

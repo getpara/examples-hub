@@ -1,35 +1,37 @@
-"use client";
+interface HeaderProps {
+  isConnected: boolean;
+  address: string;
+  onConnect: () => void;
+}
 
-import { useAccount, useModal } from "@getpara/react-sdk";
-import { useParaCosmjsAminoSigner } from "@getpara/react-sdk/cosmos";
-
-export function Header() {
-  const { openModal } = useModal();
-  const { isConnected } = useAccount();
-  const { aminoSigner } = useParaCosmjsAminoSigner();
-
-  const address = aminoSigner?.address;
-
+export function Header({ isConnected, address, onConnect }: HeaderProps) {
   return (
-    <header className="border-b border-gray-200">
-      <div className="container mx-auto px-4 py-4 flex justify-end">
-        <div>
-          {isConnected ? (
-            <button
-              onClick={() => openModal()}
-              data-testid="account-address-display"
-              className="px-4 py-2 bg-gray-700 text-white rounded-none hover:bg-gray-800 transition-colors text-sm font-medium cursor-pointer">
-              {address ? `${address.slice(0, 10)}...${address.slice(-4)}` : "Loading..."}
-            </button>
-          ) : (
-            <button
-              onClick={() => openModal()}
-              data-testid="header-connect-button"
-              className="px-4 py-2 bg-gray-900 text-white rounded-none hover:bg-gray-950 transition-colors text-sm font-medium cursor-pointer">
-              Connect Wallet
-            </button>
-          )}
+    <header className="sticky top-0 z-10 bg-card/80 backdrop-blur-xl border-b border-border/50">
+      <div className="mx-auto max-w-5xl px-6 py-3 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <img src="/para.svg" alt="Para" className="h-5 w-auto" />
+          <span className="text-xs font-medium text-muted-foreground">Cosmos Example</span>
         </div>
+
+        {isConnected ? (
+          <button
+            onClick={onConnect}
+            data-testid="account-address-display"
+            data-address={address}
+            className="flex items-center gap-2.5 px-4 py-1.5 text-sm rounded-lg border border-border bg-card hover:bg-muted transition-all cursor-pointer">
+            <span className="h-2 w-2 rounded-full bg-success" />
+            <span className="font-mono text-xs">
+              {address.slice(0, 6)}...{address.slice(-4)}
+            </span>
+          </button>
+        ) : (
+          <button
+            onClick={onConnect}
+            data-testid="header-connect-button"
+            className="btn-primary px-5 py-1.5 text-sm">
+            Connect Wallet
+          </button>
+        )}
       </div>
     </header>
   );

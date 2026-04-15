@@ -11,7 +11,7 @@ A minimal Next.js example demonstrating Para Modal integration with Solana walle
 - Opening the Para modal via the `useModal` hook
 - Checking authentication state with `useAccount`
 - Retrieving wallet address with `useWallet`
-- Signing messages with `useSignMessage`
+- Signing messages with `useParaSolanaSigner` and Solana wallet adapter
 
 ## Setup
 
@@ -45,8 +45,6 @@ src/
 │       └── SignMessage.tsx     # Sign message UI
 ├── hooks/
 │   └── useSignHelloWorld.ts    # Custom hook for signing
-└── lib/
-    └── e2e-helpers.ts          # E2E testing utilities
 ```
 
 ## Solana Configuration
