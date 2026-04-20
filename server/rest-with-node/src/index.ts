@@ -183,12 +183,22 @@ app.post(
   async (req: Request<{ walletId: string }>, res: Response) => {
     const { transaction } = req.body;
 
-    if (!transaction || typeof transaction !== 'object' || Array.isArray(transaction)) {
-      return res.status(400).json({ error: 'transaction object is required' });
+    // EVM: transaction is an object with { to, chainId, ... }.
+    // Solana: transaction is a base64-encoded string. Both legacy `Transaction` and
+    // v0 `VersionedTransaction` (with Address Lookup Tables) are accepted — the REST
+    // API auto-detects the format.
+    const isEvm = transaction && typeof transaction === 'object' && !Array.isArray(transaction);
+    const isSolana = typeof transaction === 'string' && transaction.length > 0;
+
+    if (!isEvm && !isSolana) {
+      return res.status(400).json({
+        error:
+          'transaction must be an EVM object ({ to, chainId, ... }) or a base64-encoded Solana transaction string',
+      });
     }
 
-    if (!transaction.to || !transaction.chainId) {
-      return res.status(400).json({ error: 'transaction.to and transaction.chainId are required' });
+    if (isEvm && (!transaction.to || !transaction.chainId)) {
+      return res.status(400).json({ error: 'EVM transaction.to and transaction.chainId are required' });
     }
 
     try {
