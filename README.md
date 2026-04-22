@@ -27,6 +27,7 @@ examples-hub/
 │   │   ├── signer-solana-web3    # Solana Web3.js signing
 │   │   ├── signer-solana-signers-v2  # Solana Signers v2
 │   │   ├── signer-solana-anchor  # Solana Anchor framework
+│   │   ├── signer-canton-network # Canton Network external party onboarding (Solana)
 │   │   ├── connector-wagmi       # Wagmi connector
 │   │   ├── connector-rainbowkit  # RainbowKit connector
 │   │   ├── connector-reown-appkit # Reown AppKit connector
