@@ -1,6 +1,8 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
+import { openAuthSessionAsync } from 'expo-web-browser';
+import type { StateSnapshot } from '@getpara/react-native-wallet';
 import { para } from '@/lib/para';
-import { openAuthUrl } from '@/lib/auth';
+import { APP_SCHEME } from '@/lib/constants';
 import type { AuthStatus } from '@/types';
 
 interface UseOneClickLoginResult {
@@ -15,122 +17,102 @@ interface UseOneClickLoginResult {
 export function useOneClickLogin(onSuccess: () => void): UseOneClickLoginResult {
   const [status, setStatus] = useState<AuthStatus>('idle');
   const [error, setError] = useState<string | null>(null);
+  const isAuthActiveRef = useRef(false);
 
   const reset = useCallback(() => {
     setStatus('idle');
     setError(null);
   }, []);
 
-  const loginWithEmail = useCallback(
-    async (email: string): Promise<boolean> => {
+  // Subscribe to Para state phase changes and open portal URLs the SDK emits
+  // during email/phone authentication (verification, passkey, password, PIN).
+  // Only acts while an auth call is in flight.
+  useEffect(() => {
+    const lastUrlRef = { current: null as string | null };
+
+    const unsubscribe = para.onStatePhaseChange((snapshot: StateSnapshot) => {
+      if (!isAuthActiveRef.current) return;
+
+      const { authStateInfo } = snapshot;
+      const url =
+        authStateInfo.verificationUrl ||
+        authStateInfo.passkeyKnownDeviceUrl ||
+        authStateInfo.passkeyUrl ||
+        authStateInfo.passwordUrl ||
+        authStateInfo.pinUrl;
+
+      if (url && url !== lastUrlRef.current) {
+        lastUrlRef.current = url;
+        const authUrl = new URL(url);
+        authUrl.searchParams.set('nativeCallbackUrl', APP_SCHEME);
+        openAuthSessionAsync(authUrl.toString(), APP_SCHEME, { preferEphemeralSession: false });
+      }
+    });
+
+    return unsubscribe;
+  }, []);
+
+  const runAuth = useCallback(
+    async (fn: () => Promise<unknown>, errorLabel: string): Promise<boolean> => {
       try {
         reset();
         setStatus('loading');
+        isAuthActiveRef.current = true;
 
-        const authState = await para.signUpOrLogIn({ auth: { email } });
-
-        if (authState?.stage === 'verify' && 'loginUrl' in authState && authState.loginUrl) {
-          const result = await openAuthUrl(authState.loginUrl);
-
-          if (!result.success) {
-            throw new Error('Authentication was cancelled');
-          }
-
-          if (authState.nextStage === 'login') {
-            await para.waitForLogin({});
-          } else {
-            await para.waitForWalletCreation({});
-          }
-
-          setStatus('success');
-          onSuccess();
-          return true;
-        }
-
-        throw new Error('One-click login not available for this account');
-      } catch (err) {
-        const message = err instanceof Error ? err.message : 'Login failed';
-        setError(message);
-        setStatus('error');
-        return false;
-      }
-    },
-    [reset, onSuccess]
-  );
-
-  const loginWithPhone = useCallback(
-    async (phone: string): Promise<boolean> => {
-      try {
-        reset();
-        setStatus('loading');
-
-        const authState = await para.signUpOrLogIn({
-          auth: { phone: phone as `+${number}` },
-        });
-
-        if (authState?.stage === 'verify' && 'loginUrl' in authState && authState.loginUrl) {
-          const result = await openAuthUrl(authState.loginUrl);
-
-          if (!result.success) {
-            throw new Error('Authentication was cancelled');
-          }
-
-          if (authState.nextStage === 'login') {
-            await para.waitForLogin({});
-          } else {
-            await para.waitForWalletCreation({});
-          }
-
-          setStatus('success');
-          onSuccess();
-          return true;
-        }
-
-        throw new Error('One-click login not available for this account');
-      } catch (err) {
-        const message = err instanceof Error ? err.message : 'Login failed';
-        setError(message);
-        setStatus('error');
-        return false;
-      }
-    },
-    [reset, onSuccess]
-  );
-
-  const loginWithGoogle = useCallback(async (): Promise<boolean> => {
-    try {
-      reset();
-      setStatus('loading');
-
-      const oauthUrl = await para.getOAuthUrl({ method: 'GOOGLE' });
-      const result = await openAuthUrl(oauthUrl);
-
-      if (!result.success) {
-        throw new Error('Authentication was cancelled');
-      }
-
-      const authState = await para.verifyOAuth({ method: 'GOOGLE' });
-
-      if (authState.stage === 'done') {
-        if (authState.isNewUser) {
-          await para.waitForWalletCreation({});
-        } else {
-          await para.waitForLogin({});
-        }
+        await fn();
 
         setStatus('success');
         onSuccess();
         return true;
+      } catch (err) {
+        const message = err instanceof Error ? err.message : errorLabel;
+        setError(message);
+        setStatus('error');
+        return false;
+      } finally {
+        isAuthActiveRef.current = false;
       }
+    },
+    [reset, onSuccess]
+  );
 
-      throw new Error('Unexpected OAuth state');
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Google login failed';
-      setError(message);
-      setStatus('error');
-      return false;
-    }
-  }, [reset, onSuccess]);
+  const loginWithEmail = useCallback(
+    (email: string) =>
+      runAuth(() => para.authenticateWithEmailOrPhone({ auth: { email } }), 'Login failed'),
+    [runAuth]
+  );
+
+  const loginWithPhone = useCallback(
+    (phone: string) =>
+      runAuth(
+        () => para.authenticateWithEmailOrPhone({ auth: { phone: phone as `+${number}` } }),
+        'Login failed'
+      ),
+    [runAuth]
+  );
+
+  const loginWithGoogle = useCallback(
+    () =>
+      runAuth(
+        () =>
+          para.authenticateWithOAuth({
+            method: 'GOOGLE',
+            appScheme: APP_SCHEME,
+            redirectCallbacks: {
+              onOAuthUrl: async (url) => {
+                const browserResult = await openAuthSessionAsync(url, APP_SCHEME, {
+                  preferEphemeralSession: false,
+                });
+                if (browserResult.type !== 'success') {
+                  throw new Error(`Browser returned "${browserResult.type}"`);
+                }
+              },
+            },
+          }),
+        'Google login failed'
+      ),
+    [runAuth]
+  );
 
   return {
     status,

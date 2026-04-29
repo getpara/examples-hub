@@ -1,6 +1,12 @@
 import "server-only";
 
-import { WalletSDKImpl, localNetAuthDefault, LedgerController } from "@canton-network/wallet-sdk";
+import {
+  WalletSDKImpl,
+  localNetAuthDefault,
+  LedgerController,
+  TokenStandardController,
+  ValidatorController,
+} from "@canton-network/wallet-sdk";
 import { pino } from "pino";
 
 const logger = pino({ name: "signer-canton-network", level: "info" });
@@ -11,6 +17,13 @@ function envOrThrow(key: string): string {
   return value;
 }
 
+// SINGLE-USER DEMO. The cached SDK is fine for a one-user starter, but
+// `sdk.setPartyId(partyId)` mutates the same `userLedger` and `tokenStandard`
+// controllers in place. Two concurrent requests that call setPartyId for
+// different parties will race — one request can submit using another
+// request's bound party. For multi-user serving, build per-request
+// controllers from the factories below (or wrap setPartyId+prepare+execute
+// in a per-process mutex).
 let sdkPromise: Promise<WalletSDKImpl> | null = null;
 
 export function getSdk(): Promise<WalletSDKImpl> {
@@ -43,11 +56,28 @@ export function getSdk(): Promise<WalletSDKImpl> {
   const ledgerFactory = (uid: string, authTokenProvider: any, isAdmin: boolean) =>
     new LedgerController(uid, new URL(ledgerApiUrl), undefined, isAdmin, authTokenProvider);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const tokenStandardFactory = (uid: string, authTokenProvider: any, isAdmin: boolean) =>
+    new TokenStandardController(
+      uid,
+      new URL(ledgerApiUrl),
+      new URL(validatorApiUrl),
+      undefined,
+      authTokenProvider,
+      isAdmin,
+    );
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const validatorFactory = (uid: string, authTokenProvider: any) =>
+    new ValidatorController(uid, new URL(validatorApiUrl), authTokenProvider);
+
   sdkPromise = (async () => {
     const sdk = new WalletSDKImpl().configure({
       logger,
       authFactory,
       ledgerFactory,
+      tokenStandardFactory,
+      validatorFactory,
     });
 
     await sdk.connect();

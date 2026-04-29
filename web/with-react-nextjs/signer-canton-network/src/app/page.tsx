@@ -6,11 +6,24 @@ import { Header } from "@/components/layout/Header";
 import { ConnectCard } from "@/components/ui/ConnectCard";
 import { WalletInfo } from "@/components/ui/WalletInfo";
 import { CantonOnboardCard } from "@/components/ui/CantonOnboardCard";
+import { CantonPreapprovalCard } from "@/components/ui/CantonPreapprovalCard";
 
 export default function Home() {
   const { openModal } = useModal();
   const { isConnected } = useAccount();
-  const { onboard, isPending, error, multiHash, partyId, address = "" } = useCantonOnboarding();
+  const {
+    onboard,
+    isPending,
+    error,
+    multiHash,
+    partyId,
+    address = "",
+    installPreapproval,
+    isInstallingPreapproval,
+    preapprovalError,
+    preapprovalHash,
+    preapprovalUpdateId,
+  } = useCantonOnboarding();
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -34,6 +47,15 @@ export default function Home() {
               multiHash={multiHash}
               partyId={partyId}
             />
+            {partyId && (
+              <CantonPreapprovalCard
+                onInstall={installPreapproval}
+                isPending={isInstallingPreapproval}
+                error={preapprovalError}
+                preparedHash={preapprovalHash}
+                updateId={preapprovalUpdateId}
+              />
+            )}
           </div>
         )}
       </main>

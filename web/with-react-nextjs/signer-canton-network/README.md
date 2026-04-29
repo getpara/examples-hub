@@ -9,7 +9,8 @@ This is the React/web port of a server-side Canton + Para integration: connect t
 - Setting up `ParaProvider` with Solana as the selected embedded-wallet type (`src/components/ParaProvider.tsx`).
 - Opening the Para modal via `useModal` and reading the embedded Solana wallet via `useWallet` (`src/app/page.tsx`).
 - Signing a Canton-supplied `multiHash` with Para via `useSignMessage().signMessageAsync({ walletId, messageBase64 })` (`src/hooks/useCantonOnboarding.ts`).
-- Keeping the Canton `WalletSDKImpl` plus validator credentials on the server in Next.js API routes (`src/app/api/canton/generate/route.ts`, `src/app/api/canton/allocate/route.ts`, `src/lib/canton.ts`) so they never reach the browser.
+- Using Canton's generic interactive-submission API (`prepareSubmission` / `executeSubmission`) for post-onboarding ledger writes — demonstrated by installing a `TransferPreapproval` so anyone can send Amulet to the new party (`src/app/api/canton/preapproval/`). The Para signing call is the same as onboarding; the rest of the flow is new.
+- Keeping the Canton `WalletSDKImpl` plus validator credentials on the server in Next.js API routes (`src/app/api/canton/generate/route.ts`, `src/app/api/canton/allocate/route.ts`, `src/app/api/canton/preapproval/`, `src/lib/canton.ts`) so they never reach the browser.
 
 ## How the onboarding flow works
 
@@ -18,6 +19,16 @@ This is the React/web port of a server-side Canton + Para integration: connect t
 3. **Sign.** The client signs the `multiHash` bytes with the Para Solana signer. Result: a base64 Ed25519 signature.
 4. **Allocate.** The client POSTs `{ signatureBase64, generatedParty }` to `/api/canton/allocate`. The server calls `sdk.userLedger.allocateExternalParty(signatureBase64, generatedParty)` and returns the resulting `partyId`.
 5. **Done.** The UI displays the `partyId` — your Para wallet is now an external party on Canton.
+
+## Post-onboarding: the same pattern, every time
+
+After allocation, every ledger write from the external party follows a `prepare → Para-sign → execute` loop with the exact same Para call. The example demonstrates this with a one-click **Install TransferPreapproval** action:
+
+1. **Prepare.** Client POSTs `{ partyId }` to `/api/canton/preapproval/prepare`. The server looks up the validator's provider party + DSO, builds a `TransferPreapprovalProposal` command via `sdk.userLedger.createTransferPreapprovalCommand(...)`, and returns `{ preparedTransactionHash, prepared, commandId }` from `prepareSubmission`.
+2. **Sign.** Client signs `preparedTransactionHash` with Para — same `signMessageAsync({ walletId, messageBase64 })` call as onboarding.
+3. **Execute.** Client POSTs the prepared transaction + signature + Solana public key to `/api/canton/preapproval/execute`. The server calls `sdk.userLedger.executeSubmission(...)` and returns the resulting `updateId`.
+
+This is the template for any future ledger interaction (token transfers, contract exercises, etc.): swap the prepared command, keep the signing path identical.
 
 ## Setup
 
@@ -36,7 +47,7 @@ yarn install
 yarn dev
 ```
 
-Open http://localhost:3001, click **Connect with Para**, finish auth, then click **Onboard as Canton external party**.
+Open http://localhost:3001, click **Connect with Para**, finish auth, then click **Onboard as Canton external party**. Once a `partyId` appears, click **Install TransferPreapproval** to exercise the same Para-signing path against an everyday ledger write.
 
 ## Project structure
 
@@ -47,16 +58,20 @@ src/
 │   ├── page.tsx                         # Connect → Onboard flow
 │   └── api/canton/
 │       ├── generate/route.ts            # POST → Canton generateExternalParty
-│       └── allocate/route.ts            # POST → Canton allocateExternalParty
+│       ├── allocate/route.ts            # POST → Canton allocateExternalParty
+│       └── preapproval/
+│           ├── prepare/route.ts         # POST → prepareSubmission (TransferPreapprovalProposal)
+│           └── execute/route.ts         # POST → executeSubmission (Para-signed)
 ├── components/
 │   ├── ParaProvider.tsx                 # Para SDK + Solana external wallets
 │   ├── layout/Header.tsx
 │   └── ui/
 │       ├── ConnectCard.tsx
 │       ├── WalletInfo.tsx
-│       └── CantonOnboardCard.tsx        # Onboarding UI
+│       ├── CantonOnboardCard.tsx        # Onboarding UI
+│       └── CantonPreapprovalCard.tsx    # Post-onboarding signing demo
 ├── hooks/
-│   └── useCantonOnboarding.ts           # generate → sign → allocate
+│   └── useCantonOnboarding.ts           # generate → sign → allocate + prepare → sign → execute
 └── lib/
     └── canton.ts                        # Server-only Canton SDK setup
 ```

@@ -1,0 +1,94 @@
+appId: com.usecapsule.example.swift
+---
+- clearState
+- launchApp
+- waitForAnimationToEnd
+
+# Wait for auth screen
+- assertVisible: "Sign Up or Log In"
+
+# Generate random test email
+- evalScript: ${output.email = 'maestro-aa-' + Date.now() + '@test.getpara.com'}
+
+# Enter email
+- tapOn: "Enter email or phone"
+- inputText: "${output.email}"
+
+# Tap continue to trigger ASWebAuth
+- tapOn: "Continue"
+
+# Handle ASWebAuth consent dialog — optional because the OS-level consent
+# persists across app reinstalls, so subsequent runs on the same simulator
+# skip this dialog and go straight to the portal.
+- runFlow:
+    when:
+      visible: "Cancel"
+    commands:
+      - tapOn: "Continue"
+
+# Wait for OTP page
+- extendedWaitUntil:
+    visible: "Verify"
+    timeout: 15000
+
+# Tap on OTP input field for keyboard focus
+- tapOn:
+    point: "20%,58%"
+- waitForAnimationToEnd
+
+# Enter OTP digits (test emails accept any 6-digit code)
+- inputText: "1"
+- waitForAnimationToEnd
+- inputText: "2"
+- waitForAnimationToEnd
+- inputText: "3"
+- waitForAnimationToEnd
+- inputText: "4"
+- waitForAnimationToEnd
+- inputText: "5"
+- waitForAnimationToEnd
+- inputText: "6"
+
+# Wait for wallets screen
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible: "Wallets"
+    timeout: 30000
+- assertVisible: "Wallets"
+
+# Tap on EVM wallet card
+- tapOn: "EVM"
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible: "EVM Wallet"
+    timeout: 10000
+
+# Scroll down to reveal the Account Abstraction section
+- scrollUntilVisible:
+    element:
+      text: "Open Smart Account"
+    direction: DOWN
+    timeout: 10000
+
+# Open the Smart Account screen
+- tapOn: "Open Smart Account"
+- waitForAnimationToEnd
+
+# Wait for Smart Account screen to render with both addresses
+- extendedWaitUntil:
+    visible: "Smart Account"
+    timeout: 10000
+- assertVisible: "EOA (Para Wallet)"
+- extendedWaitUntil:
+    visible: "Smart Account (Alchemy Modular Account)"
+    timeout: 30000
+
+# Trigger the gasless transaction
+- tapOn: "Send Gasless Transaction"
+
+# UserOp inclusion on Sepolia can take 75s+; the SDK has a 120s timeout
+- extendedWaitUntil:
+    visible: "Transaction sent successfully!"
+    timeout: 120000
+- assertVisible: "Transaction sent successfully!"
+- assertVisible: "View on Etherscan"

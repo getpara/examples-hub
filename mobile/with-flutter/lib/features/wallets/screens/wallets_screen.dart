@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:para/para.dart';
 import '../../../client/para.dart';
+import '../../smart_account/smart_account_screen.dart';
 import '../widgets/wallet_card.dart';
 import 'details/evm_wallet_view.dart';
 import 'details/solana_wallet_view.dart';
@@ -385,6 +386,12 @@ class _WalletsScreenState extends State<WalletsScreen> {
     );
   }
 
+  void _navigateToSmartAccount() {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const SmartAccountScreen()),
+    );
+  }
+
   void _navigateToWalletDetail(Wallet wallet) {
     Navigator.of(context).push(
       MaterialPageRoute(
@@ -432,6 +439,11 @@ class _WalletsScreenState extends State<WalletsScreen> {
           ),
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.flash_on_outlined, color: Colors.black),
+            onPressed: _navigateToSmartAccount,
+            tooltip: 'Smart Account',
+          ),
           IconButton(
             icon: _isFetchingJwt
                 ? const SizedBox(

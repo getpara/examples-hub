@@ -1,48 +1,58 @@
-'use client';
+"use client";
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ParaProvider as ParaSDKProvider, Environment } from '@getpara/react-sdk';
-import { fetchPregenWalletsOverride } from '@/lib/para/fetchPregenWalletsOverride';
+import { useEffect, useState } from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import ParaWeb, { Environment, ParaProvider as ParaSDKProvider } from "@getpara/react-sdk";
+import { fetchPregenWalletsOverride } from "@/lib/para/fetchPregenWalletsOverride";
+import "@getpara/react-sdk/styles.css";
 
-const API_KEY = process.env.NEXT_PUBLIC_PARA_API_KEY ?? '';
+const API_KEY = process.env.NEXT_PUBLIC_PARA_API_KEY ?? "";
+const ENVIRONMENT = (process.env.NEXT_PUBLIC_PARA_ENVIRONMENT as Environment) || Environment.BETA;
 
 if (!API_KEY) {
-  throw new Error('API key is not defined. Please set NEXT_PUBLIC_PARA_API_KEY in your environment variables.');
+  throw new Error("API key is not defined. Please set NEXT_PUBLIC_PARA_API_KEY in your environment variables.");
 }
 
 const queryClient = new QueryClient();
 
 export function ParaProvider({ children }: { children: React.ReactNode }) {
+  const [para, setPara] = useState<ParaWeb | null>(null);
+
+  useEffect(() => {
+    setPara(
+      new ParaWeb(ENVIRONMENT, API_KEY, {
+        fetchPregenWalletsOverride,
+      }),
+    );
+  }, []);
+
+  if (!para) {
+    return null;
+  }
+
   return (
     <QueryClientProvider client={queryClient}>
       <ParaSDKProvider
-        paraClientConfig={{
-          env: Environment.BETA,
-          apiKey: API_KEY,
-          opts: {
-            fetchPregenWalletsOverride: fetchPregenWalletsOverride,
-          },
-        }}
-        config={{ appName: 'Para Pregen Claim' }}
+        paraClientConfig={para}
+        config={{ appName: "Para Pregen Claim" }}
         paraModalConfig={{
           disableEmailLogin: false,
           disablePhoneLogin: false,
-          authLayout: ['AUTH:FULL', 'EXTERNAL:FULL'],
-          oAuthMethods: ['APPLE', 'DISCORD', 'FACEBOOK', 'FARCASTER', 'GOOGLE', 'TWITTER'],
+          authLayout: ["AUTH:FULL", "EXTERNAL:FULL"],
+          oAuthMethods: ["APPLE", "DISCORD", "FACEBOOK", "FARCASTER", "GOOGLE", "TWITTER"],
           onRampTestMode: true,
           theme: {
-            foregroundColor: '#222222',
-            backgroundColor: '#FFFFFF',
-            accentColor: '#888888',
-            mode: 'light',
-            borderRadius: 'none',
-            font: 'Inter',
+            foregroundColor: "#2E2926",
+            backgroundColor: "#FFFFFF",
+            accentColor: "#E8642B",
+            mode: "light",
+            borderRadius: "md",
+            font: "Inter",
           },
-          logo: '/para.svg',
+          logo: "/para.svg",
           recoverySecretStepEnabled: true,
           twoFactorAuthEnabled: false,
-        }}
-      >
+        }}>
         {children}
       </ParaSDKProvider>
     </QueryClientProvider>
