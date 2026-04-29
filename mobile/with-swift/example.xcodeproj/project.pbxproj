@@ -24,6 +24,8 @@
 		8FC8B8FD2D8B7AE10046C3DC /* LaunchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FC8B8FB2D8B7AE10046C3DC /* LaunchView.swift */; };
 		8FFEAD1A2DC5675100103C14 /* PhoneFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FFEAD182DC5675100103C14 /* PhoneFormatter.swift */; };
 		E8315DD82D5548F100FFF8C8 /* WalletsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8315DD72D5548F100FFF8C8 /* WalletsView.swift */; };
+		AA62500001000000AABBCCDD /* SmartAccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA62500002000000AABBCCDD /* SmartAccountView.swift */; };
+		AA62500003000000AABBCCDD /* AlchemyConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA62500004000000AABBCCDD /* AlchemyConfig.swift */; };
 		E8315DDA2D55717300FFF8C8 /* SolanaWalletView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8315DD92D55717300FFF8C8 /* SolanaWalletView.swift */; };
 		E8315DDC2D55717F00FFF8C8 /* CosmosWalletView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8315DDB2D55717F00FFF8C8 /* CosmosWalletView.swift */; };
 		E86A47412D0CA63700546CC2 /* AppRootManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E86A47402D0CA62F00546CC2 /* AppRootManager.swift */; };
@@ -64,6 +66,8 @@
 		8FE93AA72D80F58C00CE018E /* exampleUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = exampleUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		8FFEAD182DC5675100103C14 /* PhoneFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneFormatter.swift; sourceTree = "<group>"; };
 		E8315DD72D5548F100FFF8C8 /* WalletsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalletsView.swift; sourceTree = "<group>"; };
+		AA62500002000000AABBCCDD /* SmartAccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartAccountView.swift; sourceTree = "<group>"; };
+		AA62500004000000AABBCCDD /* AlchemyConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlchemyConfig.swift; sourceTree = "<group>"; };
 		E8315DD92D55717300FFF8C8 /* SolanaWalletView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SolanaWalletView.swift; sourceTree = "<group>"; };
 		E8315DDB2D55717F00FFF8C8 /* CosmosWalletView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CosmosWalletView.swift; sourceTree = "<group>"; };
 		E86A47402D0CA62F00546CC2 /* AppRootManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRootManager.swift; sourceTree = "<group>"; };
@@ -120,6 +124,15 @@
 				8F4302562DE8DE9000186768 /* EVMWalletView.swift */,
 			);
 			path = Wallet;
+			sourceTree = "<group>";
+		};
+		AA62500005000000AABBCCDD /* SmartAccount */ = {
+			isa = PBXGroup;
+			children = (
+				AA62500002000000AABBCCDD /* SmartAccountView.swift */,
+				AA62500004000000AABBCCDD /* AlchemyConfig.swift */,
+			);
+			path = SmartAccount;
 			sourceTree = "<group>";
 		};
 		8FA0077F2D56ECFB009EF0C3 /* Resources */ = {
@@ -188,6 +201,7 @@
 				8FE94DE12DA9AC1E009CBD28 /* App */,
 				8FA0077C2D56ECC9009EF0C3 /* Auth */,
 				8FA0077D2D56ECDA009EF0C3 /* Wallet */,
+				AA62500005000000AABBCCDD /* SmartAccount */,
 				8FC8B8FC2D8B7AE10046C3DC /* UI */,
 				8FFEAD192DC5675100103C14 /* Utils */,
 				8FA007892D58387F009EF0C3 /* Info.plist */,
@@ -372,6 +386,8 @@
 				E86A47412D0CA63700546CC2 /* AppRootManager.swift in Sources */,
 				E8315DD82D5548F100FFF8C8 /* WalletsView.swift in Sources */,
 				8FA0078B2D5A7841009EF0C3 /* MetaMaskDemoView.swift in Sources */,
+				AA62500001000000AABBCCDD /* SmartAccountView.swift in Sources */,
+				AA62500003000000AABBCCDD /* AlchemyConfig.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -683,7 +699,7 @@
 			repositoryURL = "https://github.com/getpara/swift-sdk";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 2.0.0;
+				minimumVersion = 2.8.0;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */

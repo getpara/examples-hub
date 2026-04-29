@@ -320,13 +320,15 @@ struct WalletsView: View {
     
     @ViewBuilder
     private func walletDetailView(for wallet: Wallet) -> some View {
-        switch wallet.type! {
+        switch wallet.type {
         case .evm:
             EVMWalletView(selectedWallet: wallet)
         case .solana:
             SolanaWalletView(selectedWallet: wallet)
         case .cosmos:
             CosmosWalletView(selectedWallet: wallet)
+        case .none:
+            Text("Wallet type unavailable").foregroundStyle(.secondary)
         }
     }
     

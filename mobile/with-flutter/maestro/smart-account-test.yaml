@@ -1,0 +1,101 @@
+appId: com.usecapsule.example.flutter
+---
+- clearState
+- launchApp
+- waitForAnimationToEnd
+
+# Logout if already signed in
+- tapOn:
+    text: "Logout"
+    optional: true
+- waitForAnimationToEnd
+
+# Wait for auth screen
+- extendedWaitUntil:
+    visible: "Sign Up or Log In"
+    timeout: 10000
+
+# Generate random test email
+- evalScript: ${output.email = 'maestro-aa-' + Date.now() + '@test.getpara.com'}
+
+# Switch to email tab and enter email
+- tapOn: "Email"
+- waitForAnimationToEnd
+- tapOn: "Email address"
+- inputText: "${output.email}"
+- pressKey: "Enter"
+
+# Tap continue to trigger ASWebAuth
+- tapOn: "Continue"
+
+# Handle ASWebAuth consent dialog — optional because the OS-level consent
+# persists across app reinstalls, so subsequent runs on the same simulator
+# skip this dialog and go straight to the portal.
+- runFlow:
+    when:
+      visible: "Cancel"
+    commands:
+      - tapOn: "Continue"
+
+# Wait for OTP page
+- extendedWaitUntil:
+    visible: "Verify"
+    timeout: 15000
+
+# Tap on OTP input field for keyboard focus
+- tapOn:
+    point: "20%,58%"
+- waitForAnimationToEnd
+
+# Enter OTP digits (test emails accept any 6-digit code)
+- inputText: "1"
+- waitForAnimationToEnd
+- inputText: "2"
+- waitForAnimationToEnd
+- inputText: "3"
+- waitForAnimationToEnd
+- inputText: "4"
+- waitForAnimationToEnd
+- inputText: "5"
+- waitForAnimationToEnd
+- inputText: "6"
+
+# Wait for wallets screen
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible: "Wallets"
+    timeout: 30000
+- assertVisible: "Wallets"
+
+# Create an EVM wallet (smart account needs an EOA to sign)
+- tapOn: "Create Your First Wallet"
+- extendedWaitUntil:
+    visible: "Select Wallet Type"
+    timeout: 10000
+- tapOn: "EVM"
+- extendedWaitUntil:
+    visible: "0x.*"
+    timeout: 30000
+
+# Open the Smart Account screen via the AppBar icon
+- tapOn: "Smart Account"
+- waitForAnimationToEnd
+
+# Wait for Smart Account screen to render with both addresses
+- extendedWaitUntil:
+    visible: "Connected Wallets"
+    timeout: 10000
+- assertVisible: "EOA (Para Wallet)"
+- extendedWaitUntil:
+    visible: "Smart Account (Alchemy Modular Account)"
+    timeout: 30000
+
+# Trigger the gasless transaction
+- tapOn: "Send Gasless Transaction"
+
+# UserOp inclusion on Sepolia can take 75s+; the SDK has a 120s timeout
+- extendedWaitUntil:
+    visible: "Transaction sent successfully!"
+    timeout: 120000
+- assertVisible: "Transaction sent successfully!"
+- assertVisible: "View on Etherscan"

@@ -1,20 +1,3 @@
-import { openAuthSessionAsync } from 'expo-web-browser';
-import { APP_SCHEME } from './constants';
-
-/**
- * Opens an authentication URL in the system browser with deep link callback
- */
-export async function openAuthUrl(url: string): Promise<{ success: boolean }> {
-  const authUrl = new URL(url);
-  authUrl.searchParams.set('nativeCallbackUrl', APP_SCHEME);
-
-  const result = await openAuthSessionAsync(authUrl.toString(), APP_SCHEME);
-
-  return {
-    success: result.type === 'success',
-  };
-}
-
 /**
  * Formats a phone number for display
  */

@@ -496,6 +496,32 @@ struct EVMWalletView: View {
                 .cornerRadius(16)
                 .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
 
+                // Account Abstraction
+                VStack(spacing: 12) {
+                    Text("Account Abstraction")
+                        .font(.headline)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+
+                    NavigationLink {
+                        SmartAccountView(eoaWallet: selectedWallet)
+                            .environmentObject(paraManager)
+                    } label: {
+                        Label("Open Smart Account", systemImage: "sparkles")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.bordered)
+                    .tint(.indigo)
+                    .accessibilityIdentifier("openSmartAccountButton")
+
+                    Text("Provision an Alchemy smart account for this EOA and send a gasless transaction on Sepolia.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .padding()
+                .background(Color(.systemBackground))
+                .cornerRadius(16)
+                .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
             }
             .padding(.horizontal)
         }
