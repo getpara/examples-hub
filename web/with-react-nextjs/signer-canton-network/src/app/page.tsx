@@ -7,6 +7,8 @@ import { ConnectCard } from "@/components/ui/ConnectCard";
 import { WalletInfo } from "@/components/ui/WalletInfo";
 import { CantonOnboardCard } from "@/components/ui/CantonOnboardCard";
 import { CantonPreapprovalCard } from "@/components/ui/CantonPreapprovalCard";
+import { CantonTapCard } from "@/components/ui/CantonTapCard";
+import { CantonSendCard } from "@/components/ui/CantonSendCard";
 
 export default function Home() {
   const { openModal } = useModal();
@@ -23,11 +25,25 @@ export default function Home() {
     preapprovalError,
     preapprovalHash,
     preapprovalUpdateId,
+    sendAmulet,
+    isSending,
+    sendError,
+    sendHash,
+    sendUpdateId,
+    tapAmulet,
+    isTapping,
+    tapError,
+    tapHash,
+    tapUpdateId,
+    fetchBalance,
+    balance,
+    isFetchingBalance,
+    balanceError,
   } = useCantonOnboarding();
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header isConnected={isConnected} address={address} onConnect={openModal} />
+      <Header isConnected={isConnected} address={address} partyId={partyId} onConnect={openModal} />
 
       <main
         className={
@@ -39,7 +55,14 @@ export default function Home() {
           <ConnectCard onConnect={openModal} />
         ) : (
           <div className="space-y-4">
-            <WalletInfo address={address} />
+            <WalletInfo
+              address={address}
+              partyId={partyId}
+              balance={balance}
+              isFetchingBalance={isFetchingBalance}
+              balanceError={balanceError}
+              onRefreshBalance={fetchBalance}
+            />
             <CantonOnboardCard
               onOnboard={onboard}
               isPending={isPending}
@@ -54,6 +77,25 @@ export default function Home() {
                 error={preapprovalError}
                 preparedHash={preapprovalHash}
                 updateId={preapprovalUpdateId}
+              />
+            )}
+            {partyId && (
+              <CantonTapCard
+                onTap={tapAmulet}
+                isPending={isTapping}
+                error={tapError}
+                preparedHash={tapHash}
+                updateId={tapUpdateId}
+              />
+            )}
+            {partyId && (
+              <CantonSendCard
+                onSend={sendAmulet}
+                isPending={isSending}
+                error={sendError}
+                preparedHash={sendHash}
+                updateId={sendUpdateId}
+                defaultReceiverPartyId={partyId}
               />
             )}
           </div>

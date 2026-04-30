@@ -35,9 +35,9 @@ export function CantonOnboardCard({
         )}
 
         <p className="text-xs text-muted-foreground leading-relaxed">
-          This will (1) ask Canton to prepare an external party for your Para Solana key, (2) sign
-          the resulting hash with Para, and (3) submit the signature to allocate the party on the
-          ledger.
+          This will (1) ask Canton to prepare an external party for your Para-managed Ed25519 key,
+          (2) sign the resulting hash with Para, and (3) submit the signature to allocate the party
+          on the ledger.
         </p>
 
         <button
