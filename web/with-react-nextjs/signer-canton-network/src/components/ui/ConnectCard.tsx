@@ -12,7 +12,7 @@ export function ConnectCard({ onConnect }: ConnectCardProps) {
           Onboard onto Canton
         </h1>
         <p className="text-[13px] font-mono text-muted-foreground leading-relaxed mb-8">
-          Connect with Para to allocate your Solana wallet as a Canton external party.
+          Connect with Para to allocate a Canton external party backed by an embedded Ed25519 key.
         </p>
 
         <button

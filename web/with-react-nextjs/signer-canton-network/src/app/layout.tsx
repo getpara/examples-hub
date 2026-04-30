@@ -8,7 +8,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Signer Canton Network Example",
-  description: "Allocate a Para-managed Solana wallet as a Canton Network external party",
+  description: "Onboard a Canton Network external party signed by Para's embedded Ed25519 key",
 };
 
 export default function RootLayout({

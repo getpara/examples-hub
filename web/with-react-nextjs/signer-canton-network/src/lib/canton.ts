@@ -3,6 +3,7 @@ import "server-only";
 import {
   WalletSDKImpl,
   localNetAuthDefault,
+  localNetStaticConfig,
   LedgerController,
   TokenStandardController,
   ValidatorController,
@@ -35,6 +36,12 @@ export function getSdk(): Promise<WalletSDKImpl> {
   const userId = process.env.AUTH_USER_ID || "ledger-api-user";
   const adminId = process.env.AUTH_ADMIN_ID || userId;
   const unsafeSecret = envOrThrow("AUTH_UNSAFE_SECRET");
+  // Token-standard transfer commands look up factory + choice context from
+  // a registry served via the validator's scan-proxy. Defaults to the SDK's
+  // canonical LocalNet URL; override for hosted deployments.
+  const transferFactoryRegistryUrl = process.env.TRANSFER_FACTORY_REGISTRY_URL
+    ? new URL(process.env.TRANSFER_FACTORY_REGISTRY_URL)
+    : localNetStaticConfig.LOCALNET_REGISTRY_API_URL;
 
   const authFactory = () => {
     // canton-network/wallet-sdk@0.21.x does not export types for the auth
@@ -83,6 +90,10 @@ export function getSdk(): Promise<WalletSDKImpl> {
     await sdk.connect();
     await sdk.connectAdmin();
     await sdk.connectTopology(new URL(validatorApiUrl));
+
+    if (sdk.tokenStandard) {
+      sdk.tokenStandard.setTransferFactoryRegistryUrl(transferFactoryRegistryUrl);
+    }
 
     return sdk;
   })().catch((err) => {

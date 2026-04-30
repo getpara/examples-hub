@@ -25,6 +25,7 @@ export function ParaProvider({ children }: { children: React.ReactNode }) {
           authLayout: ["AUTH:FULL"],
           oAuthMethods: ["GOOGLE", "TWITTER", "APPLE", "DISCORD", "FACEBOOK", "FARCASTER"],
           onRampTestMode: true,
+          hideWallets: true,
           theme: {
             foregroundColor: "#2E2926",
             backgroundColor: "#FFFFFF",
