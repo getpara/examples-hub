@@ -6,8 +6,8 @@ A minimal Next.js example demonstrating Para Modal integration with Solana walle
 
 ## What This Example Shows
 
-- Setting up `ParaProvider` with Solana wallet configuration
-- Configuring external wallets (Phantom, Glow, Backpack, Solflare) via `externalWalletConfig`
+- Setting up `ParaProvider` with Solana connector runtime configuration
+- Configuring allowed external wallets in the Para Developer Portal
 - Opening the Para modal via the `useModal` hook
 - Checking authentication state with `useAccount`
 - Retrieving wallet address with `useWallet`
@@ -15,7 +15,7 @@ A minimal Next.js example demonstrating Para Modal integration with Solana walle
 
 ## Setup
 
-1. Create a `.env` file:
+1. Create a `.env` file with the API key and environment for the Para project you configured in the Developer Portal:
 
 ```env
 NEXT_PUBLIC_PARA_API_KEY=your_api_key_here
@@ -49,11 +49,12 @@ src/
 
 ## Solana Configuration
 
-This example configures Para to work with Solana wallets:
+This example keeps Solana network wiring in code because the Solana connector needs runtime endpoint and network setup. Configure the remaining app, auth, branding, wallet visibility, and external wallet settings in the Para Developer Portal for the API key.
+
+The `ParaProvider` omits deprecated provider config so Portal-owned settings stay out of code. The `paraModalConfig` fields are runtime modal behavior for this demo, not persistent project configuration.
 
 ```typescript
 externalWalletConfig={{
-  wallets: ["GLOW", "PHANTOM", "BACKPACK", "SOLFLARE"],
   solanaConnector: {
     config: {
       endpoint: clusterApiUrl(WalletAdapterNetwork.Devnet),

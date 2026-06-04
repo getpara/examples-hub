@@ -7,7 +7,7 @@ This example demonstrates how to implement custom OAuth authentication with Para
 ## Features
 
 - One-click OAuth login (no passkeys required)
-- Support for Google, Apple, Discord, X (Twitter), Facebook, and Farcaster
+- OAuth login with Google, Apple, Discord, and X (Twitter)
 - Automatic wallet creation for new users
 - Message signing with "Hello World!" example
 - **Clean separation of logic (hooks) and presentation (components)**
@@ -20,7 +20,11 @@ Create a `.env.local` file in the root directory:
 
 ```env
 NEXT_PUBLIC_PARA_API_KEY=your_para_api_key
+# Optional. Defaults to BETA.
+NEXT_PUBLIC_PARA_ENVIRONMENT=BETA
 ```
+
+Configure the API key in the [Para Developer Portal](https://developer.getpara.com) for the selected environment with the app display name, branding, enabled OAuth providers, 2FA policy, and auth layout. This example keeps custom OAuth UI and popup behavior in code, but leaves persistent Para app configuration in the Portal. It does not set theme, external wallet, WalletConnect, or RPC overrides in code.
 
 ### Installation
 

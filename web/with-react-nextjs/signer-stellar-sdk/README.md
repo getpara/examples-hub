@@ -4,7 +4,7 @@ This example demonstrates how to use the [Para SDK](https://docs.getpara.com) wi
 
 ## Setup
 
-1. Copy `.env.example` to `.env.local` and fill in your Para API key:
+1. Copy `.env.example` to `.env.local` and fill in your Para API key from the Para Developer Portal:
 
 ```bash
 cp .env.example .env.local
@@ -21,6 +21,10 @@ yarn install
 ```bash
 yarn dev
 ```
+
+## Developer Portal Configuration
+
+This example expects app identity, branding, theme, and authentication methods to be configured in the Para Developer Portal for the API key. The `ParaProvider` keeps only API key/environment and runtime modal behavior. Stellar testnet settings are fixed in code for this demo, and no WalletConnect, external wallet, logo, app name, theme, or RPC URL environment variables are required.
 
 ## Key Dependencies
 

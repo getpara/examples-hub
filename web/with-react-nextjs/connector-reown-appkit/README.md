@@ -27,6 +27,12 @@ yarn install
 yarn dev
 ```
 
+## Developer Portal Configuration
+
+Configure the API key in the Para Developer Portal with the app display identity, authentication methods, branding, theme, and wallet visibility. This example does not set `paraModalConfig`, `configOverrides`, or `externalWalletConfig` in app code.
+
+The `paraConnector({ appName })` value remains in code because `@getpara/wagmi-v2-integration` requires it to initialize the connector modal; keep it aligned with the Developer Portal display identity. The Reown AppKit metadata, feature flags, chain list, and WalletConnect project ID also remain in code because they configure Reown AppKit and wagmi provider behavior, not Para Portal partner configuration.
+
 ## Project Structure
 
 ```

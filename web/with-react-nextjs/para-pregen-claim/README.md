@@ -32,6 +32,10 @@ Run locally:
 yarn dev
 ```
 
+## Developer Portal Configuration
+
+This example expects app identity, authentication methods, theme, and wallet visibility to be configured in the Para Developer Portal for the API key. The `ParaProvider` keeps only the API key/environment, the pregen wallet fetch override needed by this flow, and runtime modal behavior such as on-ramp test mode and recovery step visibility.
+
 ## Flow
 
 1. Enter the future claimant email.
@@ -42,35 +46,6 @@ yarn dev
 6. `/api/wallet/share` updates the pregen wallet identifier to `pregenId: { email }`, decrypts the share, and returns it.
 7. The SDK preloads the user share and completes the claim during authentication.
 8. After the claimed wallet is connected, click **Export private key** to open the Para export flow for that wallet.
-
-## Local Para Build
-
-This example resolves local `@getpara/*` packages through `file:` dependencies and package `resolutions`. Build changed Para packages before building or deploying the example:
-
-```bash
-cd ../../../../packages/user-management-client && yarn build
-cd ../core-sdk && yarn build
-cd ../../examples-hub/web/with-react-nextjs/para-pregen-claim
-yarn install
-yarn build
-```
-
-This keeps the example on local package builds for prebuilt deploys.
-
-For a prebuilt Vercel deploy:
-
-```bash
-vercel build
-vercel deploy --prebuilt
-```
-
-## E2E
-
-From the monorepo root:
-
-```bash
-yarn e2e:examples-hub react-nextjs-pregen-claim
-```
 
 ## Key Files
 

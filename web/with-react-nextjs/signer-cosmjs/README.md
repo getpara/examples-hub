@@ -12,46 +12,45 @@ Create a `.env.local` file in the root directory with the following:
 
 ```env
 NEXT_PUBLIC_PARA_API_KEY=your_para_api_key_here
+NEXT_PUBLIC_PARA_ENVIRONMENT=BETA
 ```
+
+These are the only environment variables read by the app. `NEXT_PUBLIC_PARA_API_KEY` selects the Developer Portal project, and `NEXT_PUBLIC_PARA_ENVIRONMENT` selects the Para environment. It defaults to `BETA` when omitted and can be set to `SANDBOX` or `PROD` when using keys from those environments.
 
 ### Package Manager Instructions
 
-Using npm:
-```bash
-npm install
-npm run dev
-```
-
 Using yarn:
+
 ```bash
 yarn install
 yarn dev
 ```
 
-Using pnpm:
-```bash
-pnpm install
-pnpm dev
-```
+## Developer Portal Configuration
+
+Configure app identity, authentication methods, branding, theme, wallet visibility, and external wallet availability in the Para Developer Portal for the API key used by this example. The `ParaProvider` keeps only API key/environment, Cosmos signer connector wiring, and runtime modal behavior. There are no `configOverrides` in this example, so Developer Portal settings are not overridden by code.
+
+The Cosmos chain and RPC endpoints used by the demo transactions live in `src/config/chains.ts` and `src/config/constants.ts`. The Graz connector setup in `src/components/ParaProvider.tsx` is provider wiring for Cosmos wallet support, not persistent partner configuration.
 
 ## Key Dependencies
 
-- **@getpara/cosmjs-v0-integration** (2.0.0-alpha.26) - Para SDK integration for CosmJS
-- **@getpara/react-sdk** (2.0.0-alpha.26) - Para React SDK for wallet connections
-- **@cosmjs/stargate** (0.33.1) - Cosmos SDK Stargate client
-- **@cosmjs/cosmwasm-stargate** (0.33.1) - CosmWasm support for Stargate
-- **@cosmjs/proto-signing** (0.33.1) - Protobuf message signing
-- **@cosmjs/amino** (0.33.1) - Amino encoding for Cosmos
-- **@tanstack/react-query** (5.81.2) - Data fetching and state management
-- **next** (15.1.5) - React framework
+- **@getpara/react-sdk** (3.0.0-alpha.1) - Para React SDK for wallet connections
+- **@getpara/react-sdk** (3.0.0-alpha.1) - Para provider, account, and modal hooks
+- **@cosmjs/stargate** (0.37.0) - Cosmos SDK Stargate client
+- **@cosmjs/cosmwasm-stargate** (0.37.0) - CosmWasm support for Stargate
+- **@cosmjs/proto-signing** (0.37.0) - Protobuf message signing
+- **@cosmjs/amino** (0.37.0) - Amino encoding for Cosmos
+- **graz** (0.4.2) - Cosmos wallet connector support
+- **@tanstack/react-query** (5.90.12) - Data fetching and state management
+- **next** (15.1.12) - React framework
 
 ## Key Files
 
-- `src/app/providers.tsx` - Para SDK provider setup and configuration
+- `src/components/ParaProvider.tsx` - Para SDK provider setup and Cosmos connector wiring
 - `src/hooks/useParaSigner.ts` - Custom hook for Para signer integration with CosmJS
+- `src/hooks/useParaCosmWasmSigner.ts` - Custom hook for Para signer integration with CosmWasm
 - `src/hooks/useCosmosQueryClient.ts` - Cosmos query client setup hook
-- `src/hooks/useAccountAddress.ts` - Account address management hook
-- `src/config/constants.ts` - Configuration constants including API key
+- `src/config/constants.ts` - Cosmos constants used by the demo flows
 - `src/config/chains.ts` - Cosmos chain configurations
 - `src/app/*/page.tsx` - Example pages demonstrating various Cosmos operations
 

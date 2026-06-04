@@ -26,6 +26,10 @@ yarn install
 yarn dev
 ```
 
+## Developer Portal Configuration
+
+This example expects app identity, authentication methods, theme, and wallet visibility to be configured in the Para Developer Portal for the API key. The code keeps only the Graz connector and chain wiring needed by the example.
+
 ## Project Structure
 
 ```

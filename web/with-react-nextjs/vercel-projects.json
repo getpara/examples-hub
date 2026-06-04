@@ -63,6 +63,10 @@
     "projectId": "prj_zCfF3GFTcducjKqpowbpEj3dVQUK",
     "url": "https://para-example-signer-solana-anchor.vercel.app"
   },
+  "signer-stellar-sdk": {
+    "projectId": "prj_mfIqKE4zGRpTcUaKM0yDTbEk3CYm",
+    "url": "https://para-example-signer-stellar-sdk.vercel.app"
+  },
   "connector-wagmi": {
     "projectId": "prj_jxuWJWyYM3v0IBvxq17XpmvJT0rJ",
     "url": "https://para-example-connector-wagmi.vercel.app"

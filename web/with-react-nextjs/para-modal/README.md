@@ -14,7 +14,7 @@ A minimal Next.js example demonstrating Para Modal integration for wallet connec
 
 ## Setup
 
-1. Create a `.env` file:
+1. Create a `.env` file with the public API key and environment for your Para Developer Portal app:
 
 ```env
 NEXT_PUBLIC_PARA_API_KEY=your_api_key_here
@@ -27,6 +27,12 @@ NEXT_PUBLIC_PARA_ENVIRONMENT=BETA
 yarn install
 yarn dev
 ```
+
+## Developer Portal Configuration
+
+This example expects persistent app settings to be configured on the API key in the Para Developer Portal. Configure the app display name, branding and logo, theme, OAuth providers, email and phone login options, and wallet visibility in the Portal.
+
+The local `ParaProvider` only passes the API key, environment, and runtime modal behavior such as on-ramp test mode and recovery step visibility. This example does not use `configOverrides`, so Portal settings are the source of truth for persistent app, auth, branding, and wallet configuration.
 
 ## Project Structure
 

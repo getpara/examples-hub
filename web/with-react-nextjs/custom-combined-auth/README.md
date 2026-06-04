@@ -22,7 +22,11 @@ Create a `.env.local` file in the root directory:
 
 ```env
 NEXT_PUBLIC_PARA_API_KEY=your_para_api_key
+# Optional. Defaults to BETA.
+NEXT_PUBLIC_PARA_ENVIRONMENT=BETA
 ```
+
+Configure the API key in the [Para Developer Portal](https://developer.getpara.com) for the selected environment with the app display name, branding, OAuth providers, email and phone login availability, 2FA policy, and auth layout. This example keeps custom auth UI and verification iframe behavior in code, but leaves persistent Para app configuration in the Portal. It does not set theme, external wallet, WalletConnect, or RPC overrides in code.
 
 ### Installation
 
@@ -129,7 +133,7 @@ const {
 ```
 User enters email/phone → signUpOrLogIn({ auth })
        ↓
-step: "verify" → Show iframe with loginUrl
+step: "verify" → Show iframe with loginFullUrl (loginUrl fallback)
        ↓
 User enters OTP in iframe
        ↓
@@ -144,7 +148,7 @@ Done - user authenticated
 ```
 User clicks OAuth button → verifyOAuth({ method, onOAuthUrl })
        ↓
-Popup opens → User authenticates with provider
+Popup opens with the popup URL from onOAuthUrl → User authenticates with provider
        ↓
 stage: "done"
        ↓

@@ -28,6 +28,10 @@ yarn install
 yarn dev
 ```
 
+## Developer Portal Configuration
+
+This example expects Para app identity, authentication methods, theme, and wallet visibility to be configured in the Para Developer Portal for the API key. The Para wagmi connector still requires an `appName` option to initialize the connector modal; keep it aligned with the Developer Portal display identity. `NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID` is kept because the standalone wagmi `walletConnect` connector requires it; it is not used as Para Portal-owned external wallet config. `NEXT_PUBLIC_SEPOLIA_RPC_URL` is kept for wagmi Sepolia network transport.
+
 ## Project Structure
 
 ```

@@ -65,6 +65,7 @@ Get an API key at [developer.getpara.com](https://developer.getpara.com), then s
 | Withdraw | API Key → **On/Off Ramps → Buy Crypto & Withdraw** | Disable | Not functional for Canton. |
 | Receive | API Key → **On/Off Ramps → Receive** | Disable | Address + QR display is for EVM/Solana mainnets — Canton parties aren't reachable from those addresses. |
 | Send | API Key → **On/Off Ramps → Send** | Disable | Sends in this demo go through the in-app **Send Amulet** card, not the Para modal. |
+| Hide wallets | API Key modal UX settings | Enable | Keeps Para's internal `SOLANA` wallet type out of user-facing Canton copy. |
 
 End state of the On/Off Ramps page: **Buy Crypto, Withdraw, Receive, and Send all toggled off** — none of the modal's wallet-action tiles surface for Canton users.
 
@@ -74,7 +75,7 @@ CLI equivalent (one command for the ramp toggles; wallet types are dev-portal-on
 para keys config ramps <key-id> --no-buy-enabled --no-withdraw-enabled --no-receive-enabled --no-send-enabled
 ```
 
-The example also sets `paraModalConfig.hideWallets: true` in `src/components/ParaProvider.tsx`. That's a client-side modal config (not a dev-portal setting): it strips the remaining "Solana Wallet" branding from the modal so the account view reads as "My Account". Para provisions Canton's Ed25519 key under the `SOLANA` wallet type internally — `hideWallets` keeps that implementation detail out of user-facing copy.
+App identity, authentication methods, theme, wallet visibility, and modal wallet wording are portal-owned in v3. The example keeps only API key/environment and runtime modal behavior in `src/components/ParaProvider.tsx`.
 
 ### 2. Configure the example
 

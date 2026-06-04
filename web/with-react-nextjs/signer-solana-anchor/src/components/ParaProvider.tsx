@@ -1,14 +1,22 @@
-"use client";
+'use client';
 
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ParaProvider as ParaSDKProvider } from "@getpara/react-sdk";
-import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
-import { clusterApiUrl } from "@solana/web3.js";
-import { API_KEY, ENVIRONMENT } from "@/config/constants";
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ParaProvider as ParaSDKProvider } from '@getpara/react-sdk';
+import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
+import { clusterApiUrl } from '@solana/web3.js';
+import type { ComponentProps } from 'react';
+import { API_KEY, ENVIRONMENT } from '@/config/constants';
 
 // Solana network configuration
 const solanaNetwork = WalletAdapterNetwork.Devnet;
 const endpoint = clusterApiUrl(solanaNetwork);
+type SolanaConnectorConfig = NonNullable<
+  NonNullable<ComponentProps<typeof ParaSDKProvider>['externalWalletConfig']>['solanaConnector']
+>['config'];
+const solanaConnectorConfig = {
+  endpoint,
+  chain: solanaNetwork,
+} as unknown as SolanaConnectorConfig;
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -32,39 +40,15 @@ export function ParaProvider({
           env: ENVIRONMENT,
         }}
         externalWalletConfig={{
-          wallets: ["GLOW", "PHANTOM", "BACKPACK", "SOLFLARE"],
           solanaConnector: {
-            config: {
-              endpoint,
-              chain: solanaNetwork,
-              appIdentity: {
-                uri: typeof window !== "undefined" ? `${window.location.protocol}//${window.location.host}` : "",
-              },
-            },
-          },
-          walletConnect: {
-            projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID || "",
+            config: solanaConnectorConfig,
           },
         }}
-        config={{ appName: "Para Solana Anchor Example" }}
         paraModalConfig={{
-          disableEmailLogin: false,
-          disablePhoneLogin: false,
-          authLayout: ["AUTH:FULL", "EXTERNAL:FULL"],
-          oAuthMethods: ["APPLE", "DISCORD", "FACEBOOK", "FARCASTER", "GOOGLE", "TWITTER"],
           onRampTestMode: true,
-          theme: {
-            foregroundColor: "#222222",
-            backgroundColor: "#FFFFFF",
-            accentColor: "#888888",
-            mode: "light",
-            borderRadius: "none",
-            font: "Inter",
-          },
-          logo: "/para.svg",
           recoverySecretStepEnabled: true,
-          twoFactorAuthEnabled: false,
-        }}>
+        }}
+      >
         {children}
       </ParaSDKProvider>
     </QueryClientProvider>

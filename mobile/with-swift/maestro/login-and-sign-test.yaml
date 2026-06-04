@@ -25,12 +25,12 @@ appId: com.usecapsule.example.swift
 
 # Wait for OTP page
 - extendedWaitUntil:
-    visible: "Verify"
+    visible: "Send new code"
     timeout: 15000
 
 # Tap on OTP input field for keyboard focus
 - tapOn:
-    point: "20%,58%"
+    point: "15%,35%"
 - waitForAnimationToEnd
 
 # Enter OTP digits

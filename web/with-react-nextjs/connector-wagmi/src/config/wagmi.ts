@@ -10,26 +10,12 @@ import { sepolia } from "wagmi/chains";
 
 const connector = para ? paraConnector({
   appName: "Para Wagmi Example",
-  authLayout: ["AUTH:FULL", "EXTERNAL:FULL"],
   chains: [sepolia],
-  disableEmailLogin: false,
-  disablePhoneLogin: false,
-  logo: "/para.svg",
-  oAuthMethods: ["APPLE", "DISCORD", "FACEBOOK", "FARCASTER", "GOOGLE", "TWITTER"],
   onRampTestMode: true,
   options: {},
   para,
   queryClient,
   recoverySecretStepEnabled: true,
-  theme: {
-    accentColor: "#888888",
-    backgroundColor: "#FFFFFF",
-    borderRadius: "none",
-    font: "Inter",
-    foregroundColor: "#222222",
-    mode: "light",
-  },
-  twoFactorAuthEnabled: false,
 }) : null;
 
 const config = {

@@ -6,8 +6,8 @@ A minimal Next.js example demonstrating Para Modal integration with Cosmos walle
 
 ## What This Example Shows
 
-- Setting up `ParaProvider` with Cosmos wallet configuration
-- Configuring external wallets (Keplr, Leap) via `externalWalletConfig`
+- Setting up `ParaProvider` with Cosmos connector runtime configuration
+- Configuring allowed external wallets in the Para Developer Portal
 - Opening the Para modal via the `useModal` hook
 - Checking authentication state with `useAccount`
 - Retrieving Cosmos wallet address with `useParaCosmjsAminoSigner`
@@ -15,7 +15,7 @@ A minimal Next.js example demonstrating Para Modal integration with Cosmos walle
 
 ## Setup
 
-1. Create a `.env` file:
+1. Create a `.env` file with the API key and environment for the Para project you configured in the Developer Portal:
 
 ```env
 NEXT_PUBLIC_PARA_API_KEY=your_api_key_here
@@ -49,15 +49,18 @@ src/
 
 ## Cosmos Configuration
 
-This example configures Para to work with Cosmos wallets:
+This example keeps Cosmos chain wiring in code because the Cosmos connector needs runtime chain and selected-chain setup. The remaining app, auth, branding, and external wallet settings should be configured in the Para Developer Portal for the API key, including app display identity, allowed external wallets, OAuth providers, email or phone login toggles, theme, and WalletConnect settings when applicable.
+
+The `ParaProvider` omits deprecated provider config so Portal-owned settings stay out of code. The `paraModalConfig` fields are runtime modal behavior for this demo, not persistent project configuration.
 
 ```typescript
 externalWalletConfig={{
-  wallets: ["KEPLR", "LEAP"],
   cosmosConnector: {
     config: {
       chains: [cosmoshub, osmosis, noble],
       selectedChainId: cosmoshub.chainId,
+      multiChain: false,
+      onSwitchChain: () => {},
     },
   },
 }}
@@ -68,19 +71,19 @@ externalWalletConfig={{
 This example uses the Cosmos ADR-036 standard for arbitrary message signing:
 
 ```typescript
-import { useParaCosmjsAminoSigner } from "@getpara/react-sdk/cosmos";
-import { makeSignDoc } from "@cosmjs/amino";
+import { useParaCosmjsAminoSigner } from '@getpara/react-sdk/cosmos';
+import { makeSignDoc } from '@cosmjs/amino';
 
 const { aminoSigner } = useParaCosmjsAminoSigner();
 
 // Create ADR-036 sign doc
 const signDoc = makeSignDoc(
-  [{ type: "sign/MsgSignData", value: { signer: address, data: btoa(message) } }],
-  { amount: [], gas: "0" },
-  "cosmoshub-4",
-  "",
+  [{ type: 'sign/MsgSignData', value: { signer: address, data: btoa(message) } }],
+  { amount: [], gas: '0' },
+  'cosmoshub-4',
+  '',
   0,
-  0
+  0,
 );
 
 const { signature } = await aminoSigner.signAmino(address, signDoc);

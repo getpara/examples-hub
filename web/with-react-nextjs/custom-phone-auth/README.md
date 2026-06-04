@@ -20,7 +20,12 @@ Create a `.env.local` file in the root directory:
 
 ```env
 NEXT_PUBLIC_PARA_API_KEY=your_para_api_key
+NEXT_PUBLIC_PARA_ENVIRONMENT=BETA
 ```
+
+Use an API key from the matching Para environment. `NEXT_PUBLIC_PARA_ENVIRONMENT` defaults to `BETA` if omitted and can be set to `SANDBOX` or `PROD` when using keys from those environments.
+
+Configure the API key in the [Para Developer Portal](https://developer.getpara.com) with the app display name, branding, phone login availability, 2FA policy, and auth layout. This example keeps custom phone auth UI and verification iframe behavior in code, but leaves persistent Para app configuration in the Portal.
 
 ### Installation
 

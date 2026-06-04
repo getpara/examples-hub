@@ -19,7 +19,13 @@ NEXT_PUBLIC_PARA_ENVIRONMENT=BETA
 NEXT_PUBLIC_GELATO_API_KEY=your_gelato_api_key
 ```
 
-2. Install dependencies and run:
+2. Configure the API key in the Para Developer Portal:
+
+- Set the app or project display name, for example `Gelato AA Example`.
+- Configure Branding for the logo, light theme, primary interactive color, font, and border radius.
+- Configure Auth for the enabled OAuth providers, email and phone login toggles, 2FA setting, and auth layout.
+
+3. Install dependencies and run:
 
 ```bash
 yarn install

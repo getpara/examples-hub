@@ -17,6 +17,7 @@ A Next.js example demonstrating Para SDK integration with Rhinestone for EIP-433
 NEXT_PUBLIC_PARA_API_KEY=your_para_api_key
 NEXT_PUBLIC_PARA_ENVIRONMENT=BETA
 RHINESTONE_API_KEY=your_rhinestone_api_key
+NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
 2. Install dependencies and run:
@@ -30,6 +31,12 @@ yarn dev
 
 - **Para API Key**: Get from [Para Developer Portal](https://developer.getpara.com)
 - **Rhinestone API Key**: Contact Rhinestone team for access
+
+## Developer Portal Configuration
+
+Configure the app name, branding, logo, theme, enabled OAuth providers, email and phone login options, 2FA setting, and auth layout on the Para API key in the Developer Portal. This example keeps only runtime modal behavior in code and relies on the Portal for persistent Para app configuration.
+
+The Rhinestone API key remains a server-side environment variable because it authenticates the orchestrator proxy. `NEXT_PUBLIC_APP_URL` is still used by the example to build the local orchestrator proxy URL when `window.location.origin` is unavailable.
 
 ## Project Structure
 

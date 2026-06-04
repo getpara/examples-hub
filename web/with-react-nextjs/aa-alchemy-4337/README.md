@@ -33,6 +33,12 @@ yarn dev
 - **Alchemy API Key**: Get from [Alchemy Dashboard](https://dashboard.alchemy.com)
 - **Alchemy Gas Policy ID**: Create a gas policy in your Alchemy Dashboard under "Gas Manager"
 
+## Developer Portal Configuration
+
+Configure the app name, branding, logo, theme, enabled OAuth providers, email and phone login options, 2FA setting, and auth layout on the Para API key in the Developer Portal. This example keeps only runtime modal behavior in code and relies on the Portal for persistent Para app configuration.
+
+The Alchemy API key and gas policy ID remain environment variables because they configure Alchemy Account Kit and gas sponsorship for this example, not Para Portal settings.
+
 ## Project Structure
 
 ```

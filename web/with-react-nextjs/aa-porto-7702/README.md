@@ -22,14 +22,20 @@ A minimal Next.js example demonstrating Para SDK integration with Porto for EIP-
 
 ## Setup
 
-1. Create a `.env` file:
+1. In the [Para Developer Portal](https://developer.getpara.com), configure the project used by your API key:
+
+   - Set the app or project display name, for example `Porto EIP-7702 Example`.
+   - Configure Branding with your logo, light theme colors, font, and border radius.
+   - Configure Auth with the email and phone login settings, OAuth providers, auth layout, and 2FA setting you want for this example.
+
+2. Create a `.env` file:
 
 ```env
 NEXT_PUBLIC_PARA_API_KEY=your_para_api_key
 NEXT_PUBLIC_PARA_ENVIRONMENT=BETA
 ```
 
-2. Install dependencies and run:
+3. Install dependencies and run:
 
 ```bash
 yarn install
@@ -39,6 +45,10 @@ yarn dev
 ## Getting API Keys
 
 - **Para API Key**: Get from [Para Developer Portal](https://developer.getpara.com)
+
+## Para Configuration Ownership
+
+Persistent Para app identity, branding, and auth settings are owned by the Developer Portal for the API key used to run this example. The local `ParaProvider` keeps only runtime modal behavior, such as on-ramp test mode and recovery secret step handling. Porto-specific account upgrade settings, including the Base Sepolia chain and Porto relay endpoint, remain in code because they are required by this EIP-7702 example.
 
 ## Project Structure
 

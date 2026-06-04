@@ -2,6 +2,9 @@ import { ParaMobile, Environment } from '@getpara/react-native-wallet';
 import { openBrowserAsync } from 'expo-web-browser';
 
 const API_KEY = process.env.EXPO_PUBLIC_PARA_API_KEY || '';
+const PARA_ENV = process.env.EXPO_PUBLIC_PARA_ENV || 'beta';
+
+const ENVIRONMENT = PARA_ENV.toLowerCase() === 'sandbox' ? Environment.SANDBOX : Environment.BETA;
 
 if (!API_KEY) {
   console.warn('EXPO_PUBLIC_PARA_API_KEY is not set. Please add it to your environment variables.');
@@ -9,7 +12,7 @@ if (!API_KEY) {
 
 // Create Para singleton instance
 // disableWorkers is required for React Native (no Web Worker support)
-export const para = new ParaMobile(Environment.BETA, API_KEY, undefined, {
+export const para = new ParaMobile(ENVIRONMENT, API_KEY, undefined, {
   disableWorkers: true,
 });
 

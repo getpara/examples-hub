@@ -20,7 +20,10 @@ Create a `.env.local` file in the root directory:
 
 ```env
 NEXT_PUBLIC_PARA_API_KEY=your_para_api_key
+NEXT_PUBLIC_PARA_ENVIRONMENT=BETA
 ```
+
+Configure the API key in the [Para Developer Portal](https://developer.getpara.com) with the app display name, branding, email login availability, 2FA policy, and auth layout. This example keeps custom email auth UI and verification iframe behavior in code, but leaves persistent Para app configuration in the Portal.
 
 ### Installation
 

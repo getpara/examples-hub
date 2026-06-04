@@ -6,8 +6,8 @@ A minimal Next.js example demonstrating Para Modal integration with EVM wallets 
 
 ## What This Example Shows
 
-- Setting up `ParaProvider` with EVM wallet configuration
-- Configuring external wallets (MetaMask) via `externalWalletConfig`
+- Setting up `ParaProvider` with EVM connector runtime configuration
+- Configuring allowed external wallets in the Para Developer Portal
 - Opening the Para modal via the `useModal` hook
 - Checking authentication state with `useAccount`
 - Retrieving wallet address with `useWallet`
@@ -15,14 +15,22 @@ A minimal Next.js example demonstrating Para Modal integration with EVM wallets 
 
 ## Setup
 
-1. Create a `.env` file:
+1. Create a `.env` file with your Para API key and environment:
 
 ```env
 NEXT_PUBLIC_PARA_API_KEY=your_api_key_here
 NEXT_PUBLIC_PARA_ENVIRONMENT=BETA
 ```
 
-2. Install dependencies and run:
+2. In the Para Developer Portal, configure the project used by that API key:
+
+- App name and display identity
+- Branding, logo, and modal presentation
+- Allowed auth methods and login options
+- Allowed EVM external wallets
+- WalletConnect project ID, if your enabled EVM wallets require WalletConnect
+
+3. Install dependencies and run:
 
 ```bash
 yarn install
@@ -49,11 +57,10 @@ src/
 
 ## EVM Configuration
 
-This example configures Para to work with EVM wallets:
+This example keeps only EVM connector runtime setup in code. The `externalWalletConfig` block passes the Wagmi connector chain configuration that the runtime needs; it is not used for project-owned wallet settings. Wallet availability, app identity, auth methods, WalletConnect project ID, and modal presentation should be configured in the Para Developer Portal for the API key:
 
 ```typescript
 externalWalletConfig={{
-  wallets: ["METAMASK"],
   evmConnector: {
     config: {
       chains: [sepolia],

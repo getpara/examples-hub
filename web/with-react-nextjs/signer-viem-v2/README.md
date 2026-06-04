@@ -16,40 +16,35 @@ NEXT_PUBLIC_PARA_API_KEY=your_para_api_key_here
 
 ### Package Manager Instructions
 
-Using npm:
-```bash
-npm install
-npm run dev
-```
+This example includes a `yarn.lock`, so use Yarn for deterministic local setup:
 
-Using yarn:
 ```bash
 yarn install
 yarn dev
 ```
 
-Using pnpm:
-```bash
-pnpm install
-pnpm dev
-```
+## Developer Portal Configuration
+
+Create the API key in the Para Developer Portal and configure the app identity, authentication methods, branding, theme, wallet visibility, and external wallet settings for that key there. This example does not set Portal-owned config in code. The `ParaProvider` keeps only the API key, Para environment, the EVM connector wiring needed for the Viem signer flows, and runtime modal behavior.
+
+The demo uses Sepolia and a public Sepolia RPC URL from `src/config/constants.ts`; no RPC URL environment variable is required.
 
 ## Key Dependencies
 
-- **@getpara/viem-v2-integration** (2.0.0-alpha.26) - Para SDK integration for Viem v2
-- **@getpara/react-sdk** (2.0.0-alpha.26) - Para React SDK for wallet connections
-- **viem** (2.26.3) - TypeScript-first Ethereum library (v2)
-- **@tanstack/react-query** (5.81.2) - Data fetching and state management
-- **next** (15.1.5) - React framework
+- **@getpara/viem-v2-integration** (3.0.0-alpha.1) - Para SDK integration for Viem v2
+- **@getpara/react-sdk** (3.0.0-alpha.1) - Para React SDK for wallet connections
+- **viem** (2.42.1) - TypeScript-first Ethereum library (v2)
+- **@tanstack/react-query** (5.90.12) - Data fetching and state management
+- **next** (15.1.12) - React framework
 - **hardhat** - Ethereum development environment for contract compilation
 
 ## Key Files
 
-- `src/context/ParaProvider.tsx` - Para SDK provider setup and configuration
-- `src/hooks/useParaSigner.ts` - Custom hook for Para signer integration with Viem v2
-- `src/hooks/useViemProvider.ts` - Viem v2 client setup hook
+- `src/components/ParaProvider.tsx` - Para SDK provider setup and configuration
+- `src/hooks/useDeployContract.ts` - Custom hook for Para contract deployment with Viem v2
+- `src/lib/viem.ts` - Viem v2 public client setup
 - `src/config/constants.ts` - Configuration constants including API key
-- `src/config/contracts.ts` - Contract configurations and ABIs
+- `src/lib/contracts.ts` - Contract configurations and ABIs
 - `src/app/*/page.tsx` - Example pages demonstrating various blockchain operations
 - `src/contracts/ParaTestToken.sol` - Sample ERC20 token contract
 

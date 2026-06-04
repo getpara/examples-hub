@@ -31,6 +31,12 @@ yarn dev
 - **Para API Key**: Get from [Para Developer Portal](https://developer.getpara.com)
 - **Thirdweb Client ID**: Get from [Thirdweb Dashboard](https://thirdweb.com/dashboard)
 
+## Developer Portal Configuration
+
+Configure the app name, branding, logo, theme, enabled OAuth providers, email and phone login options, 2FA setting, and auth layout on the Para API key in the Developer Portal. This example keeps only runtime modal behavior in code and relies on the Portal for persistent Para app configuration.
+
+The Thirdweb client ID remains an environment variable because it configures Thirdweb smart account and paymaster behavior for this example, not Para Portal settings.
+
 ## Project Structure
 
 ```

@@ -48,7 +48,6 @@ const cosmosicsprovidertestnet = defineChainInfo({
 const paraConfig: ParaGrazConfig = {
   paraWeb: para! as ParaGrazConfig["paraWeb"],
   connectorClass: ParaGrazConnector,
-  modalProps: { appName: "Para + Graz Example" },
   queryClient: queryClient,
 };
 

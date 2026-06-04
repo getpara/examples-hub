@@ -27,6 +27,10 @@ yarn install
 yarn dev
 ```
 
+## Developer Portal Configuration
+
+This example expects Para app identity, branding, authentication methods, theme, wallet visibility, and Para-managed external wallet settings to be configured in the Para Developer Portal for the API key. The local `NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID` value remains because RainbowKit requires a WalletConnect project ID when building its wagmi connectors, and the RainbowKit `appName` remains because RainbowKit connector metadata requires an app label.
+
 ## Project Structure
 
 ```
