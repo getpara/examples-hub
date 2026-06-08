@@ -2,14 +2,12 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "@/styles/globals.css";
 import "@getpara/react-sdk/styles.css";
-import { ParaProvider } from "@/components/ParaProvider";
-import { Header } from "@/components/layout/Header";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Thirdweb AA Example",
-  description: "Para SDK with Thirdweb Account Abstraction for gas-sponsored transactions",
+  title: "Thirdweb Account Abstraction Example",
+  description: "Create a Thirdweb EIP-4337 smart account with Para and send a sponsored transaction.",
 };
 
 export default function RootLayout({
@@ -19,12 +17,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>
-        <ParaProvider>
-          <Header />
-          {children}
-        </ParaProvider>
-      </body>
+      <body className={inter.className}>{children}</body>
     </html>
   );
 }

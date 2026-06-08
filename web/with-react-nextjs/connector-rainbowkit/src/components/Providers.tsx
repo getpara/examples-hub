@@ -7,9 +7,9 @@ import { WagmiProvider } from "wagmi";
 import { queryClient, wagmiConfig } from "@/client/wagmi";
 
 const rainbowkitTheme = lightTheme({
-  accentColor: "#0066CC",
+  accentColor: "#E8642B",
   accentColorForeground: "white",
-  borderRadius: "none",
+  borderRadius: "medium",
   fontStack: "system",
   overlayBlur: "large",
 });

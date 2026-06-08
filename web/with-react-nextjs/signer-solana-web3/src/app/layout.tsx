@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import "@/styles/globals.css";
-import "@getpara/react-sdk/styles.css";
-import Header from "@/components/layout/Header";
-import { ParaProvider } from "@/components/ParaProvider";
+import "@getpara/react-sdk-lite/styles.css";
+
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Para Solana Web3 Integration",
-  description: "Solana Web3.js integration with Para SDK",
+  title: "Para Solana web3.js",
+  description: "An example showcasing how to sign Solana web3.js messages and transactions with Para",
 };
 
 export default function RootLayout({
@@ -16,11 +17,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>
-        <ParaProvider>
-          <Header />
-          <main>{children}</main>
-        </ParaProvider>
+      <body className={`${inter.className} antialiased`}>
+        {children}
       </body>
     </html>
   );

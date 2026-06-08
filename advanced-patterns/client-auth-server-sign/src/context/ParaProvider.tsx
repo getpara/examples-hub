@@ -22,9 +22,8 @@ export function ParaProvider({
         oAuthMethods: ["APPLE", "DISCORD", "FACEBOOK", "FARCASTER", "GOOGLE", "TWITTER"],
         onRampTestMode: true,
         theme: {
-          foregroundColor: "#222222",
           backgroundColor: "#FFFFFF",
-          accentColor: "#888888",
+          foregroundColor: "#888888",
           mode: "light",
           borderRadius: "none",
           font: "Inter",

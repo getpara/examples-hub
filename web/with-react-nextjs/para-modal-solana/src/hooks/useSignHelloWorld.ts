@@ -10,35 +10,60 @@ const HELLO_WORLD_MESSAGE = "Hello World!";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const rpc = createSolanaRpc("https://api.devnet.solana.com" as Parameters<typeof createSolanaRpc>[0]) as any;
 
+type SolanaSignMessageRequest = {
+  content: Uint8Array;
+  signatures: Record<string, Uint8Array>;
+};
+
+type ParaSolanaMessageSigner = {
+  signMessages(messages: SolanaSignMessageRequest[]): Promise<Array<Record<string, Uint8Array>>>;
+};
+
+function getErrorMessage(error: unknown, fallback: string) {
+  return error instanceof Error ? error.message : fallback;
+}
+
+function bytesToBase64(bytes: Uint8Array) {
+  let binary = "";
+  for (const byte of bytes) {
+    binary += String.fromCharCode(byte);
+  }
+  return btoa(binary);
+}
+
 export function useSignHelloWorld() {
   const { connectionType } = useAccount();
   const { solanaSigner } = useParaSolanaSigner({ rpc });
   const { signMessage: solanaWalletSign } = useSolanaWallet();
 
   const [isPending, setIsPending] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [signature, setSignature] = useState<string | undefined>();
 
   const isExternal = connectionType === "external";
 
   const sign = useCallback(async () => {
     setIsPending(true);
-    setError(null);
+    setErrorMessage(null);
+    setSignature(undefined);
 
     try {
       const encoded = new TextEncoder().encode(HELLO_WORLD_MESSAGE);
 
       if (isExternal && solanaWalletSign) {
         const sig = await solanaWalletSign(encoded);
-        setSignature(Buffer.from(sig).toString("base64"));
+        setSignature(bytesToBase64(sig));
       } else if (solanaSigner) {
-        const results = await (solanaSigner as any).signMessages([{ content: encoded, signatures: {} }]);
+        const signer = solanaSigner as ParaSolanaMessageSigner;
+        const results = await signer.signMessages([{ content: encoded, signatures: {} }]);
         const sigBytes = Object.values(results[0] as Record<string, Uint8Array>)[0];
         if (!sigBytes) throw new Error("Unexpected signing result format");
-        setSignature(Buffer.from(sigBytes).toString("base64"));
+        setSignature(bytesToBase64(sigBytes));
+      } else {
+        throw new Error("No Solana signer available");
       }
     } catch (err) {
-      setError(err instanceof Error ? err : new Error("Failed to sign message"));
+      setErrorMessage(getErrorMessage(err, "Failed to sign message"));
     } finally {
       setIsPending(false);
     }
@@ -48,7 +73,7 @@ export function useSignHelloWorld() {
     sign,
     message: HELLO_WORLD_MESSAGE,
     isPending,
-    error,
+    errorMessage,
     signature,
   };
 }

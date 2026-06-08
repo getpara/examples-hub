@@ -1,0 +1,95 @@
+"use client";
+
+import { useState } from "react";
+import { ActionButton } from "@/components/ui/ActionButton";
+import { Card } from "@/components/ui/Card";
+import { DataField } from "@/components/ui/DataField";
+import { StatusAlert } from "@/components/ui/StatusAlert";
+import { useMessageSigning } from "@/hooks/useMessageSigning";
+import { useStellarWalletConnection } from "@/hooks/useStellarWalletConnection";
+
+export default function SignMessageDemo() {
+  const [message, setMessage] = useState("Hello from Para + Stellar!");
+
+  const wallet = useStellarWalletConnection();
+  const { signMessage, verifySignature, signature, isLoading, error, isReady, isVerified, reset } =
+    useMessageSigning();
+
+  const handleSign = async () => {
+    reset();
+    await signMessage(message);
+  };
+
+  const handleVerify = async () => {
+    if (signature) {
+      await verifySignature(message);
+    }
+  };
+
+  return (
+    <div className="mx-auto w-full max-w-6xl px-5 py-10">
+      <div className="mb-8 text-center animate-fade-in-up">
+        <h1 className="mb-3 text-2xl font-semibold tracking-tight text-card-foreground">Sign Message Demo</h1>
+        <p className="mx-auto max-w-2xl text-[13px] font-mono leading-relaxed text-muted-foreground">
+          Sign arbitrary text with Para's Stellar signer, then verify the signature with the connected public key.
+        </p>
+      </div>
+
+      <div className="mx-auto max-w-xl">
+        {error && <StatusAlert type="error" message={error.message} />}
+        {signature && !error && isVerified === null && (
+          <StatusAlert type="success" message="Message signed successfully!" />
+        )}
+        {isVerified === true && <StatusAlert type="success" message="Signature verified successfully!" />}
+        {isVerified === false && !error && (
+          <StatusAlert type="error" message="Invalid signature for this message and public key." />
+        )}
+
+        <div className="space-y-4">
+          <div className="space-y-3">
+            <label htmlFor="message" className="block text-sm font-medium text-foreground">
+              Message to Sign
+            </label>
+            <textarea
+              id="message"
+              value={message}
+              onChange={(event) => setMessage(event.target.value)}
+              placeholder="Enter a message to sign"
+              required
+              disabled={isLoading}
+              data-testid="sign-message-input"
+              className="field-control"
+              rows={4}
+            />
+          </div>
+
+          <ActionButton
+            onClick={handleSign}
+            isLoading={isLoading}
+            disabled={!message.trim() || !isReady || !wallet.isConnected}
+            loadingText="Signing Message..."
+            data-testid="sign-submit-button">
+            {!wallet.isConnected ? "Connect Wallet" : "Sign Message"}
+          </ActionButton>
+
+          {signature && (
+            <Card title="Signature">
+              <DataField label="Message" value={message} mono />
+              <div className="mt-4">
+                <DataField
+                  label="Signature"
+                  value={signature}
+                  mono
+                  data-testid="sign-signature-display"
+                />
+              </div>
+              <button type="button" onClick={handleVerify} className="btn-secondary mt-4 px-4 py-2 text-sm">
+                Verify
+              </button>
+            </Card>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

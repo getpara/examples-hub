@@ -3,16 +3,16 @@ interface StatusAlertProps {
   message: string;
 }
 
-export function StatusAlert({ type, message }: StatusAlertProps) {
-  const styles = {
-    success: "bg-green-50 border-green-200 text-green-800",
-    error: "bg-red-50 border-red-200 text-red-800",
-    info: "bg-blue-50 border-blue-200 text-blue-800",
-  };
+const alertStyles = {
+  success: "bg-success/8 border-success/15 text-success-foreground",
+  error: "bg-destructive/8 border-destructive/15 text-destructive",
+  info: "bg-muted/70 border-border text-muted-foreground",
+};
 
+export function StatusAlert({ type, message }: StatusAlertProps) {
   return (
-    <div className={`p-4 border ${styles[type]} mb-4`}>
-      <p className="text-sm">{message}</p>
+    <div className={`mb-4 rounded-xl border px-4 py-3 animate-fade-in ${alertStyles[type]}`}>
+      <p className="break-words text-sm">{message}</p>
     </div>
   );
 }

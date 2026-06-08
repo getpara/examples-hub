@@ -8,6 +8,7 @@ import '../features/auth/widgets/otp_verification_sheet.dart';
 import '../features/auth/widgets/connect_wallet_button.dart';
 import '../features/auth/widgets/external_wallet_selection_sheet.dart';
 import '../features/auth/models/external_wallet_provider.dart';
+import '../config/deep_link_constants.dart';
 import 'wallet_creation_loading_screen.dart';
 import 'external_wallet_demo_screen.dart';
 
@@ -36,7 +37,9 @@ class _AuthScreenState extends State<AuthScreen> {
   @override
   void initState() {
     super.initState();
-    _webAuthSession = FlutterWebAuthSession(callbackUrlScheme: 'paraflutter');
+    _webAuthSession = FlutterWebAuthSession(
+      callbackUrlScheme: DeepLinkConstants.appScheme,
+    );
   }
 
   Future<void> _handleSocialAuth(SocialProvider provider) async {
@@ -51,7 +54,7 @@ class _AuthScreenState extends State<AuthScreen> {
 
       final authState = await para.verifyOAuth(
         provider: oauthMethod,
-        appScheme: 'paraflutter',
+        appScheme: DeepLinkConstants.appScheme,
       );
 
       await _continueAuth(authState, flow: _AuthFlow.oauth);
@@ -227,7 +230,7 @@ class _AuthScreenState extends State<AuthScreen> {
         signupMethod: SignupMethod.passkey,
         webAuthenticationSession: _webAuthSession,
       );
-      
+
       // Success - the loading screen will handle navigation via onComplete
       if (mounted) {
         Navigator.of(context).pop(); // Close loading screen
@@ -370,7 +373,8 @@ class _AuthScreenState extends State<AuthScreen> {
     );
   }
 
-  Future<void> _handleExternalWalletAuth(ExternalWalletProvider provider) async {
+  Future<void> _handleExternalWalletAuth(
+      ExternalWalletProvider provider) async {
     if (!mounted) return;
 
     try {
@@ -399,20 +403,25 @@ class _AuthScreenState extends State<AuthScreen> {
       if (mounted) {
         Navigator.pop(context); // Close the sheet
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('External wallet connection failed: ${e.toString()}')),
+          SnackBar(
+              content:
+                  Text('External wallet connection failed: ${e.toString()}')),
         );
       }
     }
   }
 
-  Future<String?> _connectExternalWallet(ExternalWalletProvider provider) async {
+  Future<String?> _connectExternalWallet(
+      ExternalWalletProvider provider) async {
     if (provider == ExternalWalletProvider.phantom) {
       return phantomConnector.connect();
     }
 
     if (provider == ExternalWalletProvider.metamask) {
       await metamaskConnector.connect();
-      return metamaskConnector.accounts.isNotEmpty ? metamaskConnector.accounts.first : null;
+      return metamaskConnector.accounts.isNotEmpty
+          ? metamaskConnector.accounts.first
+          : null;
     }
 
     return null;
@@ -439,9 +448,9 @@ class _AuthScreenState extends State<AuthScreen> {
               Text(
                 'Sign Up or Log In',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black,
-                ),
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black,
+                    ),
               ),
               const SizedBox(height: 32),
               // Social login buttons
@@ -461,7 +470,8 @@ class _AuthScreenState extends State<AuthScreen> {
                       child: SocialAuthButton(
                         provider: SocialProvider.apple,
                         isLoading: _loadingProvider == SocialProvider.apple,
-                        onPressed: () => _handleSocialAuth(SocialProvider.apple),
+                        onPressed: () =>
+                            _handleSocialAuth(SocialProvider.apple),
                       ),
                     ),
                   if (Platform.isIOS) const SizedBox(width: 8),
@@ -469,7 +479,8 @@ class _AuthScreenState extends State<AuthScreen> {
                     child: SocialAuthButton(
                       provider: SocialProvider.discord,
                       isLoading: _loadingProvider == SocialProvider.discord,
-                      onPressed: () => _handleSocialAuth(SocialProvider.discord),
+                      onPressed: () =>
+                          _handleSocialAuth(SocialProvider.discord),
                     ),
                   ),
                 ],

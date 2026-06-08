@@ -11,6 +11,7 @@ interface UseOneClickLoginResult {
   loginWithEmail: (email: string) => Promise<boolean>;
   loginWithPhone: (phone: string) => Promise<boolean>;
   loginWithGoogle: () => Promise<boolean>;
+  loginWithApple: () => Promise<boolean>;
   reset: () => void;
 }
 
@@ -91,12 +92,12 @@ export function useOneClickLogin(onSuccess: () => void): UseOneClickLoginResult 
     [runAuth]
   );
 
-  const loginWithGoogle = useCallback(
-    () =>
+  const loginWithOAuth = useCallback(
+    (method: 'GOOGLE' | 'APPLE', errorLabel: string) =>
       runAuth(
         () =>
           para.authenticateWithOAuth({
-            method: 'GOOGLE',
+            method,
             appScheme: APP_SCHEME,
             redirectCallbacks: {
               onOAuthUrl: async (url) => {
@@ -109,9 +110,19 @@ export function useOneClickLogin(onSuccess: () => void): UseOneClickLoginResult 
               },
             },
           }),
-        'Google login failed'
+        errorLabel
       ),
     [runAuth]
+  );
+
+  const loginWithGoogle = useCallback(
+    () => loginWithOAuth('GOOGLE', 'Google login failed'),
+    [loginWithOAuth]
+  );
+
+  const loginWithApple = useCallback(
+    () => loginWithOAuth('APPLE', 'Apple login failed'),
+    [loginWithOAuth]
   );
 
   return {
@@ -120,6 +131,7 @@ export function useOneClickLogin(onSuccess: () => void): UseOneClickLoginResult 
     loginWithEmail,
     loginWithPhone,
     loginWithGoogle,
+    loginWithApple,
     reset,
   };
 }

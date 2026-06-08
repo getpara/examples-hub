@@ -44,6 +44,10 @@ yarn install
 yarn dev
 ```
 
+## Developer Portal Configuration
+
+This custom UI example uses direct `@getpara/web-sdk` methods instead of `ParaProvider`. Configure app identity, enabled auth methods, branding, theme, wallet visibility, and wallet creation settings in the Para Developer Portal for the API key. The app reads only `VITE_PARA_API_KEY` and `VITE_PARA_ENVIRONMENT`; it does not require a WalletConnect project ID.
+
 ## Project Structure
 
 ```

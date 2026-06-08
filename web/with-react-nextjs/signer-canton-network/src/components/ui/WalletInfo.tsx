@@ -40,6 +40,7 @@ export function WalletInfo({
             </p>
           </div>
           <button
+            type="button"
             onClick={onRefreshBalance}
             data-testid="canton-balance-refresh"
             disabled={isFetchingBalance}

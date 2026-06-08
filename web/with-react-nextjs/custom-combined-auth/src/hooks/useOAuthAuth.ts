@@ -18,6 +18,11 @@ export interface UseOAuthAuthReturn {
   cancel: () => void;
 }
 
+interface OAuthDoneState {
+  stage: "done";
+  isNewUser: boolean;
+}
+
 export function useOAuthAuth(): UseOAuthAuthReturn {
   const [activeProvider, setActiveProvider] = useState<TOAuthMethod | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -77,18 +82,18 @@ export function useOAuthAuth(): UseOAuthAuthReturn {
       if (method === "FARCASTER") {
         verifyFarcaster(
           {
-            onConnectUri: (uri) => {
+            onConnectUri: (uri: string) => {
               popupWindow.current = window.open(uri, "farcaster", "popup=true");
             },
             isCanceled: () => shouldCancel.current || !!popupWindow.current?.closed,
           },
           {
-            onSuccess: (authState) => {
+            onSuccess: (authState: OAuthDoneState) => {
               if (authState.stage === "done") {
                 handleAuthComplete(authState.isNewUser);
               }
             },
-            onError: (err) => {
+            onError: (err: Error) => {
               setError(err.message);
               resetState();
             },
@@ -98,18 +103,18 @@ export function useOAuthAuth(): UseOAuthAuthReturn {
         verifyOAuth(
           {
             method: method as Exclude<TOAuthMethod, "TELEGRAM" | "FARCASTER">,
-            onOAuthUrl: (url) => {
+            onOAuthUrl: (url: string) => {
               popupWindow.current = window.open(url, "oauth", "popup=true");
             },
             isCanceled: () => shouldCancel.current || !!popupWindow.current?.closed,
           },
           {
-            onSuccess: (authState) => {
+            onSuccess: (authState: OAuthDoneState) => {
               if (authState.stage === "done") {
                 handleAuthComplete(authState.isNewUser);
               }
             },
-            onError: (err) => {
+            onError: (err: Error) => {
               setError(err.message);
               resetState();
             },

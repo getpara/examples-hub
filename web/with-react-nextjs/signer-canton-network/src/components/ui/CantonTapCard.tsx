@@ -62,11 +62,12 @@ export function CantonTapCard({
             placeholder="100"
             inputMode="decimal"
             disabled={isPending}
-            className="w-full rounded-xl border border-border bg-background px-3 py-2 font-mono text-xs leading-relaxed focus:outline-none focus:ring-2 focus:ring-accent/40 disabled:opacity-50"
+            className="w-full rounded-xl border border-border bg-background px-3 py-2 font-mono text-xs leading-relaxed focus:outline-none focus:ring-2 focus:ring-primary/30 disabled:opacity-50"
           />
         </div>
 
         <button
+          type="button"
           onClick={() => onTap({ amount })}
           data-testid="canton-tap-button"
           disabled={!canTap}

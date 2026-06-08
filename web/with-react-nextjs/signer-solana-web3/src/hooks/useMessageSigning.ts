@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import { getBase58Decoder, getBase58Encoder, getUtf8Encoder } from "@solana/kit";
+import { useCallback, useState } from "react";
+import { Buffer } from "buffer";
+import bs58 from "bs58";
 import nacl from "tweetnacl";
 import { useParaSigner } from "./useParaSigner";
 
@@ -15,19 +16,24 @@ export function useMessageSigning() {
   const signMessage = useCallback(
     async (message: string) => {
       if (!signer || !isReady) {
-        setError(new Error("Signer not ready"));
+        setError(new Error("Signer not ready. Please connect your wallet."));
+        return;
+      }
+
+      if (!message.trim()) {
+        setError(new Error("Please enter a message to sign."));
         return;
       }
 
       setIsLoading(true);
       setError(null);
+      setSignature(null);
       setIsVerified(null);
 
       try {
-        const messageBytes = getUtf8Encoder().encode(message.trim());
+        const messageBytes = new TextEncoder().encode(message.trim());
         const signedBytes = await signer.signBytes(Buffer.from(messageBytes));
-        const sig = getBase58Decoder().decode(signedBytes);
-        setSignature(`${sig}`);
+        setSignature(bs58.encode(signedBytes));
       } catch (err) {
         console.error("Error signing message:", err);
         setError(err instanceof Error ? err : new Error("Failed to sign message"));
@@ -41,13 +47,13 @@ export function useMessageSigning() {
   const verifySignature = useCallback(
     async (message: string) => {
       if (!signer?.sender || !signature) {
-        setError(new Error("No signer or signature to verify"));
+        setError(new Error("No signer or signature to verify."));
         return;
       }
 
       try {
-        const messageBytes = new Uint8Array(getUtf8Encoder().encode(message));
-        const signatureBytes = new Uint8Array(getBase58Encoder().encode(signature));
+        const messageBytes = new TextEncoder().encode(message);
+        const signatureBytes = bs58.decode(signature);
         const publicKeyBuffer = signer.sender.toBytes();
         const isValid = nacl.sign.detached.verify(messageBytes, signatureBytes, publicKeyBuffer);
         setIsVerified(isValid);

@@ -1,29 +1,26 @@
-"use client";
-
 import Image from "next/image";
-import { useAppKit, useAppKitAccount } from "@reown/appkit/react";
 import { formatAddress } from "@/utils/format";
 
-export function Header() {
-  const { open } = useAppKit();
-  const { isConnected, address } = useAppKitAccount();
+interface HeaderProps {
+  address?: string;
+  isConnected: boolean;
+  onConnect: () => void;
+}
 
+export function Header({ address, isConnected, onConnect }: HeaderProps) {
   return (
-    <header className="border-b border-gray-200">
-      <div className="container mx-auto px-4 py-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Image src="/para.svg" alt="Para" width={32} height={32} />
-            <span className="text-xl font-semibold">Reown AppKit + Para</span>
+    <header className="sticky top-0 z-10 border-b border-border/50 bg-card/80 backdrop-blur-xl">
+      <div className="mx-auto flex max-w-4xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
+        <div className="flex min-w-0 items-center gap-3">
+          <Image src="/para.svg" alt="Para" width={28} height={28} priority />
+          <div className="min-w-0">
+            <p className="truncate text-sm font-semibold text-card-foreground">Para</p>
+            <p className="truncate text-xs text-muted-foreground">Reown AppKit example</p>
           </div>
-
-          <button
-            onClick={() => open()}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
-          >
-            {isConnected && address ? formatAddress(address) : "Connect Wallet"}
-          </button>
         </div>
+        <button type="button" onClick={onConnect} className="btn-primary shrink-0 px-4 py-2 text-sm">
+          {isConnected && address ? formatAddress(address) : "Connect Wallet"}
+        </button>
       </div>
     </header>
   );

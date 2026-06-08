@@ -15,7 +15,7 @@ export function EmailForm({ email, onEmailChange, onSubmit, isPending, disabled 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-card-foreground">
           Email address
         </label>
         <input
@@ -25,14 +25,14 @@ export function EmailForm({ email, onEmailChange, onSubmit, isPending, disabled 
           onChange={(e) => onEmailChange(e.target.value)}
           placeholder="you@example.com"
           disabled={disabled || isPending}
-          className="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+          className="min-h-11 w-full rounded-lg border border-border bg-card px-3 text-sm text-card-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15 disabled:cursor-not-allowed disabled:bg-muted"
           required
         />
       </div>
       <button
         type="submit"
         disabled={isPending || !email || disabled}
-        className="w-full px-4 py-2 bg-gray-900 text-white hover:bg-gray-950 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed font-medium">
+        className="btn-primary min-h-11 w-full px-4 text-sm">
         {isPending ? "Loading..." : "Continue with Email"}
       </button>
     </form>

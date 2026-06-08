@@ -2,6 +2,7 @@ import "server-only";
 
 import {
   WalletSDKImpl,
+  type WalletSDK,
   localNetAuthDefault,
   localNetStaticConfig,
   LedgerController,
@@ -25,9 +26,9 @@ function envOrThrow(key: string): string {
 // request's bound party. For multi-user serving, build per-request
 // controllers from the factories below (or wrap setPartyId+prepare+execute
 // in a per-process mutex).
-let sdkPromise: Promise<WalletSDKImpl> | null = null;
+let sdkPromise: Promise<WalletSDK> | null = null;
 
-export function getSdk(): Promise<WalletSDKImpl> {
+export function getSdk(): Promise<WalletSDK> {
   if (sdkPromise) return sdkPromise;
 
   const ledgerApiUrl = envOrThrow("LEDGER_API_URL");

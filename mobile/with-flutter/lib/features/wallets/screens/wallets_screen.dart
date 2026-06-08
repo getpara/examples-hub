@@ -8,6 +8,7 @@ import '../widgets/wallet_card.dart';
 import 'details/evm_wallet_view.dart';
 import 'details/solana_wallet_view.dart';
 import 'details/cosmos_wallet_view.dart';
+import 'details/stellar_wallet_view.dart';
 
 class WalletsScreen extends StatefulWidget {
   final VoidCallback onLogout;
@@ -403,6 +404,8 @@ class _WalletsScreenState extends State<WalletsScreen> {
               return SolanaWalletView(wallet: wallet);
             case WalletType.cosmos:
               return CosmosWalletView(wallet: wallet);
+            case WalletType.stellar:
+              return StellarWalletView(wallet: wallet);
             default:
               return Scaffold(
                 appBar: AppBar(title: const Text('Unknown Wallet')),

@@ -2,9 +2,9 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { ethers } from "ethers";
-import { useWallet } from "@getpara/react-sdk";
+import { useWallet } from "@getpara/react-sdk-lite";
 import { useParaSigner } from "./useParaSigner";
-import ParaTestToken from "@/contracts/artifacts/contracts/ParaTestToken.sol/ParaTestToken.json";
+import ParaTestToken from "@/contracts/artifacts/src/contracts/ParaTestToken.sol/ParaTestToken.json";
 
 export type TokenAttestation = {
   holder: string;

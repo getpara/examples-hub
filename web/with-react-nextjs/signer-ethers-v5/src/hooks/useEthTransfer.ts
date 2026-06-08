@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { ethers } from "ethers";
-import { useWallet } from "@getpara/react-sdk";
+import { useWallet } from "@getpara/react-sdk-lite";
 import { useParaSigner } from "./useParaSigner";
 
 const HOLESKY_CHAIN_ID = 17000;

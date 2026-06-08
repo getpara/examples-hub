@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import "@/styles/globals.css";
 import "@getpara/react-sdk-lite/styles.css";
 import { AppKitProvider } from "@/context/AppKitProvider";
-import { AppWrapper } from "@/components/layout/AppWrapper";
+
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Reown AppKit + Para",
-  description: "Reown AppKit integration with Para wallet connector",
+  title: "Para + Reown AppKit Example",
+  description: "Para integration with Reown AppKit wallet connector",
 };
 
 export default function RootLayout({
@@ -16,9 +18,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>
+      <body className={inter.className}>
         <AppKitProvider>
-          <AppWrapper>{children}</AppWrapper>
+          {children}
         </AppKitProvider>
       </body>
     </html>

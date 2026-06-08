@@ -41,6 +41,7 @@ export function CantonOnboardCard({
         </p>
 
         <button
+          type="button"
           onClick={onOnboard}
           data-testid="canton-onboard-button"
           disabled={isPending || Boolean(partyId)}

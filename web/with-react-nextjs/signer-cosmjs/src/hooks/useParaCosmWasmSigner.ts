@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { SigningCosmWasmClient } from "@cosmjs/cosmwasm-stargate";
+import { SigningCosmWasmClient } from "@cosmjs/cosmwasm";
 import { GasPrice } from "@cosmjs/stargate";
-import { useParaCosmjsProtoSigner } from "@getpara/react-sdk/cosmos";
-import { useAccount } from "@getpara/react-sdk";
+import { useParaCosmjsProtoSigner } from "@getpara/react-sdk-lite/chains/cosmos";
+import { useAccount } from "@getpara/react-sdk-lite";
 import { DEFAULT_CHAIN } from "@/config/chains";
 import { DEFAULT_GAS_PRICE } from "@/config/constants";
 

@@ -1,95 +1,101 @@
 # Para Modal + Cosmos Example
 
-[![Live Demo](https://img.shields.io/badge/▶_Live_Demo-black?style=for-the-badge&logo=vercel)](https://para-example-para-modal-cosmos.vercel.app)
+[![Live Demo](https://img.shields.io/badge/Live_Demo-black?style=for-the-badge&logo=vercel)](https://para-example-para-modal-cosmos.vercel.app)
 
-A minimal Next.js example demonstrating Para Modal integration with Cosmos wallets (Keplr/Leap) for wallet connection and ADR-036 message signing.
+A minimal Next.js example showing Para Modal with Cosmos wallets and ADR-036 message signing. Para SDK and Graz logic lives in hooks and provider setup, while the UI components receive plain props.
 
-## What This Example Shows
+## Features
 
-- Setting up `ParaProvider` with Cosmos wallet configuration
-- Configuring external wallets (Keplr, Leap) via `externalWalletConfig`
-- Opening the Para modal via the `useModal` hook
-- Checking authentication state with `useAccount`
-- Retrieving Cosmos wallet address with `useParaCosmjsAminoSigner`
-- Signing arbitrary messages using ADR-036 standard with Amino encoding
+- Para Modal connection flow
+- Cosmos external wallet connector configuration
+- Cosmos wallet address display
+- ADR-036 arbitrary message signing with Amino encoding
+- Portal-driven persistent app, auth, branding, and wallet configuration
+- Clean separation between SDK hooks and presentation components
 
 ## Setup
 
-1. Create a `.env` file:
+Create a local `.env` file:
 
 ```env
 NEXT_PUBLIC_PARA_API_KEY=your_api_key_here
 NEXT_PUBLIC_PARA_ENVIRONMENT=BETA
 ```
 
-2. Install dependencies and run:
+Configure the API key in the [Para Developer Portal](https://developer.getpara.com) with the app display name, branding and logo, theme, allowed external wallets, OAuth providers, email and phone login options, and WalletConnect settings when applicable. This example keeps the Cosmos connector chain wiring in code because the connector needs runtime chain setup.
+
+Install and run the production build:
 
 ```bash
 yarn install
-yarn dev
+yarn build
+yarn start
 ```
 
-## Project Structure
+## Key Files
 
-```
+```text
 src/
 ├── app/
-│   ├── layout.tsx              # Root layout with ParaProvider
-│   └── page.tsx                # Main page with auth flow
+│   ├── layout.tsx                    # Root layout, metadata, ParaProvider, SDK styles
+│   └── page.tsx                      # Server entry that renders the client example
 ├── components/
-│   ├── ParaProvider.tsx        # Para SDK provider with Cosmos config
-│   ├── layout/Header.tsx       # Header with Cosmos address display
+│   ├── ParaModalCosmosExample.tsx    # Client orchestration
+│   ├── ParaProvider.tsx              # Para SDK provider with Cosmos connector config
+│   ├── layout/Header.tsx             # Prop-only header
 │   └── ui/
-│       ├── ConnectCard.tsx     # Connect wallet card
-│       ├── WalletInfo.tsx      # Connected Cosmos wallet display
-│       └── SignMessage.tsx     # ADR-036 sign message UI
+│       ├── ConnectCard.tsx           # Prop-only connect card
+│       ├── WalletInfo.tsx            # Prop-only Cosmos wallet display
+│       └── SignMessage.tsx           # Prop-only ADR-036 signing UI
 ├── hooks/
-│   └── useSignHelloWorld.ts    # ADR-036 signing with useParaCosmjsAminoSigner
+│   ├── useParaModalCosmosWallet.ts   # Copyable modal connection state
+│   └── useSignHelloWorld.ts          # Copyable ADR-036 signing logic
+└── styles/globals.css                # Para example tokens and UI primitives
 ```
 
 ## Cosmos Configuration
 
-This example configures Para to work with Cosmos wallets:
+`ParaProvider` passes the Cosmos connector runtime configuration:
 
-```typescript
+```tsx
 externalWalletConfig={{
-  wallets: ["KEPLR", "LEAP"],
   cosmosConnector: {
     config: {
       chains: [cosmoshub, osmosis, noble],
       selectedChainId: cosmoshub.chainId,
+      multiChain: false,
+      onSwitchChain: () => {},
     },
   },
 }}
 ```
 
-## ADR-036 Message Signing
+## Hook Contracts
 
-This example uses the Cosmos ADR-036 standard for arbitrary message signing:
+`useParaModalCosmosWallet` owns the Para Modal connection hooks:
 
-```typescript
-import { useParaCosmjsAminoSigner } from "@getpara/react-sdk/cosmos";
-import { makeSignDoc } from "@cosmjs/amino";
-
-const { aminoSigner } = useParaCosmjsAminoSigner();
-
-// Create ADR-036 sign doc
-const signDoc = makeSignDoc(
-  [{ type: "sign/MsgSignData", value: { signer: address, data: btoa(message) } }],
-  { amount: [], gas: "0" },
-  "cosmoshub-4",
-  "",
-  0,
-  0
-);
-
-const { signature } = await aminoSigner.signAmino(address, signDoc);
+```tsx
+const {
+  address,
+  isConnected,
+  openModal,
+} = useParaModalCosmosWallet();
 ```
 
-## Learn More
+`useSignHelloWorld` owns ADR-036 signing:
 
-- [Para Documentation](https://docs.getpara.com)
-- [Para Website](https://getpara.com)
-- [Para Developer Portal](https://developer.getpara.com)
-- [Cosmos ADR-036](https://docs.cosmos.network/main/architecture/adr-036-arbitrary-signature)
-- [Next.js Documentation](https://nextjs.org/docs)
+```tsx
+const {
+  errorMessage,
+  isPending,
+  message,
+  sign,
+  signature,
+} = useSignHelloWorld();
+```
+
+The signing hook uses `useParaCosmjsAminoSigner` for embedded wallets and `useOfflineSigners` from Graz for external Cosmos wallets.
+
+## Notes
+
+The example includes direct dependencies that are currently reached by the catch-all Para React SDK build graph, including `@metamask/delegation-toolkit`, `ethers`, `@stellar/stellar-sdk`, and `@wagmi/core`. It also keeps `arg` and `starknet` direct because `graz --generate` reaches them through the Graz CLI and Keplr dependency tree during postinstall.

@@ -6,6 +6,7 @@ import 'client/para.dart';
 import 'screens/launch_screen.dart';
 import 'screens/auth_screen.dart';
 import 'screens/home_screen.dart';
+import 'config/deep_link_constants.dart';
 import 'services/deep_link_service.dart';
 
 enum AppState { launch, auth, home }
@@ -48,7 +49,10 @@ class _ParaAppState extends State<ParaApp> {
         nextState = AppState.launch;
         break;
       case SessionStatus.authenticated:
-        nextState = AppState.home;
+        // AuthScreen owns the final transition while an interactive auth flow is
+        // in progress. Moving to Home immediately can mount WalletsScreen before
+        // the SDK has finished waiting for signup/login session details.
+        nextState = _state == AppState.auth ? AppState.auth : AppState.home;
         break;
       case SessionStatus.needsAuth:
         nextState = AppState.auth;
@@ -67,19 +71,13 @@ class _ParaAppState extends State<ParaApp> {
 
   void _handleDeepLink(Uri uri) {
     // Validate the scheme first
-    if (uri.scheme != 'paraflutter') {
+    if (uri.scheme != DeepLinkConstants.appScheme) {
       return;
     }
 
     try {
-      // Handle Para callback URLs
-      if (DeepLinkService.isParaCallback(uri)) {
-        // Para SDK should handle these automatically through web view
-        _showSnackBar('Processing authentication callback...');
-      }
-
       // Handle wallet connection URLs
-      else if (DeepLinkService.isWalletConnectionCallback(uri)) {
+      if (DeepLinkService.isWalletConnectionCallback(uri)) {
         // Validate and extract address parameter
         final address = uri.queryParameters['address'];
         if (address != null && address.isNotEmpty) {

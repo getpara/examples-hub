@@ -1,6 +1,14 @@
 import "./globals.css";
-import { ParaProvider } from "@/components/ParaProvider";
-import { Header } from "@/components/layout/Header";
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import "@getpara/react-sdk/styles.css";
+
+const inter = Inter({ subsets: ["latin"] });
+
+export const metadata: Metadata = {
+  title: "Custom Phone Auth Example",
+  description: "Authenticate with Para using a custom phone number flow.",
+};
 
 export default function RootLayout({
   children,
@@ -9,12 +17,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>
-        <ParaProvider>
-          <Header />
-          <main className="min-h-screen bg-gray-50">{children}</main>
-        </ParaProvider>
-      </body>
+      <body className={inter.className}>{children}</body>
     </html>
   );
 }

@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 interface HeaderProps {
   isConnected: boolean;
   address: string;
@@ -13,12 +15,13 @@ export function Header({ isConnected, address, partyId, onConnect }: HeaderProps
     <header className="sticky top-0 z-10 bg-card/80 backdrop-blur-xl border-b border-border/50">
       <div className="mx-auto max-w-5xl px-6 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <img src="/para.svg" alt="Para" className="h-5 w-auto" />
+          <Image src="/para.svg" alt="Para" width={79} height={24} className="h-5 w-auto" />
           <span className="text-xs font-medium text-muted-foreground">Canton External Party Example</span>
         </div>
 
         {isConnected ? (
           <button
+            type="button"
             onClick={onConnect}
             data-testid="account-address-display"
             data-address={address}
@@ -32,6 +35,7 @@ export function Header({ isConnected, address, partyId, onConnect }: HeaderProps
           </button>
         ) : (
           <button
+            type="button"
             onClick={onConnect}
             data-testid="header-connect-button"
             className="btn-primary px-5 py-1.5 text-sm">

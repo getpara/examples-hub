@@ -1,31 +1,33 @@
 interface TransactionHashProps {
-  txHash: string;
+  transactionHash: string | null;
 }
 
-export function TransactionHash({ txHash }: TransactionHashProps) {
-  if (!txHash) return null;
+export function TransactionHash({ transactionHash }: TransactionHashProps) {
+  if (!transactionHash) {
+    return null;
+  }
 
-  const explorerUrl = `https://testnet.ping.pub/cosmos/tx/${txHash}`;
+  const explorerUrl = `https://testnet.ping.pub/cosmos/tx/${transactionHash}`;
 
   return (
-    <div className="mt-8 rounded-none border border-gray-200">
-      <div className="flex justify-between items-center px-6 py-4 bg-gray-50 border-b border-gray-200">
-        <h3 className="text-sm font-medium text-gray-900">Transaction Hash:</h3>
+    <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden animate-fade-in">
+      <div className="px-6 py-4 border-b border-border/60 flex items-center justify-between gap-4">
+        <h2 className="text-sm font-semibold">Transaction Hash</h2>
         <a
           href={explorerUrl}
           target="_blank"
           rel="noopener noreferrer"
           data-testid="tx-explorer-link"
-          className="px-3 py-1 text-sm bg-gray-900 text-white hover:bg-gray-950 transition-colors rounded-none cursor-pointer">
-          View on Ping.pub
+          className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+          View -&gt;
         </a>
       </div>
       <div className="p-6">
-        <p
-          className="text-sm font-mono break-all text-gray-600 bg-white p-4 border border-gray-200"
-          data-testid="tx-hash-display">
-          {txHash}
-        </p>
+        <div className="rounded-xl bg-muted/60 px-4 py-3 break-all" data-testid="tx-hash-display">
+          <code className="text-xs font-mono text-muted-foreground leading-relaxed">
+            {transactionHash}
+          </code>
+        </div>
       </div>
     </div>
   );

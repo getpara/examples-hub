@@ -1,0 +1,81 @@
+appId: com.usecapsule.example.swift
+---
+- clearState
+- launchApp
+- waitForAnimationToEnd
+
+- assertVisible: "Sign Up or Log In"
+- evalScript: ${output.email = 'maestro-stellar-' + Date.now() + '@test.getpara.com'}
+
+- tapOn: "Enter email or phone"
+- inputText: "${output.email}"
+- tapOn: "Continue"
+
+- extendedWaitUntil:
+    visible: "Cancel"
+    timeout: 10000
+- tapOn: "Continue"
+
+- extendedWaitUntil:
+    visible: "Send new code"
+    timeout: 30000
+
+- tapOn:
+    point: "15%,35%"
+- waitForAnimationToEnd
+- inputText: "1"
+- waitForAnimationToEnd
+- inputText: "2"
+- waitForAnimationToEnd
+- inputText: "3"
+- waitForAnimationToEnd
+- inputText: "4"
+- waitForAnimationToEnd
+- inputText: "5"
+- waitForAnimationToEnd
+- inputText: "6"
+
+- waitForAnimationToEnd
+- runFlow:
+    when:
+      visible: "Approve"
+    commands:
+      - tapOn: "Approve"
+
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible: "Wallets"
+    timeout: 30000
+
+- runFlow:
+    when:
+      visible: "Create Your First Wallet"
+    commands:
+      - tapOn:
+          id: "createFirstWalletButton"
+      - tapOn:
+          id: "stellarWalletButton"
+
+- runFlow:
+    when:
+      visible: "Add Wallet"
+    commands:
+      - tapOn:
+          id: "addWalletButton"
+      - tapOn:
+          id: "stellarWalletButton"
+
+- extendedWaitUntil:
+    visible: "STELLAR"
+    timeout: 30000
+- tapOn:
+    id: "walletCell_STELLAR"
+- extendedWaitUntil:
+    visible: "Stellar Wallet"
+    timeout: 10000
+
+- tapOn: "Sign Transaction"
+- extendedWaitUntil:
+    visible: "Transaction Signed"
+    timeout: 20000
+- assertVisible: "Transaction Signed"

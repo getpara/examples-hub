@@ -1,41 +1,40 @@
 import { useState, useRef, useCallback } from "react";
 import {
   useVerifyOAuth,
-  useVerifyFarcaster,
   useWaitForLogin,
   useWaitForWalletCreation,
   type TOAuthMethod,
 } from "@getpara/react-sdk";
+import type { OAuthProviderMethod } from "@/types/auth";
 
 export interface UseOAuthAuthReturn {
-  // State
-  activeProvider: TOAuthMethod | null;
+  activeProvider: OAuthProviderMethod | null;
   error: string | null;
   isPending: boolean;
-
-  // Actions
-  authenticate: (method: TOAuthMethod) => void;
+  authenticate: (method: OAuthProviderMethod) => void;
   cancel: () => void;
 }
 
+interface OAuthDoneState {
+  stage: "done";
+  isNewUser: boolean;
+}
+
 export function useOAuthAuth(): UseOAuthAuthReturn {
-  const [activeProvider, setActiveProvider] = useState<TOAuthMethod | null>(null);
+  const [activeProvider, setActiveProvider] = useState<OAuthProviderMethod | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const { verifyOAuth, isPending: isVerifyingOAuth } = useVerifyOAuth();
-  const { verifyFarcaster, isPending: isVerifyingFarcaster } = useVerifyFarcaster();
   const { waitForLogin, isPending: isWaitingForLogin } = useWaitForLogin();
   const { waitForWalletCreation, isPending: isWaitingForWallet } = useWaitForWalletCreation();
 
   const popupWindow = useRef<Window | null>(null);
   const shouldCancel = useRef(false);
 
-  // Reset state
   const resetState = useCallback(() => {
     setActiveProvider(null);
   }, []);
 
-  // Handle post-auth completion (new user vs returning user)
   const handleAuthComplete = useCallback(
     (isNewUser: boolean) => {
       shouldCancel.current = false;
@@ -67,60 +66,36 @@ export function useOAuthAuth(): UseOAuthAuthReturn {
     [waitForLogin, waitForWalletCreation, resetState]
   );
 
-  // Authenticate with OAuth provider
   const authenticate = useCallback(
-    (method: TOAuthMethod) => {
+    (method: OAuthProviderMethod) => {
       setError(null);
       setActiveProvider(method);
       shouldCancel.current = false;
 
-      if (method === "FARCASTER") {
-        verifyFarcaster(
-          {
-            onConnectUri: (uri) => {
-              popupWindow.current = window.open(uri, "farcaster", "popup=true");
-            },
-            isCanceled: () => shouldCancel.current || !!popupWindow.current?.closed,
+      verifyOAuth(
+        {
+          method: method as Exclude<TOAuthMethod, "TELEGRAM" | "FARCASTER">,
+          onOAuthUrl: (url: string) => {
+            popupWindow.current = window.open(url, "oauth", "popup=true");
           },
-          {
-            onSuccess: (authState) => {
-              if (authState.stage === "done") {
-                handleAuthComplete(authState.isNewUser);
-              }
-            },
-            onError: (err) => {
-              setError(err.message);
-              resetState();
-            },
-          }
-        );
-      } else if (method !== "TELEGRAM") {
-        verifyOAuth(
-          {
-            method: method as Exclude<TOAuthMethod, "TELEGRAM" | "FARCASTER">,
-            onOAuthUrl: (url) => {
-              popupWindow.current = window.open(url, "oauth", "popup=true");
-            },
-            isCanceled: () => shouldCancel.current || !!popupWindow.current?.closed,
+          isCanceled: () => shouldCancel.current || !!popupWindow.current?.closed,
+        },
+        {
+          onSuccess: (authState: OAuthDoneState) => {
+            if (authState.stage === "done") {
+              handleAuthComplete(authState.isNewUser);
+            }
           },
-          {
-            onSuccess: (authState) => {
-              if (authState.stage === "done") {
-                handleAuthComplete(authState.isNewUser);
-              }
-            },
-            onError: (err) => {
-              setError(err.message);
-              resetState();
-            },
-          }
-        );
-      }
+          onError: (err: Error) => {
+            setError(err.message);
+            resetState();
+          },
+        }
+      );
     },
-    [verifyOAuth, verifyFarcaster, handleAuthComplete, resetState]
+    [verifyOAuth, handleAuthComplete, resetState]
   );
 
-  // Cancel authentication
   const cancel = useCallback(() => {
     shouldCancel.current = true;
     popupWindow.current?.close();
@@ -128,7 +103,7 @@ export function useOAuthAuth(): UseOAuthAuthReturn {
     setError(null);
   }, [resetState]);
 
-  const isPending = isVerifyingOAuth || isVerifyingFarcaster || isWaitingForLogin || isWaitingForWallet;
+  const isPending = isVerifyingOAuth || isWaitingForLogin || isWaitingForWallet;
 
   return {
     activeProvider,

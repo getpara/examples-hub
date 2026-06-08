@@ -75,7 +75,7 @@ export function CantonSendCard({
             placeholder="party::namespace"
             spellCheck={false}
             disabled={isPending}
-            className="w-full rounded-xl border border-border bg-background px-3 py-2 font-mono text-xs leading-relaxed focus:outline-none focus:ring-2 focus:ring-accent/40 disabled:opacity-50"
+            className="w-full rounded-xl border border-border bg-background px-3 py-2 font-mono text-xs leading-relaxed focus:outline-none focus:ring-2 focus:ring-primary/30 disabled:opacity-50"
           />
         </div>
 
@@ -91,7 +91,7 @@ export function CantonSendCard({
             placeholder="1.0"
             inputMode="decimal"
             disabled={isPending}
-            className="w-full rounded-xl border border-border bg-background px-3 py-2 font-mono text-xs leading-relaxed focus:outline-none focus:ring-2 focus:ring-accent/40 disabled:opacity-50"
+            className="w-full rounded-xl border border-border bg-background px-3 py-2 font-mono text-xs leading-relaxed focus:outline-none focus:ring-2 focus:ring-primary/30 disabled:opacity-50"
           />
         </div>
 
@@ -106,11 +106,12 @@ export function CantonSendCard({
             onChange={(e) => setMemo(e.target.value)}
             placeholder="hello canton"
             disabled={isPending}
-            className="w-full rounded-xl border border-border bg-background px-3 py-2 font-mono text-xs leading-relaxed focus:outline-none focus:ring-2 focus:ring-accent/40 disabled:opacity-50"
+            className="w-full rounded-xl border border-border bg-background px-3 py-2 font-mono text-xs leading-relaxed focus:outline-none focus:ring-2 focus:ring-primary/30 disabled:opacity-50"
           />
         </div>
 
         <button
+          type="button"
           onClick={() => onSend({ receiverPartyId, amount, memo: memo || undefined })}
           data-testid="canton-send-button"
           disabled={!canSend}

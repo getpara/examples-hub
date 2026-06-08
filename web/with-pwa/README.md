@@ -13,6 +13,8 @@ NEXT_PUBLIC_PARA_API_KEY=your_para_api_key
 NEXT_PUBLIC_PARA_ENVIRONMENT=BETA
 ```
 
+Configure the API key in the [Para Developer Portal](https://developer.getpara.com/) with the app display name, branding assets, theme colors, OAuth providers, email and phone authentication settings, 2FA policy, and auth layout for this PWA. This example only keeps runtime modal behavior in code, including `onRampTestMode` and `recoverySecretStepEnabled`.
+
 ### Installation
 
 Install dependencies using your preferred package manager:
@@ -30,7 +32,7 @@ pnpm install
 
 ## Key Dependencies
 
-- `@getpara/react-sdk` (v2.0.0-alpha.26) - Para React SDK for wallet integration
+- `@getpara/react-sdk` (v3.0.0-alpha.1) - Para React SDK for wallet integration
 - `@tanstack/react-query` (v5.81.2) - Data fetching and state management
 - `next` (v15.1.5) - React framework with PWA support
 - `react` (v19.0.0) - React library

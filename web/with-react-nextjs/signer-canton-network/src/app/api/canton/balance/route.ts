@@ -3,6 +3,15 @@ import { getSdk } from "@/lib/canton";
 
 export const runtime = "nodejs";
 
+type CantonHolding = {
+  interfaceViewValue?: {
+    amount?: number | string;
+    instrumentId?: {
+      id?: string;
+    };
+  };
+};
+
 export async function POST(request: Request) {
   let body: { partyId?: string; instrumentId?: string };
   try {
@@ -27,7 +36,7 @@ export async function POST(request: Request) {
     // Sum unlocked holdings for the configured instrument. listHoldingUtxos
     // returns PrettyContract<Holding>[]; the Daml view sits on
     // interfaceViewValue ({ amount, instrumentId: { id }, ... }).
-    const utxos = await sdk.tokenStandard.listHoldingUtxos(false);
+    const utxos = (await sdk.tokenStandard.listHoldingUtxos(false)) as CantonHolding[];
     const total = utxos
       .filter((h) => h.interfaceViewValue?.instrumentId?.id === instrumentId)
       .reduce((sum, h) => sum + Number(h.interfaceViewValue?.amount ?? 0), 0);

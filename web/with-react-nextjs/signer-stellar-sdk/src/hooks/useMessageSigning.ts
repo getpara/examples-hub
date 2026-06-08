@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import { Buffer } from "buffer";
 import { StrKey } from "@stellar/stellar-sdk";
 import nacl from "tweetnacl";
 import { useParaSigner } from "./useParaSigner";
@@ -24,7 +25,8 @@ export function useMessageSigning() {
       setIsVerified(null);
 
       try {
-        const messageBytes = Buffer.from(new TextEncoder().encode(message.trim()));
+        const normalizedMessage = message.trim();
+        const messageBytes = Buffer.from(new TextEncoder().encode(normalizedMessage));
         const signedBytes = await signer.signBytes(messageBytes);
         setSignature(signedBytes.toString("hex"));
       } catch (err) {
@@ -45,7 +47,7 @@ export function useMessageSigning() {
       }
 
       try {
-        const messageBytes = new Uint8Array(new TextEncoder().encode(message));
+        const messageBytes = new Uint8Array(new TextEncoder().encode(message.trim()));
         const signatureBytes = new Uint8Array(Buffer.from(signature, "hex"));
         const publicKeyBytes = StrKey.decodeEd25519PublicKey(signer.address);
         const isValid = nacl.sign.detached.verify(messageBytes, signatureBytes, publicKeyBytes);

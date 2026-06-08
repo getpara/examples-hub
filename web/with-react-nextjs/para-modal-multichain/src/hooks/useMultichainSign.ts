@@ -20,54 +20,83 @@ export type ChainSignState = {
   label: string;
   sign: () => void;
   isPending: boolean;
-  error: Error | null;
+  errorMessage: string | null;
   signature?: string;
 };
+
+type SignState = {
+  isPending: boolean;
+  errorMessage: string | null;
+  signature?: string;
+};
+
+type WalletWithType = {
+  type?: string;
+};
+
+const initialSignState: SignState = {
+  isPending: false,
+  errorMessage: null,
+  signature: undefined,
+};
+
+function getErrorMessage(error: unknown, fallback: string) {
+  return error instanceof Error ? error.message : fallback;
+}
+
+function bytesToBase64(bytes: Uint8Array) {
+  let binary = "";
+  for (const byte of bytes) {
+    binary += String.fromCharCode(byte);
+  }
+  return btoa(binary);
+}
 
 export function useMultichainSign() {
   const { connectionType, embedded, external } = useAccount();
 
   // EVM hooks
   const { signMessageAsync: wagmiSign } = useWagmiSignMessage();
-  const [evmState, setEvmState] = useState({ isPending: false, error: null as Error | null, signature: undefined as string | undefined });
+  const [evmState, setEvmState] = useState<SignState>(initialSignState);
 
   // Cosmos hooks
   const { aminoSigner: cosmosEmbedded } = useParaCosmjsAminoSigner();
   const { data: grazSigners } = useOfflineSigners();
-  const [cosmosState, setCosmosState] = useState({ isPending: false, error: null as Error | null, signature: undefined as string | undefined });
+  const [cosmosState, setCosmosState] = useState<SignState>(initialSignState);
 
   // Solana hooks
   const { solanaSigner } = useParaSolanaSigner({ rpc });
   const { signMessage: solanaExternalSign } = useSolanaWallet();
-  const [solanaState, setSolanaState] = useState({ isPending: false, error: null as Error | null, signature: undefined as string | undefined });
+  const [solanaState, setSolanaState] = useState<SignState>(initialSignState);
 
   const isExternal = connectionType === "external";
 
   // Detect available chains from embedded wallets and external connections
-  const wallets = embedded.wallets ?? [];
+  const wallets = (embedded.wallets ?? []) as WalletWithType[];
   const connectedNetworks = external.connectedNetworks ?? [];
 
-  const hasEvm = wallets.some((w: any) => w.type === "EVM") || connectedNetworks.includes("evm");
-  const hasCosmos = wallets.some((w: any) => w.type === "COSMOS") || connectedNetworks.includes("cosmos");
-  const hasSolana = wallets.some((w: any) => w.type === "SOLANA") || connectedNetworks.includes("solana");
+  const hasEvm = wallets.some((wallet) => wallet.type === "EVM") || connectedNetworks.includes("evm");
+  const hasCosmos = wallets.some((wallet) => wallet.type === "COSMOS") || connectedNetworks.includes("cosmos");
+  const hasSolana = wallets.some((wallet) => wallet.type === "SOLANA") || connectedNetworks.includes("solana");
 
   const signEvm = useCallback(async () => {
-    setEvmState((s) => ({ ...s, isPending: true, error: null }));
+    setEvmState({ isPending: true, errorMessage: null, signature: undefined });
     try {
       const sig = await wagmiSign({ message: HELLO_WORLD_MESSAGE });
-      setEvmState((s) => ({ ...s, signature: sig }));
+      setEvmState({ isPending: false, errorMessage: null, signature: sig });
     } catch (err) {
-      setEvmState((s) => ({ ...s, error: err instanceof Error ? err : new Error("EVM signing failed") }));
-    } finally {
-      setEvmState((s) => ({ ...s, isPending: false }));
+      setEvmState({ isPending: false, errorMessage: getErrorMessage(err, "EVM signing failed"), signature: undefined });
     }
   }, [wagmiSign]);
 
   const signCosmos = useCallback(async () => {
     const externalCosmosSigner = grazSigners?.offlineSignerAmino as OfflineAminoSigner | undefined;
     const signer: OfflineAminoSigner | null | undefined = isExternal ? externalCosmosSigner : cosmosEmbedded;
-    if (!signer) return;
-    setCosmosState((s) => ({ ...s, isPending: true, error: null }));
+    if (!signer) {
+      setCosmosState({ isPending: false, errorMessage: "No Cosmos signer available", signature: undefined });
+      return;
+    }
+    setCosmosState({ isPending: true, errorMessage: null, signature: undefined });
     try {
       const accounts = await signer.getAccounts();
       if (!accounts.length) throw new Error("No Cosmos accounts found");
@@ -81,34 +110,30 @@ export function useMultichainSign() {
         0
       );
       const { signature: sig } = await signer.signAmino(address, signDoc);
-      setCosmosState((s) => ({ ...s, signature: sig.signature }));
+      setCosmosState({ isPending: false, errorMessage: null, signature: sig.signature });
     } catch (err) {
-      setCosmosState((s) => ({ ...s, error: err instanceof Error ? err : new Error("Cosmos signing failed") }));
-    } finally {
-      setCosmosState((s) => ({ ...s, isPending: false }));
+      setCosmosState({ isPending: false, errorMessage: getErrorMessage(err, "Cosmos signing failed"), signature: undefined });
     }
   }, [isExternal, grazSigners, cosmosEmbedded]);
 
   const signSolana = useCallback(async () => {
-    setSolanaState((s) => ({ ...s, isPending: true, error: null }));
+    setSolanaState({ isPending: true, errorMessage: null, signature: undefined });
     try {
       const encoded = new TextEncoder().encode(HELLO_WORLD_MESSAGE);
       if (isExternal && solanaExternalSign) {
         const sig = await solanaExternalSign(encoded);
-        setSolanaState((s) => ({ ...s, signature: Buffer.from(sig).toString("base64") }));
+        setSolanaState({ isPending: false, errorMessage: null, signature: bytesToBase64(sig) });
       } else if (solanaSigner) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const results = await (solanaSigner as any).signMessages([{ content: encoded, signatures: {} }]);
         const sigBytes = Object.values(results[0] as Record<string, Uint8Array>)[0];
         if (!sigBytes) throw new Error("Unexpected signing result format");
-        setSolanaState((s) => ({ ...s, signature: Buffer.from(sigBytes).toString("base64") }));
+        setSolanaState({ isPending: false, errorMessage: null, signature: bytesToBase64(sigBytes) });
       } else {
         throw new Error("No Solana signer available");
       }
     } catch (err) {
-      setSolanaState((s) => ({ ...s, error: err instanceof Error ? err : new Error("Solana signing failed") }));
-    } finally {
-      setSolanaState((s) => ({ ...s, isPending: false }));
+      setSolanaState({ isPending: false, errorMessage: getErrorMessage(err, "Solana signing failed"), signature: undefined });
     }
   }, [isExternal, solanaExternalSign, solanaSigner]);
 

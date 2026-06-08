@@ -1,12 +1,19 @@
-require("@nomicfoundation/hardhat-ethers");
+import { defineConfig } from "hardhat/config";
 
 const config = {
-  solidity: "0.8.20",
+  solidity: {
+    version: "0.8.24",
+    settings: {
+      evmVersion: "cancun",
+    },
+  },
   paths: {
-    root: "./src",
-    sources: "./contracts",
-    artifacts: "./contracts/artifacts",
+    sources: {
+      solidity: "./src/contracts",
+    },
+    artifacts: "./src/contracts/artifacts",
+    cache: "./cache",
   },
 };
 
-module.exports = config;
+export default defineConfig(config);

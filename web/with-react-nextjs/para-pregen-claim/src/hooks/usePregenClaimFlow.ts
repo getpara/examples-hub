@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
-import { useAccount, useExportPrivateKey, useModal, useWallet } from "@getpara/react-sdk";
+import { useAccount, useExportPrivateKey, useModal, useWallet } from "@getpara/react-sdk-lite";
 import type { GenerateWalletResponse } from "@/lib/para/types";
 
 export type PregenWalletDraft = {

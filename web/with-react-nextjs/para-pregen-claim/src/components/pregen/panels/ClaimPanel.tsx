@@ -24,6 +24,7 @@ export function ClaimPanel({ draft, isConnected, isLoading, onClaim }: ClaimPane
         </div>
 
         <button
+          type="button"
           onClick={onClaim}
           data-testid="claim-pregen-button"
           disabled={!draft || isConnected || isLoading}

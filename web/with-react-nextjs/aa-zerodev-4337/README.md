@@ -1,13 +1,13 @@
 # ZeroDev Account Abstraction Example
 
-A minimal Next.js example demonstrating Para SDK integration with ZeroDev for EIP-4337 gas-sponsored transactions.
+A minimal Next.js example that uses Para with ZeroDev Kernel account abstraction to send a gas-sponsored EIP-4337 transaction on Sepolia.
 
 ## What This Example Shows
 
 - Setting up `ParaProvider` for Para SDK authentication
-- Using `useViemAccount` hook from `@getpara/react-sdk/evm` for the Viem signer
-- Creating ZeroDev Kernel smart accounts with Para as the signer
-- Sending gas-sponsored UserOperations via ZeroDev's paymaster
+- Using `useZeroDevSmartAccount` from `@getpara/react-sdk`
+- Creating a ZeroDev Kernel account with Para as the signer
+- Sending a zero-value sponsored transaction through ZeroDev
 
 ## Setup
 
@@ -19,35 +19,49 @@ NEXT_PUBLIC_PARA_ENVIRONMENT=BETA
 NEXT_PUBLIC_ZERODEV_PROJECT_ID=your_zerodev_project_id
 ```
 
-2. Install dependencies and run:
+2. Install dependencies:
 
 ```bash
 yarn install
-yarn dev
 ```
+
+3. Build and run the production server:
+
+```bash
+yarn build
+yarn start
+```
+
+For local development, use `yarn dev`.
 
 ## Getting API Keys
 
 - **Para API Key**: Get from [Para Developer Portal](https://developer.getpara.com)
 - **ZeroDev Project ID**: Get from [ZeroDev Dashboard](https://dashboard.zerodev.app)
 
+## Developer Portal Configuration
+
+Configure the app name, branding, logo, theme, enabled OAuth providers, email and phone login options, 2FA setting, and auth layout on the Para API key in the Developer Portal. This example keeps only runtime modal behavior in code and relies on the Portal for persistent Para app configuration.
+
+The ZeroDev project ID remains an environment variable because it configures ZeroDev Kernel account and paymaster behavior for this example, not Para Portal settings.
+
 ## Project Structure
 
 ```
 src/
 ├── app/
-│   ├── layout.tsx                  # Root layout with ParaProvider
-│   └── page.tsx                    # Main page with wallet + transaction UI
+│   ├── layout.tsx                  # Root layout and global styles
+│   └── page.tsx                    # Example route
 ├── components/
 │   ├── ParaProvider.tsx            # Para SDK provider setup
-│   ├── layout/Header.tsx           # Header with connect button
+│   ├── ZeroDev4337Example.tsx      # Client container for wallet state + UI
+│   ├── layout/Header.tsx           # Presentational header
 │   └── ui/
 │       ├── ConnectCard.tsx         # Connect wallet card
-│       ├── WalletInfo.tsx          # EOA + Smart Account display
-│       └── SendTransaction.tsx     # Sponsored transaction UI
+│       ├── WalletInfo.tsx          # Para wallet + Kernel account display
+│       └── SendTransaction.tsx     # Presentational transaction UI
 ├── hooks/
-│   ├── useSmartAccountClient.ts    # ZeroDev Kernel account setup
-│   └── useSendUserOperation.ts     # Transaction sending hook
+│   └── useZeroDevSponsoredTransaction.ts
 └── lib/
     └── zerodev.ts                  # ZeroDev configuration
 ```
@@ -55,60 +69,24 @@ src/
 ## Key Integration Pattern
 
 ```typescript
-import { useViemAccount } from "@getpara/react-sdk/evm";
-import { createKernelAccount, createKernelAccountClient, createZeroDevPaymasterClient } from "@zerodev/sdk";
-import { signerToEcdsaValidator } from "@zerodev/ecdsa-validator";
-import { createWalletClient, createPublicClient, http } from "viem";
+import { useZeroDevSmartAccount } from "@getpara/react-sdk";
+import { sepolia } from "viem/chains";
 
-// Get Viem account from Para SDK (handles signing internally)
-const { viemAccount } = useViemAccount();
-
-// Create wallet and public clients
-const walletClient = createWalletClient({
-  account: viemAccount,
+const { smartAccount, isLoading, error } = useZeroDevSmartAccount({
+  projectId: process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID ?? "",
   chain: sepolia,
-  transport: http(PUBLIC_RPC),
+  enabled: isConnected,
 });
 
-const publicClient = createPublicClient({
-  chain: sepolia,
-  transport: http(PUBLIC_RPC),
+if (!smartAccount) {
+  return;
+}
+
+const receipt = await smartAccount.sendTransaction({
+  to: "0x000000000000000000000000000000000000dEaD",
 });
 
-// Create ECDSA validator with Para signer
-const ecdsaValidator = await signerToEcdsaValidator(walletClient, {
-  signer: viemAccount,
-  entryPoint: ENTRY_POINT,
-  kernelVersion: KERNEL_VERSION,
-});
-
-// Create Kernel account
-const kernelAccount = await createKernelAccount(publicClient, {
-  plugins: { sudo: ecdsaValidator },
-  entryPoint: ENTRY_POINT,
-  kernelVersion: KERNEL_VERSION,
-});
-
-// Create paymaster and kernel client
-const paymasterClient = createZeroDevPaymasterClient({
-  chain: sepolia,
-  transport: http(PAYMASTER_RPC),
-});
-
-const kernelClient = createKernelAccountClient({
-  account: kernelAccount,
-  chain: sepolia,
-  bundlerTransport: http(BUNDLER_RPC),
-  paymaster: {
-    getPaymasterData: (userOperation) => paymasterClient.sponsorUserOperation({ userOperation }),
-  },
-});
-
-// Send sponsored UserOperation
-const userOpHash = await kernelClient.sendUserOperation({
-  callData: await kernelAccount.encodeCalls([{ to, data, value }]),
-});
-const receipt = await kernelClient.waitForUserOperationReceipt({ hash: userOpHash });
+console.log(receipt.transactionHash);
 ```
 
 ## Learn More

@@ -1,36 +1,40 @@
 interface TxResultProps {
   signature: string;
+  explorerUrl?: string;
   label?: string;
-  actionLabel?: string;
-  onAction?: () => void;
 }
 
-export function TxResult({ signature, label = "Transaction Signature:", actionLabel, onAction }: TxResultProps) {
-  const explorerUrl = `https://solscan.io/tx/${signature}?cluster=devnet`;
+const DEFAULT_EXPLORER = "https://solscan.io/tx";
+
+export function TxResult({ signature, explorerUrl, label = "Transaction Signature" }: TxResultProps) {
+  const explorer = explorerUrl || DEFAULT_EXPLORER;
 
   return (
-    <div className="mt-8 rounded-none border border-gray-200">
-      <div className="flex justify-between items-center px-6 py-4 bg-gray-50 border-b border-gray-200">
-        <h3 className="text-sm font-medium text-gray-900">{label}</h3>
-        {actionLabel && onAction ? (
-          <button
-            type="button"
-            onClick={onAction}
-            className="px-3 py-1 text-sm bg-gray-900 text-white hover:bg-gray-950 transition-colors rounded-none">
-            {actionLabel}
-          </button>
-        ) : (
+    <div className="mt-8 overflow-hidden rounded-2xl border border-border bg-card shadow-sm animate-fade-in">
+      <div className="border-b border-border/60 px-6 py-4">
+        <h3 className="text-sm font-semibold">{label}</h3>
+      </div>
+      <div className="space-y-4 p-6">
+        <div>
+          <p className="mb-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+            Signature
+          </p>
+          <p className="break-all rounded-xl bg-muted/60 px-4 py-3 font-mono text-xs leading-relaxed text-muted-foreground">
+            {signature}
+          </p>
+        </div>
+        <div>
+          <p className="mb-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+            Explorer Link
+          </p>
           <a
-            href={explorerUrl}
+            href={`${explorer}/${signature}?cluster=devnet`}
             target="_blank"
             rel="noopener noreferrer"
-            className="px-3 py-1 text-sm bg-gray-900 text-white hover:bg-gray-950 transition-colors rounded-none">
+            className="text-sm font-medium text-primary underline-offset-4 hover:underline">
             View on Solscan
           </a>
-        )}
-      </div>
-      <div className="p-6">
-        <p className="text-sm font-mono break-all text-gray-600 bg-white p-4 border border-gray-200">{signature}</p>
+        </div>
       </div>
     </div>
   );

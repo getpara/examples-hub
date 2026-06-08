@@ -12,7 +12,7 @@ import {
   useSignMessage,
   useWallet,
   useWalletState,
-} from "@getpara/react-sdk";
+} from "@getpara/react-sdk-lite";
 
 export function useCantonOnboarding() {
   const account = useAccount();

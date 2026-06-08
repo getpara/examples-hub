@@ -1,12 +1,21 @@
-import { ConnectButton } from "@rainbow-me/rainbowkit";
+import type { ReactNode } from "react";
 
-export function ConnectCard() {
+interface ConnectCardProps {
+  connectButton: ReactNode;
+}
+
+export function ConnectCard({ connectButton }: ConnectCardProps) {
   return (
-    <div className="max-w-md mx-auto bg-white rounded-none border border-gray-200 p-8">
-      <h2 className="text-2xl font-bold mb-4 text-center">Connect Wallet</h2>
-      <p className="text-gray-600 text-center mb-6">Connect your wallet to sign messages with Para.</p>
-      <div className="flex justify-center" data-testid="auth-connect-button">
-        <ConnectButton />
+    <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+      <div className="mb-6 text-center">
+        <p className="mb-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">Get started</p>
+        <h2 className="text-xl font-semibold tracking-tight text-card-foreground">Connect Wallet</h2>
+        <p className="mt-2 text-sm leading-6 text-muted-foreground">
+          Open RainbowKit and choose the Para wallet connector.
+        </p>
+      </div>
+      <div data-testid="auth-connect-button">
+        {connectButton}
       </div>
     </div>
   );

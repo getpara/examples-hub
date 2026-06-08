@@ -1,17 +1,21 @@
 interface DataFieldProps {
   label: string;
-  value: string | null | undefined;
-  isLoading?: boolean;
+  value: string;
   mono?: boolean;
 }
 
-export function DataField({ label, value, isLoading = false, mono = false }: DataFieldProps) {
+export function DataField({ label, value, mono }: DataFieldProps) {
   return (
-    <div className="flex justify-between items-center py-2 border-b border-gray-100">
-      <span className="text-sm text-gray-600">{label}</span>
-      <span className={`text-sm font-medium text-gray-900 ${mono ? "font-mono" : ""}`}>
-        {isLoading ? "Loading..." : value ?? "-"}
-      </span>
+    <div>
+      <p className="mb-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+        {label}
+      </p>
+      <p
+        className={`break-all rounded-xl bg-muted/60 px-4 py-3 text-sm leading-relaxed ${
+          mono ? "font-mono" : ""
+        }`}>
+        {value}
+      </p>
     </div>
   );
 }

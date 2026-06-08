@@ -1,4 +1,4 @@
-import ParaTestToken from "@/contracts/artifacts/contracts/ParaTestToken.sol/ParaTestToken.json";
+import ParaTestToken from "@/contracts/artifacts/src/contracts/ParaTestToken.sol/ParaTestToken.json";
 import type { Abi } from "viem";
 
 export const PARA_TEST_TOKEN_ADDRESS = "0xeea2b6fa12842ba9b7bb18e86af73a2d3f5f9c57" as const;

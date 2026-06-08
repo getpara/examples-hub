@@ -1,101 +1,112 @@
-"use client";
-
-import { useConnect, useDisconnect, useAccount, getAvailableWallets, WalletType } from "graz";
-import { Modal } from "./ui/Modal";
-import { useEffect } from "react";
-
-// Chain ID for Cosmos ICS Provider Testnet (defined in Provider.tsx)
-const CHAIN_ID = "provider";
+import type { WalletType } from "graz";
+import { Modal } from "@/components/ui/Modal";
+import type { WalletOption } from "@/hooks/useGrazWalletConnection";
+import { truncateAddress } from "@/utils/format";
 
 interface ConnectWalletModalProps {
   isOpen: boolean;
+  isConnected: boolean;
+  connectedAddress: string;
+  paraWallet: WalletOption | null;
+  otherWallets: WalletOption[];
+  connectStatus: string;
+  connectError: Error | null;
+  isDisconnecting: boolean;
+  onConnect: (walletType: WalletType) => void;
+  onDisconnect: () => void;
   onClose: () => void;
 }
 
-export function ConnectWalletModal({ isOpen, onClose }: ConnectWalletModalProps) {
-  const { connect, status } = useConnect();
-  const { disconnect } = useDisconnect();
-  const { data: accountRecord, isConnected } = useAccount();
-  const account = accountRecord?.[0];
-  const availableWallets = getAvailableWallets();
-  const wallets = Object.entries(availableWallets)
-    .filter(([_, isAvailable]) => isAvailable)
-    .map(([walletType]) => ({
-      walletType: walletType as WalletType,
-      name: walletType
-        .split("_")
-        .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-        .join(" "),
-    }));
-
-  const paraWallet = wallets.find((wallet) => wallet.walletType === WalletType.PARA);
-  const otherWallets = wallets.filter((wallet) => wallet.walletType !== WalletType.PARA);
-
-  // Close modal on successful connection
-  useEffect(() => {
-    if (status === "success") {
-      onClose();
-    }
-  }, [status, onClose]);
-
-  const handleDisconnect = () => {
-    disconnect();
-    onClose();
-  };
-
+export function ConnectWalletModal({
+  isOpen,
+  isConnected,
+  connectedAddress,
+  paraWallet,
+  otherWallets,
+  connectStatus,
+  connectError,
+  isDisconnecting,
+  onConnect,
+  onDisconnect,
+  onClose,
+}: ConnectWalletModalProps) {
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      data-testid="auth-modal">
+    <Modal isOpen={isOpen} onClose={onClose} data-testid="auth-modal">
       <div className="p-6">
-        <h2 className="text-xl font-semibold mb-6">{isConnected ? "Wallet Settings" : "Connect Wallet"}</h2>
+        <h2 className="text-sm font-semibold mb-1">
+          {isConnected ? "Wallet Settings" : "Connect Wallet"}
+        </h2>
+        <p className="text-[13px] text-muted-foreground mb-6">
+          {isConnected
+            ? "Manage the Cosmos wallet connected through Graz."
+            : "Choose Para or another available Cosmos wallet."}
+        </p>
 
         {isConnected ? (
           <div className="space-y-4">
-            <div className="bg-gray-50 p-4 rounded-none border border-gray-200">
-              <p className="text-sm text-gray-600 mb-1">Connected</p>
-              <p className="text-sm font-mono text-gray-900">
-                {account?.bech32Address?.slice(0, 6)}...{account?.bech32Address?.slice(-4)}
+            <div className="rounded-xl bg-muted/60 border border-border/60 px-4 py-3">
+              <p className="text-xs text-muted-foreground mb-1">Connected Address</p>
+              <p className="text-sm font-mono break-all">
+                {truncateAddress(connectedAddress, 10, 8)}
               </p>
             </div>
             <button
-              onClick={handleDisconnect}
+              type="button"
+              onClick={onDisconnect}
               data-testid="auth-logout-button"
-              className="w-full px-4 py-2 bg-red-600 text-white rounded-none hover:bg-red-700 transition-colors cursor-pointer">
-              Disconnect
+              disabled={isDisconnecting}
+              className="w-full rounded-lg border border-destructive/20 bg-destructive/8 px-4 py-2.5 text-sm font-medium text-destructive hover:bg-destructive/12 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+              {isDisconnecting ? "Disconnecting..." : "Disconnect"}
             </button>
           </div>
         ) : (
-          <div className="space-y-6">
-            {/* Social Login Section */}
+          <div className="space-y-5">
             <div>
-              <h3 className="text-sm font-medium text-gray-500 mb-3">Social Login</h3>
-              {paraWallet && (
+              <p className="text-xs font-medium text-muted-foreground mb-2">Para</p>
+              {paraWallet ? (
                 <button
-                  onClick={() => connect({ walletType: paraWallet.walletType, chainId: CHAIN_ID })}
+                  type="button"
+                  onClick={() => onConnect(paraWallet.walletType)}
                   data-testid="auth-oauth-para"
-                  className="w-full px-4 py-2 bg-gray-900 text-white rounded-none hover:bg-gray-950 transition-colors cursor-pointer">
+                  className="btn-primary w-full px-4 py-2.5 text-sm">
                   Connect with {paraWallet.name}
                 </button>
+              ) : (
+                <div className="rounded-xl bg-muted/60 border border-border/60 px-4 py-3">
+                  <p className="text-sm text-muted-foreground">Para is not available in this browser.</p>
+                </div>
               )}
             </div>
 
-            {/* Other Wallets Section */}
             {otherWallets.length > 0 && (
               <div>
-                <h3 className="text-sm font-medium text-gray-500 mb-3">Other Wallets</h3>
+                <p className="text-xs font-medium text-muted-foreground mb-2">Other Wallets</p>
                 <div className="space-y-2">
                   {otherWallets.map((wallet) => (
                     <button
+                      type="button"
                       key={wallet.walletType}
-                      onClick={() => connect({ walletType: wallet.walletType, chainId: CHAIN_ID })}
+                      onClick={() => onConnect(wallet.walletType)}
                       data-testid={`wallet-option-${wallet.walletType}`}
-                      className="w-full px-4 py-2 bg-gray-100 text-gray-900 rounded-none hover:bg-gray-200 transition-colors cursor-pointer">
+                      className="btn-secondary w-full px-4 py-2.5 text-sm">
                       Connect with {wallet.name}
                     </button>
                   ))}
                 </div>
+              </div>
+            )}
+
+            {connectStatus === "pending" && (
+              <div className="rounded-xl bg-muted/60 border border-border/60 px-4 py-3 animate-fade-in">
+                <p className="text-sm text-muted-foreground">Opening wallet connection...</p>
+              </div>
+            )}
+
+            {connectError && (
+              <div className="rounded-xl bg-destructive/8 border border-destructive/15 px-4 py-3 animate-fade-in">
+                <p className="text-sm text-destructive break-words">
+                  {connectError.message || "Wallet connection failed."}
+                </p>
               </div>
             )}
           </div>

@@ -11,6 +11,12 @@ export function useXlmTransfer() {
   const [error, setError] = useState<Error | null>(null);
   const [status, setStatus] = useState<"idle" | "pending" | "confirming" | "success" | "error">("idle");
 
+  const reset = useCallback(() => {
+    setTxHash(null);
+    setError(null);
+    setStatus("idle");
+  }, []);
+
   const transfer = useCallback(
     async (destination: string, amount: string) => {
       if (!signer || !server || !address || !isReady) {
@@ -28,8 +34,8 @@ export function useXlmTransfer() {
           throw new Error("Invalid recipient Stellar address format");
         }
 
-        const amountFloat = parseFloat(amount);
-        if (isNaN(amountFloat) || amountFloat <= 0) {
+        const amountFloat = Number.parseFloat(amount);
+        if (Number.isNaN(amountFloat) || amountFloat <= 0) {
           throw new Error("Please enter a valid amount greater than 0");
         }
 
@@ -43,7 +49,7 @@ export function useXlmTransfer() {
             Operation.payment({
               destination,
               asset: Asset.native(),
-              amount: amountFloat.toString(),
+              amount: amountFloat.toFixed(7).replace(/0+$/, "").replace(/\.$/, ""),
             })
           )
           .setTimeout(30)
@@ -66,5 +72,5 @@ export function useXlmTransfer() {
     [signer, server, address, isReady]
   );
 
-  return { transfer, txHash, isLoading, error, isReady, status };
+  return { transfer, txHash, isLoading, error, isReady, status, reset };
 }

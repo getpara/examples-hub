@@ -3,7 +3,7 @@
 import { useState, useCallback } from "react";
 import { ethers } from "ethers";
 import { useParaSigner } from "./useParaSigner";
-import ParaTestToken from "@/contracts/artifacts/contracts/ParaTestToken.sol/ParaTestToken.json";
+import ParaTestToken from "@/contracts/artifacts/src/contracts/ParaTestToken.sol/ParaTestToken.json";
 
 export interface DeploymentInfo {
   contractAddress: string;

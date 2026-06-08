@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { ethers } from "ethers";
-import { useWallet } from "@getpara/react-sdk";
+import { useWallet } from "@getpara/react-sdk-lite";
 import { useEthersProvider } from "./useEthersProvider";
 
 export function useBalance() {

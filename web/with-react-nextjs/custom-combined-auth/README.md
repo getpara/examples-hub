@@ -1,179 +1,92 @@
 # Custom Combined Auth
 
-[![Live Demo](https://img.shields.io/badge/▶_Live_Demo-black?style=for-the-badge&logo=vercel)](https://para-example-custom-combined-auth.vercel.app)
+[![Live Demo](https://img.shields.io/badge/Live_Demo-black?style=for-the-badge&logo=vercel)](https://para-example-custom-combined-auth.vercel.app)
 
-This example demonstrates how to implement a unified authentication flow combining email, phone, and OAuth with Para SDK in a Next.js application. It shows the pattern for building your own multi-method auth UI using Para's React SDK hooks directly, without using the built-in ParaModal.
-
-## Features
-
-- **Tabbed Auth UI** - Clean switching between Email, Phone, and Social login
-- **Email OTP** - One-click email verification
-- **Phone OTP** - One-click phone verification with country code selector
-- **OAuth Login** - Google, Apple, Discord, and X (Twitter)
-- **Automatic wallet creation** for new users
-- **Message signing** with "Hello World!" example
-- **Clean separation of logic (hooks) and presentation (components)**
+This example shows a custom Para authentication surface for email, phone, and OAuth login in a Next.js app. It uses Para React SDK hooks directly instead of ParaModal so the auth logic can be copied into an app with its own UI.
 
 ## Setup
 
-### Environment Variables
-
-Create a `.env.local` file in the root directory:
+Create `.env`:
 
 ```env
 NEXT_PUBLIC_PARA_API_KEY=your_para_api_key
+NEXT_PUBLIC_PARA_ENVIRONMENT=BETA
 ```
 
-### Installation
+Configure the API key in the [Para Developer Portal](https://developer.getpara.com) for the selected environment with the app display name, branding, OAuth providers, email and phone login availability, 2FA policy, and auth layout.
+
+Install and run the production server:
 
 ```bash
 yarn install
-yarn dev
-```
-
-## Architecture
-
-This example follows the **Smart/Dumb Component Pattern** for clean separation of concerns:
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│  HOOKS (Logic Layer - Reusable)                             │
-│  ┌─────────────────┐ ┌─────────────────┐ ┌───────────────┐  │
-│  │ useEmailAuth    │ │ usePhoneAuth    │ │ useOAuthAuth  │  │
-│  │ - email state   │ │ - phone state   │ │ - provider    │  │
-│  │ - verify flow   │ │ - verify flow   │ │ - popup flow  │  │
-│  └────────┬────────┘ └────────┬────────┘ └───────┬───────┘  │
-│           │                   │                  │          │
-│           └───────────┬───────┴──────────────────┘          │
-│                       ▼                                     │
-│           ┌─────────────────────┐                           │
-│           │ useCombinedAuth     │ (composes all three)      │
-│           │ - tab state         │                           │
-│           │ - unified error     │                           │
-│           └─────────────────────┘                           │
-└─────────────────────────────────────────────────────────────┘
-                        │
-                        ▼
-┌─────────────────────────────────────────────────────────────┐
-│  COMPONENTS (Presentation Layer - UI Only)                  │
-│  ┌───────────┐ ┌───────────┐ ┌─────────────┐ ┌───────────┐  │
-│  │ EmailForm │ │ PhoneForm │ │ OAuthButtons│ │ AuthTabs  │  │
-│  │(props only│ │(props only│ │ (props only)│ │(props only│  │
-│  └───────────┘ └───────────┘ └─────────────┘ └───────────┘  │
-│  ┌─────────────────┐ ┌─────────────────────────────────┐    │
-│  │ VerifyIframe    │ │ AuthCard                        │    │
-│  │ (props only)    │ │ (layout wrapper)                │    │
-│  └─────────────────┘ └─────────────────────────────────┘    │
-└─────────────────────────────────────────────────────────────┘
+yarn build
+yarn start
 ```
 
 ## Key Files
 
-```
+```text
 src/
-├── hooks/
-│   ├── useEmailAuth.ts       # Email auth logic
-│   ├── usePhoneAuth.ts       # Phone auth logic
-│   ├── useOAuthAuth.ts       # OAuth auth logic
-│   ├── useCombinedAuth.ts    # Composes all three (copy for multi-auth)
-│   └── useSignHelloWorld.ts  # Message signing logic
-├── constants/
-│   └── auth.ts               # Country codes + OAuth providers config
+├── app/
+│   ├── layout.tsx
+│   └── page.tsx
 ├── components/
-│   ├── ParaProvider.tsx      # Para SDK provider setup
-│   ├── layout/Header.tsx     # Header with wallet display
+│   ├── CustomCombinedAuthExample.tsx
+│   ├── ParaProvider.tsx
+│   ├── layout/Header.tsx
 │   └── ui/
-│       ├── CombinedAuth.tsx  # Container (connects hook to UI)
-│       ├── AuthTabs.tsx      # Presentational (tab switcher)
-│       ├── EmailForm.tsx     # Presentational (email input)
-│       ├── PhoneForm.tsx     # Presentational (phone input)
-│       ├── OAuthButtons.tsx  # Presentational (provider buttons)
-│       ├── VerifyIframe.tsx  # Presentational (OTP verification)
-│       ├── AuthCard.tsx      # Presentational (layout wrapper)
-│       ├── WalletInfo.tsx    # Connected wallet info
-│       └── SignMessage.tsx   # Message signing UI
-└── app/
-    ├── layout.tsx            # Root layout with ParaProvider
-    └── page.tsx              # Main page with auth flow
+│       ├── CombinedAuth.tsx
+│       ├── EmailForm.tsx
+│       ├── PhoneForm.tsx
+│       ├── OAuthButtons.tsx
+│       ├── VerifyIframe.tsx
+│       ├── WalletInfo.tsx
+│       └── SignMessage.tsx
+├── hooks/
+│   ├── useCombinedAuth.ts
+│   ├── useEmailAuth.ts
+│   ├── usePhoneAuth.ts
+│   ├── useOAuthAuth.ts
+│   ├── useParaSession.ts
+│   └── useSignHelloWorld.ts
+└── constants/auth.ts
 ```
 
-## useCombinedAuth Hook
+`src/hooks/*` contains the copyable Para logic. `src/components/ui/*` is prop-driven presentation and has no Para, Wagmi, or Viem imports.
 
-The `useCombinedAuth` hook composes all three auth hooks:
+## Core Auth Hook
+
+`useCombinedAuth` composes the email, phone, and OAuth hooks:
 
 ```tsx
-const {
-  // Tab state
-  activeTab,       // "email" | "phone" | "social"
-  setActiveTab,    // Switch tabs
+const auth = useCombinedAuth();
 
-  // Individual auth hooks (each has its own state + actions)
-  email,           // useEmailAuth return value
-  phone,           // usePhoneAuth return value
-  oauth,           // useOAuthAuth return value
-
-  // Unified state (derived from active tab)
-  step,            // "input" | "verify"
-  verifyUrl,       // URL for OTP iframe (email/phone)
-  error,           // Error from active auth method
-  isPending,       // Loading state from active auth method
-  cancel,          // Cancel active auth method
-} = useCombinedAuth();
+return (
+  <CombinedAuth
+    activeTab={auth.activeTab}
+    countryCodes={COUNTRY_CODES}
+    email={auth.email}
+    error={auth.error}
+    isPending={auth.isPending}
+    oauth={auth.oauth}
+    onCancel={auth.cancel}
+    onTabChange={auth.setActiveTab}
+    phone={auth.phone}
+    providers={OAUTH_PROVIDERS}
+    step={auth.step}
+    verifyUrl={auth.verifyUrl}
+  />
+);
 ```
 
-**Copy this hook** (or individual auth hooks) to implement your own multi-auth flow.
+Email and phone auth use `useSignUpOrLogIn`, show the returned verification iframe, then call `useWaitForLogin` or `useWaitForWalletCreation` based on the next stage. OAuth auth uses `useVerifyOAuth` or `useVerifyFarcaster`, then waits for login or wallet creation based on whether the user is new.
 
-## How It Works
+## Connected Wallet Hooks
 
-### Email/Phone Flow (OTP)
-```
-User enters email/phone → signUpOrLogIn({ auth })
-       ↓
-step: "verify" → Show iframe with loginUrl
-       ↓
-User enters OTP in iframe
-       ↓
-Check nextStage:
-  - "signup" → waitForWalletCreation()
-  - "login"  → waitForLogin()
-       ↓
-Done - user authenticated
-```
+`useParaSession` reads the connected wallet state and exposes `disconnect`. `useSignHelloWorld` creates a Para Viem client for Sepolia and signs a message with `useParaViemSignMessage`.
 
-### OAuth Flow (One-Click)
-```
-User clicks OAuth button → verifyOAuth({ method, onOAuthUrl })
-       ↓
-Popup opens → User authenticates with provider
-       ↓
-stage: "done"
-       ↓
-Check isNewUser:
-  - true  → waitForWalletCreation()
-  - false → waitForLogin()
-       ↓
-Done - user authenticated
-```
+## Dependency Notes
 
-## Para SDK Hooks Used
+This example uses `@getpara/react-sdk@3.0.0` with Next.js 16 and React 19. Because the current catch-all SDK entry evaluates chain and account-abstraction barrels during production builds, the example includes the build-reachable modules `@metamask/delegation-toolkit`, `ethers`, `@stellar/stellar-sdk`, and `@wagmi/core` directly until the SDK export surface is narrowed.
 
-| Hook | Purpose |
-|------|---------|
-| `useSignUpOrLogIn` | Email/Phone OTP initiation |
-| `useVerifyOAuth` | OAuth popup flow (Google, Apple, etc.) |
-| `useVerifyFarcaster` | Farcaster-specific OAuth |
-| `useWaitForLogin` | Poll for login completion |
-| `useWaitForWalletCreation` | Poll for wallet creation (new users) |
-| `useAccount` | Connection state |
-| `useSignMessage` | Signs messages with the wallet |
-
-## What Developers Can Copy
-
-1. **Just the hooks** - If you have your own UI
-2. **Hooks + Presentational components** - If you want the UI pattern too
-3. **Full container** - If you want a drop-in solution
-
-## Learn More
-
-- [Para Documentation](https://docs.getpara.com)
-- [Para React SDK](https://docs.getpara.com/sdk/react)
+The remaining install warnings are expected from shared wallet packages that still peer on Wagmi Core v2 or optional React Native packages.

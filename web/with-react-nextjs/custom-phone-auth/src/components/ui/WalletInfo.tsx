@@ -1,18 +1,21 @@
-import { useWallet } from "@getpara/react-sdk";
+interface WalletInfoProps {
+  address?: string;
+}
 
-export function WalletInfo() {
-  const { data: wallet } = useWallet();
-  const address = wallet?.address;
-
+export function WalletInfo({ address }: WalletInfoProps) {
   return (
-    <div className="mb-8 rounded-none border border-gray-200">
-      <div className="px-6 py-3 bg-gray-50 border-b border-gray-200">
-        <h3 className="text-sm font-medium text-gray-900">Connected Wallet</h3>
+    <div className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
+      <div className="border-b border-border/60 px-6 py-4">
+        <h2 className="text-lg font-semibold text-card-foreground">Connected wallet</h2>
+        <p className="mt-1 text-sm text-muted-foreground">Para wallet address</p>
       </div>
-      <div className="px-6 py-3">
-        <p className="text-sm text-gray-500">Address</p>
-        <p className="text-lg font-medium text-gray-900 font-mono">
-          {address?.slice(0, 6)}...{address?.slice(-4)}
+      <div className="px-6 py-5">
+        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Address</p>
+        <p
+          className="mt-2 break-all font-mono text-sm font-medium text-card-foreground"
+          data-testid="account-address-display"
+          data-address={address}>
+          {address ?? "No wallet connected"}
         </p>
       </div>
     </div>

@@ -2,11 +2,11 @@ interface SignMessageProps {
   message: string;
   onSign: () => void;
   isPending: boolean;
-  error: Error | null;
+  errorMessage: string | null;
   signature?: string;
 }
 
-export function SignMessage({ message, onSign, isPending, error, signature }: SignMessageProps) {
+export function SignMessage({ message, onSign, isPending, errorMessage, signature }: SignMessageProps) {
   return (
     <div
       className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden animate-fade-in-up-delayed">
@@ -15,15 +15,15 @@ export function SignMessage({ message, onSign, isPending, error, signature }: Si
       </div>
 
       <div className="p-6 space-y-4">
-        {error && (
+        {errorMessage && (
           <div className="rounded-xl bg-destructive/8 border border-destructive/15 px-4 py-3 animate-fade-in">
             <p className="text-sm text-destructive">
-              {error.message || "Signing failed. Please try again."}
+              {errorMessage || "Signing failed. Please try again."}
             </p>
           </div>
         )}
 
-        {signature && !error && (
+        {signature && !errorMessage && (
           <div className="rounded-xl bg-success/8 border border-success/15 px-4 py-3 animate-fade-in">
             <p className="text-sm text-success-foreground">Message signed successfully!</p>
           </div>
@@ -35,6 +35,7 @@ export function SignMessage({ message, onSign, isPending, error, signature }: Si
         </div>
 
         <button
+          type="button"
           onClick={onSign}
           data-testid="sign-submit-button"
           disabled={isPending}

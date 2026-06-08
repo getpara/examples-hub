@@ -1,13 +1,13 @@
 # Alchemy Account Abstraction Example
 
-A minimal Next.js example demonstrating Para SDK integration with Alchemy Account Kit for EIP-4337 gas-sponsored transactions.
+A minimal Next.js example showing how to use Para with Alchemy Account Kit to create a smart account and send a gas-sponsored EIP-4337 transaction.
 
 ## What This Example Shows
 
-- Setting up `ParaProvider` for Para SDK authentication
-- Using `useViemAccount` hook from `@getpara/react-sdk/evm` for the Viem signer
-- Creating Alchemy modular smart accounts with Para as the signer
-- Sending gas-sponsored UserOperations via Alchemy's paymaster
+- Configuring `ParaProvider` for Para authentication
+- Creating an Alchemy smart account with `useAlchemySmartAccount`
+- Sending a sponsored transaction with React `useState` state management
+- Keeping the reusable account abstraction logic separate from the example UI
 
 ## Setup
 
@@ -20,12 +20,20 @@ NEXT_PUBLIC_ALCHEMY_API_KEY=your_alchemy_api_key
 NEXT_PUBLIC_ALCHEMY_GAS_POLICY_ID=your_gas_policy_id
 ```
 
-2. Install dependencies and run:
+2. Install dependencies:
 
 ```bash
 yarn install
-yarn dev
 ```
+
+3. Build and start the app:
+
+```bash
+yarn build
+yarn start
+```
+
+4. Open `http://127.0.0.1:3000`.
 
 ## Getting API Keys
 
@@ -33,59 +41,84 @@ yarn dev
 - **Alchemy API Key**: Get from [Alchemy Dashboard](https://dashboard.alchemy.com)
 - **Alchemy Gas Policy ID**: Create a gas policy in your Alchemy Dashboard under "Gas Manager"
 
+## Developer Portal Configuration
+
+Configure the app name, branding, logo, theme, enabled OAuth providers, email and phone login options, 2FA setting, and auth layout on the Para API key in the Developer Portal. This example keeps only runtime modal behavior in code and relies on the Portal for persistent Para app configuration.
+
+The Alchemy API key and gas policy ID remain environment variables because they configure Alchemy Account Kit and gas sponsorship for this example, not Para Portal settings.
+
 ## Project Structure
 
-```
+```text
 src/
 ├── app/
-│   ├── layout.tsx                  # Root layout with ParaProvider
-│   └── page.tsx                    # Main page with wallet + transaction UI
+│   ├── layout.tsx                         # Root layout, font, and global styles
+│   └── page.tsx                           # Server page metadata and app entry
 ├── components/
-│   ├── ParaProvider.tsx            # Para SDK provider setup
-│   ├── layout/Header.tsx           # Header with connect button
+│   ├── AlchemyExample.tsx                 # ParaProvider plus client SDK hook orchestration
+│   ├── ParaProvider.tsx                   # Para SDK provider setup
+│   ├── layout/Header.tsx                  # Presentational header
 │   └── ui/
-│       ├── ConnectCard.tsx         # Connect wallet card
-│       ├── WalletInfo.tsx          # EOA + Smart Account display
-│       └── SendTransaction.tsx     # Sponsored transaction UI
+│       ├── ConnectCard.tsx                # Presentational connect card
+│       ├── WalletInfo.tsx                 # Presentational wallet and smart account display
+│       └── SendTransaction.tsx            # Presentational sponsored transaction UI
 ├── hooks/
-│   └── useAlchemySmartAccount.ts   # Alchemy modular account setup
+│   └── useAlchemySponsoredTransaction.ts  # Copyable account abstraction logic
 └── lib/
-    └── alchemy.ts                  # Alchemy configuration
+    └── alchemy.ts                         # Alchemy configuration
 ```
 
 ## Key Integration Pattern
 
-```typescript
-import { useViemAccount } from "@getpara/react-sdk/evm";
-import { createModularAccountV2Client } from "@account-kit/smart-contracts";
-import { alchemy, sepolia } from "@account-kit/infra";
-import { WalletClientSigner } from "@aa-sdk/core";
-import { createWalletClient, http } from "viem";
+The reusable logic lives in `src/hooks/useAlchemySponsoredTransaction.ts`. The UI components receive props only, so you can copy the hook into your app without copying this example's UI.
 
-// Get Viem account from Para SDK (handles signing internally)
-const { viemAccount } = useViemAccount();
+```tsx
+import { useCallback, useState } from "react";
+import { useAlchemySmartAccount } from "@getpara/react-sdk";
+import type { Hash } from "viem";
+import { sepolia } from "viem/chains";
 
-// Create wallet client and wrap as signer for Alchemy SDK
-const walletClient = createWalletClient({
-  account: viemAccount,
-  chain: sepolia,
-  transport: http(),
-});
-const signer = new WalletClientSigner(walletClient, "para");
+const TARGET_ADDRESS = "0x000000000000000000000000000000000000dEaD" as const;
 
-// Create Alchemy modular account with gas sponsorship
-const client = await createModularAccountV2Client({
-  transport: alchemy({ apiKey: ALCHEMY_API_KEY }),
-  chain: sepolia,
-  signer,
-  policyId: GAS_POLICY_ID,
-});
+export function useSponsoredTransaction() {
+  const [transactionHash, setTransactionHash] = useState<Hash | null>(null);
+  const [transactionError, setTransactionError] = useState<Error | null>(null);
+  const [isSendingTransaction, setIsSendingTransaction] = useState(false);
 
-// Send sponsored UserOperation
-const userOpHash = await client.sendUserOperation({
-  uo: { target: "0x...", data: "0x", value: BigInt(0) },
-});
-const txHash = await client.waitForUserOperationTransaction(userOpHash);
+  const { smartAccount, isLoading, error } = useAlchemySmartAccount({
+    apiKey: process.env.NEXT_PUBLIC_ALCHEMY_API_KEY ?? "",
+    chain: sepolia,
+    gasPolicyId: process.env.NEXT_PUBLIC_ALCHEMY_GAS_POLICY_ID ?? "",
+  });
+
+  const sendSponsoredTransaction = useCallback(async () => {
+    if (!smartAccount) return;
+
+    setIsSendingTransaction(true);
+    setTransactionError(null);
+    setTransactionHash(null);
+
+    try {
+      const receipt = await smartAccount.sendTransaction({ to: TARGET_ADDRESS });
+      setTransactionHash(receipt.transactionHash);
+    } catch (cause) {
+      setTransactionError(cause instanceof Error ? cause : new Error("Transaction failed."));
+    } finally {
+      setIsSendingTransaction(false);
+    }
+  }, [smartAccount]);
+
+  return {
+    smartAccountAddress: smartAccount?.smartAccountAddress ?? null,
+    transactionHash,
+    transactionError,
+    isSmartAccountLoading: isLoading,
+    smartAccountError: error,
+    isSendingTransaction,
+    canSendTransaction: Boolean(smartAccount) && !isSendingTransaction,
+    sendSponsoredTransaction,
+  };
+}
 ```
 
 ## Learn More

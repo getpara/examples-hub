@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { CosmWasmClient } from "@cosmjs/cosmwasm-stargate";
+import { CosmWasmClient } from "@cosmjs/cosmwasm";
 import { useParaCosmWasmSigner } from "./useParaCosmWasmSigner";
 import { DEFAULT_CHAIN } from "@/config/chains";
 

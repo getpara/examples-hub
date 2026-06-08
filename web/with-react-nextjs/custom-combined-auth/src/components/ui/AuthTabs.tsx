@@ -1,4 +1,4 @@
-import type { AuthTab } from "@/hooks/useCombinedAuth";
+import type { AuthTab } from "@/types/auth";
 
 interface AuthTabsProps {
   activeTab: AuthTab;
@@ -14,17 +14,18 @@ const TABS: { id: AuthTab; label: string }[] = [
 
 export function AuthTabs({ activeTab, onTabChange, disabled }: AuthTabsProps) {
   return (
-    <div className="flex border-b border-gray-200 mb-4">
+    <div className="grid grid-cols-3 gap-1 rounded-lg bg-muted p-1">
       {TABS.map(({ id, label }) => (
         <button
+          type="button"
           key={id}
           onClick={() => onTabChange(id)}
           disabled={disabled}
-          className={`flex-1 py-2 text-sm font-medium transition-colors ${
+          className={`min-h-10 rounded-md px-3 text-sm font-medium transition-colors ${
             activeTab === id
-              ? "border-b-2 border-gray-900 text-gray-900"
-              : "text-gray-500 hover:text-gray-700"
-          } disabled:cursor-not-allowed`}>
+              ? "bg-card text-card-foreground shadow-sm"
+              : "text-muted-foreground hover:text-card-foreground"
+          } disabled:cursor-not-allowed disabled:opacity-60`}>
           {label}
         </button>
       ))}

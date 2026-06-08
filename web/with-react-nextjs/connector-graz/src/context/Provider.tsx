@@ -1,16 +1,16 @@
 "use client";
 
+import type { PropsWithChildren } from "react";
 import { para } from "@/lib/para/client";
+import { CHAIN_ID } from "@/config/constants";
 import { ParaGrazConnector } from "@getpara/graz-integration";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { GrazProvider, defineChainInfo, type ParaGrazConfig } from "graz";
-import { PropsWithChildren } from "react";
 
 const queryClient = new QueryClient();
 
-// Define Cosmos ICS Provider Testnet chain
 const cosmosicsprovidertestnet = defineChainInfo({
-  chainId: "provider",
+  chainId: CHAIN_ID,
   chainName: "Cosmos ICS Provider Testnet",
   rpc: "https://rpc.provider-sentry-01.ics-testnet.polypore.xyz",
   rest: "https://rest.provider-sentry-01.ics-testnet.polypore.xyz",
@@ -45,25 +45,24 @@ const cosmosicsprovidertestnet = defineChainInfo({
   },
 });
 
-const paraConfig: ParaGrazConfig = {
-  paraWeb: para! as ParaGrazConfig["paraWeb"],
-  connectorClass: ParaGrazConnector,
-  modalProps: { appName: "Para + Graz Example" },
-  queryClient: queryClient,
-};
+export function Provider({ children }: PropsWithChildren) {
+  const paraConfig: ParaGrazConfig | undefined = para
+    ? {
+        paraWeb: para as ParaGrazConfig["paraWeb"],
+        connectorClass: ParaGrazConnector,
+        queryClient,
+      }
+    : undefined;
 
-export const Provider: React.FC<PropsWithChildren> = ({ children }) => {
   return (
     <QueryClientProvider client={queryClient}>
-      {
-        <GrazProvider
-          grazOptions={{
-            chains: [cosmosicsprovidertestnet],
-            paraConfig,
-          }}>
-          {children}
-        </GrazProvider>
-      }
+      <GrazProvider
+        grazOptions={{
+          chains: [cosmosicsprovidertestnet],
+          ...(paraConfig ? { paraConfig } : {}),
+        }}>
+        {children}
+      </GrazProvider>
     </QueryClientProvider>
   );
-};
+}

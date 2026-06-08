@@ -1,36 +1,95 @@
 @import "tailwindcss";
 
+:root {
+  --background: oklch(97.8% 0.012 65);
+  --foreground: oklch(19.65% 0.0026 67.68);
+  --primary: oklch(66.86% 0.223 37.2);
+  --primary-foreground: oklch(98% 0.005 70);
+  --muted: oklch(95% 0.01 60);
+  --muted-foreground: oklch(48% 0.012 58);
+  --card: oklch(100% 0 0);
+  --card-foreground: oklch(25% 0.004 60);
+  --border-color: oklch(92% 0.006 55);
+  --destructive: oklch(57.7% 0.245 27.325);
+  --success: oklch(65% 0.17 150);
+  --success-foreground: oklch(38% 0.1 150);
+}
+
 @theme {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-border: var(--border-color);
+  --color-destructive: var(--destructive);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+
+  --animate-fade-in-up: fade-in-up 0.5s ease-out both;
+  --animate-fade-in: fade-in 0.3s ease-out both;
 }
 
-/* Tailwind v4 changed the default border color from gray-200 to currentcolor.
-   This restores the v3 behavior for backward compatibility. */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 @layer base {
   *,
   ::after,
   ::before,
   ::backdrop,
   ::file-selector-button {
-    border-color: var(--color-gray-200, currentcolor);
+    border-color: var(--color-border, currentcolor);
   }
 }
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@layer components {
+  .btn-primary {
+    @apply cursor-pointer rounded-lg bg-primary font-medium text-primary-foreground
+      transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/25
+      active:translate-y-0 active:shadow-sm disabled:pointer-events-none disabled:opacity-50;
+  }
+
+  .btn-secondary {
+    @apply cursor-pointer rounded-lg border border-border bg-card font-medium text-card-foreground
+      transition-colors duration-200 hover:bg-muted disabled:pointer-events-none disabled:opacity-50;
+  }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.hydrated-app {
+  display: none;
+}
+
+html[data-custom-oauth-auth-hydrated="true"] .hydrated-app {
+  display: block;
+}
+
+html[data-custom-oauth-auth-hydrated="true"] .ssr-preview {
+  display: none;
 }
 
 body {
+  min-height: 100vh;
   color: var(--foreground);
   background: var(--background);
-  font-family: "Inter", Arial, Helvetica, sans-serif;
 }

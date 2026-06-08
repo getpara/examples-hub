@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useAccount, useClient } from "@getpara/react-sdk";
+import { useAccount, useClient } from "@getpara/react-sdk-lite";
 import { ParaEthersV5Signer } from "@getpara/ethers-v5-integration";
 import { useEthersProvider } from "./useEthersProvider";
 

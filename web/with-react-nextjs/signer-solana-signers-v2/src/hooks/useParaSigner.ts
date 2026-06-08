@@ -1,7 +1,7 @@
 "use client";
 
-import { useAccount } from "@getpara/react-sdk";
-import { useParaSolanaSigner } from "@getpara/react-sdk/solana";
+import { useAccount } from "@getpara/react-sdk-lite";
+import { useParaSolanaSigner } from "@getpara/react-sdk-lite/chains/solana";
 import { useSolana } from "./useSolana";
 
 export function useParaSigner() {

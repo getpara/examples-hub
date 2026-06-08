@@ -1,83 +1,81 @@
 "use client";
 
-import { useConnect, useDisconnect, useAccount } from "wagmi";
 import { Modal } from "./ui/Modal";
-import { useEffect } from "react";
+import type { WalletConnectorOption } from "@/hooks/useWagmiWalletConnection";
+import { truncateAddress } from "@/utils/format";
 
 interface ConnectWalletModalProps {
+  activeConnectorName?: string;
+  address?: string;
+  connectors: WalletConnectorOption[];
+  isConnected: boolean;
   isOpen: boolean;
   onClose: () => void;
+  onConnect: (connectorId: string) => void;
+  onDisconnect: () => void;
 }
 
-export function ConnectWalletModal({ isOpen, onClose }: ConnectWalletModalProps) {
-  const { connect, connectors, isSuccess } = useConnect();
-  const { disconnect } = useDisconnect();
-  const { isConnected, address, connector: activeConnector } = useAccount();
-
-  const paraConnector = connectors.find((connector) => connector.id === "para");
-  const otherConnectors = connectors.filter((connector) => connector.id !== "para");
-
-  // Close modal on successful connection
-  useEffect(() => {
-    if (isSuccess) {
-      onClose();
-    }
-  }, [isSuccess, onClose]);
-
-  const handleDisconnect = () => {
-    disconnect();
-    onClose();
-  };
+export function ConnectWalletModal({
+  activeConnectorName,
+  address,
+  connectors,
+  isConnected,
+  isOpen,
+  onClose,
+  onConnect,
+  onDisconnect,
+}: ConnectWalletModalProps) {
+  const paraConnectors = connectors.filter((connector) => connector.isPara);
+  const otherConnectors = connectors.filter((connector) => !connector.isPara);
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} data-testid="auth-modal">
       <div className="p-6">
-        <h2 className="text-xl font-semibold mb-6">{isConnected ? "Wallet Settings" : "Connect Wallet"}</h2>
+        <h2 className="mb-6 text-xl font-semibold text-card-foreground">
+          {isConnected ? "Wallet Settings" : "Connect Wallet"}
+        </h2>
 
         {isConnected ? (
           <div className="space-y-4">
-            <div className="bg-gray-50 p-4 rounded-none border border-gray-200">
-              <p className="text-sm text-gray-600 mb-1">Connected with {activeConnector?.name}</p>
-              <p className="text-sm font-mono text-gray-900">
-                {address?.slice(0, 6)}...{address?.slice(-4)}
-              </p>
+            <div className="rounded-xl border border-border bg-muted/60 px-4 py-3">
+              <p className="mb-1 text-sm text-muted-foreground">Connected with {activeConnectorName}</p>
+              <p className="font-mono text-sm text-card-foreground">{address ? truncateAddress(address) : ""}</p>
             </div>
             <button
-              onClick={handleDisconnect}
+              type="button"
+              onClick={onDisconnect}
               data-testid="auth-logout-button"
-              className="w-full px-4 py-2 bg-red-600 text-white rounded-none hover:bg-red-700 transition-colors cursor-pointer"
-            >
+              className="w-full rounded-lg border border-destructive/15 bg-destructive/8 px-4 py-3 text-sm font-medium text-destructive transition-colors hover:bg-destructive/12">
               Disconnect
             </button>
           </div>
         ) : (
           <div className="space-y-6">
-            {/* Social Login Section */}
             <div>
-              <h3 className="text-sm font-medium text-gray-500 mb-3">Social Login</h3>
-              {paraConnector && (
+              <h3 className="mb-3 text-sm font-medium text-muted-foreground">Social Login</h3>
+              {paraConnectors.map((connector) => (
                 <button
-                  onClick={() => connect({ connector: paraConnector })}
+                  key={connector.id}
+                  type="button"
+                  onClick={() => onConnect(connector.id)}
                   data-testid="auth-oauth-para"
-                  className="w-full px-4 py-2 bg-gray-900 text-white rounded-none hover:bg-gray-950 transition-colors cursor-pointer"
-                >
-                  Connect with {paraConnector.name}
+                  className="btn-primary w-full px-4 py-3">
+                  Connect with {connector.name}
                 </button>
-              )}
+              ))}
             </div>
 
-            {/* Other Wallets Section */}
             {otherConnectors.length > 0 && (
               <div>
-                <h3 className="text-sm font-medium text-gray-500 mb-3">Other Wallets</h3>
+                <h3 className="mb-3 text-sm font-medium text-muted-foreground">Other Wallets</h3>
                 <div className="space-y-2">
                   {otherConnectors.map((connector) => (
                     <button
                       key={connector.id}
-                      onClick={() => connect({ connector })}
+                      type="button"
+                      onClick={() => onConnect(connector.id)}
                       data-testid={`wallet-option-${connector.id}`}
-                      className="w-full px-4 py-2 bg-gray-100 text-gray-900 rounded-none hover:bg-gray-200 transition-colors cursor-pointer"
-                    >
+                      className="w-full rounded-lg border border-border bg-card px-4 py-3 text-sm font-medium text-card-foreground transition-colors hover:bg-muted">
                       Connect with {connector.name}
                     </button>
                   ))}

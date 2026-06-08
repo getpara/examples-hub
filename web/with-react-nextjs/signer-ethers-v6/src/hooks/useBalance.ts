@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { ethers } from "ethers";
-import { useWallet } from "@getpara/react-sdk";
-import { provider } from "@/lib/provider";
+import { useWallet } from "@getpara/react-sdk-lite";
+import { useEthersProvider } from "./useEthersProvider";
 
 export function useBalance() {
   const [balance, setBalance] = useState<string | null>(null);
@@ -11,9 +11,10 @@ export function useBalance() {
   const [error, setError] = useState<Error | null>(null);
 
   const { data: wallet } = useWallet();
+  const { provider } = useEthersProvider();
 
   const refetch = useCallback(async () => {
-    if (!wallet?.address) {
+    if (!wallet?.address || !provider) {
       setBalance(null);
       return;
     }
@@ -30,7 +31,7 @@ export function useBalance() {
     } finally {
       setIsLoading(false);
     }
-  }, [wallet?.address]);
+  }, [wallet?.address, provider]);
 
   useEffect(() => {
     refetch();

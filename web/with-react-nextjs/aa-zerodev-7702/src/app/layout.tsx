@@ -2,14 +2,12 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "@/styles/globals.css";
 import "@getpara/react-sdk/styles.css";
-import { ParaProvider } from "@/components/ParaProvider";
-import { Header } from "@/components/layout/Header";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "ZeroDev AA Example",
-  description: "Para SDK with ZeroDev Account Abstraction for gas-sponsored transactions",
+  title: "ZeroDev EIP-7702 Example",
+  description: "Delegate smart account behavior to a Para wallet EOA with ZeroDev.",
 };
 
 export default function RootLayout({
@@ -19,12 +17,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>
-        <ParaProvider>
-          <Header />
-          {children}
-        </ParaProvider>
-      </body>
+      <body className={inter.className}>{children}</body>
     </html>
   );
 }

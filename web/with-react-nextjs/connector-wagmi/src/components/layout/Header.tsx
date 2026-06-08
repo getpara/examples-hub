@@ -1,45 +1,26 @@
-"use client";
-
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useAccount } from "wagmi";
+import Image from "next/image";
+import { truncateAddress } from "@/utils/format";
 
 interface HeaderProps {
-  onConnectClick: () => void;
+  address?: string;
+  isConnected: boolean;
+  onConnect: () => void;
 }
 
-export default function Header({ onConnectClick }: HeaderProps) {
-  const pathname = usePathname();
-  const { address, isConnected } = useAccount();
-
+export function Header({ address, isConnected, onConnect }: HeaderProps) {
   return (
-    <header className="border-b border-gray-200">
-      <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-        <nav>
-          {pathname !== "/" && (
-            <Link
-              href="/"
-              className="inline-flex items-center text-gray-600 hover:text-gray-900 px-4 py-2 rounded-none transition-colors">
-              ← Back to Selector
-            </Link>
-          )}
-        </nav>
-        <div>
-          {isConnected ? (
-            <button
-              onClick={onConnectClick}
-              className="px-4 py-2 bg-gray-700 text-white rounded-none hover:bg-gray-800 transition-colors text-sm font-medium cursor-pointer">
-              Connected: {address?.slice(0, 6)}...
-              {address?.slice(-4)}
-            </button>
-          ) : (
-            <button
-              onClick={onConnectClick}
-              className="px-4 py-2 bg-gray-900 text-white rounded-none hover:bg-gray-950 transition-colors text-sm font-medium cursor-pointer">
-              Connect Wallet
-            </button>
-          )}
+    <header className="sticky top-0 z-10 border-b border-border/50 bg-card/80 backdrop-blur-xl">
+      <div className="mx-auto flex max-w-4xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
+        <div className="flex min-w-0 items-center gap-3">
+          <Image src="/para.svg" alt="Para" width={28} height={28} priority />
+          <div className="min-w-0">
+            <p className="truncate text-sm font-semibold text-card-foreground">Para</p>
+            <p className="truncate text-xs text-muted-foreground">Wagmi example</p>
+          </div>
         </div>
+        <button type="button" onClick={onConnect} className="btn-primary shrink-0 px-4 py-2 text-sm">
+          {isConnected && address ? truncateAddress(address) : "Connect Wallet"}
+        </button>
       </div>
     </header>
   );

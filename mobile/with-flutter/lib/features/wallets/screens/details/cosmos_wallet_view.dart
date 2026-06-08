@@ -199,7 +199,7 @@ class _CosmosWalletViewState extends State<CosmosWalletView> {
       } else if (result is para_sdk.DeniedSignatureResultWithUrl) {
         _showResult(
           'Denied',
-          'Transaction denied\nReview URL: ${result.transactionReviewUrl}',
+          'Transaction denied',
         );
       } else {
         _showResult('Error', 'Failed to sign transaction');
@@ -422,7 +422,7 @@ class _CosmosWalletViewState extends State<CosmosWalletView> {
           ),
           const SizedBox(height: 16),
           DropdownButtonFormField<String>(
-              value: _selectedChain,
+              initialValue: _selectedChain,
               style: TextStyle(
                 fontSize: 16,
                 color: Theme.of(context).colorScheme.onSurface,

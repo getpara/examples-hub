@@ -1,7 +1,4 @@
-interface CountryCode {
-  code: string;
-  label: string;
-}
+import type { CountryCodeOption } from "@/types/auth";
 
 interface PhoneFormProps {
   countryCode: string;
@@ -11,7 +8,7 @@ interface PhoneFormProps {
   onSubmit: () => void;
   isPending: boolean;
   disabled?: boolean;
-  countryCodes: readonly CountryCode[];
+  countryCodes: readonly CountryCodeOption[];
 }
 
 export function PhoneForm({
@@ -32,16 +29,16 @@ export function PhoneForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="phone" className="mb-1.5 block text-sm font-medium text-card-foreground">
           Phone number
         </label>
-        <div className="flex gap-2">
+        <div className="grid grid-cols-[minmax(7rem,9rem)_minmax(0,1fr)] gap-2">
           <select
             id="countryCode"
             value={countryCode}
             onChange={(e) => onCountryCodeChange(e.target.value)}
             disabled={disabled || isPending}
-            className="px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed bg-white">
+            className="min-h-11 rounded-lg border border-border bg-card px-3 text-sm text-card-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15 disabled:cursor-not-allowed disabled:bg-muted">
             {countryCodes.map(({ code, label }) => (
               <option key={code} value={code}>
                 {label}
@@ -55,7 +52,7 @@ export function PhoneForm({
             onChange={(e) => onPhoneNumberChange(e.target.value)}
             placeholder="(555) 123-4567"
             disabled={disabled || isPending}
-            className="flex-1 px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+            className="min-h-11 min-w-0 rounded-lg border border-border bg-card px-3 text-sm text-card-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15 disabled:cursor-not-allowed disabled:bg-muted"
             required
           />
         </div>
@@ -63,7 +60,7 @@ export function PhoneForm({
       <button
         type="submit"
         disabled={isPending || !phoneNumber || disabled}
-        className="w-full px-4 py-2 bg-gray-900 text-white hover:bg-gray-950 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed font-medium">
+        className="btn-primary min-h-11 w-full px-4 text-sm">
         {isPending ? "Loading..." : "Continue with Phone"}
       </button>
     </form>

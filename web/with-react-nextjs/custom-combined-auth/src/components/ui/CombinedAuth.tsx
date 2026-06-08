@@ -1,9 +1,6 @@
 "use client";
 
-import { useAccount } from "@getpara/react-sdk";
-import type { TOAuthMethod } from "@getpara/react-sdk";
-import { useCombinedAuth } from "@/hooks/useCombinedAuth";
-import { COUNTRY_CODES, OAUTH_PROVIDERS } from "@/constants/auth";
+import type { AuthTab, CountryCodeOption, OAuthProviderOption } from "@/types/auth";
 import { AuthCard } from "./AuthCard";
 import { AuthTabs } from "./AuthTabs";
 import { EmailForm } from "./EmailForm";
@@ -11,24 +8,52 @@ import { PhoneForm } from "./PhoneForm";
 import { OAuthButtons } from "./OAuthButtons";
 import { VerifyIframe } from "./VerifyIframe";
 
-export function CombinedAuth() {
-  const { isConnected } = useAccount();
-  const {
-    activeTab,
-    setActiveTab,
-    email,
-    phone,
-    oauth,
-    step,
-    verifyUrl,
-    error,
-    isPending,
-    cancel,
-  } = useCombinedAuth();
+interface CombinedAuthProps {
+  activeTab: AuthTab;
+  countryCodes: readonly CountryCodeOption[];
+  email: {
+    email: string;
+    isPending: boolean;
+    setEmail: (email: string) => void;
+    submit: () => void;
+  };
+  error: string | null;
+  isPending: boolean;
+  oauth: {
+    activeProvider: OAuthProviderOption["method"] | null;
+    authenticate: (method: OAuthProviderOption["method"]) => void;
+    cancel: () => void;
+    isPending: boolean;
+  };
+  onCancel: () => void;
+  onTabChange: (tab: AuthTab) => void;
+  phone: {
+    countryCode: string;
+    isPending: boolean;
+    phoneNumber: string;
+    setCountryCode: (code: string) => void;
+    setPhoneNumber: (phone: string) => void;
+    submit: () => void;
+  };
+  providers: readonly OAuthProviderOption[];
+  step: "input" | "verify";
+  verifyUrl: string | null;
+}
 
-  if (isConnected) return null;
-
-  // Show verification iframe for email/phone OTP
+export function CombinedAuth({
+  activeTab,
+  countryCodes,
+  email,
+  error,
+  isPending,
+  oauth,
+  onCancel,
+  onTabChange,
+  phone,
+  providers,
+  step,
+  verifyUrl,
+}: CombinedAuthProps) {
   if (step === "verify" && verifyUrl) {
     const statusMessage =
       activeTab === "email"
@@ -40,15 +65,15 @@ export function CombinedAuth() {
           : undefined;
 
     return (
-      <AuthCard title="Sign in to your account" error={error}>
-        <VerifyIframe url={verifyUrl} onCancel={cancel} statusMessage={statusMessage} />
+      <AuthCard title="Verify account" description="Complete the Para verification challenge." error={error}>
+        <VerifyIframe url={verifyUrl} onCancel={onCancel} statusMessage={statusMessage} />
       </AuthCard>
     );
   }
 
   return (
-    <AuthCard title="Sign in to your account" error={error}>
-      <AuthTabs activeTab={activeTab} onTabChange={setActiveTab} disabled={isPending} />
+    <AuthCard title="Sign in" description="Choose an auth method backed by Para." error={error}>
+      <AuthTabs activeTab={activeTab} onTabChange={onTabChange} disabled={isPending} />
 
       {activeTab === "email" && (
         <EmailForm
@@ -67,24 +92,25 @@ export function CombinedAuth() {
           onPhoneNumberChange={phone.setPhoneNumber}
           onSubmit={phone.submit}
           isPending={phone.isPending}
-          countryCodes={COUNTRY_CODES}
+          countryCodes={countryCodes}
         />
       )}
 
       {activeTab === "social" && (
         <>
           <OAuthButtons
-            providers={OAUTH_PROVIDERS}
+            providers={providers}
             activeProvider={oauth.activeProvider}
-            onAuthenticate={(method) => oauth.authenticate(method as TOAuthMethod)}
+            onAuthenticate={oauth.authenticate}
             isPending={oauth.isPending}
           />
           {oauth.isPending && (
             <div className="mt-4 space-y-3">
-              <div className="text-center text-sm text-gray-500">Waiting for authentication...</div>
+              <div className="text-center text-sm text-muted-foreground">Waiting for authentication...</div>
               <button
+                type="button"
                 onClick={oauth.cancel}
-                className="w-full px-4 py-2 border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors font-medium">
+                className="btn-secondary min-h-11 w-full px-4 text-sm">
                 Cancel
               </button>
             </div>

@@ -1,4 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.INTERNET"/>
 
     <application
         android:label="Para Flutter"
@@ -24,12 +25,15 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
 
-            <!-- Intent filter for the custom scheme -->
+            <!-- App deep links for sample app/external-wallet callbacks. Auth
+                 callbacks use the bare paraflutter scheme and are owned by
+                 flutter_web_auth_2's CallbackActivity below. -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="paraflutter" />
+                <data android:scheme="paraflutter" android:host="wallet" />
+                <data android:scheme="paraflutter" android:host="phantom" />
             </intent-filter>
 
         </activity>
@@ -42,7 +46,7 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="paraflutter" />
+                <data android:scheme="paraflutter" android:host="" />
             </intent-filter>
         </activity>
 

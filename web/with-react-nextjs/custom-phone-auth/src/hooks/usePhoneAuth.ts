@@ -7,19 +7,15 @@ import {
   getPortalBaseURL,
   type AuthStateVerify,
 } from "@getpara/react-sdk";
-
-export type PhoneAuthStep = "input" | "verify";
+import type { PhoneAuthStep } from "@/types/auth";
 
 export interface UsePhoneAuthReturn {
-  // State
   countryCode: string;
   phoneNumber: string;
   step: PhoneAuthStep;
   verifyUrl: string | null;
   error: string | null;
   isPending: boolean;
-
-  // Actions
   setCountryCode: (code: string) => void;
   setPhoneNumber: (phone: string) => void;
   submit: () => void;
@@ -41,13 +37,11 @@ export function usePhoneAuth(): UsePhoneAuthReturn {
 
   const shouldCancel = useRef(false);
 
-  // Reset to initial state
   const resetState = useCallback(() => {
     setStep("input");
     setVerifyUrl(null);
   }, []);
 
-  // Handle post-auth completion (new user vs returning user)
   const handleAuthComplete = useCallback(
     (isNewUser: boolean) => {
       shouldCancel.current = false;
@@ -88,7 +82,6 @@ export function usePhoneAuth(): UsePhoneAuthReturn {
     [waitForLogin, waitForWalletCreation, resetState]
   );
 
-  // Listen for iframe messages (OTP verification complete)
   useEffect(() => {
     if (step !== "verify" || !para) return;
 
@@ -105,7 +98,6 @@ export function usePhoneAuth(): UsePhoneAuthReturn {
     return () => window.removeEventListener("message", handleMessage);
   }, [step, para]);
 
-  // Submit phone for authentication
   const submit = useCallback(() => {
     setError(null);
 
@@ -132,7 +124,6 @@ export function usePhoneAuth(): UsePhoneAuthReturn {
     );
   }, [countryCode, phoneNumber, signUpOrLogIn, handleAuthComplete]);
 
-  // Cancel authentication
   const cancel = useCallback(() => {
     shouldCancel.current = true;
     resetState();

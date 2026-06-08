@@ -7,8 +7,13 @@ interface DataFieldProps {
 export function DataField({ label, value, mono }: DataFieldProps) {
   return (
     <div>
-      <p className="text-sm text-gray-600 mb-2">{label}</p>
-      <p className={`text-sm ${mono ? "font-mono" : ""} bg-white p-4 border border-gray-200 break-all`}>
+      <p className="mb-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+        {label}
+      </p>
+      <p
+        className={`break-all rounded-xl bg-muted/60 px-4 py-3 text-sm leading-relaxed ${
+          mono ? "font-mono" : ""
+        }`}>
         {value}
       </p>
     </div>
