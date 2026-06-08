@@ -5,7 +5,7 @@
  */
 
 import { useEffect } from "react";
-import type Para from "@getpara/web-sdk";
+import type Para from "@getpara/react-sdk-lite";
 
 declare global {
   interface Window {

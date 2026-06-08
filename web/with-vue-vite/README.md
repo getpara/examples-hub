@@ -30,12 +30,17 @@ A Vue + Vite example demonstrating custom UI authentication with Para's web-sdk.
 
 ## Setup
 
-1. Create a `.env` file:
+1. Create a `.env` file from `.env.example` and set your Para API key:
 
 ```env
 VITE_PARA_API_KEY=your_api_key_here
 VITE_PARA_ENVIRONMENT=BETA
 ```
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `VITE_PARA_API_KEY` | Yes | API key from the Para Developer Portal project used by this example. |
+| `VITE_PARA_ENVIRONMENT` | No | Para environment for the API key. Defaults to `BETA` when omitted. |
 
 2. Install dependencies and run:
 
@@ -43,6 +48,15 @@ VITE_PARA_ENVIRONMENT=BETA
 yarn install
 yarn dev
 ```
+
+## Developer Portal Configuration
+
+This custom UI example uses direct `@getpara/web-sdk` methods without provider-level configuration objects. Configure persistent project settings in the Para Developer Portal for the API key you use here:
+
+- App name or display identity.
+- Branding, logo, theme colors, fonts, border radius, and wallet visibility.
+- Email and phone login availability.
+- OAuth providers displayed by this example: Google, Apple, Discord, and X.
 
 ## Project Structure
 

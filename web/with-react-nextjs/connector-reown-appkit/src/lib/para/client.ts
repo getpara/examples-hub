@@ -1,11 +1,9 @@
 import { ParaWeb } from "@getpara/react-sdk-lite";
 
-const API_KEY = process.env.NEXT_PUBLIC_PARA_API_KEY;
+const API_KEY = process.env.NEXT_PUBLIC_PARA_API_KEY ?? "";
 
 if (!API_KEY) {
-  throw new Error(
-    "API key is not defined. Please set NEXT_PUBLIC_PARA_API_KEY in your environment variables."
-  );
+  console.warn("NEXT_PUBLIC_PARA_API_KEY is not set. Para authentication will not work.");
 }
 
-export const para = new ParaWeb(API_KEY);
+export const para = typeof window !== "undefined" && API_KEY ? new ParaWeb(API_KEY) : null;

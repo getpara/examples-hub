@@ -2,10 +2,9 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { ethers } from "ethers";
-import { useWallet } from "@getpara/react-sdk";
-import { useParaEthersSigner } from "@getpara/react-sdk/evm";
-import { provider } from "@/lib/provider";
-import ParaTestToken from "@/contracts/artifacts/contracts/ParaTestToken.sol/ParaTestToken.json";
+import { useWallet } from "@getpara/react-sdk-lite";
+import { useParaSigner } from "./useParaSigner";
+import ParaTestToken from "@/contracts/artifacts/src/contracts/ParaTestToken.sol/ParaTestToken.json";
 
 export type SignedPermit = {
   deadline: string;
@@ -30,7 +29,7 @@ export function usePermitSigning(
   const [error, setError] = useState<Error | null>(null);
 
   const { data: wallet } = useWallet();
-  const { ethersSigner: signer } = useParaEthersSigner({ provider });
+  const { signer, provider } = useParaSigner();
 
   const fetchTokenData = useCallback(async () => {
     if (!wallet?.address || !provider) return;

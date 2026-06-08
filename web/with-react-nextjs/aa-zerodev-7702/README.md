@@ -1,13 +1,13 @@
 # ZeroDev EIP-7702 Example
 
-A minimal Next.js example demonstrating Para SDK integration with ZeroDev for EIP-7702 gas-sponsored transactions.
+A minimal Next.js example that uses Para with ZeroDev to send a gas-sponsored EIP-7702 transaction on Sepolia.
 
 ## What This Example Shows
 
 - Setting up `ParaProvider` for Para SDK authentication
-- Using `useViemAccount` hook from `@getpara/react-sdk/evm` for the Viem signer
-- Creating ZeroDev 7702 smart EOA accounts with Para as the signer
-- Sending gas-sponsored transactions via ZeroDev's paymaster
+- Using `useZeroDevSmartAccount` from `@getpara/react-sdk`
+- Enabling ZeroDev EIP-7702 mode for a Para wallet EOA
+- Sending a zero-value sponsored transaction through ZeroDev
 
 ## Setup
 
@@ -19,35 +19,49 @@ NEXT_PUBLIC_PARA_ENVIRONMENT=BETA
 NEXT_PUBLIC_ZERODEV_PROJECT_ID=your_zerodev_project_id
 ```
 
-2. Install dependencies and run:
+2. Install dependencies:
 
 ```bash
 yarn install
-yarn dev
 ```
+
+3. Build and run the production server:
+
+```bash
+yarn build
+yarn start
+```
+
+For local development, use `yarn dev`.
 
 ## Getting API Keys
 
 - **Para API Key**: Get from [Para Developer Portal](https://developer.getpara.com)
 - **ZeroDev Project ID**: Get from [ZeroDev Dashboard](https://dashboard.zerodev.app)
 
+## Developer Portal Configuration
+
+Configure the app name, branding, logo, theme, enabled OAuth providers, email and phone login options, 2FA setting, and auth layout on the Para API key in the Developer Portal. This example keeps only runtime modal behavior in code and relies on the Portal for persistent Para app configuration.
+
+The ZeroDev project ID remains an environment variable because it configures ZeroDev EIP-7702 account and paymaster behavior for this example, not Para Portal settings.
+
 ## Project Structure
 
 ```
 src/
 ├── app/
-│   ├── layout.tsx                  # Root layout with ParaProvider
-│   └── page.tsx                    # Main page with wallet + transaction UI
+│   ├── layout.tsx                  # Root layout and global styles
+│   └── page.tsx                    # Example route
 ├── components/
 │   ├── ParaProvider.tsx            # Para SDK provider setup
-│   ├── layout/Header.tsx           # Header with connect button
+│   ├── ZeroDev7702Example.tsx      # Client container for wallet state + UI
+│   ├── layout/Header.tsx           # Presentational header
 │   └── ui/
 │       ├── ConnectCard.tsx         # Connect wallet card
-│       ├── WalletInfo.tsx          # EOA + 7702 account display
-│       └── SendTransaction.tsx     # Sponsored transaction UI
+│       ├── WalletInfo.tsx          # Para wallet + EIP-7702 account display
+│       └── SendTransaction.tsx     # Presentational transaction UI
 ├── hooks/
-│   ├── useSmartAccountClient.ts    # ZeroDev 7702 account setup
-│   └── useSendUserOperation.ts     # Transaction sending hook
+│   └── useZeroDev7702SponsoredTransaction.ts
 └── lib/
     └── zerodev.ts                  # ZeroDev configuration
 ```
@@ -55,60 +69,30 @@ src/
 ## Key Integration Pattern
 
 ```typescript
-import { useViemAccount } from "@getpara/react-sdk/evm";
-import { createZeroDevPaymasterClient } from "@zerodev/sdk";
-import { create7702KernelAccount, create7702KernelAccountClient } from "@zerodev/ecdsa-validator";
-import { createPublicClient, http } from "viem";
+import { useZeroDevSmartAccount } from "@getpara/react-sdk";
+import { sepolia } from "viem/chains";
 
-// Get Viem account from Para SDK (handles signing internally, including signAuthorization)
-const { viemAccount } = useViemAccount();
-
-// Create public client
-const publicClient = createPublicClient({
+const { smartAccount, isLoading, error } = useZeroDevSmartAccount({
+  projectId: process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID ?? "",
   chain: sepolia,
-  transport: http(PUBLIC_RPC),
+  mode: "7702",
+  enabled: isConnected,
 });
 
-// Create 7702 Kernel account - simpler than 4337, no validator plugins needed
-const kernelAccount = await create7702KernelAccount(publicClient, {
-  signer: viemAccount,
-  entryPoint: ENTRY_POINT,
-  kernelVersion: KERNEL_VERSION, // KERNEL_V3_3 for 7702
+if (!smartAccount) {
+  return;
+}
+
+const receipt = await smartAccount.sendTransaction({
+  to: "0x000000000000000000000000000000000000dEaD",
 });
 
-// Create paymaster and kernel client
-const paymasterClient = createZeroDevPaymasterClient({
-  chain: sepolia,
-  transport: http(PAYMASTER_RPC),
-});
-
-const kernelClient = create7702KernelAccountClient({
-  account: kernelAccount,
-  chain: sepolia,
-  bundlerTransport: http(BUNDLER_RPC),
-  paymaster: paymasterClient,
-  client: publicClient,
-});
-
-// Send sponsored transaction - no encodeCalls needed for 7702
-const userOpHash = await kernelClient.sendUserOperation({
-  calls: [{ to, data, value }],
-});
-const receipt = await kernelClient.waitForUserOperationReceipt({ hash: userOpHash });
+console.log(receipt.transactionHash);
 ```
-
-## Key Differences from EIP-4337
-
-| Aspect         | EIP-4337                  | EIP-7702              |
-| -------------- | ------------------------- | --------------------- |
-| Account Setup  | Validator + plugins       | Direct signer         |
-| Kernel Version | KERNEL_V3_1               | KERNEL_V3_3           |
-| Sending Ops    | `encodeCalls()` required  | Pass `calls` directly |
-| Address        | New smart account address | Same as EOA           |
 
 ## Learn More
 
 - [Para Documentation](https://docs.getpara.com)
 - [ZeroDev Documentation](https://docs.zerodev.app)
-- [ZeroDev 7702 Guide](https://docs.zerodev.app/sdk/advanced/eip-7702)
+- [ZeroDev EIP-7702 Guide](https://docs.zerodev.app/sdk/advanced/eip-7702)
 - [EIP-7702 Specification](https://eips.ethereum.org/EIPS/eip-7702)

@@ -1,13 +1,10 @@
-interface OAuthProvider {
-  method: string;
-  label: string;
-  icon: string;
-}
+import Image from "next/image";
+import type { OAuthProviderOption } from "@/types/auth";
 
 interface OAuthButtonsProps {
-  providers: readonly OAuthProvider[];
-  activeProvider: string | null;
-  onAuthenticate: (method: string) => void;
+  providers: readonly OAuthProviderOption[];
+  activeProvider: OAuthProviderOption["method"] | null;
+  onAuthenticate: (method: OAuthProviderOption["method"]) => void;
   isPending: boolean;
   disabled?: boolean;
 }
@@ -20,15 +17,16 @@ export function OAuthButtons({
   disabled,
 }: OAuthButtonsProps) {
   return (
-    <div className="space-y-3">
+    <div className="grid gap-3 sm:grid-cols-2">
       {providers.map(({ method, label, icon }) => (
         <button
+          type="button"
           key={method}
           onClick={() => onAuthenticate(method)}
           disabled={isPending || disabled}
-          className="w-full flex items-center justify-center gap-3 px-4 py-2 border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-          <img src={icon} alt="" className="w-5 h-5" />
-          <span className="text-sm font-medium">
+          className="btn-secondary flex min-h-11 w-full items-center justify-center gap-3 px-4 text-sm">
+          <Image src={icon} alt="" width={20} height={20} className="h-5 w-5" />
+          <span className="font-medium">
             {activeProvider === method ? "Loading..." : `Continue with ${label}`}
           </span>
         </button>

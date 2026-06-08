@@ -2,10 +2,9 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { ethers } from "ethers";
-import { useWallet } from "@getpara/react-sdk";
-import { useParaEthersSigner } from "@getpara/react-sdk/evm";
-import { provider } from "@/lib/provider";
-import ParaTestToken from "@/contracts/artifacts/contracts/ParaTestToken.sol/ParaTestToken.json";
+import { useWallet } from "@getpara/react-sdk-lite";
+import { useParaSigner } from "./useParaSigner";
+import ParaTestToken from "@/contracts/artifacts/src/contracts/ParaTestToken.sol/ParaTestToken.json";
 
 const DEFAULT_CONTRACT_ADDRESS = "0x83cC70475A0d71EF1F2F61FeDE625c8C7E90C3f2";
 
@@ -19,7 +18,7 @@ export function useContractInteraction(contractAddress: string = DEFAULT_CONTRAC
   const [error, setError] = useState<Error | null>(null);
 
   const { data: wallet } = useWallet();
-  const { ethersSigner: signer } = useParaEthersSigner({ provider });
+  const { signer, provider } = useParaSigner();
 
   const fetchContractData = useCallback(async () => {
     if (!wallet?.address || !provider) return;

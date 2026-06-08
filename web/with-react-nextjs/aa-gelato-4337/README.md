@@ -1,13 +1,13 @@
 # Gelato Account Abstraction Example
 
-A minimal Next.js example demonstrating Para SDK integration with Gelato for EIP-4337 gas-sponsored transactions.
+A minimal Next.js example showing how to use Para with Gelato smart wallets to create a smart account and send a gas-sponsored EIP-4337 transaction.
 
 ## What This Example Shows
 
-- Setting up `ParaProvider` for Para SDK authentication
-- Using `useViemAccount` hook from `@getpara/react-sdk/evm` for the Viem signer
-- Creating Gelato Kernel smart accounts with Para as the signer
-- Sending gas-sponsored UserOperations via Gelato's relay infrastructure
+- Configuring `ParaProvider` for Para authentication
+- Creating a Gelato smart account with `useGelatoSmartAccount`
+- Sending a sponsored transaction with React `useState` state management
+- Keeping the reusable account abstraction logic separate from the example UI
 
 ## Setup
 
@@ -19,89 +19,103 @@ NEXT_PUBLIC_PARA_ENVIRONMENT=BETA
 NEXT_PUBLIC_GELATO_API_KEY=your_gelato_api_key
 ```
 
-2. Install dependencies and run:
+2. Install dependencies:
 
 ```bash
 yarn install
-yarn dev
 ```
+
+3. Build and start the app:
+
+```bash
+yarn build
+yarn start
+```
+
+4. Open `http://127.0.0.1:3000`.
 
 ## Getting API Keys
 
 - **Para API Key**: Get from [Para Developer Portal](https://developer.getpara.com)
 - **Gelato API Key**: Get from [Gelato Dashboard](https://app.gelato.network)
 
+## Developer Portal Configuration
+
+Configure the app name, branding, logo, theme, enabled OAuth providers, email and phone login options, 2FA setting, and auth layout on the Para API key in the Developer Portal. This example keeps only runtime modal behavior in code and relies on the Portal for persistent Para app configuration.
+
+The Gelato API key remains an environment variable because it configures Gelato smart wallet sponsorship for this example, not Para Portal settings.
+
 ## Project Structure
 
-```
+```text
 src/
 ├── app/
-│   ├── layout.tsx                  # Root layout with ParaProvider
-│   └── page.tsx                    # Main page with wallet + transaction UI
+│   ├── layout.tsx                       # Root layout, font, and global styles
+│   └── page.tsx                         # Server page metadata and app entry
 ├── components/
-│   ├── ParaProvider.tsx            # Para SDK provider setup
-│   ├── layout/Header.tsx           # Header with connect button
+│   ├── GelatoExample.tsx                # ParaProvider plus client SDK hook orchestration
+│   ├── ParaProvider.tsx                 # Para SDK provider setup
+│   ├── layout/Header.tsx                # Presentational header
 │   └── ui/
-│       ├── ConnectCard.tsx         # Connect wallet card
-│       ├── WalletInfo.tsx          # EOA + Smart Account display
-│       └── SendTransaction.tsx     # Sponsored transaction UI
+│       ├── ConnectCard.tsx              # Presentational connect card
+│       ├── WalletInfo.tsx               # Presentational wallet and smart account display
+│       └── SendTransaction.tsx          # Presentational sponsored transaction UI
 ├── hooks/
-│   ├── useSmartAccountClient.ts    # Gelato Kernel account setup
-│   └── useSendUserOperation.ts     # User operation sending logic
+│   └── useGelatoSponsoredTransaction.ts # Copyable Gelato account abstraction logic
 └── lib/
-    └── gelato.ts                   # Gelato configuration
+    └── gelato.ts                        # Gelato configuration
 ```
 
 ## Key Integration Pattern
 
-```typescript
-import { useViemAccount } from "@getpara/react-sdk/evm";
-import { accounts, createGelatoSmartWalletClient } from "@gelatonetwork/smartwallet";
-import { createWalletClient, createPublicClient, http } from "viem";
+The reusable logic lives in `src/hooks/useGelatoSponsoredTransaction.ts`. The UI components receive props only, so you can copy the hook into your app without copying this example's UI.
+
+```tsx
+import { useCallback, useState } from "react";
+import { useGelatoSmartAccount } from "@getpara/react-sdk";
+import type { Hash } from "viem";
 import { sepolia } from "viem/chains";
 
-// Get Viem account from Para SDK (handles signing internally)
-const { viemAccount } = useViemAccount();
+const TARGET_ADDRESS = "0x000000000000000000000000000000000000dEaD" as const;
 
-// Create public client for chain interaction
-const publicClient = createPublicClient({
-  chain: sepolia,
-  transport: http(),
-});
+export function useSponsoredGelatoTransaction() {
+  const [transactionHash, setTransactionHash] = useState<Hash | null>(null);
+  const [transactionError, setTransactionError] = useState<Error | null>(null);
+  const [isSendingTransaction, setIsSendingTransaction] = useState(false);
 
-// Create Kernel account (ERC-4337)
-const kernelAccount = await accounts.kernel({
-  owner: viemAccount,
-  client: publicClient,
-  index: BigInt(0),
-  eip7702: false,
-});
+  const { smartAccount, isLoading, error } = useGelatoSmartAccount({
+    apiKey: process.env.NEXT_PUBLIC_GELATO_API_KEY ?? "",
+    chain: sepolia,
+  });
 
-// Create wallet client with Kernel account
-const walletClient = createWalletClient({
-  account: kernelAccount,
-  chain: sepolia,
-  transport: http(),
-});
+  const sendSponsoredTransaction = useCallback(async () => {
+    if (!smartAccount) return;
 
-// Create Gelato smart wallet client
-const smartWalletClient = await createGelatoSmartWalletClient(walletClient, {
-  apiKey: GELATO_API_KEY,
-});
+    setIsSendingTransaction(true);
+    setTransactionError(null);
+    setTransactionHash(null);
 
-// Send sponsored UserOperation
-const result = await smartWalletClient.execute({
-  payment: { type: "sponsored" },
-  calls: [
-    {
-      to: "0x...",
-      data: "0x",
-      value: BigInt(0),
-    },
-  ],
-});
+    try {
+      const receipt = await smartAccount.sendTransaction({ to: TARGET_ADDRESS });
+      setTransactionHash(receipt.transactionHash);
+    } catch (cause) {
+      setTransactionError(cause instanceof Error ? cause : new Error("Transaction failed."));
+    } finally {
+      setIsSendingTransaction(false);
+    }
+  }, [smartAccount]);
 
-const txHash = await result.wait();
+  return {
+    smartAccountAddress: smartAccount?.smartAccountAddress ?? null,
+    transactionHash,
+    transactionError,
+    smartAccountError: error,
+    isSmartAccountLoading: isLoading,
+    isSendingTransaction,
+    canSendTransaction: Boolean(smartAccount) && !isSendingTransaction,
+    sendSponsoredTransaction,
+  };
+}
 ```
 
 ## Learn More

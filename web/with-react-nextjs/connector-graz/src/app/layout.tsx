@@ -1,8 +1,14 @@
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import "@/styles/globals.css";
 import "@getpara/react-sdk-lite/styles.css";
-import { Provider } from "@/context/Provider";
-import { AppWrapper } from "@/components/layout/AppWrapper";
-import { ModalProvider } from "@/context/ModalContext";
+
+const inter = Inter({ subsets: ["latin"] });
+
+export const metadata: Metadata = {
+  title: "Para + Graz Example",
+  description: "Connect a Cosmos wallet through Para and Graz, then send a testnet token transfer.",
+};
 
 export default function RootLayout({
   children,
@@ -11,13 +17,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>
-        <Provider>
-          <ModalProvider>
-            <AppWrapper>{children}</AppWrapper>
-          </ModalProvider>
-        </Provider>
-      </body>
+      <body className={inter.className}>{children}</body>
     </html>
   );
 }

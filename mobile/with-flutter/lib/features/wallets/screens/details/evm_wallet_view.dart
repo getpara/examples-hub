@@ -163,7 +163,7 @@ class _EVMWalletViewState extends State<EVMWalletView> {
       } else if (result is para_sdk.DeniedSignatureResultWithUrl) {
         _showResult(
           'Denied', 
-          'Signature denied\nReview URL: ${result.transactionReviewUrl}',
+          'Signature denied',
         );
       } else {
         _showResult('Error', 'Signature denied');
@@ -230,7 +230,7 @@ class _EVMWalletViewState extends State<EVMWalletView> {
       } else if (result is para_sdk.DeniedSignatureResultWithUrl) {
         _showResult(
           'Denied', 
-          'Transaction denied\nReview URL: ${result.transactionReviewUrl}',
+          'Transaction denied',
         );
       } else {
         _showResult('Error', 'Failed to sign transaction');
@@ -312,7 +312,7 @@ class _EVMWalletViewState extends State<EVMWalletView> {
       } else if (result is para_sdk.DeniedSignatureResultWithUrl) {
         _showResult(
           'Denied',
-          'ERC20 transfer denied\nReview URL: ${result.transactionReviewUrl}',
+          'ERC20 transfer denied',
         );
       } else {
         _showResult('Error', 'Failed to sign ERC20 transfer');

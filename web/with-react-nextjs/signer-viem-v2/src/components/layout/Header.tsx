@@ -1,43 +1,53 @@
-"use client";
-
+import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useModal, useAccount, useWallet } from "@getpara/react-sdk";
 
-export default function Header() {
-  const pathname = usePathname();
-  const { isConnected } = useAccount();
-  const { data: wallet } = useWallet();
-  const { openModal } = useModal();
-  const address = wallet?.address as `0x${string}` | undefined;
+interface HeaderProps {
+  address: string;
+  isConnected: boolean;
+  onConnect: () => void;
+  showBackLink: boolean;
+}
 
+export function Header({ address, isConnected, onConnect, showBackLink }: HeaderProps) {
   return (
-    <header className="border-b border-gray-200">
-      <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-        <nav>
-          {pathname !== "/" && (
+    <header className="sticky top-0 z-10 border-b border-border/50 bg-card/80 backdrop-blur-xl">
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3">
+        <div className="flex min-w-0 items-center gap-4">
+          <Link href="/" className="flex items-center gap-2">
+            <Image src="/para.svg" alt="Para" width={28} height={28} priority className="h-5 w-auto" />
+            <span className="text-xs font-medium text-muted-foreground">Viem v2 Signer</span>
+          </Link>
+
+          {showBackLink && (
             <Link
               href="/"
-              className="inline-flex items-center text-gray-600 hover:text-gray-900 px-4 py-2 rounded-none transition-colors">
-              ← Back to Selector
+              className="hidden rounded-lg border border-border bg-card px-3 py-1.5 text-xs font-medium text-muted-foreground transition-all hover:bg-muted hover:text-foreground sm:inline-flex">
+              Back to demos
             </Link>
           )}
-        </nav>
-        <div>
-          {isConnected ? (
-            <button
-              onClick={() => openModal()}
-              className="px-4 py-2 bg-gray-700 text-white rounded-none hover:bg-gray-800 transition-colors">
-              Connected: {address?.slice(0, 6)}...{address?.slice(-4)}
-            </button>
-          ) : (
-            <button
-              onClick={() => openModal()}
-              className="px-4 py-2 bg-gray-900 text-white rounded-none hover:bg-gray-950 transition-colors">
-              Connect Wallet
-            </button>
-          )}
         </div>
+
+        {isConnected ? (
+          <button
+            type="button"
+            onClick={onConnect}
+            data-testid="account-address-display"
+            data-address={address}
+            className="flex items-center gap-2.5 rounded-lg border border-border bg-card px-4 py-1.5 text-sm transition-all hover:bg-muted cursor-pointer">
+            <span className="h-2 w-2 rounded-full bg-success" />
+            <span className="font-mono text-xs">
+              {address ? `${address.slice(0, 6)}...${address.slice(-4)}` : "Loading"}
+            </span>
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={onConnect}
+            data-testid="header-connect-button"
+            className="btn-primary px-5 py-1.5 text-sm">
+            Connect Wallet
+          </button>
+        )}
       </div>
     </header>
   );

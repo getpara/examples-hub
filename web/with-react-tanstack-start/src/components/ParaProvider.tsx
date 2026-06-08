@@ -1,20 +1,19 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Environment, ParaProvider as ParaSDKProvider } from "@getpara/react-sdk";
-import { sepolia, celo, mainnet, polygon } from "wagmi/chains";
-import { cosmoshub, osmosis, noble } from "graz/chains";
-import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
-import { clusterApiUrl } from "@solana/web3.js";
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Environment, ParaProvider as ParaSDKProvider } from '@getpara/react-sdk';
+import { sepolia, celo, mainnet, polygon } from 'wagmi/chains';
+import { cosmoshub, osmosis, noble } from 'graz/chains';
+import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
+import { clusterApiUrl } from '@solana/web3.js';
 
 // Para API configuration - set these in your .env file
-const API_KEY = import.meta.env.VITE_PARA_API_KEY ?? "";
+const API_KEY = import.meta.env.VITE_PARA_API_KEY ?? '';
 const ENVIRONMENT = (import.meta.env.VITE_PARA_ENVIRONMENT as Environment) || Environment.BETA;
 
 if (!API_KEY) {
-  throw new Error("API key is not defined. Please set VITE_PARA_API_KEY in your environment variables.");
+  console.warn('VITE_PARA_API_KEY is not set. Para authentication will not work.');
 }
 
 const queryClient = new QueryClient();
-
 // Chain configurations
 const cosmosChains = [cosmoshub, osmosis, noble];
 const solanaNetwork = WalletAdapterNetwork.Devnet;
@@ -29,20 +28,6 @@ export function ParaProvider({ children }: { children: React.ReactNode }) {
           env: ENVIRONMENT,
         }}
         externalWalletConfig={{
-          wallets: [
-            "METAMASK",
-            "COINBASE",
-            "WALLETCONNECT",
-            "RAINBOW",
-            "ZERION",
-            "KEPLR",
-            "LEAP",
-            "RABBY",
-            "GLOW",
-            "PHANTOM",
-            "BACKPACK",
-            "SOLFLARE",
-          ],
           evmConnector: {
             config: {
               chains: [mainnet, polygon, sepolia, celo],
@@ -60,34 +45,14 @@ export function ParaProvider({ children }: { children: React.ReactNode }) {
             config: {
               endpoint,
               chain: solanaNetwork,
-              appIdentity: {
-                uri: typeof window !== "undefined" ? `${window.location.protocol}//${window.location.host}` : "",
-              },
             },
           },
-          walletConnect: {
-            projectId: import.meta.env.VITE_WALLET_CONNECT_PROJECT_ID || "",
-          },
         }}
-        config={{ appName: "Para Modal + Multichain Example" }}
         paraModalConfig={{
-          disableEmailLogin: false,
-          disablePhoneLogin: false,
-          authLayout: ["AUTH:FULL", "EXTERNAL:FULL"],
-          oAuthMethods: ["APPLE", "DISCORD", "FACEBOOK", "FARCASTER", "GOOGLE", "TWITTER"],
           onRampTestMode: true,
-          theme: {
-            foregroundColor: "#222222",
-            backgroundColor: "#FFFFFF",
-            accentColor: "#888888",
-            mode: "light",
-            borderRadius: "none",
-            font: "Inter",
-          },
-          logo: "/para.svg",
           recoverySecretStepEnabled: true,
-          twoFactorAuthEnabled: false,
-        }}>
+        }}
+      >
         {children}
       </ParaSDKProvider>
     </QueryClientProvider>

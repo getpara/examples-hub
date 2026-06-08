@@ -1,103 +1,71 @@
-"use client";
-
-import { useBalance, useActiveChains } from "graz";
-import { formatBalance } from "@/utils/format";
-
 interface BalanceCardProps {
-  address?: string;
+  address: string;
+  networkName: string;
+  balanceLabel: string;
+  isLoading: boolean;
+  hasBalance: boolean;
+  faucetUrl: string;
   onRefresh: () => void;
 }
 
-export function BalanceCard({ address, onRefresh }: BalanceCardProps) {
-  const activeChains = useActiveChains();
-  const activeChain = activeChains?.[0];
-
-  const currencies = activeChain?.currencies || [];
-  const chainDenom = currencies?.[0]?.coinMinimalDenom || "uatom";
-  const chainDecimals = currencies?.[0]?.coinDecimals || 6;
-
-  const {
-    data: balance,
-    isLoading,
-    refetch,
-  } = useBalance({
-    chainId: activeChain?.chainId || "cosmoshub-4",
-    denom: chainDenom,
-    bech32Address: address!,
-  });
-
-  const handleRefresh = () => {
-    refetch();
-    onRefresh();
-  };
-
-  const formatCosmosBalance = (amount: string, denom: string) => {
-    const displayAmount = parseFloat(amount) / 10 ** chainDecimals;
-    return `${formatBalance(displayAmount.toString())} ${currencies[0]?.coinDenom || denom}`;
-  };
-
-  const hasBalance = balance && parseFloat(balance.amount) > 0;
-
+export function BalanceCard({
+  address,
+  networkName,
+  balanceLabel,
+  isLoading,
+  hasBalance,
+  faucetUrl,
+  onRefresh,
+}: BalanceCardProps) {
   return (
-    <div className="mb-8 rounded-none border border-gray-200">
-      <div className="flex justify-between items-center px-6 py-3 bg-gray-50 border-b border-gray-200">
-        <h3 className="text-sm font-medium text-gray-900">Current Balance:</h3>
-        <div className="flex items-center gap-2">
-          <a
-            href="https://testnet.ping.pub/cosmos/faucet"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded transition-all cursor-pointer"
-            title="Get test tokens from faucet">
-            <span className="text-sm">💧</span>
-          </a>
-          <button
-            onClick={handleRefresh}
-            disabled={isLoading}
-            data-testid="account-refresh-balance"
-            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded transition-all disabled:opacity-50 cursor-pointer"
-            title="Refresh balance">
-            <span className={`inline-block text-sm ${isLoading ? "animate-spin" : ""}`}>🔄</span>
-          </button>
-        </div>
+    <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden animate-fade-in-up">
+      <div className="px-6 py-4 border-b border-border/60 flex items-center justify-between gap-4">
+        <h2 className="text-sm font-semibold">Cosmos Wallet</h2>
+        <button
+          type="button"
+          onClick={onRefresh}
+          disabled={isLoading}
+          data-testid="account-refresh-balance"
+          className="btn-secondary px-3 py-1.5 text-xs disabled:opacity-50 disabled:cursor-not-allowed">
+          {isLoading ? "Refreshing" : "Refresh"}
+        </button>
       </div>
-      <div className="px-6 py-3">
-        <p
-          className="text-sm text-gray-500 bg-gray-100 p-2 rounded-md"
-          data-testid="account-network-display">
-          Network: {activeChain?.chainName || "Unknown"}
-        </p>
-        {isLoading ? (
-          <p
-            className="text-lg font-medium text-gray-900"
-            data-testid="account-balance-display">
-            Loading...
+
+      <div className="p-6 space-y-4">
+        <div className="rounded-xl bg-muted/60 px-4 py-3">
+          <p className="text-xs text-muted-foreground mb-1">Network</p>
+          <p className="text-sm font-medium" data-testid="account-network-display">
+            {networkName}
           </p>
-        ) : !balance || !hasBalance ? (
-          <div className="mt-2">
-            <p
-              className="text-lg font-medium text-gray-900 mb-2"
-              data-testid="account-balance-display">
-              {balance ? formatCosmosBalance(balance.amount, balance.denom) : "Unable to fetch balance"}
+        </div>
+
+        <div className="rounded-xl bg-muted/60 px-4 py-3">
+          <p className="text-xs text-muted-foreground mb-1">Address</p>
+          <p className="text-sm font-mono break-all" data-testid="account-address-full">
+            {address}
+          </p>
+        </div>
+
+        <div className="rounded-xl bg-muted/60 px-4 py-3">
+          <p className="text-xs text-muted-foreground mb-1">Balance</p>
+          <p className="text-sm font-mono font-medium" data-testid="account-balance-display">
+            {balanceLabel}
+          </p>
+        </div>
+
+        {!hasBalance && !isLoading && (
+          <div className="rounded-xl bg-primary/8 border border-primary/15 px-4 py-3 animate-fade-in">
+            <p className="text-sm text-muted-foreground mb-3">
+              Need testnet tokens before sending a transfer.
             </p>
-            <div className="bg-blue-50 border border-blue-200 p-3 rounded-none">
-              <p className="text-sm text-blue-700 mb-2">No tokens? Get test tokens from the faucet!</p>
-              <a
-                href="https://testnet.ping.pub/cosmos/faucet"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-sm bg-blue-600 text-white px-3 py-1 hover:bg-blue-700 transition-colors rounded-none">
-                Get Tokens
-                <span className="text-xs">↗</span>
-              </a>
-            </div>
+            <a
+              href={faucetUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex text-sm font-medium text-foreground hover:text-primary transition-colors">
+              Open faucet -&gt;
+            </a>
           </div>
-        ) : (
-          <p
-            className="text-lg font-medium text-gray-900"
-            data-testid="account-balance-display">
-            {formatCosmosBalance(balance.amount, balance.denom)}
-          </p>
         )}
       </div>
     </div>

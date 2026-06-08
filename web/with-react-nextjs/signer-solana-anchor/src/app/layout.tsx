@@ -1,7 +1,14 @@
-import Header from "@/components/layout/Header";
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import "@/styles/globals.css";
-import "@getpara/react-sdk/styles.css";
-import { ParaProvider } from "@/components/ParaProvider";
+import "@getpara/react-sdk-lite/styles.css";
+
+const inter = Inter({ subsets: ["latin"] });
+
+export const metadata: Metadata = {
+  title: "Para Solana Anchor Signer",
+  description: "An example showcasing how to sign Solana and Anchor transactions with the Para SDK",
+};
 
 export default function RootLayout({
   children,
@@ -10,11 +17,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>
-        <ParaProvider>
-          <Header />
-          <main>{children}</main>
-        </ParaProvider>
+      <body className={`${inter.className} antialiased`}>
+        {children}
       </body>
     </html>
   );

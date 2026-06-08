@@ -1,33 +1,42 @@
-"use client";
-
-import { useAccount } from "@getpara/react-sdk";
-import type { TOAuthMethod } from "@getpara/react-sdk";
-import { useOAuthAuth } from "@/hooks/useOAuthAuth";
-import { OAUTH_PROVIDERS } from "@/constants/auth";
+import type { OAuthProviderOption } from "@/types/auth";
 import { AuthCard } from "./AuthCard";
 import { OAuthButtons } from "./OAuthButtons";
 
-export function OAuthAuth() {
-  const { isConnected } = useAccount();
-  const { activeProvider, authenticate, cancel, error, isPending } = useOAuthAuth();
+interface OAuthAuthProps {
+  providers: readonly OAuthProviderOption[];
+  activeProvider: OAuthProviderOption["method"] | null;
+  error: string | null;
+  isPending: boolean;
+  onAuthenticate: (method: OAuthProviderOption["method"]) => void;
+  onCancel: () => void;
+}
 
-  if (isConnected) return null;
-
+export function OAuthAuth({
+  providers,
+  activeProvider,
+  error,
+  isPending,
+  onAuthenticate,
+  onCancel,
+}: OAuthAuthProps) {
   return (
-    <AuthCard title="Sign in with OAuth" error={error}>
+    <AuthCard
+      title="Sign in with OAuth"
+      description="Use Para OAuth hooks with your own provider buttons."
+      error={error}>
       <OAuthButtons
-        providers={OAUTH_PROVIDERS}
+        providers={providers}
         activeProvider={activeProvider}
-        onAuthenticate={(method) => authenticate(method as TOAuthMethod)}
+        onAuthenticate={onAuthenticate}
         isPending={isPending}
       />
 
       {isPending && (
-        <div className="mt-4 space-y-3">
-          <div className="text-center text-sm text-gray-500">Waiting for authentication...</div>
-          <button
-            onClick={cancel}
-            className="w-full px-4 py-2 border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors font-medium">
+        <div className="space-y-3">
+          <div className="rounded-lg border border-border bg-muted p-3 text-center text-sm text-muted-foreground">
+            Waiting for authentication...
+          </div>
+          <button type="button" onClick={onCancel} className="btn-secondary min-h-11 w-full px-4 text-sm">
             Cancel
           </button>
         </div>

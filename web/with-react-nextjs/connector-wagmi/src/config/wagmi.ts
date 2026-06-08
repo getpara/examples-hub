@@ -2,47 +2,26 @@
 
 import { paraConnector } from "@getpara/wagmi-v2-integration";
 import { para } from "@/lib/para/client";
-import { WALLET_CONNECT_PROJECT_ID, SEPOLIA_RPC_URL } from "@/config/constants";
+import { SEPOLIA_RPC_URL } from "@/config/constants";
 import { queryClient } from "@/context/QueryProvider";
-import { createConfig, CreateConfigParameters, http, cookieStorage, createStorage } from "wagmi";
-import { coinbaseWallet, injected, metaMask, walletConnect } from "wagmi/connectors";
+import { createConfig, type CreateConfigParameters, http, cookieStorage, createStorage } from "wagmi";
 import { sepolia } from "wagmi/chains";
 
-const connector = para ? paraConnector({
-  appName: "Para Wagmi Example",
-  authLayout: ["AUTH:FULL", "EXTERNAL:FULL"],
-  chains: [sepolia],
-  disableEmailLogin: false,
-  disablePhoneLogin: false,
-  logo: "/para.svg",
-  oAuthMethods: ["APPLE", "DISCORD", "FACEBOOK", "FARCASTER", "GOOGLE", "TWITTER"],
-  onRampTestMode: true,
-  options: {},
-  para,
-  queryClient,
-  recoverySecretStepEnabled: true,
-  theme: {
-    accentColor: "#888888",
-    backgroundColor: "#FFFFFF",
-    borderRadius: "none",
-    font: "Inter",
-    foregroundColor: "#222222",
-    mode: "light",
-  },
-  twoFactorAuthEnabled: false,
-}) : null;
+const connector = para
+  ? paraConnector({
+      appName: "Para Wagmi Example",
+      chains: [sepolia],
+      onRampTestMode: true,
+      options: {},
+      para,
+      queryClient,
+      recoverySecretStepEnabled: true,
+    })
+  : null;
 
 const config = {
   chains: [sepolia],
-  connectors: [
-    ...(connector ? [connector] : []),
-    walletConnect({
-      projectId: WALLET_CONNECT_PROJECT_ID,
-    }),
-    injected(),
-    metaMask(),
-    coinbaseWallet(),
-  ],
+  connectors: connector ? [connector] : [],
   ssr: true,
   storage: createStorage({
     storage: cookieStorage,

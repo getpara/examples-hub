@@ -52,6 +52,7 @@
 @layer components {
   .btn-primary {
     @apply rounded-lg bg-primary font-medium text-primary-foreground
+      cursor-pointer
       transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/25
       active:translate-y-0 active:shadow-sm;
   }

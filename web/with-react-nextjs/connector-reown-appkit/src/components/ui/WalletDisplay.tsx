@@ -1,51 +1,59 @@
-"use client";
+import { formatAddress } from "@/utils/format";
 
-import { useAppKitAccount, useAppKitNetwork, useDisconnect } from "@reown/appkit/react";
-import { useBalance } from "wagmi";
-import { formatUnits } from "viem";
-import { formatAddress, formatBalance } from "@/utils/format";
+interface WalletDisplayProps {
+  address?: string;
+  balance: string;
+  networkName: string;
+  onDisconnect: () => void;
+  onOpenAccount: () => void;
+}
 
-export function WalletDisplay() {
-  const { address, isConnected } = useAppKitAccount();
-  const { caipNetwork } = useAppKitNetwork();
-  const { disconnect } = useDisconnect();
-  const { data: balanceData } = useBalance({
-    address: address as `0x${string}` | undefined,
-  });
-
-  if (!isConnected || !address) {
-    return null;
-  }
-
+export function WalletDisplay({
+  address,
+  balance,
+  networkName,
+  onDisconnect,
+  onOpenAccount,
+}: WalletDisplayProps) {
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <h3 className="text-lg font-semibold mb-4">Wallet Information</h3>
-      
-      <div className="space-y-4">
-        <div>
-          <label className="text-sm text-gray-600">Address</label>
-          <p className="font-mono text-sm mt-1">{formatAddress(address)}</p>
-        </div>
-        
-        <div>
-          <label className="text-sm text-gray-600">Network</label>
-          <p className="text-sm mt-1">{caipNetwork?.name || "Unknown"}</p>
-        </div>
-        
-        <div>
-          <label className="text-sm text-gray-600">Balance</label>
-          <p className="text-sm mt-1">
-            {balanceData ? formatBalance(formatUnits(balanceData.value, balanceData.decimals)) : "0"} {balanceData?.symbol}
-          </p>
+    <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+      <div className="border-b border-border/60 px-6 py-4">
+        <div className="flex items-center gap-2">
+          <span className="h-2 w-2 rounded-full bg-success" />
+          <h2 className="text-sm font-semibold text-card-foreground">Connected wallet</h2>
         </div>
       </div>
-      
-      <button
-        onClick={() => disconnect()}
-        className="w-full mt-6 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
-      >
-        Disconnect
-      </button>
+
+      <div className="space-y-4 px-6 py-5">
+        <div>
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Address</p>
+          <p className="mt-2 break-all font-mono text-sm font-medium text-card-foreground" data-testid="account-address-display">
+            {address ? formatAddress(address) : "Unknown address"}
+          </p>
+        </div>
+
+        <div>
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Network</p>
+          <p className="mt-2 text-sm font-medium text-card-foreground">{networkName}</p>
+        </div>
+
+        <div>
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Balance</p>
+          <p className="mt-2 text-sm font-medium text-card-foreground">{balance}</p>
+        </div>
+
+        <div className="grid gap-3 pt-2 sm:grid-cols-2">
+          <button type="button" onClick={onOpenAccount} className="btn-primary px-4 py-3">
+            Open Account
+          </button>
+          <button
+            type="button"
+            onClick={onDisconnect}
+            className="rounded-lg border border-border bg-card px-4 py-3 text-sm font-medium text-card-foreground transition-colors hover:bg-muted">
+            Disconnect
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

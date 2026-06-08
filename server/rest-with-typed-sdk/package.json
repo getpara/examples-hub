@@ -1,0 +1,27 @@
+{
+  "name": "rest-with-typed-sdk",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc --project tsconfig.json",
+    "dev": "tsx src/index.ts",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@getpara/rest-sdk": "3.1.0",
+    "@solana/addresses": "^2.2.1",
+    "@solana/keys": "^2.2.1",
+    "@solana/signers": "^2.2.1",
+    "@solana/transactions": "^2.2.1",
+    "dotenv": "^17.2.0",
+    "ethers": "6.15.0",
+    "viem": "2.42.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3"
+  },
+  "packageManager": "yarn@4.13.0"
+}

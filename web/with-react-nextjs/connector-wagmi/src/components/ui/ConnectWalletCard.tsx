@@ -6,17 +6,14 @@ interface ConnectWalletCardProps {
 
 export function ConnectWalletCard({ onConnect }: ConnectWalletCardProps) {
   return (
-    <div className="max-w-xl mx-auto">
-      <Card
-        title="ETH Transfer"
-        description="Send ETH from your wallet to any address using Wagmi">
-        <button
-          onClick={onConnect}
-          data-testid="auth-connect-button"
-          className="w-full rounded-none bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-950 transition-colors cursor-pointer">
-          Connect Wallet
-        </button>
-      </Card>
-    </div>
+    <Card title="ETH Transfer" description="Connect your wallet before sending Sepolia ETH.">
+      <button
+        type="button"
+        onClick={onConnect}
+        data-testid="auth-connect-button"
+        className="btn-primary w-full px-4 py-3">
+        Connect Wallet
+      </button>
+    </Card>
   );
 }

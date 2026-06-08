@@ -1,36 +1,41 @@
-"use client";
-
-import { useAccount } from "@getpara/react-sdk";
-import { usePhoneAuth } from "@/hooks/usePhoneAuth";
-import { COUNTRY_CODES } from "@/constants/auth";
+import type { CountryCodeOption, PhoneAuthStep } from "@/types/auth";
 import { AuthCard } from "./AuthCard";
 import { PhoneForm } from "./PhoneForm";
 import { VerifyIframe } from "./VerifyIframe";
 
-export function PhoneAuth() {
-  const { isConnected } = useAccount();
-  const {
-    countryCode,
-    phoneNumber,
-    setCountryCode,
-    setPhoneNumber,
-    submit,
-    cancel,
-    step,
-    verifyUrl,
-    error,
-    isPending,
-  } = usePhoneAuth();
+interface PhoneAuthProps {
+  countryCode: string;
+  countryCodes: readonly CountryCodeOption[];
+  error: string | null;
+  isPending: boolean;
+  onCancel: () => void;
+  onCountryCodeChange: (code: string) => void;
+  onPhoneNumberChange: (phone: string) => void;
+  onSubmit: () => void;
+  phoneNumber: string;
+  step: PhoneAuthStep;
+  verifyUrl: string | null;
+}
 
-  if (isConnected) return null;
-
-  // Show verification iframe for OTP
+export function PhoneAuth({
+  countryCode,
+  countryCodes,
+  error,
+  isPending,
+  onCancel,
+  onCountryCodeChange,
+  onPhoneNumberChange,
+  onSubmit,
+  phoneNumber,
+  step,
+  verifyUrl,
+}: PhoneAuthProps) {
   if (step === "verify" && verifyUrl) {
     return (
-      <AuthCard title="Sign in with Phone" error={error}>
+      <AuthCard title="Verify phone" description="Complete the Para SMS verification challenge." error={error}>
         <VerifyIframe
           url={verifyUrl}
-          onCancel={cancel}
+          onCancel={onCancel}
           statusMessage={isPending ? "Waiting for verification..." : undefined}
         />
       </AuthCard>
@@ -38,15 +43,15 @@ export function PhoneAuth() {
   }
 
   return (
-    <AuthCard title="Sign in with Phone" error={error}>
+    <AuthCard title="Sign in with phone" description="Use Para phone auth with your own input and OTP UI." error={error}>
       <PhoneForm
         countryCode={countryCode}
         phoneNumber={phoneNumber}
-        onCountryCodeChange={setCountryCode}
-        onPhoneNumberChange={setPhoneNumber}
-        onSubmit={submit}
+        onCountryCodeChange={onCountryCodeChange}
+        onPhoneNumberChange={onPhoneNumberChange}
+        onSubmit={onSubmit}
         isPending={isPending}
-        countryCodes={COUNTRY_CODES}
+        countryCodes={countryCodes}
       />
     </AuthCard>
   );

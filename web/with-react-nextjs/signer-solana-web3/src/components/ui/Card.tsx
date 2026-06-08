@@ -3,19 +3,21 @@ import React from "react";
 interface CardProps {
   title: string;
   description?: string;
-  path?: string;
   children: React.ReactNode;
 }
 
-export function Card({ title, description, path, children }: CardProps) {
+export function Card({ title, description, children }: CardProps) {
   return (
-    <div className="rounded-none border border-gray-200 bg-white shadow-xs hover:shadow-md transition-shadow duration-300">
-      <div className="p-6">
-        <h3 className="text-lg font-semibold leading-none tracking-tight">{title}</h3>
-        {description && <p className="mt-2 text-sm text-gray-500 leading-normal">{description}</p>}
-        {path && <p className="mt-2 font-mono text-xs text-gray-400 leading-normal">Path: {path}</p>}
+    <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm animate-fade-in-up">
+      <div className="flex-grow px-6 py-5">
+        <h3 className="mb-2 text-base font-semibold tracking-tight text-card-foreground">{title}</h3>
+        {description && (
+          <p className="text-[13px] font-mono leading-relaxed text-muted-foreground">
+            {description}
+          </p>
+        )}
       </div>
-      <div className="p-6 pt-0">{children}</div>
+      <div className="border-t border-border/60 px-6 py-4">{children}</div>
     </div>
   );
 }

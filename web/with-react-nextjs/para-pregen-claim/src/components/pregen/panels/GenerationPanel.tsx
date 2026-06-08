@@ -50,6 +50,7 @@ export function GenerationPanel({
         </div>
 
         <button
+          type="button"
           onClick={onGenerate}
           data-testid="generate-pregen-button"
           disabled={!email || isGenerating || isConnected || !!draft}

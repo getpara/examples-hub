@@ -2,9 +2,8 @@
 
 import { useState, useCallback } from "react";
 import { ethers } from "ethers";
-import { useParaEthersSigner } from "@getpara/react-sdk/evm";
-import { provider } from "@/lib/provider";
-import ParaTestToken from "@/contracts/artifacts/contracts/ParaTestToken.sol/ParaTestToken.json";
+import { useParaSigner } from "./useParaSigner";
+import ParaTestToken from "@/contracts/artifacts/src/contracts/ParaTestToken.sol/ParaTestToken.json";
 
 export interface DeploymentInfo {
   contractAddress: string;
@@ -17,7 +16,7 @@ export function useContractDeployment() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  const { ethersSigner: signer } = useParaEthersSigner({ provider });
+  const { signer } = useParaSigner();
 
   const deployContract = useCallback(async () => {
     if (!signer) {

@@ -1,45 +1,41 @@
-"use client";
-
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useAccount } from "graz";
+import Image from "next/image";
 
 interface HeaderProps {
-  onConnectClick: () => void;
+  isConnected: boolean;
+  address: string;
+  onConnect: () => void;
 }
 
-export default function Header({ onConnectClick }: HeaderProps) {
-  const pathname = usePathname();
-  const { data: accountRecord, isConnected } = useAccount();
-  const account = accountRecord?.[0];
+export function Header({ isConnected, address, onConnect }: HeaderProps) {
+  const shortAddress = address ? `${address.slice(0, 10)}...${address.slice(-6)}` : "";
+
   return (
-    <header className="border-b border-gray-200">
-      <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-        <nav>
-          {pathname !== "/" && (
-            <Link
-              href="/"
-              className="inline-flex items-center text-gray-600 hover:text-gray-900 px-4 py-2 rounded-none transition-colors">
-              ← Back to Selector
-            </Link>
-          )}
-        </nav>
-        <div>
-          {isConnected ? (
-            <button
-              onClick={onConnectClick}
-              className="px-4 py-2 bg-gray-700 text-white rounded-none hover:bg-gray-800 transition-colors text-sm font-medium cursor-pointer">
-              Connected: {account?.bech32Address?.slice(0, 12)}...
-              {account?.bech32Address?.slice(-6)}
-            </button>
-          ) : (
-            <button
-              onClick={onConnectClick}
-              className="px-4 py-2 bg-gray-900 text-white rounded-none hover:bg-gray-950 transition-colors text-sm font-medium cursor-pointer">
-              Connect Wallet
-            </button>
-          )}
+    <header className="sticky top-0 z-10 bg-card/80 backdrop-blur-xl border-b border-border/50">
+      <div className="mx-auto max-w-5xl px-6 py-3 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Image src="/para.svg" alt="Para" width={60} height={20} className="h-5 w-auto" />
+          <span className="text-xs font-medium text-muted-foreground">Graz Connector Example</span>
         </div>
+
+        {isConnected ? (
+          <button
+            type="button"
+            onClick={onConnect}
+            data-testid="account-address-display"
+            data-address={address}
+            className="flex items-center gap-2.5 px-4 py-1.5 text-sm rounded-lg border border-border bg-card hover:bg-muted transition-all cursor-pointer">
+            <span className="h-2 w-2 rounded-full bg-success" />
+            <span className="font-mono text-xs">{shortAddress}</span>
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={onConnect}
+            data-testid="header-connect-button"
+            className="btn-primary px-5 py-1.5 text-sm">
+            Connect Wallet
+          </button>
+        )}
       </div>
     </header>
   );

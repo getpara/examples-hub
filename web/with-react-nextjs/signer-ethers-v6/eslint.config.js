@@ -2,7 +2,7 @@ import js from "@eslint/js";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
-  { ignores: ["dist", "build", ".next", "out", "node_modules", "hardhat.config.js"] },
+  { ignores: ["dist", "build", ".next", "out", "node_modules", "cache", "src/contracts/artifacts"] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ["**/*.{ts,tsx,js,jsx}"],

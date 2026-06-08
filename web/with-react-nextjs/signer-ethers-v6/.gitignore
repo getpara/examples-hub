@@ -12,6 +12,7 @@
 
 # testing
 /coverage
+/cache
 
 # next.js
 /.next/
@@ -46,4 +47,4 @@ src/cache
 .next
 
 # Analysis documents
-ETHERS_V5_V6_COMPARISON.md
+TRANSACTION_ANALYSIS.md

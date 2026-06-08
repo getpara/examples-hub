@@ -2,14 +2,16 @@
 
 [![Live Demo](https://img.shields.io/badge/▶_Live_Demo-black?style=for-the-badge&logo=vercel)](https://para-example-connector-wagmi.vercel.app)
 
-A Next.js example demonstrating Para integration with Wagmi for wallet connection and ETH transfers.
+A minimal Next.js example showing Para as a Wagmi connector for Sepolia ETH transfers.
 
 ## What This Example Shows
 
-- Setting up wagmi providers with Para as a wallet connector
-- Custom wallet connection modal with Para and other wallet options
-- Checking connection state with wagmi's `useAccount`
-- Sending ETH transactions with wagmi's `useSendTransaction`
+- Configuring `@getpara/wagmi-v2-integration` with a Para client
+- Creating a Wagmi config with Para as the wallet connector
+- Reading connection and balance state with Wagmi hooks
+- Sending Sepolia ETH transactions with Wagmi's `useSendTransaction`
+
+This example uses Wagmi 3 and `@wagmi/core` 3. The remaining install peer warning for `@wagmi/core` comes from mobile/Farcaster-oriented transitive packages that still request the Wagmi 2 core range.
 
 ## Setup
 
@@ -17,15 +19,84 @@ A Next.js example demonstrating Para integration with Wagmi for wallet connectio
 
 ```env
 NEXT_PUBLIC_PARA_API_KEY=your_api_key_here
-NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID=your_walletconnect_project_id
 NEXT_PUBLIC_SEPOLIA_RPC_URL=your_sepolia_rpc_url
 ```
 
-2. Install dependencies and run:
+`NEXT_PUBLIC_SEPOLIA_RPC_URL` is optional. The example falls back to `https://ethereum-sepolia-rpc.publicnode.com` when it is not set.
+
+2. Install dependencies:
 
 ```bash
 yarn install
-yarn dev
+```
+
+3. Build and start the production server:
+
+```bash
+yarn build
+yarn start
+```
+
+4. Open the app:
+
+```text
+http://localhost:3000
+```
+
+## Developer Portal Configuration
+
+This example expects Para app identity, authentication methods, theme, and wallet visibility to be configured in the Para Developer Portal for the API key. The Para Wagmi connector still requires an `appName` option to initialize the connector modal; keep it aligned with the Developer Portal display identity. `NEXT_PUBLIC_SEPOLIA_RPC_URL` configures the Wagmi Sepolia transport.
+
+## Core Integration
+
+The Wagmi connector setup lives in `src/config/wagmi.ts`:
+
+```ts
+const connector = para
+  ? paraConnector({
+      appName: "Para Wagmi Example",
+      chains: [sepolia],
+      onRampTestMode: true,
+      options: {},
+      para,
+      queryClient,
+      recoverySecretStepEnabled: true,
+    })
+  : null;
+
+export const wagmiConfig = createConfig({
+  chains: [sepolia],
+  connectors: connector ? [connector] : [],
+  ssr: true,
+  storage: createStorage({ storage: cookieStorage }),
+  transports: {
+    [sepolia.id]: http(SEPOLIA_RPC_URL),
+  },
+});
+```
+
+The copyable transfer logic lives in `src/hooks/useWagmiEthTransfer.ts`:
+
+```ts
+export function useWagmiEthTransfer({ isConnected }: { isConnected: boolean }) {
+  const [to, setTo] = useState("");
+  const [amount, setAmount] = useState("");
+  const { sendTransaction, data: hash, isPending } = useSendTransaction();
+  const receipt = useWaitForTransactionReceipt({ hash });
+
+  const submit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (!isConnected) return;
+
+    sendTransaction({
+      to: to as `0x${string}`,
+      value: parseEther(amount),
+    });
+  };
+
+  return { amount, hash, isLoading: isPending || receipt.isLoading, setAmount, setTo, submit, to };
+}
 ```
 
 ## Project Structure
@@ -34,24 +105,27 @@ yarn dev
 src/
 ├── app/
 │   ├── layout.tsx              # Root layout with providers
-│   └── page.tsx                # Main page with transfer flow
+│   └── page.tsx                # Server entry for the example
 ├── components/
-│   ├── ConnectWalletModal.tsx  # Custom wallet connection modal
+│   ├── WagmiExample.tsx        # Client orchestration and SDK hooks
+│   ├── ConnectWalletModal.tsx  # Presentational wallet connection modal
 │   ├── layout/
-│   │   ├── AppWrapper.tsx      # Modal context wrapper
-│   │   └── Header.tsx          # Header with connect button
+│   │   └── Header.tsx          # Presentational header
 │   └── ui/
-│       ├── BalanceCard.tsx     # Wallet balance display
+│       ├── BalanceCard.tsx     # Presentational balance display
 │       ├── ConnectWalletCard.tsx
-│       ├── TransferForm.tsx    # ETH transfer form
+│       ├── TransferForm.tsx    # Presentational ETH transfer form
 │       └── TransactionHash.tsx # Transaction result display
 ├── config/
 │   ├── constants.ts            # Environment config
 │   └── wagmi.ts                # wagmi + Para connector config
 ├── context/
-│   ├── ModalContext.tsx        # Modal state management
 │   ├── QueryProvider.tsx       # React Query provider
 │   └── WagmiProvider.tsx       # wagmi provider setup
+├── hooks/
+│   ├── useWagmiBalance.ts
+│   ├── useWagmiEthTransfer.ts
+│   └── useWagmiWalletConnection.ts
 └── lib/
     └── para/client.ts          # Para client initialization
 ```

@@ -19,10 +19,20 @@ A minimal TanStack Start example demonstrating Para Modal integration with multi
 
 ```env
 VITE_PARA_API_KEY=your_api_key_here
-VITE_PARA_ENVIRONMENT=BETA
+VITE_PARA_ENVIRONMENT=beta
 ```
 
-2. Install dependencies and run:
+2. Configure the API key in the [Para Developer Portal](https://developer.getpara.com):
+
+- App name or project display identity
+- Branding, logo, theme colors, font, and border radius
+- OAuth providers, email login, phone login, 2FA, and auth layout
+- Enabled external wallets for EVM, Cosmos, and Solana
+- WalletConnect project ID, if WalletConnect is enabled
+
+The example keeps EVM, Cosmos, and Solana connector runtime setup in code because those values are required by the provider libraries. It does not use `configOverrides`; Developer Portal configuration remains the source of truth for app, auth, branding, and external wallet ownership.
+
+3. Install dependencies and run:
 
 ```bash
 yarn install
@@ -56,15 +66,10 @@ src/
 
 ## Multichain Configuration
 
-This example configures Para to work with wallets across multiple chains:
+This example keeps connector runtime setup in code and uses Developer Portal external wallet settings for the enabled wallet list and WalletConnect project ID:
 
 ```typescript
 externalWalletConfig={{
-  wallets: [
-    "METAMASK", "COINBASE", "WALLETCONNECT", "RAINBOW", "ZERION",  // EVM
-    "KEPLR", "LEAP",  // Cosmos
-    "GLOW", "PHANTOM", "BACKPACK", "SOLFLARE",  // Solana
-  ],
   evmConnector: {
     config: { chains: [mainnet, polygon, sepolia, celo] },
   },
@@ -86,7 +91,7 @@ externalWalletConfig={{
 ## SSR Considerations
 
 This example uses TanStack Start's SSR shell component pattern. The Para SDK provider is SSR-safe because:
-- Provider configuration is static (API key, theme)
+- Provider configuration is static for the API key and runtime connector setup
 - Para SDK hooks are only used in client-side components
 - Header component uses `"use client"` directive for hook usage
 

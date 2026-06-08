@@ -1,7 +1,7 @@
 import 'package:para/para.dart';
 import 'package:flutter/material.dart';
 
-enum WalletChain { evm, solana, cosmos }
+enum WalletChain { evm, solana, cosmos, stellar }
 
 extension WalletChainExtension on WalletChain {
   String get displayName {
@@ -12,6 +12,8 @@ extension WalletChainExtension on WalletChain {
         return 'SOLANA';
       case WalletChain.cosmos:
         return 'COSMOS';
+      case WalletChain.stellar:
+        return 'STELLAR';
     }
   }
 
@@ -23,6 +25,8 @@ extension WalletChainExtension on WalletChain {
         return const Color(0xFF9945FF); // Solana Purple
       case WalletChain.cosmos:
         return const Color(0xFF502D82); // Cosmic Purple
+      case WalletChain.stellar:
+        return const Color(0xFF111827); // Stellar Black
     }
   }
 
@@ -46,6 +50,12 @@ extension WalletChainExtension on WalletChain {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
         );
+      case WalletChain.stellar:
+        return const LinearGradient(
+          colors: [Color(0xFF111827), Color(0xFF6B7280)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        );
     }
   }
 }
@@ -60,6 +70,8 @@ extension WalletTypeExtension on WalletType {
         return WalletChain.solana;
       case WalletType.cosmos:
         return WalletChain.cosmos;
+      case WalletType.stellar:
+        return WalletChain.stellar;
     }
   }
 }
@@ -67,13 +79,33 @@ extension WalletTypeExtension on WalletType {
 // Extension to help format wallet addresses
 extension WalletAddressFormatting on Wallet {
   String get formattedAddress {
-    final addr = type == WalletType.cosmos
-        ? (addressSecondary ?? address ?? 'unknown')
-        : (address ?? 'unknown');
-    
+    final addr = switch (type) {
+      WalletType.cosmos => addressSecondary ?? address ?? 'unknown',
+      WalletType.stellar => _stellarAddress,
+      _ => address ?? 'unknown',
+    };
+
     if (addr.length <= 12) return addr;
     final prefix = addr.substring(0, 8);
     final suffix = addr.substring(addr.length - 6);
     return '$prefix...$suffix';
+  }
+
+  String get _stellarAddress {
+    final rawAddress = address;
+    if (rawAddress != null && rawAddress.startsWith('G')) {
+      return rawAddress;
+    }
+    if (publicKey != null && publicKey!.isNotEmpty) {
+      try {
+        return getStellarAddress(publicKey!);
+      } catch (_) {}
+    }
+    if (rawAddress != null && rawAddress.isNotEmpty) {
+      try {
+        return getStellarAddressFromSolana(rawAddress);
+      } catch (_) {}
+    }
+    return rawAddress ?? 'unknown';
   }
 }

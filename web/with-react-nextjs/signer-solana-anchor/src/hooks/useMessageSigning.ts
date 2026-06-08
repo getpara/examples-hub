@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { getBase58Encoder, getUtf8Encoder, getBase58Decoder } from "@solana/kit";
+import { Buffer } from "buffer";
+import bs58 from "bs58";
 import nacl from "tweetnacl";
 import { useParaSigner } from "./useParaSigner";
 
@@ -27,9 +28,9 @@ export function useMessageSigning() {
 
       try {
         const messageToSign = message.trim();
-        const messageBytes = getUtf8Encoder().encode(messageToSign);
+        const messageBytes = new TextEncoder().encode(messageToSign);
         const signedBytes = await signer.signBytes(Buffer.from(messageBytes));
-        const sig = getBase58Decoder().decode(signedBytes);
+        const sig = bs58.encode(signedBytes);
 
         setSignature(sig);
       } catch (err) {
@@ -50,8 +51,8 @@ export function useMessageSigning() {
       }
 
       try {
-        const messageBytes = new Uint8Array(getUtf8Encoder().encode(message));
-        const signatureBytes = new Uint8Array(getBase58Encoder().encode(sig));
+        const messageBytes = new TextEncoder().encode(message);
+        const signatureBytes = bs58.decode(sig);
         const publicKeyBuffer = anchorProvider.wallet.publicKey.toBytes();
         const isValid = nacl.sign.detached.verify(messageBytes, signatureBytes, publicKeyBuffer);
 

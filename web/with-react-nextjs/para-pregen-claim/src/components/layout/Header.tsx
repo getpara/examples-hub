@@ -12,12 +12,13 @@ export function Header({ isConnected, address, canClaim, onConnect }: HeaderProp
     <header className="sticky top-0 z-10 border-b border-border/70 bg-card/85 backdrop-blur-xl">
       <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-3">
         <div className="flex items-center gap-2">
-          <Image src="/para.svg" alt="Para" width={21} height={20} className="h-5 w-auto" />
+          <Image src="/para.svg" alt="Para" width={79} height={24} className="h-5 w-auto" />
           <span className="text-xs font-medium text-muted-foreground">Pregen Claim</span>
         </div>
 
         {isConnected ? (
           <button
+            type="button"
             onClick={onConnect}
             data-testid="account-address-display"
             data-address={address}
@@ -29,6 +30,7 @@ export function Header({ isConnected, address, canClaim, onConnect }: HeaderProp
           </button>
         ) : (
           <button
+            type="button"
             onClick={onConnect}
             data-testid="header-connect-button"
             disabled={!canClaim}

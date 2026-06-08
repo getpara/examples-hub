@@ -36,7 +36,7 @@ export function useMessageSigning() {
         const txRaw = await signingClient.sign(address, msgs, fee, message);
 
         // Extract the signature from the transaction
-        const sig = Buffer.from(txRaw.signatures[0]).toString("base64");
+        const sig = bytesToBase64(txRaw.signatures[0]);
         setSignature(sig);
       } catch (err) {
         const error = err instanceof Error ? err : new Error("Failed to sign message");
@@ -63,4 +63,14 @@ export function useMessageSigning() {
     error,
     reset,
   };
+}
+
+function bytesToBase64(bytes: Uint8Array) {
+  let binary = "";
+
+  bytes.forEach((byte) => {
+    binary += String.fromCharCode(byte);
+  });
+
+  return btoa(binary);
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useEffectEvent } from "react";
 
 interface ModalProps {
   isOpen: boolean;
@@ -10,10 +10,12 @@ interface ModalProps {
 }
 
 export function Modal({ isOpen, onClose, children, "data-testid": dataTestId }: ModalProps) {
+  const handleClose = useEffectEvent(onClose);
+
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        onClose();
+        handleClose();
       }
     };
 
@@ -26,18 +28,21 @@ export function Modal({ isOpen, onClose, children, "data-testid": dataTestId }: 
       document.removeEventListener("keydown", handleEscape);
       document.body.style.overflow = "unset";
     };
-  }, [isOpen, onClose]);
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="fixed inset-0 bg-black opacity-50 transition-opacity" />
-      <div className="relative z-50 w-full max-w-md mx-4 bg-white border border-gray-200 rounded-none shadow-xl" data-testid={dataTestId}>
+      <div className="fixed inset-0 bg-foreground/20 backdrop-blur-sm transition-opacity" />
+      <div
+        className="relative z-50 w-full max-w-md mx-4 rounded-2xl border border-border bg-card shadow-xl"
+        data-testid={dataTestId}>
         <button
+          type="button"
           onClick={onClose}
           data-testid="modal-close-button"
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+          className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
           aria-label="Close modal">
           <svg
             className="w-6 h-6"

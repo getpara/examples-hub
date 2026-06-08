@@ -1,73 +1,96 @@
-import { ExternalLink } from "lucide-react";
 import type { Hash } from "viem";
 
 interface SendTransactionProps {
+  chainName: string;
+  targetAddress: `0x${string}`;
   onSend: () => void;
   isPending: boolean;
   error: Error | null;
-  txHash: Hash | null;
+  transactionHash: Hash | null;
   isReady: boolean;
 }
 
-export function SendTransaction({ onSend, isPending, error, txHash, isReady }: SendTransactionProps) {
-  const showStatus = isPending || !!error || !!txHash;
-
-  const statusConfig = isPending
-    ? { bg: "bg-gray-100 border-gray-300", text: "text-gray-700", message: "Sending sponsored transaction..." }
-    : error
-      ? {
-          bg: "bg-gray-200 border-gray-400",
-          text: "text-gray-900",
-          message: error.message || "Transaction failed. Please try again.",
-        }
-      : {
-          bg: "bg-gray-50 border-gray-200",
-          text: "text-gray-800",
-          message: "Transaction sent successfully!",
-        };
-
+export function SendTransaction({
+  chainName,
+  targetAddress,
+  onSend,
+  isPending,
+  error,
+  transactionHash,
+  isReady,
+}: SendTransactionProps) {
   return (
-    <>
-      {showStatus && (
-        <div className={`mb-4 p-4 rounded-none border ${statusConfig.bg}`}>
-          <p className={`text-sm break-words ${statusConfig.text}`}>{statusConfig.message}</p>
-        </div>
-      )}
-
-      <div className="bg-white rounded-none border border-gray-200 p-6 mb-4">
-        <h3 className="text-lg font-medium mb-4">Send Sponsored Transaction</h3>
-        <div className="space-y-4">
-          <div className="p-4 bg-gray-50 border border-gray-200 rounded-none">
-            <p className="text-sm text-gray-600 mb-1">Transaction type:</p>
-            <p className="text-lg font-mono font-semibold">Gas-Sponsored UserOperation</p>
-            <p className="text-sm text-gray-500 mt-2">
-              This sends a zero-value transaction to demonstrate EIP-4337 gas sponsorship via ZeroDev&apos;s paymaster.
-            </p>
-          </div>
-          <button
-            onClick={onSend}
-            disabled={isPending || !isReady}
-            className="w-full px-4 py-2 bg-gray-900 text-white rounded-none hover:bg-gray-950 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed font-medium">
-            {isPending ? "Sending..." : "Send Sponsored Transaction"}
-          </button>
-        </div>
+    <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden animate-fade-in-up-delayed">
+      <div className="px-6 py-4 border-b border-border/60">
+        <h2 className="text-sm font-semibold">Send Sponsored Transaction</h2>
       </div>
 
-      {txHash && (
-        <div className="bg-white rounded-none border border-gray-200 p-6">
-          <h3 className="text-lg font-medium mb-2">Transaction Hash</h3>
-          <div className="bg-gray-50 p-4 rounded-none border border-gray-200 break-all">
-            <code className="text-sm text-gray-800 font-mono">{txHash}</code>
+      <div className="p-6 space-y-4">
+        {isPending && (
+          <div className="rounded-xl bg-muted/60 border border-border/60 px-4 py-3 animate-fade-in">
+            <p className="text-sm text-muted-foreground">
+              Sending gas-sponsored EIP-4337 transaction...
+            </p>
           </div>
-          <a
-            href={`https://sepolia.etherscan.io/tx/${txHash}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 mt-3 text-sm text-gray-600 hover:text-gray-900 transition-colors">
-            View on Etherscan <ExternalLink className="w-4 h-4" />
-          </a>
+        )}
+
+        {error && (
+          <div className="rounded-xl bg-destructive/8 border border-destructive/15 px-4 py-3 animate-fade-in">
+            <p className="text-sm text-destructive break-words">
+              {error.message || "Transaction failed. Please try again."}
+            </p>
+          </div>
+        )}
+
+        {transactionHash && !error && (
+          <div className="rounded-xl bg-success/8 border border-success/15 px-4 py-3 animate-fade-in">
+            <p className="text-sm text-success-foreground">Sponsored EIP-4337 transaction sent.</p>
+          </div>
+        )}
+
+        <div className="rounded-xl bg-muted/60 px-4 py-3">
+          <p className="text-xs text-muted-foreground mb-1">Network</p>
+          <p className="text-sm font-mono font-medium">{chainName}</p>
         </div>
-      )}
-    </>
+
+        <div className="rounded-xl bg-muted/60 px-4 py-3">
+          <p className="text-xs text-muted-foreground mb-1">Target</p>
+          <p className="text-sm font-mono break-all">{targetAddress}</p>
+        </div>
+
+        <p className="text-[13px] font-mono text-muted-foreground leading-relaxed">
+          Sends a zero-value UserOperation using ZeroDev gas sponsorship.
+        </p>
+
+        <button
+          type="button"
+          onClick={onSend}
+          data-testid="send-sponsored-transaction-button"
+          disabled={isPending || !isReady}
+          className="btn-primary w-full px-4 py-2.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none">
+          {isPending ? "Sending..." : "Send Sponsored Transaction"}
+        </button>
+
+        {transactionHash && (
+          <div className="animate-fade-in">
+            <p className="text-xs text-muted-foreground mb-2">Transaction Hash</p>
+            <div
+              className="rounded-xl bg-muted/60 px-4 py-3 break-all"
+              data-testid="transaction-hash-display">
+              <code className="text-xs font-mono text-muted-foreground leading-relaxed">
+                {transactionHash}
+              </code>
+            </div>
+            <a
+              href={`https://sepolia.etherscan.io/tx/${transactionHash}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 mt-3 text-sm text-muted-foreground hover:text-foreground transition-colors">
+              View on Etherscan -&gt;
+            </a>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }

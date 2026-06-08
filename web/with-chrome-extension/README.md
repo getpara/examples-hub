@@ -13,6 +13,8 @@ VITE_PARA_API_KEY=your_para_api_key
 VITE_PARA_ENVIRONMENT=BETA
 ```
 
+Configure the API key in the [Para Developer Portal](https://developer.getpara.com) with the persistent app settings this example expects. Set the app or project display name for the Chrome extension, configure branding and logo, choose theme colors, enable the OAuth providers you want to offer, set the email and phone login toggles, choose the auth layout, and configure 2FA there. This example only keeps runtime modal behavior in code, including `onRampTestMode` and `recoverySecretStepEnabled`.
+
 ### Installation
 
 Install dependencies using your preferred package manager:
@@ -30,7 +32,7 @@ pnpm install
 
 ## Key Dependencies
 
-- `@getpara/react-sdk` (v2.0.0-alpha.26) - Para React SDK for wallet integration
+- `@getpara/react-sdk` (v3.0.0-alpha.1) - Para React SDK for wallet integration
 - `@tanstack/react-query` (v5.81.2) - Data fetching and state management
 - `vite` (v6.1.0) - Build tool and development server
 - `@vitejs/plugin-react` (v4.3.4) - Vite React plugin

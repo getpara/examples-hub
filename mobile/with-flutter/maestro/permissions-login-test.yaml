@@ -9,12 +9,28 @@ appId: com.usecapsule.example.flutter
 - clearState
 - launchApp
 - waitForAnimationToEnd
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - tapOn:
+          text: "Close app"
+          optional: true
+      - waitForAnimationToEnd
 
 # Logout if already signed in
 - tapOn:
     text: "Logout"
     optional: true
 - waitForAnimationToEnd
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - tapOn:
+          text: "Close app"
+          optional: true
+      - waitForAnimationToEnd
 
 # Wait for auth screen
 - extendedWaitUntil:
@@ -27,27 +43,62 @@ appId: com.usecapsule.example.flutter
 # Switch to email tab and enter email
 - tapOn: "Email"
 - waitForAnimationToEnd
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - tapOn:
+          point: "74%,63%"
+      - waitForAnimationToEnd
 - tapOn: "Email address"
 - inputText: "${output.email}"
 - pressKey: "Enter"
 
 # Tap continue to trigger ASWebAuth
 - tapOn: "Continue"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - waitForAnimationToEnd
+      - runFlow:
+          when:
+            visible: "Use without an account"
+          commands:
+            - tapOn: "Use without an account"
+            - waitForAnimationToEnd
+      - runFlow:
+          when:
+            visible: "Continue"
+          commands:
+            - tapOn: "Continue"
+            - waitForAnimationToEnd
+      - runFlow:
+          when:
+            visible: "Use without an account"
+          commands:
+            - tapOn: "Use without an account"
+            - waitForAnimationToEnd
 
-# Handle ASWebAuth consent dialog
-- extendedWaitUntil:
-    visible: "Cancel"
-    timeout: 10000
-- tapOn: "Continue"
+# Handle the iOS ASWebAuth consent dialog. Android usually goes straight to
+# the browser/OTP flow, so this iOS-only system dialog block is skipped there.
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - extendedWaitUntil:
+          visible: "Cancel"
+          timeout: 10000
+      - tapOn: "Continue"
 
 # Wait for OTP page
 - extendedWaitUntil:
-    visible: "Verify"
-    timeout: 15000
+    visible: "Send new code"
+    timeout: 30000
 
 # Tap on OTP input field for keyboard focus
 - tapOn:
-    point: "20%,58%"
+    point: "15%,35%"
 - waitForAnimationToEnd
 
 # Enter OTP digits
@@ -63,13 +114,70 @@ appId: com.usecapsule.example.flutter
 - waitForAnimationToEnd
 - inputText: "6"
 
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - pressKey: "Enter"
+      - waitForAnimationToEnd
+
+- runFlow:
+    when:
+      platform: Android
+      visible: "Open with"
+    commands:
+      - tapOn:
+          point: "20%,82%"
+      - tapOn:
+          text: "Just once"
+          optional: true
+      - waitForAnimationToEnd
+- runFlow:
+    when:
+      platform: Android
+      visible: "Just once"
+    commands:
+      - tapOn:
+          text: "Para Flutter"
+          index: 0
+      - tapOn:
+          text: "Just once"
+          optional: true
+      - waitForAnimationToEnd
+
 # Permissions consent screen should appear
 - waitForAnimationToEnd
-- extendedWaitUntil:
-    visible: "Approve"
-    timeout: 15000
-- assertVisible: "Message Signing"
-- tapOn: "Approve"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - waitForAnimationToEnd
+      - tapOn:
+          point: "50%,42%"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - extendedWaitUntil:
+          visible: "Approve"
+          timeout: 15000
+      - tapOn: "Approve"
+- runFlow:
+    when:
+      platform: Android
+      visible: "Just once"
+    commands:
+      - tapOn: "Just once"
+      - waitForAnimationToEnd
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      # Chrome Custom Tabs can stay visually on top after the custom-scheme
+      # callback succeeds. Close it so Maestro targets the running app again.
+      - tapOn:
+          point: "6%,9%"
+      - waitForAnimationToEnd
 
 # Wait for wallets screen
 - waitForAnimationToEnd
@@ -100,6 +208,41 @@ appId: com.usecapsule.example.flutter
 - tapOn: "Sign Message (EIP-191)"
 
 # Wait for signature result
+- extendedWaitUntil:
+    visible: "Message Signed"
+    timeout: 15000
+- assertVisible: "Message Signed"
+- tapOn: "OK"
+
+# Return to wallets and create a Stellar wallet through the same Add Wallet flow
+- tapOn:
+    text: "Back"
+    optional: true
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible: "Wallets"
+    timeout: 10000
+- tapOn: "Add Wallet"
+- extendedWaitUntil:
+    visible: "Select Wallet Type"
+    timeout: 10000
+- tapOn: "STELLAR"
+- extendedWaitUntil:
+    visible: "G.*"
+    timeout: 30000
+
+# Open Stellar wallet and verify bridge-backed message signing works
+- tapOn: "G.*"
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible: "Stellar Wallet"
+    timeout: 10000
+- assertVisible: "Stellar Wallet"
+- assertVisible: "G.*"
+- tapOn: "Enter a message to sign"
+- inputText: "Hello from Stellar!"
+- pressKey: "Enter"
+- tapOn: "Sign Message (Ed25519)"
 - extendedWaitUntil:
     visible: "Message Signed"
     timeout: 15000

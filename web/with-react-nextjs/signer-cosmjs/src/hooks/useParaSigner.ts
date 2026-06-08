@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { SigningStargateClient, GasPrice } from "@cosmjs/stargate";
-import { useParaCosmjsProtoSigner } from "@getpara/react-sdk/cosmos";
-import { useAccount } from "@getpara/react-sdk";
+import { useParaCosmjsProtoSigner } from "@getpara/react-sdk-lite/chains/cosmos";
+import { useAccount } from "@getpara/react-sdk-lite";
 import { DEFAULT_CHAIN } from "@/config/chains";
 import { DEFAULT_GAS_PRICE } from "@/config/constants";
 

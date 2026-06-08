@@ -54,7 +54,7 @@ export function useSignHelloWorld() {
     sign,
     message: HELLO_WORLD_MESSAGE,
     isPending,
-    error,
+    errorMessage: error?.message ?? null,
     signature,
   };
 }

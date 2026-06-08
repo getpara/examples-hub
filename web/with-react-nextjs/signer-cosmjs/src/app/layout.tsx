@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "@/styles/globals.css";
-import "@getpara/react-sdk/styles.css";
+import "@getpara/react-sdk-lite/styles.css";
 import { ParaProvider } from "@/components/ParaProvider";
-import Header from "@/components/layout/Header";
+import { ConnectedHeader } from "@/components/layout/ConnectedHeader";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Para + CosmJS Demo",
+  title: "Para CosmJS Signer Example",
   description: "Sign Cosmos transactions with Para SDK and CosmJS",
 };
 
@@ -21,8 +21,8 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <ParaProvider>
-          <Header />
-          <main className="min-h-screen">{children}</main>
+          <ConnectedHeader />
+          {children}
         </ParaProvider>
       </body>
     </html>

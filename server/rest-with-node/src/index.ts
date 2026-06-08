@@ -15,7 +15,7 @@ if (!PARA_API_KEY) {
   console.warn('PARA_API_KEY is not set. Requests to Para will fail until you add it to .env');
 }
 
-type WalletType = 'EVM' | 'SOLANA' | 'COSMOS';
+type WalletType = 'EVM' | 'SOLANA' | 'COSMOS' | 'STELLAR';
 
 type WalletScheme = 'DKLS' | 'CGGMP' | 'ED25519';
 

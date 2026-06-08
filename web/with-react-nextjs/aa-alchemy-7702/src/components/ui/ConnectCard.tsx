@@ -1,19 +1,36 @@
+import Image from "next/image";
+
 interface ConnectCardProps {
   onConnect: () => void;
 }
 
 export function ConnectCard({ onConnect }: ConnectCardProps) {
   return (
-    <div className="max-w-md mx-auto bg-white rounded-none border border-gray-200 p-8">
-      <h2 className="text-2xl font-bold mb-4 text-center">Connect Wallet</h2>
-      <p className="text-gray-600 text-center mb-6">
-        Connect your wallet to use Alchemy Account Abstraction with gas-sponsored transactions.
-      </p>
-      <button
-        onClick={onConnect}
-        className="w-full px-6 py-3 bg-gray-900 text-white rounded-none hover:bg-gray-950 transition-colors font-medium">
-        Connect with Para
-      </button>
+    <div className="w-full max-w-sm animate-fade-in-up">
+      <div className="rounded-2xl border border-border bg-card p-10 shadow-xl shadow-black/[0.04] text-center">
+        <Image
+          src="/para.svg"
+          alt="Para"
+          width={84}
+          height={28}
+          className="h-7 w-auto mx-auto mb-8 opacity-80"
+        />
+
+        <h1 className="text-xl font-semibold tracking-tight text-card-foreground mb-3">
+          Upgrade your EOA
+        </h1>
+        <p className="text-[13px] font-mono text-muted-foreground leading-relaxed mb-8">
+          Connect with Para to send a gas-sponsored EIP-7702 transaction through Alchemy Account Kit.
+        </p>
+
+        <button
+          type="button"
+          onClick={onConnect}
+          data-testid="auth-connect-button"
+          className="btn-primary w-full px-4 py-2.5">
+          Connect with Para
+        </button>
+      </div>
     </div>
   );
 }

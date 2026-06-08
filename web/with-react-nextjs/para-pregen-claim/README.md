@@ -1,32 +1,51 @@
 # Para Pregen Claim
 
-This Next.js example shows a UUID-to-email pregen wallet claim flow with post-claim private key export.
+A Next.js example showing a UUID-to-email pregen wallet claim flow with post-claim private key export.
 
-The app first creates a pregen EVM wallet with a random `customId` UUID. It encrypts and stores the user share with an internal email mapping. When the user starts the claim flow, the Para provider callback asks the app backend for the share. The backend updates the Para pregen wallet identifier from the UUID to the authenticating email, decrypts the share, and returns it so the SDK can preload and claim the wallet during auth.
+The app creates a pregen EVM wallet with a random `customId` UUID, encrypts and stores the user share with an app-owned email mapping, then upgrades the Para pregen identifier from UUID to email during authentication so the SDK can preload and claim the wallet.
+
+## What This Example Shows
+
+- Creating a pregen EVM wallet with `@getpara/server-sdk`
+- Storing an encrypted user share in SQLite for a local demo backend
+- Providing `fetchPregenWalletsOverride` to the React SDK Lite provider
+- Claiming the pregen wallet during Para authentication
+- Exporting the claimed wallet private key after the connected wallet matches the generated wallet
+- Keeping flow logic in `usePregenClaimFlow` so the UI can be replaced by your app's components
 
 ## Setup
 
-Create `.env` or `.env.local` in this directory:
+Create `.env` in this directory:
 
 ```env
-NEXT_PUBLIC_PARA_API_KEY=your-para-api-key
+NEXT_PUBLIC_PARA_API_KEY=your_para_api_key
 NEXT_PUBLIC_PARA_ENVIRONMENT=BETA
-ENCRYPTION_KEY=your-32-character-encryption-key
+ENCRYPTION_KEY=your_32_character_encryption_key
 ```
 
-Generate an encryption key:
+Generate a local encryption key:
 
 ```bash
 openssl rand -base64 24 | head -c 32
 ```
 
-Install dependencies:
+Configure the project used by that API key in the Para Developer Portal:
+
+- App name and display identity
+- Branding, logo, and modal presentation
+- Email authentication
+- EVM wallet support
+- Private key export settings appropriate for your project
+
+Install and run the production build locally:
 
 ```bash
 yarn install
+yarn build
+yarn start
 ```
 
-Run locally:
+For development:
 
 ```bash
 yarn dev
@@ -35,50 +54,39 @@ yarn dev
 ## Flow
 
 1. Enter the future claimant email.
-2. The app creates a pregen wallet with `pregenId: { customId: randomUUID() }`.
+2. The app creates a pregen EVM wallet with `pregenId: { customId: randomUUID() }`.
 3. The app stores the encrypted user share, wallet ID, wallet address, UUID, and email mapping in SQLite.
-4. Click **Begin claim**.
+4. Click `Begin claim`.
 5. Para auth calls `fetchPregenWalletsOverride` with the authenticating email.
 6. `/api/wallet/share` updates the pregen wallet identifier to `pregenId: { email }`, decrypts the share, and returns it.
 7. The SDK preloads the user share and completes the claim during authentication.
-8. After the claimed wallet is connected, click **Export private key** to open the Para export flow for that wallet.
-
-## Local Para Build
-
-This example resolves local `@getpara/*` packages through `file:` dependencies and package `resolutions`. Build changed Para packages before building or deploying the example:
-
-```bash
-cd ../../../../packages/user-management-client && yarn build
-cd ../core-sdk && yarn build
-cd ../../examples-hub/web/with-react-nextjs/para-pregen-claim
-yarn install
-yarn build
-```
-
-This keeps the example on local package builds for prebuilt deploys.
-
-For a prebuilt Vercel deploy:
-
-```bash
-vercel build
-vercel deploy --prebuilt
-```
-
-## E2E
-
-From the monorepo root:
-
-```bash
-yarn e2e:examples-hub react-nextjs-pregen-claim
-```
+8. After the claimed wallet is connected, click `Export private key` to open the Para export flow for that wallet.
 
 ## Key Files
 
-- `src/components/ParaProvider.tsx`
-- `src/components/pregen/panels/ExportPrivateKeyPanel.tsx`
-- `src/hooks/usePregenClaimFlow.ts`
-- `src/lib/para/fetchPregenWalletsOverride.ts`
-- `src/lib/para/pregenClaimService.ts`
-- `src/app/api/wallet/generate/route.ts`
-- `src/app/api/wallet/share/route.ts`
-- `src/lib/db/keySharesDB.ts`
+```text
+src/app/page.tsx                                   # Server page metadata and entry
+src/components/ParaProvider.tsx                    # Para SDK Lite provider with pregen override
+src/components/pregen/PregenClaimContainer.tsx     # Client orchestration
+src/hooks/usePregenClaimFlow.ts                    # Copyable claim and export flow logic
+src/lib/para/pregenClaimService.ts                 # Pregen generation and identifier upgrade logic
+src/lib/para/fetchPregenWalletsOverride.ts         # SDK pregen wallet share callback
+src/app/api/wallet/generate/route.ts               # Local demo API for pregen generation
+src/app/api/wallet/share/route.ts                  # Local demo API for share retrieval
+src/lib/db/keySharesDB.ts                          # SQLite demo storage
+src/components/pregen/panels/*                     # Replaceable example UI
+```
+
+## Dependency Notes
+
+This example uses `@getpara/react-sdk-lite@3.0.0` and `@getpara/server-sdk@3.0.0`. Some Para package `latest` tags still point at the v2 line, so the manifest intentionally keeps the v3 versions instead of downgrading to the registry `latest` tag.
+
+The app intentionally uses `@getpara/react-sdk-lite` instead of the catch-all `@getpara/react-sdk` because this flow only needs the Para modal, core wallet hooks, and pregen claim override. That keeps unused account-abstraction, wallet connector, Cosmos, Solana, Stellar, Wagmi, and Ethers dependencies out of the example.
+
+`viem` remains declared directly because the Para v3 SDK packages use it as a peer dependency.
+
+## Learn More
+
+- [Para Documentation](https://docs.getpara.com)
+- [Para Developer Portal](https://developer.getpara.com)
+- [Next.js Documentation](https://nextjs.org/docs)

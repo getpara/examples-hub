@@ -42,6 +42,7 @@ export function CantonPreapprovalCard({
         </p>
 
         <button
+          type="button"
           onClick={onInstall}
           data-testid="canton-preapproval-button"
           disabled={isPending || Boolean(updateId)}

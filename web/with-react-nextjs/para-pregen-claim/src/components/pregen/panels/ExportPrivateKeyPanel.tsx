@@ -27,6 +27,7 @@ export function ExportPrivateKeyPanel({
         {exportError && <StatusBanner tone="error" message={exportError} />}
 
         <button
+          type="button"
           onClick={onExportPrivateKey}
           data-testid="export-private-key-button"
           disabled={!isClaimedWallet || isExportingPrivateKey}

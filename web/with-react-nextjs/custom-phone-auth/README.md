@@ -1,125 +1,90 @@
 # Custom Phone Auth
 
-[![Live Demo](https://img.shields.io/badge/▶_Live_Demo-black?style=for-the-badge&logo=vercel)](https://para-example-custom-phone-auth.vercel.app)
+[![Live Demo](https://img.shields.io/badge/Live_Demo-black?style=for-the-badge&logo=vercel)](https://para-example-custom-phone-auth.vercel.app)
 
-This example demonstrates how to implement custom phone authentication with Para SDK in a Next.js application. It shows the minimal setup needed to build your own phone auth UI using Para's React SDK hooks directly, without using the built-in ParaModal.
+This example shows how to build your own phone authentication UI with Para's React SDK hooks in a Next.js app. The copyable phone auth logic lives in hooks, while the UI components stay prop-driven so you can reuse the auth flow without copying this example's styling.
 
 ## Features
 
-- Custom phone input with country code selection
-- Embedded iframe for seamless SMS verification
-- Automatic polling for login/wallet creation completion
-- Message signing with "Hello World!" example
-- **Clean separation of logic (hooks) and presentation (components)**
+- Phone number input with country code selection
+- Embedded Para verification iframe for SMS OTP completion
+- Automatic wallet creation for new users
+- Returning-user login completion
+- EVM message signing after authentication
+- Server-rendered first screen plus hydrated Para runtime
+- Clean separation between SDK logic and presentation components
 
 ## Setup
 
-### Environment Variables
-
-Create a `.env.local` file in the root directory:
+Create a local `.env` file:
 
 ```env
 NEXT_PUBLIC_PARA_API_KEY=your_para_api_key
+NEXT_PUBLIC_PARA_ENVIRONMENT=BETA
 ```
 
-### Installation
+Configure the API key in the [Para Developer Portal](https://developer.getpara.com) for the selected environment with the app display name, branding, phone login availability, 2FA policy, and auth layout. This example keeps the phone input and verification iframe behavior in code, but leaves persistent Para app configuration in the Portal.
+
+Install and run the production build:
 
 ```bash
 yarn install
-yarn dev
-```
-
-## Architecture
-
-This example follows the **Smart/Dumb Component Pattern** for clean separation of concerns:
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│  HOOKS (Logic Layer - Reusable)                             │
-│  ┌─────────────────────────────────────────────────────┐    │
-│  │ usePhoneAuth                                        │    │
-│  │ - Manages phone/country state, verification flow    │    │
-│  │ - Handles Para SDK interactions                     │    │
-│  │ - Returns state + actions                           │    │
-│  └─────────────────────────────────────────────────────┘    │
-└─────────────────────────────────────────────────────────────┘
-                        │
-                        ▼
-┌─────────────────────────────────────────────────────────────┐
-│  COMPONENTS (Presentation Layer - UI Only)                  │
-│  ┌─────────────┐ ┌─────────────┐ ┌─────────────────────┐    │
-│  │ PhoneForm   │ │VerifyIframe│ │ AuthCard            │    │
-│  │ (props only)│ │(props only) │ │ (layout wrapper)    │    │
-│  └─────────────┘ └─────────────┘ └─────────────────────┘    │
-└─────────────────────────────────────────────────────────────┘
+yarn build
+yarn start
 ```
 
 ## Key Files
 
-```
+```text
 src/
-├── hooks/
-│   ├── usePhoneAuth.ts       # Phone auth logic (copy this for your own UI)
-│   └── useSignHelloWorld.ts  # Message signing logic
-├── constants/
-│   └── auth.ts               # Country codes configuration
+├── app/
+│   ├── layout.tsx                     # Root layout, metadata, SDK styles
+│   └── page.tsx                       # Server page with preview + client runtime
 ├── components/
-│   ├── ParaProvider.tsx      # Para SDK provider setup
-│   ├── layout/Header.tsx     # Header with wallet display
-│   └── ui/
-│       ├── PhoneAuth.tsx     # Container (connects hook to UI)
-│       ├── PhoneForm.tsx     # Presentational (phone input form)
-│       ├── VerifyIframe.tsx  # Presentational (OTP verification)
-│       ├── AuthCard.tsx      # Presentational (layout wrapper)
-│       ├── WalletInfo.tsx    # Connected wallet info
-│       └── SignMessage.tsx   # Message signing UI
-└── app/
-    ├── layout.tsx            # Root layout with ParaProvider
-    └── page.tsx              # Main page with auth flow
+│   ├── CustomPhoneAuthExample.tsx     # Client orchestration and provider placement
+│   ├── CustomPhoneAuthPreview.tsx     # Server-rendered disconnected first screen
+│   ├── ParaProvider.tsx               # Para SDK provider setup
+│   ├── layout/Header.tsx              # Prop-only header
+│   └── ui/                            # Prop-only auth, wallet, and signing UI
+├── constants/auth.ts                  # Country code options
+├── hooks/
+│   ├── usePhoneAuth.ts                # Copyable phone auth flow
+│   ├── useParaSession.ts              # Para session state and logout
+│   └── useSignHelloWorld.ts           # Message signing logic
+└── types/auth.ts                      # UI-facing auth option types
 ```
 
-## usePhoneAuth Hook
+## Hook Contract
 
-The `usePhoneAuth` hook encapsulates all phone authentication logic:
+`usePhoneAuth` owns the Para SDK calls for the phone auth flow, verification iframe URL, and login completion:
 
 ```tsx
 const {
-  // State
-  countryCode,     // Current country code (e.g., "+1")
-  phoneNumber,     // Current phone number
-  step,            // "input" | "verify"
-  verifyUrl,       // URL for OTP iframe
-  error,           // Error message if any
-  isPending,       // Loading state
-
-  // Actions
-  setCountryCode,  // Update country code
-  setPhoneNumber,  // Update phone number
-  submit,          // Start auth flow
-  cancel,          // Cancel verification
+  countryCode,
+  phoneNumber,
+  setCountryCode,
+  setPhoneNumber,
+  step,
+  submit,
+  verifyUrl,
 } = usePhoneAuth();
 ```
 
-**Copy this hook** to implement phone auth with your own UI components.
-
-## How It Works
-
-1. **PhoneAuth Container** - Connects `usePhoneAuth` hook to presentational components
-2. **PhoneForm** - Renders phone input with country selector, calls `onSubmit` when user submits
-3. **Verification Iframe** - Embeds Para verification URL for SMS code entry
-4. **Polling** - Hook uses `useWaitForLogin` and `useWaitForWalletCreation` internally
+The presentation components do not import Para, Wagmi, or Viem. They receive only state and callbacks from `CustomPhoneAuthExample`.
 
 ## Para SDK Hooks Used
 
 | Hook | Purpose |
-|------|---------|
-| `useSignUpOrLogIn` | Initiates phone authentication |
-| `useWaitForLogin` | Polls for login completion |
-| `useWaitForWalletCreation` | Polls for wallet creation (new users) |
-| `useAccount` | Gets connection state |
-| `useSignMessage` | Signs messages with the wallet |
+| --- | --- |
+| `useSignUpOrLogIn` | Starts phone authentication |
+| `useWaitForWalletCreation` | Waits for first-time wallet creation |
+| `useWaitForLogin` | Waits for returning-user login completion |
+| `useAccount` | Reads connection state |
+| `useWallet` | Reads the connected wallet address |
+| `useLogout` | Disconnects the Para session |
+| `useParaViemClient` | Creates a Viem client for the Para wallet |
+| `useParaViemSignMessage` | Signs the example message |
 
-## Learn More
+## Notes
 
-- [Para Documentation](https://docs.getpara.com)
-- [Para React SDK](https://docs.getpara.com/sdk/react)
+The example includes direct dependencies that are currently reached by the catch-all Para React SDK build graph, including `@metamask/delegation-toolkit`, `ethers`, `@stellar/stellar-sdk`, and `@wagmi/core`. These keep the production build self-contained until the SDK export boundary can be narrowed.

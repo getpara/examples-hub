@@ -6,46 +6,52 @@ interface TxResultProps {
   showExplorerLink?: boolean;
   actionLabel?: string;
   onAction?: () => void;
-  "data-testid"?: string;
 }
 
 export function TxResult({
   signature,
-  label = "Transaction Hash:",
+  label = "Transaction Hash",
   showExplorerLink = true,
   actionLabel,
   onAction,
-  "data-testid": testId,
 }: TxResultProps) {
   const explorerUrl = `${TESTNET_EXPLORER_URL}/${signature}`;
 
   return (
-    <div className="mt-8 rounded-none border border-gray-200">
-      <div className="flex justify-between items-center px-6 py-4 bg-gray-50 border-b border-gray-200">
-        <h3 className="text-sm font-medium text-gray-900">{label}</h3>
-        <div className="flex gap-2">
+    <div className="mt-8 overflow-hidden rounded-2xl border border-border bg-card shadow-sm animate-fade-in">
+      <div className="border-b border-border/60 px-6 py-4">
+        <h3 className="text-sm font-semibold">{label}</h3>
+      </div>
+      <div className="space-y-4 p-6">
+        <div>
+          <p className="mb-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+            Value
+          </p>
+          <p className="break-all rounded-xl bg-muted/60 px-4 py-3 font-mono text-xs leading-relaxed text-muted-foreground">
+            {signature}
+          </p>
+        </div>
+
+        <div className="flex flex-wrap gap-2">
           {onAction && actionLabel && (
             <button
+              type="button"
               onClick={onAction}
-              className="px-3 py-1 text-sm bg-gray-900 text-white hover:bg-gray-950 transition-colors rounded-none">
+              className="btn-secondary px-3 py-1.5 text-sm">
               {actionLabel}
             </button>
           )}
+
           {showExplorerLink && (
             <a
               href={explorerUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="px-3 py-1 text-sm bg-gray-900 text-white hover:bg-gray-950 transition-colors rounded-none">
+              className="btn-secondary px-3 py-1.5 text-sm">
               View on Stellar Expert
             </a>
           )}
         </div>
-      </div>
-      <div className="p-6">
-        <p className="text-sm font-mono break-all text-gray-600 bg-white p-4 border border-gray-200" data-testid={testId}>
-          {signature}
-        </p>
       </div>
     </div>
   );

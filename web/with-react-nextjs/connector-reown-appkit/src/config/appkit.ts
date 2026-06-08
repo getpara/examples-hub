@@ -13,10 +13,10 @@ export const APP_DESCRIPTION =
   "This example demonstrates how to integrate Para as a custom wagmi connector in Reown AppKit.";
 export const chains = [mainnet, arbitrum, optimism, polygon, base] as const;
 
-export const projectId = process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID;
+export const projectId = process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID ?? "";
 
 if (!projectId) {
-  throw new Error("NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID is not set");
+  console.warn("NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID is not set. Reown WalletConnect flows will not work.");
 }
 
 const queryClient = new QueryClient({
@@ -34,30 +34,19 @@ const metadata = {
   icons: ["https://avatars.githubusercontent.com/u/179229932"],
 };
 
-const connector = paraConnector({
-  para: para,
-  chains: [...chains],
-  appName: "Reown AppKit with Para",
-  logo: "/para.svg",
-  queryClient,
-  oAuthMethods: ["APPLE", "DISCORD", "FACEBOOK", "FARCASTER", "GOOGLE", "TWITTER"],
-  theme: {
-    foregroundColor: "#2D3648",
-    backgroundColor: "#FFFFFF",
-    accentColor: "#0066CC",
-    mode: "light",
-    borderRadius: "none" as const,
-    font: "Inter",
-  },
-  onRampTestMode: true,
-  disableEmailLogin: false,
-  disablePhoneLogin: false,
-  authLayout: ["AUTH:FULL"],
-  recoverySecretStepEnabled: true,
-  options: {},
-});
+const connector = para
+  ? paraConnector({
+      para,
+      chains: [...chains],
+      appName: "Reown AppKit with Para",
+      queryClient,
+      onRampTestMode: true,
+      recoverySecretStepEnabled: true,
+      options: {},
+    })
+  : null;
 
-const connectors: CreateConnectorFn[] = [connector as CreateConnectorFn];
+const connectors: CreateConnectorFn[] = connector ? [connector as CreateConnectorFn] : [];
 
 export const wagmiAdapter = new WagmiAdapter({
   ssr: true,

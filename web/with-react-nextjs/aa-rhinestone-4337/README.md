@@ -1,100 +1,105 @@
-# Rhinestone Global Wallet Example
+# Rhinestone Account Abstraction Example
 
-A Next.js example demonstrating Para SDK integration with Rhinestone for EIP-4337 cross-chain global wallets. Users can deposit tokens on any supported chain and spend them on any other chain with a single account address.
+A minimal Next.js example showing how to use Para with Rhinestone to create an EIP-4337 global wallet.
 
 ## What This Example Shows
 
-- Setting up `ParaProvider` for Para SDK authentication
-- Using `useViemAccount` hook from `@getpara/react-sdk/evm` for the Viem signer
-- Creating Rhinestone global wallets with Para as the signer
-- Executing cross-chain transactions with automatic bridging
+- Setting up `ParaProvider` for Para wallet authentication
+- Creating a Para Viem account with `useParaViemAccount`
+- Creating a Rhinestone account with the Para signer
+- Fetching the Rhinestone portfolio for the global wallet
+- Keeping Rhinestone logic separate from the example UI
 
 ## Setup
 
-1. Create a `.env` file:
+1. In the [Para Developer Portal](https://developer.getpara.com), configure the project used by your API key:
+
+   - Set the app or project display name, for example `Rhinestone Account Abstraction Example`.
+   - Configure Branding with your logo, light theme colors, font, and border radius.
+   - Configure Auth with the email and phone login settings, OAuth providers, auth layout, and 2FA setting you want for this example.
+
+2. Create a `.env` file:
 
 ```env
 NEXT_PUBLIC_PARA_API_KEY=your_para_api_key
 NEXT_PUBLIC_PARA_ENVIRONMENT=BETA
 RHINESTONE_API_KEY=your_rhinestone_api_key
+NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
-2. Install dependencies and run:
+3. Install dependencies and run the production build:
 
 ```bash
 yarn install
-yarn dev
+yarn build
+yarn start
 ```
 
 ## Getting API Keys
 
-- **Para API Key**: Get from [Para Developer Portal](https://developer.getpara.com)
-- **Rhinestone API Key**: Contact Rhinestone team for access
+- **Para API Key**: Get one from the [Para Developer Portal](https://developer.getpara.com).
+- **Rhinestone API Key**: Contact Rhinestone for orchestrator API access.
+
+## Configuration Ownership
+
+Persistent Para app identity, branding, and auth settings are owned by the Developer Portal for the API key used to run this example. The local `ParaProvider` keeps only runtime modal behavior, such as on-ramp test mode and recovery secret step handling. The Rhinestone API key remains a server-side environment variable because it authenticates the orchestrator proxy route.
 
 ## Project Structure
 
 ```
 src/
 ├── app/
-│   ├── api/orchestrator/[...path]/route.ts  # Rhinestone API proxy
-│   ├── layout.tsx                            # Root layout with ParaProvider
-│   └── page.tsx                              # Main page
+│   ├── api/orchestrator/[...path]/route.ts  # Rhinestone orchestrator proxy
+│   ├── layout.tsx                           # Server layout and metadata
+│   └── page.tsx                             # Example entry
 ├── components/
-│   ├── ParaProvider.tsx                      # Para SDK provider setup
-│   ├── MainContent.tsx                       # Transaction UI
-│   ├── WalletSidebar.tsx                     # Wallet info sidebar
-│   └── ui/                                   # UI components
+│   ├── ParaProvider.tsx                     # Para SDK provider setup
+│   ├── Rhinestone4337Example.tsx            # Client orchestration
+│   ├── layout/Header.tsx                    # Presentational header
+│   └── ui/                                  # Presentational example UI
 ├── hooks/
-│   └── useGlobalWallet.ts                    # Rhinestone account hook
+│   └── useRhinestoneGlobalWallet.ts         # Copyable Rhinestone logic
 └── lib/
-    └── rhinestone.ts                         # Rhinestone configuration
+    └── rhinestone.ts                        # Chain and token configuration
 ```
 
 ## Key Integration Pattern
 
+The reusable logic lives in `src/hooks/useRhinestoneGlobalWallet.ts`. The UI components receive props only, so you can copy the hook into your app without copying this example's UI.
+
 ```typescript
-import { useViemAccount } from "@getpara/react-sdk/evm";
+import { useParaViemAccount } from "@getpara/react-sdk/evm";
 import { RhinestoneSDK } from "@rhinestone/sdk";
+import type { Account } from "viem";
 
-// Get Viem account from Para SDK (handles signing internally)
-const { viemAccount } = useViemAccount();
+export function useRhinestoneGlobalWallet() {
+  const { viemAccount } = useParaViemAccount();
+  const rhinestone = new RhinestoneSDK({
+    apiKey: "proxy",
+    endpointUrl: `${window.location.origin}/api/orchestrator`,
+  });
 
-// Create Rhinestone SDK instance (uses API proxy for auth)
-const rhinestone = new RhinestoneSDK({
-  apiKey: "proxy",
-  endpointUrl: `${window.location.origin}/api/orchestrator`,
-});
+  async function createGlobalWallet() {
+    if (!viemAccount) {
+      throw new Error("Connect a Para wallet first.");
+    }
 
-// Create global wallet with Para signer
-const rhinestoneAccount = await rhinestone.createAccount({
-  owners: {
-    type: "ecdsa",
-    accounts: [viemAccount],
-  },
-});
+    const account = await rhinestone.createAccount({
+      owners: {
+        type: "ecdsa",
+        accounts: [viemAccount as Account],
+      },
+    });
 
-// Get global wallet address (same across all chains)
-const globalAddress = rhinestoneAccount.getAddress();
+    return {
+      address: account.getAddress(),
+      portfolio: await account.getPortfolio(),
+    };
+  }
 
-// Execute cross-chain transaction
-const transaction = await rhinestoneAccount.sendTransaction({
-  sourceChains: [arbitrum],  // Look for tokens on Arbitrum
-  targetChain: base,          // Execute on Base
-  calls: [{ to, data, value }],
-  tokenRequests: [{ address: usdcOnBase, amount: 5000000n }],
-  sponsored: true,
-});
-
-await rhinestoneAccount.waitForExecution(transaction);
+  return { createGlobalWallet };
+}
 ```
-
-## Supported Chains
-
-- Ethereum
-- Arbitrum
-- Base
-- Polygon
-- Optimism
 
 ## Learn More
 

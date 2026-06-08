@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useCallback, useState } from "react";
 import { LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
 import { useParaSigner } from "./useParaSigner";
 
@@ -14,7 +14,7 @@ export function useSolTransfer() {
   const transfer = useCallback(
     async (to: string, amount: string) => {
       if (!signer?.sender || !connection || !isReady) {
-        setError(new Error("Signer not ready"));
+        setError(new Error("Signer not ready. Please connect your wallet."));
         return;
       }
 
@@ -24,22 +24,25 @@ export function useSolTransfer() {
       setStatus("pending");
 
       try {
-        // Validate recipient address
-        if (!PublicKey.isOnCurve(to)) {
-          throw new Error("Invalid recipient address format");
+        let toPubKey: PublicKey;
+        try {
+          toPubKey = new PublicKey(to);
+        } catch {
+          throw new Error("Invalid recipient address format.");
+        }
+
+        if (!PublicKey.isOnCurve(toPubKey)) {
+          throw new Error("Invalid recipient address format.");
         }
 
         const amountFloat = parseFloat(amount);
         if (isNaN(amountFloat) || amountFloat <= 0) {
-          throw new Error("Please enter a valid amount greater than 0");
+          throw new Error("Please enter a valid amount greater than 0.");
         }
 
-        // Check balance
         const balanceLamports = await connection.getBalance(signer.sender);
-        const toPubKey = new PublicKey(to);
-        const amountLamports = amountFloat * LAMPORTS_PER_SOL;
+        const amountLamports = Math.floor(amountFloat * LAMPORTS_PER_SOL);
 
-        // Build transaction to estimate fee
         const tx = new Transaction();
         tx.add(
           SystemProgram.transfer({
@@ -55,7 +58,7 @@ export function useSolTransfer() {
 
         const estimatedFee = await tx.getEstimatedFee(connection);
         if (estimatedFee === null) {
-          throw new Error("Failed to estimate transaction fee");
+          throw new Error("Failed to estimate transaction fee.");
         }
 
         const totalCost = amountLamports + estimatedFee;
@@ -67,12 +70,10 @@ export function useSolTransfer() {
           );
         }
 
-        // Send transaction
         const signature = await signer.sendTransaction(tx);
         setTxSignature(signature);
         setStatus("confirming");
 
-        // Wait for confirmation
         let confirmed = false;
         while (!confirmed) {
           const statusResult = await connection.getSignatureStatus(signature, {
@@ -84,7 +85,7 @@ export function useSolTransfer() {
           ) {
             confirmed = true;
           }
-          await new Promise((r) => setTimeout(r, 500));
+          await new Promise((resolve) => setTimeout(resolve, 500));
         }
 
         setStatus("success");

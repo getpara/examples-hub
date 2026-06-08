@@ -1,19 +1,18 @@
-"use client";
+'use client';
 
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Environment, ParaProvider as ParaSDKProvider } from "@getpara/react-sdk";
-import { cosmoshub, osmosis, noble } from "graz/chains";
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Environment, ParaProvider as ParaSDKProvider } from '@getpara/react-sdk-lite';
+import { cosmoshub, osmosis, noble } from 'graz/chains';
 
 // Para API configuration - set these in your .env file
-const API_KEY = process.env.NEXT_PUBLIC_PARA_API_KEY ?? "";
+const API_KEY = process.env.NEXT_PUBLIC_PARA_API_KEY ?? '';
 const ENVIRONMENT = (process.env.NEXT_PUBLIC_PARA_ENVIRONMENT as Environment) || Environment.BETA;
 
 if (!API_KEY) {
-  throw new Error("API key is not defined. Please set NEXT_PUBLIC_PARA_API_KEY in your environment variables.");
+  console.warn('NEXT_PUBLIC_PARA_API_KEY is not set. Para authentication will not work.');
 }
 
 const queryClient = new QueryClient();
-
 // Cosmos chains supported by this example
 const cosmosChains = [cosmoshub, osmosis, noble];
 
@@ -26,38 +25,20 @@ export function ParaProvider({ children }: { children: React.ReactNode }) {
           env: ENVIRONMENT,
         }}
         externalWalletConfig={{
-          wallets: ["KEPLR", "LEAP"],
           cosmosConnector: {
             config: {
               chains: cosmosChains,
               selectedChainId: cosmoshub.chainId,
               multiChain: false,
-              onSwitchChain: (chainId) => {
-                // eslint-disable-next-line no-console
-                console.log("Switched chain to:", chainId);
-              },
+              onSwitchChain: () => {},
             },
           },
         }}
-        config={{ appName: "Para + CosmJS Demo" }}
         paraModalConfig={{
-          disableEmailLogin: false,
-          disablePhoneLogin: false,
-          authLayout: ["AUTH:FULL", "EXTERNAL:FULL"],
-          oAuthMethods: ["APPLE", "DISCORD", "FACEBOOK", "FARCASTER", "GOOGLE", "TWITTER"],
           onRampTestMode: true,
-          theme: {
-            foregroundColor: "#222222",
-            backgroundColor: "#FFFFFF",
-            accentColor: "#888888",
-            mode: "light",
-            borderRadius: "none",
-            font: "Inter",
-          },
-          logo: "/para.svg",
           recoverySecretStepEnabled: true,
-          twoFactorAuthEnabled: false,
-        }}>
+        }}
+      >
         {children}
       </ParaSDKProvider>
     </QueryClientProvider>

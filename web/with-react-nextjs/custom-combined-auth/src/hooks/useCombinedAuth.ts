@@ -2,26 +2,18 @@ import { useState, useCallback } from "react";
 import { useEmailAuth, type UseEmailAuthReturn } from "./useEmailAuth";
 import { usePhoneAuth, type UsePhoneAuthReturn } from "./usePhoneAuth";
 import { useOAuthAuth, type UseOAuthAuthReturn } from "./useOAuthAuth";
-
-export type AuthTab = "email" | "phone" | "social";
+import type { AuthTab } from "@/types/auth";
 
 export interface UseCombinedAuthReturn {
-  // Tab state
   activeTab: AuthTab;
   setActiveTab: (tab: AuthTab) => void;
-
-  // Auth hooks
   email: UseEmailAuthReturn;
   phone: UsePhoneAuthReturn;
   oauth: UseOAuthAuthReturn;
-
-  // Unified state (derived from active tab)
   step: "input" | "verify";
   verifyUrl: string | null;
   error: string | null;
   isPending: boolean;
-
-  // Unified actions
   cancel: () => void;
 }
 
@@ -31,8 +23,10 @@ export function useCombinedAuth(): UseCombinedAuthReturn {
   const email = useEmailAuth();
   const phone = usePhoneAuth();
   const oauth = useOAuthAuth();
+  const cancelEmail = email.cancel;
+  const cancelPhone = phone.cancel;
+  const cancelOAuth = oauth.cancel;
 
-  // Derive unified state from active tab
   const step = activeTab === "email" ? email.step : activeTab === "phone" ? phone.step : "input";
 
   const verifyUrl = activeTab === "email" ? email.verifyUrl : activeTab === "phone" ? phone.verifyUrl : null;
@@ -41,16 +35,15 @@ export function useCombinedAuth(): UseCombinedAuthReturn {
 
   const isPending = activeTab === "email" ? email.isPending : activeTab === "phone" ? phone.isPending : oauth.isPending;
 
-  // Unified cancel
   const cancel = useCallback(() => {
     if (activeTab === "email") {
-      email.cancel();
+      cancelEmail();
     } else if (activeTab === "phone") {
-      phone.cancel();
+      cancelPhone();
     } else {
-      oauth.cancel();
+      cancelOAuth();
     }
-  }, [activeTab, email, phone, oauth]);
+  }, [activeTab, cancelEmail, cancelPhone, cancelOAuth]);
 
   return {
     activeTab,

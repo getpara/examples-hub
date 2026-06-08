@@ -11,7 +11,8 @@ covers the core operations exposed by the REST surface:
 It defaults to the Beta environment (`https://api.beta.getpara.com`) so you can try it safely. For additional REST
 endpoints, check the docs—this sample intentionally sticks to the minimal create/read/sign flow.
 
-Use this when you want to learn the HTTP integration without installing any Para SDK packages.
+Use this when you want to learn the HTTP integration without installing any Para SDK packages. For production
+TypeScript backends, prefer `@getpara/rest-sdk` unless you specifically want to own the raw HTTP layer.
 
 ## Prerequisites
 

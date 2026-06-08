@@ -1,138 +1,89 @@
 # Custom OAuth Auth
 
-[![Live Demo](https://img.shields.io/badge/▶_Live_Demo-black?style=for-the-badge&logo=vercel)](https://para-example-custom-oauth-auth.vercel.app)
+[![Live Demo](https://img.shields.io/badge/Live_Demo-black?style=for-the-badge&logo=vercel)](https://para-example-custom-oauth-auth.vercel.app)
 
-This example demonstrates how to implement custom OAuth authentication with Para SDK in a Next.js application. It shows the minimal setup needed to build your own OAuth auth UI using Para's React SDK hooks directly, without using the built-in ParaModal.
+This example shows how to build your own OAuth sign-in UI with Para's React SDK hooks in a Next.js app. The copyable Para logic lives in hooks, while the UI components stay prop-driven so you can bring the auth flow into your own interface without copying this example's styling.
 
 ## Features
 
-- One-click OAuth login (no passkeys required)
-- Support for Google, Apple, Discord, X (Twitter), Facebook, and Farcaster
+- Google, Apple, Discord, and X OAuth provider buttons
 - Automatic wallet creation for new users
-- Message signing with "Hello World!" example
-- **Clean separation of logic (hooks) and presentation (components)**
+- Returning-user login completion
+- EVM message signing after authentication
+- Server-rendered first screen plus hydrated Para runtime
+- Clean separation between SDK logic and presentation components
 
 ## Setup
 
-### Environment Variables
-
-Create a `.env.local` file in the root directory:
+Create a local `.env` file:
 
 ```env
 NEXT_PUBLIC_PARA_API_KEY=your_para_api_key
+NEXT_PUBLIC_PARA_ENVIRONMENT=BETA
 ```
 
-### Installation
+Configure the API key in the [Para Developer Portal](https://developer.getpara.com) for the selected environment with the app display name, branding, enabled OAuth providers, 2FA policy, and auth layout. This example keeps the OAuth buttons and popup behavior in code, but leaves persistent Para app configuration in the Portal.
+
+Install and run the production build:
 
 ```bash
 yarn install
-yarn dev
-```
-
-## Architecture
-
-This example follows the **Smart/Dumb Component Pattern** for clean separation of concerns:
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│  HOOKS (Logic Layer - Reusable)                             │
-│  ┌─────────────────────────────────────────────────────┐    │
-│  │ useOAuthAuth                                        │    │
-│  │ - Manages OAuth provider state                      │    │
-│  │ - Handles popup flow and Para SDK interactions      │    │
-│  │ - Returns state + actions                           │    │
-│  └─────────────────────────────────────────────────────┘    │
-└─────────────────────────────────────────────────────────────┘
-                        │
-                        ▼
-┌─────────────────────────────────────────────────────────────┐
-│  COMPONENTS (Presentation Layer - UI Only)                  │
-│  ┌───────────────────┐ ┌─────────────────────────────┐      │
-│  │ OAuthButtons      │ │ AuthCard                    │      │
-│  │ (props only)      │ │ (layout wrapper)            │      │
-│  └───────────────────┘ └─────────────────────────────┘      │
-└─────────────────────────────────────────────────────────────┘
+yarn build
+yarn start
 ```
 
 ## Key Files
 
-```
+```text
 src/
-├── hooks/
-│   ├── useOAuthAuth.ts       # OAuth auth logic (copy this for your own UI)
-│   └── useSignHelloWorld.ts  # Message signing logic
-├── constants/
-│   └── auth.ts               # OAuth providers configuration
+├── app/
+│   ├── layout.tsx                     # Root layout, metadata, SDK styles
+│   └── page.tsx                       # Server page with preview + client runtime
 ├── components/
-│   ├── ParaProvider.tsx      # Para SDK provider setup
-│   ├── layout/Header.tsx     # Header with wallet display
-│   └── ui/
-│       ├── OAuthAuth.tsx     # Container (connects hook to UI)
-│       ├── OAuthButtons.tsx  # Presentational (provider buttons)
-│       ├── AuthCard.tsx      # Presentational (layout wrapper)
-│       ├── WalletInfo.tsx    # Connected wallet info
-│       └── SignMessage.tsx   # Message signing UI
-└── app/
-    ├── layout.tsx            # Root layout with ParaProvider
-    └── page.tsx              # Main page with auth flow
+│   ├── CustomOAuthAuthExample.tsx     # Client orchestration and provider placement
+│   ├── CustomOAuthAuthPreview.tsx     # Server-rendered disconnected first screen
+│   ├── ParaProvider.tsx               # Para SDK provider setup
+│   ├── layout/Header.tsx              # Prop-only header
+│   └── ui/                            # Prop-only auth, wallet, and signing UI
+├── constants/auth.ts                  # OAuth provider button configuration
+├── hooks/
+│   ├── useOAuthAuth.ts                # Copyable OAuth auth flow
+│   ├── useParaSession.ts              # Para session state and logout
+│   └── useSignHelloWorld.ts           # Message signing logic
+└── types/auth.ts                      # UI-facing auth option types
 ```
 
-## useOAuthAuth Hook
+## Hook Contract
 
-The `useOAuthAuth` hook encapsulates all OAuth authentication logic:
+`useOAuthAuth` owns the Para SDK calls for the OAuth popup flow and login completion:
 
 ```tsx
 const {
-  // State
-  activeProvider,  // Currently authenticating provider (null when idle)
-  error,           // Error message if any
-  isPending,       // Loading state
-
-  // Actions
-  authenticate,    // Start OAuth flow: authenticate("GOOGLE")
-  cancel,          // Cancel authentication
+  activeProvider,
+  authenticate,
+  cancel,
+  error,
+  isPending,
 } = useOAuthAuth();
+
+authenticate("GOOGLE");
 ```
 
-**Copy this hook** to implement OAuth auth with your own UI components.
-
-## How It Works
-
-1. **OAuthAuth Container** - Connects `useOAuthAuth` hook to presentational components
-2. **OAuthButtons** - Renders provider buttons, calls `onAuthenticate` on click
-3. **OAuth Popup** - Hook opens popup via `useVerifyOAuth`, user authenticates
-4. **Wallet Creation** - Hook handles `waitForWalletCreation` or `waitForLogin` internally
-
-## OAuth Flow (One-Click)
-
-```
-User clicks "Continue with Google"
-         ↓
-useOAuthAuth.authenticate("GOOGLE")
-         ↓
-Popup opens → User authenticates with Google
-         ↓
-authState.stage === "done"
-         ↓
-Check authState.isNewUser:
-  - true  → waitForWalletCreation()
-  - false → waitForLogin()
-         ↓
-User authenticated, wallet ready
-```
+The presentation components do not import Para, Wagmi, or Viem. They receive only state and callbacks from `CustomOAuthAuthExample`.
 
 ## Para SDK Hooks Used
 
 | Hook | Purpose |
-|------|---------|
-| `useVerifyOAuth` | Initiates OAuth authentication (Google, Apple, Discord, X, Facebook) |
-| `useVerifyFarcaster` | Initiates Farcaster authentication |
-| `useWaitForWalletCreation` | Polls for wallet creation (new users) |
-| `useWaitForLogin` | Polls for login completion (returning users) |
-| `useAccount` | Gets connection state |
-| `useSignMessage` | Signs messages with the wallet |
+| --- | --- |
+| `useVerifyOAuth` | Opens the OAuth provider flow |
+| `useWaitForWalletCreation` | Waits for first-time wallet creation |
+| `useWaitForLogin` | Waits for returning-user login completion |
+| `useAccount` | Reads connection state |
+| `useWallet` | Reads the connected wallet address |
+| `useLogout` | Disconnects the Para session |
+| `useParaViemClient` | Creates a Viem client for the Para wallet |
+| `useParaViemSignMessage` | Signs the example message |
 
-## Learn More
+## Notes
 
-- [Para Documentation](https://docs.getpara.com)
-- [Para React SDK](https://docs.getpara.com/sdk/react)
+The example includes direct dependencies that are currently reached by the catch-all Para React SDK build graph, including `@metamask/delegation-toolkit`, `ethers`, `@stellar/stellar-sdk`, and `@wagmi/core`. These keep the production build self-contained until the SDK export boundary can be narrowed.

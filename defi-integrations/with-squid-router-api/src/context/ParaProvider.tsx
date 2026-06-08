@@ -29,9 +29,8 @@ export function ParaProvider({
         ],
         onRampTestMode: true,
         theme: {
-          foregroundColor: "#2D3648",
           backgroundColor: "#FFFFFF",
-          accentColor: "#0066CC",
+          foregroundColor: "#0066CC",
           mode: "light",
           borderRadius: "none",
           font: "Inter",

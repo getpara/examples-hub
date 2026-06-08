@@ -1,29 +1,29 @@
 interface ActionButtonProps {
   onClick?: () => void;
+  isLoading: boolean;
   disabled?: boolean;
-  isLoading?: boolean;
   loadingText?: string;
-  children: React.ReactNode;
   type?: "button" | "submit";
+  children: React.ReactNode;
   "data-testid"?: string;
 }
 
 export function ActionButton({
   onClick,
-  disabled,
   isLoading,
+  disabled,
   loadingText,
-  children,
   type = "button",
+  children,
   "data-testid": testId,
 }: ActionButtonProps) {
   return (
     <button
       type={type}
       onClick={onClick}
-      disabled={disabled || isLoading}
       data-testid={testId}
-      className="w-full rounded-none bg-gray-900 px-6 py-3 text-sm font-medium text-white hover:bg-gray-950 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+      className="btn-primary w-full px-6 py-3 text-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
+      disabled={isLoading || disabled}>
       {isLoading ? loadingText || "Loading..." : children}
     </button>
   );

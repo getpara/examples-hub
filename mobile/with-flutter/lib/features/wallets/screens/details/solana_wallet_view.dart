@@ -154,7 +154,7 @@ class _SolanaWalletViewState extends State<SolanaWalletView> {
       } else if (result is para_sdk.DeniedSignatureResultWithUrl) {
         _showResult(
           'Denied', 
-          'Signature denied\nReview URL: ${result.transactionReviewUrl}',
+          'Signature denied',
         );
       } else {
         _showResult('Error', 'Signature denied');
@@ -203,7 +203,7 @@ class _SolanaWalletViewState extends State<SolanaWalletView> {
       } else if (result is para_sdk.DeniedSignatureResultWithUrl) {
         _showResult(
           'Denied', 
-          'Transaction denied\nReview URL: ${result.transactionReviewUrl}',
+          'Transaction denied',
         );
       } else {
         _showResult('Error', 'Failed to sign transaction');

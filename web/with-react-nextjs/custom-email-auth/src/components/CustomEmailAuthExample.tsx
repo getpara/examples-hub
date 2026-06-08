@@ -1,0 +1,86 @@
+"use client";
+
+import { useEffect } from "react";
+import { ParaProvider } from "@/components/ParaProvider";
+import { Header } from "@/components/layout/Header";
+import { EmailAuth } from "@/components/ui/EmailAuth";
+import { SignMessage } from "@/components/ui/SignMessage";
+import { WalletInfo } from "@/components/ui/WalletInfo";
+import { useEmailAuth } from "@/hooks/useEmailAuth";
+import { useParaSession } from "@/hooks/useParaSession";
+import { useSignHelloWorld } from "@/hooks/useSignHelloWorld";
+
+export function CustomEmailAuthExample() {
+  useEffect(() => {
+    document.documentElement.dataset.customEmailAuthHydrated = "true";
+
+    return () => {
+      delete document.documentElement.dataset.customEmailAuthHydrated;
+    };
+  }, []);
+
+  return (
+    <div className="hydrated-app">
+      <ParaProvider>
+        <CustomEmailAuthRuntime />
+      </ParaProvider>
+    </div>
+  );
+}
+
+function CustomEmailAuthRuntime() {
+  const auth = useEmailAuth();
+  const session = useParaSession();
+  const signing = useSignHelloWorld();
+
+  return (
+    <main className="min-h-screen bg-background">
+      <Header address={session.address} isConnected={session.isConnected} />
+
+      <section className="mx-auto grid max-w-5xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[minmax(0,0.9fr)_minmax(22rem,1fr)] lg:px-8 lg:py-16">
+        <div className="animate-fade-in-up">
+          <p className="mb-3 text-sm font-semibold uppercase tracking-wide text-primary">Custom email auth</p>
+          <h1 className="text-4xl font-semibold tracking-normal text-foreground sm:text-5xl">
+            Email OTP with your own Para UI
+          </h1>
+          <p className="mt-5 max-w-xl text-base leading-7 text-muted-foreground">
+            Start an email auth flow with Para hooks, then sign an EVM message once the wallet is connected.
+          </p>
+        </div>
+
+        <div className="animate-fade-in-up space-y-4">
+          {!session.isConnected ? (
+            <EmailAuth
+              email={auth.email}
+              error={auth.error}
+              isPending={auth.isPending}
+              onCancel={auth.cancel}
+              onEmailChange={auth.setEmail}
+              onSubmit={auth.submit}
+              step={auth.step}
+              verifyUrl={auth.verifyUrl}
+            />
+          ) : (
+            <>
+              <WalletInfo address={session.address} />
+              <SignMessage
+                errorMessage={signing.errorMessage}
+                isPending={signing.isPending}
+                message={signing.message}
+                onSign={signing.signMessage}
+                signature={signing.signature}
+              />
+              <button
+                type="button"
+                onClick={() => session.disconnect()}
+                disabled={session.isDisconnecting}
+                className="btn-secondary min-h-11 w-full px-4 text-sm">
+                {session.isDisconnecting ? "Disconnecting..." : "Disconnect"}
+              </button>
+            </>
+          )}
+        </div>
+      </section>
+    </main>
+  );
+}

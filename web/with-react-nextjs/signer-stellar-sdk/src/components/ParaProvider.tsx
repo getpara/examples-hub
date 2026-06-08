@@ -1,10 +1,21 @@
 "use client";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ParaProvider as ParaSDKProvider } from "@getpara/react-sdk";
+import { ParaProvider as ParaSDKProvider } from "@getpara/react-sdk-lite";
 import { API_KEY, ENVIRONMENT } from "@/config/constants";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5,
+      gcTime: 1000 * 60 * 30,
+    },
+  },
+});
+
+if (!API_KEY) {
+  console.warn("NEXT_PUBLIC_PARA_API_KEY is not set. Para authentication will not work.");
+}
 
 export function ParaProvider({
   children,
@@ -18,25 +29,11 @@ export function ParaProvider({
           apiKey: API_KEY,
           env: ENVIRONMENT,
         }}
-        config={{ appName: "Para Stellar SDK Example" }}
         paraModalConfig={{
-          disableEmailLogin: false,
-          disablePhoneLogin: false,
-          authLayout: ["AUTH:FULL"],
-          oAuthMethods: ["APPLE", "DISCORD", "FACEBOOK", "FARCASTER", "GOOGLE", "TWITTER"],
           onRampTestMode: true,
-          theme: {
-            foregroundColor: "#222222",
-            backgroundColor: "#FFFFFF",
-            accentColor: "#888888",
-            mode: "light",
-            borderRadius: "none",
-            font: "Inter",
-          },
-          logo: "/para.svg",
           recoverySecretStepEnabled: true,
-          twoFactorAuthEnabled: false,
-        }}>
+        }}
+      >
         {children}
       </ParaSDKProvider>
     </QueryClientProvider>

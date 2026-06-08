@@ -3,12 +3,28 @@ appId: com.usecapsule.example.flutter
 - clearState
 - launchApp
 - waitForAnimationToEnd
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - tapOn:
+          text: "Close app"
+          optional: true
+      - waitForAnimationToEnd
 
 # Logout if already signed in
 - tapOn:
     text: "Logout"
     optional: true
 - waitForAnimationToEnd
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - tapOn:
+          text: "Close app"
+          optional: true
+      - waitForAnimationToEnd
 
 # Wait for auth screen
 - extendedWaitUntil:
@@ -21,27 +37,61 @@ appId: com.usecapsule.example.flutter
 # Switch to email tab and enter email
 - tapOn: "Email"
 - waitForAnimationToEnd
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - tapOn:
+          point: "74%,63%"
+      - waitForAnimationToEnd
 - tapOn: "Email address"
 - inputText: "${output.email}"
 - pressKey: "Enter"
 
 # Tap continue to trigger ASWebAuth
 - tapOn: "Continue"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - waitForAnimationToEnd
+      - runFlow:
+          when:
+            visible: "Use without an account"
+          commands:
+            - tapOn: "Use without an account"
+            - waitForAnimationToEnd
+      - runFlow:
+          when:
+            visible: "Continue"
+          commands:
+            - tapOn: "Continue"
+            - waitForAnimationToEnd
+      - runFlow:
+          when:
+            visible: "Use without an account"
+          commands:
+            - tapOn: "Use without an account"
+            - waitForAnimationToEnd
 
 # Handle ASWebAuth consent dialog
-- extendedWaitUntil:
-    visible: "Cancel"
-    timeout: 10000
-- tapOn: "Continue"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - extendedWaitUntil:
+          visible: "Cancel"
+          timeout: 10000
+      - tapOn: "Continue"
 
 # Wait for OTP page
 - extendedWaitUntil:
-    visible: "Verify"
-    timeout: 15000
+    visible: "Send new code"
+    timeout: 30000
 
 # Tap on OTP input field for keyboard focus
 - tapOn:
-    point: "20%,58%"
+    point: "15%,35%"
 - waitForAnimationToEnd
 
 # Enter OTP digits
@@ -56,6 +106,23 @@ appId: com.usecapsule.example.flutter
 - inputText: "5"
 - waitForAnimationToEnd
 - inputText: "6"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - pressKey: "Enter"
+      - waitForAnimationToEnd
+      # Chrome Custom Tabs can stay visually on top after the custom-scheme
+      # callback succeeds. Close it so Maestro targets the Flutter app again.
+      - tapOn:
+          point: "6%,9%"
+      - waitForAnimationToEnd
+
+- runFlow:
+    when:
+      visible: "Approve"
+    commands:
+      - tapOn: "Approve"
 
 # Wait for wallets screen
 - waitForAnimationToEnd

@@ -1,22 +1,28 @@
-"use client";
+import Image from "next/image";
 
-import { useAccount, useWallet } from "@getpara/react-sdk";
+interface HeaderProps {
+  address?: string;
+  isConnected: boolean;
+}
 
-export function Header() {
-  const { data: wallet } = useWallet();
-  const { isConnected } = useAccount();
+function truncateAddress(address: string) {
+  return `${address.slice(0, 6)}...${address.slice(-4)}`;
+}
 
+export function Header({ address, isConnected }: HeaderProps) {
   return (
-    <header className="border-b border-gray-200">
-      <div className="container mx-auto px-4 py-4 flex justify-end">
-        {isConnected && wallet?.address && (
-          <span
-            data-testid="account-address-display"
-            data-address={wallet.address}
-            className="px-4 py-2 text-gray-700 text-sm font-medium font-mono">
-            {wallet.address.slice(0, 6)}...{wallet.address.slice(-4)}
-          </span>
-        )}
+    <header className="sticky top-0 z-10 border-b border-border/50 bg-card/80 backdrop-blur-xl">
+      <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
+        <div className="flex min-w-0 items-center gap-3">
+          <Image src="/para.svg" alt="Para" width={28} height={28} priority />
+          <div className="min-w-0">
+            <p className="truncate text-sm font-semibold text-card-foreground">Para</p>
+            <p className="truncate text-xs text-muted-foreground">Email auth example</p>
+          </div>
+        </div>
+        <div className="rounded-lg border border-border bg-muted px-3 py-2 text-xs font-medium text-muted-foreground">
+          {isConnected && address ? truncateAddress(address) : "Disconnected"}
+        </div>
       </div>
     </header>
   );

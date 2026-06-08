@@ -38,7 +38,7 @@ extension Color {
 struct WalletsView: View {
     @EnvironmentObject var paraManager: ParaManager
     @EnvironmentObject var appRootManager: AppRootManager
-    
+
     @State private var showCreateWalletSheet = false
     @State private var isRefreshing = false
     @State private var refreshError: Error?
@@ -56,7 +56,7 @@ struct WalletsView: View {
     @State private var jwtPayload: [String: Any]?
     @State private var jwtError: Error?
     @State private var isLoadingJwt = false
-    
+
     private func fetchJwt() {
         isLoadingJwt = true
         jwtError = nil
@@ -81,7 +81,7 @@ struct WalletsView: View {
             }
         }
     }
-    
+
     private func decodeJwtPayload(_ token: String) -> [String: Any]? {
         let parts = token.split(separator: ".")
         guard parts.count == 3 else { return nil }
@@ -222,6 +222,8 @@ struct WalletsView: View {
             Color(hex: "9945FF") // Solana Purple
         case .cosmos:
             Color(hex: "502D82") // Cosmic Purple
+        case .stellar:
+            Color(hex: "08B5E5") // Stellar Blue
         }
     }
     
@@ -248,6 +250,23 @@ struct WalletsView: View {
                 startPoint: .top,
                 endPoint: .bottom,
             )
+        case .stellar:
+            LinearGradient(
+                colors: [Color(hex: "08B5E5"), Color(hex: "111827")],
+                startPoint: .leading,
+                endPoint: .trailing,
+            )
+        }
+    }
+
+    private func walletAddress(for wallet: Wallet) -> String {
+        switch wallet.type {
+        case .cosmos:
+            wallet.addressSecondary ?? wallet.address ?? "unknown"
+        case .stellar:
+            wallet.stellarAddress ?? wallet.address ?? "unknown"
+        default:
+            wallet.address ?? "unknown"
         }
     }
     
@@ -260,8 +279,7 @@ struct WalletsView: View {
                 .fill(chainGradient(for: wallet.type ?? .evm))
                 .overlay(
                     VStack(alignment: .leading, spacing: 8) {
-                        let address = wallet.type == .cosmos ? (wallet.addressSecondary ?? "unknown") : (wallet.address ?? "unknown")
-                        let displayAddress = formatAddress(address)
+                        let displayAddress = formatAddress(walletAddress(for: wallet))
                         
                         Text(displayAddress)
                             .font(.system(.title3, design: .monospaced))
@@ -327,6 +345,8 @@ struct WalletsView: View {
             SolanaWalletView(selectedWallet: wallet)
         case .cosmos:
             CosmosWalletView(selectedWallet: wallet)
+        case .stellar:
+            StellarWalletView(selectedWallet: wallet)
         case .none:
             Text("Wallet type unavailable").foregroundStyle(.secondary)
         }
@@ -520,8 +540,7 @@ struct WalletsView: View {
                         .padding(.top, 24)
                     
                     VStack(spacing: 8) {
-                        // Only enable EVM for now
-                        ForEach([WalletType.evm], id: \.self) { type in
+                        ForEach([WalletType.evm, WalletType.solana, WalletType.cosmos, WalletType.stellar], id: \.self) { type in
                             Button(action: {
                                 createWallet(type: type)
                             }) {
@@ -541,7 +560,7 @@ struct WalletsView: View {
                     .padding(.horizontal)
                     .padding(.bottom, 16)
                 }
-                .presentationDetents([.height(240)])
+                .presentationDetents([.height(450)])
             }
             .alert("Refresh Failed", isPresented: $showRefreshError) {
                 Button("OK", role: .cancel) {}
@@ -622,7 +641,7 @@ struct WalletsView: View {
         "signer": "signer1",
         "publicKey": "publicKey1",
     ])
-    
+
     var solanaWallet = mockParaManager.wallets[1]
     solanaWallet = Wallet(result: [
         "id": "2",
@@ -631,7 +650,7 @@ struct WalletsView: View {
         "signer": "signer2",
         "publicKey": "publicKey2",
     ])
-    
+
     var cosmosWallet = mockParaManager.wallets[2]
     cosmosWallet = Wallet(result: [
         "id": "3",
@@ -642,8 +661,16 @@ struct WalletsView: View {
         "publicKey": "publicKey3",
     ])
     
-    mockParaManager.wallets = [evmWallet, solanaWallet, cosmosWallet]
+    let stellarWallet = Wallet(result: [
+        "id": "4",
+        "type": "STELLAR",
+        "address": "FhBpLCxutevuuZ8bnQMLSvQ6Z9tLXr6vZP5DLSbbDpGq",
+        "signer": "signer4",
+        "publicKey": "da4f143ecf1e3e0d6780c0965cb950aee498e51aa29af0acfc2e23e359a3e232",
+    ])
     
+    mockParaManager.wallets = [evmWallet, solanaWallet, cosmosWallet, stellarWallet]
+
     return WalletsView()
         .environmentObject(mockParaManager)
         .environmentObject(AppRootManager())

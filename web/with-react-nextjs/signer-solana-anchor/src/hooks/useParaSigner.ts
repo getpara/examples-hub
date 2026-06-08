@@ -1,13 +1,20 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
-import { useAccount, useClient } from "@getpara/react-sdk";
+import { Buffer } from "buffer";
+import { useAccount, useClient } from "@getpara/react-sdk-lite";
 import { ParaSolanaWeb3Signer } from "@getpara/solana-web3.js-v1-integration";
 import * as web3 from "@solana/web3.js";
 import * as anchor from "@coral-xyz/anchor";
 import { useSolana } from "./useSolana";
 
 type AnchorConnection = ConstructorParameters<typeof anchor.AnchorProvider>[0];
+
+function installBrowserBuffer() {
+  if (typeof globalThis !== "undefined" && !("Buffer" in globalThis)) {
+    (globalThis as typeof globalThis & { Buffer: typeof Buffer }).Buffer = Buffer;
+  }
+}
 
 export function useParaSigner() {
   const { isConnected } = useAccount();
@@ -50,6 +57,7 @@ export function useParaSigner() {
   useEffect(() => {
     if (isConnected && connection && client) {
       try {
+        installBrowserBuffer();
         const newSigner = new ParaSolanaWeb3Signer(client, connection);
         setSigner(newSigner);
 

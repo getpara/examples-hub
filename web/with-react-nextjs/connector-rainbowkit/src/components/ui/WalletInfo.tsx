@@ -1,17 +1,28 @@
-import { useAccount } from "wagmi";
+interface WalletInfoProps {
+  address?: string;
+}
 
-export function WalletInfo() {
-  const { address } = useAccount();
+function formatAddress(address?: string) {
+  if (!address) {
+    return "Unknown address";
+  }
 
+  return `${address.slice(0, 6)}...${address.slice(-4)}`;
+}
+
+export function WalletInfo({ address }: WalletInfoProps) {
   return (
-    <div className="mb-8 rounded-none border border-gray-200">
-      <div className="px-6 py-3 bg-gray-50 border-b border-gray-200">
-        <h3 className="text-sm font-medium text-gray-900">Connected Wallet</h3>
+    <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+      <div className="border-b border-border/60 px-6 py-4">
+        <div className="flex items-center gap-2">
+          <span className="h-2 w-2 rounded-full bg-success" />
+          <h2 className="text-sm font-semibold text-card-foreground">Connected wallet</h2>
+        </div>
       </div>
-      <div className="px-6 py-3">
-        <p className="text-sm text-gray-500">Address</p>
-        <p className="text-lg font-medium text-gray-900 font-mono" data-testid="account-address-display">
-          {address?.slice(0, 6)}...{address?.slice(-4)}
+      <div className="px-6 py-4">
+        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Address</p>
+        <p className="mt-2 break-all font-mono text-sm font-medium text-card-foreground" data-testid="account-address-display">
+          {formatAddress(address)}
         </p>
       </div>
     </div>

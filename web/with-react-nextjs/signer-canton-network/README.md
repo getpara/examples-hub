@@ -1,12 +1,12 @@
 # Signer Canton Network
 
-A Next.js example showing how to onboard a Canton Network **external party** signed by a Para-managed embedded Ed25519 key, using the React SDK and the Para Modal.
+A Next.js example showing how to onboard a Canton Network **external party** signed by a Para-managed embedded Ed25519 key, using React SDK Lite and the Para Modal.
 
 This is the React/web port of a server-side Canton + Para integration: connect through `ParaModal`, get a Para-managed Ed25519 key (provisioned as the `SOLANA` wallet type — Canton requires the same Ed25519 curve Solana uses), then run Canton's `generateExternalParty` → sign with Para → `allocateExternalParty` flow to produce a `partyId` on the Canton ledger.
 
 ## What this example shows
 
-- Setting up `ParaProvider` so the embedded Ed25519 key is available for Canton signing (`src/components/ParaProvider.tsx`).
+- Setting up `@getpara/react-sdk-lite` so the embedded Ed25519 key is available for Canton signing (`src/components/ParaProvider.tsx`).
 - Opening the Para modal via `useModal` and reading the embedded wallet via `useWallet` (`src/app/page.tsx`).
 - Signing a Canton-supplied `multiHash` with Para via `useSignMessage().signMessageAsync({ walletId, messageBase64 })` (`src/hooks/useCantonOnboarding.ts`).
 - Using Canton's generic interactive-submission API (`prepareSubmission` / `executeSubmission`) for post-onboarding ledger writes. Three flavors are demonstrated, all behind the same Para signing path: installing a `TransferPreapproval` so others can send to the party (`src/app/api/canton/preapproval/`), funding the party with test Amulet via the AmuletRules DevNet **Tap** choice (`src/app/api/canton/tap/`), and sending Amulet via token-standard `createTransfer` (`src/app/api/canton/transfer/`).
@@ -65,6 +65,7 @@ Get an API key at [developer.getpara.com](https://developer.getpara.com), then s
 | Withdraw | API Key → **On/Off Ramps → Buy Crypto & Withdraw** | Disable | Not functional for Canton. |
 | Receive | API Key → **On/Off Ramps → Receive** | Disable | Address + QR display is for EVM/Solana mainnets — Canton parties aren't reachable from those addresses. |
 | Send | API Key → **On/Off Ramps → Send** | Disable | Sends in this demo go through the in-app **Send Amulet** card, not the Para modal. |
+| Hide wallets | API Key modal UX settings | Enable | Keeps Para's internal `SOLANA` wallet type out of user-facing Canton copy. |
 
 End state of the On/Off Ramps page: **Buy Crypto, Withdraw, Receive, and Send all toggled off** — none of the modal's wallet-action tiles surface for Canton users.
 
@@ -74,7 +75,7 @@ CLI equivalent (one command for the ramp toggles; wallet types are dev-portal-on
 para keys config ramps <key-id> --no-buy-enabled --no-withdraw-enabled --no-receive-enabled --no-send-enabled
 ```
 
-The example also sets `paraModalConfig.hideWallets: true` in `src/components/ParaProvider.tsx`. That's a client-side modal config (not a dev-portal setting): it strips the remaining "Solana Wallet" branding from the modal so the account view reads as "My Account". Para provisions Canton's Ed25519 key under the `SOLANA` wallet type internally — `hideWallets` keeps that implementation detail out of user-facing copy.
+App identity, authentication methods, theme, wallet visibility, and modal wallet wording are portal-owned in v3. The example keeps only API key/environment and runtime modal behavior in `src/components/ParaProvider.tsx`.
 
 ### 2. Configure the example
 
@@ -88,10 +89,11 @@ Fill in `NEXT_PUBLIC_PARA_API_KEY` with the key from step 1. The Canton defaults
 
 ```bash
 yarn install
-yarn dev
+yarn build
+yarn start
 ```
 
-Open http://localhost:3001 and walk through:
+Open http://localhost:3000 and walk through:
 
 1. **Connect with Para** — finishes auth and provisions the embedded Ed25519 key.
 2. **Onboard as Canton external party** — runs generate → Para-sign → allocate, returns a `partyId`.
@@ -102,13 +104,21 @@ Open http://localhost:3001 and walk through:
 
 Each step prompts Para once for a signature; the full demo runs in seconds. The `partyId` is cached to `localStorage` keyed by the Para wallet address, so a refresh skips straight to step 3.
 
+For development, run:
+
+```bash
+yarn dev
+```
+
+The dev server uses http://localhost:3001.
+
 ## Project structure
 
 ```
 src/
 ├── app/
 │   ├── layout.tsx                       # Root layout with ParaProvider
-│   ├── page.tsx                         # Connect → Onboard → Preapproval → Tap → Send
+│   ├── page.tsx                         # Server page metadata and entry
 │   └── api/canton/
 │       ├── generate/route.ts            # POST → Canton generateExternalParty
 │       ├── allocate/route.ts            # POST → Canton allocateExternalParty
@@ -124,6 +134,7 @@ src/
 │       └── balance/route.ts             # POST → tokenStandard.listHoldingUtxos (read-only)
 ├── components/
 │   ├── ParaProvider.tsx                 # Para SDK + Ed25519 embedded wallets
+│   ├── CantonNetworkExample.tsx         # Connect → Onboard → Preapproval → Tap → Send
 │   ├── layout/Header.tsx
 │   └── ui/
 │       ├── ConnectCard.tsx
@@ -140,6 +151,8 @@ src/
 
 ## Production notes
 
+- This example uses `@getpara/react-sdk-lite@3.0.0` instead of the catch-all `@getpara/react-sdk` because it only needs Para modal/core hooks and does not use account abstraction, external wallet connector, EVM, Cosmos, Solana signer, Stellar, Wagmi, or Ethers helpers. `viem` remains direct because the Para v3 SDK packages use it as a peer dependency.
+- `@canton-network/wallet-sdk@0.21.1` is intentionally kept on the latest compatible 0.x line for the external-party API used here. The Canton `1.x` SDK exposes a different `SDK.create` surface and is not a drop-in replacement for this example.
 - `src/lib/canton.ts` uses `localNetAuthDefault` (shared-secret) for the localnet demo. For a hosted Canton deployment, swap the auth factory for whatever your validator expects (typically OAuth/JWT) and set `VALIDATOR_AUDIENCE` accordingly.
 - The Canton SDK is initialized once per server process and cached in `getSdk()`. The token-standard registry URL is set after `sdk.connect()` from `localNetStaticConfig.LOCALNET_REGISTRY_API_URL` by default; override with `TRANSFER_FACTORY_REGISTRY_URL` (typically your validator's `/api/validator/v0/scan-proxy`) for hosted deployments.
 - **Single-user demo caveat:** the cached SDK reuses `userLedger` and `tokenStandard` controllers across requests, and `sdk.setPartyId(partyId)` mutates them in place. Concurrent requests for different parties will race. For multi-user production serving, either build per-request controllers from the factories in `getSdk()` or wrap `setPartyId` + `prepareSubmission` + `executeSubmission` in a per-process mutex.

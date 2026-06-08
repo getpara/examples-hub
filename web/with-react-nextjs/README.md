@@ -32,15 +32,16 @@ Build your own authentication interface using Para's auth methods.
 
 Sign transactions with different libraries.
 
-| Example                    | Library         | Chain  | Live Demo                                                        |
-| -------------------------- | --------------- | ------ | ---------------------------------------------------------------- |
-| `signer-ethers-v5`         | Ethers.js v5    | EVM    | [View](https://para-example-signer-ethers-v5.vercel.app)         |
-| `signer-ethers-v6`         | Ethers.js v6    | EVM    | [View](https://para-example-signer-ethers-v6.vercel.app)         |
-| `signer-viem-v2`           | Viem v2         | EVM    | [View](https://para-example-signer-viem-v2.vercel.app)           |
-| `signer-cosmjs`            | CosmJS          | Cosmos | [View](https://para-example-signer-cosmjs.vercel.app)            |
-| `signer-solana-web3`       | @solana/web3.js | Solana | [View](https://para-example-signer-solana-web3.vercel.app)       |
-| `signer-solana-signers-v2` | @solana/signers | Solana | [View](https://para-example-signer-solana-signers-v2.vercel.app) |
-| `signer-solana-anchor`     | Anchor          | Solana | [View](https://para-example-signer-solana-anchor.vercel.app)     |
+| Example                    | Library         | Chain   | Live Demo                                                        |
+| -------------------------- | --------------- | ------- | ---------------------------------------------------------------- |
+| `signer-ethers-v5`         | Ethers.js v5    | EVM     | [View](https://para-example-signer-ethers-v5.vercel.app)         |
+| `signer-ethers-v6`         | Ethers.js v6    | EVM     | [View](https://para-example-signer-ethers-v6.vercel.app)         |
+| `signer-viem-v2`           | Viem v2         | EVM     | [View](https://para-example-signer-viem-v2.vercel.app)           |
+| `signer-cosmjs`            | CosmJS          | Cosmos  | [View](https://para-example-signer-cosmjs.vercel.app)            |
+| `signer-solana-web3`       | @solana/web3.js | Solana  | [View](https://para-example-signer-solana-web3.vercel.app)       |
+| `signer-solana-signers-v2` | @solana/signers | Solana  | [View](https://para-example-signer-solana-signers-v2.vercel.app) |
+| `signer-solana-anchor`     | Anchor          | Solana  | [View](https://para-example-signer-solana-anchor.vercel.app)     |
+| `signer-stellar-sdk`       | Stellar SDK     | Stellar | [View](https://para-example-signer-stellar-sdk.vercel.app)       |
 
 ### Wallet Connectors
 

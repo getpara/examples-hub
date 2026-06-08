@@ -1,24 +1,40 @@
 interface TxResultProps {
   signature: string;
+  explorerUrl?: string;
   label?: string;
 }
 
-export function TxResult({ signature, label = "Transaction Signature" }: TxResultProps) {
-  const explorerUrl = `https://solscan.io/tx/${signature}?cluster=devnet`;
-  const shortSig = `${signature.slice(0, 8)}...${signature.slice(-8)}`;
+const DEFAULT_EXPLORER = "https://solscan.io/tx";
+
+export function TxResult({ signature, explorerUrl, label = "Transaction Signature" }: TxResultProps) {
+  const explorer = explorerUrl || DEFAULT_EXPLORER;
 
   return (
-    <div className="p-4 bg-gray-50 border border-gray-200">
-      <p className="text-sm text-gray-600 mb-2">{label}</p>
-      <div className="flex items-center justify-between gap-4">
-        <code className="text-sm font-mono text-gray-800 break-all">{shortSig}</code>
-        <a
-          href={explorerUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-sm text-blue-600 hover:text-blue-800 whitespace-nowrap">
-          View on Solscan
-        </a>
+    <div className="mt-8 overflow-hidden rounded-2xl border border-border bg-card shadow-sm animate-fade-in">
+      <div className="border-b border-border/60 px-6 py-4">
+        <h3 className="text-sm font-semibold">{label}</h3>
+      </div>
+      <div className="space-y-4 p-6">
+        <div>
+          <p className="mb-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+            Signature
+          </p>
+          <p className="break-all rounded-xl bg-muted/60 px-4 py-3 font-mono text-xs leading-relaxed text-muted-foreground">
+            {signature}
+          </p>
+        </div>
+        <div>
+          <p className="mb-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+            Explorer Link
+          </p>
+          <a
+            href={`${explorer}/${signature}?cluster=devnet`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm font-medium text-primary underline-offset-4 hover:underline">
+            View on Solscan
+          </a>
+        </div>
       </div>
     </div>
   );

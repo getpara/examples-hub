@@ -19,7 +19,6 @@ A minimal React + Vite example demonstrating Para Modal integration with multich
 ```env
 VITE_PARA_API_KEY=your_api_key_here
 VITE_PARA_ENVIRONMENT=BETA
-VITE_WALLET_CONNECT_PROJECT_ID=your_wallet_connect_project_id
 ```
 
 2. Install dependencies and run:
@@ -50,17 +49,18 @@ src/
     └── globals.css            # Tailwind styles
 ```
 
-## Multichain Configuration
+## Developer Portal Configuration
 
-This example configures Para to work with wallets across multiple chains:
+This example expects persistent app settings to be configured on the API key in the [Para Developer Portal](https://developer.getpara.com). Set the app name, branding, logo, theme, OAuth providers, email and phone login availability, 2FA policy, modal auth layout, external wallet list, and WalletConnect project ID there.
+
+The provider keeps only runtime modal behavior in `paraModalConfig`: `onRampTestMode` and `recoverySecretStepEnabled`. It does not pass `config` or `configOverrides`, so Developer Portal settings remain the source of truth.
+
+## Multichain Connector Configuration
+
+This example wires the EVM, Cosmos, and Solana connector providers so Portal-enabled external wallets can connect across multiple chains:
 
 ```typescript
 externalWalletConfig={{
-  wallets: [
-    "METAMASK", "COINBASE", "WALLETCONNECT", "RAINBOW", "ZERION",  // EVM
-    "KEPLR", "LEAP",  // Cosmos
-    "GLOW", "PHANTOM", "BACKPACK", "SOLFLARE",  // Solana
-  ],
   evmConnector: {
     config: { chains: [mainnet, polygon, sepolia, celo] },
   },
@@ -85,7 +85,7 @@ This example uses `vite-plugin-node-polyfills` to polyfill Node.js built-ins req
 
 ```typescript
 // vite.config.ts
-import { nodePolyfills } from "vite-plugin-node-polyfills";
+import { nodePolyfills } from 'vite-plugin-node-polyfills';
 
 export default defineConfig({
   plugins: [react(), nodePolyfills(), tailwindcss()],
