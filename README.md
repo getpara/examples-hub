@@ -4,6 +4,11 @@ A collection of example applications demonstrating how to integrate `@getpara/*`
 
 > **Note:** All examples use the **2.0.0-alpha** version of `@getpara/*` SDKs.
 
+## Live Examples
+
+- **Directory:** [examples.getpara.com](https://examples.getpara.com)
+- **React + Next.js Vercel links:** [web/with-react-nextjs](web/with-react-nextjs/README.md)
+
 ## Folder Index
 
 ```
@@ -27,6 +32,7 @@ examples-hub/
 │   │   ├── signer-solana-web3    # Solana Web3.js signing
 │   │   ├── signer-solana-signers-v2  # Solana Signers v2
 │   │   ├── signer-solana-anchor  # Solana Anchor framework
+│   │   ├── signer-stellar-sdk    # Stellar SDK signing
 │   │   ├── signer-canton-network # Canton Network external party onboarding (Solana)
 │   │   ├── connector-wagmi       # Wagmi connector
 │   │   ├── connector-rainbowkit  # RainbowKit connector
@@ -40,6 +46,9 @@ examples-hub/
 │   │   ├── aa-gelato-7702        # Gelato (EIP-7702)
 │   │   ├── aa-porto-7702         # Porto (EIP-7702)
 │   │   ├── aa-rhinestone-4337    # Rhinestone (ERC-4337)
+│   │   ├── aa-safe-4337          # Safe (ERC-4337)
+│   │   ├── aa-safe-4337-recovery # Safe SocialRecoveryModule (ERC-4337)
+│   │   ├── aa-safe-4337-recovery-custom-auth # Safe recovery with custom auth UI
 │   │   └── aa-thirdweb-4337      # Thirdweb (ERC-4337)
 │   ├── with-react-vite/          # React + Vite (Para Modal)
 │   ├── with-react-tanstack-start/ # React + TanStack Start

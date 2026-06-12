@@ -15,7 +15,7 @@ Pre-built authentication modal with different chain configurations.
 | `para-modal-solana`     | Solana only                     | [View](https://para-example-para-modal-solana.vercel.app)     |
 | `para-modal-cosmos`     | Cosmos chains only              | [View](https://para-example-para-modal-cosmos.vercel.app)     |
 | `para-modal-multichain` | All chains enabled              | [View](https://para-example-para-modal-multichain.vercel.app) |
-| `para-pregen-claim`     | Claim pre-generated wallets     | —                                                             |
+| `para-pregen-claim`     | Claim pre-generated wallets     | [View](https://para-example-para-pregen-claim.vercel.app)     |
 
 ### Custom Authentication UI
 
@@ -58,17 +58,20 @@ Integrate Para as a wallet option in existing wallet connection UIs.
 
 Gasless and sponsored transactions using smart accounts.
 
-| Example              | Provider   | Standard | Live Demo                                             |
-| -------------------- | ---------- | -------- | ----------------------------------------------------- |
-| `aa-alchemy-4337`    | Alchemy    | ERC-4337 | —                                                     |
-| `aa-alchemy-7702`    | Alchemy    | EIP-7702 | —                                                     |
-| `aa-zerodev-4337`    | ZeroDev    | ERC-4337 | —                                                     |
-| `aa-zerodev-7702`    | ZeroDev    | EIP-7702 | —                                                     |
-| `aa-gelato-4337`     | Gelato     | ERC-4337 | —                                                     |
-| `aa-gelato-7702`     | Gelato     | EIP-7702 | —                                                     |
-| `aa-porto-7702`      | Porto      | EIP-7702 | [View](https://para-example-aa-porto-7702.vercel.app) |
-| `aa-rhinestone-4337` | Rhinestone | ERC-4337 | —                                                     |
-| `aa-thirdweb-4337`   | Thirdweb   | ERC-4337 | —                                                     |
+| Example                  | Provider   | Standard | Live Demo                                                                 |
+| ------------------------ | ---------- | -------- | ------------------------------------------------------------------------- |
+| `aa-alchemy-4337`        | Alchemy    | ERC-4337 | [View](https://para-example-aa-alchemy-4337.vercel.app)                   |
+| `aa-alchemy-7702`        | Alchemy    | EIP-7702 | [View](https://para-example-aa-alchemy-7702.vercel.app)                   |
+| `aa-zerodev-4337`        | ZeroDev    | ERC-4337 | [View](https://para-example-aa-zerodev-4337.vercel.app)                   |
+| `aa-zerodev-7702`        | ZeroDev    | EIP-7702 | [View](https://para-example-aa-zerodev-7702.vercel.app)                   |
+| `aa-gelato-4337`         | Gelato     | ERC-4337 | [View](https://para-example-aa-gelato-4337.vercel.app)                    |
+| `aa-gelato-7702`         | Gelato     | EIP-7702 | [View](https://para-example-aa-gelato-7702.vercel.app)                    |
+| `aa-porto-7702`          | Porto      | EIP-7702 | [View](https://para-example-aa-porto-7702.vercel.app)                     |
+| `aa-rhinestone-4337`     | Rhinestone | ERC-4337 | [View](https://para-example-aa-rhinestone-4337.vercel.app)                |
+| `aa-safe-4337`           | Safe       | ERC-4337 | [View](https://para-example-aa-safe-4337.vercel.app)                      |
+| `aa-safe-4337-recovery`  | Safe       | ERC-4337 | [View](https://para-example-aa-safe-4337-recovery.vercel.app)             |
+| `aa-safe-4337-recovery-custom-auth` | Safe | ERC-4337 | [View](https://para-example-aa-safe-4337-recovery-custom-auth.vercel.app) |
+| `aa-thirdweb-4337`       | Thirdweb   | ERC-4337 | [View](https://para-example-aa-thirdweb-4337.vercel.app)                  |
 
 ## Quick Start
 

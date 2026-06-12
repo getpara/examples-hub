@@ -1,5 +1,7 @@
 # ZeroDev Account Abstraction Example
 
+[![Live Demo](https://img.shields.io/badge/Live_Demo-black?style=for-the-badge&logo=vercel)](https://para-example-aa-zerodev-4337.vercel.app)
+
 A minimal Next.js example that uses Para with ZeroDev Kernel account abstraction to send a gas-sponsored EIP-4337 transaction on Sepolia.
 
 ## What This Example Shows

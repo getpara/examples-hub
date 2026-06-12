@@ -1,5 +1,7 @@
 # Alchemy EIP-7702 Example
 
+[![Live Demo](https://img.shields.io/badge/Live_Demo-black?style=for-the-badge&logo=vercel)](https://para-example-aa-alchemy-7702.vercel.app)
+
 A minimal Next.js example showing how to use Para with Alchemy Account Kit to delegate smart account behavior to an EOA with EIP-7702 and send a gas-sponsored transaction.
 
 ## What This Example Shows

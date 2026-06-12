@@ -1,5 +1,7 @@
 # Gelato Account Abstraction Example
 
+[![Live Demo](https://img.shields.io/badge/Live_Demo-black?style=for-the-badge&logo=vercel)](https://para-example-aa-gelato-4337.vercel.app)
+
 A minimal Next.js example showing how to use Para with Gelato smart wallets to create a smart account and send a gas-sponsored EIP-4337 transaction.
 
 ## What This Example Shows

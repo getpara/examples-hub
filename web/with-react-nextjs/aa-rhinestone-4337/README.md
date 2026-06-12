@@ -1,5 +1,7 @@
 # Rhinestone Account Abstraction Example
 
+[![Live Demo](https://img.shields.io/badge/Live_Demo-black?style=for-the-badge&logo=vercel)](https://para-example-aa-rhinestone-4337.vercel.app)
+
 A minimal Next.js example showing how to use Para with Rhinestone to create an EIP-4337 global wallet.
 
 ## What This Example Shows
