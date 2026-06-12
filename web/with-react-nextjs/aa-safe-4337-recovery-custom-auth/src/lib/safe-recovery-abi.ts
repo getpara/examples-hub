@@ -1,0 +1,133 @@
+export const safeAbi = [
+  {
+    type: "function",
+    name: "enableModule",
+    stateMutability: "nonpayable",
+    inputs: [{ name: "module", type: "address" }],
+    outputs: [],
+  },
+  {
+    type: "function",
+    name: "isModuleEnabled",
+    stateMutability: "view",
+    inputs: [{ name: "module", type: "address" }],
+    outputs: [{ name: "", type: "bool" }],
+  },
+  {
+    type: "function",
+    name: "nonce",
+    stateMutability: "view",
+    inputs: [],
+    outputs: [{ name: "", type: "uint256" }],
+  },
+  {
+    type: "function",
+    name: "getTransactionHash",
+    stateMutability: "view",
+    inputs: [
+      { name: "to", type: "address" },
+      { name: "value", type: "uint256" },
+      { name: "data", type: "bytes" },
+      { name: "operation", type: "uint8" },
+      { name: "safeTxGas", type: "uint256" },
+      { name: "baseGas", type: "uint256" },
+      { name: "gasPrice", type: "uint256" },
+      { name: "gasToken", type: "address" },
+      { name: "refundReceiver", type: "address" },
+      { name: "_nonce", type: "uint256" },
+    ],
+    outputs: [{ name: "", type: "bytes32" }],
+  },
+  {
+    type: "function",
+    name: "execTransaction",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "to", type: "address" },
+      { name: "value", type: "uint256" },
+      { name: "data", type: "bytes" },
+      { name: "operation", type: "uint8" },
+      { name: "safeTxGas", type: "uint256" },
+      { name: "baseGas", type: "uint256" },
+      { name: "gasPrice", type: "uint256" },
+      { name: "gasToken", type: "address" },
+      { name: "refundReceiver", type: "address" },
+      { name: "signatures", type: "bytes" },
+    ],
+    outputs: [{ name: "success", type: "bool" }],
+  },
+] as const;
+
+export const socialRecoveryAbi = [
+  {
+    type: "function",
+    name: "addGuardianWithThreshold",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "_guardian", type: "address" },
+      { name: "_threshold", type: "uint256" },
+    ],
+    outputs: [],
+  },
+  {
+    type: "function",
+    name: "isGuardian",
+    stateMutability: "view",
+    inputs: [
+      { name: "_wallet", type: "address" },
+      { name: "_guardian", type: "address" },
+    ],
+    outputs: [{ name: "", type: "bool" }],
+  },
+  {
+    type: "function",
+    name: "threshold",
+    stateMutability: "view",
+    inputs: [{ name: "_wallet", type: "address" }],
+    outputs: [{ name: "", type: "uint256" }],
+  },
+  {
+    type: "function",
+    name: "confirmRecovery",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "_wallet", type: "address" },
+      { name: "_newOwners", type: "address[]" },
+      { name: "_newThreshold", type: "uint256" },
+      { name: "_execute", type: "bool" },
+    ],
+    outputs: [],
+  },
+  {
+    type: "function",
+    name: "finalizeRecovery",
+    stateMutability: "nonpayable",
+    inputs: [{ name: "_wallet", type: "address" }],
+    outputs: [],
+  },
+  {
+    type: "function",
+    name: "cancelRecovery",
+    stateMutability: "nonpayable",
+    inputs: [],
+    outputs: [],
+  },
+  {
+    type: "function",
+    name: "getRecoveryRequest",
+    stateMutability: "view",
+    inputs: [{ name: "_wallet", type: "address" }],
+    outputs: [
+      {
+        name: "request",
+        type: "tuple",
+        components: [
+          { name: "guardiansApprovalCount", type: "uint256" },
+          { name: "newThreshold", type: "uint256" },
+          { name: "executeAfter", type: "uint64" },
+          { name: "newOwners", type: "address[]" },
+        ],
+      },
+    ],
+  },
+] as const;

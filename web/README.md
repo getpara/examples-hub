@@ -2,6 +2,10 @@
 
 Browser-based web application examples using `@getpara/react-sdk` and `@getpara/web-sdk`.
 
+## Live Examples
+
+React + Next.js deployed examples are listed with their Vercel URLs in [with-react-nextjs](with-react-nextjs/README.md). The full examples directory is available at [examples.getpara.com](https://examples.getpara.com).
+
 ## Folder Structure
 
 ```
@@ -30,6 +34,8 @@ web/
 │   ├── signer-solana-web3       # Sign with @solana/web3.js
 │   ├── signer-solana-signers-v2 # Sign with @solana/signers
 │   ├── signer-solana-anchor     # Sign with Anchor framework
+│   ├── signer-stellar-sdk       # Sign with Stellar SDK
+│   ├── signer-canton-network    # Canton Network external party onboarding
 │   │
 │   │── Wallet Connectors
 │   ├── connector-wagmi          # Wagmi integration
@@ -46,6 +52,9 @@ web/
 │   ├── aa-gelato-7702           # Gelato (EIP-7702)
 │   ├── aa-porto-7702            # Porto (EIP-7702)
 │   ├── aa-rhinestone-4337       # Rhinestone (ERC-4337)
+│   ├── aa-safe-4337             # Safe (ERC-4337)
+│   ├── aa-safe-4337-recovery    # Safe recovery guardian
+│   ├── aa-safe-4337-recovery-custom-auth # Safe recovery with custom auth UI
 │   └── aa-thirdweb-4337         # Thirdweb (ERC-4337)
 │
 ├── with-react-vite/             # React + Vite starter

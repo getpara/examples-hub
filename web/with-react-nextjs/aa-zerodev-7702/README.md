@@ -1,5 +1,7 @@
 # ZeroDev EIP-7702 Example
 
+[![Live Demo](https://img.shields.io/badge/Live_Demo-black?style=for-the-badge&logo=vercel)](https://para-example-aa-zerodev-7702.vercel.app)
+
 A minimal Next.js example that uses Para with ZeroDev to send a gas-sponsored EIP-7702 transaction on Sepolia.
 
 ## What This Example Shows

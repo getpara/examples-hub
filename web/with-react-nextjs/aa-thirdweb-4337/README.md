@@ -1,5 +1,7 @@
 # Thirdweb Account Abstraction Example
 
+[![Live Demo](https://img.shields.io/badge/Live_Demo-black?style=for-the-badge&logo=vercel)](https://para-example-aa-thirdweb-4337.vercel.app)
+
 A minimal Next.js example that uses Para as the signer for a Thirdweb EIP-4337 smart account and sends a gas-sponsored transaction on Sepolia.
 
 ## What This Example Shows

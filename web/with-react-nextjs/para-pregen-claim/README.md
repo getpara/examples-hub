@@ -1,5 +1,7 @@
 # Para Pregen Claim
 
+[![Live Demo](https://img.shields.io/badge/Live_Demo-black?style=for-the-badge&logo=vercel)](https://para-example-para-pregen-claim.vercel.app)
+
 A Next.js example showing a UUID-to-email pregen wallet claim flow with post-claim private key export.
 
 The app creates a pregen EVM wallet with a random `customId` UUID, encrypts and stores the user share with an app-owned email mapping, then upgrades the Para pregen identifier from UUID to email during authentication so the SDK can preload and claim the wallet.
