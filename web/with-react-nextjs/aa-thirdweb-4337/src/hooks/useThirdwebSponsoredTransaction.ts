@@ -7,6 +7,8 @@ import { createWalletClient, http, type Hash } from "viem";
 import { thirdwebClient, THIRDWEB_CHAIN, VIEM_CHAIN } from "@/lib/thirdweb";
 
 const BURN_ADDRESS = "0x000000000000000000000000000000000000dEaD" as const;
+const THIRDWEB_CLIENT_ID_ERROR =
+  "NEXT_PUBLIC_THIRDWEB_CLIENT_ID is not configured. Add it to your environment to use Thirdweb features.";
 type ThirdwebWalletClient = Parameters<typeof viemAdapter.walletClient.fromViem>[0]["walletClient"];
 
 interface UseThirdwebSponsoredTransactionOptions {
@@ -56,6 +58,18 @@ export function useThirdwebSponsoredTransaction({
       };
     }
 
+    const client = thirdwebClient;
+
+    if (!client) {
+      setSmartAccount(null);
+      setSmartAccountAddress(null);
+      setAccountError(new Error(THIRDWEB_CLIENT_ID_ERROR));
+      setIsConnectingSmartAccount(false);
+      return () => {
+        isCurrent = false;
+      };
+    }
+
     const connectSmartAccount = async () => {
       setIsConnectingSmartAccount(true);
       setAccountError(null);
@@ -70,7 +84,7 @@ export function useThirdwebSponsoredTransaction({
           walletClient: walletClient as unknown as ThirdwebWalletClient,
         });
         const account = await wallet.connect({
-          client: thirdwebClient,
+          client,
           personalAccount,
         });
 
@@ -103,6 +117,13 @@ export function useThirdwebSponsoredTransaction({
   }, [enabled, viemAccount, wallet]);
 
   const sendSponsoredTransaction = useCallback(async () => {
+    const client = thirdwebClient;
+
+    if (!client) {
+      setTransactionError(new Error(THIRDWEB_CLIENT_ID_ERROR));
+      return;
+    }
+
     if (!smartAccount) {
       setTransactionError(new Error("Thirdweb smart account is not ready yet."));
       return;
@@ -114,7 +135,7 @@ export function useThirdwebSponsoredTransaction({
 
     try {
       const transaction = prepareTransaction({
-        client: thirdwebClient,
+        client,
         chain: THIRDWEB_CHAIN,
         to: BURN_ADDRESS,
         value: BigInt(0),
@@ -141,7 +162,8 @@ export function useThirdwebSponsoredTransaction({
     transactionError,
     isAccountLoading,
     isSendingTransaction,
-    canSendTransaction: enabled && Boolean(smartAccount) && !isAccountLoading && !isSendingTransaction,
+    canSendTransaction:
+      enabled && Boolean(thirdwebClient) && Boolean(smartAccount) && !isAccountLoading && !isSendingTransaction,
     sendSponsoredTransaction,
   };
 }
