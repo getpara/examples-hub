@@ -592,14 +592,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@getpara/core-sdk@npm:3.1.0":
-  version: 3.1.0
-  resolution: "@getpara/core-sdk@npm:3.1.0"
+"@getpara/core-sdk@npm:3.2.0":
+  version: 3.2.0
+  resolution: "@getpara/core-sdk@npm:3.2.0"
   dependencies:
     "@celo/utils": "npm:^8.0.2"
     "@cosmjs/encoding": "npm:^0.32.4"
     "@ethereumjs/util": "npm:^9.1.0"
-    "@getpara/user-management-client": "npm:3.1.0"
+    "@getpara/user-management-client": "npm:3.2.0"
     "@noble/hashes": "npm:^1.5.0"
     "@opentelemetry/api": "npm:^1.9.1"
     "@opentelemetry/context-zone": "npm:^2.7.1"
@@ -619,25 +619,25 @@ __metadata:
     node-forge: "npm:^1.3.1"
     uuid: "npm:^11.1.0"
     xstate: "npm:^5.24.0"
-  checksum: 10c0/46ed700255105bee93652a0b9c2ad2ac7071c7e2ebab53a876c0b3e7d26ec8ba86f0647a4a2b98c4a2e38906dff400e00e02e6f4adbb03e7e247c67667f80894
+  checksum: 10c0/3da06f41e18ac5e1eede44987aab6beaf5c6cffb088517b319f7b3dbf3be3fad304393d9cb57320fc68a970753bf9cd4e19cca6373744aa34bbf61c7cec708a3
   languageName: node
   linkType: hard
 
-"@getpara/react-common@npm:3.1.0":
-  version: 3.1.0
-  resolution: "@getpara/react-common@npm:3.1.0"
+"@getpara/react-common@npm:3.2.0":
+  version: 3.2.0
+  resolution: "@getpara/react-common@npm:3.2.0"
   dependencies:
-    "@getpara/web-sdk": "npm:3.1.0"
+    "@getpara/web-sdk": "npm:3.2.0"
   peerDependencies:
     react: ">=18"
     react-dom: ">=18"
-  checksum: 10c0/19d8b0186cdaffcb36db6f009c4544fcaad8bd84caa773410051e53b5838da9000866eab10649e6a4b9da9091323bbaca08fe5f0ef14341a1b02d1fd2ba1e3b0
+  checksum: 10c0/3a29967c26d98bf9b69e132751cc420269de7e51d5d5e9eff5c7b3d7eeff603cce38656f3ee091f111b6ee97825a5d699125a3987775aa35260315be3089726e
   languageName: node
   linkType: hard
 
-"@getpara/react-component-library@npm:3.1.0":
-  version: 3.1.0
-  resolution: "@getpara/react-component-library@npm:3.1.0"
+"@getpara/react-component-library@npm:3.2.0":
+  version: 3.2.0
+  resolution: "@getpara/react-component-library@npm:3.2.0"
   dependencies:
     "@radix-ui/react-avatar": "npm:^1.1.2"
     "@radix-ui/react-checkbox": "npm:^1.3.3"
@@ -675,15 +675,15 @@ __metadata:
   peerDependencies:
     react: ">=18"
     react-dom: ">=18"
-  checksum: 10c0/a245a43313cee7c7ac50d19df749cf30295d300015e423bddaa300759be944d39cdafefeac6e4b5ffe7caa70a585bcda5e5659e85c2a1483f849b499a4523d99
+  checksum: 10c0/4fe2ff37b882c2b16671e7b0766f1a4436be7f7855d1cf8119c24840bfe46d276e81b5ac4036abbc6006fece7889583694213eaf862c699a7caea253642a7ddb
   languageName: node
   linkType: hard
 
-"@getpara/react-core@npm:3.1.0":
-  version: 3.1.0
-  resolution: "@getpara/react-core@npm:3.1.0"
+"@getpara/react-core@npm:3.2.0":
+  version: 3.2.0
+  resolution: "@getpara/react-core@npm:3.2.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.1.0"
+    "@getpara/core-sdk": "npm:3.2.0"
     zustand: "npm:^5.0.0"
   peerDependencies:
     "@getpara/cosmjs-v0-integration": ">=2"
@@ -705,18 +705,18 @@ __metadata:
       optional: true
     "@getpara/viem-v2-integration":
       optional: true
-  checksum: 10c0/3a94a11693ae7dfc51aff950ef72451c8a4a7ba488e69ac7808257ad597c31e8e0ff18b65ae614e9278e26888b9955c3a9bc210ae1f95cf7f3872d5780c750fd
+  checksum: 10c0/21b0564f00678e138199d446c3af66c60f45ebbcc8f83208f4ad71634e889adfe3afb0dc44733a3ed1e6743c62783c1a5ca7e4ec4ab422d4cfaf60d25eb78d0a
   languageName: node
   linkType: hard
 
-"@getpara/react-sdk-lite@npm:3.1.0":
-  version: 3.1.0
-  resolution: "@getpara/react-sdk-lite@npm:3.1.0"
+"@getpara/react-sdk-lite@npm:3.2.0":
+  version: 3.2.0
+  resolution: "@getpara/react-sdk-lite@npm:3.2.0"
   dependencies:
-    "@getpara/react-common": "npm:3.1.0"
-    "@getpara/react-component-library": "npm:3.1.0"
-    "@getpara/react-core": "npm:3.1.0"
-    "@getpara/web-sdk": "npm:3.1.0"
+    "@getpara/react-common": "npm:3.2.0"
+    "@getpara/react-component-library": "npm:3.2.0"
+    "@getpara/react-core": "npm:3.2.0"
+    "@getpara/web-sdk": "npm:3.2.0"
     date-fns: "npm:^3.6.0"
     detect-browser: "npm:^5.3.0"
     framer-motion: "npm:^11.3.31"
@@ -765,7 +765,7 @@ __metadata:
       optional: true
   bin:
     setup-para: dist/cli/cli.mjs
-  checksum: 10c0/f6a16698b67a26f453a4ac49eb2e14be61a2c743bc693fb798297b81823bf6e6e5d13759be66ddf899f0461a13a27d0782959baec1f2710f9c45c3fb3f568195
+  checksum: 10c0/09ea73b6c50388b4ce28520117ca1d80931e55ba03dbf173114c67f9a10d8abeb5955e8be974272c5f77a904080479b8651a251a7f7c99a50b3a413c768ff832
   languageName: node
   linkType: hard
 
@@ -776,12 +776,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@getpara/solana-wallet-connectors@npm:3.1.0":
-  version: 3.1.0
-  resolution: "@getpara/solana-wallet-connectors@npm:3.1.0"
+"@getpara/solana-wallet-connectors@npm:3.2.0":
+  version: 3.2.0
+  resolution: "@getpara/solana-wallet-connectors@npm:3.2.0"
   dependencies:
-    "@getpara/react-common": "npm:3.1.0"
-    "@getpara/web-sdk": "npm:3.1.0"
+    "@getpara/react-common": "npm:3.2.0"
+    "@getpara/web-sdk": "npm:3.2.0"
     bs58: "npm:^6.0.0"
   peerDependencies:
     "@farcaster/mini-app-solana": ^1.0.5
@@ -794,40 +794,40 @@ __metadata:
   peerDependenciesMeta:
     "@farcaster/mini-app-solana":
       optional: true
-  checksum: 10c0/b1e6389d6a31f174ee5e2c1355688149ad7aa4a11c3c50d88d77a9eb08769db9bc3be3a5d327505194faa2ab06557ff6e5f20220d710d4baf49d47db602d699d
+  checksum: 10c0/5c1072b553b2248a20981730cc8da83a453ae280d23890c4f19a293590a24d6f5534a89186443afdf5ac9f11b63e34890103efbbdd5916a75c34611a9054e8e7
   languageName: node
   linkType: hard
 
-"@getpara/solana-web3.js-v1-integration@npm:3.1.0":
-  version: 3.1.0
-  resolution: "@getpara/solana-web3.js-v1-integration@npm:3.1.0"
+"@getpara/solana-web3.js-v1-integration@npm:3.2.0":
+  version: 3.2.0
+  resolution: "@getpara/solana-web3.js-v1-integration@npm:3.2.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.1.0"
+    "@getpara/core-sdk": "npm:3.2.0"
   peerDependencies:
     "@solana/web3.js": ^1.98.0
-  checksum: 10c0/1385847d0b9be5969ebb5de78ef3fecec6cf532e59b3dfb464054873867abca48b89b2b681e38f27aa8015db8cb770c86539f85502ede51051e2d6f770ac3639
+  checksum: 10c0/fead20365dc4b5de36eec420386c0f52a96cae24daf0e2be8c51ad9f28a4af8150d5db329dd2f30dda9919167da3670024f942cdbc8fd26485ab7d98c29e8f50
   languageName: node
   linkType: hard
 
-"@getpara/user-management-client@npm:3.1.0":
-  version: 3.1.0
-  resolution: "@getpara/user-management-client@npm:3.1.0"
+"@getpara/user-management-client@npm:3.2.0":
+  version: 3.2.0
+  resolution: "@getpara/user-management-client@npm:3.2.0"
   dependencies:
     "@getpara/shared": "npm:^1.21.0"
     "@opentelemetry/api": "npm:^1.9.1"
     axios: "npm:^1.8.4"
     axios-retry: "npm:^4.5.0"
     libphonenumber-js: "npm:^1.11.7"
-  checksum: 10c0/075ff3b4b600ea6edafdc83bb9ef140184e738badd1ec07ec7f6038b32611d8753fd2004a6c96f553b2ceb63db6d319203a7b3c475d080c6c03f5c05e4c40421
+  checksum: 10c0/9e337b18ad44c397686d38a3b2b75d89667961207dcbb7be5038849bcf0e67537de6b3b52302364c56e41c2afc59f5ed8053321c819d0c584ca1c3e65714b830
   languageName: node
   linkType: hard
 
-"@getpara/web-sdk@npm:3.1.0":
-  version: 3.1.0
-  resolution: "@getpara/web-sdk@npm:3.1.0"
+"@getpara/web-sdk@npm:3.2.0":
+  version: 3.2.0
+  resolution: "@getpara/web-sdk@npm:3.2.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.1.0"
-    "@getpara/user-management-client": "npm:3.1.0"
+    "@getpara/core-sdk": "npm:3.2.0"
+    "@getpara/user-management-client": "npm:3.2.0"
     "@opentelemetry/api": "npm:^1.9.1"
     base64url: "npm:^3.0.1"
     buffer: "npm:6.0.3"
@@ -840,7 +840,7 @@ __metadata:
   peerDependenciesMeta:
     "@farcaster/miniapp-sdk":
       optional: true
-  checksum: 10c0/bbe23094fd6d56184e2f617f86451dd7ceba85d04d00580f251af116c266e346b25377a93b45fa07d2edc0cdf86e1283247b059152e702b005bbf0cdb19b0e02
+  checksum: 10c0/3b0a8882a6be2212bf5d7302fabbdfdba39d0fba3e14f9d1ab36294e39d5ad3ef4e59848ba61bbec31efae07bb90c4faa473d6197555e40e504c896c39f41805
   languageName: node
   linkType: hard
 
@@ -8556,9 +8556,9 @@ __metadata:
     "@eslint/js": "npm:10.0.1"
     "@farcaster/mini-app-solana": "npm:1.1.3"
     "@farcaster/miniapp-sdk": "npm:0.3.0"
-    "@getpara/react-sdk-lite": "npm:3.1.0"
-    "@getpara/solana-wallet-connectors": "npm:3.1.0"
-    "@getpara/solana-web3.js-v1-integration": "npm:3.1.0"
+    "@getpara/react-sdk-lite": "npm:3.2.0"
+    "@getpara/solana-wallet-connectors": "npm:3.2.0"
+    "@getpara/solana-web3.js-v1-integration": "npm:3.2.0"
     "@solana-mobile/wallet-adapter-mobile": "npm:2.2.9"
     "@solana/wallet-adapter-base": "npm:0.9.27"
     "@solana/wallet-adapter-react": "npm:0.15.39"

@@ -10,6 +10,8 @@ if (!THIRDWEB_CLIENT_ID) {
   console.warn("NEXT_PUBLIC_THIRDWEB_CLIENT_ID is not set. Thirdweb features will not work.");
 }
 
-export const thirdwebClient = createThirdwebClient({
-  clientId: THIRDWEB_CLIENT_ID,
-});
+export const thirdwebClient = THIRDWEB_CLIENT_ID
+  ? createThirdwebClient({
+      clientId: THIRDWEB_CLIENT_ID,
+    })
+  : null;
