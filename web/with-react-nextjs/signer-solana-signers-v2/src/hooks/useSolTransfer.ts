@@ -11,11 +11,25 @@ import {
   lamports,
   Signature,
 } from "@solana/kit";
-import { compileTransaction, getBase64EncodedWireTransaction } from "@solana/transactions";
+import {
+  compileTransaction,
+  getBase64EncodedWireTransaction,
+} from "@solana/transactions";
 import { getTransferSolInstruction } from "@solana-program/system";
 import { useParaSigner } from "./useParaSigner";
 
 const LAMPORTS_PER_SOL = BigInt(1000000000);
+
+function parseSolToLamports(amount: string): bigint | null {
+  const trimmed = amount.trim();
+  if (!/^\d+(?:\.\d{1,9})?$/.test(trimmed)) return null;
+
+  const [whole, fractional = ""] = trimmed.split(".");
+  const lamports =
+    BigInt(whole) * LAMPORTS_PER_SOL + BigInt(fractional.padEnd(9, "0"));
+
+  return lamports > BigInt(0) ? lamports : null;
+}
 
 export function useSolTransfer() {
   const { signer, rpc, isReady } = useParaSigner();
@@ -27,7 +41,9 @@ export function useSolTransfer() {
   const sendTransaction = useCallback(
     async (to: string, amount: string) => {
       if (!signer || !rpc || !isReady) {
-        setError(new Error("Signer not initialized. Please connect your wallet."));
+        setError(
+          new Error("Signer not initialized. Please connect your wallet."),
+        );
         return;
       }
 
@@ -36,8 +52,8 @@ export function useSolTransfer() {
         return;
       }
 
-      const amountFloat = parseFloat(amount);
-      if (isNaN(amountFloat) || amountFloat <= 0) {
+      const amountLamports = parseSolToLamports(amount);
+      if (amountLamports === null) {
         setError(new Error("Please enter a valid amount greater than 0."));
         return;
       }
@@ -50,15 +66,18 @@ export function useSolTransfer() {
         // Validate balance
         const balanceResponse = await rpc.getBalance(signer.address).send();
         const balanceLamports = balanceResponse.value;
-        const amountLamports = parseFloat(amount) * Number(LAMPORTS_PER_SOL);
-        const estimatedFee = 5000;
+        const estimatedFee = BigInt(5000);
         const totalCost = amountLamports + estimatedFee;
 
-        if (totalCost > Number(balanceLamports)) {
-          const requiredSol = (totalCost / Number(LAMPORTS_PER_SOL)).toFixed(4);
-          const availableSol = (Number(balanceLamports) / Number(LAMPORTS_PER_SOL)).toFixed(4);
+        if (totalCost > balanceLamports) {
+          const requiredSol = (
+            Number(totalCost) / Number(LAMPORTS_PER_SOL)
+          ).toFixed(4);
+          const availableSol = (
+            Number(balanceLamports) / Number(LAMPORTS_PER_SOL)
+          ).toFixed(4);
           throw new Error(
-            `Insufficient balance. Transaction requires approximately ${requiredSol} SOL, but you have only ${availableSol} SOL available.`
+            `Insufficient balance. Transaction requires approximately ${requiredSol} SOL, but you have only ${availableSol} SOL available.`,
           );
         }
 
@@ -69,14 +88,18 @@ export function useSolTransfer() {
         const transferInstruction = getTransferSolInstruction({
           source: signer,
           destination: to as Address,
-          amount: lamports(BigInt(Math.floor(amountFloat * Number(LAMPORTS_PER_SOL)))),
+          amount: lamports(amountLamports),
         });
 
         const transactionMessage = pipe(
           createTransactionMessage({ version: "legacy" }),
           (tx) => setTransactionMessageFeePayer(signer.address, tx),
-          (tx) => setTransactionMessageLifetimeUsingBlockhash({ blockhash, lastValidBlockHeight }, tx),
-          (tx) => appendTransactionMessageInstruction(transferInstruction, tx)
+          (tx) =>
+            setTransactionMessageLifetimeUsingBlockhash(
+              { blockhash, lastValidBlockHeight },
+              tx,
+            ),
+          (tx) => appendTransactionMessageInstruction(transferInstruction, tx),
         );
 
         const tx = compileTransaction(transactionMessage);
@@ -117,12 +140,16 @@ export function useSolTransfer() {
         }
       } catch (err) {
         console.error("Error sending transaction:", err);
-        setError(err instanceof Error ? err : new Error("Failed to send transaction. Please try again."));
+        setError(
+          err instanceof Error
+            ? err
+            : new Error("Failed to send transaction. Please try again."),
+        );
       } finally {
         setIsLoading(false);
       }
     },
-    [signer, rpc, isReady]
+    [signer, rpc, isReady],
   );
 
   const reset = useCallback(() => {
