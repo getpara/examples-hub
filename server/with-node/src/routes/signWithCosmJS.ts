@@ -9,6 +9,8 @@ import { decrypt } from "../utils/encryption-utils.js";
 export async function cosmjsPregenSignHandler(req: Request, res: Response): Promise<void> {
   const PARA_API_KEY = process.env.PARA_API_KEY;
   const PARA_ENVIRONMENT = (process.env.PARA_ENVIRONMENT as Environment) || Environment.BETA;
+  // Cosmos Hub RPC; override with COSMOS_RPC_URL if desired.
+  const COSMOS_RPC_URL = process.env.COSMOS_RPC_URL || "https://cosmos-rpc.publicnode.com";
 
   try {
     if (!PARA_API_KEY) {
@@ -55,7 +57,7 @@ export async function cosmjsPregenSignHandler(req: Request, res: Response): Prom
 
     console.log("Connecting to Cosmos RPC...");
     const stargateClient = await SigningStargateClient.connectWithSigner(
-      "https://rpc.cosmos.directory/cosmoshub",
+      COSMOS_RPC_URL,
       paraProtoSigner
     );
     console.log("Connected to Cosmos RPC");

@@ -5,11 +5,12 @@ import { decrypt } from "../utils/encryption-utils.js";
 import { ParaSolanaWeb3Signer } from "@getpara/solana-web3.js-v1-integration";
 import { Connection, Transaction, SystemProgram, LAMPORTS_PER_SOL } from "@solana/web3.js";
 
-const ALCHEMY_SOLANA_TESTNET_RPC_URL = 'https://api.testnet.solana.com';
-
 export async function solanaPregenSignHandler(req: Request, res: Response): Promise<void> {
   const PARA_API_KEY = process.env.PARA_API_KEY;
   const PARA_ENVIRONMENT = (process.env.PARA_ENVIRONMENT as Environment) || Environment.BETA;
+  // Only used to fetch a recent blockhash for the demo transaction, which is
+  // signed but never broadcast. Override with SOLANA_RPC_URL if desired.
+  const SOLANA_RPC_URL = process.env.SOLANA_RPC_URL || "https://solana-testnet-rpc.publicnode.com";
   try {
     const email = req.body.email as string | undefined;
 
@@ -39,7 +40,7 @@ export async function solanaPregenSignHandler(req: Request, res: Response): Prom
     const decryptedKeyShare = await decrypt(keyShare);
     await para.setUserShare(decryptedKeyShare);
 
-    const connection = new Connection(ALCHEMY_SOLANA_TESTNET_RPC_URL);
+    const connection = new Connection(SOLANA_RPC_URL);
     const solanaSigner = new ParaSolanaWeb3Signer(para, connection);
 
     if (!solanaSigner.sender) {
