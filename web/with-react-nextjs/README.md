@@ -27,6 +27,7 @@ Build your own authentication interface using Para's auth methods.
 | `custom-phone-auth`    | Phone/SMS authentication              | [View](https://para-example-custom-phone-auth.vercel.app)    |
 | `custom-oauth-auth`    | OAuth providers (Google, Apple, etc.) | [View](https://para-example-custom-oauth-auth.vercel.app)    |
 | `custom-combined-auth` | Multiple auth methods in one UI       | [View](https://para-example-custom-combined-auth.vercel.app) |
+| `custom-oidc-auth`     | Custom OIDC via web-sdk (no provider) | [View](https://para-example-custom-oidc-auth.vercel.app)     |
 
 ### Blockchain Signers
 
