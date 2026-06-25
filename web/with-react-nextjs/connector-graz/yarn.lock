@@ -1118,14 +1118,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@getpara/core-sdk@npm:3.3.0":
-  version: 3.3.0
-  resolution: "@getpara/core-sdk@npm:3.3.0"
+"@getpara/core-sdk@npm:3.4.0":
+  version: 3.4.0
+  resolution: "@getpara/core-sdk@npm:3.4.0"
   dependencies:
     "@celo/utils": "npm:^8.0.2"
     "@cosmjs/encoding": "npm:^0.32.4"
     "@ethereumjs/util": "npm:^9.1.0"
-    "@getpara/user-management-client": "npm:3.3.0"
+    "@getpara/user-management-client": "npm:3.4.0"
     "@noble/hashes": "npm:^1.5.0"
     "@opentelemetry/api": "npm:^1.9.1"
     "@opentelemetry/context-zone": "npm:^2.7.1"
@@ -1145,30 +1145,30 @@ __metadata:
     node-forge: "npm:^1.3.1"
     uuid: "npm:^11.1.0"
     xstate: "npm:^5.24.0"
-  checksum: 10c0/b6e8f7d1fb61921d5c406d07cf4a1f7fed9311d402865ec9eb57a9aa5f83c3ecc4149ff2ef999b7bc0bf673bd45b94fb4502f857061b263225246174ddcb1210
+  checksum: 10c0/ce72b37ee471517c2fc1f8d5b556d288e286b8e97a047d24ba71d0adf1e86035e3b0cf1aa029ca933b6d92cbbfd803f2e52065b21503d8144242adab462535e8
   languageName: node
   linkType: hard
 
-"@getpara/cosmjs-v0-integration@npm:3.3.0":
-  version: 3.3.0
-  resolution: "@getpara/cosmjs-v0-integration@npm:3.3.0"
+"@getpara/cosmjs-v0-integration@npm:3.4.0":
+  version: 3.4.0
+  resolution: "@getpara/cosmjs-v0-integration@npm:3.4.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.3.0"
+    "@getpara/core-sdk": "npm:3.4.0"
   peerDependencies:
     "@cosmjs/amino": ^0.32.4
     "@cosmjs/encoding": ^0.32.4
     "@cosmjs/proto-signing": ^0.32.4
     "@cosmjs/stargate": ^0.32.4
-  checksum: 10c0/ec505c209c368a6b357820ef2fb84281baf8a92ef389917f911f63559d4654f3a04778d44671df306a64c5036caae6fbc98997866feb8098e61e4dce9c540763
+  checksum: 10c0/07a9ea9623af2b5b5ec1414e87b48708325cc940e7c0f22916fc83b0da0172740be0301b890b83791582f8eef01f57b452555af10d3c4cf2730425da3d61de3a
   languageName: node
   linkType: hard
 
-"@getpara/graz-connector@npm:3.3.0":
-  version: 3.3.0
-  resolution: "@getpara/graz-connector@npm:3.3.0"
+"@getpara/graz-connector@npm:3.4.0":
+  version: 3.4.0
+  resolution: "@getpara/graz-connector@npm:3.4.0"
   dependencies:
-    "@getpara/cosmjs-v0-integration": "npm:3.3.0"
-    "@getpara/web-sdk": "npm:3.3.0"
+    "@getpara/cosmjs-v0-integration": "npm:3.4.0"
+    "@getpara/web-sdk": "npm:3.4.0"
   peerDependencies:
     "@cosmjs/amino": ^0.32.4
     "@cosmjs/encoding": ^0.32.4
@@ -1178,40 +1178,40 @@ __metadata:
     "@keplr-wallet/types": ">=0.12.156"
     cosmjs-types: ^0.9.0
     graz: ">=0.4.1"
-  checksum: 10c0/939b1f84ca5a42dbb046d66b9d75d71cbf829a9a72ab048d22a56c95ba822ef936f913e5a149b3842546694e787371b65ec6e5bea8d3c02585fabbce3565073c
+  checksum: 10c0/cbffcff7df3cfb79d0a08b56b44853f1e64eaad34f48c961031d8620f01f55d4f27652458628ccfca84a876321b3e58e672d883afb0d3ed93ec864d28d544421
   languageName: node
   linkType: hard
 
-"@getpara/graz-integration@npm:3.3.0":
-  version: 3.3.0
-  resolution: "@getpara/graz-integration@npm:3.3.0"
+"@getpara/graz-integration@npm:3.4.0":
+  version: 3.4.0
+  resolution: "@getpara/graz-integration@npm:3.4.0"
   dependencies:
-    "@getpara/graz-connector": "npm:3.3.0"
+    "@getpara/graz-connector": "npm:3.4.0"
   peerDependencies:
     "@getpara/react-sdk-lite": ">=3"
     "@tanstack/react-query": ^5.74.0
     graz: ">=0.4.1"
     react: ">=18"
     react-dom: ">=18"
-  checksum: 10c0/8523a66a4c05c8ae3187d96e56a3f4f6118628f21df5a24d11ba9b5e0a4b9b84711abbdc280c7bb3999db2db17ad5711dc06612c77966e5b92309c7ebb32aad4
+  checksum: 10c0/9a21a25554e3a7743b1c8bbf81259f4929a08e13d73cc6c1356952bc8b932e8e74c3227d4ec928db3c0f06d5fce3b5f9f7a4a49a30ccf889f56f068b3362296c
   languageName: node
   linkType: hard
 
-"@getpara/react-common@npm:3.3.0":
-  version: 3.3.0
-  resolution: "@getpara/react-common@npm:3.3.0"
+"@getpara/react-common@npm:3.4.0":
+  version: 3.4.0
+  resolution: "@getpara/react-common@npm:3.4.0"
   dependencies:
-    "@getpara/web-sdk": "npm:3.3.0"
+    "@getpara/web-sdk": "npm:3.4.0"
   peerDependencies:
     react: ">=18"
     react-dom: ">=18"
-  checksum: 10c0/f14c7dc1418c87bd4c3be9373200043358085b6c568730619d1c9dc8886474caa9adb6256c88057a301fc5d4cee63f13c2163c9f9203ee5864a800b6edd571f8
+  checksum: 10c0/576a3104af62897236bcae44832b5638ee93e06e31bcc03c693468821886b801156ab93861a308c470064bc1979bb07ef1d537e536a77b649659a986f9d02130
   languageName: node
   linkType: hard
 
-"@getpara/react-component-library@npm:3.3.0":
-  version: 3.3.0
-  resolution: "@getpara/react-component-library@npm:3.3.0"
+"@getpara/react-component-library@npm:3.4.0":
+  version: 3.4.0
+  resolution: "@getpara/react-component-library@npm:3.4.0"
   dependencies:
     "@radix-ui/react-avatar": "npm:^1.1.2"
     "@radix-ui/react-checkbox": "npm:^1.3.3"
@@ -1249,15 +1249,15 @@ __metadata:
   peerDependencies:
     react: ">=18"
     react-dom: ">=18"
-  checksum: 10c0/87f0419e59148594b12ff33a15ab448e1cdfe37dcaab961d574f931034082230fd1e1d7793c43c67fa558e95ca0bfd955ce8c4a96e4e2e0402ad2b5f67422fff
+  checksum: 10c0/8fe9f829572f694c90ffa1ee1de54cfa2f257832982ed880aa83f559c85b407bcb43ebcc254b5f0368c10bac1028025b9fed839918ac598d0baa5e520ee42fb7
   languageName: node
   linkType: hard
 
-"@getpara/react-core@npm:3.3.0":
-  version: 3.3.0
-  resolution: "@getpara/react-core@npm:3.3.0"
+"@getpara/react-core@npm:3.4.0":
+  version: 3.4.0
+  resolution: "@getpara/react-core@npm:3.4.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.3.0"
+    "@getpara/core-sdk": "npm:3.4.0"
     zustand: "npm:^5.0.0"
   peerDependencies:
     "@getpara/cosmjs-v0-integration": ">=2"
@@ -1279,18 +1279,18 @@ __metadata:
       optional: true
     "@getpara/viem-v2-integration":
       optional: true
-  checksum: 10c0/4a83a74e46b9ab468caa4e002b7978855b554c159c471484f74061749125f7f37efac6d1de9530743257df7d6592222e8d7f25f8f79cac5b8832ed3b2350fdd7
+  checksum: 10c0/1322551a786d96652524e4bbf4b95f07ff8255e1dba9fa5ae41cea473aa593999022aa727177912c81d0022ff7ddda12c58475df07c4a94307042222505e8c0a
   languageName: node
   linkType: hard
 
-"@getpara/react-sdk-lite@npm:3.3.0":
-  version: 3.3.0
-  resolution: "@getpara/react-sdk-lite@npm:3.3.0"
+"@getpara/react-sdk-lite@npm:3.4.0":
+  version: 3.4.0
+  resolution: "@getpara/react-sdk-lite@npm:3.4.0"
   dependencies:
-    "@getpara/react-common": "npm:3.3.0"
-    "@getpara/react-component-library": "npm:3.3.0"
-    "@getpara/react-core": "npm:3.3.0"
-    "@getpara/web-sdk": "npm:3.3.0"
+    "@getpara/react-common": "npm:3.4.0"
+    "@getpara/react-component-library": "npm:3.4.0"
+    "@getpara/react-core": "npm:3.4.0"
+    "@getpara/web-sdk": "npm:3.4.0"
     date-fns: "npm:^3.6.0"
     detect-browser: "npm:^5.3.0"
     framer-motion: "npm:^11.3.31"
@@ -1339,7 +1339,7 @@ __metadata:
       optional: true
   bin:
     setup-para: dist/cli/cli.mjs
-  checksum: 10c0/fc3d41f4248ee00918dfeef4b53977754bffa9d94d84680bd5afb71cd1080d2edf4b8295d296b20a72a5270ae4c65b13eb7e05470cf6c750046ac545aa190eb3
+  checksum: 10c0/1614c2237d852ace8a2899ac0f673c50ea7175abe60603667048faf82fba21de67225afa9d5c0182149e4833fa2155169bb0d43b3dec7448d63ae0949bda5e21
   languageName: node
   linkType: hard
 
@@ -1350,25 +1350,25 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@getpara/user-management-client@npm:3.3.0":
-  version: 3.3.0
-  resolution: "@getpara/user-management-client@npm:3.3.0"
+"@getpara/user-management-client@npm:3.4.0":
+  version: 3.4.0
+  resolution: "@getpara/user-management-client@npm:3.4.0"
   dependencies:
     "@getpara/shared": "npm:^1.21.0"
     "@opentelemetry/api": "npm:^1.9.1"
     axios: "npm:^1.8.4"
     axios-retry: "npm:^4.5.0"
     libphonenumber-js: "npm:^1.11.7"
-  checksum: 10c0/cd656a8bae76d8e4849e86d851eb44bd4cb570e12e39654d149f3a2f27154c9c3714d13eba73dddacf35eba154a30dde9cba47bff4cf2c34abf9685d9fc52234
+  checksum: 10c0/e46162c16dc63558dec41e551bb4112c5d7dce054971aef2d0a8da9606116981586c30da0e0beff590d1b2fe47f694215ddee732dba8c4532d95afea18ef711c
   languageName: node
   linkType: hard
 
-"@getpara/web-sdk@npm:3.3.0":
-  version: 3.3.0
-  resolution: "@getpara/web-sdk@npm:3.3.0"
+"@getpara/web-sdk@npm:3.4.0":
+  version: 3.4.0
+  resolution: "@getpara/web-sdk@npm:3.4.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.3.0"
-    "@getpara/user-management-client": "npm:3.3.0"
+    "@getpara/core-sdk": "npm:3.4.0"
+    "@getpara/user-management-client": "npm:3.4.0"
     "@opentelemetry/api": "npm:^1.9.1"
     base64url: "npm:^3.0.1"
     buffer: "npm:6.0.3"
@@ -1381,7 +1381,7 @@ __metadata:
   peerDependenciesMeta:
     "@farcaster/miniapp-sdk":
       optional: true
-  checksum: 10c0/7d0ba2974748763d8ab2ed9d08a8717a0830793223dabd84fbb627996b6147cf01172847804a0bfd03ba9e30aaca2e884775046dcc83d98ec5dafadc32c4eedb
+  checksum: 10c0/205915be429b02697a9518ceeb9b715cdf7651b8545879fab4cb0f6459d1fe407c5bc55e019c7cf05f1299dda80d08b94f3ec17c3f59246542eb5f01ea10d51e
   languageName: node
   linkType: hard
 
@@ -7220,8 +7220,8 @@ __metadata:
     "@farcaster/miniapp-sdk": "npm:0.3.0"
     "@farcaster/miniapp-wagmi-connector": "npm:2.0.0"
     "@gemini-wallet/core": "npm:0.3.2"
-    "@getpara/graz-integration": "npm:3.3.0"
-    "@getpara/react-sdk-lite": "npm:3.3.0"
+    "@getpara/graz-integration": "npm:3.4.0"
+    "@getpara/react-sdk-lite": "npm:3.4.0"
     "@metamask/sdk": "npm:0.34.0"
     "@safe-global/safe-apps-provider": "npm:0.18.6"
     "@safe-global/safe-apps-sdk": "npm:9.1.0"

@@ -1534,141 +1534,141 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@getpara/aa-alchemy@npm:3.3.0":
-  version: 3.3.0
-  resolution: "@getpara/aa-alchemy@npm:3.3.0"
+"@getpara/aa-alchemy@npm:3.4.0":
+  version: 3.4.0
+  resolution: "@getpara/aa-alchemy@npm:3.4.0"
   dependencies:
     "@aa-sdk/core": "npm:^4.84.1"
     "@account-kit/infra": "npm:^4.84.1"
     "@account-kit/smart-contracts": "npm:^4.84.1"
-    "@getpara/viem-v2-integration": "npm:3.3.0"
+    "@getpara/viem-v2-integration": "npm:3.4.0"
   peerDependencies:
     viem: ">=2.0.0"
-  checksum: 10c0/13122eba928c33d41b1c35a2d11dc72443a2f11dc66ee07c137c3967c89660041c471c2f91de45c5c1d8554bbc2bf87588df3b84972bc139d19bd03421f4648f
+  checksum: 10c0/78da7f886e2ba631c4d23081b085b75817b9a0025ae3d441297805f344d24fdb5b2b00473b032173ab26184fd94c927ca4b184217e83a27b746c06b3eade8b59
   languageName: node
   linkType: hard
 
-"@getpara/aa-biconomy@npm:3.3.0":
-  version: 3.3.0
-  resolution: "@getpara/aa-biconomy@npm:3.3.0"
+"@getpara/aa-biconomy@npm:3.4.0":
+  version: 3.4.0
+  resolution: "@getpara/aa-biconomy@npm:3.4.0"
   dependencies:
     "@biconomy/abstractjs": "npm:1.1.21"
-    "@getpara/viem-v2-integration": "npm:3.3.0"
+    "@getpara/viem-v2-integration": "npm:3.4.0"
     "@safe-global/types-kit": "npm:^3.0.0"
   peerDependencies:
     viem: ">=2.0.0"
-  checksum: 10c0/e5f3b7205e7a520b508c3d5caf1ac376c818a0ee0a7659cf328da95fcf133554a721dbd7b20aaddd1b189adf24b490bfdb002e07dca76ebca111d3d06f04e283
+  checksum: 10c0/b34117cf2538f5e94c28813986a06d76bc9f12f4215ccfd6b18f4cda9f15f9d733632ba0ba42e3c55a8f6b3bb60f5a52cbe49e74ff950105644ec498cde8fa30
   languageName: node
   linkType: hard
 
-"@getpara/aa-cdp@npm:3.3.0":
-  version: 3.3.0
-  resolution: "@getpara/aa-cdp@npm:3.3.0"
+"@getpara/aa-cdp@npm:3.4.0":
+  version: 3.4.0
+  resolution: "@getpara/aa-cdp@npm:3.4.0"
   dependencies:
-    "@getpara/viem-v2-integration": "npm:3.3.0"
+    "@getpara/viem-v2-integration": "npm:3.4.0"
     permissionless: "npm:^0.2.12"
   peerDependencies:
     viem: ">=2.0.0"
-  checksum: 10c0/0f2a34453baebffcbbb899af9243fc17a02bbe7603479aa1b72394fd4744fbed8c254f06e9251c32372e607f5c49d7eb9e221df08e676cff00c3392bccbea1ec
+  checksum: 10c0/f0d52aa81025d82528d9e7cd2108dff2b7d8e195e98750f5b5ebe98801b60326885dee15e2132a86e7e94d15dfe9468d00f2b167de5da78e97c66c998f6c5700
   languageName: node
   linkType: hard
 
-"@getpara/aa-gelato@npm:3.3.0":
-  version: 3.3.0
-  resolution: "@getpara/aa-gelato@npm:3.3.0"
+"@getpara/aa-gelato@npm:3.4.0":
+  version: 3.4.0
+  resolution: "@getpara/aa-gelato@npm:3.4.0"
   dependencies:
     "@gelatocloud/gasless": "npm:^0.0.12"
-    "@getpara/viem-v2-integration": "npm:3.3.0"
+    "@getpara/viem-v2-integration": "npm:3.4.0"
   peerDependencies:
     viem: ">=2.0.0"
-  checksum: 10c0/2a94d2960d07763dd38e31d13da058d4f0b4486d965844c473ffaf67106edd6b0d45ce49af341dbb3a31d02a1e99f1d365d6e0da7f28f504992389d2899151f3
+  checksum: 10c0/431e1441eb265a68c88fe50c055636638d7b17bb69220ecc849602a737ed2dc8a2e8ab2bd435b50efd77ddc9fd35e6f1bcfc50fb216da25489ecc6a041d1c945
   languageName: node
   linkType: hard
 
-"@getpara/aa-pimlico@npm:3.3.0":
-  version: 3.3.0
-  resolution: "@getpara/aa-pimlico@npm:3.3.0"
+"@getpara/aa-pimlico@npm:3.4.0":
+  version: 3.4.0
+  resolution: "@getpara/aa-pimlico@npm:3.4.0"
   dependencies:
-    "@getpara/viem-v2-integration": "npm:3.3.0"
+    "@getpara/viem-v2-integration": "npm:3.4.0"
     permissionless: "npm:^0.2.12"
   peerDependencies:
     viem: ">=2.0.0"
-  checksum: 10c0/0b33ea2687e14af40c10feb11059fe1f473cf4397d84d5199d1562fb59ee83fd58c8bd6a80c85dd3237337498a95bf3651f9964d5702583b6f76cd7ac957c78a
+  checksum: 10c0/5d48caa179b69b9deac2f26e1a88f4d5d54a28530a7115a4d4bda2de0d84b97554f97fab81bf56b77b6d090822e1e1c40d81bf546d5a9f19794710fdd44c3972
   languageName: node
   linkType: hard
 
-"@getpara/aa-porto@npm:3.3.0":
-  version: 3.3.0
-  resolution: "@getpara/aa-porto@npm:3.3.0"
+"@getpara/aa-porto@npm:3.4.0":
+  version: 3.4.0
+  resolution: "@getpara/aa-porto@npm:3.4.0"
   dependencies:
-    "@getpara/viem-v2-integration": "npm:3.3.0"
+    "@getpara/viem-v2-integration": "npm:3.4.0"
     porto: "npm:^0.2.37"
   peerDependencies:
     viem: ">=2.0.0"
-  checksum: 10c0/faae591222efe42b93bce6f115cd7f4a71d8c7b3bff4389a17d8a20df77f8a37ce8f57b247ade2aa39904ea1dc6962e1cfed6ac3a6390f9e62b383ca24ed1e1b
+  checksum: 10c0/ab7abd88f92372772a5fc036f7fa6f7d109be21e1c16ed983b4c009a2668eb45c20ad776b9f7c09850fa27b1021ca1be7766a5f005e0ef858dc258ceb2227408
   languageName: node
   linkType: hard
 
-"@getpara/aa-rhinestone@npm:3.3.0":
-  version: 3.3.0
-  resolution: "@getpara/aa-rhinestone@npm:3.3.0"
+"@getpara/aa-rhinestone@npm:3.4.0":
+  version: 3.4.0
+  resolution: "@getpara/aa-rhinestone@npm:3.4.0"
   dependencies:
-    "@getpara/viem-v2-integration": "npm:3.3.0"
+    "@getpara/viem-v2-integration": "npm:3.4.0"
     "@rhinestone/module-sdk": "npm:0.4.0"
     "@rhinestone/sdk": "npm:^1.2.14"
     permissionless: "npm:^0.2.12"
   peerDependencies:
     viem: ">=2.0.0"
-  checksum: 10c0/64fa5658445ee53b54689af87ea6487b1e8d3e27746af5c7c29652d905dca48e522dd0ac5f4b053da19547ca191ac3a06410fddfe916382d5b81108699ebd2c4
+  checksum: 10c0/567d8a43c5a37ff02f7303dd40e483bea96e0d198972f422fd0b7ad047490b0f8f5b233cbe4823edbf93688d6c14aba7fdc9ffc968c80c2103aa9c8da17e4057
   languageName: node
   linkType: hard
 
-"@getpara/aa-safe@npm:3.3.0":
-  version: 3.3.0
-  resolution: "@getpara/aa-safe@npm:3.3.0"
+"@getpara/aa-safe@npm:3.4.0":
+  version: 3.4.0
+  resolution: "@getpara/aa-safe@npm:3.4.0"
   dependencies:
-    "@getpara/aa-pimlico": "npm:3.3.0"
-    "@getpara/viem-v2-integration": "npm:3.3.0"
+    "@getpara/aa-pimlico": "npm:3.4.0"
+    "@getpara/viem-v2-integration": "npm:3.4.0"
     permissionless: "npm:^0.2.12"
   peerDependencies:
     viem: ">=2.0.0"
-  checksum: 10c0/28006ada347d55cb10945b8a85bd13106759e4609dd87484c0235bb652e682c28d38e1f80e4979fa058622a8e09312bfe96ccea55efbdcc50303dbc13b2d1038
+  checksum: 10c0/9f065ebb8c37c875de8389a1e50f0864318f0c3f7f60877a170675a5170f879a834d2025d3cc30c7e8ec42665f09e8a14060584b56be84e839984adea05ed07b
   languageName: node
   linkType: hard
 
-"@getpara/aa-thirdweb@npm:3.3.0":
-  version: 3.3.0
-  resolution: "@getpara/aa-thirdweb@npm:3.3.0"
+"@getpara/aa-thirdweb@npm:3.4.0":
+  version: 3.4.0
+  resolution: "@getpara/aa-thirdweb@npm:3.4.0"
   dependencies:
-    "@getpara/viem-v2-integration": "npm:3.3.0"
+    "@getpara/viem-v2-integration": "npm:3.4.0"
     thirdweb: "npm:^5.118.2"
   peerDependencies:
     viem: ">=2.0.0"
-  checksum: 10c0/e9e5bcdf945be86ce925eecd543304232a5a671c247fa94699fc309817292af1618fdd82d4c15f8e298a11847b12ffa0600f0012ce93928ca23920cd11c7c3c6
+  checksum: 10c0/ee478bd8dd8d840fc13394c8cb54f7cbc4ad4b7bae4efcfa6c64cac32b67d14b4718966f2e4f41edd9445a64ef9b95e4375af9f77b2068c5e093290ca16c5df3
   languageName: node
   linkType: hard
 
-"@getpara/aa-zerodev@npm:3.3.0":
-  version: 3.3.0
-  resolution: "@getpara/aa-zerodev@npm:3.3.0"
+"@getpara/aa-zerodev@npm:3.4.0":
+  version: 3.4.0
+  resolution: "@getpara/aa-zerodev@npm:3.4.0"
   dependencies:
-    "@getpara/viem-v2-integration": "npm:3.3.0"
+    "@getpara/viem-v2-integration": "npm:3.4.0"
     "@zerodev/ecdsa-validator": "npm:^5.4.3"
     "@zerodev/sdk": "npm:^5.4.3"
   peerDependencies:
     viem: ">=2.0.0"
-  checksum: 10c0/d1f40953ece43b99f310d1cff4cab863d24825596fca3672547a11421d98c962cf8ec071e7ce1645756c5d54836025a7c430a8c4e6038416a1da20709b169965
+  checksum: 10c0/5185894aaab43f9c3a0447919a3893a45a6e62afe5d4b0bb582167dcd50cd8a93aa2284c1238be2001e45fa3c5ffcf63e15328988472db26d5366cf726a140f5
   languageName: node
   linkType: hard
 
-"@getpara/core-sdk@npm:3.3.0":
-  version: 3.3.0
-  resolution: "@getpara/core-sdk@npm:3.3.0"
+"@getpara/core-sdk@npm:3.4.0":
+  version: 3.4.0
+  resolution: "@getpara/core-sdk@npm:3.4.0"
   dependencies:
     "@celo/utils": "npm:^8.0.2"
     "@cosmjs/encoding": "npm:^0.32.4"
     "@ethereumjs/util": "npm:^9.1.0"
-    "@getpara/user-management-client": "npm:3.3.0"
+    "@getpara/user-management-client": "npm:3.4.0"
     "@noble/hashes": "npm:^1.5.0"
     "@opentelemetry/api": "npm:^1.9.1"
     "@opentelemetry/context-zone": "npm:^2.7.1"
@@ -1688,31 +1688,31 @@ __metadata:
     node-forge: "npm:^1.3.1"
     uuid: "npm:^11.1.0"
     xstate: "npm:^5.24.0"
-  checksum: 10c0/b6e8f7d1fb61921d5c406d07cf4a1f7fed9311d402865ec9eb57a9aa5f83c3ecc4149ff2ef999b7bc0bf673bd45b94fb4502f857061b263225246174ddcb1210
+  checksum: 10c0/ce72b37ee471517c2fc1f8d5b556d288e286b8e97a047d24ba71d0adf1e86035e3b0cf1aa029ca933b6d92cbbfd803f2e52065b21503d8144242adab462535e8
   languageName: node
   linkType: hard
 
-"@getpara/cosmjs-v0-integration@npm:3.3.0":
-  version: 3.3.0
-  resolution: "@getpara/cosmjs-v0-integration@npm:3.3.0"
+"@getpara/cosmjs-v0-integration@npm:3.4.0":
+  version: 3.4.0
+  resolution: "@getpara/cosmjs-v0-integration@npm:3.4.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.3.0"
+    "@getpara/core-sdk": "npm:3.4.0"
   peerDependencies:
     "@cosmjs/amino": ^0.32.4
     "@cosmjs/encoding": ^0.32.4
     "@cosmjs/proto-signing": ^0.32.4
     "@cosmjs/stargate": ^0.32.4
-  checksum: 10c0/ec505c209c368a6b357820ef2fb84281baf8a92ef389917f911f63559d4654f3a04778d44671df306a64c5036caae6fbc98997866feb8098e61e4dce9c540763
+  checksum: 10c0/07a9ea9623af2b5b5ec1414e87b48708325cc940e7c0f22916fc83b0da0172740be0301b890b83791582f8eef01f57b452555af10d3c4cf2730425da3d61de3a
   languageName: node
   linkType: hard
 
-"@getpara/cosmos-wallet-connectors@npm:3.3.0":
-  version: 3.3.0
-  resolution: "@getpara/cosmos-wallet-connectors@npm:3.3.0"
+"@getpara/cosmos-wallet-connectors@npm:3.4.0":
+  version: 3.4.0
+  resolution: "@getpara/cosmos-wallet-connectors@npm:3.4.0"
   dependencies:
-    "@getpara/graz-connector": "npm:3.3.0"
-    "@getpara/react-common": "npm:3.3.0"
-    "@getpara/web-sdk": "npm:3.3.0"
+    "@getpara/graz-connector": "npm:3.4.0"
+    "@getpara/react-common": "npm:3.4.0"
+    "@getpara/web-sdk": "npm:3.4.0"
     "@leapwallet/cosmos-social-login-capsule-provider": "npm:^0.0.41"
     zustand: "npm:^4.5.2"
     zustand-sync-tabs: "npm:^0.2.2"
@@ -1720,17 +1720,17 @@ __metadata:
     graz: ">=0.4.1"
     react: ">=18"
     react-dom: ">=18"
-  checksum: 10c0/eb96e34e73c158e3e70e2f425910a47ac79d5cc3d35df18c7f4954bae61e394ab3fb6c15a8076f1b6a86263b438a0db07b7fcd2fe71dc11e2b2c630bf3e1af9d
+  checksum: 10c0/082d5359deb131633fb3ff4d908da30561677f4aa1750064d2ac95e4fa42cf22a0b6644d94a9f612c33ffcfb2caad1e92c563c322855c14d79d53d4e483cd3a5
   languageName: node
   linkType: hard
 
-"@getpara/evm-wallet-connectors@npm:3.3.0":
-  version: 3.3.0
-  resolution: "@getpara/evm-wallet-connectors@npm:3.3.0"
+"@getpara/evm-wallet-connectors@npm:3.4.0":
+  version: 3.4.0
+  resolution: "@getpara/evm-wallet-connectors@npm:3.4.0"
   dependencies:
     "@coinbase/wallet-sdk": "npm:4.3.0"
-    "@getpara/wagmi-v2-connector": "npm:3.3.0"
-    "@getpara/web-sdk": "npm:3.3.0"
+    "@getpara/wagmi-v2-connector": "npm:3.4.0"
+    "@getpara/web-sdk": "npm:3.4.0"
     "@walletconnect/ethereum-provider": "npm:2.23.0"
     zustand: "npm:^4.5.2"
     zustand-sync-tabs: "npm:^0.2.2"
@@ -1745,16 +1745,16 @@ __metadata:
   peerDependenciesMeta:
     "@farcaster/miniapp-wagmi-connector":
       optional: true
-  checksum: 10c0/540703f6f3f2cbe5797c8beb860fc4cf530b09712eaa62706dea7718af7899f441e846715a18fd079030a3187851d962a3ec60f5952343b3284b5574f547cd72
+  checksum: 10c0/1ee8f75e47b5a362fe945ae1b4d12608221d75d0674105d1cbfab975e5ada0858771ce0d033869d2f61b482ff8b7b0584e577c2e1c6bedcb3c154a514c01d6d8
   languageName: node
   linkType: hard
 
-"@getpara/graz-connector@npm:3.3.0":
-  version: 3.3.0
-  resolution: "@getpara/graz-connector@npm:3.3.0"
+"@getpara/graz-connector@npm:3.4.0":
+  version: 3.4.0
+  resolution: "@getpara/graz-connector@npm:3.4.0"
   dependencies:
-    "@getpara/cosmjs-v0-integration": "npm:3.3.0"
-    "@getpara/web-sdk": "npm:3.3.0"
+    "@getpara/cosmjs-v0-integration": "npm:3.4.0"
+    "@getpara/web-sdk": "npm:3.4.0"
   peerDependencies:
     "@cosmjs/amino": ^0.32.4
     "@cosmjs/encoding": ^0.32.4
@@ -1764,25 +1764,25 @@ __metadata:
     "@keplr-wallet/types": ">=0.12.156"
     cosmjs-types: ^0.9.0
     graz: ">=0.4.1"
-  checksum: 10c0/939b1f84ca5a42dbb046d66b9d75d71cbf829a9a72ab048d22a56c95ba822ef936f913e5a149b3842546694e787371b65ec6e5bea8d3c02585fabbce3565073c
+  checksum: 10c0/cbffcff7df3cfb79d0a08b56b44853f1e64eaad34f48c961031d8620f01f55d4f27652458628ccfca84a876321b3e58e672d883afb0d3ed93ec864d28d544421
   languageName: node
   linkType: hard
 
-"@getpara/react-common@npm:3.3.0":
-  version: 3.3.0
-  resolution: "@getpara/react-common@npm:3.3.0"
+"@getpara/react-common@npm:3.4.0":
+  version: 3.4.0
+  resolution: "@getpara/react-common@npm:3.4.0"
   dependencies:
-    "@getpara/web-sdk": "npm:3.3.0"
+    "@getpara/web-sdk": "npm:3.4.0"
   peerDependencies:
     react: ">=18"
     react-dom: ">=18"
-  checksum: 10c0/f14c7dc1418c87bd4c3be9373200043358085b6c568730619d1c9dc8886474caa9adb6256c88057a301fc5d4cee63f13c2163c9f9203ee5864a800b6edd571f8
+  checksum: 10c0/576a3104af62897236bcae44832b5638ee93e06e31bcc03c693468821886b801156ab93861a308c470064bc1979bb07ef1d537e536a77b649659a986f9d02130
   languageName: node
   linkType: hard
 
-"@getpara/react-component-library@npm:3.3.0":
-  version: 3.3.0
-  resolution: "@getpara/react-component-library@npm:3.3.0"
+"@getpara/react-component-library@npm:3.4.0":
+  version: 3.4.0
+  resolution: "@getpara/react-component-library@npm:3.4.0"
   dependencies:
     "@radix-ui/react-avatar": "npm:^1.1.2"
     "@radix-ui/react-checkbox": "npm:^1.3.3"
@@ -1820,15 +1820,15 @@ __metadata:
   peerDependencies:
     react: ">=18"
     react-dom: ">=18"
-  checksum: 10c0/87f0419e59148594b12ff33a15ab448e1cdfe37dcaab961d574f931034082230fd1e1d7793c43c67fa558e95ca0bfd955ce8c4a96e4e2e0402ad2b5f67422fff
+  checksum: 10c0/8fe9f829572f694c90ffa1ee1de54cfa2f257832982ed880aa83f559c85b407bcb43ebcc254b5f0368c10bac1028025b9fed839918ac598d0baa5e520ee42fb7
   languageName: node
   linkType: hard
 
-"@getpara/react-core@npm:3.3.0":
-  version: 3.3.0
-  resolution: "@getpara/react-core@npm:3.3.0"
+"@getpara/react-core@npm:3.4.0":
+  version: 3.4.0
+  resolution: "@getpara/react-core@npm:3.4.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.3.0"
+    "@getpara/core-sdk": "npm:3.4.0"
     zustand: "npm:^5.0.0"
   peerDependencies:
     "@getpara/cosmjs-v0-integration": ">=2"
@@ -1850,18 +1850,18 @@ __metadata:
       optional: true
     "@getpara/viem-v2-integration":
       optional: true
-  checksum: 10c0/4a83a74e46b9ab468caa4e002b7978855b554c159c471484f74061749125f7f37efac6d1de9530743257df7d6592222e8d7f25f8f79cac5b8832ed3b2350fdd7
+  checksum: 10c0/1322551a786d96652524e4bbf4b95f07ff8255e1dba9fa5ae41cea473aa593999022aa727177912c81d0022ff7ddda12c58475df07c4a94307042222505e8c0a
   languageName: node
   linkType: hard
 
-"@getpara/react-sdk-lite@npm:3.3.0":
-  version: 3.3.0
-  resolution: "@getpara/react-sdk-lite@npm:3.3.0"
+"@getpara/react-sdk-lite@npm:3.4.0":
+  version: 3.4.0
+  resolution: "@getpara/react-sdk-lite@npm:3.4.0"
   dependencies:
-    "@getpara/react-common": "npm:3.3.0"
-    "@getpara/react-component-library": "npm:3.3.0"
-    "@getpara/react-core": "npm:3.3.0"
-    "@getpara/web-sdk": "npm:3.3.0"
+    "@getpara/react-common": "npm:3.4.0"
+    "@getpara/react-component-library": "npm:3.4.0"
+    "@getpara/react-core": "npm:3.4.0"
+    "@getpara/web-sdk": "npm:3.4.0"
     date-fns: "npm:^3.6.0"
     detect-browser: "npm:^5.3.0"
     framer-motion: "npm:^11.3.31"
@@ -1910,32 +1910,32 @@ __metadata:
       optional: true
   bin:
     setup-para: dist/cli/cli.mjs
-  checksum: 10c0/fc3d41f4248ee00918dfeef4b53977754bffa9d94d84680bd5afb71cd1080d2edf4b8295d296b20a72a5270ae4c65b13eb7e05470cf6c750046ac545aa190eb3
+  checksum: 10c0/1614c2237d852ace8a2899ac0f673c50ea7175abe60603667048faf82fba21de67225afa9d5c0182149e4833fa2155169bb0d43b3dec7448d63ae0949bda5e21
   languageName: node
   linkType: hard
 
-"@getpara/react-sdk@npm:3.3.0":
-  version: 3.3.0
-  resolution: "@getpara/react-sdk@npm:3.3.0"
+"@getpara/react-sdk@npm:3.4.0":
+  version: 3.4.0
+  resolution: "@getpara/react-sdk@npm:3.4.0"
   dependencies:
-    "@getpara/aa-alchemy": "npm:3.3.0"
-    "@getpara/aa-biconomy": "npm:3.3.0"
-    "@getpara/aa-cdp": "npm:3.3.0"
-    "@getpara/aa-gelato": "npm:3.3.0"
-    "@getpara/aa-pimlico": "npm:3.3.0"
-    "@getpara/aa-porto": "npm:3.3.0"
-    "@getpara/aa-rhinestone": "npm:3.3.0"
-    "@getpara/aa-safe": "npm:3.3.0"
-    "@getpara/aa-thirdweb": "npm:3.3.0"
-    "@getpara/aa-zerodev": "npm:3.3.0"
-    "@getpara/cosmjs-v0-integration": "npm:3.3.0"
-    "@getpara/cosmos-wallet-connectors": "npm:3.3.0"
-    "@getpara/evm-wallet-connectors": "npm:3.3.0"
-    "@getpara/react-sdk-lite": "npm:3.3.0"
-    "@getpara/solana-signers-v2-integration": "npm:3.3.0"
-    "@getpara/solana-wallet-connectors": "npm:3.3.0"
-    "@getpara/stellar-sdk-v14-integration": "npm:3.3.0"
-    "@getpara/viem-v2-integration": "npm:3.3.0"
+    "@getpara/aa-alchemy": "npm:3.4.0"
+    "@getpara/aa-biconomy": "npm:3.4.0"
+    "@getpara/aa-cdp": "npm:3.4.0"
+    "@getpara/aa-gelato": "npm:3.4.0"
+    "@getpara/aa-pimlico": "npm:3.4.0"
+    "@getpara/aa-porto": "npm:3.4.0"
+    "@getpara/aa-rhinestone": "npm:3.4.0"
+    "@getpara/aa-safe": "npm:3.4.0"
+    "@getpara/aa-thirdweb": "npm:3.4.0"
+    "@getpara/aa-zerodev": "npm:3.4.0"
+    "@getpara/cosmjs-v0-integration": "npm:3.4.0"
+    "@getpara/cosmos-wallet-connectors": "npm:3.4.0"
+    "@getpara/evm-wallet-connectors": "npm:3.4.0"
+    "@getpara/react-sdk-lite": "npm:3.4.0"
+    "@getpara/solana-signers-v2-integration": "npm:3.4.0"
+    "@getpara/solana-wallet-connectors": "npm:3.4.0"
+    "@getpara/stellar-sdk-v14-integration": "npm:3.4.0"
+    "@getpara/viem-v2-integration": "npm:3.4.0"
   peerDependencies:
     "@tanstack/react-query": ">=5.0.0"
     react: "*"
@@ -1945,7 +1945,7 @@ __metadata:
   peerDependenciesMeta:
     wagmi:
       optional: true
-  checksum: 10c0/ee1a6b461211c8abea99f891a9213c5f4f2bf0f0a4398ac4143bc813a496e5a65021bc9deda130b3656f20d887ece8ac6a080f82462ef0abf06bc98a014c139f
+  checksum: 10c0/03f92f0cbd71c9626a7803897ee23885eddc608a8cdfdd97082764cbaffd3c0625e93e9503bc853bf96307dee823f09adcc667c82577d17b4a124ffb982bbd33
   languageName: node
   linkType: hard
 
@@ -1956,11 +1956,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@getpara/solana-signers-v2-integration@npm:3.3.0":
-  version: 3.3.0
-  resolution: "@getpara/solana-signers-v2-integration@npm:3.3.0"
+"@getpara/solana-signers-v2-integration@npm:3.4.0":
+  version: 3.4.0
+  resolution: "@getpara/solana-signers-v2-integration@npm:3.4.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.3.0"
+    "@getpara/core-sdk": "npm:3.4.0"
     bs58: "npm:^6.0.0"
   peerDependencies:
     "@solana/addresses": ^2.2.1
@@ -1969,16 +1969,16 @@ __metadata:
     "@solana/rpc-spec": ^2.3.0
     "@solana/signers": ^2.2.1
     "@solana/transactions": ^2.2.1
-  checksum: 10c0/8abdb2dedf09707492667cc380c035216df9db3588a81f8076c4bb2a75f437a9d0f34a63dbb60075fcfe54965d00b57ffb92975d4a6ad0a8dc5559bc70ec99e5
+  checksum: 10c0/ab4f3683734810509b1f2abab77eb1c5e7a4309e36299cca12ce28b4f33701ad8d8493b9764d3769ea116eeb131a42a33fec573d21339f60c4e230381fd0435c
   languageName: node
   linkType: hard
 
-"@getpara/solana-wallet-connectors@npm:3.3.0":
-  version: 3.3.0
-  resolution: "@getpara/solana-wallet-connectors@npm:3.3.0"
+"@getpara/solana-wallet-connectors@npm:3.4.0":
+  version: 3.4.0
+  resolution: "@getpara/solana-wallet-connectors@npm:3.4.0"
   dependencies:
-    "@getpara/react-common": "npm:3.3.0"
-    "@getpara/web-sdk": "npm:3.3.0"
+    "@getpara/react-common": "npm:3.4.0"
+    "@getpara/web-sdk": "npm:3.4.0"
     bs58: "npm:^6.0.0"
   peerDependencies:
     "@farcaster/mini-app-solana": ^1.0.5
@@ -1991,79 +1991,79 @@ __metadata:
   peerDependenciesMeta:
     "@farcaster/mini-app-solana":
       optional: true
-  checksum: 10c0/f4bc8ffa4e734928ba3bc0e0ff665f150034de98c247e1be2f6e3d0577eca3d9176262644ea3dc32e34192e9e2d4f016b6e45da4b6bd7d43f61a98ce7edf5e91
+  checksum: 10c0/db05000d645879da14b84a19e251904b6d30e6f8d207d7db63a986ae09a558f3d877a52bc73e8ce974eea00e11b52ebed2609031a1991ddd096f01dc6c9ada3a
   languageName: node
   linkType: hard
 
-"@getpara/solana-web3.js-v1-integration@npm:3.3.0":
-  version: 3.3.0
-  resolution: "@getpara/solana-web3.js-v1-integration@npm:3.3.0"
+"@getpara/solana-web3.js-v1-integration@npm:3.4.0":
+  version: 3.4.0
+  resolution: "@getpara/solana-web3.js-v1-integration@npm:3.4.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.3.0"
+    "@getpara/core-sdk": "npm:3.4.0"
   peerDependencies:
     "@solana/web3.js": ^1.98.0
-  checksum: 10c0/01be395af66ae52ab9458f24e9607df22d63fe0369df8289c6a0fe304a94ceaeebd62909324bce9bb5d45eb3c8b7aaf0c86cd9da4ef7f3cb7a144dfb13b68798
+  checksum: 10c0/40657cc8b1fdc47435c9b843d2102ca2ccba79d259019ea5824633f86d2ee9dd1939bb2ad0e0691b50bb75bd2fad5f3908b28bd9aee36efcf63eddc6f40cd9ac
   languageName: node
   linkType: hard
 
-"@getpara/stellar-sdk-v14-integration@npm:3.3.0":
-  version: 3.3.0
-  resolution: "@getpara/stellar-sdk-v14-integration@npm:3.3.0"
+"@getpara/stellar-sdk-v14-integration@npm:3.4.0":
+  version: 3.4.0
+  resolution: "@getpara/stellar-sdk-v14-integration@npm:3.4.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.3.0"
+    "@getpara/core-sdk": "npm:3.4.0"
     bs58: "npm:^6.0.0"
   peerDependencies:
     "@stellar/stellar-sdk": ^14.0.0
-  checksum: 10c0/9d38ca8065910140c267af1c9c5d67dd10992fd573fe3f4b4dda51eee8716f0762c6661f42a96c6a40aa2e0348f8a494ff7dd65e0946e217558d6f763cbc4a8c
+  checksum: 10c0/04db643e768324e3472f265848c35caa0f91fa2ecb5c4363d697b7608dc27d28ee31f20e12b9c2bde83ad9a2d93885adb8d534f48bb994fb91cebaf3c8db0627
   languageName: node
   linkType: hard
 
-"@getpara/user-management-client@npm:3.3.0":
-  version: 3.3.0
-  resolution: "@getpara/user-management-client@npm:3.3.0"
+"@getpara/user-management-client@npm:3.4.0":
+  version: 3.4.0
+  resolution: "@getpara/user-management-client@npm:3.4.0"
   dependencies:
     "@getpara/shared": "npm:^1.21.0"
     "@opentelemetry/api": "npm:^1.9.1"
     axios: "npm:^1.8.4"
     axios-retry: "npm:^4.5.0"
     libphonenumber-js: "npm:^1.11.7"
-  checksum: 10c0/cd656a8bae76d8e4849e86d851eb44bd4cb570e12e39654d149f3a2f27154c9c3714d13eba73dddacf35eba154a30dde9cba47bff4cf2c34abf9685d9fc52234
+  checksum: 10c0/e46162c16dc63558dec41e551bb4112c5d7dce054971aef2d0a8da9606116981586c30da0e0beff590d1b2fe47f694215ddee732dba8c4532d95afea18ef711c
   languageName: node
   linkType: hard
 
-"@getpara/viem-v2-integration@npm:3.3.0":
-  version: 3.3.0
-  resolution: "@getpara/viem-v2-integration@npm:3.3.0"
+"@getpara/viem-v2-integration@npm:3.4.0":
+  version: 3.4.0
+  resolution: "@getpara/viem-v2-integration@npm:3.4.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.3.0"
+    "@getpara/core-sdk": "npm:3.4.0"
   peerDependencies:
     viem: ^2.39.0
-  checksum: 10c0/1a06bbea70f50ce11e348cc0ffecb391f2f93fafc0e7090ac452cd508143ef87a801cca1ca2a8ec7aff757ab8782f5362d0f929415e08e90aaa955ed19c5979d
+  checksum: 10c0/eda009689f73eb44b8eefbc6b3270a0122cc853922fbaf3485237042cf9b9777c4241f7bf1e21137d13bd46fe2f7cbee78f3ee61967dc88ef1354cbb00362751
   languageName: node
   linkType: hard
 
-"@getpara/wagmi-v2-connector@npm:3.3.0":
-  version: 3.3.0
-  resolution: "@getpara/wagmi-v2-connector@npm:3.3.0"
+"@getpara/wagmi-v2-connector@npm:3.4.0":
+  version: 3.4.0
+  resolution: "@getpara/wagmi-v2-connector@npm:3.4.0"
   dependencies:
-    "@getpara/viem-v2-integration": "npm:3.3.0"
-    "@getpara/web-sdk": "npm:3.3.0"
+    "@getpara/viem-v2-integration": "npm:3.4.0"
+    "@getpara/web-sdk": "npm:3.4.0"
   peerDependencies:
     "@wagmi/core": ^2.16.7 || ^3.0.0
     react: ">=18"
     react-dom: ">=18"
     viem: ^2.39.0
     wagmi: ^2.14.16 || ^3.0.0
-  checksum: 10c0/28888c3020a802c88eacbdc6b8536cae813a99e5e4f87150d97eca3cedbeb4005cfa1b26f0dbf347c7ada2463169e339cfa4aa9b3c74fdb69575ce50903a0916
+  checksum: 10c0/b65f39890315c0c0ee08ce783e1d9e54e07866e0c89d6e2826f9c7c21e8c0c4a0470ded1f2a2ef67628fdab71bd451f178e850e969ef0b0406123283df088997
   languageName: node
   linkType: hard
 
-"@getpara/web-sdk@npm:3.3.0":
-  version: 3.3.0
-  resolution: "@getpara/web-sdk@npm:3.3.0"
+"@getpara/web-sdk@npm:3.4.0":
+  version: 3.4.0
+  resolution: "@getpara/web-sdk@npm:3.4.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.3.0"
-    "@getpara/user-management-client": "npm:3.3.0"
+    "@getpara/core-sdk": "npm:3.4.0"
+    "@getpara/user-management-client": "npm:3.4.0"
     "@opentelemetry/api": "npm:^1.9.1"
     base64url: "npm:^3.0.1"
     buffer: "npm:6.0.3"
@@ -2076,7 +2076,7 @@ __metadata:
   peerDependenciesMeta:
     "@farcaster/miniapp-sdk":
       optional: true
-  checksum: 10c0/7d0ba2974748763d8ab2ed9d08a8717a0830793223dabd84fbb627996b6147cf01172847804a0bfd03ba9e30aaca2e884775046dcc83d98ec5dafadc32c4eedb
+  checksum: 10c0/205915be429b02697a9518ceeb9b715cdf7651b8545879fab4cb0f6459d1fe407c5bc55e019c7cf05f1299dda80d08b94f3ec17c3f59246542eb5f01ea10d51e
   languageName: node
   linkType: hard
 
@@ -16291,8 +16291,8 @@ __metadata:
     "@cosmjs/stargate": "npm:^0.34.0"
     "@cosmjs/tendermint-rpc": "npm:^0.34.0"
     "@eslint/js": "npm:^9.29.0"
-    "@getpara/react-sdk": "npm:3.3.0"
-    "@getpara/solana-web3.js-v1-integration": "npm:3.3.0"
+    "@getpara/react-sdk": "npm:3.4.0"
+    "@getpara/solana-web3.js-v1-integration": "npm:3.4.0"
     "@solana-mobile/wallet-adapter-mobile": "npm:^2.2.2"
     "@solana/wallet-adapter-base": "npm:^0.9.27"
     "@solana/wallet-adapter-react": "npm:^0.15.39"
