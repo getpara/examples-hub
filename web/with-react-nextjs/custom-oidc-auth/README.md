@@ -9,6 +9,8 @@ transaction signed with ethers — all on Sepolia, with links to view each trans
 - Wrapping the app in the Para React provider (`ParaProvider` + React Query)
 - Signing in with `useAuthenticateWithOAuth` using `method: "CUSTOM_OIDC"`
 - Opening the passkey popup the SDK surfaces via `onStatePhaseChange`
+- Handling a login-time 2FA (MFA) challenge with `useEnrollMfa` / `useVerifyMfa` — QR
+  enrollment with backup codes, then TOTP / backup-code verification
 - Reading the connected wallet with `useAccount` / `useWallet`
 - Funding the wallet with `useRequestFaucet` (`ETHEREUM_SEPOLIA`)
 - Sending a transaction with an ethers signer from `useParaEthersSigner`
@@ -17,9 +19,14 @@ transaction signed with ethers — all on Sepolia, with links to view each trans
 ## Flow
 
 1. **Sign in with OIDC** — custom OIDC handshake, plus passkey creation for new users.
-2. **Request faucet** — funds the Para wallet with Sepolia testnet ETH.
-3. **Send transaction** — self-transfers 0.0001 ETH, signed by the Para wallet through ethers.
-4. **View on Etherscan** — each step links to its transaction on Sepolia.
+2. **Two-factor (if required)** — when the partner requires login-time 2FA, the sign-in pauses:
+   new users enroll (scan a QR, save backup codes), returning users enter a TOTP or backup code.
+3. **Request faucet** — funds the Para wallet with Sepolia testnet ETH.
+4. **Send transaction** — self-transfers 0.0001 ETH, signed by the Para wallet through ethers.
+5. **View on Etherscan** — each step links to its transaction on Sepolia.
+
+> The 2FA step only appears when the partner has login-time 2FA enabled. Without it, sign-in
+> goes straight to the wallet.
 
 > The send-transaction step needs gas, so request faucet funds first. An unfunded wallet shows a
 > clear "request faucet funds first" message instead of an opaque RPC error.
@@ -64,6 +71,7 @@ src/
 │   └── e2e-helpers.ts
 ├── hooks/
 │   ├── useOidcAuth.ts     # Custom OIDC sign-in via useAuthenticateWithOAuth + passkey popup
+│   ├── useMfaChallenge.ts # Login-time 2FA: detect awaiting_2fa*, enrollMfa + verifyMfa
 │   ├── useParaSession.ts  # Connected wallet + logout (useAccount/useWallet/useLogout)
 │   ├── useFaucet.ts        # useRequestFaucet wrapper (ETHEREUM_SEPOLIA)
 │   ├── useEthersProvider.ts
@@ -74,6 +82,7 @@ src/
     ├── layout/Header.tsx
     └── ui/
         ├── OidcSignInCard.tsx
+        ├── MfaChallengeCard.tsx # QR + backup codes (enroll) / TOTP + backup-code (verify)
         ├── WalletInfo.tsx
         ├── RequestFaucet.tsx
         ├── SendTransaction.tsx
@@ -94,6 +103,13 @@ with no Para imports.
 // Sign in (src/hooks/useOidcAuth.ts)
 const { authenticateWithOAuthAsync } = useAuthenticateWithOAuth();
 await authenticateWithOAuthAsync({ method: "CUSTOM_OIDC", useShortUrls: true /* + popup callbacks */ });
+
+// Login-time 2FA (src/hooks/useMfaChallenge.ts)
+// onStatePhaseChange reports authPhase "awaiting_2fa_enrollment" | "awaiting_2fa" mid-login.
+const { enrollMfaAsync } = useEnrollMfa(); // -> { uri (QR), backupCodes } on enrollment
+const { verifyMfaAsync } = useVerifyMfa();
+const result = await verifyMfaAsync({ code }); // ok -> SDK re-polls and advances to the wallet
+if (!result.ok) showAttemptsRemaining(result.attemptsRemaining);
 
 // Faucet (src/hooks/useFaucet.ts)
 const { requestFaucetAsync } = useRequestFaucet();
