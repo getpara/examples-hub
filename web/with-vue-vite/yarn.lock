@@ -691,14 +691,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@getpara/core-sdk@npm:3.4.0":
-  version: 3.4.0
-  resolution: "@getpara/core-sdk@npm:3.4.0"
+"@getpara/core-sdk@npm:3.5.0":
+  version: 3.5.0
+  resolution: "@getpara/core-sdk@npm:3.5.0"
   dependencies:
     "@celo/utils": "npm:^8.0.2"
     "@cosmjs/encoding": "npm:^0.32.4"
     "@ethereumjs/util": "npm:^9.1.0"
-    "@getpara/user-management-client": "npm:3.4.0"
+    "@getpara/user-management-client": "npm:3.5.0"
     "@noble/hashes": "npm:^1.5.0"
     "@opentelemetry/api": "npm:^1.9.1"
     "@opentelemetry/context-zone": "npm:^2.7.1"
@@ -718,47 +718,47 @@ __metadata:
     node-forge: "npm:^1.3.1"
     uuid: "npm:^11.1.0"
     xstate: "npm:^5.24.0"
-  checksum: 10c0/ce72b37ee471517c2fc1f8d5b556d288e286b8e97a047d24ba71d0adf1e86035e3b0cf1aa029ca933b6d92cbbfd803f2e52065b21503d8144242adab462535e8
+  checksum: 10c0/228d0d246a4b730e1c7ab06f65807179414cc54925212313b5a24c4873be72d12487509d4a7e1cb90d54883dcef381c022f20d8f2869f3fe4236ecab1db72101
   languageName: node
   linkType: hard
 
-"@getpara/shared@npm:^1.21.0":
-  version: 1.21.0
-  resolution: "@getpara/shared@npm:1.21.0"
-  checksum: 10c0/21bb83cc29ee518190f498383097cefe7f55972de715c638dc17de5419897733d80e8b6aab5a3f2b8ff5caf60fe31810d219ada3ed635b03e47f65528e6c7cf9
+"@getpara/shared@npm:^1.23.0":
+  version: 1.23.0
+  resolution: "@getpara/shared@npm:1.23.0"
+  checksum: 10c0/591e31432d05311a17024033234cdda821b6a093e31895ec5bfbc9bc5854e40c8d0401861fd1efa6f04bc82498e4046b450fd1c1bb6ea894cfac9bbf2206893a
   languageName: node
   linkType: hard
 
-"@getpara/user-management-client@npm:3.4.0":
-  version: 3.4.0
-  resolution: "@getpara/user-management-client@npm:3.4.0"
+"@getpara/user-management-client@npm:3.5.0":
+  version: 3.5.0
+  resolution: "@getpara/user-management-client@npm:3.5.0"
   dependencies:
-    "@getpara/shared": "npm:^1.21.0"
+    "@getpara/shared": "npm:^1.23.0"
     "@opentelemetry/api": "npm:^1.9.1"
     axios: "npm:^1.8.4"
     axios-retry: "npm:^4.5.0"
     libphonenumber-js: "npm:^1.11.7"
-  checksum: 10c0/e46162c16dc63558dec41e551bb4112c5d7dce054971aef2d0a8da9606116981586c30da0e0beff590d1b2fe47f694215ddee732dba8c4532d95afea18ef711c
+  checksum: 10c0/a3b49c0b324e3e8694c91ef5539f69857ee8d623e63af02b25f9b58b5231a5c2d4216bc58cd7cb80508a36d6fbe6e1e74775cabbf33112af0295cff8a611bfd8
   languageName: node
   linkType: hard
 
-"@getpara/viem-v2-integration@npm:3.4.0":
-  version: 3.4.0
-  resolution: "@getpara/viem-v2-integration@npm:3.4.0"
+"@getpara/viem-v2-integration@npm:3.5.0":
+  version: 3.5.0
+  resolution: "@getpara/viem-v2-integration@npm:3.5.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.4.0"
+    "@getpara/core-sdk": "npm:3.5.0"
   peerDependencies:
     viem: ^2.39.0
-  checksum: 10c0/eda009689f73eb44b8eefbc6b3270a0122cc853922fbaf3485237042cf9b9777c4241f7bf1e21137d13bd46fe2f7cbee78f3ee61967dc88ef1354cbb00362751
+  checksum: 10c0/5183bc7a84d8f9f6c0764a5de805d55b45d72a6b5513cbd1f5dbfaccc088f6b13136e15d90145b6a44c2b322dd5672170427fb32c893d850b39914376bc6d6fe
   languageName: node
   linkType: hard
 
-"@getpara/web-sdk@npm:3.4.0":
-  version: 3.4.0
-  resolution: "@getpara/web-sdk@npm:3.4.0"
+"@getpara/web-sdk@npm:3.5.0":
+  version: 3.5.0
+  resolution: "@getpara/web-sdk@npm:3.5.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.4.0"
-    "@getpara/user-management-client": "npm:3.4.0"
+    "@getpara/core-sdk": "npm:3.5.0"
+    "@getpara/user-management-client": "npm:3.5.0"
     "@opentelemetry/api": "npm:^1.9.1"
     base64url: "npm:^3.0.1"
     buffer: "npm:6.0.3"
@@ -771,7 +771,7 @@ __metadata:
   peerDependenciesMeta:
     "@farcaster/miniapp-sdk":
       optional: true
-  checksum: 10c0/205915be429b02697a9518ceeb9b715cdf7651b8545879fab4cb0f6459d1fe407c5bc55e019c7cf05f1299dda80d08b94f3ec17c3f59246542eb5f01ea10d51e
+  checksum: 10c0/a57ca76e6db9b8cc5452723770330196c78a170991db7202e76c66d3d00a2382207ad9f3a4ee3322e4cc571d7f1bd25fdd31150f4fc9e524087c3b63350603e9
   languageName: node
   linkType: hard
 
@@ -5511,8 +5511,8 @@ __metadata:
   resolution: "with-vue-vite@workspace:."
   dependencies:
     "@eslint/js": "npm:^9.29.0"
-    "@getpara/viem-v2-integration": "npm:3.4.0"
-    "@getpara/web-sdk": "npm:3.4.0"
+    "@getpara/viem-v2-integration": "npm:3.5.0"
+    "@getpara/web-sdk": "npm:3.5.0"
     "@tailwindcss/vite": "npm:4.1.11"
     "@vitejs/plugin-vue": "npm:^5.2.1"
     "@vue/tsconfig": "npm:^0.7.0"
