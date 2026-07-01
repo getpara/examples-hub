@@ -20,7 +20,7 @@ const STATUS_STYLES = {
 
 function getStatusMessage(status: SendTransactionStatus, error: string | null, txHash: string | null) {
   if (error) return error;
-  if (status === "signing") return "Review in Para.";
+  if (status === "signing") return "Signing transaction...";
   if (status === "submitted" && txHash) return "Transaction submitted. Waiting for Sepolia confirmation...";
   if (status === "confirmed" && txHash) return "Sent successfully.";
   return null;
@@ -51,7 +51,7 @@ export function SendTransaction({
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="text-base font-semibold text-card-foreground">Send ETH</h2>
-          <p className="mt-1 text-sm text-muted-foreground">Sends over the limit may require approval.</p>
+          <p className="mt-1 text-sm text-muted-foreground">Sends above the custom limit are denied immediately.</p>
           {recipientAddress && <p className="mt-1 text-sm text-muted-foreground">Funds return to the demo faucet.</p>}
         </div>
         <button

@@ -10,6 +10,9 @@ import { SEPOLIA_CHAIN_ID } from "@/lib/para";
 export const SEND_AMOUNT_ETH = "0.001";
 export const SEND_MIN_GAS_BUFFER_ETH = "0.0002";
 export const SEND_MIN_BALANCE_WEI = ethers.parseEther(SEND_AMOUNT_ETH) + ethers.parseEther(SEND_MIN_GAS_BUFFER_ETH);
+export const CUSTOM_LIMIT_DENIED_MESSAGE =
+  "Custom limit exceeded. This send was denied by policy and was not signed.";
+const POLICY_DENIED_CODE = "POLICY_DENIED";
 const TRANSACTION_CONFIRMATION_TIMEOUT_MS = 120_000;
 export type SendTransactionStatus = "idle" | "signing" | "submitted" | "confirmed" | "failed";
 
@@ -23,6 +26,31 @@ export interface UseSendTransactionReturn {
   isReady: boolean;
   error: string | null;
   reset: () => void;
+}
+
+type TransactionErrorReason = Error | string | object | null;
+
+function getStringProperty(reason: object, property: "code" | "message") {
+  if (property === "code" && "code" in reason && typeof reason.code === "string") {
+    return reason.code;
+  }
+
+  if (property === "message" && "message" in reason && typeof reason.message === "string") {
+    return reason.message;
+  }
+
+  return "";
+}
+
+function getTransactionErrorMessage(reason: TransactionErrorReason) {
+  if (typeof reason === "string") return reason;
+  if (!reason) return "Transaction failed.";
+
+  return getStringProperty(reason, "message") || "Transaction failed.";
+}
+
+function isPolicyDeniedError(reason: TransactionErrorReason) {
+  return typeof reason === "object" && reason !== null && getStringProperty(reason, "code") === POLICY_DENIED_CODE;
 }
 
 // Sends a fixed Sepolia transfer back to the faucet, signed by the embedded Para wallet. The signer
@@ -78,6 +106,7 @@ export function useSendTransaction(recipientAddress: string | null): UseSendTran
       };
 
       const txResponse = await ethersSigner.sendTransaction(tx);
+
       setTxHash(txResponse.hash);
       setStatus("submitted");
 
@@ -90,8 +119,11 @@ export function useSendTransaction(recipientAddress: string | null): UseSendTran
       }
       setStatus("confirmed");
     } catch (err) {
+      const reason =
+        err instanceof Error || typeof err === "string" || (typeof err === "object" && err !== null) ? err : null;
+
       setStatus("failed");
-      setError(err instanceof Error ? err.message : "Transaction failed.");
+      setError(isPolicyDeniedError(reason) ? CUSTOM_LIMIT_DENIED_MESSAGE : getTransactionErrorMessage(reason));
     } finally {
       setIsLoading(false);
     }
