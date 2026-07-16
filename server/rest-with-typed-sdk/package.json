@@ -9,7 +9,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@getpara/rest-sdk": "3.6.0",
+    "@getpara/rest-sdk": "3.7.0",
     "@solana/addresses": "^2.2.1",
     "@solana/keys": "^2.2.1",
     "@solana/signers": "^2.2.1",
