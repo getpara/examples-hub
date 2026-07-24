@@ -5,6 +5,7 @@ interface SignMessageProps {
   isPending: boolean;
   errorMessage: string | null;
   signature?: string;
+  testId?: string;
 }
 
 export function SignMessage({
@@ -14,9 +15,11 @@ export function SignMessage({
   isPending,
   errorMessage,
   signature,
+  testId,
 }: SignMessageProps) {
   return (
     <div
+      data-testid={testId}
       className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden animate-fade-in-up-delayed">
       <div className="px-6 py-4 border-b border-border/60">
         <h2 className="text-sm font-semibold">{title}</h2>

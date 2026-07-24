@@ -19,10 +19,12 @@ enum _AuthFlow {
 
 class AuthScreen extends StatefulWidget {
   final VoidCallback onSuccess;
+  final Future<AuthState> Function({required Auth auth})? initiateAuthFlow;
 
   const AuthScreen({
     super.key,
     required this.onSuccess,
+    this.initiateAuthFlow,
   });
 
   @override
@@ -79,10 +81,9 @@ class _AuthScreenState extends State<AuthScreen> {
     setState(() => _isProcessing = true);
 
     try {
-      await _ensureBridgeReady();
-
       final auth = isPhone ? Auth.phone(value) : Auth.email(value);
-      final authState = await para.initiateAuthFlow(auth: auth);
+      final initiateAuthFlow = widget.initiateAuthFlow ?? para.initiateAuthFlow;
+      final authState = await initiateAuthFlow(auth: auth);
 
       await _continueAuth(
         authState,
@@ -314,11 +315,6 @@ class _AuthScreenState extends State<AuthScreen> {
 
       return false;
     }
-  }
-
-  Future<void> _ensureBridgeReady() async {
-    // Small delay to ensure Para bridge is ready
-    await Future.delayed(const Duration(milliseconds: 500));
   }
 
   Future<SignupMethod?> _chooseSignupMethod() async {
