@@ -4,12 +4,12 @@
 
 A Next.js example showing a UUID-to-email pregen wallet claim flow with post-claim private key export.
 
-The app creates a pregen EVM wallet with a random `customId` UUID, encrypts and stores the user share with an app-owned email mapping, then upgrades the Para pregen identifier from UUID to email during authentication so the SDK can preload and claim the wallet.
+The app creates a pregen EVM wallet with a random `customId` UUID, encrypts and stores the user share with an app-owned email mapping in Redis, then upgrades the Para pregen identifier from UUID to email during authentication so the SDK can preload and claim the wallet.
 
 ## What This Example Shows
 
 - Creating a pregen EVM wallet with `@getpara/server-sdk`
-- Storing an encrypted user share in SQLite for a local demo backend
+- Storing an encrypted user share in Redis for a local or deployed demo backend
 - Providing `fetchPregenWalletsOverride` to the React SDK Lite provider
 - Claiming the pregen wallet during Para authentication
 - Exporting the claimed wallet private key after the connected wallet matches the generated wallet
@@ -23,6 +23,8 @@ Create `.env` in this directory:
 NEXT_PUBLIC_PARA_API_KEY=your_para_api_key
 NEXT_PUBLIC_PARA_ENVIRONMENT=BETA
 ENCRYPTION_KEY=your_32_character_encryption_key
+KV_REST_API_URL=your_upstash_rest_url
+KV_REST_API_TOKEN=your_upstash_rest_token
 ```
 
 Generate a local encryption key:
@@ -53,11 +55,13 @@ For development:
 yarn dev
 ```
 
+The same Redis store is used locally and on Vercel. Each encrypted wallet record expires one hour after it is created.
+
 ## Flow
 
 1. Enter the future claimant email.
 2. The app creates a pregen EVM wallet with `pregenId: { customId: randomUUID() }`.
-3. The app stores the encrypted user share, wallet ID, wallet address, UUID, and email mapping in SQLite.
+3. The app stores the encrypted user share, wallet ID, wallet address, UUID, and email mapping in Redis for one hour.
 4. Click `Begin claim`.
 5. Para auth calls `fetchPregenWalletsOverride` with the authenticating email.
 6. `/api/wallet/share` updates the pregen wallet identifier to `pregenId: { email }`, decrypts the share, and returns it.
@@ -75,7 +79,7 @@ src/lib/para/pregenClaimService.ts                 # Pregen generation and ident
 src/lib/para/fetchPregenWalletsOverride.ts         # SDK pregen wallet share callback
 src/app/api/wallet/generate/route.ts               # Local demo API for pregen generation
 src/app/api/wallet/share/route.ts                  # Local demo API for share retrieval
-src/lib/db/keySharesDB.ts                          # SQLite demo storage
+src/lib/db/keySharesDB.ts                          # Redis-backed session storage
 src/components/pregen/panels/*                     # Replaceable example UI
 ```
 

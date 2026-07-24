@@ -996,14 +996,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@getpara/core-sdk@npm:3.8.0":
-  version: 3.8.0
-  resolution: "@getpara/core-sdk@npm:3.8.0"
+"@getpara/core-sdk@npm:3.9.0":
+  version: 3.9.0
+  resolution: "@getpara/core-sdk@npm:3.9.0"
   dependencies:
     "@celo/utils": "npm:^8.0.2"
     "@cosmjs/encoding": "npm:^0.32.4"
     "@ethereumjs/util": "npm:^9.1.0"
-    "@getpara/user-management-client": "npm:3.8.0"
+    "@getpara/user-management-client": "npm:3.9.0"
     "@noble/hashes": "npm:^1.5.0"
     "@opentelemetry/api": "npm:^1.9.1"
     "@opentelemetry/context-zone": "npm:^2.9.0"
@@ -1023,31 +1023,31 @@ __metadata:
     node-forge: "npm:^1.4.0"
     uuid: "npm:^11.1.1"
     xstate: "npm:^5.24.0"
-  checksum: 10c0/ce76397b450dcd41f5ea52fbf50cf1d6106c081c12bdb458417add0ca8afded19edd4e706e3aee0786809017ee88c553bd7abcd042d9a0bd1060c8318067d770
+  checksum: 10c0/7a089a47fb92987cf0ef926fb3b6ee4e4a242b8c88cc17699e2b21c231bfe6df9abbb2dfef0b63a0a065a7111cbf179e1a05fcca0c524bcd00c97c2dc3a8fcf5
   languageName: node
   linkType: hard
 
-"@getpara/cosmjs-v0-integration@npm:3.8.0":
-  version: 3.8.0
-  resolution: "@getpara/cosmjs-v0-integration@npm:3.8.0"
+"@getpara/cosmjs-v0-integration@npm:3.9.0":
+  version: 3.9.0
+  resolution: "@getpara/cosmjs-v0-integration@npm:3.9.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.8.0"
+    "@getpara/core-sdk": "npm:3.9.0"
   peerDependencies:
     "@cosmjs/amino": ^0.32.4
     "@cosmjs/encoding": ^0.32.4
     "@cosmjs/proto-signing": ^0.32.4
     "@cosmjs/stargate": ^0.32.4
-  checksum: 10c0/71ad359c7150d5f227985b52414d1fde17f99aa1df0dab9cdc919b687442d871fbe30f68b63bd475f8167c4bb440cf6f16df87e23e415b395d1086a0c11f0d7b
+  checksum: 10c0/003df546f57bbc07b2b2390156e0a3ef94e276897e369e881ef4465ea813d4632ba086321dbff14e34ef2de01a754db66a3346b2c865d16f9c12edbd7c8b5e5a
   languageName: node
   linkType: hard
 
-"@getpara/cosmos-wallet-connectors@npm:3.8.0":
-  version: 3.8.0
-  resolution: "@getpara/cosmos-wallet-connectors@npm:3.8.0"
+"@getpara/cosmos-wallet-connectors@npm:3.9.0":
+  version: 3.9.0
+  resolution: "@getpara/cosmos-wallet-connectors@npm:3.9.0"
   dependencies:
-    "@getpara/graz-connector": "npm:3.8.0"
-    "@getpara/react-common": "npm:3.8.0"
-    "@getpara/web-sdk": "npm:3.8.0"
+    "@getpara/graz-connector": "npm:3.9.0"
+    "@getpara/react-common": "npm:3.9.0"
+    "@getpara/web-sdk": "npm:3.9.0"
     "@leapwallet/cosmos-social-login-capsule-provider": "npm:^0.0.41"
     zustand: "npm:^4.5.2"
     zustand-sync-tabs: "npm:^0.2.2"
@@ -1055,16 +1055,16 @@ __metadata:
     graz: ">=0.4.1"
     react: ">=18"
     react-dom: ">=18"
-  checksum: 10c0/de7a89c10e6bd1eb2690d3dfe0bdbaea051a58967264a53937e4e688931105f4609349d8872106faf35bb87dd6fce4aca1a8656a3847310528235b5798479b6c
+  checksum: 10c0/8ae2bf5e7ebbea770748d887951b9a5e962d6efbaf9748cc85952c0d9b3363c60fd52bc7bfd8eb4ad1e5ced95c650e182eb5e6c0e1d8a8e7b07f37c609ce4831
   languageName: node
   linkType: hard
 
-"@getpara/graz-connector@npm:3.8.0":
-  version: 3.8.0
-  resolution: "@getpara/graz-connector@npm:3.8.0"
+"@getpara/graz-connector@npm:3.9.0":
+  version: 3.9.0
+  resolution: "@getpara/graz-connector@npm:3.9.0"
   dependencies:
-    "@getpara/cosmjs-v0-integration": "npm:3.8.0"
-    "@getpara/web-sdk": "npm:3.8.0"
+    "@getpara/cosmjs-v0-integration": "npm:3.9.0"
+    "@getpara/web-sdk": "npm:3.9.0"
   peerDependencies:
     "@cosmjs/amino": ^0.32.4
     "@cosmjs/encoding": ^0.32.4
@@ -1074,25 +1074,25 @@ __metadata:
     "@keplr-wallet/types": ">=0.12.156"
     cosmjs-types: ^0.9.0
     graz: ">=0.4.1"
-  checksum: 10c0/7c51640b15f7bf4d52e660c1b6d0badd670ba350f4e4af0a6f43fdbb755d960e7af49ec6089ae0b7889d12cea0c53698dfddf4fa7503620c3d954e29c2c00006
+  checksum: 10c0/87144e7a042e919d32845086531496d6c00e22268b2358a0c938d12776e48324d7699c033d42ac5d8846d945c0f5f09f6ba557094b88ebad53af3edccd2bd464
   languageName: node
   linkType: hard
 
-"@getpara/react-common@npm:3.8.0":
-  version: 3.8.0
-  resolution: "@getpara/react-common@npm:3.8.0"
+"@getpara/react-common@npm:3.9.0":
+  version: 3.9.0
+  resolution: "@getpara/react-common@npm:3.9.0"
   dependencies:
-    "@getpara/web-sdk": "npm:3.8.0"
+    "@getpara/web-sdk": "npm:3.9.0"
   peerDependencies:
     react: ">=18"
     react-dom: ">=18"
-  checksum: 10c0/0c762ed6f0adba6cc9c1b2de230d80bfbfb472dfa423491d15bd23f3b9024eadb50c65d1284f4ad5c2a88bf1f41a5226dba512459379363fb51de13d594658b6
+  checksum: 10c0/3b3eae7a1e19cd09262bb37f1085b65366e9bcefb7ac63286d380f468a50b4daa584de7703559e81b4920e1af2c72df8ec8174c6885e8d13cd49a52e06469524
   languageName: node
   linkType: hard
 
-"@getpara/react-component-library@npm:3.8.0":
-  version: 3.8.0
-  resolution: "@getpara/react-component-library@npm:3.8.0"
+"@getpara/react-component-library@npm:3.9.0":
+  version: 3.9.0
+  resolution: "@getpara/react-component-library@npm:3.9.0"
   dependencies:
     "@radix-ui/react-avatar": "npm:^1.1.2"
     "@radix-ui/react-checkbox": "npm:^1.3.3"
@@ -1130,21 +1130,22 @@ __metadata:
   peerDependencies:
     react: ">=18"
     react-dom: ">=18"
-  checksum: 10c0/ab4913496e50a11cb5f34af16f098a68b51d1c7f1e8638ff057108027e498b920e1937b6c2db80f284495235ae1f652fd09935bc297e2c0762bd868ae7be638f
+  checksum: 10c0/9f272b9748d62964fb62dbbdf36a743bb920d66229cbb1fdbcca488416b120ee42efbbb201582ed6d3f38193416904492b9814ae532262929e5f0af9649f071d
   languageName: node
   linkType: hard
 
-"@getpara/react-core@npm:3.8.0":
-  version: 3.8.0
-  resolution: "@getpara/react-core@npm:3.8.0"
+"@getpara/react-core@npm:3.9.0":
+  version: 3.9.0
+  resolution: "@getpara/react-core@npm:3.9.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.8.0"
+    "@getpara/core-sdk": "npm:3.9.0"
     zustand: "npm:^5.0.0"
   peerDependencies:
     "@getpara/cosmjs-v0-integration": ">=2"
     "@getpara/ethers-v6-integration": ">=2"
     "@getpara/solana-signers-v2-integration": ">=2"
     "@getpara/stellar-sdk-v14-integration": ">=2"
+    "@getpara/sui-sdk-integration": ">=2"
     "@getpara/viem-v2-integration": ">=2"
     "@tanstack/react-query": ">=5"
     react: ">=18"
@@ -1158,20 +1159,22 @@ __metadata:
       optional: true
     "@getpara/stellar-sdk-v14-integration":
       optional: true
+    "@getpara/sui-sdk-integration":
+      optional: true
     "@getpara/viem-v2-integration":
       optional: true
-  checksum: 10c0/0bb053f39275db3e521e21a092bb2a7f48d8e8b8b5a1b082219863055c8ee4419df1ac2cfa225e8f77b804dca728e9125d7300fd7a1df8f7449e167effa9ea97
+  checksum: 10c0/443f48156609b2002d13d6993e280eded2492425777bbc44b567b40f7bb86758c14c78e8a8139898617016c80982add47046a2a8720ee33c0e424dff70b37dc7
   languageName: node
   linkType: hard
 
-"@getpara/react-sdk-lite@npm:3.8.0":
-  version: 3.8.0
-  resolution: "@getpara/react-sdk-lite@npm:3.8.0"
+"@getpara/react-sdk-lite@npm:3.9.0":
+  version: 3.9.0
+  resolution: "@getpara/react-sdk-lite@npm:3.9.0"
   dependencies:
-    "@getpara/react-common": "npm:3.8.0"
-    "@getpara/react-component-library": "npm:3.8.0"
-    "@getpara/react-core": "npm:3.8.0"
-    "@getpara/web-sdk": "npm:3.8.0"
+    "@getpara/react-common": "npm:3.9.0"
+    "@getpara/react-component-library": "npm:3.9.0"
+    "@getpara/react-core": "npm:3.9.0"
+    "@getpara/web-sdk": "npm:3.9.0"
     date-fns: "npm:^3.6.0"
     detect-browser: "npm:^5.3.0"
     framer-motion: "npm:^11.3.31"
@@ -1220,36 +1223,36 @@ __metadata:
       optional: true
   bin:
     setup-para: dist/cli/cli.mjs
-  checksum: 10c0/2f77a36675a0d507f3b9ca2db733981ddca3d9713d46e0655d4645180dd6604de60c76cd6e4acacf00cde2ac065768f2215c2d6707714ededccfbfac0f046d22
+  checksum: 10c0/2551d0b0a93bd953274a9dc4f60263f73bd057985237e499e21ac42259ee6b3d35101e900a9d3bff70a0708488ba97f29e1c7f3fc46fba2ed44d2eec760ebd59
   languageName: node
   linkType: hard
 
-"@getpara/shared@npm:^1.23.0":
-  version: 1.23.0
-  resolution: "@getpara/shared@npm:1.23.0"
-  checksum: 10c0/591e31432d05311a17024033234cdda821b6a093e31895ec5bfbc9bc5854e40c8d0401861fd1efa6f04bc82498e4046b450fd1c1bb6ea894cfac9bbf2206893a
+"@getpara/shared@npm:^1.24.0":
+  version: 1.24.0
+  resolution: "@getpara/shared@npm:1.24.0"
+  checksum: 10c0/a20db4de4da8c3918c2c6ac783f891a312c8e80143f582627201ce86f46492e288efea3073b371fce173f7c0750485461f8189c50fc7844b36091333d48eb543
   languageName: node
   linkType: hard
 
-"@getpara/user-management-client@npm:3.8.0":
-  version: 3.8.0
-  resolution: "@getpara/user-management-client@npm:3.8.0"
+"@getpara/user-management-client@npm:3.9.0":
+  version: 3.9.0
+  resolution: "@getpara/user-management-client@npm:3.9.0"
   dependencies:
-    "@getpara/shared": "npm:^1.23.0"
+    "@getpara/shared": "npm:^1.24.0"
     "@opentelemetry/api": "npm:^1.9.1"
     axios: "npm:^1.8.4"
     axios-retry: "npm:^4.5.0"
     libphonenumber-js: "npm:^1.11.7"
-  checksum: 10c0/6f20ddebcdbacc78cb55b3cd395f075a2945f28a2e9f9c0e3b20dcbfdfdd959b4283f3a5af25127fc0324eb874ab7dedf6e96c9aeba1067ea5871c77951c4ce2
+  checksum: 10c0/f1e3bb97c66024ff35125ca16c967a0aced94e69f4ac58c3f03a7a56c0e45ed732c3bd287d0d52af5e29d2e90a24ae41ab18a849e1361c85cd5d52367b76c7f2
   languageName: node
   linkType: hard
 
-"@getpara/web-sdk@npm:3.8.0":
-  version: 3.8.0
-  resolution: "@getpara/web-sdk@npm:3.8.0"
+"@getpara/web-sdk@npm:3.9.0":
+  version: 3.9.0
+  resolution: "@getpara/web-sdk@npm:3.9.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.8.0"
-    "@getpara/user-management-client": "npm:3.8.0"
+    "@getpara/core-sdk": "npm:3.9.0"
+    "@getpara/user-management-client": "npm:3.9.0"
     "@opentelemetry/api": "npm:^1.9.1"
     base64url: "npm:^3.0.1"
     buffer: "npm:6.0.3"
@@ -1262,7 +1265,7 @@ __metadata:
   peerDependenciesMeta:
     "@farcaster/miniapp-sdk":
       optional: true
-  checksum: 10c0/77532e4f282594132c5e1b0348e652a413d75414134f419e3dad7f4db893df2385ec93f55ccd176a41b31b292c38b55af61878dfe62d0e6016061a8958018929
+  checksum: 10c0/5821de5810f8d5ef4cd952ce4d16c2a9c3860716ac335867f1d108cee7c54fc86b0e182f70e9d1eb61d70a9244154f26d2eac8beb1db804522bf481e2b2bb936
   languageName: node
   linkType: hard
 
@@ -8853,8 +8856,8 @@ __metadata:
     "@cosmjs/stargate": "npm:0.39.0"
     "@cosmjs/tendermint-rpc": "npm:0.39.0"
     "@eslint/js": "npm:10.0.1"
-    "@getpara/cosmos-wallet-connectors": "npm:3.8.0"
-    "@getpara/react-sdk-lite": "npm:3.8.0"
+    "@getpara/cosmos-wallet-connectors": "npm:3.9.0"
+    "@getpara/react-sdk-lite": "npm:3.9.0"
     "@tailwindcss/postcss": "npm:4.3.0"
     "@tanstack/react-query": "npm:5.101.0"
     "@types/node": "npm:25.9.1"

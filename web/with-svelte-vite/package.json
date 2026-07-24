@@ -12,8 +12,8 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "@getpara/viem-v2-integration": "3.8.0",
-    "@getpara/web-sdk": "3.8.0",
+    "@getpara/viem-v2-integration": "3.9.0",
+    "@getpara/web-sdk": "3.9.0",
     "viem": "^2.27.0"
   },
   "devDependencies": {

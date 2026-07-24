@@ -29,6 +29,7 @@ export function ParaModalMultichainExample() {
             {signing.chains.map((chain) => (
               <SignMessage
                 key={chain.chainId}
+                testId={`sign-card-${chain.chainId}`}
                 title={`Sign Message - ${chain.label}`}
                 message={signing.message}
                 onSign={chain.sign}
