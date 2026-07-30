@@ -26,6 +26,11 @@ export function ParaModalMultichainExample() {
         ) : (
           <div className="space-y-4">
             <WalletInfo address={wallet.address} />
+            <div
+              data-testid="embedded-wallets"
+              className="hidden">
+              {JSON.stringify(signing.wallets)}
+            </div>
             {signing.chains.map((chain) => (
               <SignMessage
                 key={chain.chainId}

@@ -1,9 +1,11 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { useAccount } from "@getpara/react-sdk";
+import { useAccount, useClient } from "@getpara/react-sdk";
 import { useParaCosmjsAminoSigner } from "@getpara/react-sdk/cosmos";
 import { useParaSolanaSigner } from "@getpara/react-sdk/solana";
+import { useParaStellarSigner } from "@getpara/react-sdk/stellar";
+import { Buffer } from "buffer";
 import { useSignMessage as useWagmiSignMessage } from "wagmi";
 import { useOfflineSigners } from "graz";
 import { useWallet as useSolanaWallet } from "@solana/wallet-adapter-react";
@@ -31,7 +33,9 @@ type SignState = {
 };
 
 type WalletWithType = {
+  id?: string;
   type?: string;
+  address?: string;
 };
 
 const initialSignState: SignState = {
@@ -69,6 +73,16 @@ export function useMultichainSign() {
   const { signMessage: solanaExternalSign } = useSolanaWallet();
   const [solanaState, setSolanaState] = useState<SignState>(initialSignState);
 
+  // Stellar hooks. ED25519 wallets are interchangeable across Solana/Stellar/Sui
+  // in the SDK's default resolution, so bind the signer to the STELLAR-typed
+  // wallet explicitly.
+  const para = useClient();
+  const stellarWalletId = Object.values(para?.wallets ?? {}).find(
+    (wallet) => (wallet as WalletWithType).type === "STELLAR"
+  )?.id;
+  const { stellarSigner } = useParaStellarSigner({ walletId: stellarWalletId });
+  const [stellarState, setStellarState] = useState<SignState>(initialSignState);
+
   const isExternal = connectionType === "external";
 
   // Detect available chains from embedded wallets and external connections
@@ -78,6 +92,7 @@ export function useMultichainSign() {
   const hasEvm = wallets.some((wallet) => wallet.type === "EVM") || connectedNetworks.includes("evm");
   const hasCosmos = wallets.some((wallet) => wallet.type === "COSMOS") || connectedNetworks.includes("cosmos");
   const hasSolana = wallets.some((wallet) => wallet.type === "SOLANA") || connectedNetworks.includes("solana");
+  const hasStellar = wallets.some((wallet) => wallet.type === "STELLAR");
 
   const signEvm = useCallback(async () => {
     setEvmState({ isPending: true, errorMessage: null, signature: undefined });
@@ -137,10 +152,25 @@ export function useMultichainSign() {
     }
   }, [isExternal, solanaExternalSign, solanaSigner]);
 
+  const signStellar = useCallback(async () => {
+    setStellarState({ isPending: true, errorMessage: null, signature: undefined });
+    try {
+      if (!stellarSigner) throw new Error("No Stellar signer available");
+      const messageBytes = Buffer.from(new TextEncoder().encode(HELLO_WORLD_MESSAGE));
+      const sig = await stellarSigner.signBytes(messageBytes);
+      setStellarState({ isPending: false, errorMessage: null, signature: sig.toString("base64") });
+    } catch (err) {
+      setStellarState({ isPending: false, errorMessage: getErrorMessage(err, "Stellar signing failed"), signature: undefined });
+    }
+  }, [stellarSigner]);
+
   const chains: ChainSignState[] = [];
   if (hasEvm) chains.push({ chainId: "evm", label: "EVM", sign: signEvm, ...evmState });
   if (hasCosmos) chains.push({ chainId: "cosmos", label: "Cosmos", sign: signCosmos, ...cosmosState });
   if (hasSolana) chains.push({ chainId: "solana", label: "Solana", sign: signSolana, ...solanaState });
+  if (hasStellar) chains.push({ chainId: "stellar", label: "Stellar", sign: signStellar, ...stellarState });
 
-  return { message: HELLO_WORLD_MESSAGE, chains };
+  const walletSummaries = wallets.map((wallet) => ({ id: wallet.id, type: wallet.type, address: wallet.address }));
+
+  return { message: HELLO_WORLD_MESSAGE, chains, wallets: walletSummaries };
 }
