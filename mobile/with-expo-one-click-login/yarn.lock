@@ -2386,28 +2386,28 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@getpara/aa-alchemy@npm:3.11.0":
-  version: 3.11.0
-  resolution: "@getpara/aa-alchemy@npm:3.11.0"
+"@getpara/aa-alchemy@npm:3.12.0":
+  version: 3.12.0
+  resolution: "@getpara/aa-alchemy@npm:3.12.0"
   dependencies:
     "@aa-sdk/core": "npm:^4.84.1"
     "@account-kit/infra": "npm:^4.84.1"
     "@account-kit/smart-contracts": "npm:^4.84.1"
-    "@getpara/viem-v2-integration": "npm:3.11.0"
+    "@getpara/viem-v2-integration": "npm:3.12.0"
   peerDependencies:
     viem: ">=2.0.0"
-  checksum: 10c0/31b9f5b6f5d72a81b57af392a997d1af29d7a33638f35e14bd639a953164785a1402f2586fb202068047dca1f62fb3eaceb3309dc33d6acbc696514369cf74b3
+  checksum: 10c0/6a848978cde5153c8394a2fa3efe369964f9683b2a229a0cdfc4b1292f9c4afb0e7ada4c4817b5bf6369594fbf2acd5f44745d8728430cc7899b6b1f75793c82
   languageName: node
   linkType: hard
 
-"@getpara/core-sdk@npm:3.11.0":
-  version: 3.11.0
-  resolution: "@getpara/core-sdk@npm:3.11.0"
+"@getpara/core-sdk@npm:3.12.0":
+  version: 3.12.0
+  resolution: "@getpara/core-sdk@npm:3.12.0"
   dependencies:
     "@celo/utils": "npm:^8.0.2"
     "@cosmjs/encoding": "npm:^0.32.4"
     "@ethereumjs/util": "npm:^9.1.0"
-    "@getpara/user-management-client": "npm:3.11.0"
+    "@getpara/user-management-client": "npm:3.12.0"
     "@noble/hashes": "npm:^1.5.0"
     "@opentelemetry/api": "npm:^1.9.1"
     "@opentelemetry/context-zone": "npm:^2.9.0"
@@ -2427,15 +2427,15 @@ __metadata:
     node-forge: "npm:^1.4.0"
     uuid: "npm:^11.1.1"
     xstate: "npm:^5.24.0"
-  checksum: 10c0/47b67fd316d66eca1039eb81be6014d3997a53d4c7d71eaad55473019d0200093b68e8ed2db188cd4df3219550d0262e14d60a59f0b4274ef61b043d6196a8c1
+  checksum: 10c0/3a3321fe525ca5e62e3c898df5bc4c9590d13aea47dc2402d1fe5bca636135b75ece5a429dc3441da0658d223a761996428201291ceffbb84b2d8274c185a092
   languageName: node
   linkType: hard
 
-"@getpara/react-core@npm:3.11.0":
-  version: 3.11.0
-  resolution: "@getpara/react-core@npm:3.11.0"
+"@getpara/react-core@npm:3.12.0":
+  version: 3.12.0
+  resolution: "@getpara/react-core@npm:3.12.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.11.0"
+    "@getpara/core-sdk": "npm:3.12.0"
     zustand: "npm:^5.0.0"
   peerDependencies:
     "@getpara/cosmjs-v0-integration": ">=2"
@@ -2460,19 +2460,19 @@ __metadata:
       optional: true
     "@getpara/viem-v2-integration":
       optional: true
-  checksum: 10c0/6a4002d99605ff35a93415d95923dcc01ebc159aad4bbc2438d6eedb3582d7209c365344676755c6c00aa0aac35096ab3adebd513384eb335aa7214622b68475
+  checksum: 10c0/8fc8ce9d4506b5fe19ab8d7b605aa913c371f988e4f620e53a9c8e12ed98fb318039a3aff02dd74e248dc6e2a1351a69f49c10dd91815fc9a7bf381d16558e77
   languageName: node
   linkType: hard
 
-"@getpara/react-native-wallet@npm:3.11.0":
-  version: 3.11.0
-  resolution: "@getpara/react-native-wallet@npm:3.11.0"
+"@getpara/react-native-wallet@npm:3.12.0":
+  version: 3.12.0
+  resolution: "@getpara/react-native-wallet@npm:3.12.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.11.0"
-    "@getpara/react-core": "npm:3.11.0"
-    "@getpara/user-management-client": "npm:3.11.0"
-    "@getpara/viem-v2-integration": "npm:3.11.0"
-    "@getpara/web-sdk": "npm:3.11.0"
+    "@getpara/core-sdk": "npm:3.12.0"
+    "@getpara/react-core": "npm:3.12.0"
+    "@getpara/user-management-client": "npm:3.12.0"
+    "@getpara/viem-v2-integration": "npm:3.12.0"
+    "@getpara/web-sdk": "npm:3.12.0"
     "@peculiar/webcrypto": "npm:^1.5.0"
     "@ungap/structured-clone": "npm:1.3.0"
     react-native-url-polyfill: "npm:2.0.0"
@@ -2494,7 +2494,7 @@ __metadata:
   peerDependenciesMeta:
     "@getpara/viem-v2-integration":
       optional: true
-  checksum: 10c0/a494dc3b4dc6acdbfff345367ebe74d784ec05f2e383693f0f82c4ec59a641e81d23e9100ebc87a45a484a0996626c0e5367768d70d48878aca7e15aa22e386a
+  checksum: 10c0/44b605d7df39dd5e544362bbd16c29450bee4f703d5dc333b95077456a27eb576908fd6bb81d81b564fcf7645416cbcda082aa3ab03bfec3940720a5cb64688c
   languageName: node
   linkType: hard
 
@@ -2505,36 +2505,36 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@getpara/user-management-client@npm:3.11.0":
-  version: 3.11.0
-  resolution: "@getpara/user-management-client@npm:3.11.0"
+"@getpara/user-management-client@npm:3.12.0":
+  version: 3.12.0
+  resolution: "@getpara/user-management-client@npm:3.12.0"
   dependencies:
     "@getpara/shared": "npm:^1.24.0"
     "@opentelemetry/api": "npm:^1.9.1"
     axios: "npm:^1.8.4"
     axios-retry: "npm:^4.5.0"
     libphonenumber-js: "npm:^1.11.7"
-  checksum: 10c0/3362193daff5ef7a811aada679319a09c78e0f8cb5c4cfc45249c881b2115db37a62df23e46f7b0f543ec44dda44d9d4ee80e44006259bf3ceff2482bd13972a
+  checksum: 10c0/a29b09c898a45289cdaf9020598b6f7842ead1424334b323a9da3464688cf6d046349420cb6483438015db9c7e531fbd82dacf10243f886e8d81267f699da53e
   languageName: node
   linkType: hard
 
-"@getpara/viem-v2-integration@npm:3.11.0":
-  version: 3.11.0
-  resolution: "@getpara/viem-v2-integration@npm:3.11.0"
+"@getpara/viem-v2-integration@npm:3.12.0":
+  version: 3.12.0
+  resolution: "@getpara/viem-v2-integration@npm:3.12.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.11.0"
+    "@getpara/core-sdk": "npm:3.12.0"
   peerDependencies:
     viem: ^2.39.0
-  checksum: 10c0/71f07707d1fc72586657467f625fc3e301b134b89d8ff1898e1bed47f43e5693680e71ff0eda4778698b49348dfba2016b7d45f188638b151be60d7cb56f15c3
+  checksum: 10c0/26f0a1568c1e689b96dd63888f0a22df5532b9333bfe3f6f46cef50eacd0a90c4d2cd49b2c42f7ad89c9573a5aff6da0c003ee2c5d79c6fb7d9e85d7d012afc2
   languageName: node
   linkType: hard
 
-"@getpara/web-sdk@npm:3.11.0":
-  version: 3.11.0
-  resolution: "@getpara/web-sdk@npm:3.11.0"
+"@getpara/web-sdk@npm:3.12.0":
+  version: 3.12.0
+  resolution: "@getpara/web-sdk@npm:3.12.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.11.0"
-    "@getpara/user-management-client": "npm:3.11.0"
+    "@getpara/core-sdk": "npm:3.12.0"
+    "@getpara/user-management-client": "npm:3.12.0"
     "@opentelemetry/api": "npm:^1.9.1"
     base64url: "npm:^3.0.1"
     buffer: "npm:6.0.3"
@@ -2547,7 +2547,7 @@ __metadata:
   peerDependenciesMeta:
     "@farcaster/miniapp-sdk":
       optional: true
-  checksum: 10c0/5c3816efd8ebe0d6dff7d2b9935e9f9b306251f084d0dc2a78dbbae893aec40873cd48c2f1bd95d2179ee775ccaf3f1cc9fbc35758539c5f0daad67db973966d
+  checksum: 10c0/6eaf15d7d6c8dff589ec5daa243abfc606d335518fe27707b910dde138960b9d7977812f1e16f293e9ef5db702d5a842d1701e32e4ebf196fcc8ad9774f1b452
   languageName: node
   linkType: hard
 
@@ -10095,9 +10095,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ox@npm:0.14.7":
-  version: 0.14.7
-  resolution: "ox@npm:0.14.7"
+"ox@npm:0.14.30":
+  version: 0.14.30
+  resolution: "ox@npm:0.14.30"
   dependencies:
     "@adraffy/ens-normalize": "npm:^1.11.0"
     "@noble/ciphers": "npm:^1.3.0"
@@ -10112,7 +10112,7 @@ __metadata:
   peerDependenciesMeta:
     typescript:
       optional: true
-  checksum: 10c0/c4bc216b4e689a0d4e6d6640be30bcc7e82209e4d69c1dd2d2c10c6b3b709f658c6b3e7ebe68e590602d6b0ef15785090d890b75cc7e67a094fe50d84778b9f9
+  checksum: 10c0/dfefa9218269103b3da3686c4da62849aef15e4347fd21f898fa113d9b4c2b86afab7c662c94d58206257736202647ce96249405c021c4a233712ac34fa3cc1b
   languageName: node
   linkType: hard
 
@@ -11327,8 +11327,8 @@ __metadata:
   linkType: hard
 
 "rpc-websockets@npm:^9.0.2":
-  version: 9.3.7
-  resolution: "rpc-websockets@npm:9.3.7"
+  version: 9.3.9
+  resolution: "rpc-websockets@npm:9.3.9"
   dependencies:
     "@swc/helpers": "npm:^0.5.11"
     "@types/uuid": "npm:^10.0.0"
@@ -11337,14 +11337,14 @@ __metadata:
     bufferutil: "npm:^4.0.1"
     eventemitter3: "npm:^5.0.1"
     utf-8-validate: "npm:^6.0.0"
-    uuid: "npm:^11.0.0"
+    uuid: "npm:^14.0.0"
     ws: "npm:^8.5.0"
   dependenciesMeta:
     bufferutil:
       optional: true
     utf-8-validate:
       optional: true
-  checksum: 10c0/6b2fbf24f68ad00301de4c2d827868c3a625659ebec2451bfc5d39373dd1f18d8b051ebd6f44996731428378b26e92335f981e1cb96f2b6d04f481ab2d988cd2
+  checksum: 10c0/080015638cef0a4d5ea6d941bea12e52447b867ee5a07939a4d856609d05de84a6b5c01c7c3555b86e85780a361f800eadc1a014929fa48f18f0fecda8096d75
   languageName: node
   linkType: hard
 
@@ -12743,12 +12743,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"uuid@npm:^11.0.0, uuid@npm:^11.0.2, uuid@npm:^11.1.1":
+"uuid@npm:^11.0.2, uuid@npm:^11.1.1":
   version: 11.1.1
   resolution: "uuid@npm:11.1.1"
   bin:
     uuid: dist/esm/bin/uuid
   checksum: 10c0/9e3af58eba872ece5a5e76f4773a94fc78a0ef2c2444c38dbe6b42f41dadf76c01850fd783604f27986f6195e6286aef064d45987d401b2a33127b98ddf7c0c5
+  languageName: node
+  linkType: hard
+
+"uuid@npm:^14.0.0":
+  version: 14.0.1
+  resolution: "uuid@npm:14.0.1"
+  bin:
+    uuid: dist-node/bin/uuid
+  checksum: 10c0/2d961289097cb68c37d93d1da0b5c3aafc1eb9948a455cca8d0ae53a099b2fe583b8933254a84097f700e6bac2e23033364904df0467c22551d5d9611febcaf6
   languageName: node
   linkType: hard
 
@@ -12797,8 +12806,8 @@ __metadata:
   linkType: hard
 
 "viem@npm:^2.45.0":
-  version: 2.47.6
-  resolution: "viem@npm:2.47.6"
+  version: 2.55.1
+  resolution: "viem@npm:2.55.1"
   dependencies:
     "@noble/curves": "npm:1.9.1"
     "@noble/hashes": "npm:1.8.0"
@@ -12806,14 +12815,14 @@ __metadata:
     "@scure/bip39": "npm:1.6.0"
     abitype: "npm:1.2.3"
     isows: "npm:1.0.7"
-    ox: "npm:0.14.7"
-    ws: "npm:8.18.3"
+    ox: "npm:0.14.30"
+    ws: "npm:8.21.0"
   peerDependencies:
     typescript: ">=5.0.4"
   peerDependenciesMeta:
     typescript:
       optional: true
-  checksum: 10c0/e89fa80221c193b3fdda4816a407b16f26f2fe680ac6d2533029cb0532d71c0cf41b272087ea93216c8d57ab82c4bd6621d38576c24e8f5ae3cfdf5012e39ceb
+  checksum: 10c0/4747450c511604dc2280b94b6a6eab53638058a559531f7707d31f21de51670449530f9ebc2fbc06d961b8b5a6cfadb920683e701058adc8996619b012bbc56d
   languageName: node
   linkType: hard
 
@@ -13044,9 +13053,9 @@ __metadata:
     "@babel/core": "npm:^7.20.0"
     "@craftzdog/react-native-buffer": "npm:^6.1.0"
     "@expo/vector-icons": "npm:^15.0.2"
-    "@getpara/aa-alchemy": "npm:3.11.0"
-    "@getpara/react-native-wallet": "npm:3.11.0"
-    "@getpara/viem-v2-integration": "npm:3.11.0"
+    "@getpara/aa-alchemy": "npm:3.12.0"
+    "@getpara/react-native-wallet": "npm:3.12.0"
+    "@getpara/viem-v2-integration": "npm:3.12.0"
     "@peculiar/webcrypto": "npm:^1.5.0"
     "@react-native-async-storage/async-storage": "npm:^2.2.0"
     "@react-navigation/native": "npm:^7.1.6"
@@ -13146,9 +13155,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ws@npm:8.18.3":
-  version: 8.18.3
-  resolution: "ws@npm:8.18.3"
+"ws@npm:8.21.0, ws@npm:^8.12.1, ws@npm:^8.5.0":
+  version: 8.21.0
+  resolution: "ws@npm:8.21.0"
   peerDependencies:
     bufferutil: ^4.0.1
     utf-8-validate: ">=5.0.2"
@@ -13157,7 +13166,7 @@ __metadata:
       optional: true
     utf-8-validate:
       optional: true
-  checksum: 10c0/eac918213de265ef7cb3d4ca348b891a51a520d839aa51cdb8ca93d4fa7ff9f6ccb339ccee89e4075324097f0a55157c89fa3f7147bde9d8d7e90335dc087b53
+  checksum: 10c0/ef4a243476283fc49bc7550966c4af4aa0eef56273837211e700de3b664e08604a760cdddcb5ba43c049140e74ccfec5b0ee0bb439e08c2adf9138902fdde5f9
   languageName: node
   linkType: hard
 
@@ -13182,21 +13191,6 @@ __metadata:
     utf-8-validate:
       optional: true
   checksum: 10c0/7972670b676fb1ccba73b0899ca3c2e04e8c2075629c2614cced7f556536f96a672bbf4619fc5a06c8b8720bb839a47ca88c69c95dc14c9c61a99fbecba1c866
-  languageName: node
-  linkType: hard
-
-"ws@npm:^8.12.1, ws@npm:^8.5.0":
-  version: 8.21.0
-  resolution: "ws@npm:8.21.0"
-  peerDependencies:
-    bufferutil: ^4.0.1
-    utf-8-validate: ">=5.0.2"
-  peerDependenciesMeta:
-    bufferutil:
-      optional: true
-    utf-8-validate:
-      optional: true
-  checksum: 10c0/ef4a243476283fc49bc7550966c4af4aa0eef56273837211e700de3b664e08604a760cdddcb5ba43c049140e74ccfec5b0ee0bb439e08c2adf9138902fdde5f9
   languageName: node
   linkType: hard
 

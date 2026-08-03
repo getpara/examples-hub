@@ -2011,14 +2011,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@getpara/core-sdk@npm:3.11.0":
-  version: 3.11.0
-  resolution: "@getpara/core-sdk@npm:3.11.0"
+"@getpara/core-sdk@npm:3.12.0":
+  version: 3.12.0
+  resolution: "@getpara/core-sdk@npm:3.12.0"
   dependencies:
     "@celo/utils": "npm:^8.0.2"
     "@cosmjs/encoding": "npm:^0.32.4"
     "@ethereumjs/util": "npm:^9.1.0"
-    "@getpara/user-management-client": "npm:3.11.0"
+    "@getpara/user-management-client": "npm:3.12.0"
     "@noble/hashes": "npm:^1.5.0"
     "@opentelemetry/api": "npm:^1.9.1"
     "@opentelemetry/context-zone": "npm:^2.9.0"
@@ -2038,15 +2038,15 @@ __metadata:
     node-forge: "npm:^1.4.0"
     uuid: "npm:^11.1.1"
     xstate: "npm:^5.24.0"
-  checksum: 10c0/47b67fd316d66eca1039eb81be6014d3997a53d4c7d71eaad55473019d0200093b68e8ed2db188cd4df3219550d0262e14d60a59f0b4274ef61b043d6196a8c1
+  checksum: 10c0/3a3321fe525ca5e62e3c898df5bc4c9590d13aea47dc2402d1fe5bca636135b75ece5a429dc3441da0658d223a761996428201291ceffbb84b2d8274c185a092
   languageName: node
   linkType: hard
 
-"@getpara/react-core@npm:3.11.0":
-  version: 3.11.0
-  resolution: "@getpara/react-core@npm:3.11.0"
+"@getpara/react-core@npm:3.12.0":
+  version: 3.12.0
+  resolution: "@getpara/react-core@npm:3.12.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.11.0"
+    "@getpara/core-sdk": "npm:3.12.0"
     zustand: "npm:^5.0.0"
   peerDependencies:
     "@getpara/cosmjs-v0-integration": ">=2"
@@ -2071,19 +2071,19 @@ __metadata:
       optional: true
     "@getpara/viem-v2-integration":
       optional: true
-  checksum: 10c0/6a4002d99605ff35a93415d95923dcc01ebc159aad4bbc2438d6eedb3582d7209c365344676755c6c00aa0aac35096ab3adebd513384eb335aa7214622b68475
+  checksum: 10c0/8fc8ce9d4506b5fe19ab8d7b605aa913c371f988e4f620e53a9c8e12ed98fb318039a3aff02dd74e248dc6e2a1351a69f49c10dd91815fc9a7bf381d16558e77
   languageName: node
   linkType: hard
 
-"@getpara/react-native-wallet@npm:3.11.0":
-  version: 3.11.0
-  resolution: "@getpara/react-native-wallet@npm:3.11.0"
+"@getpara/react-native-wallet@npm:3.12.0":
+  version: 3.12.0
+  resolution: "@getpara/react-native-wallet@npm:3.12.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.11.0"
-    "@getpara/react-core": "npm:3.11.0"
-    "@getpara/user-management-client": "npm:3.11.0"
-    "@getpara/viem-v2-integration": "npm:3.11.0"
-    "@getpara/web-sdk": "npm:3.11.0"
+    "@getpara/core-sdk": "npm:3.12.0"
+    "@getpara/react-core": "npm:3.12.0"
+    "@getpara/user-management-client": "npm:3.12.0"
+    "@getpara/viem-v2-integration": "npm:3.12.0"
+    "@getpara/web-sdk": "npm:3.12.0"
     "@peculiar/webcrypto": "npm:^1.5.0"
     "@ungap/structured-clone": "npm:1.3.0"
     react-native-url-polyfill: "npm:2.0.0"
@@ -2105,7 +2105,7 @@ __metadata:
   peerDependenciesMeta:
     "@getpara/viem-v2-integration":
       optional: true
-  checksum: 10c0/a494dc3b4dc6acdbfff345367ebe74d784ec05f2e383693f0f82c4ec59a641e81d23e9100ebc87a45a484a0996626c0e5367768d70d48878aca7e15aa22e386a
+  checksum: 10c0/44b605d7df39dd5e544362bbd16c29450bee4f703d5dc333b95077456a27eb576908fd6bb81d81b564fcf7645416cbcda082aa3ab03bfec3940720a5cb64688c
   languageName: node
   linkType: hard
 
@@ -2116,36 +2116,36 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@getpara/user-management-client@npm:3.11.0":
-  version: 3.11.0
-  resolution: "@getpara/user-management-client@npm:3.11.0"
+"@getpara/user-management-client@npm:3.12.0":
+  version: 3.12.0
+  resolution: "@getpara/user-management-client@npm:3.12.0"
   dependencies:
     "@getpara/shared": "npm:^1.24.0"
     "@opentelemetry/api": "npm:^1.9.1"
     axios: "npm:^1.8.4"
     axios-retry: "npm:^4.5.0"
     libphonenumber-js: "npm:^1.11.7"
-  checksum: 10c0/3362193daff5ef7a811aada679319a09c78e0f8cb5c4cfc45249c881b2115db37a62df23e46f7b0f543ec44dda44d9d4ee80e44006259bf3ceff2482bd13972a
+  checksum: 10c0/a29b09c898a45289cdaf9020598b6f7842ead1424334b323a9da3464688cf6d046349420cb6483438015db9c7e531fbd82dacf10243f886e8d81267f699da53e
   languageName: node
   linkType: hard
 
-"@getpara/viem-v2-integration@npm:3.11.0":
-  version: 3.11.0
-  resolution: "@getpara/viem-v2-integration@npm:3.11.0"
+"@getpara/viem-v2-integration@npm:3.12.0":
+  version: 3.12.0
+  resolution: "@getpara/viem-v2-integration@npm:3.12.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.11.0"
+    "@getpara/core-sdk": "npm:3.12.0"
   peerDependencies:
     viem: ^2.39.0
-  checksum: 10c0/71f07707d1fc72586657467f625fc3e301b134b89d8ff1898e1bed47f43e5693680e71ff0eda4778698b49348dfba2016b7d45f188638b151be60d7cb56f15c3
+  checksum: 10c0/26f0a1568c1e689b96dd63888f0a22df5532b9333bfe3f6f46cef50eacd0a90c4d2cd49b2c42f7ad89c9573a5aff6da0c003ee2c5d79c6fb7d9e85d7d012afc2
   languageName: node
   linkType: hard
 
-"@getpara/web-sdk@npm:3.11.0":
-  version: 3.11.0
-  resolution: "@getpara/web-sdk@npm:3.11.0"
+"@getpara/web-sdk@npm:3.12.0":
+  version: 3.12.0
+  resolution: "@getpara/web-sdk@npm:3.12.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.11.0"
-    "@getpara/user-management-client": "npm:3.11.0"
+    "@getpara/core-sdk": "npm:3.12.0"
+    "@getpara/user-management-client": "npm:3.12.0"
     "@opentelemetry/api": "npm:^1.9.1"
     base64url: "npm:^3.0.1"
     buffer: "npm:6.0.3"
@@ -2158,7 +2158,7 @@ __metadata:
   peerDependenciesMeta:
     "@farcaster/miniapp-sdk":
       optional: true
-  checksum: 10c0/5c3816efd8ebe0d6dff7d2b9935e9f9b306251f084d0dc2a78dbbae893aec40873cd48c2f1bd95d2179ee775ccaf3f1cc9fbc35758539c5f0daad67db973966d
+  checksum: 10c0/6eaf15d7d6c8dff589ec5daa243abfc606d335518fe27707b910dde138960b9d7977812f1e16f293e9ef5db702d5a842d1701e32e4ebf196fcc8ad9774f1b452
   languageName: node
   linkType: hard
 
@@ -4740,7 +4740,7 @@ __metadata:
     "@babel/runtime": "npm:^7.25.0"
     "@craftzdog/react-native-buffer": "npm:^6.1.0"
     "@eslint/js": "npm:^9.29.0"
-    "@getpara/react-native-wallet": "npm:3.11.0"
+    "@getpara/react-native-wallet": "npm:3.12.0"
     "@react-native-async-storage/async-storage": "npm:^2.2.0"
     "@react-native-community/cli": "npm:19.1.2"
     "@react-native-community/cli-platform-android": "npm:19.0.0"

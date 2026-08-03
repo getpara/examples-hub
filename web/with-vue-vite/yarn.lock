@@ -691,14 +691,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@getpara/core-sdk@npm:3.11.0":
-  version: 3.11.0
-  resolution: "@getpara/core-sdk@npm:3.11.0"
+"@getpara/core-sdk@npm:3.12.0":
+  version: 3.12.0
+  resolution: "@getpara/core-sdk@npm:3.12.0"
   dependencies:
     "@celo/utils": "npm:^8.0.2"
     "@cosmjs/encoding": "npm:^0.32.4"
     "@ethereumjs/util": "npm:^9.1.0"
-    "@getpara/user-management-client": "npm:3.11.0"
+    "@getpara/user-management-client": "npm:3.12.0"
     "@noble/hashes": "npm:^1.5.0"
     "@opentelemetry/api": "npm:^1.9.1"
     "@opentelemetry/context-zone": "npm:^2.9.0"
@@ -718,7 +718,7 @@ __metadata:
     node-forge: "npm:^1.4.0"
     uuid: "npm:^11.1.1"
     xstate: "npm:^5.24.0"
-  checksum: 10c0/47b67fd316d66eca1039eb81be6014d3997a53d4c7d71eaad55473019d0200093b68e8ed2db188cd4df3219550d0262e14d60a59f0b4274ef61b043d6196a8c1
+  checksum: 10c0/3a3321fe525ca5e62e3c898df5bc4c9590d13aea47dc2402d1fe5bca636135b75ece5a429dc3441da0658d223a761996428201291ceffbb84b2d8274c185a092
   languageName: node
   linkType: hard
 
@@ -729,36 +729,36 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@getpara/user-management-client@npm:3.11.0":
-  version: 3.11.0
-  resolution: "@getpara/user-management-client@npm:3.11.0"
+"@getpara/user-management-client@npm:3.12.0":
+  version: 3.12.0
+  resolution: "@getpara/user-management-client@npm:3.12.0"
   dependencies:
     "@getpara/shared": "npm:^1.24.0"
     "@opentelemetry/api": "npm:^1.9.1"
     axios: "npm:^1.8.4"
     axios-retry: "npm:^4.5.0"
     libphonenumber-js: "npm:^1.11.7"
-  checksum: 10c0/3362193daff5ef7a811aada679319a09c78e0f8cb5c4cfc45249c881b2115db37a62df23e46f7b0f543ec44dda44d9d4ee80e44006259bf3ceff2482bd13972a
+  checksum: 10c0/a29b09c898a45289cdaf9020598b6f7842ead1424334b323a9da3464688cf6d046349420cb6483438015db9c7e531fbd82dacf10243f886e8d81267f699da53e
   languageName: node
   linkType: hard
 
-"@getpara/viem-v2-integration@npm:3.11.0":
-  version: 3.11.0
-  resolution: "@getpara/viem-v2-integration@npm:3.11.0"
+"@getpara/viem-v2-integration@npm:3.12.0":
+  version: 3.12.0
+  resolution: "@getpara/viem-v2-integration@npm:3.12.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.11.0"
+    "@getpara/core-sdk": "npm:3.12.0"
   peerDependencies:
     viem: ^2.39.0
-  checksum: 10c0/71f07707d1fc72586657467f625fc3e301b134b89d8ff1898e1bed47f43e5693680e71ff0eda4778698b49348dfba2016b7d45f188638b151be60d7cb56f15c3
+  checksum: 10c0/26f0a1568c1e689b96dd63888f0a22df5532b9333bfe3f6f46cef50eacd0a90c4d2cd49b2c42f7ad89c9573a5aff6da0c003ee2c5d79c6fb7d9e85d7d012afc2
   languageName: node
   linkType: hard
 
-"@getpara/web-sdk@npm:3.11.0":
-  version: 3.11.0
-  resolution: "@getpara/web-sdk@npm:3.11.0"
+"@getpara/web-sdk@npm:3.12.0":
+  version: 3.12.0
+  resolution: "@getpara/web-sdk@npm:3.12.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.11.0"
-    "@getpara/user-management-client": "npm:3.11.0"
+    "@getpara/core-sdk": "npm:3.12.0"
+    "@getpara/user-management-client": "npm:3.12.0"
     "@opentelemetry/api": "npm:^1.9.1"
     base64url: "npm:^3.0.1"
     buffer: "npm:6.0.3"
@@ -771,7 +771,7 @@ __metadata:
   peerDependenciesMeta:
     "@farcaster/miniapp-sdk":
       optional: true
-  checksum: 10c0/5c3816efd8ebe0d6dff7d2b9935e9f9b306251f084d0dc2a78dbbae893aec40873cd48c2f1bd95d2179ee775ccaf3f1cc9fbc35758539c5f0daad67db973966d
+  checksum: 10c0/6eaf15d7d6c8dff589ec5daa243abfc606d335518fe27707b910dde138960b9d7977812f1e16f293e9ef5db702d5a842d1701e32e4ebf196fcc8ad9774f1b452
   languageName: node
   linkType: hard
 
@@ -4322,9 +4322,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ox@npm:0.11.3":
-  version: 0.11.3
-  resolution: "ox@npm:0.11.3"
+"ox@npm:0.14.30":
+  version: 0.14.30
+  resolution: "ox@npm:0.14.30"
   dependencies:
     "@adraffy/ens-normalize": "npm:^1.11.0"
     "@noble/ciphers": "npm:^1.3.0"
@@ -4339,7 +4339,7 @@ __metadata:
   peerDependenciesMeta:
     typescript:
       optional: true
-  checksum: 10c0/aab488bb5ff2e9c9d688f4044ebceb5efc4f62e71c19c2813d1ba93509dfcf618c7c97dd06ed867843340ac9744911ef3f3a4504850711a67f220f94aa9d8feb
+  checksum: 10c0/dfefa9218269103b3da3686c4da62849aef15e4347fd21f898fa113d9b4c2b86afab7c662c94d58206257736202647ce96249405c021c4a233712ac34fa3cc1b
   languageName: node
   linkType: hard
 
@@ -5261,8 +5261,8 @@ __metadata:
   linkType: hard
 
 "viem@npm:^2.27.0":
-  version: 2.44.1
-  resolution: "viem@npm:2.44.1"
+  version: 2.55.1
+  resolution: "viem@npm:2.55.1"
   dependencies:
     "@noble/curves": "npm:1.9.1"
     "@noble/hashes": "npm:1.8.0"
@@ -5270,14 +5270,14 @@ __metadata:
     "@scure/bip39": "npm:1.6.0"
     abitype: "npm:1.2.3"
     isows: "npm:1.0.7"
-    ox: "npm:0.11.3"
-    ws: "npm:8.18.3"
+    ox: "npm:0.14.30"
+    ws: "npm:8.21.0"
   peerDependencies:
     typescript: ">=5.0.4"
   peerDependenciesMeta:
     typescript:
       optional: true
-  checksum: 10c0/0ffa3c93896d57d795531e2cfa18ceafd188deda3b9a15f7d714d6aabce31fe8ae8876bb9441c368cc87aaa4d2cf49f9aa73ae50c7147502ec6cc4ce6c3b83b5
+  checksum: 10c0/4747450c511604dc2280b94b6a6eab53638058a559531f7707d31f21de51670449530f9ebc2fbc06d961b8b5a6cfadb920683e701058adc8996619b012bbc56d
   languageName: node
   linkType: hard
 
@@ -5462,8 +5462,8 @@ __metadata:
   resolution: "with-vue-vite@workspace:."
   dependencies:
     "@eslint/js": "npm:^9.29.0"
-    "@getpara/viem-v2-integration": "npm:3.11.0"
-    "@getpara/web-sdk": "npm:3.11.0"
+    "@getpara/viem-v2-integration": "npm:3.12.0"
+    "@getpara/web-sdk": "npm:3.12.0"
     "@tailwindcss/vite": "npm:4.1.11"
     "@vitejs/plugin-vue": "npm:^5.2.1"
     "@vue/tsconfig": "npm:^0.7.0"
@@ -5486,9 +5486,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ws@npm:8.18.3":
-  version: 8.18.3
-  resolution: "ws@npm:8.18.3"
+"ws@npm:8.21.0":
+  version: 8.21.0
+  resolution: "ws@npm:8.21.0"
   peerDependencies:
     bufferutil: ^4.0.1
     utf-8-validate: ">=5.0.2"
@@ -5497,7 +5497,7 @@ __metadata:
       optional: true
     utf-8-validate:
       optional: true
-  checksum: 10c0/eac918213de265ef7cb3d4ca348b891a51a520d839aa51cdb8ca93d4fa7ff9f6ccb339ccee89e4075324097f0a55157c89fa3f7147bde9d8d7e90335dc087b53
+  checksum: 10c0/ef4a243476283fc49bc7550966c4af4aa0eef56273837211e700de3b664e08604a760cdddcb5ba43c049140e74ccfec5b0ee0bb439e08c2adf9138902fdde5f9
   languageName: node
   linkType: hard
 
