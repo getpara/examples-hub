@@ -730,14 +730,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@getpara/core-sdk@npm:3.11.0":
-  version: 3.11.0
-  resolution: "@getpara/core-sdk@npm:3.11.0"
+"@getpara/core-sdk@npm:3.12.0":
+  version: 3.12.0
+  resolution: "@getpara/core-sdk@npm:3.12.0"
   dependencies:
     "@celo/utils": "npm:^8.0.2"
     "@cosmjs/encoding": "npm:^0.32.4"
     "@ethereumjs/util": "npm:^9.1.0"
-    "@getpara/user-management-client": "npm:3.11.0"
+    "@getpara/user-management-client": "npm:3.12.0"
     "@noble/hashes": "npm:^1.5.0"
     "@opentelemetry/api": "npm:^1.9.1"
     "@opentelemetry/context-zone": "npm:^2.9.0"
@@ -757,17 +757,17 @@ __metadata:
     node-forge: "npm:^1.4.0"
     uuid: "npm:^11.1.1"
     xstate: "npm:^5.24.0"
-  checksum: 10c0/47b67fd316d66eca1039eb81be6014d3997a53d4c7d71eaad55473019d0200093b68e8ed2db188cd4df3219550d0262e14d60a59f0b4274ef61b043d6196a8c1
+  checksum: 10c0/3a3321fe525ca5e62e3c898df5bc4c9590d13aea47dc2402d1fe5bca636135b75ece5a429dc3441da0658d223a761996428201291ceffbb84b2d8274c185a092
   languageName: node
   linkType: hard
 
-"@getpara/evm-wallet-connectors@npm:3.11.0":
-  version: 3.11.0
-  resolution: "@getpara/evm-wallet-connectors@npm:3.11.0"
+"@getpara/evm-wallet-connectors@npm:3.12.0":
+  version: 3.12.0
+  resolution: "@getpara/evm-wallet-connectors@npm:3.12.0"
   dependencies:
     "@coinbase/wallet-sdk": "npm:4.3.0"
-    "@getpara/wagmi-v2-connector": "npm:3.11.0"
-    "@getpara/web-sdk": "npm:3.11.0"
+    "@getpara/wagmi-v2-connector": "npm:3.12.0"
+    "@getpara/web-sdk": "npm:3.12.0"
     "@walletconnect/ethereum-provider": "npm:2.23.0"
     zustand: "npm:^4.5.2"
     zustand-sync-tabs: "npm:^0.2.2"
@@ -782,25 +782,25 @@ __metadata:
   peerDependenciesMeta:
     "@farcaster/miniapp-wagmi-connector":
       optional: true
-  checksum: 10c0/6903f1749e35e6a87d75139ea20c0cf34462e273e3b9ea4d46e7fadc43dc36b4bdbeb09d667cb80b106c6528c93e8dccfe534cbbeee5f2b8790c2cfcb93a7c50
+  checksum: 10c0/f45180930d70eb8c09c66cba8cef36121c2776cbbd8c2ef6362f19054cc3cf23e4da5394db5855ac16e7e62731d4000b3b4837df7c3f3bf940aeda271402833b
   languageName: node
   linkType: hard
 
-"@getpara/react-common@npm:3.11.0":
-  version: 3.11.0
-  resolution: "@getpara/react-common@npm:3.11.0"
+"@getpara/react-common@npm:3.12.0":
+  version: 3.12.0
+  resolution: "@getpara/react-common@npm:3.12.0"
   dependencies:
-    "@getpara/web-sdk": "npm:3.11.0"
+    "@getpara/web-sdk": "npm:3.12.0"
   peerDependencies:
     react: ">=18"
     react-dom: ">=18"
-  checksum: 10c0/609c2fb6c5617e83c020e0a1b4a12273a342a816f20e5b82c94c8806d654889842f614c8438f9e01b4f195d62029bc35e4f0a73cde277d946c5868bfbf0e165b
+  checksum: 10c0/e6e1209580d1042f891dac28e406eeb38e346908c676c83f8aaca0dee2d9f1823e47d7c38e4f72c7ba4979492469ec9baa205d97304934c57f3a7dcaf9afa2db
   languageName: node
   linkType: hard
 
-"@getpara/react-component-library@npm:3.11.0":
-  version: 3.11.0
-  resolution: "@getpara/react-component-library@npm:3.11.0"
+"@getpara/react-component-library@npm:3.12.0":
+  version: 3.12.0
+  resolution: "@getpara/react-component-library@npm:3.12.0"
   dependencies:
     "@radix-ui/react-avatar": "npm:^1.1.2"
     "@radix-ui/react-checkbox": "npm:^1.3.3"
@@ -838,15 +838,15 @@ __metadata:
   peerDependencies:
     react: ">=18"
     react-dom: ">=18"
-  checksum: 10c0/6dd37a50405db91625022342a569b9543554de958efa42d9a729df213b5c8b9235866bcc701e8acc50e301bdb4779c5695b7231252ff37de92b2e6a36e999429
+  checksum: 10c0/42342bc46a3bb1249a5426c2d938c2a04a23843920973f85163aae88996402234244a5e9a4eb8e6abffc01d9029e2fa87ee39f3d8815c071a37a622852669a86
   languageName: node
   linkType: hard
 
-"@getpara/react-core@npm:3.11.0":
-  version: 3.11.0
-  resolution: "@getpara/react-core@npm:3.11.0"
+"@getpara/react-core@npm:3.12.0":
+  version: 3.12.0
+  resolution: "@getpara/react-core@npm:3.12.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.11.0"
+    "@getpara/core-sdk": "npm:3.12.0"
     zustand: "npm:^5.0.0"
   peerDependencies:
     "@getpara/cosmjs-v0-integration": ">=2"
@@ -871,18 +871,18 @@ __metadata:
       optional: true
     "@getpara/viem-v2-integration":
       optional: true
-  checksum: 10c0/6a4002d99605ff35a93415d95923dcc01ebc159aad4bbc2438d6eedb3582d7209c365344676755c6c00aa0aac35096ab3adebd513384eb335aa7214622b68475
+  checksum: 10c0/8fc8ce9d4506b5fe19ab8d7b605aa913c371f988e4f620e53a9c8e12ed98fb318039a3aff02dd74e248dc6e2a1351a69f49c10dd91815fc9a7bf381d16558e77
   languageName: node
   linkType: hard
 
-"@getpara/react-sdk-lite@npm:3.11.0":
-  version: 3.11.0
-  resolution: "@getpara/react-sdk-lite@npm:3.11.0"
+"@getpara/react-sdk-lite@npm:3.12.0":
+  version: 3.12.0
+  resolution: "@getpara/react-sdk-lite@npm:3.12.0"
   dependencies:
-    "@getpara/react-common": "npm:3.11.0"
-    "@getpara/react-component-library": "npm:3.11.0"
-    "@getpara/react-core": "npm:3.11.0"
-    "@getpara/web-sdk": "npm:3.11.0"
+    "@getpara/react-common": "npm:3.12.0"
+    "@getpara/react-component-library": "npm:3.12.0"
+    "@getpara/react-core": "npm:3.12.0"
+    "@getpara/web-sdk": "npm:3.12.0"
     date-fns: "npm:^3.6.0"
     detect-browser: "npm:^5.3.0"
     framer-motion: "npm:^11.3.31"
@@ -931,7 +931,7 @@ __metadata:
       optional: true
   bin:
     setup-para: dist/cli/cli.mjs
-  checksum: 10c0/782f05fb28ba6a3143b9b8d4cf0da0d8fbd2422ef6167d512133d9d439f7f54514c8aa41a081de943c4341a7089c9a249f181b1c603ca6cf58dbb3b38e4c4308
+  checksum: 10c0/86665dad7411409358c2801ee087e5f507766c92ee465eee0e8b63ef511e99604b8566f0b429378012637f90e0919073a21bf7f4386c75f9f46ea480d4a9f775
   languageName: node
   linkType: hard
 
@@ -942,52 +942,52 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@getpara/user-management-client@npm:3.11.0":
-  version: 3.11.0
-  resolution: "@getpara/user-management-client@npm:3.11.0"
+"@getpara/user-management-client@npm:3.12.0":
+  version: 3.12.0
+  resolution: "@getpara/user-management-client@npm:3.12.0"
   dependencies:
     "@getpara/shared": "npm:^1.24.0"
     "@opentelemetry/api": "npm:^1.9.1"
     axios: "npm:^1.8.4"
     axios-retry: "npm:^4.5.0"
     libphonenumber-js: "npm:^1.11.7"
-  checksum: 10c0/3362193daff5ef7a811aada679319a09c78e0f8cb5c4cfc45249c881b2115db37a62df23e46f7b0f543ec44dda44d9d4ee80e44006259bf3ceff2482bd13972a
+  checksum: 10c0/a29b09c898a45289cdaf9020598b6f7842ead1424334b323a9da3464688cf6d046349420cb6483438015db9c7e531fbd82dacf10243f886e8d81267f699da53e
   languageName: node
   linkType: hard
 
-"@getpara/viem-v2-integration@npm:3.11.0":
-  version: 3.11.0
-  resolution: "@getpara/viem-v2-integration@npm:3.11.0"
+"@getpara/viem-v2-integration@npm:3.12.0":
+  version: 3.12.0
+  resolution: "@getpara/viem-v2-integration@npm:3.12.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.11.0"
+    "@getpara/core-sdk": "npm:3.12.0"
   peerDependencies:
     viem: ^2.39.0
-  checksum: 10c0/71f07707d1fc72586657467f625fc3e301b134b89d8ff1898e1bed47f43e5693680e71ff0eda4778698b49348dfba2016b7d45f188638b151be60d7cb56f15c3
+  checksum: 10c0/26f0a1568c1e689b96dd63888f0a22df5532b9333bfe3f6f46cef50eacd0a90c4d2cd49b2c42f7ad89c9573a5aff6da0c003ee2c5d79c6fb7d9e85d7d012afc2
   languageName: node
   linkType: hard
 
-"@getpara/wagmi-v2-connector@npm:3.11.0":
-  version: 3.11.0
-  resolution: "@getpara/wagmi-v2-connector@npm:3.11.0"
+"@getpara/wagmi-v2-connector@npm:3.12.0":
+  version: 3.12.0
+  resolution: "@getpara/wagmi-v2-connector@npm:3.12.0"
   dependencies:
-    "@getpara/viem-v2-integration": "npm:3.11.0"
-    "@getpara/web-sdk": "npm:3.11.0"
+    "@getpara/viem-v2-integration": "npm:3.12.0"
+    "@getpara/web-sdk": "npm:3.12.0"
   peerDependencies:
     "@wagmi/core": ^2.16.7 || ^3.0.0
     react: ">=18"
     react-dom: ">=18"
     viem: ^2.39.0
     wagmi: ^2.14.16 || ^3.0.0
-  checksum: 10c0/84c907164a1567b3f01905b2ffefc2de96d515d76678c4f13a020303a25c4035ed0150939c417e1d49cdb6eec75aa5e5f038c12244ac71842154413fc65e3dd7
+  checksum: 10c0/c4aed42a984a017d05a9f173541506c4a3f02e6552a2da6a137b77acd56be3a20a85c3f880905dc7f0c49ca8962ac6e660ee4fb6a58d09fc66342afea9f6ee94
   languageName: node
   linkType: hard
 
-"@getpara/web-sdk@npm:3.11.0":
-  version: 3.11.0
-  resolution: "@getpara/web-sdk@npm:3.11.0"
+"@getpara/web-sdk@npm:3.12.0":
+  version: 3.12.0
+  resolution: "@getpara/web-sdk@npm:3.12.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.11.0"
-    "@getpara/user-management-client": "npm:3.11.0"
+    "@getpara/core-sdk": "npm:3.12.0"
+    "@getpara/user-management-client": "npm:3.12.0"
     "@opentelemetry/api": "npm:^1.9.1"
     base64url: "npm:^3.0.1"
     buffer: "npm:6.0.3"
@@ -1000,7 +1000,7 @@ __metadata:
   peerDependenciesMeta:
     "@farcaster/miniapp-sdk":
       optional: true
-  checksum: 10c0/5c3816efd8ebe0d6dff7d2b9935e9f9b306251f084d0dc2a78dbbae893aec40873cd48c2f1bd95d2179ee775ccaf3f1cc9fbc35758539c5f0daad67db973966d
+  checksum: 10c0/6eaf15d7d6c8dff589ec5daa243abfc606d335518fe27707b910dde138960b9d7977812f1e16f293e9ef5db702d5a842d1701e32e4ebf196fcc8ad9774f1b452
   languageName: node
   linkType: hard
 
@@ -6893,9 +6893,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ox@npm:0.11.3":
-  version: 0.11.3
-  resolution: "ox@npm:0.11.3"
+"ox@npm:0.14.30":
+  version: 0.14.30
+  resolution: "ox@npm:0.14.30"
   dependencies:
     "@adraffy/ens-normalize": "npm:^1.11.0"
     "@noble/ciphers": "npm:^1.3.0"
@@ -6910,28 +6910,7 @@ __metadata:
   peerDependenciesMeta:
     typescript:
       optional: true
-  checksum: 10c0/aab488bb5ff2e9c9d688f4044ebceb5efc4f62e71c19c2813d1ba93509dfcf618c7c97dd06ed867843340ac9744911ef3f3a4504850711a67f220f94aa9d8feb
-  languageName: node
-  linkType: hard
-
-"ox@npm:0.14.29":
-  version: 0.14.29
-  resolution: "ox@npm:0.14.29"
-  dependencies:
-    "@adraffy/ens-normalize": "npm:^1.11.0"
-    "@noble/ciphers": "npm:^1.3.0"
-    "@noble/curves": "npm:1.9.1"
-    "@noble/hashes": "npm:^1.8.0"
-    "@scure/bip32": "npm:^1.7.0"
-    "@scure/bip39": "npm:^1.6.0"
-    abitype: "npm:^1.2.3"
-    eventemitter3: "npm:5.0.1"
-  peerDependencies:
-    typescript: ">=5.4.0"
-  peerDependenciesMeta:
-    typescript:
-      optional: true
-  checksum: 10c0/bf36b2cd83d67bf43893b73876630554d0bd1748c7ad769607ceb8fe1aaf6afa6f9411a31e7e815de107a035811ebfa790c0af591aa403e363b83a1896acfc7b
+  checksum: 10c0/dfefa9218269103b3da3686c4da62849aef15e4347fd21f898fa113d9b4c2b86afab7c662c94d58206257736202647ce96249405c021c4a233712ac34fa3cc1b
   languageName: node
   linkType: hard
 
@@ -7665,9 +7644,9 @@ __metadata:
   resolution: "signer-viem-v2@workspace:."
   dependencies:
     "@eslint/js": "npm:10.0.1"
-    "@getpara/evm-wallet-connectors": "npm:3.11.0"
-    "@getpara/react-sdk-lite": "npm:3.11.0"
-    "@getpara/viem-v2-integration": "npm:3.11.0"
+    "@getpara/evm-wallet-connectors": "npm:3.12.0"
+    "@getpara/react-sdk-lite": "npm:3.12.0"
+    "@getpara/viem-v2-integration": "npm:3.12.0"
     "@openzeppelin/contracts": "npm:5.6.1"
     "@tailwindcss/postcss": "npm:4.3.0"
     "@tanstack/react-query": "npm:5.101.0"
@@ -7687,7 +7666,7 @@ __metadata:
     ts-node: "npm:10.9.2"
     typescript: "npm:6.0.3"
     typescript-eslint: "npm:8.60.1"
-    viem: "npm:2.52.2"
+    viem: "npm:2.55.1"
     wagmi: "npm:3.6.16"
   languageName: unknown
   linkType: soft
@@ -8379,9 +8358,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"viem@npm:2.52.2":
-  version: 2.52.2
-  resolution: "viem@npm:2.52.2"
+"viem@npm:2.55.1, viem@npm:>=2.37.9":
+  version: 2.55.1
+  resolution: "viem@npm:2.55.1"
   dependencies:
     "@noble/curves": "npm:1.9.1"
     "@noble/hashes": "npm:1.8.0"
@@ -8389,35 +8368,14 @@ __metadata:
     "@scure/bip39": "npm:1.6.0"
     abitype: "npm:1.2.3"
     isows: "npm:1.0.7"
-    ox: "npm:0.14.29"
-    ws: "npm:8.20.1"
+    ox: "npm:0.14.30"
+    ws: "npm:8.21.0"
   peerDependencies:
     typescript: ">=5.0.4"
   peerDependenciesMeta:
     typescript:
       optional: true
-  checksum: 10c0/5a94c8170cce7f9dafd1b21da4e9dd6c7782600ada7b02db87cf721a2db5b81e8c13476a5e75fcbd4baf852dd9738254e015482076581cb7ce33059e04f57a02
-  languageName: node
-  linkType: hard
-
-"viem@npm:>=2.37.9":
-  version: 2.44.1
-  resolution: "viem@npm:2.44.1"
-  dependencies:
-    "@noble/curves": "npm:1.9.1"
-    "@noble/hashes": "npm:1.8.0"
-    "@scure/bip32": "npm:1.7.0"
-    "@scure/bip39": "npm:1.6.0"
-    abitype: "npm:1.2.3"
-    isows: "npm:1.0.7"
-    ox: "npm:0.11.3"
-    ws: "npm:8.18.3"
-  peerDependencies:
-    typescript: ">=5.0.4"
-  peerDependenciesMeta:
-    typescript:
-      optional: true
-  checksum: 10c0/0ffa3c93896d57d795531e2cfa18ceafd188deda3b9a15f7d714d6aabce31fe8ae8876bb9441c368cc87aaa4d2cf49f9aa73ae50c7147502ec6cc4ce6c3b83b5
+  checksum: 10c0/4747450c511604dc2280b94b6a6eab53638058a559531f7707d31f21de51670449530f9ebc2fbc06d961b8b5a6cfadb920683e701058adc8996619b012bbc56d
   languageName: node
   linkType: hard
 
@@ -8559,9 +8517,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ws@npm:8.18.3, ws@npm:~8.18.3":
-  version: 8.18.3
-  resolution: "ws@npm:8.18.3"
+"ws@npm:8.21.0, ws@npm:^8.18.0":
+  version: 8.21.0
+  resolution: "ws@npm:8.21.0"
   peerDependencies:
     bufferutil: ^4.0.1
     utf-8-validate: ">=5.0.2"
@@ -8570,22 +8528,7 @@ __metadata:
       optional: true
     utf-8-validate:
       optional: true
-  checksum: 10c0/eac918213de265ef7cb3d4ca348b891a51a520d839aa51cdb8ca93d4fa7ff9f6ccb339ccee89e4075324097f0a55157c89fa3f7147bde9d8d7e90335dc087b53
-  languageName: node
-  linkType: hard
-
-"ws@npm:8.20.1":
-  version: 8.20.1
-  resolution: "ws@npm:8.20.1"
-  peerDependencies:
-    bufferutil: ^4.0.1
-    utf-8-validate: ">=5.0.2"
-  peerDependenciesMeta:
-    bufferutil:
-      optional: true
-    utf-8-validate:
-      optional: true
-  checksum: 10c0/ce162433218399cdedeb76fd33363d4d86a7d910058d4e3c679dce08cea65d6da6b39f11baa4d7808d024cf46ed88f6a05c17611621aaad8fc5e62edacc30c5d
+  checksum: 10c0/ef4a243476283fc49bc7550966c4af4aa0eef56273837211e700de3b664e08604a760cdddcb5ba43c049140e74ccfec5b0ee0bb439e08c2adf9138902fdde5f9
   languageName: node
   linkType: hard
 
@@ -8604,9 +8547,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ws@npm:^8.18.0":
-  version: 8.21.0
-  resolution: "ws@npm:8.21.0"
+"ws@npm:~8.18.3":
+  version: 8.18.3
+  resolution: "ws@npm:8.18.3"
   peerDependencies:
     bufferutil: ^4.0.1
     utf-8-validate: ">=5.0.2"
@@ -8615,7 +8558,7 @@ __metadata:
       optional: true
     utf-8-validate:
       optional: true
-  checksum: 10c0/ef4a243476283fc49bc7550966c4af4aa0eef56273837211e700de3b664e08604a760cdddcb5ba43c049140e74ccfec5b0ee0bb439e08c2adf9138902fdde5f9
+  checksum: 10c0/eac918213de265ef7cb3d4ca348b891a51a520d839aa51cdb8ca93d4fa7ff9f6ccb339ccee89e4075324097f0a55157c89fa3f7147bde9d8d7e90335dc087b53
   languageName: node
   linkType: hard
 

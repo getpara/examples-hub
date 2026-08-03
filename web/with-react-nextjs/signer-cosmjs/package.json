@@ -19,8 +19,8 @@
     "@cosmjs/proto-signing": "0.39.0",
     "@cosmjs/stargate": "0.39.0",
     "@cosmjs/tendermint-rpc": "0.39.0",
-    "@getpara/cosmos-wallet-connectors": "3.11.0",
-    "@getpara/react-sdk-lite": "3.11.0",
+    "@getpara/cosmos-wallet-connectors": "3.12.0",
+    "@getpara/react-sdk-lite": "3.12.0",
     "@tanstack/react-query": "5.101.0",
     "arg": "5.0.2",
     "cosmjs-types": "0.11.0",
@@ -29,7 +29,7 @@
     "react": "19.2.7",
     "react-dom": "19.2.7",
     "starknet": "6.24.1",
-    "viem": "2.52.2"
+    "viem": "2.55.1"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
