@@ -1,10 +1,11 @@
 import type { Request, Response } from "express";
-import { Para as ParaServer, Environment } from "@getpara/server-sdk";
+import { Environment } from "@getpara/server-sdk";
 import { getKeyShareInDB } from "../db/keySharesDB.js";
 import { decrypt } from "../utils/encryption-utils.js";
 import { createParaViemAccount, createParaViemClient } from "@getpara/viem-v2-integration";
 import { http, parseEther, parseGwei } from "viem";
 import { sepolia } from "viem/chains";
+import { createParaServer } from "../utils/createParaServer.js";
 
 export async function viemPregenSignHandler(req: Request, res: Response): Promise<void> {
   const PARA_API_KEY = process.env.PARA_API_KEY;
@@ -22,7 +23,7 @@ export async function viemPregenSignHandler(req: Request, res: Response): Promis
       return;
     }
 
-    const para = new ParaServer(PARA_ENVIRONMENT, PARA_API_KEY);
+    const para = createParaServer(PARA_ENVIRONMENT, PARA_API_KEY);
 
     const hasPregenWallet = await para.hasPregenWallet({ pregenId: { email } });
     if (!hasPregenWallet) {

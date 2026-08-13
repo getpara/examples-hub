@@ -1,13 +1,14 @@
 import { alchemy, arbitrumSepolia } from "@account-kit/infra";
 import { createModularAccountV2Client } from "@account-kit/smart-contracts";
 import { BatchUserOperationCallData, SmartAccountSigner } from "@aa-sdk/core";
-import { Para as ParaServer, Environment } from "@getpara/server-sdk";
+import { Environment } from "@getpara/server-sdk";
 import { createParaViemAccount } from "@getpara/viem-v2-integration";
 import { Request, Response } from "express";
 import { encodeFunctionData, type LocalAccount, type SignableMessage } from "viem";
-import Example from "../contracts/Example.json";
-import { getKeyShareInDB } from "../db/keySharesDB";
-import { decrypt } from "../utils/encryption-utils";
+import Example from "../contracts/Example.json" with { type: "json" };
+import { getKeyShareInDB } from "../db/keySharesDB.js";
+import { decrypt } from "../utils/encryption-utils.js";
+import { createParaServer } from "../utils/createParaServer.js";
 
 export async function alchemyEip7702SignHandler(req: Request, res: Response): Promise<void> {
   const EXAMPLE_CONTRACT_ADDRESS = "0x7920b6d8b07f0b9a3b96f238c64e022278db1419";
@@ -37,7 +38,7 @@ export async function alchemyEip7702SignHandler(req: Request, res: Response): Pr
       return;
     }
 
-    const para = new ParaServer(PARA_ENVIRONMENT, PARA_API_KEY);
+    const para = createParaServer(PARA_ENVIRONMENT, PARA_API_KEY);
     const hasPregenWallet = await para.hasPregenWallet({ pregenId: { email } });
 
     if (!hasPregenWallet) {

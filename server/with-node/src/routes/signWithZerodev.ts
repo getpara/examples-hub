@@ -2,13 +2,14 @@ import { Request, Response } from "express";
 import { signerToEcdsaValidator } from "@zerodev/ecdsa-validator";
 import { createKernelAccount, createKernelAccountClient, createZeroDevPaymasterClient } from "@zerodev/sdk";
 import { getEntryPoint, KERNEL_V3_1 } from "@zerodev/sdk/constants";
-import { Para as ParaServer, Environment } from "@getpara/server-sdk";
+import { Environment } from "@getpara/server-sdk";
 import { createParaViemAccount, createParaViemClient } from "@getpara/viem-v2-integration";
 import { arbitrumSepolia } from "viem/chains";
 import { createPublicClient, encodeFunctionData, http, parseGwei } from "viem";
-import Example from "../contracts/Example.json";
+import Example from "../contracts/Example.json" with { type: "json" };
 import { getKeyShareInDB } from "../db/keySharesDB.js";
 import { decrypt } from "../utils/encryption-utils.js";
+import { createParaServer } from "../utils/createParaServer.js";
 
 export async function zerodevPregenSignHandler(req: Request, res: Response): Promise<void> {
   const PARA_API_KEY = process.env.PARA_API_KEY;
@@ -35,7 +36,7 @@ export async function zerodevPregenSignHandler(req: Request, res: Response): Pro
       return;
     }
 
-    const para = new ParaServer(PARA_ENVIRONMENT, PARA_API_KEY);
+    const para = createParaServer(PARA_ENVIRONMENT, PARA_API_KEY);
 
     const hasPregenWallet = await para.hasPregenWallet({ pregenId: { email } });
     if (!hasPregenWallet) {
