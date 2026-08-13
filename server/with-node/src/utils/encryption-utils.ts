@@ -27,8 +27,9 @@ export async function encrypt(text: string): Promise<string> {
   try {
     const keyString = getEncryptionKey();
     const cryptoKey = await importSecretKey(keyString);
-    const iv = crypto.getRandomValues(new Uint8Array(IV_LENGTH));
-    const encodedText = new TextEncoder().encode(text);
+    const iv = new Uint8Array(IV_LENGTH);
+    crypto.getRandomValues(iv);
+    const encodedText = new Uint8Array(new TextEncoder().encode(text));
 
     const encryptedBuffer = await crypto.subtle.encrypt({ name: ALGORITHM, iv: iv }, cryptoKey, encodedText);
 
@@ -54,7 +55,7 @@ export async function decrypt(encryptedText: string): Promise<string> {
 
   const [ivBase64, encryptedDataBas64] = parts;
 
-  let iv: Uint8Array;
+  let iv: Uint8Array<ArrayBuffer>;
   let encryptedBuffer: ArrayBuffer;
   let cryptoKey: CryptoKey;
 
@@ -62,7 +63,7 @@ export async function decrypt(encryptedText: string): Promise<string> {
     const ivBuf = Buffer.from(ivBase64, "base64");
     const encryptedBuf = Buffer.from(encryptedDataBas64, "base64");
 
-    iv = new Uint8Array(ivBuf.buffer.slice(ivBuf.byteOffset, ivBuf.byteOffset + ivBuf.byteLength));
+    iv = new Uint8Array(ivBuf);
 
     encryptedBuffer = encryptedBuf.buffer.slice(
       encryptedBuf.byteOffset,
@@ -82,7 +83,7 @@ export async function decrypt(encryptedText: string): Promise<string> {
   }
 
   try {
-    const decryptedBuffer = await crypto.subtle.decrypt({ name: ALGORITHM, iv: iv as BufferSource }, cryptoKey, encryptedBuffer);
+    const decryptedBuffer = await crypto.subtle.decrypt({ name: ALGORITHM, iv }, cryptoKey, encryptedBuffer);
 
     const decryptedText = new TextDecoder().decode(decryptedBuffer);
     return decryptedText;

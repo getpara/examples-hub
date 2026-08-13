@@ -19,10 +19,10 @@
     "build:types": "rm -rf dist/types && tsc --module esnext --declarationDir dist/types --emitDeclarationOnly --declaration"
   },
   "dependencies": {
-    "@getpara/graz-connector": "3.13.0"
+    "@getpara/graz-connector": "3.14.0"
   },
   "devDependencies": {
-    "@getpara/react-sdk-lite": "3.13.0",
+    "@getpara/react-sdk-lite": "3.14.0",
     "@tanstack/react-query": "^5.74.0",
     "graz": ">=0.4.1",
     "react": "^18.3.1",
@@ -30,7 +30,7 @@
     "typescript": "^5.8.3"
   },
   "peerDependencies": {
-    "@getpara/react-sdk-lite": "3.13.0",
+    "@getpara/react-sdk-lite": "3.14.0",
     "@tanstack/react-query": "^5.74.0",
     "graz": ">=0.4.1",
     "react": ">=18",

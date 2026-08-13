@@ -24,7 +24,7 @@
     "@farcaster/miniapp-sdk": "0.3.0",
     "@farcaster/miniapp-wagmi-connector": "2.0.0",
     "@gemini-wallet/core": "0.3.2",
-    "@getpara/rainbowkit-wallet": "3.13.0",
+    "@getpara/rainbowkit-wallet": "3.14.0",
     "@metamask/sdk": "0.34.0",
     "@rainbow-me/rainbowkit": "2.2.9",
     "@safe-global/safe-apps-provider": "0.18.6",

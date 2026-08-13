@@ -1,9 +1,10 @@
 import type { Request, Response } from "express";
-import { Para as ParaServer, Environment } from "@getpara/server-sdk";
+import { Environment } from "@getpara/server-sdk";
 import { getKeyShareInDB } from "../db/keySharesDB.js";
 import { decrypt } from "../utils/encryption-utils.js";
 import { ParaSolanaWeb3Signer } from "@getpara/solana-web3.js-v1-integration";
 import { Connection, Transaction, SystemProgram, LAMPORTS_PER_SOL } from "@solana/web3.js";
+import { createParaServer } from "../utils/createParaServer.js";
 
 export async function solanaPregenSignHandler(req: Request, res: Response): Promise<void> {
   const PARA_API_KEY = process.env.PARA_API_KEY;
@@ -24,7 +25,7 @@ export async function solanaPregenSignHandler(req: Request, res: Response): Prom
       return;
     }
 
-    const para = new ParaServer(PARA_ENVIRONMENT, PARA_API_KEY);
+    const para = createParaServer(PARA_ENVIRONMENT, PARA_API_KEY);
 
     const hasPregenWallet = await para.hasPregenWallet({ pregenId: { email } });
     if (!hasPregenWallet) {

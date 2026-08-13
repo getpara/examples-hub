@@ -1,9 +1,10 @@
 import type { Request, Response } from "express";
-import { Para as ParaServer, Environment } from "@getpara/server-sdk";
+import { Environment } from "@getpara/server-sdk";
 import { createParaEthersSigner } from "@getpara/ethers-v6-integration";
 import { ethers } from "ethers";
 import { getKeyShareInDB } from "../db/keySharesDB.js";
 import { decrypt } from "../utils/encryption-utils.js";
+import { createParaServer } from "../utils/createParaServer.js";
 
 export async function ethersPregenSignHandler(req: Request, res: Response): Promise<void> {
   const PARA_API_KEY = process.env.PARA_API_KEY;
@@ -21,7 +22,7 @@ export async function ethersPregenSignHandler(req: Request, res: Response): Prom
       return;
     }
 
-    const para = new ParaServer(PARA_ENVIRONMENT, PARA_API_KEY);
+    const para = createParaServer(PARA_ENVIRONMENT, PARA_API_KEY);
 
     const hasPregenWallet = await para.hasPregenWallet({ pregenId: { email } });
     if (!hasPregenWallet) {
