@@ -717,14 +717,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@getpara/core-sdk@npm:3.14.0":
-  version: 3.14.0
-  resolution: "@getpara/core-sdk@npm:3.14.0"
+"@getpara/core-sdk@npm:3.15.0":
+  version: 3.15.0
+  resolution: "@getpara/core-sdk@npm:3.15.0"
   dependencies:
     "@celo/utils": "npm:^8.0.2"
     "@cosmjs/encoding": "npm:^0.32.4"
     "@ethereumjs/util": "npm:^9.1.0"
-    "@getpara/user-management-client": "npm:3.14.0"
+    "@getpara/user-management-client": "npm:3.15.0"
     "@noble/hashes": "npm:^1.5.0"
     "@opentelemetry/api": "npm:^1.9.1"
     "@opentelemetry/context-zone": "npm:^2.9.0"
@@ -744,25 +744,25 @@ __metadata:
     node-forge: "npm:^1.4.0"
     uuid: "npm:^11.1.1"
     xstate: "npm:^5.24.0"
-  checksum: 10c0/848f4b858c51edf5e06b2a1e89d87edc0e18aa15010fddd1e068ff3b83d46e40f9fa913e69c8b62a2f1ab949110ca9f427933346e93570ed69e7eb7020c85d14
+  checksum: 10c0/ddeba9e64e22d05959ab26c436a6ccac2f04f3312bd865cfba940a903d2b6085d5d12d6f30386fade8727bb2dfbbc463fd2416aa402cbd8435124a79ec7be464
   languageName: node
   linkType: hard
 
-"@getpara/react-common@npm:3.14.0":
-  version: 3.14.0
-  resolution: "@getpara/react-common@npm:3.14.0"
+"@getpara/react-common@npm:3.15.0":
+  version: 3.15.0
+  resolution: "@getpara/react-common@npm:3.15.0"
   dependencies:
-    "@getpara/web-sdk": "npm:3.14.0"
+    "@getpara/web-sdk": "npm:3.15.0"
   peerDependencies:
     react: ">=18"
     react-dom: ">=18"
-  checksum: 10c0/299d28c27258b739972ee096b0d750158d0a7656c35998a8a604a3195d5c65d58406af840daa4f96e90681aa660745e5d5004dd94e33e7a4be5cdf0f8ce42f49
+  checksum: 10c0/d00ab1c046f9683a89a55fef5ad1d870503b50385596cfc03f8e352b376680d398f473cc15c07d2f51067a70cda4bd1e3ba434f9490e88d8755857be8b069af1
   languageName: node
   linkType: hard
 
-"@getpara/react-component-library@npm:3.14.0":
-  version: 3.14.0
-  resolution: "@getpara/react-component-library@npm:3.14.0"
+"@getpara/react-component-library@npm:3.15.0":
+  version: 3.15.0
+  resolution: "@getpara/react-component-library@npm:3.15.0"
   dependencies:
     "@radix-ui/react-avatar": "npm:^1.1.2"
     "@radix-ui/react-checkbox": "npm:^1.3.3"
@@ -800,15 +800,15 @@ __metadata:
   peerDependencies:
     react: ">=18"
     react-dom: ">=18"
-  checksum: 10c0/c7348fb056a00bdbc71b4456cb7a0ade8517b70f208673bebb26335413f987ec80f6c7dc8b38cc26baa027dc764af41acc7bfa95c07e129d9701597791bfbfec
+  checksum: 10c0/94aea5045cfe1fcffbe1eb773844843cb73c5c455892cb0377d6d80c4cf9eda8fbad6237db29c583e074ebfed6e5752b2ccf98c188320c00afafc060767b77da
   languageName: node
   linkType: hard
 
-"@getpara/react-core@npm:3.14.0":
-  version: 3.14.0
-  resolution: "@getpara/react-core@npm:3.14.0"
+"@getpara/react-core@npm:3.15.0":
+  version: 3.15.0
+  resolution: "@getpara/react-core@npm:3.15.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.14.0"
+    "@getpara/core-sdk": "npm:3.15.0"
     zustand: "npm:^5.0.0"
   peerDependencies:
     "@getpara/cosmjs-v0-integration": ">=2"
@@ -833,18 +833,18 @@ __metadata:
       optional: true
     "@getpara/viem-v2-integration":
       optional: true
-  checksum: 10c0/9b219666934068eae34fbd4098c1698d0d68a5fc4b8b189da19ae272cb3614778a4678e99ce4c60007b532ca70ccdfcb66c2fdac8752a8b0563a7029acba09b7
+  checksum: 10c0/c32dfd5e63a3810a36c21c26e5bc2d59da8ced1b79b67c68aafb83dc6c76564a99fe082f49cf1caee249d03d5e0719d417d9e2ada8a5f36ab522b6b9a5bbadf0
   languageName: node
   linkType: hard
 
-"@getpara/react-sdk-lite@npm:3.14.0":
-  version: 3.14.0
-  resolution: "@getpara/react-sdk-lite@npm:3.14.0"
+"@getpara/react-sdk-lite@npm:3.15.0":
+  version: 3.15.0
+  resolution: "@getpara/react-sdk-lite@npm:3.15.0"
   dependencies:
-    "@getpara/react-common": "npm:3.14.0"
-    "@getpara/react-component-library": "npm:3.14.0"
-    "@getpara/react-core": "npm:3.14.0"
-    "@getpara/web-sdk": "npm:3.14.0"
+    "@getpara/react-common": "npm:3.15.0"
+    "@getpara/react-component-library": "npm:3.15.0"
+    "@getpara/react-core": "npm:3.15.0"
+    "@getpara/web-sdk": "npm:3.15.0"
     date-fns: "npm:^3.6.0"
     detect-browser: "npm:^5.3.0"
     framer-motion: "npm:^11.3.31"
@@ -893,7 +893,7 @@ __metadata:
       optional: true
   bin:
     setup-para: dist/cli/cli.mjs
-  checksum: 10c0/75358179fb9c642d1afa1f6ebc122aa812ddf797561a9f5659c9f13c5fa8007de6938736206d2b06e458cd82fab62d237a7c5706a7502fd760cba06bb3bc7434
+  checksum: 10c0/e71572ecf59c1997a03499132936307d3cddcb0155605e58c759c487b530bc7e05fc721883116b6cb095835143db6736f5d5ed1f849cd4ea2c1040b3af57c828
   languageName: node
   linkType: hard
 
@@ -906,25 +906,25 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@getpara/user-management-client@npm:3.14.0":
-  version: 3.14.0
-  resolution: "@getpara/user-management-client@npm:3.14.0"
+"@getpara/user-management-client@npm:3.15.0":
+  version: 3.15.0
+  resolution: "@getpara/user-management-client@npm:3.15.0"
   dependencies:
     "@getpara/shared": "npm:^1.28.0"
     "@opentelemetry/api": "npm:^1.9.1"
     axios: "npm:^1.8.4"
     axios-retry: "npm:^4.5.0"
     libphonenumber-js: "npm:^1.11.7"
-  checksum: 10c0/7320bf5f2ec9500b7ccb43cba328292b8280d57ed2841c0f90c1111716ffa79b30e39124ef55f02e3b0e219d2e50f1fb706f428ebcdf485dec5b53087aae74c4
+  checksum: 10c0/043d82737369a838b427c63ef2aa4598abc3a8c22ece91a133495e00cee69df2c3ca5f8ad8b401ee1ed21a4e9a55ed5f3fcb3cc2341d715b5057245574f6810d
   languageName: node
   linkType: hard
 
-"@getpara/web-sdk@npm:3.14.0":
-  version: 3.14.0
-  resolution: "@getpara/web-sdk@npm:3.14.0"
+"@getpara/web-sdk@npm:3.15.0":
+  version: 3.15.0
+  resolution: "@getpara/web-sdk@npm:3.15.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.14.0"
-    "@getpara/user-management-client": "npm:3.14.0"
+    "@getpara/core-sdk": "npm:3.15.0"
+    "@getpara/user-management-client": "npm:3.15.0"
     "@opentelemetry/api": "npm:^1.9.1"
     base64url: "npm:^3.0.1"
     buffer: "npm:6.0.3"
@@ -937,7 +937,7 @@ __metadata:
   peerDependenciesMeta:
     "@farcaster/miniapp-sdk":
       optional: true
-  checksum: 10c0/83c96acb37789e110b6e927fe0ade7d11e785d68cc3302e895085d1e263be14b20b1ee5d132418abf01488d7b7bf5d7bab46796b783885a72781a9d1a9eaf2cf
+  checksum: 10c0/b1220755b689f42e517f58e5756e148733fc03b47ae41a627423b7a636f0e9b000cf1a18b8cab1b5b8421b3e799164719ffee59bb17947e33c7e9163311c075c
   languageName: node
   linkType: hard
 
@@ -6011,7 +6011,7 @@ __metadata:
     "@canton-network/core-tx-visualizer": "npm:0.26.0"
     "@canton-network/wallet-sdk": "npm:0.21.1"
     "@eslint/js": "npm:10.0.1"
-    "@getpara/react-sdk-lite": "npm:3.14.0"
+    "@getpara/react-sdk-lite": "npm:3.15.0"
     "@tailwindcss/postcss": "npm:4.3.0"
     "@tanstack/react-query": "npm:5.101.0"
     "@types/node": "npm:25.9.1"
