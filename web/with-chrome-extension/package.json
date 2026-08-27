@@ -16,7 +16,7 @@
     "@cosmjs/proto-signing": "^0.34.0",
     "@cosmjs/stargate": "^0.34.0",
     "@cosmjs/tendermint-rpc": "^0.34.0",
-    "@getpara/react-sdk": "3.15.0",
+    "@getpara/react-sdk": "3.16.0",
     "@solana-mobile/wallet-adapter-mobile": "^2.2.2",
     "@solana/wallet-adapter-base": "^0.9.27",
     "@solana/wallet-adapter-react": "^0.15.39",
