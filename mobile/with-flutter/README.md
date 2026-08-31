@@ -1,30 +1,22 @@
 # Para Flutter Example
 
 This example demonstrates integrating the Para SDK with a Flutter application for both iOS and Android platforms. It
-showcases essential Para features, including multi-method authentication (email, phone, OAuth) with passkeys,
-cross-chain wallet management (EVM, Cosmos, Solana), and transaction signing. Use this project as a starting point for
-building your Flutter application with Para.
+showcases Para Basic Login, wallet management for EVM, Solana, Cosmos, Stellar, and Sui, and the complete set of
+signing payloads supported by the Para Bridge. Use this project as a starting point for building your Flutter
+application with Para.
 
 ## Key Files/Folders
 
-- `lib/examples`: Contains the core Flutter application logic demonstrating Para SDK usage.
+- `lib/features/wallets/signing`: Contains the chain-specific message and transaction signing examples.
+- `lib/features/wallets/screens`: Contains wallet management and chain detail screens.
+- `lib/config/para_config.dart`: Maps hosted or local environment values into the Para SDK.
 - `.env.example`: Template for environment variables.
 
 ## Prerequisites
 
 - **Flutter SDK**: Ensure Flutter is installed and configured correctly.
 - **Platform IDEs**: Xcode for iOS development and/or Android Studio for Android development.
-- **Para API Key**: Obtain your API key from [developer.getpara.com](https://developer.getpara.com). Create a `.env`
-  file in the project root and add your key:
-  ```
-  PARA_BETA_API_KEY=your_api_key_here
-  ```
-
-## Installation
-
-> **Note**: Full passkey functionality on iOS requires a valid Apple Developer Account and a registered bundle ID
-> matching the Team ID provided to Para. For Android, passkey functionality requires a device with secure lock screen
-> and biometric authentication enabled, plus Google Play Services with an active Google account.
+- **Para API Key**: Obtain your API key from [developer.getpara.com](https://developer.getpara.com).
 
 ---
 
@@ -33,16 +25,16 @@ building your Flutter application with Para.
 The project demonstrates comprehensive integration through these key components:
 
 - **Authentication Flows**
-  - Email-based authentication with passkey support
-  - Phone number verification with passkey support
-  - OAuth provider integration with passkey support
+  - Basic Login through Para's hosted verification session
+  - Email, phone, and social authentication
+  - Native callback handling after authentication completes
 - **Wallet Management Interface**
   - Wallet creation and querying across networks
-  - Support for EVM, Solana, and Cosmos chains
+  - Support for EVM, Solana, Cosmos, Stellar, and Sui wallets
 - **Transaction Signing Examples**
-  - Network-specific transaction construction
-  - Unified signing interface implementation
-  - Chain-specific transaction examples
+  - Chain-specific message and transaction construction
+  - Explicit routing for shared Ed25519 wallets
+  - Structured and canonical serialized payload examples
 
 ---
 
@@ -51,8 +43,8 @@ The project demonstrates comprehensive integration through these key components:
 1. **Clone** this repository and navigate to the project directory:
 
    ```bash
-   git clone https://github.com/getpara/examples-hub.git
-   cd examples-hub/mobile/with-flutter
+   git clone https://github.com/capsule-org/js-monorepo.git
+   cd js-monorepo/examples-hub/mobile/with-flutter
    ```
 
 2. **Install Flutter dependencies**:
@@ -93,9 +85,21 @@ Create a `.env` file (or rename `.env.example`) in the project root with the val
 
 ```
 PARA_API_KEY=your_api_key_here
-# options: beta or prod
-PARA_ENV=beta
+# options: sandbox, beta, or prod
+PARA_ENV=sandbox
 ```
+
+To run the SDK and Bridge against local Para services, set all four values:
+
+```
+PARA_API_KEY=your_local_api_key
+PARA_ENV=dev
+PARA_BRIDGE_URL=http://localhost:5173
+PARA_RELYING_PARTY_ID=localhost
+```
+
+The app refuses to start in `dev` without an explicit local Bridge URL and relying-party ID. Hosted environments use
+the SDK's standard URLs.
 
 When running in CI (including Xcode Cloud), define `PARA_API_KEY` and `PARA_ENV` as workflow environment variables or
 secrets. The `ios/ci_scripts/ci_post_clone.sh` hook generates the `.env` file automatically using those variables and
@@ -103,15 +107,8 @@ falls back to the checked-in `.env.example` so the Flutter asset bundler always 
 
 ### iOS Setup
 
-For iOS passkey functionality:
-
-1. Update the bundle identifier in your Xcode project settings
-2. Submit your Team ID and bundle ID to [Para Support](https://developer.getpara.com)
-3. Allow time for domain association propagation (up to 24 hours)
-4. Launch the app on iOS
-
-> **Note**: iOS passkey functionality requires a valid Apple Developer Team ID registered with Para. Allow up to 24
-> hours for domain association propagation after registration.
+Keep the configured callback scheme when changing the bundle identifier so the Basic Login browser session can return
+to the app after verification.
 
 > **Export Compliance:** `ios/Runner/Info.plist` sets `ITSAppUsesNonExemptEncryption` to `false`, indicating the app
 > only relies on Apple's standard encryption. When App Store Connect asks about encryption, you can answer "No"
@@ -129,130 +126,56 @@ For custom package names:
 2. Register your SHA-256 fingerprint with Para
 3. Allow time for domain association propagation
 
-> **Note**: Android passkey functionality requires a device with secure lock screen and biometric authentication
-> (fingerprint or face recognition) enabled, plus Google Play Services with an active Google account for cloud backup
-> security.
-
 ---
 
 ## Key Features
 
-### Authentication Methods
+### Signing Examples
 
-The example implements multiple authentication flows, each supporting passkey functionality:
+Open a wallet and select **Signing examples**. The examples are separated by chain and by message or transaction so
+you can copy only the flow your integration needs:
 
-**Email Authentication Flow**
+- **EVM**: plain EIP-191 messages, EIP-712 typed data, EIP-7702 authorizations, and transaction types 0 through 2.
+- **Solana**: plain and raw messages, structured transfers, serialized legacy transactions, and serialized v0 transactions.
+- **Cosmos**: ADR-036 messages, structured Direct and Amino transactions, and serialized Direct and Amino sign documents.
+- **Stellar**: plain and raw messages, Soroban authorization entries, structured payments, standard XDR, fee-bump XDR, and Soroban XDR.
+- **Sui**: plain personal messages, personal-message bytes, and serialized BCS transactions.
 
-```dart
-// Sign up or log in
-var authState = await para.signUpOrLogIn(auth: {'email': email});
+These examples sign but do not broadcast. Structured examples build safe test-shaped payloads in the app. Serialized
+examples ask you to paste a canonical payload because it must contain the real account, signer, sequence, and recent
+chain data from your application before Para signs it.
 
-// First-time user setup
-if (authState.stage == AuthStage.verify) {
+### Basic Login
 
-  // Verify email with OTP
-  authState = await para.verifyOtp(otp: code);
-
-  // Set up passkey
-  await para.generatePasskey(identifier: email, biometricsId: signupState.passkeyId);
-
-  // Create wallet
-  final result = await para.createWallet(skipDistribute: false);
-}
-
-// Login with passkey
-final wallet = await para.loginWithPasskey();
-```
-
-**Phone Authentication Flow**
+The standard mobile path is Basic Login. The app starts authentication with an email, phone number, or social
+provider, opens Para's hosted verification URL in a secure system browser session, and returns to the wallet list when
+Para reports that login or signup is complete:
 
 ```dart
-// Sign up or log in - phone is an international format like `+13105551234`
-var authState = await para.signUpOrLogIn(auth: {'phone': phone});
+final authState = await para.initiateAuthFlow(auth: Auth.email(email));
+final loginUrl = authState.loginUrl;
 
-// First-time user setup
-if (authState.stage == AuthStage.verify) {
-
-  // Verify email with OTP
-  authState = await para.verifyOtp(otp: code);
-
-  // Set up passkey
-  await para.generatePasskey(identifier: phone, biometricsId: signupState.passkeyId);
-
-  // Create wallet
-  final result = await para.createWallet(skipDistribute: false);
-}
-
-// Login with passkey
-final wallet = await para.loginWithPasskey();
-```
-
-**Third-Party Authentication Flows**
-With third-party flows, verification via a one-time code is bypassed:
-***OAuth***
-```dart
-// Verify via an OAuth service
-final authState = await para.verifyOAuth(
-  provider: OAuthMethod.google,
-  deeplinkUrl: 'your-app-scheme'
-);
-
-// First-time user setup
-if (authState.stage == AuthStage.signup) {
-  await para.generatePasskey(
-    identifier: authState.userId,
-    biometricsId: authState.passkeyId!
+if (loginUrl != null) {
+  await para.presentAuthUrl(
+    url: loginUrl,
+    webAuthenticationSession: webAuthenticationSession,
   );
 
-  await para.createWallet(skipDistribute: false);
-}
-
-// Log in user
-final wallet = await para.loginWithPasskey();
-```
-
-***Farcaster***
-```dart
-final authState = await para.verifyFarcaster(
-  isCanceled: () {
-    // cancel if some change occurs in your UI
-    return false;
+  if (authState.effectiveNextStage == AuthStage.signup) {
+    await para.waitForSignup();
+  } else {
+    await para.waitForLogin();
   }
-);
 
-// First-time user setup
-if (authState.stage == AuthStage.signup) {
-  await para.generatePasskey(
-    identifier: authState.userId,
-    biometricsId: authState.passkeyId!
-  );
-
-  await para.createWallet(skipDistribute: false);
+  await para.fetchWallets();
 }
-
-// Log in user
-final wallet = await para.loginWithPasskey();
 ```
 
-***Telegram***
-```dart
-final authState = await para.verifyTelegram(
-  // Refer to the Telegram docs for information on bot authentication
-  telegramAuthObject: telegramAuthObject,
-);
+See `lib/screens/auth_screen.dart` for the complete implementation and `maestro/login-and-sign-test.yaml` for the
+automated email, hosted verification, native callback, wallet, and signing flow.
 
-// First-time user setup
-if (authState.stage == AuthStage.signup) {
-  await para.generatePasskey(
-    identifier: authState.userId,
-    biometricsId: authState.passkeyId!
-  );
-
-  await para.createWallet(skipDistribute: false);
-}
-
-// Log in user
-final wallet = await para.loginWithPasskey();
+```bash
+maestro test maestro/login-and-sign-test.yaml
 ```
 
 ### Wallet Management

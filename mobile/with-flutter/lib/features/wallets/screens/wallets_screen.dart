@@ -5,6 +5,7 @@ import 'package:para/para.dart';
 import '../../../client/para.dart';
 import '../../smart_account/smart_account_screen.dart';
 import '../widgets/wallet_card.dart';
+import '../signing/signing_examples_screen.dart';
 import 'details/evm_wallet_view.dart';
 import 'details/solana_wallet_view.dart';
 import 'details/cosmos_wallet_view.dart';
@@ -28,7 +29,7 @@ class _WalletsScreenState extends State<WalletsScreen> {
   List<Wallet> _wallets = [];
   bool _isLoading = true;
   bool _isRefreshing = false;
-  WalletType? _creatingWalletType;
+  BridgeChainType? _creatingChainType;
   bool _isDeletingAccount = false;
   String? _error;
   bool _isFetchingJwt = false;
@@ -86,20 +87,26 @@ class _WalletsScreenState extends State<WalletsScreen> {
     }
   }
 
-  Future<void> _createWallet(WalletType type, StateSetter setModalState) async {
-    setState(() => _creatingWalletType = type);
-    setModalState(() => _creatingWalletType = type);
+  Future<void> _createWallet(
+    BridgeChainType chainType,
+    StateSetter setModalState,
+  ) async {
+    setState(() => _creatingChainType = chainType);
+    setModalState(() => _creatingChainType = chainType);
 
     try {
-      await para.createWallet(type: type, skipDistribute: false);
+      await para.createWallet(
+        chainType: chainType,
+        skipDistribute: false,
+      );
       await _loadWallets();
       if (mounted) {
-        setState(() => _creatingWalletType = null);
+        setState(() => _creatingChainType = null);
         Navigator.of(context).pop();
       }
     } catch (e) {
       if (mounted) {
-        setState(() => _creatingWalletType = null);
+        setState(() => _creatingChainType = null);
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Create wallet failed: ${e.toString()}')),
@@ -344,22 +351,22 @@ class _WalletsScreenState extends State<WalletsScreen> {
                   ),
                 ),
                 const SizedBox(height: 24),
-                ...WalletType.values.map((type) => Padding(
+                ...BridgeChainType.values.map((chainType) => Padding(
                       padding: const EdgeInsets.only(bottom: 8),
                       child: SizedBox(
                         width: double.infinity,
                         height: 50,
                         child: ElevatedButton(
-                          onPressed: _creatingWalletType != null
+                          onPressed: _creatingChainType != null
                               ? null
-                              : () => _createWallet(type, setModalState),
+                              : () => _createWallet(chainType, setModalState),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.black,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
                           ),
-                          child: _creatingWalletType == type
+                          child: _creatingChainType == chainType
                               ? const SizedBox(
                                   height: 20,
                                   width: 20,
@@ -370,7 +377,7 @@ class _WalletsScreenState extends State<WalletsScreen> {
                                   ),
                                 )
                               : Text(
-                                  type.value,
+                                  chainType.value,
                                   style: const TextStyle(
                                     fontWeight: FontWeight.w500,
                                     color: Colors.white,
@@ -397,15 +404,17 @@ class _WalletsScreenState extends State<WalletsScreen> {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) {
-          switch (wallet.type) {
-            case WalletType.evm:
+          switch (wallet.chainType) {
+            case BridgeChainType.evm:
               return EVMWalletView(wallet: wallet);
-            case WalletType.solana:
+            case BridgeChainType.solana:
               return SolanaWalletView(wallet: wallet);
-            case WalletType.cosmos:
+            case BridgeChainType.cosmos:
               return CosmosWalletView(wallet: wallet);
-            case WalletType.stellar:
+            case BridgeChainType.stellar:
               return StellarWalletView(wallet: wallet);
+            case BridgeChainType.sui:
+              return SigningExamplesScreen(wallet: wallet);
             default:
               return Scaffold(
                 appBar: AppBar(title: const Text('Unknown Wallet')),

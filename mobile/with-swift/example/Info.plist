@@ -6,6 +6,17 @@
 	<string>$(PARA_API_KEY)</string>
 	<key>PARA_ENVIRONMENT</key>
 	<string>$(PARA_ENVIRONMENT)</string>
+	<key>PARA_BRIDGE_URL</key>
+	<string>$(PARA_BRIDGE_URL)</string>
+	<key>PARA_RELYING_PARTY_ID</key>
+	<string>$(PARA_RELYING_PARTY_ID)</string>
+#if PARA_LOCAL_NETWORKING
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
+#endif
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>

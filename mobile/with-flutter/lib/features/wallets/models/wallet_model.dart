@@ -1,7 +1,7 @@
 import 'package:para/para.dart';
 import 'package:flutter/material.dart';
 
-enum WalletChain { evm, solana, cosmos, stellar }
+enum WalletChain { evm, solana, cosmos, stellar, sui }
 
 extension WalletChainExtension on WalletChain {
   String get displayName {
@@ -14,6 +14,8 @@ extension WalletChainExtension on WalletChain {
         return 'COSMOS';
       case WalletChain.stellar:
         return 'STELLAR';
+      case WalletChain.sui:
+        return 'SUI';
     }
   }
 
@@ -27,6 +29,8 @@ extension WalletChainExtension on WalletChain {
         return const Color(0xFF502D82); // Cosmic Purple
       case WalletChain.stellar:
         return const Color(0xFF111827); // Stellar Black
+      case WalletChain.sui:
+        return const Color(0xFF4DA2FF); // Sui Blue
     }
   }
 
@@ -56,22 +60,30 @@ extension WalletChainExtension on WalletChain {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         );
+      case WalletChain.sui:
+        return const LinearGradient(
+          colors: [Color(0xFF4DA2FF), Color(0xFF6FBCF0)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        );
     }
   }
 }
 
-// Extension to convert Para WalletType to our WalletChain
-extension WalletTypeExtension on WalletType {
+// Extension to convert the Bridge chain identity to our presentation model.
+extension BridgeChainTypeExtension on BridgeChainType {
   WalletChain get toChain {
     switch (this) {
-      case WalletType.evm:
+      case BridgeChainType.evm:
         return WalletChain.evm;
-      case WalletType.solana:
+      case BridgeChainType.solana:
         return WalletChain.solana;
-      case WalletType.cosmos:
+      case BridgeChainType.cosmos:
         return WalletChain.cosmos;
-      case WalletType.stellar:
+      case BridgeChainType.stellar:
         return WalletChain.stellar;
+      case BridgeChainType.sui:
+        return WalletChain.sui;
     }
   }
 }
@@ -79,9 +91,14 @@ extension WalletTypeExtension on WalletType {
 // Extension to help format wallet addresses
 extension WalletAddressFormatting on Wallet {
   String get formattedAddress {
-    final addr = switch (type) {
-      WalletType.cosmos => addressSecondary ?? address ?? 'unknown',
-      WalletType.stellar => _stellarAddress,
+    if (chainType == BridgeChainType.sui && addressSui == null) {
+      return 'Sui address unavailable';
+    }
+
+    final addr = switch (chainType) {
+      BridgeChainType.cosmos => addressSecondary ?? address ?? 'unknown',
+      BridgeChainType.stellar => stellarAddress,
+      BridgeChainType.sui => addressSui!,
       _ => address ?? 'unknown',
     };
 
@@ -91,7 +108,7 @@ extension WalletAddressFormatting on Wallet {
     return '$prefix...$suffix';
   }
 
-  String get _stellarAddress {
+  String get stellarAddress {
     final rawAddress = address;
     if (rawAddress != null && rawAddress.startsWith('G')) {
       return rawAddress;

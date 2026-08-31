@@ -102,12 +102,12 @@ struct WalletsView: View {
         return json
     }
     
-    private func createWallet(type: WalletType) {
+    private func createWallet(chainType: BridgeChainType) {
         isCreatingWallet = true
         
         Task {
             do {
-                try await paraManager.createWallet(type: type, skipDistributable: false)
+                try await paraManager.createWallet(chainType: chainType, skipDistributable: false)
                 
                 await MainActor.run {
                     isCreatingWallet = false
@@ -214,8 +214,8 @@ struct WalletsView: View {
         .accessibilityIdentifier("createFirstWalletButton")
     }
     
-    private func chainColor(for type: WalletType) -> Color {
-        switch type {
+    private func chainColor(for chainType: BridgeChainType) -> Color {
+        switch chainType {
         case .evm:
             Color(hex: "627EEA") // Ethereum Blue
         case .solana:
@@ -224,11 +224,13 @@ struct WalletsView: View {
             Color(hex: "502D82") // Cosmic Purple
         case .stellar:
             Color(hex: "08B5E5") // Stellar Blue
+        case .sui:
+            Color(hex: "4DA2FF") // Sui Blue
         }
     }
     
-    private func chainGradient(for type: WalletType) -> LinearGradient {
-        switch type {
+    private func chainGradient(for chainType: BridgeChainType) -> LinearGradient {
+        switch chainType {
         case .evm:
             // Pure blue gradient - horizontal
             LinearGradient(
@@ -256,18 +258,31 @@ struct WalletsView: View {
                 startPoint: .leading,
                 endPoint: .trailing,
             )
+        case .sui:
+            LinearGradient(
+                colors: [Color(hex: "4DA2FF"), Color(hex: "6FBCF0")],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing,
+            )
         }
     }
 
     private func walletAddress(for wallet: Wallet) -> String {
-        switch wallet.type {
+        switch wallet.chainType {
         case .cosmos:
             wallet.addressSecondary ?? wallet.address ?? "unknown"
         case .stellar:
             wallet.stellarAddress ?? wallet.address ?? "unknown"
+        case .sui:
+            wallet.addressSui ?? "Sui address unavailable"
         default:
             wallet.address ?? "unknown"
         }
+    }
+
+    private func displayAddress(for wallet: Wallet) -> String {
+        let address = walletAddress(for: wallet)
+        return address == "Sui address unavailable" ? address : formatAddress(address)
     }
     
     @ViewBuilder
@@ -276,10 +291,10 @@ struct WalletsView: View {
             walletDetailView(for: wallet)
         } label: {
             RoundedRectangle(cornerRadius: 16)
-                .fill(chainGradient(for: wallet.type ?? .evm))
+                .fill(chainGradient(for: wallet.chainType ?? .evm))
                 .overlay(
                     VStack(alignment: .leading, spacing: 8) {
-                        let displayAddress = formatAddress(walletAddress(for: wallet))
+                        let displayAddress = displayAddress(for: wallet)
                         
                         Text(displayAddress)
                             .font(.system(.title3, design: .monospaced))
@@ -288,7 +303,7 @@ struct WalletsView: View {
                             .lineLimit(1)
                             .minimumScaleFactor(0.7)
                         
-                        Text(wallet.type?.rawValue ?? "unknown")
+                        Text(wallet.chainType?.rawValue ?? "unknown")
                             .font(.subheadline)
                             .fontWeight(.medium)
                             .foregroundStyle(.white.opacity(0.9))
@@ -298,10 +313,10 @@ struct WalletsView: View {
                         .padding(.vertical, 16),
                 )
                 .frame(height: 150)
-                .shadow(color: chainColor(for: wallet.type ?? .evm).opacity(0.3), radius: 8, x: 0, y: 4)
+                .shadow(color: chainColor(for: wallet.chainType ?? .evm).opacity(0.3), radius: 8, x: 0, y: 4)
         }
         .buttonStyle(PlainButtonStyle())
-        .accessibilityIdentifier("walletCell_\(wallet.type?.rawValue.uppercased() ?? "UNKNOWN")")
+        .accessibilityIdentifier("walletCell_\(wallet.chainType?.rawValue.uppercased() ?? "UNKNOWN")")
     }
     
     private func formatAddress(_ address: String) -> String {
@@ -338,7 +353,7 @@ struct WalletsView: View {
     
     @ViewBuilder
     private func walletDetailView(for wallet: Wallet) -> some View {
-        switch wallet.type {
+        switch wallet.chainType {
         case .evm:
             EVMWalletView(selectedWallet: wallet)
         case .solana:
@@ -347,6 +362,8 @@ struct WalletsView: View {
             CosmosWalletView(selectedWallet: wallet)
         case .stellar:
             StellarWalletView(selectedWallet: wallet)
+        case .sui:
+            SigningExamplesView(wallet: wallet)
         case .none:
             Text("Wallet type unavailable").foregroundStyle(.secondary)
         }
@@ -540,21 +557,30 @@ struct WalletsView: View {
                         .padding(.top, 24)
                     
                     VStack(spacing: 8) {
-                        ForEach([WalletType.evm, WalletType.solana, WalletType.cosmos, WalletType.stellar], id: \.self) { type in
+                        ForEach(
+                            [
+                                BridgeChainType.evm,
+                                BridgeChainType.solana,
+                                BridgeChainType.cosmos,
+                                BridgeChainType.stellar,
+                                BridgeChainType.sui,
+                            ],
+                            id: \.self
+                        ) { chainType in
                             Button(action: {
-                                createWallet(type: type)
+                                createWallet(chainType: chainType)
                             }) {
-                                Text(type.rawValue)
+                                Text(chainType.rawValue)
                                     .font(.body)
                                     .fontWeight(.medium)
                                     .foregroundStyle(.white)
                                     .frame(maxWidth: .infinity)
                                     .padding(.vertical, 16)
-                                    .background(chainGradient(for: type))
+                                    .background(chainGradient(for: chainType))
                                     .cornerRadius(10)
                             }
                             .buttonStyle(PlainButtonStyle())
-                            .accessibilityIdentifier("\(type.rawValue.lowercased())WalletButton")
+                            .accessibilityIdentifier("\(chainType.rawValue.lowercased())WalletButton")
                         }
                     }
                     .padding(.horizontal)

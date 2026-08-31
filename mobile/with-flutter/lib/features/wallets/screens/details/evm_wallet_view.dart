@@ -4,6 +4,7 @@ import 'package:http/http.dart';
 import 'package:para/para.dart' as para_sdk;
 import 'package:web3dart/web3dart.dart';
 import '../../../../client/para.dart';
+import '../../signing/signing_examples_screen.dart';
 
 class EVMWalletView extends StatefulWidget {
   final para_sdk.Wallet wallet;
@@ -458,6 +459,7 @@ class _EVMWalletViewState extends State<EVMWalletView> {
           'EVM Wallet',
           style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
         ),
+        actions: [SigningExamplesActionButton(wallet: widget.wallet)],
       ),
       body: Stack(
         children: [

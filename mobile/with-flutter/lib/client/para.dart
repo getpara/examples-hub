@@ -1,27 +1,11 @@
-import 'package:para/para.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:para/para.dart';
 import '../config/para_config.dart';
 import '../config/deep_link_constants.dart';
 
-// Helper function to map environment string to Environment enum
-Environment _getEnvironmentFromString(String? envString) {
-  switch (envString?.toLowerCase()) {
-    case 'sandbox':
-      return Environment.sandbox;
-    case 'beta':
-      return Environment.beta;
-    case 'prod':
-      return Environment.prod;
-    default:
-      return Environment.beta; // Default to beta
-  }
-}
-
 // Para Configuration
-final config = ParaConfiguration(
-  apiKey: dotenv.env['PARA_API_KEY'] ??
-      'YOUR_API_KEY_HERE', // Get from: http://developer.getpara.com
-  environment: _getEnvironmentFromString(dotenv.env['PARA_ENV']),
+final config = ParaConfiguration.fromValues(
+  dotenv.env.map((key, value) => MapEntry(key, value)),
 );
 
 // Initialize Para using configuration

@@ -59,8 +59,23 @@ appId: com.usecapsule.example.swift
     timeout: 30000
 - assertVisible: "Wallets"
 
-# Tap on EVM wallet card
-- tapOn: "EVM"
+# Create an EVM wallet when the authenticated user does not have one yet
+- runFlow:
+    when:
+      visible: "Create Your First Wallet"
+    commands:
+      - tapOn:
+          id: "createFirstWalletButton"
+      - tapOn:
+          id: "evmWalletButton"
+
+# Open the EVM wallet
+- extendedWaitUntil:
+    visible:
+      id: "walletCell_EVM"
+    timeout: 30000
+- tapOn:
+    id: "walletCell_EVM"
 - waitForAnimationToEnd
 
 # Sign a message

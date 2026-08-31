@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A1000000000000000000000C /* ParaSwift in Frameworks */ = {isa = PBXBuildFile; productRef = E89B1D3E2D80A0AF00676E3B /* ParaSwift */; };
 		8F200F542DEFB08100B39BB4 /* AlertItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F200F532DEFB08100B39BB4 /* AlertItem.swift */; };
 		8F3CD3452E73995500827FAF /* SolanaSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 8F3CD3442E73995500827FAF /* SolanaSwift */; };
 		8F3CD3482E73997E00827FAF /* web3swift in Frameworks */ = {isa = PBXBuildFile; productRef = 8F3CD3472E73997E00827FAF /* web3swift */; };
@@ -17,7 +18,6 @@
 		8F6A87932E145EA200874160 /* CountryPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F6A87922E145E9F00874160 /* CountryPickerView.swift */; };
 		8F6A87C82E149E1A00874160 /* OTPVerificationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F6A87C72E149E1A00874160 /* OTPVerificationView.swift */; };
 		8F6AE66A2DC151040098F76B /* ChooseSignupMethodView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F6AE6692DC151040098F76B /* ChooseSignupMethodView.swift */; };
-		8FA007832D57EB0D009EF0C3 /* ParaConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FA007812D57EB0D009EF0C3 /* ParaConfig.swift */; };
 		8FA007862D57F1AA009EF0C3 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FA007842D57F1AA009EF0C3 /* Extensions.swift */; };
 		8FA007882D581F0D009EF0C3 /* ExternalWalletAuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FA007872D581F08009EF0C3 /* ExternalWalletAuthView.swift */; };
 		8FA0078B2D5A7841009EF0C3 /* MetaMaskDemoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FA0078A2D5A7841009EF0C3 /* MetaMaskDemoView.swift */; };
@@ -48,6 +48,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		A10000000000000000000001 /* exampleTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = exampleTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		8F200F532DEFB08100B39BB4 /* AlertItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertItem.swift; sourceTree = "<group>"; };
 		8F4302562DE8DE9000186768 /* EVMWalletView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EVMWalletView.swift; sourceTree = "<group>"; };
 		8F5D7E372E203463001C77C6 /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
@@ -58,7 +59,6 @@
 		8F6AE6692DC151040098F76B /* ChooseSignupMethodView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChooseSignupMethodView.swift; sourceTree = "<group>"; };
 		8F4302582DE8DE9000186768 /* StellarWalletView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StellarWalletView.swift; sourceTree = "<group>"; };
 		8F924CB92D824A1700938496 /* Example.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; name = Example.xctestplan; path = exampleUITests/Example.xctestplan; sourceTree = "<group>"; };
-		8FA007812D57EB0D009EF0C3 /* ParaConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParaConfig.swift; sourceTree = "<group>"; };
 		8FA007842D57F1AA009EF0C3 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		8FA007872D581F08009EF0C3 /* ExternalWalletAuthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExternalWalletAuthView.swift; sourceTree = "<group>"; };
 		8FA007892D58387F009EF0C3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -82,10 +82,21 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		A20000000000000000000001 /* Signing */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Signing; sourceTree = "<group>"; };
+		A20000000000000000000002 /* Configuration */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Configuration; sourceTree = "<group>"; };
+		A10000000000000000000002 /* exampleTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = exampleTests; sourceTree = "<group>"; };
 		8FE93AA82D80F58C00CE018E /* exampleUITests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = exampleUITests; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		A10000000000000000000005 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A1000000000000000000000C /* ParaSwift in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		8FE93AA42D80F58C00CE018E /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -162,7 +173,6 @@
 			isa = PBXGroup;
 			children = (
 				E8F93B2B2C21EBED006AA3F6 /* ExampleApp.swift */,
-				8FA007812D57EB0D009EF0C3 /* ParaConfig.swift */,
 				E86A47402D0CA62F00546CC2 /* AppRootManager.swift */,
 			);
 			path = App;
@@ -183,6 +193,7 @@
 			children = (
 				8F924CB92D824A1700938496 /* Example.xctestplan */,
 				E8F93B2A2C21EBED006AA3F6 /* example */,
+				A10000000000000000000002 /* exampleTests */,
 				8FE93AA82D80F58C00CE018E /* exampleUITests */,
 				E8F93B292C21EBED006AA3F6 /* Products */,
 			);
@@ -192,6 +203,7 @@
 			isa = PBXGroup;
 			children = (
 				E8F93B282C21EBED006AA3F6 /* example.app */,
+				A10000000000000000000001 /* exampleTests.xctest */,
 				8FE93AA72D80F58C00CE018E /* exampleUITests.xctest */,
 			);
 			name = Products;
@@ -202,6 +214,8 @@
 			children = (
 				8F5D7E372E203463001C77C6 /* Config.xcconfig */,
 				8FE94DE12DA9AC1E009CBD28 /* App */,
+				A20000000000000000000002 /* Configuration */,
+				A20000000000000000000001 /* Signing */,
 				8FA0077C2D56ECC9009EF0C3 /* Auth */,
 				8FA0077D2D56ECDA009EF0C3 /* Wallet */,
 				AA62500005000000AABBCCDD /* SmartAccount */,
@@ -227,6 +241,31 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		A10000000000000000000003 /* exampleTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A1000000000000000000000B /* Build configuration list for PBXNativeTarget "exampleTests" */;
+			buildPhases = (
+				A10000000000000000000004 /* Sources */,
+				A10000000000000000000005 /* Frameworks */,
+				A10000000000000000000006 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				A10000000000000000000002 /* exampleTests */,
+				A20000000000000000000002 /* Configuration */,
+				A20000000000000000000001 /* Signing */,
+			);
+			name = exampleTests;
+			packageProductDependencies = (
+				E89B1D3E2D80A0AF00676E3B /* ParaSwift */,
+			);
+			productName = exampleTests;
+			productReference = A10000000000000000000001 /* exampleTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		8FE93AA62D80F58C00CE018E /* exampleUITests */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 8FE93AB12D80F58C00CE018E /* Build configuration list for PBXNativeTarget "exampleUITests" */;
@@ -257,11 +296,14 @@
 				E8F93B242C21EBED006AA3F6 /* Sources */,
 				E8F93B252C21EBED006AA3F6 /* Frameworks */,
 				E8F93B262C21EBED006AA3F6 /* Resources */,
-				8FAB15162DF25AB2003DAC18 /* ShellScript */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				A20000000000000000000002 /* Configuration */,
+				A20000000000000000000001 /* Signing */,
 			);
 			name = example;
 			packageProductDependencies = (
@@ -283,6 +325,10 @@
 				LastSwiftUpdateCheck = 1620;
 				LastUpgradeCheck = 1540;
 				TargetAttributes = {
+					A10000000000000000000003 = {
+						CreatedOnToolsVersion = 16.2;
+						TestTargetID = E8F93B272C21EBED006AA3F6;
+					};
 					8FE93AA62D80F58C00CE018E = {
 						CreatedOnToolsVersion = 16.2;
 						LastSwiftMigration = 1620;
@@ -312,12 +358,20 @@
 			projectRoot = "";
 			targets = (
 				E8F93B272C21EBED006AA3F6 /* example */,
+				A10000000000000000000003 /* exampleTests */,
 				8FE93AA62D80F58C00CE018E /* exampleUITests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		A10000000000000000000006 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		8FE93AA52D80F58C00CE018E /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -337,28 +391,14 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
-/* Begin PBXShellScriptBuildPhase section */
-		8FAB15162DF25AB2003DAC18 /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
+/* Begin PBXSourcesBuildPhase section */
+		A10000000000000000000004 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
 			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "#!/bin/bash\n\nset -e\n\n# Inject Xcode Cloud environment variable into Info.plist for TestFlight builds\nif [ -n \"$PARA_API_KEY\" ]; then\n    echo \"Injecting PARA_API_KEY into Info.plist for TestFlight build\"\n    echo \"Target path: ${BUILT_PRODUCTS_DIR}/${INFOPLIST_PATH}\"\n    \n    # Ensure the Info.plist exists and is accessible\n    if [ ! -f \"${BUILT_PRODUCTS_DIR}/${INFOPLIST_PATH}\" ]; then\n        echo \"Error: Info.plist not found at expected location\"\n        exit 1\n    fi\n    \n    # Try to set the key, if it doesn't exist, add it\n    if /usr/libexec/PlistBuddy -c \"Set :APIKey '$PARA_API_KEY'\" \"${BUILT_PRODUCTS_DIR}/${INFOPLIST_PATH}\" 2>/dev/null; then\n        echo \"Updated existing APIKey\"\n    else\n        /usr/libexec/PlistBuddy -c \"Add :APIKey string '$PARA_API_KEY'\" \"${BUILT_PRODUCTS_DIR}/${INFOPLIST_PATH}\"\n        echo \"Added new APIKey\"\n    fi\n    \n    # Verify the injection worked\n    INJECTED_KEY=$(/usr/libexec/PlistBuddy -c \"Print :APIKey\" \"${BUILT_PRODUCTS_DIR}/${INFOPLIST_PATH}\" 2>/dev/null || echo \"FAILED\")\n    echo \"Verification: APIKey = $INJECTED_KEY\"\n    \n    echo \"API key injection completed\"\nelse\n    echo \"PARA_API_KEY not found - assuming local development build\"\nfi\n";
 		};
-/* End PBXShellScriptBuildPhase section */
-
-/* Begin PBXSourcesBuildPhase section */
 		8FE93AA32D80F58C00CE018E /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -385,7 +425,6 @@
 				8F6A87C82E149E1A00874160 /* OTPVerificationView.swift in Sources */,
 				8F200F542DEFB08100B39BB4 /* AlertItem.swift in Sources */,
 				8FB1B21C2E0F4DE500B37B5E /* AuthView.swift in Sources */,
-				8FA007832D57EB0D009EF0C3 /* ParaConfig.swift in Sources */,
 				8F6A87932E145EA200874160 /* CountryPickerView.swift in Sources */,
 				E86A47412D0CA63700546CC2 /* AppRootManager.swift in Sources */,
 				E8315DD82D5548F100FFF8C8 /* WalletsView.swift in Sources */,
@@ -406,6 +445,48 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		A10000000000000000000009 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = FF9U73RS48;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.usecapsule.example.swift.exampleTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		A1000000000000000000000A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = FF9U73RS48;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.usecapsule.example.swift.exampleTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
 		8FE93AAF2D80F58C00CE018E /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -573,6 +654,7 @@
 		};
 		E8F93B372C21EBEE006AA3F6 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 8F5D7E372E203463001C77C6 /* Config.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -592,6 +674,8 @@
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKExtensionDelegateClassName = "";
+				INFOPLIST_PREPROCESS = YES;
+				INFOPLIST_PREPROCESSOR_DEFINITIONS = "PARA_LOCAL_NETWORKING=1";
 				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -631,6 +715,8 @@
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKExtensionDelegateClassName = "";
+				INFOPLIST_PREPROCESS = YES;
+				INFOPLIST_PREPROCESSOR_DEFINITIONS = "PARA_LOCAL_NETWORKING=0";
 				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -652,6 +738,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		A1000000000000000000000B /* Build configuration list for PBXNativeTarget "exampleTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A10000000000000000000009 /* Debug */,
+				A1000000000000000000000A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
 		8FE93AB12D80F58C00CE018E /* Build configuration list for PBXNativeTarget "exampleUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -703,7 +798,7 @@
 			repositoryURL = "https://github.com/getpara/swift-sdk";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 2.9.0;
+				minimumVersion = 2.10.0;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */

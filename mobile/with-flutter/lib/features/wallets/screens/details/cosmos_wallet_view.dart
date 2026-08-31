@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:para/para.dart' as para_sdk;
 import '../../../../client/para.dart';
+import '../../signing/signing_examples_screen.dart';
 
 class CosmosWalletView extends StatefulWidget {
   final para_sdk.Wallet wallet;
@@ -598,6 +599,7 @@ class _CosmosWalletViewState extends State<CosmosWalletView> {
           'Cosmos Wallet',
           style: TextStyle(color: theme.colorScheme.onSurface),
         ),
+        actions: [SigningExamplesActionButton(wallet: widget.wallet)],
       ),
       body: Stack(
         children: [
