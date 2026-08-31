@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:para/para.dart' as para_sdk;
 import '../../../../client/para.dart';
+import '../../models/wallet_model.dart';
+import '../../signing/signing_examples_screen.dart';
 
 class StellarWalletView extends StatefulWidget {
   final para_sdk.Wallet wallet;
@@ -16,24 +18,7 @@ class _StellarWalletViewState extends State<StellarWalletView> {
   String _messageToSign = '';
   bool _isLoading = false;
 
-  String get _stellarAddress {
-    final rawAddress = widget.wallet.address;
-    if (rawAddress != null && rawAddress.startsWith('G')) {
-      return rawAddress;
-    }
-    final publicKey = widget.wallet.publicKey;
-    if (publicKey != null && publicKey.isNotEmpty) {
-      try {
-        return para_sdk.getStellarAddress(publicKey);
-      } catch (_) {}
-    }
-    if (rawAddress != null && rawAddress.isNotEmpty) {
-      try {
-        return para_sdk.getStellarAddressFromSolana(rawAddress);
-      } catch (_) {}
-    }
-    return rawAddress ?? '';
-  }
+  String get _stellarAddress => widget.wallet.stellarAddress;
 
   bool get _hasStellarAddress => _stellarAddress.startsWith('G');
 
@@ -208,6 +193,7 @@ class _StellarWalletViewState extends State<StellarWalletView> {
           'Stellar Wallet',
           style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
         ),
+        actions: [SigningExamplesActionButton(wallet: widget.wallet)],
       ),
       body: Stack(
         children: [
@@ -249,8 +235,10 @@ class _StellarWalletViewState extends State<StellarWalletView> {
                                   fontSize: 12,
                                   color: _hasStellarAddress
                                       ? Theme.of(context).colorScheme.onSurface
-                                      : Theme.of(context).colorScheme.onSurface
-                                            .withValues(alpha: 0.6),
+                                      : Theme.of(context)
+                                          .colorScheme
+                                          .onSurface
+                                          .withValues(alpha: 0.6),
                                 ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -302,8 +290,8 @@ class _StellarWalletViewState extends State<StellarWalletView> {
                           style: ElevatedButton.styleFrom(
                             backgroundColor:
                                 _isLoading || _messageToSign.isEmpty
-                                ? Colors.grey[400]
-                                : Colors.black,
+                                    ? Colors.grey[400]
+                                    : Colors.black,
                             foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(vertical: 16),
                           ),

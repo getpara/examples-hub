@@ -14,3 +14,7 @@ PARA_API_KEY =
 
 // Default environment
 PARA_ENVIRONMENT = sandbox
+
+// Required only when PARA_ENVIRONMENT = dev. Local networking is enabled only in Debug builds.
+PARA_BRIDGE_URL =
+PARA_RELYING_PARTY_ID =

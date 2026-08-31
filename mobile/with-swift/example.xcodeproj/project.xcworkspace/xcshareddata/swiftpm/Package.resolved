@@ -51,8 +51,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/getpara/swift-sdk",
       "state" : {
-        "revision" : "875169c6d8b1d114eeda70d3c0b3f45e4acd18c7",
-        "version" : "2.9.0"
+        "revision" : "f08b366a9d98f177b01fdddc07ee6bea8e237d56",
+        "version" : "2.10.0"
       }
     },
     {

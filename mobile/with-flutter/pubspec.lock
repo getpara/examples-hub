@@ -660,10 +660,10 @@ packages:
     dependency: "direct main"
     description:
       name: para
-      sha256: db75ce2a8f3c90ae0763e950d3d0f3643a29e4d6039509549658b3fb540049cd
+      sha256: c5280913902669264433df1839b6ccd5e35f2178a0c4babe09ba2324b7981bd3
       url: "https://pub.dev"
     source: hosted
-    version: "2.9.1"
+    version: "2.10.0"
   passkeys:
     dependency: transitive
     description:

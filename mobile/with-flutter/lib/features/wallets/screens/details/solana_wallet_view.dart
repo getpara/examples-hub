@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:para/para.dart' as para_sdk;
 import 'package:solana/solana.dart' as solana;
 import '../../../../client/para.dart';
+import '../../signing/signing_examples_screen.dart';
 
 class SolanaWalletView extends StatefulWidget {
   final para_sdk.Wallet wallet;
@@ -272,6 +273,7 @@ class _SolanaWalletViewState extends State<SolanaWalletView> {
           'Solana Wallet',
           style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
         ),
+        actions: [SigningExamplesActionButton(wallet: widget.wallet)],
       ),
       body: Stack(
         children: [

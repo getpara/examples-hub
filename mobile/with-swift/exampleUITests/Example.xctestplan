@@ -29,6 +29,13 @@
     {
       "target" : {
         "containerPath" : "container:example.xcodeproj",
+        "identifier" : "A10000000000000000000003",
+        "name" : "exampleTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:example.xcodeproj",
         "identifier" : "8FE93AA62D80F58C00CE018E",
         "name" : "exampleUITests"
       }

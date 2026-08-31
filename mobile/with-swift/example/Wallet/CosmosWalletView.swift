@@ -70,6 +70,11 @@ struct CosmosWalletView: View {
             .padding(.horizontal)
         }
         .navigationTitle("Cosmos Wallet")
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                SigningExamplesToolbarLink(wallet: selectedWallet)
+            }
+        }
         .alert(item: Binding(
             get: { result.map { AlertItem(title: $0.title, message: $0.message) } },
             set: { _ in result = nil },

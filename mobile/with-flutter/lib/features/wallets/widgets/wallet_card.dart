@@ -14,10 +14,11 @@ class WalletCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final chain = wallet.type?.toChain ?? WalletChain.evm;
-    
+    final chain = wallet.chainType?.toChain ?? WalletChain.evm;
+    final chainName = wallet.chainType?.value ?? 'unknown';
+
     return GestureDetector(
-      key: Key('walletCell_${wallet.type?.value ?? 'unknown'}'),
+      key: Key('walletCell_$chainName'),
       onTap: onTap,
       child: Container(
         height: 150,
@@ -49,7 +50,7 @@ class WalletCard extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                wallet.type?.value ?? 'unknown',
+                chainName,
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
