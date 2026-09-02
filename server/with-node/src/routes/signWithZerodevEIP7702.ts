@@ -83,8 +83,8 @@ export async function zerodevEip7702SignHandler(req: Request, res: Response): Pr
       client: publicClient,
       userOperation: {
         estimateFeesPerGas: async () => ({
-          maxFeePerGas: parseGwei("0.24"),
-          maxPriorityFeePerGas: parseGwei("0.001"),
+          maxFeePerGas: parseGwei("2"),
+          maxPriorityFeePerGas: parseGwei("0.01"),
         }),
       },
     });

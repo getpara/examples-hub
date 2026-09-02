@@ -1489,14 +1489,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@getpara/core-sdk@npm:3.17.0":
-  version: 3.17.0
-  resolution: "@getpara/core-sdk@npm:3.17.0"
+"@getpara/core-sdk@npm:3.18.0":
+  version: 3.18.0
+  resolution: "@getpara/core-sdk@npm:3.18.0"
   dependencies:
     "@celo/utils": "npm:^8.0.2"
     "@cosmjs/encoding": "npm:^0.32.4"
     "@ethereumjs/util": "npm:^9.1.0"
-    "@getpara/user-management-client": "npm:3.17.0"
+    "@getpara/user-management-client": "npm:3.18.0"
     "@noble/hashes": "npm:^1.5.0"
     "@opentelemetry/api": "npm:^1.9.1"
     "@opentelemetry/context-zone": "npm:^2.9.0"
@@ -1516,89 +1516,89 @@ __metadata:
     node-forge: "npm:^1.4.0"
     uuid: "npm:^11.1.1"
     xstate: "npm:^5.24.0"
-  checksum: 10c0/77c2c168124b9bda80fe69d7cabaed73d116d32906420f977c1171d54f48a2a4f907956c490cedf8ca985f5d89fbe533e4ed6cb261b5a6ba2bb900f88eb4fe4c
+  checksum: 10c0/803c272b4c525f980714734e4d28c50488661a00092cbdc050bd15de0d2783d8a810064774eb49f1bee661d2a5468cace4084d85d5b899ab0336950bf6998218
   languageName: node
   linkType: hard
 
-"@getpara/cosmjs-v0-integration@npm:3.17.0":
-  version: 3.17.0
-  resolution: "@getpara/cosmjs-v0-integration@npm:3.17.0"
+"@getpara/cosmjs-v0-integration@npm:3.18.0":
+  version: 3.18.0
+  resolution: "@getpara/cosmjs-v0-integration@npm:3.18.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.17.0"
+    "@getpara/core-sdk": "npm:3.18.0"
   peerDependencies:
     "@cosmjs/amino": ^0.32.4
     "@cosmjs/encoding": ^0.32.4
     "@cosmjs/proto-signing": ^0.32.4
     "@cosmjs/stargate": ^0.32.4
-  checksum: 10c0/4179a6488a6b09478f6dd21daa02b9caf387ec0acb19000e685d7d3f30f79b6135892c728d604049c3e6bec4304afbee19b5dfa3e601a33270527cb5efdd9a9f
+  checksum: 10c0/f14c5327c3b2dc9506968e08d5d4d54c0caf39fb936a40378265b060f702134088afbf0d451e5475464c7f9b751c878d7f28377073034675943151b84016b00f
   languageName: node
   linkType: hard
 
-"@getpara/ethers-v6-integration@npm:3.17.0":
-  version: 3.17.0
-  resolution: "@getpara/ethers-v6-integration@npm:3.17.0"
+"@getpara/ethers-v6-integration@npm:3.18.0":
+  version: 3.18.0
+  resolution: "@getpara/ethers-v6-integration@npm:3.18.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.17.0"
+    "@getpara/core-sdk": "npm:3.18.0"
   peerDependencies:
     ethers: ^6.13.5
-  checksum: 10c0/a83f24c2d79bbf5e15d9936f52429a06873be0c34245167899a686cc156f8d5183a9b9c60ce8457a02d3b10da529deabfad539b4ec599ad88b85b4f6a03af5c5
+  checksum: 10c0/a1cf5965eb1fd3d680ed23320d744507a97a6eeb268188d4574c21f9435cd3bd36b0e4e951eede8422ff0bb2cd799e84f96ef5b9362b9ce02562988d04d28039
   languageName: node
   linkType: hard
 
-"@getpara/server-sdk@npm:3.17.0":
-  version: 3.17.0
-  resolution: "@getpara/server-sdk@npm:3.17.0"
+"@getpara/server-sdk@npm:3.18.0":
+  version: 3.18.0
+  resolution: "@getpara/server-sdk@npm:3.18.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.17.0"
-    "@getpara/user-management-client": "npm:3.17.0"
-    "@getpara/viem-v2-integration": "npm:3.17.0"
+    "@getpara/core-sdk": "npm:3.18.0"
+    "@getpara/user-management-client": "npm:3.18.0"
+    "@getpara/viem-v2-integration": "npm:3.18.0"
     uuid: "npm:^11.1.1"
     ws: "npm:^8.21.0"
-  checksum: 10c0/43d7340b192e35aeaa130de46baa7f56c9727e5c4353f25c1d5e56cb39cf9facd03efe48ba71d9b954982b5375e95a10b473a1a467a0a617b0e5cb1264ea5900
+  checksum: 10c0/11f471c01f1bb61f19ca37e1c202496f47de373283d3d5e8b48da85cd9480d6108cfccaf9c6ba19cebf0657c5aaf205b2c73c737bb3acaac663be86201518cbf
   languageName: node
   linkType: hard
 
-"@getpara/shared@npm:^1.28.0":
-  version: 1.28.0
-  resolution: "@getpara/shared@npm:1.28.0"
+"@getpara/shared@npm:^1.29.0":
+  version: 1.29.0
+  resolution: "@getpara/shared@npm:1.29.0"
   dependencies:
     zod: "npm:^3.22.4"
-  checksum: 10c0/5b8e69fd8c21e0d895a6a758f2bec8278f28e7951c7a44d5846283180fcaf09474b28dcb6725b9222e23ee174c66b3e723e6b93ff8036e2a8207a40a459f8afe
+  checksum: 10c0/46083b126c11de7fab020c1db79e7466b1fdb0abecb23910505062086532745fd91b2b338d19a978920f1f61dcbbf74f7e5fe9f4abd0d8e1841d323bf24a8219
   languageName: node
   linkType: hard
 
-"@getpara/solana-web3.js-v1-integration@npm:3.17.0":
-  version: 3.17.0
-  resolution: "@getpara/solana-web3.js-v1-integration@npm:3.17.0"
+"@getpara/solana-web3.js-v1-integration@npm:3.18.0":
+  version: 3.18.0
+  resolution: "@getpara/solana-web3.js-v1-integration@npm:3.18.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.17.0"
+    "@getpara/core-sdk": "npm:3.18.0"
   peerDependencies:
     "@solana/web3.js": ^1.98.0
-  checksum: 10c0/7372b68ad80026200e308fee990f1b7e66fcde259cd7cf2beadb5bc40580e5464ff046257523369d1e1d716b056313a2daa7ab48c546f37c30c68cc7c4b6170e
+  checksum: 10c0/7494f97f47d8428f5c03e49cb5b7ebbc05f4149bae5dba2d703fe58a7430529242d50e94525a436ff19ade93e055e9ae47c181ca80bc28041b5fbbe0f6371625
   languageName: node
   linkType: hard
 
-"@getpara/user-management-client@npm:3.17.0":
-  version: 3.17.0
-  resolution: "@getpara/user-management-client@npm:3.17.0"
+"@getpara/user-management-client@npm:3.18.0":
+  version: 3.18.0
+  resolution: "@getpara/user-management-client@npm:3.18.0"
   dependencies:
-    "@getpara/shared": "npm:^1.28.0"
+    "@getpara/shared": "npm:^1.29.0"
     "@opentelemetry/api": "npm:^1.9.1"
     axios: "npm:^1.8.4"
     axios-retry: "npm:^4.5.0"
     libphonenumber-js: "npm:^1.11.7"
-  checksum: 10c0/39c4d352e699098967d2ed9202e40bbcd72465a9cf9604176affff7f7850ebab4934464bdd601836684a55abfa872adf541947818f6a908c9b7f7be59ca1c703
+  checksum: 10c0/8dc2c617a312403635d7d9fafdb2c1d93681a4595da3606d68453dff1cd0e37f5deaaec691e939802e4674550caef5b815fa3072c201adbb409b9ad25de56914
   languageName: node
   linkType: hard
 
-"@getpara/viem-v2-integration@npm:3.17.0":
-  version: 3.17.0
-  resolution: "@getpara/viem-v2-integration@npm:3.17.0"
+"@getpara/viem-v2-integration@npm:3.18.0":
+  version: 3.18.0
+  resolution: "@getpara/viem-v2-integration@npm:3.18.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.17.0"
+    "@getpara/core-sdk": "npm:3.18.0"
   peerDependencies:
     viem: ^2.39.0
-  checksum: 10c0/f9ee20021e65d5cee431130a8a950d692b121459db669175bc5ee20a2415bdbf2869ec61a044a469998a659c55888b9ee73deee9bf72a6455c7afaaff7c6b7cb
+  checksum: 10c0/d27041813a403fdab9f4a5e088d66bf7593979879eeb25c9ae9a5fdca3b1fabe83a0c059d080d7a95ebdd726b4b2fe3eed6fb089e129098be0b8303f4dc4a227
   languageName: node
   linkType: hard
 
@@ -8949,12 +8949,12 @@ __metadata:
     "@cosmjs/stargate": "npm:0.34.0"
     "@eslint/js": "npm:^9.29.0"
     "@ethereumjs/rlp": "npm:5.0.2"
-    "@getpara/core-sdk": "npm:3.17.0"
-    "@getpara/cosmjs-v0-integration": "npm:3.17.0"
-    "@getpara/ethers-v6-integration": "npm:3.17.0"
-    "@getpara/server-sdk": "npm:3.17.0"
-    "@getpara/solana-web3.js-v1-integration": "npm:3.17.0"
-    "@getpara/viem-v2-integration": "npm:3.17.0"
+    "@getpara/core-sdk": "npm:3.18.0"
+    "@getpara/cosmjs-v0-integration": "npm:3.18.0"
+    "@getpara/ethers-v6-integration": "npm:3.18.0"
+    "@getpara/server-sdk": "npm:3.18.0"
+    "@getpara/solana-web3.js-v1-integration": "npm:3.18.0"
+    "@getpara/viem-v2-integration": "npm:3.18.0"
     "@solana/web3.js": "npm:1.98.2"
     "@types/crypto-js": "npm:^4.2.2"
     "@types/express": "npm:^4.17.17"
