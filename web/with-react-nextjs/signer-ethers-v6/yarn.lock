@@ -730,14 +730,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@getpara/core-sdk@npm:3.17.0":
-  version: 3.17.0
-  resolution: "@getpara/core-sdk@npm:3.17.0"
+"@getpara/core-sdk@npm:3.18.0":
+  version: 3.18.0
+  resolution: "@getpara/core-sdk@npm:3.18.0"
   dependencies:
     "@celo/utils": "npm:^8.0.2"
     "@cosmjs/encoding": "npm:^0.32.4"
     "@ethereumjs/util": "npm:^9.1.0"
-    "@getpara/user-management-client": "npm:3.17.0"
+    "@getpara/user-management-client": "npm:3.18.0"
     "@noble/hashes": "npm:^1.5.0"
     "@opentelemetry/api": "npm:^1.9.1"
     "@opentelemetry/context-zone": "npm:^2.9.0"
@@ -757,28 +757,28 @@ __metadata:
     node-forge: "npm:^1.4.0"
     uuid: "npm:^11.1.1"
     xstate: "npm:^5.24.0"
-  checksum: 10c0/77c2c168124b9bda80fe69d7cabaed73d116d32906420f977c1171d54f48a2a4f907956c490cedf8ca985f5d89fbe533e4ed6cb261b5a6ba2bb900f88eb4fe4c
+  checksum: 10c0/803c272b4c525f980714734e4d28c50488661a00092cbdc050bd15de0d2783d8a810064774eb49f1bee661d2a5468cace4084d85d5b899ab0336950bf6998218
   languageName: node
   linkType: hard
 
-"@getpara/ethers-v6-integration@npm:3.17.0":
-  version: 3.17.0
-  resolution: "@getpara/ethers-v6-integration@npm:3.17.0"
+"@getpara/ethers-v6-integration@npm:3.18.0":
+  version: 3.18.0
+  resolution: "@getpara/ethers-v6-integration@npm:3.18.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.17.0"
+    "@getpara/core-sdk": "npm:3.18.0"
   peerDependencies:
     ethers: ^6.13.5
-  checksum: 10c0/a83f24c2d79bbf5e15d9936f52429a06873be0c34245167899a686cc156f8d5183a9b9c60ce8457a02d3b10da529deabfad539b4ec599ad88b85b4f6a03af5c5
+  checksum: 10c0/a1cf5965eb1fd3d680ed23320d744507a97a6eeb268188d4574c21f9435cd3bd36b0e4e951eede8422ff0bb2cd799e84f96ef5b9362b9ce02562988d04d28039
   languageName: node
   linkType: hard
 
-"@getpara/evm-wallet-connectors@npm:3.17.0":
-  version: 3.17.0
-  resolution: "@getpara/evm-wallet-connectors@npm:3.17.0"
+"@getpara/evm-wallet-connectors@npm:3.18.0":
+  version: 3.18.0
+  resolution: "@getpara/evm-wallet-connectors@npm:3.18.0"
   dependencies:
     "@coinbase/wallet-sdk": "npm:4.3.0"
-    "@getpara/wagmi-v2-connector": "npm:3.17.0"
-    "@getpara/web-sdk": "npm:3.17.0"
+    "@getpara/wagmi-v2-connector": "npm:3.18.0"
+    "@getpara/web-sdk": "npm:3.18.0"
     "@walletconnect/ethereum-provider": "npm:2.23.0"
     zustand: "npm:^4.5.2"
     zustand-sync-tabs: "npm:^0.2.2"
@@ -793,25 +793,25 @@ __metadata:
   peerDependenciesMeta:
     "@farcaster/miniapp-wagmi-connector":
       optional: true
-  checksum: 10c0/f4d665e92c7a8b0efb47d4baa13d1720c3e3799f452f55d657ed7f1a41ded2d569f27766bd9ef957216ef0bb9ae41459705cdbe6853295b4eefd5aebbf66da9d
+  checksum: 10c0/737046e6ee69800270e1eef3fdb7152f05735548d1937b30ab7a1eefb854ac02a170ce1abc5f7cd0dacc498b8985a3b13f5f5186229067ce6dc021a1cecbdfe3
   languageName: node
   linkType: hard
 
-"@getpara/react-common@npm:3.17.0":
-  version: 3.17.0
-  resolution: "@getpara/react-common@npm:3.17.0"
+"@getpara/react-common@npm:3.18.0":
+  version: 3.18.0
+  resolution: "@getpara/react-common@npm:3.18.0"
   dependencies:
-    "@getpara/web-sdk": "npm:3.17.0"
+    "@getpara/web-sdk": "npm:3.18.0"
   peerDependencies:
     react: ">=18"
     react-dom: ">=18"
-  checksum: 10c0/54df1278ac6cdba6a761d19995a4ffe089298f4325b4490b6b2d9900bfabf3a98eb8575ec8d3864408dd975c3087d5eb051d97f472810e246fe428f66e11ec84
+  checksum: 10c0/5f6967242fd224aef26a386108538e3ddcafa1af3be5fb0938d6a20178872b3d546cf69b453550c4994e9dd12db2bf8eea25dd8cac4ebfd11a662a21a46b4eef
   languageName: node
   linkType: hard
 
-"@getpara/react-component-library@npm:3.17.0":
-  version: 3.17.0
-  resolution: "@getpara/react-component-library@npm:3.17.0"
+"@getpara/react-component-library@npm:3.18.0":
+  version: 3.18.0
+  resolution: "@getpara/react-component-library@npm:3.18.0"
   dependencies:
     "@radix-ui/react-avatar": "npm:^1.1.2"
     "@radix-ui/react-checkbox": "npm:^1.3.3"
@@ -849,15 +849,15 @@ __metadata:
   peerDependencies:
     react: ">=18"
     react-dom: ">=18"
-  checksum: 10c0/bb6411d7b599713121662900c0c76b5fbe91becb183a8dc8019dcea195ed1bc20adc667e981a4aaf4ab57743f5b9c6182f775ca17327e74865a5a1f9dc3bd983
+  checksum: 10c0/baed155c98d13a1549a2d2121ff52a0c952dcc64fd24cecca9a5cb1753b2ccff0073880433e76bf6d26c4d95c4203b15089e34a1dd3a2f20d7a5fb950047cd37
   languageName: node
   linkType: hard
 
-"@getpara/react-core@npm:3.17.0":
-  version: 3.17.0
-  resolution: "@getpara/react-core@npm:3.17.0"
+"@getpara/react-core@npm:3.18.0":
+  version: 3.18.0
+  resolution: "@getpara/react-core@npm:3.18.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.17.0"
+    "@getpara/core-sdk": "npm:3.18.0"
     zustand: "npm:^5.0.0"
   peerDependencies:
     "@getpara/cosmjs-v0-integration": ">=2"
@@ -882,18 +882,18 @@ __metadata:
       optional: true
     "@getpara/viem-v2-integration":
       optional: true
-  checksum: 10c0/8c33de849ccee3a5fb74ae2f3034442658beb9552c353de76d947867696da53e75cf7f6527d20e362abfbe7c55b103fc4336f475aea30fbb60b43a83c963689a
+  checksum: 10c0/decba47df5eb3b0069b2db5a4785e6ad6ecda0fb80cfbd5e6e9109eee0130c47ae9a26e9837d68689099742cad027f14d4440d0088fd3fb154cd6790d256d62c
   languageName: node
   linkType: hard
 
-"@getpara/react-sdk-lite@npm:3.17.0":
-  version: 3.17.0
-  resolution: "@getpara/react-sdk-lite@npm:3.17.0"
+"@getpara/react-sdk-lite@npm:3.18.0":
+  version: 3.18.0
+  resolution: "@getpara/react-sdk-lite@npm:3.18.0"
   dependencies:
-    "@getpara/react-common": "npm:3.17.0"
-    "@getpara/react-component-library": "npm:3.17.0"
-    "@getpara/react-core": "npm:3.17.0"
-    "@getpara/web-sdk": "npm:3.17.0"
+    "@getpara/react-common": "npm:3.18.0"
+    "@getpara/react-component-library": "npm:3.18.0"
+    "@getpara/react-core": "npm:3.18.0"
+    "@getpara/web-sdk": "npm:3.18.0"
     date-fns: "npm:^3.6.0"
     detect-browser: "npm:^5.3.0"
     framer-motion: "npm:^11.3.31"
@@ -942,65 +942,65 @@ __metadata:
       optional: true
   bin:
     setup-para: dist/cli/cli.mjs
-  checksum: 10c0/291f7ab9c07ea590c669431852551dda769c2a931260260bcaf4a4ac5a89255c28594d877df514d186bb747d842d360a97a215bd1fac9942524266921472b00b
+  checksum: 10c0/360aca1ba0059354dd2b369e9f459c95a31d8380411b2282c40e8b5dc8238b9bcb1c9b96680766c3d6c7c15085bf3329afebf566284a34f0e73363c9764ab125
   languageName: node
   linkType: hard
 
-"@getpara/shared@npm:^1.28.0":
-  version: 1.28.0
-  resolution: "@getpara/shared@npm:1.28.0"
+"@getpara/shared@npm:^1.29.0":
+  version: 1.29.0
+  resolution: "@getpara/shared@npm:1.29.0"
   dependencies:
     zod: "npm:^3.22.4"
-  checksum: 10c0/5b8e69fd8c21e0d895a6a758f2bec8278f28e7951c7a44d5846283180fcaf09474b28dcb6725b9222e23ee174c66b3e723e6b93ff8036e2a8207a40a459f8afe
+  checksum: 10c0/46083b126c11de7fab020c1db79e7466b1fdb0abecb23910505062086532745fd91b2b338d19a978920f1f61dcbbf74f7e5fe9f4abd0d8e1841d323bf24a8219
   languageName: node
   linkType: hard
 
-"@getpara/user-management-client@npm:3.17.0":
-  version: 3.17.0
-  resolution: "@getpara/user-management-client@npm:3.17.0"
+"@getpara/user-management-client@npm:3.18.0":
+  version: 3.18.0
+  resolution: "@getpara/user-management-client@npm:3.18.0"
   dependencies:
-    "@getpara/shared": "npm:^1.28.0"
+    "@getpara/shared": "npm:^1.29.0"
     "@opentelemetry/api": "npm:^1.9.1"
     axios: "npm:^1.8.4"
     axios-retry: "npm:^4.5.0"
     libphonenumber-js: "npm:^1.11.7"
-  checksum: 10c0/39c4d352e699098967d2ed9202e40bbcd72465a9cf9604176affff7f7850ebab4934464bdd601836684a55abfa872adf541947818f6a908c9b7f7be59ca1c703
+  checksum: 10c0/8dc2c617a312403635d7d9fafdb2c1d93681a4595da3606d68453dff1cd0e37f5deaaec691e939802e4674550caef5b815fa3072c201adbb409b9ad25de56914
   languageName: node
   linkType: hard
 
-"@getpara/viem-v2-integration@npm:3.17.0":
-  version: 3.17.0
-  resolution: "@getpara/viem-v2-integration@npm:3.17.0"
+"@getpara/viem-v2-integration@npm:3.18.0":
+  version: 3.18.0
+  resolution: "@getpara/viem-v2-integration@npm:3.18.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.17.0"
+    "@getpara/core-sdk": "npm:3.18.0"
   peerDependencies:
     viem: ^2.39.0
-  checksum: 10c0/f9ee20021e65d5cee431130a8a950d692b121459db669175bc5ee20a2415bdbf2869ec61a044a469998a659c55888b9ee73deee9bf72a6455c7afaaff7c6b7cb
+  checksum: 10c0/d27041813a403fdab9f4a5e088d66bf7593979879eeb25c9ae9a5fdca3b1fabe83a0c059d080d7a95ebdd726b4b2fe3eed6fb089e129098be0b8303f4dc4a227
   languageName: node
   linkType: hard
 
-"@getpara/wagmi-v2-connector@npm:3.17.0":
-  version: 3.17.0
-  resolution: "@getpara/wagmi-v2-connector@npm:3.17.0"
+"@getpara/wagmi-v2-connector@npm:3.18.0":
+  version: 3.18.0
+  resolution: "@getpara/wagmi-v2-connector@npm:3.18.0"
   dependencies:
-    "@getpara/viem-v2-integration": "npm:3.17.0"
-    "@getpara/web-sdk": "npm:3.17.0"
+    "@getpara/viem-v2-integration": "npm:3.18.0"
+    "@getpara/web-sdk": "npm:3.18.0"
   peerDependencies:
     "@wagmi/core": ^2.16.7 || ^3.0.0
     react: ">=18"
     react-dom: ">=18"
     viem: ^2.39.0
     wagmi: ^2.14.16 || ^3.0.0
-  checksum: 10c0/d7422766a1ec649b37fb9b32060a963cc72bb584bbe4cba280d6ea2aaa3c00b6c441cd60afad846c03062d0a15019a2f4356aa2a4f3423bd98b78ad1e4db5295
+  checksum: 10c0/7c408d9f1747e66e7a626456502f8b24273714291e29effa16bc7a2a714ad7be220dae298abee8837db6df465a2a1c1b69b1855b9243847ace8facc3eaf8a09d
   languageName: node
   linkType: hard
 
-"@getpara/web-sdk@npm:3.17.0":
-  version: 3.17.0
-  resolution: "@getpara/web-sdk@npm:3.17.0"
+"@getpara/web-sdk@npm:3.18.0":
+  version: 3.18.0
+  resolution: "@getpara/web-sdk@npm:3.18.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.17.0"
-    "@getpara/user-management-client": "npm:3.17.0"
+    "@getpara/core-sdk": "npm:3.18.0"
+    "@getpara/user-management-client": "npm:3.18.0"
     "@opentelemetry/api": "npm:^1.9.1"
     base64url: "npm:^3.0.1"
     buffer: "npm:6.0.3"
@@ -1013,7 +1013,7 @@ __metadata:
   peerDependenciesMeta:
     "@farcaster/miniapp-sdk":
       optional: true
-  checksum: 10c0/a85e6ff0d86d410c65a95aac09ad27ae165e50f7d4dc5116385c7d356b08cae43dc3d85c0592a011784765612a2378c02f1de360c1c6b5a1187211800e38e1be
+  checksum: 10c0/83e9bf2b96e126e230d658e50eb8a672e4d78d2a474e0b61c3333601134cf43dcb72d48a662c2a3404ee4a5f16021d9e8d6f57b157967107ac232d2546623770
   languageName: node
   linkType: hard
 
@@ -7650,9 +7650,9 @@ __metadata:
   resolution: "signer-ethers-v6-nextjs@workspace:."
   dependencies:
     "@eslint/js": "npm:10.0.1"
-    "@getpara/ethers-v6-integration": "npm:3.17.0"
-    "@getpara/evm-wallet-connectors": "npm:3.17.0"
-    "@getpara/react-sdk-lite": "npm:3.17.0"
+    "@getpara/ethers-v6-integration": "npm:3.18.0"
+    "@getpara/evm-wallet-connectors": "npm:3.18.0"
+    "@getpara/react-sdk-lite": "npm:3.18.0"
     "@openzeppelin/contracts": "npm:5.6.1"
     "@tailwindcss/postcss": "npm:4.3.0"
     "@tanstack/react-query": "npm:5.101.0"

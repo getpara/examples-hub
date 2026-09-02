@@ -96,8 +96,8 @@ export async function zerodevPregenSignHandler(req: Request, res: Response): Pro
       },
       userOperation: {
         estimateFeesPerGas: async () => ({
-          maxFeePerGas: parseGwei("0.24"),
-          maxPriorityFeePerGas: parseGwei("0.001"),
+          maxFeePerGas: parseGwei("2"),
+          maxPriorityFeePerGas: parseGwei("0.01"),
         }),
       },
     });
