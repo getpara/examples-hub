@@ -26,6 +26,7 @@ interface CombinedAuthProps {
     isPending: boolean;
   };
   onCancel: () => void;
+  onOpenPasskey: () => void;
   onTabChange: (tab: AuthTab) => void;
   phone: {
     countryCode: string;
@@ -36,6 +37,7 @@ interface CombinedAuthProps {
     submit: () => void;
   };
   providers: readonly OAuthProviderOption[];
+  passkeyUrl: string | null;
   step: "input" | "verify";
   verifyUrl: string | null;
 }
@@ -48,13 +50,15 @@ export function CombinedAuth({
   isPending,
   oauth,
   onCancel,
+  onOpenPasskey,
   onTabChange,
   phone,
   providers,
+  passkeyUrl,
   step,
   verifyUrl,
 }: CombinedAuthProps) {
-  if (step === "verify" && verifyUrl) {
+  if (step === "verify" && (verifyUrl || passkeyUrl)) {
     const statusMessage =
       activeTab === "email"
         ? email.isPending
@@ -66,7 +70,17 @@ export function CombinedAuth({
 
     return (
       <AuthCard title="Verify account" description="Complete the Para verification challenge." error={error}>
-        <VerifyIframe url={verifyUrl} onCancel={onCancel} statusMessage={statusMessage} />
+        {verifyUrl && <VerifyIframe url={verifyUrl} onCancel={onCancel} statusMessage={statusMessage} />}
+        {passkeyUrl && (
+          <button type="button" onClick={onOpenPasskey} className="btn-primary min-h-11 w-full px-4 text-sm">
+            Open Passkey Verification
+          </button>
+        )}
+        {!verifyUrl && (
+          <button type="button" onClick={onCancel} className="btn-secondary min-h-11 w-full px-4 text-sm">
+            Cancel
+          </button>
+        )}
       </AuthCard>
     );
   }

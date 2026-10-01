@@ -1,11 +1,5 @@
-import { useState, useRef, useCallback } from "react";
-import {
-  useVerifyOAuth,
-  useVerifyFarcaster,
-  useWaitForLogin,
-  useWaitForWalletCreation,
-  type TOAuthMethod,
-} from "@getpara/react-sdk";
+import { useState, useRef, useCallback, useEffect } from "react";
+import { useAuthenticateWithOAuth, useClient, type TOAuthMethod } from "@getpara/react-sdk";
 
 export interface UseOAuthAuthReturn {
   // State
@@ -18,122 +12,207 @@ export interface UseOAuthAuthReturn {
   cancel: () => void;
 }
 
-interface OAuthDoneState {
-  stage: "done";
-  isNewUser: boolean;
+interface OAuthAttempt {
+  isCanceled: boolean;
+  lastPopupUrl: string | null;
+  popup: Window | null;
+  popupClosed: boolean;
+  popupObserved: boolean;
+  deferredPopupCloseCheck: boolean;
+}
+
+function closePopup(attempt: OAuthAttempt) {
+  if (attempt.popup && !attempt.popup.closed) {
+    attempt.popup.close();
+  }
 }
 
 export function useOAuthAuth(): UseOAuthAuthReturn {
+  const para = useClient();
   const [activeProvider, setActiveProvider] = useState<TOAuthMethod | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const { authenticateWithOAuthAsync, isPending } = useAuthenticateWithOAuth();
+  const activeAttempt = useRef<OAuthAttempt | null>(null);
 
-  const { verifyOAuth, isPending: isVerifyingOAuth } = useVerifyOAuth();
-  const { verifyFarcaster, isPending: isVerifyingFarcaster } = useVerifyFarcaster();
-  const { waitForLogin, isPending: isWaitingForLogin } = useWaitForLogin();
-  const { waitForWalletCreation, isPending: isWaitingForWallet } = useWaitForWalletCreation();
-
-  const popupWindow = useRef<Window | null>(null);
-  const shouldCancel = useRef(false);
-
-  // Reset state
   const resetState = useCallback(() => {
     setActiveProvider(null);
   }, []);
 
-  // Handle post-auth completion (new user vs returning user)
-  const handleAuthComplete = useCallback(
-    (isNewUser: boolean) => {
-      shouldCancel.current = false;
+  useEffect(() => {
+    if (!para) return;
 
-      if (isNewUser) {
-        waitForWalletCreation(
-          { isCanceled: () => shouldCancel.current },
-          {
-            onSuccess: () => resetState(),
-            onError: (err) => {
-              setError(err.message || "Wallet creation failed");
-              resetState();
-            },
-          }
-        );
-      } else {
-        waitForLogin(
-          { isCanceled: () => shouldCancel.current },
-          {
-            onSuccess: () => resetState(),
-            onError: (err) => {
-              setError(err.message || "Login failed");
-              resetState();
-            },
-          }
-        );
+    const unsubscribe = para.onStatePhaseChange(snapshot => {
+      const attempt = activeAttempt.current;
+      if (!attempt || attempt.isCanceled) return;
+
+      const {
+        oauthUrl,
+        oauthFullUrl,
+        verificationUrl,
+        verificationFullUrl,
+        passwordUrl,
+        passwordFullUrl,
+        pinUrl,
+        pinFullUrl,
+        passkeyUrl,
+        passkeyFullUrl,
+      } = snapshot.authStateInfo;
+      const popupUrl =
+        oauthFullUrl ??
+        oauthUrl ??
+        verificationFullUrl ??
+        verificationUrl ??
+        passwordFullUrl ??
+        passwordUrl ??
+        pinFullUrl ??
+        pinUrl ??
+        passkeyFullUrl ??
+        passkeyUrl;
+
+      if (!popupUrl || popupUrl === attempt.lastPopupUrl) return;
+
+      attempt.lastPopupUrl = popupUrl;
+      if (attempt.popup && !attempt.popup.closed) {
+        attempt.popup.location.href = popupUrl;
+        return;
       }
-    },
-    [waitForLogin, waitForWalletCreation, resetState]
-  );
 
-  // Authenticate with OAuth provider
+      const popup = window.open(popupUrl, "oauth", "popup=true");
+      if (!popup) {
+        attempt.isCanceled = true;
+        if (activeAttempt.current === attempt) {
+          activeAttempt.current = null;
+          resetState();
+          setError("Popup blocked — allow popups for this site, then sign in again.");
+        }
+        return;
+      }
+
+      attempt.popup = popup;
+      attempt.popupObserved = true;
+      attempt.popupClosed = false;
+      attempt.deferredPopupCloseCheck = false;
+    });
+
+    return () => {
+      const attempt = activeAttempt.current;
+      if (attempt) {
+        attempt.isCanceled = true;
+        closePopup(attempt);
+        activeAttempt.current = null;
+      }
+      unsubscribe();
+    };
+  }, [para, resetState]);
+
   const authenticate = useCallback(
     (method: TOAuthMethod) => {
+      const previousAttempt = activeAttempt.current;
+      if (previousAttempt) {
+        previousAttempt.isCanceled = true;
+        closePopup(previousAttempt);
+      }
+
+      const attempt: OAuthAttempt = {
+        isCanceled: false,
+        lastPopupUrl: null,
+        popup: null,
+        popupClosed: false,
+        popupObserved: false,
+        deferredPopupCloseCheck: false,
+      };
+      activeAttempt.current = attempt;
       setError(null);
       setActiveProvider(method);
-      shouldCancel.current = false;
 
-      if (method === "FARCASTER") {
-        verifyFarcaster(
-          {
-            onConnectUri: (uri: string) => {
-              popupWindow.current = window.open(uri, "farcaster", "popup=true");
-            },
-            isCanceled: () => shouldCancel.current || !!popupWindow.current?.closed,
-          },
-          {
-            onSuccess: (authState: OAuthDoneState) => {
-              if (authState.stage === "done") {
-                handleAuthComplete(authState.isNewUser);
-              }
-            },
-            onError: (err: Error) => {
-              setError(err.message);
-              resetState();
-            },
-          }
-        );
-      } else if (method !== "TELEGRAM") {
-        verifyOAuth(
-          {
-            method: method as Exclude<TOAuthMethod, "TELEGRAM" | "FARCASTER">,
-            onOAuthUrl: (url: string) => {
-              popupWindow.current = window.open(url, "oauth", "popup=true");
-            },
-            isCanceled: () => shouldCancel.current || !!popupWindow.current?.closed,
-          },
-          {
-            onSuccess: (authState: OAuthDoneState) => {
-              if (authState.stage === "done") {
-                handleAuthComplete(authState.isNewUser);
-              }
-            },
-            onError: (err: Error) => {
-              setError(err.message);
-              resetState();
-            },
-          }
-        );
+      if (para?.isAuthV2Enabled()) {
+        const popup = window.open("about:blank", "oauth", "popup=true");
+        if (!popup) {
+          attempt.isCanceled = true;
+          activeAttempt.current = null;
+          resetState();
+          setError("Popup blocked — allow popups for this site, then sign in again.");
+          return;
+        }
+
+        attempt.popup = popup;
+        attempt.popupObserved = true;
       }
+
+      const onPoll = () => {
+        if (attempt.popupObserved && (!attempt.popup || attempt.popup.closed)) {
+          attempt.popupClosed = true;
+        }
+      };
+      const isPopupCanceled = () => {
+        if (attempt.isCanceled) return true;
+        if (!attempt.popupClosed) return false;
+        if (para?.getCurrentState().authStateInfo.userId) return false;
+        if (!attempt.deferredPopupCloseCheck) {
+          attempt.deferredPopupCloseCheck = true;
+          return false;
+        }
+        return true;
+      };
+
+      void authenticateWithOAuthAsync({
+        method,
+        redirectCallbacks: {
+          onOAuthPopup: popup => {
+            if (activeAttempt.current !== attempt || attempt.isCanceled) {
+              if (!popup.closed) popup.close();
+              return;
+            }
+
+            if (attempt.popup && attempt.popup !== popup && !attempt.popup.closed) {
+              attempt.popup.close();
+            }
+            attempt.popup = popup;
+            attempt.popupObserved = true;
+            attempt.popupClosed = false;
+            attempt.deferredPopupCloseCheck = false;
+          },
+        },
+        sessionPollingCallbacks: {
+          onPoll,
+          isCanceled: isPopupCanceled,
+        },
+        oAuthPollingCallbacks: {
+          onPoll,
+          isCanceled: isPopupCanceled,
+        },
+      })
+        .then(() => {
+          if (activeAttempt.current !== attempt) return;
+
+          closePopup(attempt);
+          activeAttempt.current = null;
+          resetState();
+        })
+        .catch(authError => {
+          if (activeAttempt.current !== attempt) return;
+
+          closePopup(attempt);
+          activeAttempt.current = null;
+          if (!attempt.isCanceled) {
+            setError(authError instanceof Error ? authError.message : "Authentication failed");
+            resetState();
+          }
+        });
     },
-    [verifyOAuth, verifyFarcaster, handleAuthComplete, resetState]
+    [authenticateWithOAuthAsync, para, resetState]
   );
 
-  // Cancel authentication
   const cancel = useCallback(() => {
-    shouldCancel.current = true;
-    popupWindow.current?.close();
+    const attempt = activeAttempt.current;
+    if (attempt) {
+      attempt.isCanceled = true;
+      closePopup(attempt);
+      activeAttempt.current = null;
+    }
     resetState();
     setError(null);
   }, [resetState]);
-
-  const isPending = isVerifyingOAuth || isVerifyingFarcaster || isWaitingForLogin || isWaitingForWallet;
 
   return {
     activeProvider,

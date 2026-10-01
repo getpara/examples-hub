@@ -68,7 +68,7 @@ return (
 );
 ```
 
-`useEmailAuth` starts email auth with `useSignUpOrLogIn`, renders the returned verification iframe URL, and waits for login or wallet creation with `useWaitForLogin` and `useWaitForWalletCreation`.
+`useEmailAuth` uses `useAuthenticateWithEmailOrPhone`, renders verification and credential URLs from SDK state, and resolves only after the authenticated session and any required wallet are ready.
 
 ## Connected Wallet Hooks
 

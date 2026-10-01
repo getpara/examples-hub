@@ -56,7 +56,7 @@ src/
 
 ## Hook Contract
 
-`usePhoneAuth` owns the Para SDK calls for the phone auth flow, verification iframe URL, and login completion:
+`usePhoneAuth` owns the complete phone authentication flow, including SDK-state verification and credential URLs, until the session and any required wallet are ready:
 
 ```tsx
 const {
@@ -76,9 +76,7 @@ The presentation components do not import Para, Wagmi, or Viem. They receive onl
 
 | Hook | Purpose |
 | --- | --- |
-| `useSignUpOrLogIn` | Starts phone authentication |
-| `useWaitForWalletCreation` | Waits for first-time wallet creation |
-| `useWaitForLogin` | Waits for returning-user login completion |
+| `useAuthenticateWithEmailOrPhone` | Starts and completes phone authentication through wallet readiness |
 | `useAccount` | Reads connection state |
 | `useWallet` | Reads the connected wallet address |
 | `useLogout` | Disconnects the Para session |

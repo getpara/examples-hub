@@ -58,8 +58,10 @@ function CustomPhoneAuthRuntime() {
               isPending={auth.isPending}
               onCancel={auth.cancel}
               onCountryCodeChange={auth.setCountryCode}
+              onOpenPasskey={auth.openPasskeyWindow}
               onPhoneNumberChange={auth.setPhoneNumber}
               onSubmit={auth.submit}
+              passkeyUrl={auth.passkeyUrl}
               phoneNumber={auth.phoneNumber}
               step={auth.step}
               verifyUrl={auth.verifyUrl}

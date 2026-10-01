@@ -7,17 +7,7 @@ import { useWallet as useSolanaWallet } from "@solana/wallet-adapter-react";
 import { createSolanaRpc } from "@solana/rpc";
 
 const HELLO_WORLD_MESSAGE = "Hello World!";
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const rpc = createSolanaRpc("https://api.devnet.solana.com" as Parameters<typeof createSolanaRpc>[0]) as any;
-
-type SolanaSignMessageRequest = {
-  content: Uint8Array;
-  signatures: Record<string, Uint8Array>;
-};
-
-type ParaSolanaMessageSigner = {
-  signMessages(messages: SolanaSignMessageRequest[]): Promise<Array<Record<string, Uint8Array>>>;
-};
+const rpc = createSolanaRpc("https://api.devnet.solana.com");
 
 function getErrorMessage(error: unknown, fallback: string) {
   return error instanceof Error ? error.message : fallback;
@@ -54,10 +44,9 @@ export function useSignHelloWorld() {
         const sig = await solanaWalletSign(encoded);
         setSignature(bytesToBase64(sig));
       } else if (solanaSigner) {
-        const signer = solanaSigner as ParaSolanaMessageSigner;
-        const results = await signer.signMessages([{ content: encoded, signatures: {} }]);
-        const sigBytes = Object.values(results[0] as Record<string, Uint8Array>)[0];
-        if (!sigBytes) throw new Error("Unexpected signing result format");
+        const results = await solanaSigner.signMessages([{ content: encoded, signatures: {} }]);
+        const sigBytes = Object.values(results[0] ?? {})[0];
+        if (!(sigBytes instanceof Uint8Array)) throw new Error("Unexpected signing result format");
         setSignature(bytesToBase64(sigBytes));
       } else {
         throw new Error("No Solana signer available");

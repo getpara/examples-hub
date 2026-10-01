@@ -55,7 +55,7 @@ src/
 
 ## Hook Contract
 
-`useOAuthAuth` owns the Para SDK calls for the OAuth popup flow and login completion:
+`useOAuthAuth` owns the complete OAuth popup flow, following SDK-state portal URLs until the session and any required wallet are ready:
 
 ```tsx
 const {
@@ -75,9 +75,7 @@ The presentation components do not import Para, Wagmi, or Viem. They receive onl
 
 | Hook | Purpose |
 | --- | --- |
-| `useVerifyOAuth` | Opens the OAuth provider flow |
-| `useWaitForWalletCreation` | Waits for first-time wallet creation |
-| `useWaitForLogin` | Waits for returning-user login completion |
+| `useAuthenticateWithOAuth` | Starts and completes the OAuth flow through wallet readiness |
 | `useAccount` | Reads connection state |
 | `useWallet` | Reads the connected wallet address |
 | `useLogout` | Disconnects the Para session |

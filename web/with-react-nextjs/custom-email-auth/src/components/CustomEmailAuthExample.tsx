@@ -56,7 +56,9 @@ function CustomEmailAuthRuntime() {
               isPending={auth.isPending}
               onCancel={auth.cancel}
               onEmailChange={auth.setEmail}
+              onOpenPasskey={auth.openPasskeyWindow}
               onSubmit={auth.submit}
+              passkeyUrl={auth.passkeyUrl}
               step={auth.step}
               verifyUrl={auth.verifyUrl}
             />

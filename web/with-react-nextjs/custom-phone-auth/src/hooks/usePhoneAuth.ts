@@ -1,12 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from "react";
-import {
-  useClient,
-  useSignUpOrLogIn,
-  useWaitForLogin,
-  useWaitForWalletCreation,
-  getPortalBaseURL,
-  type AuthStateVerify,
-} from "@getpara/react-sdk";
+import { useAuthenticateWithEmailOrPhone, useClient } from "@getpara/react-sdk";
 import type { PhoneAuthStep } from "@/types/auth";
 
 export interface UsePhoneAuthReturn {
@@ -14,12 +7,25 @@ export interface UsePhoneAuthReturn {
   phoneNumber: string;
   step: PhoneAuthStep;
   verifyUrl: string | null;
+  passkeyUrl: string | null;
   error: string | null;
   isPending: boolean;
   setCountryCode: (code: string) => void;
   setPhoneNumber: (phone: string) => void;
   submit: () => void;
+  openPasskeyWindow: () => void;
   cancel: () => void;
+}
+
+interface PhoneAuthAttempt {
+  isCanceled: boolean;
+  passkeyPopup: Window | null;
+}
+
+function closePasskeyPopup(attempt: PhoneAuthAttempt) {
+  if (attempt.passkeyPopup && !attempt.passkeyPopup.closed) {
+    attempt.passkeyPopup.close();
+  }
 }
 
 export function usePhoneAuth(): UsePhoneAuthReturn {
@@ -29,119 +35,144 @@ export function usePhoneAuth(): UsePhoneAuthReturn {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [step, setStep] = useState<PhoneAuthStep>("input");
   const [verifyUrl, setVerifyUrl] = useState<string | null>(null);
+  const [passkeyUrl, setPasskeyUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const { signUpOrLogIn, isPending: isSigningUp } = useSignUpOrLogIn();
-  const { waitForLogin, isPending: isWaitingForLogin } = useWaitForLogin();
-  const { waitForWalletCreation, isPending: isWaitingForWallet } = useWaitForWalletCreation();
-
-  const shouldCancel = useRef(false);
+  const { authenticateWithEmailOrPhoneAsync, isPending } = useAuthenticateWithEmailOrPhone();
+  const activeAttempt = useRef<PhoneAuthAttempt | null>(null);
 
   const resetState = useCallback(() => {
     setStep("input");
     setVerifyUrl(null);
+    setPasskeyUrl(null);
   }, []);
 
-  const handleAuthComplete = useCallback(
-    (isNewUser: boolean) => {
-      shouldCancel.current = false;
+  const cancelCoreAuthFlow = useCallback(() => {
+    if (!para) return;
 
-      if (isNewUser) {
-        waitForWalletCreation(
-          { isCanceled: () => shouldCancel.current },
-          {
-            onSuccess: () => resetState(),
-            onError: (err) => {
-              setError(err.message || "Wallet creation failed");
-              resetState();
-            },
-          }
-        );
-      } else {
-        waitForLogin(
-          { isCanceled: () => shouldCancel.current },
-          {
-            onSuccess: ({ needsWallet }) => {
-              if (needsWallet) {
-                waitForWalletCreation(
-                  { isCanceled: () => shouldCancel.current },
-                  { onSuccess: () => resetState() }
-                );
-              } else {
-                resetState();
-              }
-            },
-            onError: (err) => {
-              setError(err.message || "Login failed");
-              resetState();
-            },
-          }
-        );
-      }
-    },
-    [waitForLogin, waitForWalletCreation, resetState]
-  );
+    const state = para.getCurrentState();
+    if (state.corePhase !== "auth_flow" || state.authPhase === "authenticated") return;
+
+    void para.cancelAuthFlow().catch(() => {});
+  }, [para]);
 
   useEffect(() => {
-    if (step !== "verify" || !para) return;
+    if (!para) return;
 
-    const handleMessage = (event: MessageEvent) => {
-      const portalBase = getPortalBaseURL(para.ctx);
-      if (!event.origin.startsWith(portalBase)) return;
+    const unsubscribe = para.onStatePhaseChange(snapshot => {
+      const attempt = activeAttempt.current;
+      if (!attempt || attempt.isCanceled) return;
 
-      if (event.data?.type === "CLOSE_WINDOW" && event.data.success) {
-        setVerifyUrl(null);
+      const { verificationUrl, passwordUrl, pinUrl, passkeyUrl: nextPasskeyUrl } = snapshot.authStateInfo;
+      const iframeUrl = verificationUrl ?? passwordUrl ?? pinUrl;
+      if (iframeUrl) {
+        setVerifyUrl(current => (current === iframeUrl ? current : iframeUrl));
+        setStep("verify");
       }
-    };
 
-    window.addEventListener("message", handleMessage);
-    return () => window.removeEventListener("message", handleMessage);
-  }, [step, para]);
+      if (nextPasskeyUrl) {
+        setPasskeyUrl(current => (current === nextPasskeyUrl ? current : nextPasskeyUrl));
+        setStep("verify");
+      }
+    });
+
+    return () => {
+      const attempt = activeAttempt.current;
+      if (attempt) {
+        attempt.isCanceled = true;
+        closePasskeyPopup(attempt);
+        activeAttempt.current = null;
+        cancelCoreAuthFlow();
+      }
+      unsubscribe();
+    };
+  }, [para, cancelCoreAuthFlow]);
 
   const submit = useCallback(() => {
+    const previousAttempt = activeAttempt.current;
+    if (previousAttempt) {
+      previousAttempt.isCanceled = true;
+      closePasskeyPopup(previousAttempt);
+    }
+
+    const attempt: PhoneAuthAttempt = {
+      isCanceled: false,
+      passkeyPopup: null,
+    };
+    activeAttempt.current = attempt;
     setError(null);
+    resetState();
 
     const phone = `${countryCode}${phoneNumber.replace(/\D/g, "")}` as `+${number}`;
+    void authenticateWithEmailOrPhoneAsync({
+      auth: { phone },
+      sessionPollingCallbacks: {
+        isCanceled: () => attempt.isCanceled,
+      },
+    })
+      .then(() => {
+        if (activeAttempt.current !== attempt) return;
 
-    signUpOrLogIn(
-      { auth: { phone } },
-      {
-        onSuccess: (authState) => {
-          if (authState?.stage === "verify") {
-            const verifyState = authState as AuthStateVerify;
-            if (verifyState.loginUrl) {
-              setVerifyUrl(verifyState.loginUrl);
-              setStep("verify");
-              const needsSignup = verifyState.nextStage === "signup";
-              handleAuthComplete(needsSignup);
-            }
-          }
-        },
-        onError: (err) => {
-          setError(err.message || "Authentication failed");
-        },
-      }
-    );
-  }, [countryCode, phoneNumber, signUpOrLogIn, handleAuthComplete]);
+        closePasskeyPopup(attempt);
+        activeAttempt.current = null;
+        resetState();
+      })
+      .catch(authError => {
+        if (activeAttempt.current !== attempt) return;
+
+        closePasskeyPopup(attempt);
+        activeAttempt.current = null;
+        if (!attempt.isCanceled) {
+          setError(authError instanceof Error ? authError.message : "Authentication failed");
+          resetState();
+        }
+      });
+  }, [authenticateWithEmailOrPhoneAsync, countryCode, phoneNumber, resetState]);
+
+  const openPasskeyWindow = useCallback(() => {
+    const attempt = activeAttempt.current;
+    if (!attempt || attempt.isCanceled || !passkeyUrl) return;
+
+    setError(null);
+    if (attempt.passkeyPopup && !attempt.passkeyPopup.closed) {
+      attempt.passkeyPopup.focus();
+      return;
+    }
+
+    const popup = window.open(passkeyUrl, "ParaPasskey", "popup,width=480,height=760");
+    if (!popup) {
+      setError("Popup blocked — allow popups for this site, then try again.");
+      return;
+    }
+
+    attempt.passkeyPopup = popup;
+    popup.focus();
+  }, [passkeyUrl]);
 
   const cancel = useCallback(() => {
-    shouldCancel.current = true;
+    const attempt = activeAttempt.current;
+    if (attempt) {
+      attempt.isCanceled = true;
+      closePasskeyPopup(attempt);
+      activeAttempt.current = null;
+      cancelCoreAuthFlow();
+    }
     resetState();
     setError(null);
-  }, [resetState]);
-
-  const isPending = isSigningUp || isWaitingForLogin || isWaitingForWallet;
+  }, [cancelCoreAuthFlow, resetState]);
 
   return {
     countryCode,
     phoneNumber,
     step,
     verifyUrl,
+    passkeyUrl,
     error,
     isPending,
     setCountryCode,
     setPhoneNumber,
     submit,
+    openPasskeyWindow,
     cancel,
   };
 }

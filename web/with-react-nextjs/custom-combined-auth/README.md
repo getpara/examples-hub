@@ -79,7 +79,7 @@ return (
 );
 ```
 
-Email and phone auth use `useSignUpOrLogIn`, show the returned verification iframe, then call `useWaitForLogin` or `useWaitForWalletCreation` based on the next stage. OAuth auth uses `useVerifyOAuth` or `useVerifyFarcaster`, then waits for login or wallet creation based on whether the user is new.
+Email and phone auth use `useAuthenticateWithEmailOrPhone` and render verification or credential URLs from SDK state until complete authentication finishes. OAuth auth uses `useAuthenticateWithOAuth` and keeps its managed popup aligned with portal URL state. Each complete mutation waits for the session and any required wallet before it resolves.
 
 ## Connected Wallet Hooks
 
