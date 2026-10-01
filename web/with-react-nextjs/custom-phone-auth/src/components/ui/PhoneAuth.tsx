@@ -10,8 +10,10 @@ interface PhoneAuthProps {
   isPending: boolean;
   onCancel: () => void;
   onCountryCodeChange: (code: string) => void;
+  onOpenPasskey: () => void;
   onPhoneNumberChange: (phone: string) => void;
   onSubmit: () => void;
+  passkeyUrl: string | null;
   phoneNumber: string;
   step: PhoneAuthStep;
   verifyUrl: string | null;
@@ -24,20 +26,34 @@ export function PhoneAuth({
   isPending,
   onCancel,
   onCountryCodeChange,
+  onOpenPasskey,
   onPhoneNumberChange,
   onSubmit,
+  passkeyUrl,
   phoneNumber,
   step,
   verifyUrl,
 }: PhoneAuthProps) {
-  if (step === "verify" && verifyUrl) {
+  if (step === "verify" && (verifyUrl || passkeyUrl)) {
     return (
       <AuthCard title="Verify phone" description="Complete the Para SMS verification challenge." error={error}>
-        <VerifyIframe
-          url={verifyUrl}
-          onCancel={onCancel}
-          statusMessage={isPending ? "Waiting for verification..." : undefined}
-        />
+        {verifyUrl && (
+          <VerifyIframe
+            url={verifyUrl}
+            onCancel={onCancel}
+            statusMessage={isPending ? "Waiting for verification..." : undefined}
+          />
+        )}
+        {passkeyUrl && (
+          <button type="button" onClick={onOpenPasskey} className="btn-primary min-h-11 w-full px-4 text-sm">
+            Open Passkey Verification
+          </button>
+        )}
+        {!verifyUrl && (
+          <button type="button" onClick={onCancel} className="btn-secondary min-h-11 w-full px-4 text-sm">
+            Cancel
+          </button>
+        )}
       </AuthCard>
     );
   }

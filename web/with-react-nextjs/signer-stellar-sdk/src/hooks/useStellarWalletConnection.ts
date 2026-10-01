@@ -17,7 +17,7 @@ export function useStellarWalletConnection() {
   }, [account?.isConnected, wallet?.type, stellarWallet, setSelectedWallet]);
 
   return {
-    address: wallet?.type === "STELLAR" ? wallet.address : stellarWallet?.address ?? "",
+    address: (wallet?.type === "STELLAR" ? wallet.address : stellarWallet?.address) ?? "",
     isConnected: Boolean(account?.isConnected),
     openModal,
     wallet,

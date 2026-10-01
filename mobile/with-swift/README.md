@@ -117,6 +117,6 @@ For TestFlight and App Store builds:
 
 For detailed integration guides, API references, and advanced features:
 
-- [Para Swift SDK Documentation](https://docs.getpara.com/alpha/swift/overview)
-- [Swift SDK Setup Guide](https://docs.getpara.com/alpha/swift/setup)
+- [Para Swift SDK Documentation](https://docs.getpara.com/v3/swift/overview)
+- [Swift SDK Setup Guide](https://docs.getpara.com/v3/swift/setup)
 - [Swift SDK Repository](https://github.com/getpara/swift-sdk)

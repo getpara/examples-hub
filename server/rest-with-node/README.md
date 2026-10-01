@@ -102,4 +102,4 @@ All settings live in `.env`:
 - Build your own business logic on top of these primitives (e.g., trigger wallet creation from a queue message).
 
 For the full REST reference, read [`docs-mintlify/v2/rest`](../../docs-mintlify/v2/rest/overview.mdx) or visit
-[docs.getpara.com](https://docs.getpara.com/v2/rest/overview).
+[docs.getpara.com](https://docs.getpara.com/v3/rest/overview).

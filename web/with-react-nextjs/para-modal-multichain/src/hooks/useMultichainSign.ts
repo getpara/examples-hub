@@ -14,8 +14,7 @@ import { createSolanaRpc } from "@solana/rpc";
 
 const HELLO_WORLD_MESSAGE = "Hello World!";
 const CHAIN_ID = "cosmoshub-4";
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const rpc = createSolanaRpc("https://api.devnet.solana.com" as Parameters<typeof createSolanaRpc>[0]) as any;
+const rpc = createSolanaRpc("https://api.devnet.solana.com");
 
 export type ChainSignState = {
   chainId: string;
@@ -139,10 +138,9 @@ export function useMultichainSign() {
         const sig = await solanaExternalSign(encoded);
         setSolanaState({ isPending: false, errorMessage: null, signature: bytesToBase64(sig) });
       } else if (solanaSigner) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const results = await (solanaSigner as any).signMessages([{ content: encoded, signatures: {} }]);
-        const sigBytes = Object.values(results[0] as Record<string, Uint8Array>)[0];
-        if (!sigBytes) throw new Error("Unexpected signing result format");
+        const results = await solanaSigner.signMessages([{ content: encoded, signatures: {} }]);
+        const sigBytes = Object.values(results[0] ?? {})[0];
+        if (!(sigBytes instanceof Uint8Array)) throw new Error("Unexpected signing result format");
         setSolanaState({ isPending: false, errorMessage: null, signature: bytesToBase64(sigBytes) });
       } else {
         throw new Error("No Solana signer available");

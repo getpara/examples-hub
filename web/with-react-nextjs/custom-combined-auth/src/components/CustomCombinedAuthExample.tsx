@@ -40,6 +40,9 @@ function CustomCombinedAuthRuntime() {
   const auth = useCombinedAuth();
   const session = useParaSession();
   const signing = useSignHelloWorld();
+  const passkeyUrl =
+    auth.activeTab === "email" ? auth.email.passkeyUrl : auth.activeTab === "phone" ? auth.phone.passkeyUrl : null;
+  const openPasskeyWindow = auth.activeTab === "email" ? auth.email.openPasskeyWindow : auth.phone.openPasskeyWindow;
   const oauthActiveProvider = auth.oauth.activeProvider;
   const oauthAuthenticate = auth.oauth.authenticate;
   const oauthCancel = auth.oauth.cancel;
@@ -79,9 +82,11 @@ function CustomCombinedAuthRuntime() {
                 isPending: oauthIsPending,
               }}
               onCancel={auth.cancel}
+              onOpenPasskey={openPasskeyWindow}
               onTabChange={auth.setActiveTab}
               phone={auth.phone}
               providers={OAUTH_PROVIDERS}
+              passkeyUrl={passkeyUrl}
               step={auth.step}
               verifyUrl={auth.verifyUrl}
             />
