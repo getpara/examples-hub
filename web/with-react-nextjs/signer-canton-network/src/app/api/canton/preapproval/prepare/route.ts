@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { randomUUID } from "node:crypto";
-import { getSdk } from "@/lib/canton";
+import { getSdk } from "@/lib/server/canton";
 
 export const runtime = "nodejs";
 
@@ -23,32 +23,19 @@ export async function POST(request: Request) {
 
   try {
     const sdk = await getSdk();
-    if (!sdk.userLedger || !sdk.validator) {
+    if (!sdk.userLedger || !sdk.validator || !sdk.tokenStandard) {
       return NextResponse.json({ error: "SDK not fully initialized" }, { status: 500 });
     }
 
-    // setPartyId hydrates userLedger + tokenStandard with the act-as party
-    // and discovers the synchronizer the party lives on. Required before any
-    // prepareSubmission call.
     await sdk.setPartyId(partyId);
 
     const providerParty = await sdk.validator.getValidatorUser();
-
-    // splice-wallet >= 0.1.11 requires the DSO party in the proposal payload.
-    // The validator's scan-proxy exposes it directly; the SDK doesn't surface
-    // a typed wrapper, so we reach into the internal client.
-    const dsoRes = await (
-      sdk.validator as unknown as {
-        scanProxyClient: {
-          get: (path: string) => Promise<{ dso_party_id: string }>;
-        };
-      }
-    ).scanProxyClient.get("/v0/scan-proxy/dso-party-id");
+    const dsoPartyId = await sdk.tokenStandard.getInstrumentAdmin();
 
     const command = await sdk.userLedger.createTransferPreapprovalCommand(
       providerParty,
       partyId,
-      dsoRes.dso_party_id,
+      dsoPartyId,
     );
     if (!command) {
       return NextResponse.json(

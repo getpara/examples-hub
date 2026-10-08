@@ -1,27 +1,24 @@
-import { createRouter as createTanStackRouter } from '@tanstack/react-router'
-import { routeTree } from './routeTree.gen'
-import { DefaultCatchBoundary } from './components/DefaultCatchBoundary'
-import { NotFound } from './components/NotFound'
+import { createRouter as createTanStackRouter } from "@tanstack/react-router";
+import { routeTree } from "./routeTree.gen";
+import { DefaultCatchBoundary } from "./components/DefaultCatchBoundary";
+import { NotFound } from "./components/NotFound";
 
 export function createRouter() {
-  const router = createTanStackRouter({
+  return createTanStackRouter({
     routeTree,
-    defaultPreload: 'intent',
+    defaultPreload: "intent",
     defaultErrorComponent: DefaultCatchBoundary,
-    defaultNotFoundComponent: () => <NotFound />,
+    defaultNotFoundComponent: NotFound,
     scrollRestoration: true,
-  })
-
-  return router
+  });
 }
 
-// Required by TanStack Start for SSR hydration
 export async function getRouter() {
-  return createRouter()
+  return createRouter();
 }
 
-declare module '@tanstack/react-router' {
+declare module "@tanstack/react-router" {
   interface Register {
-    router: ReturnType<typeof createRouter>
+    router: ReturnType<typeof createRouter>;
   }
 }

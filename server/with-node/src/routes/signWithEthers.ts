@@ -51,6 +51,7 @@ export async function ethersPregenSignHandler(req: Request, res: Response): Prom
       nonce: nonce,
       gasLimit: 21000,
       gasPrice: feeData.gasPrice,
+      chainId: (await ethersProvider.getNetwork()).chainId,
     };
 
     await paraEthersSigner.signTransaction(tx);

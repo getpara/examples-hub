@@ -1,83 +1,67 @@
-# Signer Stellar SDK
+# Para Stellar SDK Signer Example
 
 [![Live Demo](https://img.shields.io/badge/Live_Demo-black?style=for-the-badge&logo=vercel)](https://para-example-signer-stellar-sdk.vercel.app)
 
-This example demonstrates how to use Para with the Stellar SDK v14 in a Next.js app. It includes message signing, signature verification, Stellar Testnet balance reads, Friendbot funding, XLM transfers, and Soroban authorization entry signing.
+A Next.js app that connects with the Para Modal and uses the Para Stellar signer with the Stellar SDK v14 on Stellar Testnet. Each route is one demo: XLM transfer, message signing, and Soroban auth entry signing. `/` opens XLM transfer. All Para SDK usage lives in `src/hooks`. Everything else is plain React and Tailwind that you can replace with your own UI.
 
 ## Setup
 
-Create a `.env` file in this directory:
+Create a local `.env` file:
 
 ```env
-NEXT_PUBLIC_PARA_API_KEY=your_para_api_key
+NEXT_PUBLIC_PARA_API_KEY=your_api_key_here
 NEXT_PUBLIC_PARA_ENVIRONMENT=BETA
 ```
+
+`NEXT_PUBLIC_PARA_ENVIRONMENT` defaults to `BETA`. Configure app identity, login methods, branding, and wallet visibility (enable Stellar wallets) in the [Para Developer Portal](https://developer.getpara.com). The local `ParaProvider` passes the API key, the environment, and runtime modal flags. The Horizon, Friendbot, and Stellar Expert testnet URLs are fixed in `src/lib/chain.ts`.
 
 Install and run the production build:
 
 ```bash
 yarn install
 yarn build
-yarn start --hostname 127.0.0.1 --port 3000
+yarn start
 ```
 
-Open [http://127.0.0.1:3000](http://127.0.0.1:3000).
+## Para usage
 
-## Developer Portal Configuration
+These are the files to copy into your own app.
 
-Configure app identity, authentication methods, branding, theme, and wallet visibility in the Para Developer Portal for the API key. The `ParaProvider` in this example only handles API key/environment setup and runtime modal behavior. Stellar Testnet Horizon, Friendbot, and explorer URLs are fixed in `src/config/constants.ts` for this demo.
-
-## Core Integration
-
-The copyable Para signer setup lives in `src/hooks/useParaSigner.ts`:
+| File | What it does |
+| --- | --- |
+| `src/components/ParaProvider.tsx` | Wraps the app in `ParaProvider` and a React Query client |
+| `src/hooks/useStellarWalletConnection.ts` | Opens the modal, reads the account with `useModal`, `useAccount`, and `useWallet`, and selects the Stellar wallet with `useWalletState` |
+| `src/hooks/useParaSigner.ts` | Creates the Stellar signer for testnet with `useParaStellarSigner` |
+| `src/hooks/useXlmTransfer.ts` | Builds a payment, signs it with `signer.signTransaction`, and submits it to Horizon |
+| `src/hooks/useMessageSigning.ts` | Signs bytes with `signer.signBytes` and verifies the Ed25519 signature with the account public key |
+| `src/hooks/useSignAuthEntry.ts` | Signs a Soroban authorization entry with `signer.signAuthEntry` |
+| `src/hooks/useAccountBalance.ts` | Reads the XLM balance from Horizon. An account that does not exist yet shows `0 XLM` |
+| `src/hooks/useFriendbot.ts` | Funds the account with 10,000 test XLM from Friendbot |
 
 ```tsx
-import { useAccount } from "@getpara/react-sdk-lite";
-import { useParaStellarSigner } from "@getpara/react-sdk-lite/chains/stellar";
-import { Horizon, Networks } from "@stellar/stellar-sdk";
-import { TESTNET_HORIZON_URL } from "@/config/constants";
-
-const server = new Horizon.Server(TESTNET_HORIZON_URL);
-
-export function useParaSigner() {
-  const { isConnected } = useAccount();
-  const { stellarSigner, isLoading } = useParaStellarSigner({
-    networkPassphrase: Networks.TESTNET,
-  });
-
-  return {
-    signer: stellarSigner,
-    server,
-    isReady: Boolean(stellarSigner && isConnected && !isLoading),
-    isLoading,
-    address: stellarSigner?.address ?? null,
-  };
-}
+const { address, isConnected, openModal } = useStellarWalletConnection();
+const { signer, isReady } = useParaSigner();
+const { transfer, txHash, isLoading, error } = useXlmTransfer();
 ```
 
-Message signing, transaction submission, Friendbot funding, balance reads, and auth-entry signing are intentionally kept in hooks so the app UI can be replaced without copying presentation code.
+`useParaStellarSigner` comes from `@getpara/react-sdk-lite/chains/stellar` and needs `@getpara/stellar-sdk-v14-integration` installed. That package peers on `@stellar/stellar-sdk` 14.x, so this example pins it to `14.6.1` rather than the v15 line.
 
-## Key Files
+A Stellar account exists on the network only after it receives XLM, so XLM transfer shows Fund with Friendbot until the account is funded and keeps Send disabled until the balance loads. `src/lib/horizon.ts` holds the Horizon client that the transfer and balance hooks share.
 
-- `src/components/ParaProvider.tsx` - SDK Lite provider configuration.
-- `src/hooks/useStellarWalletConnection.ts` - Para modal state and active Stellar wallet selection.
-- `src/hooks/useParaSigner.ts` - Para Stellar signer setup.
-- `src/hooks/useMessageSigning.ts` - Message signing and Ed25519 verification.
-- `src/hooks/useXlmTransfer.ts` - XLM transfer construction, signing, submission, and confirmation.
-- `src/hooks/useFriendbot.ts` - Stellar Testnet Friendbot funding.
-- `src/hooks/useBalance.ts` - Stellar Testnet balance query.
-- `src/hooks/useSignAuthEntry.ts` - Soroban auth-entry signing.
-- `src/components/demos/SignMessageDemo.tsx` - Message signing UI.
-- `src/components/demos/XlmTransferDemo.tsx` - XLM transfer UI.
-- `src/components/demos/SignAuthEntryDemo.tsx` - Auth-entry signing UI.
+## Project layout
 
-## Dependency Notes
+```text
+src/
+├── app/                         # Next.js layout, one page per demo route
+├── hooks/                       # Para SDK and Stellar SDK usage, one concern per hook
+├── components/
+│   ├── ParaProvider.tsx         # Para setup
+│   ├── StellarSdkExample.tsx    # Header, sign in, and account strip shared by every route
+│   ├── demos/                   # One container per route, joins its hooks with the UI
+│   ├── layout/                  # App shell, header, footer, route workbench
+│   └── ui/                      # Presentational components, props only
+├── lib/                         # Testnet config, Horizon client, demo routes, formatting, UI helpers
+└── styles/globals.css           # Tailwind theme tokens
+```
 
-This app uses `@getpara/react-sdk-lite@3.0.0` instead of the catch-all React SDK because it only needs Para modal/core hooks and `@getpara/stellar-sdk-v14-integration@3.0.0`. The Stellar integration peers on `@stellar/stellar-sdk@^14.0.0`, so this example uses the newest compatible v14 release, `@stellar/stellar-sdk@14.6.1`, rather than the incompatible v15 line.
-
-## Learn More
-
-- [Para Documentation](https://docs.getpara.com)
-- [Para Developer Portal](https://developer.getpara.com)
-- [Stellar SDK Documentation](https://stellar.github.io/js-stellar-sdk/)
-- [Next.js Documentation](https://nextjs.org/docs)
+Components in `layout/` and `ui/` never import Para. They receive data and callbacks from the containers, so you can swap them for your own design system without touching the hooks.

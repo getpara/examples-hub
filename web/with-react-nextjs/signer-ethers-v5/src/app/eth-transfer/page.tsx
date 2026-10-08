@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import EthTransferDemo from "@/components/demos/EthTransferDemo";
+import { EthTransferContainer } from "@/components/demos/EthTransferContainer";
 
 export const metadata: Metadata = {
   title: "ETH Transfer | Para Ethers v5 Signer",
@@ -7,5 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function EthTransferPage() {
-  return <EthTransferDemo />;
+  return <EthTransferContainer />;
 }

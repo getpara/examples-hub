@@ -2,32 +2,22 @@
 
 [![Live Demo](https://img.shields.io/badge/Live_Demo-black?style=for-the-badge&logo=vercel)](https://para-example-aa-porto-7702.vercel.app)
 
-A minimal Next.js example showing how to use Para with Porto to upgrade an EOA in place with EIP-7702.
-
-## What This Example Shows
-
-- Setting up `ParaProvider` for Para wallet authentication
-- Creating a Para Viem account with `useParaViemAccount`
-- Signing raw Porto authorization hashes with the Para Viem account
-- Upgrading the connected EOA with `RelayActions.upgradeAccount`
-- Keeping Porto logic separate from the example UI
+A minimal Next.js app that connects with the Para Modal and upgrades the connected EOA in place to a Porto account with EIP-7702 on Base Sepolia. The address stays the same. All Para SDK usage lives in `src/hooks`. Everything else is plain React and Tailwind that you can replace with your own UI.
 
 ## Setup
 
-1. In the [Para Developer Portal](https://developer.getpara.com), configure the project used by your API key:
-
-   - Set the app or project display name, for example `Porto EIP-7702 Example`.
-   - Configure Branding with your logo, light theme colors, font, and border radius.
-   - Configure Auth with the email and phone login settings, OAuth providers, auth layout, and 2FA setting you want for this example.
-
-2. Create a `.env` file:
+Create a local `.env` file:
 
 ```env
-NEXT_PUBLIC_PARA_API_KEY=your_para_api_key
+NEXT_PUBLIC_PARA_API_KEY=your_api_key_here
 NEXT_PUBLIC_PARA_ENVIRONMENT=BETA
 ```
 
-3. Install dependencies and run the production build:
+Configure the API key in the [Para Developer Portal](https://developer.getpara.com) with the app display name, branding and logo, theme, OAuth providers, email and phone login options, and wallet visibility. The local `ParaProvider` passes the API key, the environment, and runtime modal behavior such as on-ramp test mode and recovery step visibility.
+
+The Porto relay (`https://rpc.porto.sh`) and the Base Sepolia chain are set in `src/lib/porto.ts` and `src/lib/chain.ts`. Porto needs no API key.
+
+Install and run the production build:
 
 ```bash
 yarn install
@@ -35,75 +25,47 @@ yarn build
 yarn start
 ```
 
-## Getting API Keys
+## Para usage
 
-- **Para API Key**: Get one from the [Para Developer Portal](https://developer.getpara.com).
+These are the files to copy into your own app.
 
-## Para Configuration Ownership
+| File | What it does |
+| --- | --- |
+| `src/components/ParaProvider.tsx` | Wraps the app in `ParaProvider` and a React Query client |
+| `src/hooks/useParaModalWallet.ts` | Opens the modal and reads the connected wallet with `useModal`, `useAccount`, and `useWallet` |
+| `src/hooks/useParaViemSigner.ts` | Reads the Para wallet address from `useParaViemAccount` |
+| `src/hooks/usePortoKeys.ts` | Reads the keys Porto has authorized for the address with `RelayActions.getKeys`, and reads them again after the upgrade. Any key means the account is upgraded |
+| `src/hooks/usePortoUpgrade.ts` | Upgrades the EOA with `usePortoSmartAccount` once the user asks for it |
+| `src/hooks/useAccountBalance.ts` | Reads the Para wallet balance with `useWalletBalance`. The balance appears once the API key has an RPC URL in the Developer Portal |
 
-Persistent Para app identity, branding, and auth settings are owned by the Developer Portal for the API key used to run this example. The local `ParaProvider` keeps only runtime modal behavior, such as on-ramp test mode and recovery secret step handling. Porto-specific settings, including the Base Sepolia chain and Porto relay endpoint, remain in code because they are required by this EIP-7702 example.
-
-## Project Structure
-
+```tsx
+const { address, isConnected, openModal } = useParaModalWallet();
+const { address: signerAddress, isLoading } = useParaViemSigner();
+const { upgrade, isUpgraded, errorMessage, isPending } = usePortoUpgrade(isConnected ? signerAddress : null);
+const { keys, isChecking } = usePortoKeys(isConnected ? signerAddress : null, isUpgraded);
 ```
+
+`usePortoUpgrade` enables `usePortoSmartAccount({ chain })` only for the address whose upgrade button the user clicked, so signing in with another account does not upgrade it. The hook authorizes the Para wallet's own secp256k1 key as a Porto admin key, the Para wallet signs the EIP-7702 authorization and upgrade digests, and Porto's relay submits the upgrade. If the account already delegates to Porto, the hook skips the upgrade and returns the existing account. Porto's relay sponsors gas on testnets. `usePortoKeys` then reads the authorized keys again, and the page counts admin and session keys from them.
+
+## Project layout
+
+```text
 src/
-├── app/
-│   ├── layout.tsx                         # Server layout and metadata
-│   └── page.tsx                           # Example entry
+├── app/                         # Next.js layout and page
+├── hooks/                       # Para SDK and Porto usage, one concern per hook
 ├── components/
-│   ├── ParaProvider.tsx                   # Para SDK provider setup
-│   ├── Porto7702Example.tsx               # Client orchestration
-│   ├── layout/Header.tsx                  # Presentational header
-│   └── ui/                                # Presentational example UI
-├── hooks/
-│   └── usePorto7702Account.ts             # Copyable Porto EIP-7702 logic
-└── lib/
-    └── porto.ts                           # Porto chain and relay configuration
+│   ├── ParaProvider.tsx         # Para setup
+│   ├── Porto7702Example.tsx     # Joins the hooks with the UI
+│   ├── layout/                  # App shell, header, footer, workbench
+│   └── ui/                      # Presentational components, props only
+├── lib/                         # Porto relay and chain config, formatting, and UI helpers
+└── styles/globals.css           # Tailwind theme tokens
 ```
 
-## Key Integration Pattern
+Components in `layout/` and `ui/` never import Para. They receive data and callbacks from `Porto7702Example`, so you can swap them for your own design system without touching the hooks.
 
-The reusable logic lives in `src/hooks/usePorto7702Account.ts`. The UI components receive props only, so you can copy the hook into your app without copying this example's UI.
+## Learn more
 
-```typescript
-import { useParaViemAccount } from "@getpara/react-sdk/evm";
-import { Account, Key, RelayActions } from "porto/viem";
-import { createClient, http, type Hex } from "viem";
-import { Chains } from "porto";
-
-const portoClient = createClient({
-  chain: Chains.baseSepolia,
-  transport: http("https://rpc.porto.sh"),
-});
-
-export function usePorto7702Account() {
-  const { viemAccount } = useParaViemAccount();
-
-  async function upgradeToPorto() {
-    if (!viemAccount?.address) {
-      throw new Error("Connect a Para EOA before upgrading.");
-    }
-
-    const account = Account.from({
-      address: viemAccount.address,
-      async sign({ hash }) {
-        return viemAccount.sign({ hash: hash as Hex });
-      },
-    });
-    const adminKey = Key.createSecp256k1({ role: "admin" });
-
-    return RelayActions.upgradeAccount(portoClient, {
-      account,
-      authorizeKeys: [adminKey],
-    });
-  }
-
-  return { upgradeToPorto };
-}
-```
-
-## Learn More
-
-- [Para Documentation](https://docs.getpara.com)
-- [Porto Documentation](https://porto.sh/sdk)
-- [EIP-7702 Specification](https://eips.ethereum.org/EIPS/eip-7702)
+- [Para Porto walkthrough](https://docs.getpara.com/v3/walkthroughs/porto)
+- [Porto documentation](https://porto.sh/sdk)
+- [EIP-7702 specification](https://eips.ethereum.org/EIPS/eip-7702)

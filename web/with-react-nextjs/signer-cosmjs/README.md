@@ -1,100 +1,71 @@
-# Para SDK CosmJS Signer Example
+# Para CosmJS Signer Example
 
 [![Live Demo](https://img.shields.io/badge/Live_Demo-black?style=for-the-badge&logo=vercel)](https://para-example-signer-cosmjs.vercel.app)
 
-This Next.js app shows how to use Para as the signer for CosmJS flows. It includes demos for message signing, ATOM transfers, IBC transfers, staking, governance voting, and CosmWasm contract queries/execution.
+A Next.js app that connects with the Para Modal and uses the Para Cosmos signer from `useParaCosmjsProtoSigner` with CosmJS on the Cosmos ICS Provider Testnet. Each route is one demo: message signing, ATOM transfer, IBC transfer, staking, governance voting, and CosmWasm contract queries and execution. `/` opens message signing. All Para SDK usage lives in `src/hooks`. Everything else is plain React and Tailwind that you can replace with your own UI.
 
 ## Setup
 
-Create a `.env` file in this example directory:
+Create a local `.env` file:
 
 ```env
-NEXT_PUBLIC_PARA_API_KEY=your_para_api_key_here
+NEXT_PUBLIC_PARA_API_KEY=your_api_key_here
 NEXT_PUBLIC_PARA_ENVIRONMENT=BETA
 ```
 
-`NEXT_PUBLIC_PARA_ENVIRONMENT` defaults to `BETA` when omitted. Use a key from the same Para environment you configure in the Developer Portal.
+`NEXT_PUBLIC_PARA_ENVIRONMENT` defaults to `BETA`. Configure app identity, login methods, branding, and wallet visibility in the [Para Developer Portal](https://developer.getpara.com). The local `ParaProvider` passes the API key, the environment, the Graz Cosmos connector for external wallets, and runtime modal flags.
 
-Install, build, and run the production server:
+The chain settings live in `src/lib/chain.ts`: the public ICS Provider Testnet RPC, the `uatom` denom, the gas price, and the explorer links. Transactions need testnet ATOM for fees. Request it from the Polypore faucet at `https://faucet.polypore.xyz/request?address=<your address>&chain=provider`.
+
+Install and run the production build:
 
 ```bash
 yarn install
 yarn build
-yarn start --hostname 127.0.0.1 --port 3000
+yarn start
 ```
 
-Open [http://127.0.0.1:3000](http://127.0.0.1:3000).
+## Para usage
 
-For local iteration, use:
+These are the files to copy into your own app.
 
-```bash
-yarn dev
-```
+| File | What it does |
+| --- | --- |
+| `src/components/ParaProvider.tsx` | Wraps the app in `ParaProvider` and a React Query client |
+| `src/hooks/useCosmosWalletConnection.ts` | Opens the modal and reads the connection and the Cosmos address with `useModal`, `useAccount`, and `useParaCosmjsProtoSigner` |
+| `src/hooks/useParaSigner.ts` | Creates a `SigningStargateClient` from the Para proto signer |
+| `src/hooks/useParaCosmWasmSigner.ts` | Creates a `SigningCosmWasmClient` from the Para proto signer |
+| `src/hooks/useMessageSigning.ts` | Signs a memo-only transaction with `signingClient.sign` without broadcasting it |
+| `src/hooks/useAtomTransfer.ts` | Sends ATOM with `signingClient.sendTokens` |
+| `src/hooks/useIbcTransfer.ts` | Broadcasts a `MsgTransfer` with `signingClient.signAndBroadcast` |
+| `src/hooks/useStaking.ts` | Lists bonded validators and your delegations, and broadcasts a `MsgDelegate` |
+| `src/hooks/useGovernance.ts` | Lists proposals in the voting period and broadcasts a `MsgVote` |
+| `src/hooks/useCosmWasmExecute.ts` | Executes a contract call with `signingClient.execute` |
 
-## Developer Portal Configuration
-
-Configure app identity, authentication methods, branding, theme, wallet visibility, and external wallet availability in the Para Developer Portal for the API key used by this example.
-
-The app reads only `NEXT_PUBLIC_PARA_API_KEY` and `NEXT_PUBLIC_PARA_ENVIRONMENT`. Cosmos chain metadata and RPC endpoints live in `src/config/chains.ts` and `src/config/constants.ts`. The Graz connector configuration in `src/components/ParaProvider.tsx` wires Cosmos external wallet support at runtime.
-
-## Core Integration
-
-The reusable Para and CosmJS logic lives in hooks. UI components are prop-driven so you can copy the signer hooks without copying the example UI.
+These hooks read the chain without Para: `useCosmosQueryClient.ts` connects a CosmJS `QueryClient` with the bank, staking, and gov extensions, `useAccountBalance.ts` reads the ATOM balance through it, and `useCosmWasmQuery.ts` queries a contract with `CosmWasmClient`.
 
 ```tsx
-import { useEffect, useState } from "react";
-import { GasPrice, SigningStargateClient } from "@cosmjs/stargate";
-import { useAccount } from "@getpara/react-sdk-lite";
-import { useParaCosmjsProtoSigner } from "@getpara/react-sdk-lite/chains/cosmos";
-
-export function useParaSigner() {
-  const [signingClient, setSigningClient] = useState<SigningStargateClient | null>(null);
-  const { isConnected } = useAccount();
-  const { protoSigner, isLoading } = useParaCosmjsProtoSigner();
-
-  useEffect(() => {
-    if (!isConnected || !protoSigner) {
-      setSigningClient(null);
-      return;
-    }
-
-    SigningStargateClient.connectWithSigner("https://rpc.provider-sentry-01.ics-testnet.polypore.xyz", protoSigner, {
-      gasPrice: GasPrice.fromString("0.025uatom"),
-    }).then(setSigningClient);
-  }, [isConnected, protoSigner]);
-
-  return {
-    signingClient,
-    address: isConnected && protoSigner ? protoSigner.address : null,
-    isLoading,
-  };
-}
+const { address, isConnected, openModal } = useCosmosWalletConnection();
+const { signingClient } = useParaSigner();
+const { delegate, txHash, isLoading, error } = useStaking();
 ```
 
-See `src/hooks/useParaSigner.ts` for Stargate transactions and `src/hooks/useParaCosmWasmSigner.ts` for CosmWasm clients.
+Every signing hook waits for the user to approve the request in the Para window. Broadcasting hooks resolve once the chain includes the transaction.
 
-## Key Dependencies
+## Project layout
 
-- `@getpara/react-sdk-lite@3.0.0` for Para provider, modal, account hooks, and Cosmos signer hooks.
-- `@getpara/cosmos-wallet-connectors@3.0.0` and `graz@0.4.2` for Cosmos external wallet support.
-- `@cosmjs/stargate@0.39.0`, `@cosmjs/cosmwasm@0.39.0`, and related `@cosmjs/*` packages for Cosmos clients and transaction helpers.
-- `next@16.2.7`, `react@19.2.7`, and `react-dom@19.2.7`.
+```text
+src/
+├── app/                         # Next.js layout, one page per demo route
+├── hooks/                       # Para SDK and CosmJS usage, one concern per hook
+├── components/
+│   ├── ParaProvider.tsx         # Para setup
+│   ├── CosmjsExample.tsx        # Header, sign in, and account strip shared by every route
+│   ├── demos/                   # One container per route, joins its hooks with the UI
+│   ├── layout/                  # App shell, header, footer, route workbench
+│   └── ui/                      # Presentational components, props only
+├── lib/                         # Chain config, demo routes, vote options, formatting, UI helpers
+└── styles/globals.css           # Tailwind theme tokens
+```
 
-Some Para package `latest` tags still point at the v2 line, so this example intentionally pins Para SDK packages to `3.0.0`.
-
-## Key Files
-
-- `src/components/ParaProvider.tsx` configures the Para SDK and Cosmos connector.
-- `src/hooks/useCosmosWalletConnection.ts` centralizes modal, account, and Cosmos address state.
-- `src/hooks/useParaSigner.ts` creates a `SigningStargateClient` from the Para Cosmos signer.
-- `src/hooks/useParaCosmWasmSigner.ts` creates a `SigningCosmWasmClient` from the Para Cosmos signer.
-- `src/components/demos/*` contains the example UI for each flow.
-- `src/app/*/page.tsx` contains server route metadata and delegates to client demo components.
-
-## Learn More
-
-- [Para Documentation](https://docs.getpara.com)
-- [Para Developer Portal](https://developer.getpara.com)
-- [CosmJS Documentation](https://github.com/cosmos/cosmjs)
-- [Cosmos SDK Documentation](https://docs.cosmos.network)
-- [Next.js Documentation](https://nextjs.org/docs)
+Components in `layout/` and `ui/` never import Para. They receive data and callbacks from the containers, so you can swap them for your own design system without touching the hooks.

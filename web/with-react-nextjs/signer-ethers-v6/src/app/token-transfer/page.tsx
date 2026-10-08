@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import TokenTransferDemo from "@/components/demos/TokenTransferDemo";
+import { TokenTransferContainer } from "@/components/demos/TokenTransferContainer";
 
 export const metadata: Metadata = {
   title: "Token Transfer | Para Ethers v6 Signer",
@@ -7,5 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function TokenTransferPage() {
-  return <TokenTransferDemo />;
+  return <TokenTransferContainer />;
 }

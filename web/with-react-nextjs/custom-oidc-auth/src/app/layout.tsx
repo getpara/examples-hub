@@ -1,12 +1,11 @@
-import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
-import '@/styles/globals.css';
-
-const inter = Inter({ subsets: ['latin'] });
+import type { Metadata } from "next";
+import "@/styles/globals.css";
+import "@getpara/react-sdk/styles.css";
+import { ParaProvider } from "@/components/ParaProvider";
 
 export const metadata: Metadata = {
-  title: 'Custom OIDC Auth Example',
-  description: 'Custom OIDC sign-in driven directly by the Para web SDK.',
+  title: "Custom OIDC Auth Example",
+  description: "Sign in with Para through your own OIDC provider, with login two-factor, then fund and send Sepolia ETH.",
 };
 
 export default function RootLayout({
@@ -16,7 +15,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body>
+        <ParaProvider>{children}</ParaProvider>
+      </body>
     </html>
   );
 }

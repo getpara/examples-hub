@@ -1,8 +1,6 @@
-"use client";
-
 import { useState, useCallback } from "react";
-import { FRIENDBOT_URL } from "@/config/constants";
-import { useParaSigner } from "./useParaSigner";
+import { STELLAR_TESTNET } from "@/lib/chain";
+import { useParaSigner } from "@/hooks/useParaSigner";
 
 export function useFriendbot() {
   const { address, isReady } = useParaSigner();
@@ -21,9 +19,9 @@ export function useFriendbot() {
     setSuccess(false);
 
     try {
-      const res = await fetch(`${FRIENDBOT_URL}?addr=${encodeURIComponent(address)}`);
-      if (!res.ok) {
-        const body = await res.text();
+      const response = await fetch(`${STELLAR_TESTNET.friendbotUrl}?addr=${encodeURIComponent(address)}`);
+      if (!response.ok) {
+        const body = await response.text();
         throw new Error(`Friendbot error: ${body}`);
       }
       setSuccess(true);

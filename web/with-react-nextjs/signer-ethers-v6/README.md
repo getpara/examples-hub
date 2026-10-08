@@ -1,12 +1,12 @@
-# Para SDK Ethers v6 Signer Example
+# Para Ethers v6 Signer Example
 
 [![Live Demo](https://img.shields.io/badge/Live_Demo-black?style=for-the-badge&logo=vercel)](https://para-example-signer-ethers-v6.vercel.app)
 
-This Next.js app demonstrates how to use Para with Ethers v6 for EVM wallet operations on Holesky. It includes message signing, ETH transfers, ERC20 transfers, contract deployment, contract interaction, batched contract calls, typed data signing, and permit signing.
+A Next.js app that connects with the Para Modal and uses the Para `useParaEthersSigner` hook with Ethers v6 on Holesky. Each route is one demo: message signing, ETH transfer, contract deployment, token transfer, contract interaction, batch transactions, typed data signing, and permit signing. `/` opens message signing. All Para SDK usage lives in `src/hooks`. Everything else is plain React and Tailwind that you can replace with your own UI.
 
 ## Setup
 
-Create a `.env` file in this directory:
+Create a local `.env` file:
 
 ```env
 NEXT_PUBLIC_PARA_API_KEY=your_api_key_here
@@ -14,58 +14,61 @@ NEXT_PUBLIC_PARA_ENVIRONMENT=BETA
 NEXT_PUBLIC_HOLESKY_RPC_URL=https://ethereum-holesky-rpc.publicnode.com
 ```
 
-Install dependencies and build the production app:
+`NEXT_PUBLIC_PARA_ENVIRONMENT` defaults to `BETA`. `NEXT_PUBLIC_HOLESKY_RPC_URL` is the Ethers JSON-RPC provider used for reads and transactions; it defaults to the public Holesky RPC above. Configure app identity, login methods, branding, and wallet visibility in the [Para Developer Portal](https://developer.getpara.com). The local `ParaProvider` passes the API key, the environment, the Holesky EVM connector, and runtime modal flags.
+
+Install and run the production build:
 
 ```bash
 yarn install
 yarn build
-yarn start --hostname 127.0.0.1 --port 3000
+yarn start
 ```
 
-`NEXT_PUBLIC_PARA_API_KEY` selects the Developer Portal project used by the app. `NEXT_PUBLIC_PARA_ENVIRONMENT` defaults to `BETA` when omitted and can be set to `SANDBOX` or `PROD` when using keys from those environments. `NEXT_PUBLIC_HOLESKY_RPC_URL` is used by the local Ethers v6 JSON-RPC provider for demo reads and transactions.
+`yarn compile` recompiles the sample ERC20 contract in `src/contracts/ParaTestToken.sol` with Hardhat.
 
-## Developer Portal Configuration
+## Para usage
 
-Configure app identity, authentication methods, branding, theme, wallet visibility, and external wallet availability in the Para Developer Portal for the API key used by this example. This app does not set `configOverrides`; persistent project settings should come from the Developer Portal. `ParaProvider` keeps only API key/environment wiring, EVM connector setup, and runtime modal flags.
+These are the files to copy into your own app.
 
-## Key Dependencies
+| File | What it does |
+| --- | --- |
+| `src/components/ParaProvider.tsx` | Wraps the app in `ParaProvider` and a React Query client |
+| `src/hooks/useEvmWalletConnection.ts` | Opens the modal and reads the connected wallet with `useModal`, `useAccount`, and `useWallet` |
+| `src/hooks/useParaSigner.ts` | Gets an Ethers signer for the connected EVM wallet with `useParaEthersSigner` and the Ethers provider |
+| `src/hooks/useEthersProvider.ts` | Creates the Ethers `JsonRpcProvider` for Holesky |
+| `src/hooks/useAccountBalance.ts` | Reads the ETH balance through the Ethers provider |
+| `src/hooks/useMessageSigning.ts` | Signs a message with `signer.signMessage`, then recovers the signer address and checks it matches the wallet |
+| `src/hooks/useEthTransfer.ts` | Checks the balance, builds the transaction, and sends it with `signer.sendTransaction` |
+| `src/hooks/useContractDeployment.ts` | Deploys `ParaTestToken` with a `ContractFactory` |
+| `src/hooks/useTokenTransfer.ts` | Reads ERC20 balances and calls `transfer` |
+| `src/hooks/useContractInteraction.ts` | Reads the mint limit and calls `mint` |
+| `src/hooks/useBatchTransactions.ts` | Encodes mint and transfer calls and sends them through `multicall` |
+| `src/hooks/useTypedDataSigning.ts` | Signs an EIP-712 token attestation with `signer.signTypedData` |
+| `src/hooks/usePermitSigning.ts` | Signs an EIP-2612 permit with `signer.signTypedData` |
 
-- `@getpara/react-sdk-lite@3.0.0` provides the Para provider, modal, and hooks without pulling in every chain-specific integration.
-- `@getpara/ethers-v6-integration@3.0.0` creates the Ethers v6 signer used by the example hooks.
-- `@getpara/evm-wallet-connectors@3.0.0`, `wagmi@3.6.16`, `@wagmi/core@3.5.0`, and `viem@2.52.2` support the EVM external wallet connector.
-- `ethers@6.16.0` is the Ethers v6 release used by this example.
-- `next@16.2.7`, `react@19.2.7`, and `react-dom@19.2.7` run the app.
-- `hardhat@3.8.0` and `@openzeppelin/contracts@5.6.1` compile the sample ERC20 contract.
-
-## Key Files
-
-- `src/components/ParaProvider.tsx` wires the Para provider, API key/environment, and Holesky EVM connector.
-- `src/hooks/useParaSigner.ts` creates the `ParaEthersSigner` from the Para client and Ethers provider.
-- `src/hooks/useEthersProvider.ts` creates the Ethers JSON-RPC provider.
-- `src/hooks/use*.ts` contain the copyable signing, transfer, and contract interaction logic.
-- `src/components/demos/*` contains the example UI that consumes the hooks.
-- `src/app/*/page.tsx` contains server route wrappers and metadata.
-- `src/contracts/ParaTestToken.sol` is the sample ERC20 contract compiled by Hardhat.
-
-## Validation
-
-```bash
-yarn install
-yarn install --immutable
-yarn typecheck
-yarn lint
-yarn compile
-rm -rf .next && yarn build
-npx -y react-doctor@latest . --verbose --diff
-yarn start --hostname 127.0.0.1 --port 3000
+```tsx
+const { address, isConnected, openModal } = useEvmWalletConnection();
+const { signer, provider } = useParaSigner();
+const { sendTransaction, txHash, isLoading, error } = useEthTransfer();
 ```
 
-The production server should return HTTP 200 at `http://127.0.0.1:3000`, and the UI should render the selector page plus nested demo routes.
+Every signing hook waits for the user to approve the request in the Para window. Transaction hooks also wait for one confirmation before they resolve.
 
-## Learn More
+## Project layout
 
-- [Para Documentation](https://docs.getpara.com)
-- [Para Website](https://getpara.com)
-- [Para Developer Portal](https://developer.getpara.com)
-- [Ethers v6 Documentation](https://docs.ethers.org/v6/)
-- [Next.js Documentation](https://nextjs.org/docs)
+```text
+src/
+├── app/                         # Next.js layout, one page per demo route
+├── hooks/                       # Para SDK and Ethers usage, one concern per hook
+├── components/
+│   ├── ParaProvider.tsx         # Para setup
+│   ├── EthersV6Example.tsx      # Header, sign in, and account strip shared by every route
+│   ├── demos/                   # One container per route, joins its hook with the UI
+│   ├── layout/                  # App shell, header, footer, route workbench
+│   └── ui/                      # Presentational components, props only
+├── contracts/                   # ParaTestToken source and Hardhat artifacts
+├── lib/                         # Chain and contract config, demo routes, formatting, UI helpers
+└── styles/globals.css           # Tailwind theme tokens
+```
+
+Components in `layout/` and `ui/` never import Para. They receive data and callbacks from the containers, so you can swap them for your own design system without touching the hooks.

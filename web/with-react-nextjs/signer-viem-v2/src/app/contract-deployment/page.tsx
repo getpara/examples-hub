@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import ContractDeploymentDemo from "@/components/demos/ContractDeploymentDemo";
+import { ContractDeploymentContainer } from "@/components/demos/ContractDeploymentContainer";
 
 export const metadata: Metadata = {
   title: "Contract Deployment | Para Viem v2 Signer",
@@ -7,5 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function ContractDeploymentPage() {
-  return <ContractDeploymentDemo />;
+  return <ContractDeploymentContainer />;
 }

@@ -1,13 +1,11 @@
-import "./globals.css";
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import "@/styles/globals.css";
 import "@getpara/react-sdk/styles.css";
-
-const inter = Inter({ subsets: ["latin"] });
+import { ParaProvider } from "@/components/ParaProvider";
 
 export const metadata: Metadata = {
   title: "Custom Phone Auth Example",
-  description: "Authenticate with Para using a custom phone number flow.",
+  description: "Sign in with Para using your own phone number UI.",
 };
 
 export default function RootLayout({
@@ -17,7 +15,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body>
+        <ParaProvider>{children}</ParaProvider>
+      </body>
     </html>
   );
 }

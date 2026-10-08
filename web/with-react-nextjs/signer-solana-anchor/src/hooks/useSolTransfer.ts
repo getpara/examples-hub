@@ -1,8 +1,6 @@
-"use client";
-
 import { useState, useCallback } from "react";
 import { LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
-import { useParaSigner } from "./useParaSigner";
+import { useParaSigner } from "@/hooks/useParaSigner";
 
 export function useSolTransfer() {
   const { connection, anchorProvider, address, isReady } = useParaSigner();
@@ -45,18 +43,15 @@ export function useSolTransfer() {
         throw new Error("No sender address or provider available");
       }
 
-      // Validate address format
       if (!PublicKey.isOnCurve(toAddress)) {
         throw new Error("Invalid recipient address format.");
       }
 
-      // Validate amount
       const amountFloat = parseFloat(solAmount);
       if (isNaN(amountFloat) || amountFloat <= 0) {
         throw new Error("Please enter a valid amount greater than 0.");
       }
 
-      // Check balance
       const balanceLamports = await connection.getBalance(anchorProvider.wallet.publicKey);
       const transaction = await constructTransaction(toAddress, solAmount);
       const estimatedGas = await transaction.getEstimatedFee(connection);
@@ -98,9 +93,7 @@ export function useSolTransfer() {
           throw new Error("sendAndConfirm method not available on anchor provider");
         }
 
-        const txResponse = await anchorProvider.sendAndConfirm(
-          tx as unknown as Parameters<typeof anchorProvider.sendAndConfirm>[0]
-        );
+        const txResponse = await anchorProvider.sendAndConfirm(tx);
 
         setTxSignature(txResponse);
       } catch (err) {

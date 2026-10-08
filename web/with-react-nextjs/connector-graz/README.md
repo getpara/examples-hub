@@ -2,133 +2,68 @@
 
 [![Live Demo](https://img.shields.io/badge/Live_Demo-black?style=for-the-badge&logo=vercel)](https://para-example-connector-graz.vercel.app)
 
-A minimal Next.js example that uses Para as a Graz wallet connector for Cosmos wallet connection and testnet token transfers.
-
-## What This Example Shows
-
-- Setting up `GrazProvider` with the Para Graz connector
-- Connecting Para or another available Cosmos wallet through a custom modal
-- Reading the connected Cosmos account and balance with Graz hooks
-- Sending a Cosmos token transfer with `useSendTokens`
+A minimal Next.js app that adds Para as a Graz wallet connector, lets the user pick Para or a Cosmos wallet detected in the browser (Keplr, Leap, Cosmostation), shows the connected account and its ATOM balance on the Cosmos ICS Provider Testnet, and sends ATOM back to the testnet faucet with Graz. The Para and Graz setup lives in `src/components/ParaProvider.tsx` and the Graz hooks live in `src/hooks`. Everything else is plain React and Tailwind that you can replace with your own UI.
 
 ## Setup
 
-1. Create a `.env` file:
+Create a local `.env` file:
 
 ```env
 NEXT_PUBLIC_PARA_API_KEY=your_api_key_here
 ```
 
-2. Install dependencies:
+Configure the API key in the [Para Developer Portal](https://developer.getpara.com) with the app display name, branding, theme, and login methods. Enable Cosmos wallets for the key: the Para connector only finishes connecting once the signed-in user has a Cosmos wallet.
+
+Install and run the production build:
 
 ```bash
 yarn install
-```
-
-3. Build and run the production server:
-
-```bash
 yarn build
 yarn start
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+## Para usage
 
-For local development, use `yarn dev`.
+These are the files to copy into your own app.
 
-## Developer Portal Configuration
+| File | What it does |
+| --- | --- |
+| `src/components/ParaProvider.tsx` | Creates a `ParaWeb` client, passes it to `GrazProvider` as `paraConfig` with `ParaGrazConnector`, defines the ICS Provider Testnet chain, and wraps the app in a React Query client |
+| `src/hooks/useGrazWalletConnection.ts` | Lists the wallets available in the browser with `getAvailableWallets` and connects or disconnects with `useConnect`, `useAccount`, and `useDisconnect` |
+| `src/hooks/useGrazBalance.ts` | Reads the account balances with `useBalances` and picks out ATOM. An account that holds no ATOM has no entry, so it reads as zero |
+| `src/hooks/useGrazTokenTransfer.ts` | Sends ATOM to the faucet with `useSendTokens` and the signing client from `useStargateSigningClient` |
 
-Configure the app name, branding, logo, theme, enabled OAuth providers, email and phone login options, 2FA setting, and auth layout on the Para API key in the Developer Portal. This example keeps only the Graz connector and chain wiring in code.
+```tsx
+const para = new ParaWeb(API_KEY);
 
-## Package Resolution
-
-`@getpara/graz-integration@3.0.0` currently publishes a stale peer dependency on `@getpara/react-sdk-lite@2.14.0`. This example resolves `@getpara/graz-integration` to a local file copy with the peer metadata corrected to `3.0.0` until the published SDK package is fixed.
-
-## Project Structure
-
-```
-src/
-├── app/
-│   ├── layout.tsx                  # Root layout and global styles
-│   └── page.tsx                    # Example route
-├── components/
-│   ├── GrazExample.tsx             # Client container for wallet state + UI
-│   ├── ConnectWalletModal.tsx      # Presentational wallet modal
-│   ├── layout/Header.tsx           # Presentational header
-│   └── ui/
-│       ├── BalanceCard.tsx         # Presentational balance display
-│       ├── ConnectWalletCard.tsx   # Connect wallet card
-│       ├── Modal.tsx               # Modal shell
-│       ├── TransferForm.tsx        # Presentational transfer form
-│       └── TransactionHash.tsx     # Transaction result display
-├── context/
-│   └── Provider.tsx                # Graz provider setup
-├── hooks/
-│   ├── useGrazTokenTransfer.ts
-│   └── useGrazWalletConnection.ts
-└── lib/
-    └── para/client.ts              # Para client initialization
-```
-
-## Key Integration Pattern
-
-```typescript
-import { ParaGrazConnector } from "@getpara/graz-integration";
-import { ParaWeb } from "@getpara/react-sdk-lite";
-import { QueryClient } from "@tanstack/react-query";
-import { GrazProvider, defineChainInfo } from "graz";
-
-const queryClient = new QueryClient();
-const para = new ParaWeb(process.env.NEXT_PUBLIC_PARA_API_KEY ?? "");
-
-const chain = defineChainInfo({
-  chainId: "provider",
-  chainName: "Cosmos ICS Provider Testnet",
-  rpc: "https://rpc.provider-sentry-01.ics-testnet.polypore.xyz",
-  rest: "https://rest.provider-sentry-01.ics-testnet.polypore.xyz",
-  bip44: { coinType: 118 },
-  bech32Config: {
-    bech32PrefixAccAddr: "cosmos",
-    bech32PrefixAccPub: "cosmospub",
-    bech32PrefixValAddr: "cosmosvaloper",
-    bech32PrefixValPub: "cosmosvaloperpub",
-    bech32PrefixConsAddr: "cosmosvalcons",
-    bech32PrefixConsPub: "cosmosvalconspub",
-  },
-  currencies: [{ coinDenom: "ATOM", coinMinimalDenom: "uatom", coinDecimals: 6 }],
-  feeCurrencies: [
-    {
-      coinDenom: "ATOM",
-      coinMinimalDenom: "uatom",
-      coinDecimals: 6,
-      gasPriceStep: { low: 0.01, average: 0.025, high: 0.04 },
+<GrazProvider
+  grazOptions={{
+    chains: [icsProviderTestnet],
+    paraConfig: {
+      paraWeb: para,
+      connectorClass: ParaGrazConnector,
+      queryClient,
     },
-  ],
-  stakeCurrency: { coinDenom: "ATOM", coinMinimalDenom: "uatom", coinDecimals: 6 },
-});
-
-export function Providers({ children }: { children: React.ReactNode }) {
-  return (
-    <GrazProvider
-      grazOptions={{
-        chains: [chain],
-        paraConfig: {
-          paraWeb: para,
-          connectorClass: ParaGrazConnector,
-          queryClient,
-        },
-      }}>
-      {children}
-    </GrazProvider>
-  );
-}
+  }}>
+  {children}
+</GrazProvider>
 ```
 
-The transfer flow lives in `src/hooks/useGrazTokenTransfer.ts` so the copyable Graz logic is separate from the example UI.
+Choosing Para in the wallet picker calls `connect({ walletType: WalletType.PARA, chainId })`, which opens the Para modal. Once the user signs in, the Para wallet behaves like any other Graz wallet, so `useSendTokens` sends the transfer with the Para signer. An account with no ATOM sees a link to the testnet faucet, and Send transaction stays disabled while the balance is zero.
 
-## Learn More
+## Project layout
 
-- [Para Documentation](https://docs.getpara.com)
-- [Para Developer Portal](https://developer.getpara.com)
-- [Graz Documentation](https://graz.sh)
-- [Cosmos SDK Documentation](https://docs.cosmos.network)
+```text
+src/
+├── app/                         # Next.js layout and page
+├── hooks/                       # Graz hooks, one concern per hook
+├── components/
+│   ├── ParaProvider.tsx         # Para connector and Graz setup
+│   ├── GrazExample.tsx          # Joins the hooks with the UI
+│   ├── layout/                  # App shell, header, footer, workbench
+│   └── ui/                      # Presentational components, props only
+├── lib/                         # Chain config, wallet labels, formatting, amount form, and UI helpers
+└── styles/globals.css           # Tailwind theme tokens
+```
+
+Components in `layout/` and `ui/` never import Para or Graz. They receive data and callbacks from `GrazExample`, so you can swap them for your own design system without touching the hooks.

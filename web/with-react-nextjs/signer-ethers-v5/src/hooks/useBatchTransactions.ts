@@ -1,10 +1,8 @@
-"use client";
-
 import { useState, useEffect, useCallback } from "react";
 import { ethers } from "ethers";
 import { useWallet } from "@getpara/react-sdk-lite";
-import { useParaSigner } from "./useParaSigner";
-import ParaTestToken from "@/contracts/artifacts/src/contracts/ParaTestToken.sol/ParaTestToken.json";
+import { useParaSigner } from "@/hooks/useParaSigner";
+import { PARA_TEST_TOKEN } from "@/lib/contracts";
 
 export type Operation = {
   type: "mint" | "transfer";
@@ -12,9 +10,7 @@ export type Operation = {
   amount: string;
 };
 
-const DEFAULT_CONTRACT_ADDRESS = "0x83cC70475A0d71EF1F2F61FeDE625c8C7E90C3f2";
-
-export function useBatchTransactions(contractAddress: string = DEFAULT_CONTRACT_ADDRESS) {
+export function useBatchTransactions(contractAddress: string = PARA_TEST_TOKEN.address) {
   const [tokenBalance, setTokenBalance] = useState<string | null>(null);
   const [txHash, setTxHash] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -29,7 +25,7 @@ export function useBatchTransactions(contractAddress: string = DEFAULT_CONTRACT_
 
     setIsBalanceLoading(true);
     try {
-      const contract = new ethers.Contract(contractAddress, ParaTestToken.abi, provider);
+      const contract = new ethers.Contract(contractAddress, PARA_TEST_TOKEN.abi, provider);
       const balance = await contract.balanceOf(wallet.address);
       setTokenBalance(ethers.utils.formatEther(balance));
     } catch (err) {
@@ -46,33 +42,31 @@ export function useBatchTransactions(contractAddress: string = DEFAULT_CONTRACT_
 
   const executeMulticall = useCallback(
     async (operations: Operation[]) => {
-      if (!signer || !wallet?.address) {
-        throw new Error("Signer not initialized. Please connect your wallet.");
-      }
-
-      if (operations.length === 0) {
-        throw new Error("At least one operation is required.");
-      }
-
-      // Validate operations
-      for (const op of operations) {
-        if (!op.amount || parseFloat(op.amount) <= 0) {
-          throw new Error("All operations must have a valid amount greater than 0.");
-        }
-        if (op.type === "transfer" && !op.recipient.match(/^0x[a-fA-F0-9]{40}$/)) {
-          throw new Error("Transfer operations require a valid recipient address.");
-        }
-      }
-
       setIsLoading(true);
       setError(null);
       setTxHash(null);
 
       try {
-        const contract = new ethers.Contract(contractAddress, ParaTestToken.abi, signer);
-        const iface = new ethers.utils.Interface(ParaTestToken.abi);
+        if (!signer || !wallet?.address) {
+          throw new Error("Signer not initialized. Please connect your wallet.");
+        }
 
-        // Prepare calldata for each operation
+        if (operations.length === 0) {
+          throw new Error("At least one operation is required.");
+        }
+
+        for (const op of operations) {
+          if (!op.amount || parseFloat(op.amount) <= 0) {
+            throw new Error("All operations must have a valid amount greater than 0.");
+          }
+          if (op.type === "transfer" && !op.recipient.match(/^0x[a-fA-F0-9]{40}$/)) {
+            throw new Error("Transfer operations require a valid recipient address.");
+          }
+        }
+
+        const contract = new ethers.Contract(contractAddress, PARA_TEST_TOKEN.abi, signer);
+        const iface = new ethers.utils.Interface(PARA_TEST_TOKEN.abi);
+
         const calldata = operations.map((op) => {
           if (op.type === "mint") {
             return iface.encodeFunctionData("mint", [ethers.utils.parseEther(op.amount)]);

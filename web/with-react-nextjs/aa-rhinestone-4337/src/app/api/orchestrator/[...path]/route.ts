@@ -33,16 +33,11 @@ interface IntentOperationBody {
   };
 }
 
-function isIntentOperationBody(body: unknown): body is IntentOperationBody {
-  return typeof body === "object" && body !== null;
-}
-
-const validateDestinationOps = (body: unknown): boolean => {
+const validateDestinationOps = (body: IntentOperationBody | null): boolean => {
   if (ALLOW_ALL_CONTRACTS) return true;
-  if (!isIntentOperationBody(body)) return false;
 
   const destinationOps =
-    body.signedIntentOp?.signedMetadata?.account?.accountContext
+    body?.signedIntentOp?.signedMetadata?.account?.accountContext
       ?.destinationExecutions;
 
   if (!destinationOps) return false;
@@ -107,9 +102,8 @@ async function handleRequest(request: NextRequest, params: { path: string[] }) {
     if (request.method !== "GET" && request.method !== "HEAD") {
       const body = await request.text();
       if (body) {
-        // Validate intent operations
         if (validatesIntentOperations) {
-          const parsedBody = JSON.parse(body);
+          const parsedBody: IntentOperationBody | null = JSON.parse(body);
           if (!validateDestinationOps(parsedBody)) {
             return NextResponse.json(
               { error: "Contract not whitelisted" },

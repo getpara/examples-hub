@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Environment, ParaProvider as ParaSDKProvider } from '@getpara/react-sdk-lite';
-import { holesky } from 'viem/chains';
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Environment, ParaProvider as ParaSDKProvider } from "@getpara/react-sdk-lite";
+import { HOLESKY } from "@/lib/chain";
 
-const API_KEY = process.env.NEXT_PUBLIC_PARA_API_KEY ?? '';
+const API_KEY = process.env.NEXT_PUBLIC_PARA_API_KEY ?? "";
 const ENVIRONMENT = (process.env.NEXT_PUBLIC_PARA_ENVIRONMENT as Environment) || Environment.BETA;
 
 if (!API_KEY) {
-  console.warn('NEXT_PUBLIC_PARA_API_KEY is not set. Para authentication will not work.');
+  console.warn("NEXT_PUBLIC_PARA_API_KEY is not set. Para authentication will not work.");
 }
 
 const queryClient = new QueryClient();
@@ -24,7 +24,7 @@ export function ParaProvider({ children }: { children: React.ReactNode }) {
         externalWalletConfig={{
           evmConnector: {
             config: {
-              chains: [holesky],
+              chains: [HOLESKY.chain],
             },
           },
         }}

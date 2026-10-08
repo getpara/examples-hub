@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import ContractInteractionDemo from "@/components/demos/ContractInteractionDemo";
+import { ContractInteractionContainer } from "@/components/demos/ContractInteractionContainer";
 
 export const metadata: Metadata = {
   title: "Contract Interaction | Para Ethers v5 Signer",
@@ -7,5 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function ContractInteractionPage() {
-  return <ContractInteractionDemo />;
+  return <ContractInteractionContainer />;
 }

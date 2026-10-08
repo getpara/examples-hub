@@ -1,104 +1,71 @@
-# Para Modal + Multichain + TanStack Start Example
+# TanStack Start Example
 
-A minimal TanStack Start example demonstrating Para Modal integration with multichain wallets (EVM, Cosmos, Solana) for wallet connection and message signing.
-
-## What This Example Shows
-
-- Setting up `ParaProvider` with TanStack Start SSR
-- Configuring external wallets for EVM (MetaMask, Coinbase, Rainbow), Cosmos (Keplr, Leap), and Solana (Phantom, Glow, Backpack, Solflare)
-- Opening the Para modal via the `useModal` hook
-- Checking authentication state with `useAccount`
-- Retrieving wallet address with `useWallet`
-- Signing messages with `useSignMessage`
-- Custom hooks pattern with `useSignHelloWorld`
-- TanStack Router file-based routing
+A minimal TanStack Start app that connects with the Para Modal, shows the connected account and its Sepolia balance, and signs `Hello World!`. All Para SDK usage lives in `src/hooks`. Everything else is plain React and Tailwind that you can replace with your own UI.
 
 ## Setup
 
-1. Create a `.env` file:
+Create a local `.env` file:
 
 ```env
 VITE_PARA_API_KEY=your_api_key_here
-VITE_PARA_ENVIRONMENT=beta
+VITE_PARA_ENVIRONMENT=BETA
 ```
 
-2. Configure the API key in the [Para Developer Portal](https://developer.getpara.com):
+Configure the API key in the [Para Developer Portal](https://developer.getpara.com) with the app display name, branding and logo, theme, OAuth providers, email and phone login options, external wallets, and wallet visibility. The local `ParaProvider` passes the API key, the environment, the external wallet connectors, and runtime modal behavior such as on-ramp test mode and recovery step visibility.
 
-- App name or project display identity
-- Branding, logo, theme colors, font, and border radius
-- OAuth providers, email login, phone login, 2FA, and auth layout
-- Enabled external wallets for EVM, Cosmos, and Solana
-- WalletConnect project ID, if WalletConnect is enabled
-
-The example keeps EVM, Cosmos, and Solana connector runtime setup in code because those values are required by the provider libraries. It does not use `configOverrides`; Developer Portal configuration remains the source of truth for app, auth, branding, and external wallet ownership.
-
-3. Install dependencies and run:
+Install and run the production build:
 
 ```bash
 yarn install
-yarn dev
+yarn build
+yarn start
 ```
 
-## Project Structure
+`vite.config.ts` adds `vite-plugin-node-polyfills` for the Node.js built-ins that wallet libraries expect, and `vite-tsconfig-paths` maps `@/` to `src/`.
 
+## Para usage
+
+These are the files to copy into your own app.
+
+| File | What it does |
+| --- | --- |
+| `src/components/ParaProvider.tsx` | Wraps the app in `ParaProvider` and a React Query client, sets up the EVM, Cosmos, and Solana external wallet connectors, and passes the `fallback` shown until the SDK is ready |
+| `src/hooks/useParaModalWallet.ts` | Opens the modal and reads the connected wallet with `useModal`, `useAccount`, and `useWallet`, and passes `useClient` to the test-only cleanup |
+| `src/hooks/useSignHelloWorld.ts` | Signs `Hello World!` with `useSignMessage` |
+| `src/hooks/useAccountBalance.ts` | Reads the wallet balance with `useWalletBalance`. The balance appears once the API key has an RPC URL in the Developer Portal |
+| `src/hooks/useE2ECleanup.ts` | Test-only cleanup for the end-to-end suite, active in development only |
+
+```tsx
+const { address, isConnected, isRestoring, openModal } = useParaModalWallet();
+const { sign, message, isPending, errorMessage, signature } = useSignHelloWorld();
+const { balance, isLoading, isRefreshing, refresh } = useAccountBalance();
 ```
+
+`useSignHelloWorld` calls `signMessage({ walletId, messageBase64 })` with the base64 encoded message and returns the signature once the user approves the request in the Para window.
+
+## Server rendering
+
+`ParaProvider` creates the Para client in the browser, so the server render and the first client render show its `fallback`. This app passes `ParaModalFallback`, which holds the account strip and the sign button in a loading state. Once the SDK is ready, `isRestoring` stays true while it checks for a saved session and the app keeps showing the same layout. It then shows either the signed-in view or the sign-in panel. `ParaModalFallback` uses no Para hooks because it renders outside the provider.
+
+## Project layout
+
+```text
 src/
 ├── routes/
-│   ├── __root.tsx                # Root layout with ParaProvider
-│   └── index.tsx                 # Main route with auth flow
+│   ├── __root.tsx               # Document shell: styles and ParaProvider
+│   └── index.tsx                # Renders the example
+├── router.tsx                   # TanStack Router setup
+├── hooks/                       # Para SDK usage, one concern per hook
 ├── components/
-│   ├── ParaProvider.tsx          # Para SDK provider with multichain config
-│   ├── DefaultCatchBoundary.tsx  # TanStack error boundary
-│   ├── NotFound.tsx              # 404 component
-│   ├── layout/Header.tsx         # Header with connect button
-│   └── ui/
-│       ├── ConnectCard.tsx       # Connect wallet card
-│       ├── WalletInfo.tsx        # Connected wallet display
-│       └── SignMessage.tsx       # Sign message UI
-├── hooks/
-│   └── useSignHelloWorld.ts      # Custom hook for signing
-├── lib/
-│   └── e2e-helpers.ts            # E2E testing utilities
-├── styles/
-│   └── app.css                   # Tailwind CSS styles
-└── router.tsx                    # TanStack Router configuration
+│   ├── ParaProvider.tsx         # Para setup
+│   ├── ParaModalExample.tsx     # Joins the hooks with the UI
+│   ├── ParaModalFallback.tsx    # Loading layout for the server render and session restore
+│   ├── NotFound.tsx             # 404 screen
+│   ├── DefaultCatchBoundary.tsx # Error screen
+│   ├── layout/                  # App shell, header, footer, workbench
+│   └── ui/                      # Presentational components, props only
+├── lib/                         # Chain config, formatting, and UI helpers
+└── styles/globals.css           # Tailwind theme tokens
 ```
 
-## Multichain Configuration
-
-This example keeps connector runtime setup in code and uses Developer Portal external wallet settings for the enabled wallet list and WalletConnect project ID:
-
-```typescript
-externalWalletConfig={{
-  evmConnector: {
-    config: { chains: [mainnet, polygon, sepolia, celo] },
-  },
-  cosmosConnector: {
-    config: {
-      chains: [cosmoshub, osmosis, noble],
-      selectedChainId: cosmoshub.chainId,
-    },
-  },
-  solanaConnector: {
-    config: {
-      endpoint: clusterApiUrl(WalletAdapterNetwork.Devnet),
-      chain: WalletAdapterNetwork.Devnet,
-    },
-  },
-}}
-```
-
-## SSR Considerations
-
-This example uses TanStack Start's SSR shell component pattern. The Para SDK provider is SSR-safe because:
-- Provider configuration is static for the API key and runtime connector setup
-- Para SDK hooks are only used in client-side components
-- Header component uses `"use client"` directive for hook usage
-
-## Learn More
-
-- [Para Documentation](https://docs.getpara.com)
-- [Para Website](https://getpara.com)
-- [Para Developer Portal](https://developer.getpara.com)
-- [TanStack Router Documentation](https://tanstack.com/router)
-- [TanStack Start Documentation](https://tanstack.com/start)
+`__root.tsx` links `globals.css` before `@getpara/react-sdk/styles.css` so the app styles never leak into the modal. Components in `layout/` and `ui/` never import Para. They receive data and callbacks from `ParaModalExample`, so you can swap them for your own design system without touching the hooks.

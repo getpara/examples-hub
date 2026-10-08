@@ -2,27 +2,18 @@
 
 [![Live Demo](https://img.shields.io/badge/Live_Demo-black?style=for-the-badge&logo=vercel)](https://para-example-custom-oauth-auth.vercel.app)
 
-This example shows how to build your own OAuth sign-in UI with Para's React SDK hooks in a Next.js app. The copyable Para logic lives in hooks, while the UI components stay prop-driven so you can bring the auth flow into your own interface without copying this example's styling.
-
-## Features
-
-- Google, Apple, Discord, and X OAuth provider buttons
-- Automatic wallet creation for new users
-- Returning-user login completion
-- EVM message signing after authentication
-- Server-rendered first screen plus hydrated Para runtime
-- Clean separation between SDK logic and presentation components
+A Next.js app that signs in with its own Google, Apple, Discord, and X buttons instead of the Para Modal, then shows the connected account and its Sepolia balance and signs `Hello World!`. All Para SDK usage lives in `src/hooks`. Everything else is plain React and Tailwind that you can replace with your own UI.
 
 ## Setup
 
 Create a local `.env` file:
 
 ```env
-NEXT_PUBLIC_PARA_API_KEY=your_para_api_key
+NEXT_PUBLIC_PARA_API_KEY=your_api_key_here
 NEXT_PUBLIC_PARA_ENVIRONMENT=BETA
 ```
 
-Configure the API key in the [Para Developer Portal](https://developer.getpara.com) for the selected environment with the app display name, branding, enabled OAuth providers, 2FA policy, and auth layout. This example keeps the OAuth buttons and popup behavior in code, but leaves persistent Para app configuration in the Portal.
+Configure the API key in the [Para Developer Portal](https://developer.getpara.com) with the app display name, branding, enabled OAuth providers, and 2FA policy.
 
 Install and run the production build:
 
@@ -32,56 +23,43 @@ yarn build
 yarn start
 ```
 
-## Key Files
+## Para usage
+
+These are the files to copy into your own app.
+
+| File | What it does |
+| --- | --- |
+| `src/components/ParaProvider.tsx` | Wraps the app in `ParaProvider` and a React Query client |
+| `src/hooks/useOAuthAuth.ts` | Signs in with Google, Apple, Discord, or X through `useAuthenticateWithOAuth` and its pop-up |
+| `src/hooks/useParaSession.ts` | Reads the connected wallet with `useAccount` and `useWallet`, and logs out with `useLogout` |
+| `src/hooks/useSignHelloWorld.ts` | Signs `Hello World!` with a Para Viem client and `useParaViemSignMessage` |
+| `src/hooks/useAccountBalance.ts` | Reads the wallet balance with `useWalletBalance`. The balance appears once the API key has an RPC URL in the Developer Portal |
+| `src/hooks/useE2ECleanup.ts` | Test-only cleanup for the E2E suite, active in development only |
+
+```tsx
+const oauth = useOAuthAuth();
+const { address, isConnected, disconnect } = useParaSession();
+const { sign, message, isPending, errorMessage, signature } = useSignHelloWorld();
+
+oauth.authenticate("GOOGLE");
+```
+
+`useOAuthAuth` opens the provider in a pop-up and keeps it on the current Para URL as the client state moves through OAuth and any verification or passkey step, until the session and wallet are ready. Closing the pop-up or calling `cancel` ends the attempt.
+
+## Project layout
 
 ```text
 src/
-├── app/
-│   ├── layout.tsx                     # Root layout, metadata, SDK styles
-│   └── page.tsx                       # Server page with preview + client runtime
+├── app/                                  # Next.js layout and page
+├── hooks/                                # Para SDK usage, one concern per hook
 ├── components/
-│   ├── CustomOAuthAuthExample.tsx     # Client orchestration and provider placement
-│   ├── CustomOAuthAuthPreview.tsx     # Server-rendered disconnected first screen
-│   ├── ParaProvider.tsx               # Para SDK provider setup
-│   ├── layout/Header.tsx              # Prop-only header
-│   └── ui/                            # Prop-only auth, wallet, and signing UI
-├── constants/auth.ts                  # OAuth provider button configuration
-├── hooks/
-│   ├── useOAuthAuth.ts                # Copyable OAuth auth flow
-│   ├── useParaSession.ts              # Para session state and logout
-│   └── useSignHelloWorld.ts           # Message signing logic
-└── types/auth.ts                      # UI-facing auth option types
+│   ├── ParaProvider.tsx                  # Para setup
+│   ├── CustomOAuthAuthExample.tsx        # Joins the session and signing hooks with the UI
+│   ├── sign-in/OAuthSignInContainer.tsx  # Joins the OAuth hook with the sign in panel
+│   ├── layout/                           # App shell, header, footer, workbench
+│   └── ui/                               # Presentational components, props only
+├── lib/                                  # Chain config, provider list, copy, and UI helpers
+└── styles/globals.css                    # Tailwind theme tokens
 ```
 
-## Hook Contract
-
-`useOAuthAuth` owns the complete OAuth popup flow, following SDK-state portal URLs until the session and any required wallet are ready:
-
-```tsx
-const {
-  activeProvider,
-  authenticate,
-  cancel,
-  error,
-  isPending,
-} = useOAuthAuth();
-
-authenticate("GOOGLE");
-```
-
-The presentation components do not import Para, Wagmi, or Viem. They receive only state and callbacks from `CustomOAuthAuthExample`.
-
-## Para SDK Hooks Used
-
-| Hook | Purpose |
-| --- | --- |
-| `useAuthenticateWithOAuth` | Starts and completes the OAuth flow through wallet readiness |
-| `useAccount` | Reads connection state |
-| `useWallet` | Reads the connected wallet address |
-| `useLogout` | Disconnects the Para session |
-| `useParaViemClient` | Creates a Viem client for the Para wallet |
-| `useParaViemSignMessage` | Signs the example message |
-
-## Notes
-
-The example includes direct dependencies that are currently reached by the catch-all Para React SDK build graph, including `@metamask/delegation-toolkit`, `ethers`, `@stellar/stellar-sdk`, and `@wagmi/core`. These keep the production build self-contained until the SDK export boundary can be narrowed.
+Components in `layout/` and `ui/` never import Para. They receive data and callbacks from the two containers, so you can swap them for your own design system without touching the hooks.

@@ -1,17 +1,11 @@
-// Minimal service worker for PWA installation
-// No caching since Para auth requires online connectivity
-
-self.addEventListener('install', (_event) => {
-  // Skip waiting and activate immediately
+self.addEventListener("install", () => {
   self.skipWaiting();
 });
 
-self.addEventListener('activate', (event) => {
-  // Claim all clients immediately
+self.addEventListener("activate", (event) => {
   event.waitUntil(clients.claim());
 });
 
-// Pass through all fetch requests without caching
-self.addEventListener('fetch', (event) => {
+self.addEventListener("fetch", (event) => {
   event.respondWith(fetch(event.request));
 });

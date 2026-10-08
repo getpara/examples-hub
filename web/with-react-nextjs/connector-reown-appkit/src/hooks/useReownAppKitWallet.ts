@@ -1,29 +1,26 @@
-"use client";
-
-import { useAppKit, useAppKitAccount, useAppKitNetwork, useDisconnect } from "@reown/appkit/react";
-import { formatUnits } from "viem";
-import { useBalance } from "wagmi";
-import { formatBalance } from "@/utils/format";
+import { useCallback } from "react";
+import { useAppKit, useAppKitAccount, useDisconnect } from "@reown/appkit/react";
+import { useAccount } from "wagmi";
 
 export function useReownAppKitWallet() {
   const { open } = useAppKit();
   const { address, isConnected } = useAppKitAccount();
-  const { caipNetwork } = useAppKitNetwork();
+  const { connector } = useAccount();
   const { disconnect } = useDisconnect();
-  const { data: balanceData } = useBalance({
-    address: address as `0x${string}` | undefined,
-  });
 
-  const balance = balanceData
-    ? `${formatBalance(formatUnits(balanceData.value, balanceData.decimals))} ${balanceData.symbol}`
-    : "0";
+  const openAppKit = useCallback(() => {
+    void open();
+  }, [open]);
+
+  const disconnectWallet = useCallback(() => {
+    void disconnect();
+  }, [disconnect]);
 
   return {
-    address,
-    balance,
-    disconnectWallet: disconnect,
+    address: address ?? "",
+    connectorName: connector?.name,
     isConnected,
-    networkName: caipNetwork?.name || "Unknown",
-    openAppKit: open,
+    openAppKit,
+    disconnectWallet,
   };
 }

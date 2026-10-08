@@ -1,100 +1,54 @@
-"use client";
-
 import { useCallback, useState } from "react";
 import { ethers } from "ethers";
 import { useWallet } from "@getpara/react-sdk";
 import { useParaEthersSigner } from "@getpara/react-sdk/evm";
-import { useEthersProvider } from "./useEthersProvider";
-import { SEPOLIA_CHAIN_ID } from "@/lib/para";
+import { useEthersProvider } from "@/hooks/useEthersProvider";
+import { SEPOLIA } from "@/lib/chain";
+import { SEND_AMOUNT_ETH } from "@/lib/transfer";
 
-export const SEND_AMOUNT_ETH = "0.001";
-export const SEND_MIN_GAS_BUFFER_ETH = "0.0002";
-export const SEND_MIN_BALANCE_WEI = ethers.parseEther(SEND_AMOUNT_ETH) + ethers.parseEther(SEND_MIN_GAS_BUFFER_ETH);
-export const CUSTOM_LIMIT_DENIED_MESSAGE =
-  "Custom limit exceeded. This send was denied by policy and was not signed.";
+const CONFIRMATION_TIMEOUT_MS = 120_000;
 const POLICY_DENIED_CODE = "POLICY_DENIED";
-const TRANSACTION_CONFIRMATION_TIMEOUT_MS = 120_000;
+
 export type SendTransactionStatus = "idle" | "signing" | "submitted" | "confirmed" | "failed";
 
-export interface UseSendTransactionReturn {
-  send: () => Promise<void>;
-  amount: string;
-  txHash: string | null;
-  status: SendTransactionStatus;
-  recipientAddress: string | null;
-  isLoading: boolean;
-  isReady: boolean;
-  error: string | null;
-  reset: () => void;
+function readErrorMessage(error: object | string) {
+  if (typeof error === "string") return error;
+  return "message" in error && typeof error.message === "string" ? error.message : null;
 }
 
-type TransactionErrorReason = Error | string | object | null;
-
-function getStringProperty(reason: object, property: "code" | "message") {
-  if (property === "code" && "code" in reason && typeof reason.code === "string") {
-    return reason.code;
-  }
-
-  if (property === "message" && "message" in reason && typeof reason.message === "string") {
-    return reason.message;
-  }
-
-  return "";
+function isPolicyDenied(error: object | string) {
+  return typeof error === "object" && "code" in error && error.code === POLICY_DENIED_CODE;
 }
 
-function getTransactionErrorMessage(reason: TransactionErrorReason) {
-  if (typeof reason === "string") return reason;
-  if (!reason) return "Transaction failed.";
-
-  return getStringProperty(reason, "message") || "Transaction failed.";
-}
-
-function isPolicyDeniedError(reason: TransactionErrorReason) {
-  return typeof reason === "object" && reason !== null && getStringProperty(reason, "code") === POLICY_DENIED_CODE;
-}
-
-// Sends a fixed Sepolia transfer back to the faucet, signed by the embedded Para wallet. The signer
-// comes from useParaEthersSigner (ethers AbstractSigner backed by Para MPC); the provider
-// supplies nonce / gas / balance and broadcasts the signed tx.
-export function useSendTransaction(recipientAddress: string | null): UseSendTransactionReturn {
+export function useSendTransaction(recipientAddress: string) {
   const { provider } = useEthersProvider();
-  const { ethersSigner } = useParaEthersSigner({ provider });
+  const { ethersSigner } = useParaEthersSigner();
   const { data: wallet } = useWallet();
 
   const [txHash, setTxHash] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
   const [status, setStatus] = useState<SendTransactionStatus>("idle");
   const [error, setError] = useState<string | null>(null);
+  const [isDenied, setIsDenied] = useState(false);
 
   const send = useCallback(async () => {
-    if (!ethersSigner || !wallet?.address) {
-      setError("Signer not ready — connect your wallet first.");
-      setStatus("failed");
-      return;
-    }
-    if (!recipientAddress) {
-      setError("Faucet return address unavailable — request faucet funds first.");
-      setStatus("failed");
-      return;
-    }
-    setIsLoading(true);
     setStatus("signing");
     setError(null);
+    setIsDenied(false);
     setTxHash(null);
     try {
-      const amountWei = ethers.parseEther(SEND_AMOUNT_ETH);
+      if (!ethersSigner || !wallet?.address) {
+        throw new Error("Signer not ready. Connect your wallet first.");
+      }
 
-      // Pre-check balance so an unfunded wallet gets a clear "use the faucet" message
-      // instead of an opaque RPC rejection.
+      const amountWei = ethers.parseEther(SEND_AMOUNT_ETH);
       const balanceWei = await provider.getBalance(wallet.address);
       const feeData = await provider.getFeeData();
       const gasLimit = BigInt(21000);
       const maxGasFee = gasLimit * (feeData.maxFeePerGas ?? BigInt(0));
       if (amountWei + maxGasFee > balanceWei) {
-        throw new Error("Insufficient balance — request faucet funds first, then retry.");
+        throw new Error("Insufficient balance. Request faucet funds first, then retry.");
       }
 
-      // Return transfer: send the test amount from the Para wallet back to the faucet.
       const tx: ethers.TransactionRequest = {
         to: recipientAddress,
         value: amountWei,
@@ -102,36 +56,34 @@ export function useSendTransaction(recipientAddress: string | null): UseSendTran
         gasLimit,
         maxFeePerGas: feeData.maxFeePerGas ?? undefined,
         maxPriorityFeePerGas: feeData.maxPriorityFeePerGas ?? undefined,
-        chainId: SEPOLIA_CHAIN_ID,
+        chainId: SEPOLIA.chainId,
       };
 
-      const txResponse = await ethersSigner.sendTransaction(tx);
-
+      const signedTransaction = await ethersSigner.signTransaction(tx);
+      const txResponse = await provider.broadcastTransaction(signedTransaction);
       setTxHash(txResponse.hash);
       setStatus("submitted");
 
-      const receipt = await txResponse.wait(1, TRANSACTION_CONFIRMATION_TIMEOUT_MS);
+      const receipt = await txResponse.wait(1, CONFIRMATION_TIMEOUT_MS);
       if (!receipt) {
         throw new Error("Transaction was submitted but confirmation is taking longer than expected. Check the hash on Sepolia.");
       }
-      if (receipt?.status === 0) {
+      if (receipt.status === 0) {
         throw new Error("Transaction was submitted but failed on-chain.");
       }
       setStatus("confirmed");
-    } catch (err) {
-      const reason =
-        err instanceof Error || typeof err === "string" || (typeof err === "object" && err !== null) ? err : null;
-
+    } catch (sendError) {
+      const reason = typeof sendError === "string" || (typeof sendError === "object" && sendError !== null) ? sendError : null;
       setStatus("failed");
-      setError(isPolicyDeniedError(reason) ? CUSTOM_LIMIT_DENIED_MESSAGE : getTransactionErrorMessage(reason));
-    } finally {
-      setIsLoading(false);
+      setIsDenied(reason !== null && isPolicyDenied(reason));
+      setError((reason && readErrorMessage(reason)) || "Transaction failed.");
     }
   }, [ethersSigner, provider, recipientAddress, wallet?.address]);
 
   const reset = useCallback(() => {
     setTxHash(null);
     setError(null);
+    setIsDenied(false);
     setStatus("idle");
   }, []);
 
@@ -140,10 +92,10 @@ export function useSendTransaction(recipientAddress: string | null): UseSendTran
     amount: SEND_AMOUNT_ETH,
     txHash,
     status,
-    recipientAddress,
-    isLoading,
-    isReady: !!ethersSigner && !!wallet?.address,
+    isPending: status === "signing" || status === "submitted",
+    isReady: Boolean(ethersSigner && wallet?.address),
     error,
+    isDenied,
     reset,
   };
 }

@@ -1,127 +1,71 @@
-# Gelato Account Abstraction Example
+# Gelato Smart Account Example
 
 [![Live Demo](https://img.shields.io/badge/Live_Demo-black?style=for-the-badge&logo=vercel)](https://para-example-aa-gelato-4337.vercel.app)
 
-A minimal Next.js example showing how to use Para with Gelato smart wallets to create a smart account and send a gas-sponsored EIP-4337 transaction.
-
-## What This Example Shows
-
-- Configuring `ParaProvider` for Para authentication
-- Creating a Gelato smart account with `useGelatoSmartAccount`
-- Sending a sponsored transaction with React `useState` state management
-- Keeping the reusable account abstraction logic separate from the example UI
+A minimal Next.js app that connects with the Para Modal, creates a Gelato smart account owned by the Para wallet, and sends a zero-value, gas-sponsored transaction on Sepolia. All Para SDK usage lives in `src/hooks`. Everything else is plain React and Tailwind that you can replace with your own UI.
 
 ## Setup
 
-1. Create a `.env` file:
+Create a local `.env` file:
 
 ```env
-NEXT_PUBLIC_PARA_API_KEY=your_para_api_key
+NEXT_PUBLIC_PARA_API_KEY=your_api_key_here
 NEXT_PUBLIC_PARA_ENVIRONMENT=BETA
 NEXT_PUBLIC_GELATO_API_KEY=your_gelato_api_key
 ```
 
-2. Install dependencies:
+Configure the API key in the [Para Developer Portal](https://developer.getpara.com) with the app display name, branding and logo, theme, OAuth providers, email and phone login options, and wallet visibility. The local `ParaProvider` passes the API key, the environment, and runtime modal behavior such as on-ramp test mode and recovery step visibility.
+
+Get the Gelato API key from the [Gelato Dashboard](https://app.gelato.network). It stays an environment variable because it configures Gelato gas sponsorship, not Para.
+
+Install and run the production build:
 
 ```bash
 yarn install
-```
-
-3. Build and start the app:
-
-```bash
 yarn build
 yarn start
 ```
 
-4. Open `http://127.0.0.1:3000`.
+## Para usage
 
-## Getting API Keys
+These are the files to copy into your own app.
 
-- **Para API Key**: Get from [Para Developer Portal](https://developer.getpara.com)
-- **Gelato API Key**: Get from [Gelato Dashboard](https://app.gelato.network)
+| File | What it does |
+| --- | --- |
+| `src/components/ParaProvider.tsx` | Wraps the app in `ParaProvider` and a React Query client |
+| `src/hooks/useParaModalWallet.ts` | Opens the modal and reads the connected wallet with `useModal`, `useAccount`, and `useWallet` |
+| `src/hooks/useSmartAccount.ts` | Creates the Gelato smart account for the connected wallet with `useGelatoSmartAccount` |
+| `src/hooks/useSponsoredTransaction.ts` | Sends a zero-value transaction from the smart account with `smartAccount.sendTransaction` |
+| `src/hooks/useAccountBalance.ts` | Reads the Para wallet balance with `useWalletBalance`. The balance appears once the API key has an RPC URL in the Developer Portal |
 
-## Developer Portal Configuration
+```tsx
+const { address, isConnected, openModal } = useParaModalWallet();
+const { smartAccount, address: smartAccountAddress, isLoading, errorMessage } = useSmartAccount({ enabled: isConnected });
+const { send, targetAddress, transactionHash, isPending } = useSponsoredTransaction(smartAccount);
+```
 
-Configure the app name, branding, logo, theme, enabled OAuth providers, email and phone login options, 2FA setting, and auth layout on the Para API key in the Developer Portal. This example keeps only runtime modal behavior in code and relies on the Portal for persistent Para app configuration.
+`useSmartAccount` passes the Gelato API key and the Sepolia chain to `useGelatoSmartAccount`. Gelato runs in EIP-7702 mode: the Para wallet delegates to the Gelato account contract, so the smart account address is the same as the Para wallet address, and the first transaction also signs the EIP-7702 authorization. `useSponsoredTransaction` calls `smartAccount.sendTransaction({ to })` with the burn address `0x000000000000000000000000000000000000dEaD`. Gelato submits it as a UserOperation, sponsors the gas, and the hook returns the receipt transaction hash.
 
-The Gelato API key remains an environment variable because it configures Gelato smart wallet sponsorship for this example, not Para Portal settings.
-
-## Project Structure
+## Project layout
 
 ```text
 src/
-├── app/
-│   ├── layout.tsx                       # Root layout, font, and global styles
-│   └── page.tsx                         # Server page metadata and app entry
+├── app/                         # Next.js layout and page
+├── hooks/                       # Para SDK usage, one concern per hook
 ├── components/
-│   ├── GelatoExample.tsx                # ParaProvider plus client SDK hook orchestration
-│   ├── ParaProvider.tsx                 # Para SDK provider setup
-│   ├── layout/Header.tsx                # Presentational header
-│   └── ui/
-│       ├── ConnectCard.tsx              # Presentational connect card
-│       ├── WalletInfo.tsx               # Presentational wallet and smart account display
-│       └── SendTransaction.tsx          # Presentational sponsored transaction UI
-├── hooks/
-│   └── useGelatoSponsoredTransaction.ts # Copyable Gelato account abstraction logic
-└── lib/
-    └── gelato.ts                        # Gelato configuration
+│   ├── ParaProvider.tsx         # Para setup
+│   ├── GelatoExample.tsx        # Joins the hooks with the UI
+│   ├── layout/                  # App shell, header, footer, workbench
+│   └── ui/                      # Presentational components, props only
+├── lib/                         # Gelato and chain config, formatting, and UI helpers
+└── styles/globals.css           # Tailwind theme tokens
 ```
 
-## Key Integration Pattern
+Components in `layout/` and `ui/` never import Para. They receive data and callbacks from `GelatoExample`, so you can swap them for your own design system without touching the hooks.
 
-The reusable logic lives in `src/hooks/useGelatoSponsoredTransaction.ts`. The UI components receive props only, so you can copy the hook into your app without copying this example's UI.
+## Learn more
 
-```tsx
-import { useCallback, useState } from "react";
-import { useGelatoSmartAccount } from "@getpara/react-sdk";
-import type { Hash } from "viem";
-import { sepolia } from "viem/chains";
-
-const TARGET_ADDRESS = "0x000000000000000000000000000000000000dEaD" as const;
-
-export function useSponsoredGelatoTransaction() {
-  const [transactionHash, setTransactionHash] = useState<Hash | null>(null);
-  const [transactionError, setTransactionError] = useState<Error | null>(null);
-  const [isSendingTransaction, setIsSendingTransaction] = useState(false);
-
-  const { smartAccount, isLoading, error } = useGelatoSmartAccount({
-    apiKey: process.env.NEXT_PUBLIC_GELATO_API_KEY ?? "",
-    chain: sepolia,
-  });
-
-  const sendSponsoredTransaction = useCallback(async () => {
-    if (!smartAccount) return;
-
-    setIsSendingTransaction(true);
-    setTransactionError(null);
-    setTransactionHash(null);
-
-    try {
-      const receipt = await smartAccount.sendTransaction({ to: TARGET_ADDRESS });
-      setTransactionHash(receipt.transactionHash);
-    } catch (cause) {
-      setTransactionError(cause instanceof Error ? cause : new Error("Transaction failed."));
-    } finally {
-      setIsSendingTransaction(false);
-    }
-  }, [smartAccount]);
-
-  return {
-    smartAccountAddress: smartAccount?.smartAccountAddress ?? null,
-    transactionHash,
-    transactionError,
-    smartAccountError: error,
-    isSmartAccountLoading: isLoading,
-    isSendingTransaction,
-    canSendTransaction: Boolean(smartAccount) && !isSendingTransaction,
-    sendSponsoredTransaction,
-  };
-}
-```
-
-## Learn More
-
-- [Para Documentation](https://docs.getpara.com)
-- [Gelato Documentation](https://docs.gelato.network)
-- [EIP-4337 Specification](https://eips.ethereum.org/EIPS/eip-4337)
+- [Para account abstraction guide](https://docs.getpara.com/v3/react/guides/web3-operations/evm/account-abstraction)
+- [useGelatoSmartAccount reference](https://docs.getpara.com/v3/references/hooks/smart-accounts/gelato/use-gelato-smart-account)
+- [Gelato documentation](https://docs.gelato.network)
+- [EIP-7702 specification](https://eips.ethereum.org/EIPS/eip-7702)

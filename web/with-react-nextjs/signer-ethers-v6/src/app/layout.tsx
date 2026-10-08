@@ -1,11 +1,8 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import { ParaProvider } from "@/components/ParaProvider";
-import { ConnectedHeader } from "@/components/layout/ConnectedHeader";
 import "@/styles/globals.css";
 import "@getpara/react-sdk-lite/styles.css";
-
-const inter = Inter({ subsets: ["latin"] });
+import { EthersV6Example } from "@/components/EthersV6Example";
+import { ParaProvider } from "@/components/ParaProvider";
 
 export const metadata: Metadata = {
   title: "Para Ethers v6 Signer",
@@ -19,10 +16,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.className} antialiased`}>
+      <body>
         <ParaProvider>
-          <ConnectedHeader />
-          <main>{children}</main>
+          <EthersV6Example>{children}</EthersV6Example>
         </ParaProvider>
       </body>
     </html>

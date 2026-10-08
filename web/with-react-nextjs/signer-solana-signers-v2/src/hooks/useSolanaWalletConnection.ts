@@ -1,5 +1,3 @@
-"use client";
-
 import { useEffect } from "react";
 import { useAccount, useModal, useWallet, useWalletState } from "@getpara/react-sdk-lite";
 
@@ -16,10 +14,12 @@ export function useSolanaWalletConnection() {
     }
   }, [account?.isConnected, wallet?.type, solanaWallet, setSelectedWallet]);
 
+  const address = wallet?.type === "SOLANA" ? wallet.address : solanaWallet?.address;
+
   return {
-    address: wallet?.address ?? solanaWallet?.address ?? "",
+    address: address ?? "",
+    hasSolanaWallet: Boolean(address),
     isConnected: Boolean(account?.isConnected),
     openModal,
-    wallet,
   };
 }

@@ -1,33 +1,38 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 import "@/styles/globals.css";
 import "@getpara/react-sdk/styles.css";
-import { QueryProvider } from "@/context/QueryProvider";
-import { ParaProvider } from "@/context/ParaProvider";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+import { ParaProvider } from "@/components/ParaProvider";
 
 export const metadata: Metadata = {
-  title: "Para Provider Authentication",
-  description: "Progressive Web App for Para Provider Authentication",
+  title: "Para PWA Example",
+  description: "Connect with the Para Modal and sign a message from an installable web app.",
   manifest: "/manifest.json",
-  themeColor: "#000000",
-  viewport: "width=device-width, initial-scale=1, maximum-scale=5",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Para Auth"
-  }
+    title: "Para PWA",
+  },
 };
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  viewportFit: "cover",
+  themeColor: "#fcf9f7",
+};
+
+const REGISTER_SERVICE_WORKER = `
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js").then(
+      (registration) => console.log("SW registered:", registration),
+      (error) => console.log("SW registration failed:", error)
+    );
+  });
+}
+`;
 
 export default function RootLayout({
   children,
@@ -37,27 +42,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <Script
-          id="register-sw"
-          strategy="afterInteractive"
-          dangerouslySetInnerHTML={{
-            __html: `
-              if ('serviceWorker' in navigator) {
-                window.addEventListener('load', () => {
-                  navigator.serviceWorker.register('/sw.js').then(
-                    (registration) => console.log('SW registered:', registration),
-                    (error) => console.log('SW registration failed:', error)
-                  );
-                });
-              }
-            `,
-          }}
-        />
+        <Script id="register-sw" strategy="afterInteractive" dangerouslySetInnerHTML={{ __html: REGISTER_SERVICE_WORKER }} />
       </head>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <QueryProvider>
-          <ParaProvider>{children}</ParaProvider>
-        </QueryProvider>
+      <body>
+        <ParaProvider>{children}</ParaProvider>
       </body>
     </html>
   );

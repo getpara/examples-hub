@@ -4,15 +4,12 @@ import { useAuthenticateWithEmailOrPhone, useClient } from "@getpara/react-sdk";
 export type EmailAuthStep = "input" | "verify";
 
 export interface UseEmailAuthReturn {
-  // State
   email: string;
   step: EmailAuthStep;
   verifyUrl: string | null;
   passkeyUrl: string | null;
   error: string | null;
   isPending: boolean;
-
-  // Actions
   setEmail: (email: string) => void;
   submit: () => void;
   openPasskeyWindow: () => void;
@@ -141,7 +138,7 @@ export function useEmailAuth(): UseEmailAuthReturn {
 
     const popup = window.open(passkeyUrl, "ParaPasskey", "popup,width=480,height=760");
     if (!popup) {
-      setError("Popup blocked — allow popups for this site, then try again.");
+      setError("Pop-up blocked. Allow pop-ups for this site, then try again.");
       return;
     }
 

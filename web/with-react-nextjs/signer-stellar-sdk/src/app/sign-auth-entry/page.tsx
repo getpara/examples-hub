@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import { StellarSdkApp } from "@/components/StellarSdkApp";
-import SignAuthEntryDemo from "@/components/demos/SignAuthEntryDemo";
+import { AuthEntrySigningContainer } from "@/components/demos/AuthEntrySigningContainer";
 
 export const metadata: Metadata = {
   title: "Sign Auth Entry | Para Stellar SDK",
@@ -8,9 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function SignAuthEntryPage() {
-  return (
-    <StellarSdkApp>
-      <SignAuthEntryDemo />
-    </StellarSdkApp>
-  );
+  return <AuthEntrySigningContainer />;
 }

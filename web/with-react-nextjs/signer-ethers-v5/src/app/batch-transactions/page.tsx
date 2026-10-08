@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import BatchTransactionsDemo from "@/components/demos/BatchTransactionsDemo";
+import { BatchTransactionsContainer } from "@/components/demos/BatchTransactionsContainer";
 
 export const metadata: Metadata = {
   title: "Batch Transactions | Para Ethers v5 Signer",
@@ -7,5 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function BatchTransactionsPage() {
-  return <BatchTransactionsDemo />;
+  return <BatchTransactionsContainer />;
 }

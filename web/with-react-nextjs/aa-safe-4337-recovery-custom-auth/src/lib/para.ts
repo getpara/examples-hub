@@ -4,6 +4,4 @@ export const PARA_API_KEY = process.env.NEXT_PUBLIC_PARA_API_KEY ?? "";
 const PARA_ENVIRONMENT =
   (process.env.NEXT_PUBLIC_PARA_ENVIRONMENT as Environment | undefined) ?? Environment.BETA;
 
-export function createParaClient() {
-  return new ParaWeb(PARA_ENVIRONMENT, PARA_API_KEY);
-}
+export const para = typeof window !== "undefined" && PARA_API_KEY ? new ParaWeb(PARA_ENVIRONMENT, PARA_API_KEY) : null;

@@ -1,56 +1,48 @@
-"use client";
-
 import { useState, useCallback } from "react";
-import { coins, MsgTransferEncodeObject } from "@cosmjs/stargate";
+import { coin, type MsgTransferEncodeObject } from "@cosmjs/stargate";
 import { MsgTransfer } from "cosmjs-types/ibc/applications/transfer/v1/tx";
-import { useParaSigner } from "./useParaSigner";
-import { DEFAULT_CHAIN } from "@/config/chains";
-import { IBC_TRANSFER_PORT } from "@/config/constants";
+import { useParaSigner } from "@/hooks/useParaSigner";
+import { IBC_TRANSFER, ICS_PROVIDER_TESTNET, toMinimalDenom } from "@/lib/chain";
 
 export function useIbcTransfer() {
   const [txHash, setTxHash] = useState<string | null>(null);
-  const [gasUsed, setGasUsed] = useState<bigint | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  const { signingClient, address, isLoading: isSignerLoading } = useParaSigner();
+  const { signingClient, address } = useParaSigner();
 
   const sendIbcTransfer = useCallback(
     async (recipient: string, amount: string, channel: string) => {
-      if (!address) {
-        throw new Error("Please connect your wallet to send an IBC transfer.");
-      }
-
-      if (!signingClient) {
-        throw new Error("Signing client not initialized. Please try reconnecting.");
-      }
-
-      if (!recipient) {
-        throw new Error("Please enter a recipient address.");
-      }
-
-      const amountInMinimalDenom = Math.floor(
-        parseFloat(amount) * Math.pow(10, DEFAULT_CHAIN.coinDecimals)
-      );
-      if (isNaN(amountInMinimalDenom) || amountInMinimalDenom <= 0) {
-        throw new Error("Invalid amount. Please enter a valid positive number.");
-      }
-
       setIsLoading(true);
       setError(null);
       setTxHash(null);
-      setGasUsed(null);
 
       try {
-        // Create timeout timestamp (1 hour from now) in nanoseconds
-        const timeoutTimestamp = BigInt(Date.now() + 3600000) * BigInt(1000000);
+        if (!address) {
+          throw new Error("Please connect your wallet to send an IBC transfer.");
+        }
+
+        if (!signingClient) {
+          throw new Error("Signing client not initialized. Please try reconnecting.");
+        }
+
+        if (!recipient) {
+          throw new Error("Please enter a recipient address.");
+        }
+
+        const amountInMinimalDenom = toMinimalDenom(amount);
+        if (isNaN(amountInMinimalDenom) || amountInMinimalDenom <= 0) {
+          throw new Error("Invalid amount. Please enter a valid positive number.");
+        }
+
+        const timeoutTimestamp = BigInt(Date.now() + IBC_TRANSFER.timeoutMs) * BigInt(1000000);
 
         const transferMsg: MsgTransferEncodeObject = {
           typeUrl: "/ibc.applications.transfer.v1.MsgTransfer",
           value: MsgTransfer.fromPartial({
-            sourcePort: IBC_TRANSFER_PORT,
+            sourcePort: IBC_TRANSFER.port,
             sourceChannel: channel,
-            token: coins(amountInMinimalDenom, DEFAULT_CHAIN.coinMinimalDenom)[0],
+            token: coin(amountInMinimalDenom, ICS_PROVIDER_TESTNET.denom),
             sender: address,
             receiver: recipient,
             timeoutHeight: undefined,
@@ -66,7 +58,6 @@ export function useIbcTransfer() {
         );
 
         setTxHash(result.transactionHash);
-        setGasUsed(result.gasUsed);
       } catch (err) {
         const error = err instanceof Error ? err : new Error("Failed to send IBC transfer");
         setError(error);
@@ -80,15 +71,13 @@ export function useIbcTransfer() {
 
   const reset = useCallback(() => {
     setTxHash(null);
-    setGasUsed(null);
     setError(null);
   }, []);
 
   return {
     sendIbcTransfer,
     txHash,
-    gasUsed,
-    isLoading: isLoading || isSignerLoading,
+    isLoading,
     isReady: !!signingClient && !!address,
     error,
     reset,

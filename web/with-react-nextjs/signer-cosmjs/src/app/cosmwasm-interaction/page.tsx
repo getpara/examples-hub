@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import CosmWasmInteractionDemo from "@/components/demos/CosmWasmInteractionDemo";
+import { CosmWasmContainer } from "@/components/demos/CosmWasmContainer";
 
 export const metadata: Metadata = {
   title: "CosmWasm Contract | Para CosmJS Signer",
@@ -7,5 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function CosmWasmInteractionPage() {
-  return <CosmWasmInteractionDemo />;
+  return <CosmWasmContainer />;
 }

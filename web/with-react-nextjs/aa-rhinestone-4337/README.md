@@ -2,34 +2,24 @@
 
 [![Live Demo](https://img.shields.io/badge/Live_Demo-black?style=for-the-badge&logo=vercel)](https://para-example-aa-rhinestone-4337.vercel.app)
 
-A minimal Next.js example showing how to use Para with Rhinestone to create an EIP-4337 global wallet.
-
-## What This Example Shows
-
-- Setting up `ParaProvider` for Para wallet authentication
-- Creating a Para Viem account with `useParaViemAccount`
-- Creating a Rhinestone account with the Para signer
-- Fetching the Rhinestone portfolio for the global wallet
-- Keeping Rhinestone logic separate from the example UI
+A minimal Next.js app that connects with the Para Modal, creates a Rhinestone ERC-4337 global wallet owned by the Para wallet, and reads its token portfolio across Ethereum, Arbitrum, Base, Polygon, and Optimism. The app only reads data, so no funds move. All Para SDK usage lives in `src/hooks`. Everything else is plain React and Tailwind that you can replace with your own UI.
 
 ## Setup
 
-1. In the [Para Developer Portal](https://developer.getpara.com), configure the project used by your API key:
-
-   - Set the app or project display name, for example `Rhinestone Account Abstraction Example`.
-   - Configure Branding with your logo, light theme colors, font, and border radius.
-   - Configure Auth with the email and phone login settings, OAuth providers, auth layout, and 2FA setting you want for this example.
-
-2. Create a `.env` file:
+Create a local `.env` file:
 
 ```env
-NEXT_PUBLIC_PARA_API_KEY=your_para_api_key
+NEXT_PUBLIC_PARA_API_KEY=your_api_key_here
 NEXT_PUBLIC_PARA_ENVIRONMENT=BETA
 RHINESTONE_API_KEY=your_rhinestone_api_key
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
-3. Install dependencies and run the production build:
+Configure the API key in the [Para Developer Portal](https://developer.getpara.com) with the app display name, branding and logo, theme, OAuth providers, email and phone login options, and wallet visibility. The local `ParaProvider` passes the API key, the environment, and runtime modal behavior such as on-ramp test mode and recovery step visibility.
+
+Contact Rhinestone for an orchestrator API key. It stays a server-side environment variable: the browser calls `/api/orchestrator`, and the route in `src/app/api/orchestrator/[...path]/route.ts` forwards the request to the Rhinestone orchestrator with the key attached. For intent operations, the route only forwards requests whose destination contracts are on its allowlist. `NEXT_PUBLIC_APP_URL` is the proxy base URL during server rendering; in the browser the app uses its own origin.
+
+Install and run the production build:
 
 ```bash
 yarn install
@@ -37,74 +27,47 @@ yarn build
 yarn start
 ```
 
-## Getting API Keys
+## Para usage
 
-- **Para API Key**: Get one from the [Para Developer Portal](https://developer.getpara.com).
-- **Rhinestone API Key**: Contact Rhinestone for orchestrator API access.
+These are the files to copy into your own app.
 
-## Configuration Ownership
+| File | What it does |
+| --- | --- |
+| `src/components/ParaProvider.tsx` | Wraps the app in `ParaProvider` and a React Query client |
+| `src/hooks/useParaModalWallet.ts` | Opens the modal and reads the connected wallet with `useModal`, `useAccount`, and `useWallet` |
+| `src/hooks/useRhinestoneAccount.ts` | Creates the Rhinestone account with the Para wallet as its owner, using `useParaViemAccount` |
+| `src/hooks/usePortfolio.ts` | Reads and refreshes the Rhinestone account portfolio with `account.getPortfolio()` |
 
-Persistent Para app identity, branding, and auth settings are owned by the Developer Portal for the API key used to run this example. The local `ParaProvider` keeps only runtime modal behavior, such as on-ramp test mode and recovery secret step handling. The Rhinestone API key remains a server-side environment variable because it authenticates the orchestrator proxy route.
-
-## Project Structure
-
+```tsx
+const { address, isConnected, openModal } = useParaModalWallet();
+const { account, address: accountAddress, isLoading, errorMessage } = useRhinestoneAccount({ enabled: isConnected });
+const { tokenCount, isRefreshing, refresh } = usePortfolio(account);
 ```
+
+`useRhinestoneAccount` gets a viem account from `useParaViemAccount` and passes it to `rhinestone.createAccount({ owners: { type: "ecdsa", accounts: [viemAccount] } })`, so the Para wallet signs for the Rhinestone account. `usePortfolio` loads the portfolio once the account exists and again when you press Refresh portfolio.
+
+## Project layout
+
+```text
 src/
 ├── app/
-│   ├── api/orchestrator/[...path]/route.ts  # Rhinestone orchestrator proxy
-│   ├── layout.tsx                           # Server layout and metadata
-│   └── page.tsx                             # Example entry
+│   ├── api/orchestrator/[...path]/  # Server proxy to the Rhinestone orchestrator
+│   ├── layout.tsx                   # Next.js layout
+│   └── page.tsx                     # Next.js page
+├── hooks/                           # Para SDK usage, one concern per hook
 ├── components/
-│   ├── ParaProvider.tsx                     # Para SDK provider setup
-│   ├── Rhinestone4337Example.tsx            # Client orchestration
-│   ├── layout/Header.tsx                    # Presentational header
-│   └── ui/                                  # Presentational example UI
-├── hooks/
-│   └── useRhinestoneGlobalWallet.ts         # Copyable Rhinestone logic
-└── lib/
-    └── rhinestone.ts                        # Chain and token configuration
+│   ├── ParaProvider.tsx             # Para setup
+│   ├── Rhinestone4337Example.tsx    # Joins the hooks with the UI
+│   ├── layout/                      # App shell, header, footer, workbench
+│   └── ui/                          # Presentational components, props only
+├── lib/                             # Chain list, orchestrator URL, formatting, and UI helpers
+└── styles/globals.css               # Tailwind theme tokens
 ```
 
-## Key Integration Pattern
+Components in `layout/` and `ui/` never import Para. They receive data and callbacks from `Rhinestone4337Example`, so you can swap them for your own design system without touching the hooks.
 
-The reusable logic lives in `src/hooks/useRhinestoneGlobalWallet.ts`. The UI components receive props only, so you can copy the hook into your app without copying this example's UI.
+## Learn more
 
-```typescript
-import { useParaViemAccount } from "@getpara/react-sdk/evm";
-import { RhinestoneSDK } from "@rhinestone/sdk";
-import type { Account } from "viem";
-
-export function useRhinestoneGlobalWallet() {
-  const { viemAccount } = useParaViemAccount();
-  const rhinestone = new RhinestoneSDK({
-    apiKey: "proxy",
-    endpointUrl: `${window.location.origin}/api/orchestrator`,
-  });
-
-  async function createGlobalWallet() {
-    if (!viemAccount) {
-      throw new Error("Connect a Para wallet first.");
-    }
-
-    const account = await rhinestone.createAccount({
-      owners: {
-        type: "ecdsa",
-        accounts: [viemAccount as Account],
-      },
-    });
-
-    return {
-      address: account.getAddress(),
-      portfolio: await account.getPortfolio(),
-    };
-  }
-
-  return { createGlobalWallet };
-}
-```
-
-## Learn More
-
-- [Para Documentation](https://docs.getpara.com)
-- [Rhinestone Documentation](https://docs.rhinestone.dev)
-- [EIP-4337 Specification](https://eips.ethereum.org/EIPS/eip-4337)
+- [Para account abstraction guide](https://docs.getpara.com/v3/react/guides/web3-operations/evm/account-abstraction)
+- [Rhinestone documentation](https://docs.rhinestone.dev)
+- [ERC-4337 specification](https://eips.ethereum.org/EIPS/eip-4337)

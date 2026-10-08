@@ -1,91 +1,28 @@
-# Signer Canton Network
+# Signer Canton Network Example
 
-A Next.js example showing how to onboard a Canton Network **external party** signed by a Para-managed embedded Ed25519 key, using React SDK Lite and the Para Modal.
-
-This is the React/web port of a server-side Canton + Para integration: connect through `ParaModal`, get a Para-managed Ed25519 key (provisioned as the `SOLANA` wallet type — Canton requires the same Ed25519 curve Solana uses), then run Canton's `generateExternalParty` → sign with Para → `allocateExternalParty` flow to produce a `partyId` on the Canton ledger.
-
-## What this example shows
-
-- Setting up `@getpara/react-sdk-lite` so the embedded Ed25519 key is available for Canton signing (`src/components/ParaProvider.tsx`).
-- Opening the Para modal via `useModal` and reading the embedded wallet via `useWallet` (`src/app/page.tsx`).
-- Signing a Canton-supplied `multiHash` with Para via `useSignMessage().signMessageAsync({ walletId, messageBase64 })` (`src/hooks/useCantonOnboarding.ts`).
-- Using Canton's generic interactive-submission API (`prepareSubmission` / `executeSubmission`) for post-onboarding ledger writes. Three flavors are demonstrated, all behind the same Para signing path: installing a `TransferPreapproval` so others can send to the party (`src/app/api/canton/preapproval/`), funding the party with test Amulet via the AmuletRules DevNet **Tap** choice (`src/app/api/canton/tap/`), and sending Amulet via token-standard `createTransfer` (`src/app/api/canton/transfer/`).
-- Reading on-ledger state (Amulet balance) via `sdk.tokenStandard.listHoldingUtxos` (`src/app/api/canton/balance/`).
-- Keeping the Canton `WalletSDKImpl` plus validator credentials on the server in Next.js API routes (everything under `src/app/api/canton/` plus `src/lib/canton.ts`) so they never reach the browser.
-
-## How the onboarding flow works
-
-1. **Connect.** User clicks "Connect with Para" — ParaModal handles auth and provisions an embedded Ed25519 key.
-2. **Generate.** The client POSTs the wallet's address (base58-encoded Ed25519 public key) to `/api/canton/generate`. The server decodes it to the raw 32-byte Ed25519 public key, re-encodes as base64 (the form Canton wants), and calls `sdk.userLedger.generateExternalParty(publicKeyBase64, partyHint)`. Canton returns a `multiHash` to be signed.
-3. **Sign.** The client signs the `multiHash` bytes with the Para-managed Ed25519 key. Result: a base64 Ed25519 signature.
-4. **Allocate.** The client POSTs `{ signatureBase64, generatedParty }` to `/api/canton/allocate`. The server calls `sdk.userLedger.allocateExternalParty(signatureBase64, generatedParty)` and returns the resulting `partyId`.
-5. **Done.** The UI displays the `partyId` — your Para wallet is now an external party on Canton.
-
-## Post-onboarding: the same pattern, every time
-
-After allocation, every ledger write from the external party follows a `prepare → Para-sign → execute` loop with the exact same Para call. The example demonstrates this with a one-click **Install TransferPreapproval** action:
-
-1. **Prepare.** Client POSTs `{ partyId }` to `/api/canton/preapproval/prepare`. The server looks up the validator's provider party + DSO, builds a `TransferPreapprovalProposal` command via `sdk.userLedger.createTransferPreapprovalCommand(...)`, and returns `{ preparedTransactionHash, prepared, commandId }` from `prepareSubmission`.
-2. **Sign.** Client signs `preparedTransactionHash` with Para — same `signMessageAsync({ walletId, messageBase64 })` call as onboarding.
-3. **Execute.** Client POSTs the prepared transaction + signature + Ed25519 public key to `/api/canton/preapproval/execute`. The server calls `sdk.userLedger.executeSubmission(...)` and returns the resulting `updateId`.
-
-This is the template for any future ledger interaction (token transfers, contract exercises, etc.): swap the prepared command, keep the signing path identical.
-
-## Tap, Send, and Balance: the same loop with different commands
-
-After allocation the demo exposes three more cards. Each is a textbook case of "swap the prepared command, keep the signing path identical":
-
-**Fund this party (DevNet tap)** — `src/app/api/canton/tap/`
-1. **Prepare.** Client POSTs `{ partyId, amount }` to `/api/canton/tap/prepare`. The server calls `sdk.tokenStandard.createTap(receiver, amount, { instrumentId: "Amulet" })` (which exercises the AmuletRules DevNet `Tap` choice), then `prepareSubmission` with the command + disclosed contracts.
-2. **Sign.** Client recomputes the hash with `hashPreparedTransaction` (Web Crypto) and signs with Para.
-3. **Execute.** Client POSTs to `/api/canton/tap/execute`. The server calls `sdk.userLedger.executeSubmission(...)` and returns the `updateId`. The party now holds spendable Amulet — DevNet/LocalNet only.
-
-**Send Amulet** — `src/app/api/canton/transfer/`
-1. **Prepare.** Client POSTs `{ partyId, receiverPartyId, amount, memo? }`. The server calls `sdk.tokenStandard.createTransfer(sender, receiver, amount, { instrumentId: "Amulet" })`, then `prepareSubmission`.
-2. **Sign.** Client recomputes the hash and signs with Para.
-3. **Execute.** Client POSTs to `/api/canton/transfer/execute`. The server calls `executeSubmission` and returns an `updateId`.
-
-If the recipient has a `TransferPreapproval`, the transfer auto-completes; otherwise it creates a pending `TransferInstruction` the recipient must accept. The card defaults Recipient to the user's own `partyId` (a self-send) so the demo works end-to-end on first click — overwrite it to send to another party.
-
-**Amulet balance** — `src/app/api/canton/balance/`
-The wallet info card has a "Fetch balance" button that POSTs `{ partyId }` to `/api/canton/balance`. The server calls `sdk.tokenStandard.listHoldingUtxos(false)` and sums the `interfaceViewValue.amount` across the Amulet holdings. No Para signing required — pure read of on-ledger state through the validator's scan-proxy.
-
-> **Note on LocalNet fees:** the AmuletRules `transferConfig` on Splice LocalNet has `transferFee.initialRate = 0.0` and `createFee.fee = 0.0`, so transfers don't visibly debit the sender. The economic mechanics work the same on DevNet/MainNet; the demo's accounting is honest, the LocalNet config is just zero. For a self-send, total balance is unchanged regardless because sender and receiver are the same party.
+A Next.js app that onboards a Para wallet as a Canton Network external party with React SDK Lite and the Para Modal. Canton external parties sign with Ed25519, the same curve Solana uses, so the app selects the Para `SOLANA` wallet and signs Canton hashes with it. After onboarding, the app installs a transfer preapproval, funds the party from the DevNet tap, and sends Amulet. The party ID replaces the wallet address in the header and account strip once it exists.
 
 ## Setup
 
-### 1. Configure your API key in the Para developer portal
+Configure the API key in the [Para Developer Portal](https://developer.getpara.com):
 
-Get an API key at [developer.getpara.com](https://developer.getpara.com), then set the following on it before running the example. New API keys default to EVM-only and have all on/off-ramp tiles enabled — both need adjusting for Canton.
+| Setting | Where | Value |
+| --- | --- | --- |
+| Supported wallet types | Setup, Networks | Add Solana, so Para creates the Ed25519 key Canton needs |
+| Buy Crypto, Withdraw, Receive, Send | On/Off Ramps | Disable; the modal wallet actions do not apply to Canton parties |
+| Hide wallets | Modal UX settings | Enable, so the `SOLANA` wallet type stays out of the Canton UI |
 
-| Setting | Where in the dev portal | Value | Why |
-|---|---|---|---|
-| Supported wallet types | API Key → **Setup → Networks** | Add **Solana** (Ed25519) | Canton external parties are signed with Ed25519. Para provisions Ed25519 keys under the `SOLANA` wallet type. Without this the modal won't create the key the canton flow needs. |
-| Buy Crypto (Add Funds) | API Key → **On/Off Ramps → Buy Crypto & Withdraw** | Disable | Not functional for Canton — would confuse users. |
-| Withdraw | API Key → **On/Off Ramps → Buy Crypto & Withdraw** | Disable | Not functional for Canton. |
-| Receive | API Key → **On/Off Ramps → Receive** | Disable | Address + QR display is for EVM/Solana mainnets — Canton parties aren't reachable from those addresses. |
-| Send | API Key → **On/Off Ramps → Send** | Disable | Sends in this demo go through the in-app **Send Amulet** card, not the Para modal. |
-| Hide wallets | API Key modal UX settings | Enable | Keeps Para's internal `SOLANA` wallet type out of user-facing Canton copy. |
-
-End state of the On/Off Ramps page: **Buy Crypto, Withdraw, Receive, and Send all toggled off** — none of the modal's wallet-action tiles surface for Canton users.
-
-CLI equivalent (one command for the ramp toggles; wallet types are dev-portal-only today):
+The ramp toggles can also be set from the CLI:
 
 ```bash
 para keys config ramps <key-id> --no-buy-enabled --no-withdraw-enabled --no-receive-enabled --no-send-enabled
 ```
 
-App identity, authentication methods, theme, wallet visibility, and modal wallet wording are portal-owned in v3. The example keeps only API key/environment and runtime modal behavior in `src/components/ParaProvider.tsx`.
+The app display name, branding, theme, and login options also live in the Developer Portal. The local `ParaProvider` passes the API key, the environment, and runtime modal behavior such as on-ramp test mode and recovery step visibility.
 
-### 2. Configure the example
+Copy `.env.example` to `.env` and set `NEXT_PUBLIC_PARA_API_KEY`. The Canton variables default to a local [Splice LocalNet](https://docs.dev.sync.global/app_dev/testing/localnet.html) app-user node; point them at your own validator for a hosted deployment. They are server-only, so never prefix them with `NEXT_PUBLIC_`.
 
-```bash
-cp .env.example .env
-```
-
-Fill in `NEXT_PUBLIC_PARA_API_KEY` with the key from step 1. The Canton defaults in `.env.example` target a local [Splice LocalNet](https://docs.dev.sync.global/app_dev/testing/localnet.html) instance (app-user node); point them at your own validator for a hosted deployment.
-
-### 3. Install and run
+Install and run the production build:
 
 ```bash
 yarn install
@@ -93,76 +30,74 @@ yarn build
 yarn start
 ```
 
-Open http://localhost:3000 and walk through:
+## Para usage
 
-1. **Connect with Para** — finishes auth and provisions the embedded Ed25519 key.
-2. **Onboard as Canton external party** — runs generate → Para-sign → allocate, returns a `partyId`.
-3. **Install TransferPreapproval** — first post-onboarding ledger write; lets others auto-send Amulet to this party.
-4. **Tap Amulet** (defaults to 100) — mints test Amulet to the party so it has something to spend. DevNet/LocalNet only.
-5. **Fetch balance** on the wallet info card — confirms the holdings are visible.
-6. **Send Amulet** (defaults to a self-send of 1) — proves the full prepare → Para-sign → execute path against `tokenStandard.createTransfer`. Refresh the balance to see the new state on-ledger.
+| File | What it does |
+| --- | --- |
+| `src/components/ParaProvider.tsx` | Wraps the app in `ParaProvider` and a React Query client |
+| `src/hooks/useCantonWallet.ts` | Opens the modal with `useModal`, reads the account with `useAccount` and `useWallet`, and selects the `SOLANA` wallet with `useWalletState` |
+| `src/hooks/useCantonParty.ts` | Onboards the external party and signs the Canton `multiHash` with `useSignMessage` |
+| `src/hooks/useCantonSubmission.ts` | Runs one ledger write: prepare, verify the hash, sign with `useSignMessage`, execute. It sends the public key with `base58ToBase64` |
 
-Each step prompts Para once for a signature; the full demo runs in seconds. The `partyId` is cached to `localStorage` keyed by the Para wallet address, so a refresh skips straight to step 3.
-
-For development, run:
-
-```bash
-yarn dev
+```tsx
+const wallet = useCantonWallet();
+const party = useCantonParty({ address: wallet.address, walletId: wallet.walletId });
+const transfer = useCantonSubmission({ command: "transfer", partyId: party.partyId, address: wallet.address, walletId: wallet.walletId });
 ```
 
-The dev server uses http://localhost:3001.
+Every Para call is `signMessageAsync({ walletId, messageBase64 })`. Canton hashes are already base64, so the app passes them as `messageBase64` unchanged and sends the base64 signature back to Canton.
 
-## Project structure
+## How it works
 
-```
+Onboarding:
+
+1. The browser posts the wallet address (the base58 Ed25519 public key) to `/api/canton/generate`. The server calls `generateExternalParty` and returns the party topology and its `multiHash`.
+2. Para signs the `multiHash`.
+3. The browser posts the signature to `/api/canton/allocate`. The server calls `allocateExternalParty` and returns the `partyId`. The app saves it in `localStorage` for this wallet, so a reload skips onboarding. Once a party exists, every later step is open in any order.
+
+Every ledger write after that uses the same loop with a different command:
+
+1. The browser posts to `/api/canton/<command>/prepare`. The server builds the command and calls `prepareSubmission`.
+2. The browser recomputes the hash of the prepared transaction with `hashPreparedTransaction` from `@canton-network/core-tx-visualizer`. If it does not match the hash the server returned, the app shows an error and never asks Para to sign.
+3. Para signs the prepared hash.
+4. The browser posts the signature and public key to `/api/canton/<command>/execute`. The server calls `executeSubmission` and returns the `updateId`.
+
+| Step | Command | Canton call |
+| --- | --- | --- |
+| Install preapproval | `preapproval` | `createTransferPreapprovalCommand`, so other parties can send Amulet to this party |
+| Fund party | `tap` | `tokenStandard.createTap`, the AmuletRules DevNet tap (DevNet and LocalNet only) |
+| Send Amulet | `transfer` | `tokenStandard.createTransfer`. The recipient defaults to your own party, so a self-send works on the first try |
+
+The Amulet balance in the account strip is a read of `/api/canton/balance`, which sums the party's Amulet holdings from `listHoldingUtxos`. It does not use Para. Press refresh to fetch it.
+
+## Server code
+
+The Canton wallet SDK and the validator credentials stay on the server. `src/lib/server/canton.ts` creates the SDK once per server process with the LocalNet shared-secret auth, and the route handlers in `src/app/api/canton` call it. For a hosted validator, swap the auth factory for what your validator expects and set `VALIDATOR_AUDIENCE` and `TRANSFER_FACTORY_REGISTRY_URL`.
+
+The cached SDK serves one user at a time: `setPartyId` changes the shared ledger controllers, so concurrent requests for different parties can race. For multiple users, build controllers per request or serialize the submit calls.
+
+`@canton-network/wallet-sdk` stays on the 0.x line because the 1.x SDK has a different setup API.
+
+## Project layout
+
+```text
 src/
-├── app/
-│   ├── layout.tsx                       # Root layout with ParaProvider
-│   ├── page.tsx                         # Server page metadata and entry
-│   └── api/canton/
-│       ├── generate/route.ts            # POST → Canton generateExternalParty
-│       ├── allocate/route.ts            # POST → Canton allocateExternalParty
-│       ├── preapproval/
-│       │   ├── prepare/route.ts         # POST → prepareSubmission (TransferPreapprovalProposal)
-│       │   └── execute/route.ts         # POST → executeSubmission (Para-signed)
-│       ├── tap/
-│       │   ├── prepare/route.ts         # POST → prepareSubmission (AmuletRules DevNet Tap)
-│       │   └── execute/route.ts         # POST → executeSubmission (Para-signed)
-│       ├── transfer/
-│       │   ├── prepare/route.ts         # POST → prepareSubmission (token-standard createTransfer)
-│       │   └── execute/route.ts         # POST → executeSubmission (Para-signed)
-│       └── balance/route.ts             # POST → tokenStandard.listHoldingUtxos (read-only)
+├── app/                         # Next.js layout, page, and Canton API routes
+├── hooks/                       # Para SDK usage, one concern per hook, plus the Amulet balance read
 ├── components/
-│   ├── ParaProvider.tsx                 # Para SDK + Ed25519 embedded wallets
-│   ├── CantonNetworkExample.tsx         # Connect → Onboard → Preapproval → Tap → Send
-│   ├── layout/Header.tsx
-│   └── ui/
-│       ├── ConnectCard.tsx
-│       ├── WalletInfo.tsx               # Address + Amulet balance + refresh button
-│       ├── CantonOnboardCard.tsx        # Onboarding UI
-│       ├── CantonPreapprovalCard.tsx    # Post-onboarding signing demo
-│       ├── CantonTapCard.tsx            # DevNet faucet UI
-│       └── CantonSendCard.tsx           # Send Amulet UI (defaults to self-send)
-├── hooks/
-│   └── useCantonOnboarding.ts           # onboard, installPreapproval, tapAmulet, sendAmulet, fetchBalance
-└── lib/
-    └── canton.ts                        # Server-only Canton SDK setup (incl. transferFactoryRegistryUrl)
+│   ├── ParaProvider.tsx         # Para setup
+│   ├── CantonNetworkExample.tsx # Joins the hooks with the UI
+│   ├── layout/                  # App shell, header, footer, step workbench
+│   └── ui/                      # Presentational components, props only
+├── lib/                         # Network config, request helper, steps, forms, formatting
+│   └── server/canton.ts         # Server-only Canton SDK setup
+└── styles/globals.css           # Tailwind theme tokens
 ```
 
-## Production notes
-
-- This example uses `@getpara/react-sdk-lite@3.0.0` instead of the catch-all `@getpara/react-sdk` because it only needs Para modal/core hooks and does not use account abstraction, external wallet connector, EVM, Cosmos, Solana signer, Stellar, Wagmi, or Ethers helpers. `viem` remains direct because the Para v3 SDK packages use it as a peer dependency.
-- `@canton-network/wallet-sdk@0.21.1` is intentionally kept on the latest compatible 0.x line for the external-party API used here. The Canton `1.x` SDK exposes a different `SDK.create` surface and is not a drop-in replacement for this example.
-- `src/lib/canton.ts` uses `localNetAuthDefault` (shared-secret) for the localnet demo. For a hosted Canton deployment, swap the auth factory for whatever your validator expects (typically OAuth/JWT) and set `VALIDATOR_AUDIENCE` accordingly.
-- The Canton SDK is initialized once per server process and cached in `getSdk()`. The token-standard registry URL is set after `sdk.connect()` from `localNetStaticConfig.LOCALNET_REGISTRY_API_URL` by default; override with `TRANSFER_FACTORY_REGISTRY_URL` (typically your validator's `/api/validator/v0/scan-proxy`) for hosted deployments.
-- **Single-user demo caveat:** the cached SDK reuses `userLedger` and `tokenStandard` controllers across requests, and `sdk.setPartyId(partyId)` mutates them in place. Concurrent requests for different parties will race. For multi-user production serving, either build per-request controllers from the factories in `getSdk()` or wrap `setPartyId` + `prepareSubmission` + `executeSubmission` in a per-process mutex.
-- All Canton credentials (`LEDGER_API_URL`, `VALIDATOR_API_URL`, `AUTH_UNSAFE_SECRET`, `TRANSFER_FACTORY_REGISTRY_URL`, ...) are server-only — never prefix them with `NEXT_PUBLIC_`.
+Components in `layout/` and `ui/` never import Para. They receive data and callbacks from `CantonNetworkExample`, so you can swap them for your own design system without touching the hooks.
 
 ## Learn more
 
-- [Para Documentation](https://docs.getpara.com)
-- [Canton Wallet SDK — Integration Guide](https://docs.digitalasset.com/integrate/devnet/index.html)
-- [Canton Wallet SDK — Configuration Reference](https://docs.digitalasset.com/integrate/devnet/wallet-sdk-configuration/index.html)
-- [Canton Network — External Parties](https://docs.daml.com/2.10.0/canton/usermanual/external_parties.html)
-- [Splice LocalNet setup](https://docs.dev.sync.global/app_dev/testing/localnet.html) — docker-compose steps for a full local Canton Network stack
-- [Next.js Documentation](https://nextjs.org/docs)
+- [Canton walkthrough in the Para docs](https://docs.getpara.com/v3/walkthroughs/canton-network)
+- [Canton Wallet SDK integration guide](https://docs.digitalasset.com/integrate/devnet/index.html)
+- [Splice LocalNet setup](https://docs.dev.sync.global/app_dev/testing/localnet.html)

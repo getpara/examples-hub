@@ -1,0 +1,14 @@
+import { useAccount, useModal, useWallet } from "@getpara/react-sdk";
+
+export function useParaModalWallet() {
+  const { openModal } = useModal();
+  const { isConnected, isLoading } = useAccount();
+  const { data: wallet } = useWallet();
+
+  return {
+    address: wallet?.address ?? "",
+    isConnected,
+    isRestoring: !isConnected && isLoading,
+    openModal,
+  };
+}

@@ -1,7 +1,5 @@
-"use client";
-
 import { useState, useCallback } from "react";
-import { useParaSigner } from "./useParaSigner";
+import { useParaSigner } from "@/hooks/useParaSigner";
 
 export function useSignAuthEntry() {
   const { signer, isReady } = useParaSigner();

@@ -1,10 +1,9 @@
-"use client";
-
 import { useState } from "react";
 import type { Address, Hex } from "viem";
-import { PARA_TEST_TOKEN_ABI, PARA_TEST_TOKEN_BYTECODE } from "@/lib/contracts";
-import { CHAIN, publicClient } from "@/lib/viem";
-import { useParaSigner } from "./useParaSigner";
+import { HOLESKY } from "@/lib/chain";
+import { PARA_TEST_TOKEN } from "@/lib/contracts";
+import { publicClient } from "@/lib/publicClient";
+import { useParaSigner } from "@/hooks/useParaSigner";
 
 interface DeploymentInfo {
   contractAddress: Address;
@@ -26,17 +25,17 @@ export function useContractDeployment() {
   const deployContract = async () => {
     if (!viemClient || !account) {
       setError(new Error("Connect your Para wallet before deploying a contract."));
-      return;
+      return null;
     }
 
     try {
       setIsLoading(true);
       setError(null);
       const hash = await viemClient.deployContract({
-        abi: PARA_TEST_TOKEN_ABI,
+        abi: PARA_TEST_TOKEN.abi,
         account,
-        bytecode: PARA_TEST_TOKEN_BYTECODE,
-        chain: CHAIN,
+        bytecode: PARA_TEST_TOKEN.bytecode,
+        chain: HOLESKY.chain,
       });
       const receipt = await publicClient.waitForTransactionReceipt({ hash });
 
@@ -45,13 +44,16 @@ export function useContractDeployment() {
       }
 
       const deployedBytecode = await publicClient.getCode({ address: receipt.contractAddress });
-      setDeploymentInfo({
+      const info: DeploymentInfo = {
         contractAddress: receipt.contractAddress,
         transactionHash: hash,
         deployedBytecode,
-      });
+      };
+      setDeploymentInfo(info);
+      return info;
     } catch (err) {
       setError(err instanceof Error ? err : new Error("Failed to deploy contract"));
+      return null;
     } finally {
       setIsLoading(false);
     }

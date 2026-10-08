@@ -1,10 +1,9 @@
-"use client";
-
 import { useCallback, useEffect, useState } from "react";
 import { formatEther, parseEther, type Hex } from "viem";
-import { PARA_TEST_TOKEN_ABI, PARA_TEST_TOKEN_ADDRESS } from "@/lib/contracts";
-import { CHAIN, publicClient } from "@/lib/viem";
-import { useParaSigner } from "./useParaSigner";
+import { HOLESKY } from "@/lib/chain";
+import { PARA_TEST_TOKEN } from "@/lib/contracts";
+import { publicClient } from "@/lib/publicClient";
+import { useParaSigner } from "@/hooks/useParaSigner";
 
 export function useContractInteraction() {
   const { viemClient, account, address, isReady } = useParaSigner();
@@ -34,20 +33,20 @@ export function useContractInteraction() {
       setError(null);
       const [balance, minted, limit] = await Promise.all([
         publicClient.readContract({
-          address: PARA_TEST_TOKEN_ADDRESS,
-          abi: PARA_TEST_TOKEN_ABI,
+          address: PARA_TEST_TOKEN.address,
+          abi: PARA_TEST_TOKEN.abi,
           functionName: "balanceOf",
           args: [address],
         }),
         publicClient.readContract({
-          address: PARA_TEST_TOKEN_ADDRESS,
-          abi: PARA_TEST_TOKEN_ABI,
+          address: PARA_TEST_TOKEN.address,
+          abi: PARA_TEST_TOKEN.abi,
           functionName: "mintedAmount",
           args: [address],
         }),
         publicClient.readContract({
-          address: PARA_TEST_TOKEN_ADDRESS,
-          abi: PARA_TEST_TOKEN_ABI,
+          address: PARA_TEST_TOKEN.address,
+          abi: PARA_TEST_TOKEN.abi,
           functionName: "MINT_LIMIT",
         }),
       ]);
@@ -71,25 +70,27 @@ export function useContractInteraction() {
   const mint = async (amount: string) => {
     if (!viemClient || !account) {
       setError(new Error("Connect your Para wallet before minting tokens."));
-      return;
+      return null;
     }
 
     try {
       setIsLoading(true);
       setError(null);
       const hash = await viemClient.writeContract({
-        address: PARA_TEST_TOKEN_ADDRESS,
-        abi: PARA_TEST_TOKEN_ABI,
+        address: PARA_TEST_TOKEN.address,
+        abi: PARA_TEST_TOKEN.abi,
         account,
-        chain: CHAIN,
+        chain: HOLESKY.chain,
         functionName: "mint",
         args: [parseEther(amount)],
       });
-      await publicClient.waitForTransactionReceipt({ hash });
       setTxHash(hash);
+      await publicClient.waitForTransactionReceipt({ hash });
       await fetchContractData();
+      return hash;
     } catch (err) {
       setError(err instanceof Error ? err : new Error("Failed to mint tokens"));
+      return null;
     } finally {
       setIsLoading(false);
     }

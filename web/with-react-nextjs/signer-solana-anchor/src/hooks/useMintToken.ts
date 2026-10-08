@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useCallback, useEffect } from "react";
 import * as anchor from "@coral-xyz/anchor";
 import { SystemProgram, PublicKey, Connection } from "@solana/web3.js";
@@ -10,9 +8,8 @@ import {
   getMint,
   TOKEN_2022_PROGRAM_ID,
 } from "@solana/spl-token";
-import { TransferTokens } from "@/idl/transfer_tokens";
-import idl from "@/idl/transfer_tokens.json";
-import { useParaSigner } from "./useParaSigner";
+import { getTransferTokensProgram } from "@/lib/program";
+import { useParaSigner } from "@/hooks/useParaSigner";
 
 async function fetchTokenBalance(
   connection: Connection,
@@ -105,16 +102,13 @@ export function useMintToken(mintAddress: string) {
         const recipientPubkey = new PublicKey(recipient);
 
         anchor.setProvider(anchorProvider);
-        const program = new anchor.Program(idl as TransferTokens, anchorProvider);
+        const program = getTransferTokensProgram(anchorProvider);
 
-        // Get mint info to get decimals
         const mintInfo = await getMint(connection, mintPubkey, "confirmed", TOKEN_2022_PROGRAM_ID);
         const decimals = mintInfo.decimals;
 
-        // Convert display amount to raw amount
         const rawAmount = new anchor.BN(mintAmount * Math.pow(10, decimals));
 
-        // Get associated token address for recipient
         const recipientAta = await getAssociatedTokenAddress(
           mintPubkey,
           recipientPubkey,
@@ -138,7 +132,6 @@ export function useMintToken(mintAddress: string) {
 
         setTxSignature(tx);
 
-        // Refresh token balance
         await fetchBalance();
       } catch (err) {
         console.error("Error minting tokens:", err);

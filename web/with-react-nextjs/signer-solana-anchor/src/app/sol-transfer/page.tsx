@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
-import { SolanaAnchorApp } from "@/components/SolanaAnchorApp";
-import { SolanaAnchorPreview } from "@/components/SolanaAnchorPreview";
-import SolTransferDemo from "@/components/demos/SolTransferDemo";
+import { SolTransferContainer } from "@/components/demos/SolTransferContainer";
 
 export const metadata: Metadata = {
   title: "SOL Transfer | Para Solana Anchor Signer",
@@ -9,12 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function SolTransferPage() {
-  return (
-    <>
-      <SolanaAnchorPreview variant="sol-transfer" />
-      <SolanaAnchorApp>
-        <SolTransferDemo />
-      </SolanaAnchorApp>
-    </>
-  );
+  return <SolTransferContainer />;
 }

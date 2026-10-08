@@ -1,17 +1,14 @@
-"use client";
-
 import { useCallback, useState } from "react";
 import { LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
-import { useParaSigner } from "./useParaSigner";
+import { useParaSigner } from "@/hooks/useParaSigner";
 
 export function useSolTransfer() {
   const { signer, connection, isReady } = useParaSigner();
   const [txSignature, setTxSignature] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
-  const [status, setStatus] = useState<"idle" | "pending" | "confirming" | "success" | "error">("idle");
 
-  const transfer = useCallback(
+  const sendTransaction = useCallback(
     async (to: string, amount: string) => {
       if (!signer?.sender || !connection || !isReady) {
         setError(new Error("Signer not ready. Please connect your wallet."));
@@ -21,7 +18,6 @@ export function useSolTransfer() {
       setIsLoading(true);
       setError(null);
       setTxSignature(null);
-      setStatus("pending");
 
       try {
         let toPubKey: PublicKey;
@@ -52,7 +48,7 @@ export function useSolTransfer() {
           })
         );
 
-        const { blockhash } = await connection.getLatestBlockhash();
+        const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
         tx.recentBlockhash = blockhash;
         tx.feePayer = signer.sender;
 
@@ -72,27 +68,27 @@ export function useSolTransfer() {
 
         const signature = await signer.sendTransaction(tx);
         setTxSignature(signature);
-        setStatus("confirming");
 
-        let confirmed = false;
-        while (!confirmed) {
+        for (;;) {
           const statusResult = await connection.getSignatureStatus(signature, {
             searchTransactionHistory: true,
           });
+          if (statusResult?.value?.err) {
+            throw new Error(`Transaction failed on chain: ${JSON.stringify(statusResult.value.err)}`);
+          }
           if (
             statusResult?.value?.confirmationStatus === "confirmed" ||
             statusResult?.value?.confirmationStatus === "finalized"
           ) {
-            confirmed = true;
+            break;
+          }
+          if ((await connection.getBlockHeight()) > lastValidBlockHeight) {
+            throw new Error("Transaction expired before it was confirmed.");
           }
           await new Promise((resolve) => setTimeout(resolve, 500));
         }
-
-        setStatus("success");
       } catch (err) {
-        console.error("Error sending transaction:", err);
         setError(err instanceof Error ? err : new Error("Failed to send transaction"));
-        setStatus("error");
       } finally {
         setIsLoading(false);
       }
@@ -103,16 +99,14 @@ export function useSolTransfer() {
   const reset = useCallback(() => {
     setTxSignature(null);
     setError(null);
-    setStatus("idle");
   }, []);
 
   return {
-    transfer,
+    sendTransaction,
     txSignature,
     isLoading,
-    error,
     isReady,
-    status,
+    error,
     reset,
   };
 }

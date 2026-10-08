@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import GovernanceDemo from "@/components/demos/GovernanceDemo";
+import { GovernanceContainer } from "@/components/demos/GovernanceContainer";
 
 export const metadata: Metadata = {
   title: "Governance Voting | Para CosmJS Signer",
@@ -7,5 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function GovernancePage() {
-  return <GovernanceDemo />;
+  return <GovernanceContainer />;
 }

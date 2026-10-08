@@ -1,111 +1,75 @@
-# Chrome Extension with Para
+# Chrome Extension Example
 
-This example demonstrates how to integrate Para SDK in a Chrome extension using Vite and React. It showcases wallet connection and authentication within a browser extension popup, utilizing Chrome's storage API for persistence.
+A Chrome extension built with React and Vite. You sign in with the Para Modal in a full tab once. After that, the toolbar button opens a 400 x 600 popup that shows the account and its Sepolia balance and signs `Hello World!`. Para keeps its session in Chrome storage instead of `localStorage`. All Para SDK usage lives in `src/hooks`, `src/lib/para.ts`, and `src/background.ts`. Everything else is plain React and Tailwind that you can replace with your own UI.
 
 ## Setup
 
-### Environment Variables
-
-Create a `.env.local` file in the root directory:
+Create a local `.env` file:
 
 ```env
-VITE_PARA_API_KEY=your_para_api_key
+VITE_PARA_API_KEY=your_api_key_here
 VITE_PARA_ENVIRONMENT=BETA
 ```
 
-Configure the API key in the [Para Developer Portal](https://developer.getpara.com) with the persistent app settings this example expects. Set the app or project display name for the Chrome extension, configure branding and logo, choose theme colors, enable the OAuth providers you want to offer, set the email and phone login toggles, choose the auth layout, and configure 2FA there. This example only keeps runtime modal behavior in code, including `onRampTestMode` and `recoverySecretStepEnabled`.
+Configure the API key in the [Para Developer Portal](https://developer.getpara.com) with the app display name, branding and logo, theme, OAuth providers, email and phone login options, and 2FA. The local `ParaProvider` passes the Para client and runtime modal behavior such as on-ramp test mode and recovery step visibility.
 
-### Installation
-
-Install dependencies using your preferred package manager:
+Install and build the extension:
 
 ```bash
-# npm
-npm install
-
-# yarn
 yarn install
-
-# pnpm
-pnpm install
-```
-
-## Key Dependencies
-
-- `@getpara/react-sdk` (v3.0.0-alpha.1) - Para React SDK for wallet integration
-- `@tanstack/react-query` (v5.81.2) - Data fetching and state management
-- `vite` (v6.1.0) - Build tool and development server
-- `@vitejs/plugin-react` (v4.3.4) - Vite React plugin
-- `@types/chrome` (v0.0.317) - Chrome extension type definitions
-
-## Key Files
-
-- `src/context/ParaProvider.tsx` - Para SDK provider with Chrome storage overrides
-- `src/lib/chrome-storage.ts` - Chrome storage implementation for Para SDK
-- `src/app/App.tsx` - Main application component with wallet connection
-- `src/background.ts` - Chrome extension background script
-- `public/manifest.json` - Chrome extension manifest configuration
-
-## Development
-
-### Running in Development Mode
-
-1. Start the development server:
-
-```bash
-# npm
-npm run dev
-
-# yarn
-yarn dev
-
-# pnpm
-pnpm dev
-```
-
-2. Build the extension:
-
-```bash
-# npm
-npm run build
-
-# yarn
 yarn build
-
-# pnpm
-pnpm build
 ```
 
-### Loading the Extension in Chrome
+Then load it in Chrome:
 
-1. Open Chrome and navigate to `chrome://extensions/`
-2. Enable "Developer mode" in the top right corner
-3. Click "Load unpacked" button
-4. Select the `dist` folder from your project directory
-5. The extension will appear in your extensions list
+1. Open `chrome://extensions/` and turn on Developer mode.
+2. Click Load unpacked and select the `dist` folder.
+3. Click the extension in the toolbar. Signed out, it opens a tab with the sign-in panel. Signed in, it opens the popup.
 
-### Testing the Extension
+After a change, run `yarn build` again and click the reload icon on the extension card. To debug the popup, right-click the toolbar icon and choose Inspect popup. To debug the background script, click the service worker link on the extension card.
 
-1. Click the Para extension icon in Chrome's toolbar
-2. The popup will open showing the Para authentication interface
-3. Click "Open Para Modal" to connect your wallet
-4. Once connected, your wallet address will be displayed
+`vite.config.ts` adds `vite-plugin-node-polyfills` for the Node.js built-ins that wallet libraries expect, maps `@/` to `src/`, and builds `src/background.ts` as `background.js` next to `index.html`. `public/manifest.json` declares the service worker, the storage permissions, and the Para hosts.
 
-### Development Tips
+## Para usage
 
-- After making changes, rebuild the extension with `npm run build`
-- Click the refresh icon on the extension card in `chrome://extensions/`
-- For popup debugging, right-click the extension icon and select "Inspect popup"
-- For background script debugging, click "Inspect views: background page" on the extension card
+These are the files to copy into your own extension.
 
-## Chrome Extension Specific Notes
+| File | What it does |
+| --- | --- |
+| `src/lib/para.ts` | Creates the `ParaWeb` client with the Chrome storage overrides and starts `para.init()`. It is the only Para import in `src/lib` because the popup and the background script both build their client from it, and they share the session through Chrome storage |
+| `src/lib/chromeStorage.ts` | The storage overrides that read and write `chrome.storage.local` and `chrome.storage.session`, and seeds the storage keys the SDK reads on startup |
+| `src/background.ts` | On a toolbar click, waits for `para.init()` and calls `para.isFullyLoggedIn()`. Signed in, it opens `index.html` as the popup; otherwise, or on an error, it opens `index.html` in a new tab |
+| `src/components/ParaProvider.tsx` | Seeds Chrome storage, then wraps the app in `ParaProvider` with the client from `src/lib/para.ts` and a React Query client |
+| `src/hooks/useParaModalWallet.ts` | Opens the modal and reads the connected wallet with `useModal`, `useAccount`, and `useWallet` |
+| `src/hooks/useSignHelloWorld.ts` | Signs `Hello World!` with `useSignMessage` |
+| `src/hooks/useAccountBalance.ts` | Reads the wallet balance with `useWalletBalance`. The balance appears once the API key has an RPC URL in the Developer Portal |
 
-This example uses Chrome's storage API instead of localStorage to persist authentication data across browser sessions. The storage overrides are implemented in `src/lib/chrome-storage.ts` and passed to the Para SDK through the provider configuration.
+```tsx
+const { address, isConnected, isRestoring, openModal } = useParaModalWallet();
+const { sign, message, isPending, errorMessage, signature } = useSignHelloWorld();
+const { balance, isLoading, isRefreshing, refresh } = useAccountBalance();
+```
 
-## Learn More
+`isRestoring` is true while the SDK checks for a saved session. The page shows a loading panel until it settles, then either the sign-in panel or the signed-in view.
 
-- [Para Documentation](https://docs.getpara.com)
-- [Para Website](https://getpara.com)
-- [Para Developer Portal](https://developer.getpara.com)
-- [Chrome Extension Documentation](https://developer.chrome.com/docs/extensions)
-- [Vite Documentation](https://vitejs.dev)
+`useSignHelloWorld` calls `signMessage({ walletId, messageBase64 })` with the base64 encoded message and returns the signature once the user approves the request in the Para window. The address chip in the header opens the Para Modal for the account and log out.
+
+## Project layout
+
+```text
+public/manifest.json             # Extension manifest
+src/
+├── main.tsx                     # Entry: styles, ParaProvider, and the app
+├── background.ts                # Service worker: opens the tab or the popup
+├── app/App.tsx                  # Renders the example
+├── hooks/                       # Para SDK usage, one concern per hook
+├── components/
+│   ├── ParaProvider.tsx         # Para setup
+│   ├── ChromeExtensionExample.tsx  # Joins the hooks with the UI
+│   ├── layout/                  # App shell, header, footer, workbench
+│   └── ui/                      # Presentational components, props only
+├── lib/                         # Para client, Chrome storage, chain config, formatting, and UI helpers
+└── styles/globals.css           # Tailwind theme tokens
+```
+
+`index.html` keeps the body at least 400 x 600 so the popup and the Para Modal inside it have room. `main.tsx` imports `globals.css` before `@getpara/react-sdk/styles.css` so the app styles never leak into the modal. Components in `layout/` and `ui/` never import Para. They receive data and callbacks from `ChromeExtensionExample`, so you can swap them for your own design system without touching the hooks.

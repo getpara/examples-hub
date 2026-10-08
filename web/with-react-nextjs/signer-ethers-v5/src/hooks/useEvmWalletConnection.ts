@@ -1,5 +1,3 @@
-"use client";
-
 import { useAccount, useModal, useWallet } from "@getpara/react-sdk-lite";
 
 export function useEvmWalletConnection() {
@@ -11,6 +9,5 @@ export function useEvmWalletConnection() {
     address: wallet?.address ?? "",
     isConnected,
     openModal,
-    wallet,
   };
 }

@@ -1,53 +1,35 @@
-import {
-  ErrorComponent,
-  Link,
-  rootRouteId,
-  useMatch,
-  useRouter,
-} from '@tanstack/react-router'
-import type { ErrorComponentProps } from '@tanstack/react-router'
+import { rootRouteId, useMatch, useRouter, type ErrorComponentProps } from "@tanstack/react-router";
+import { Button } from "@/components/ui/Button";
+import { SignInPanel } from "@/components/ui/SignInPanel";
+import { SEPOLIA } from "@/lib/chain";
+import { formatErrorMessage } from "@/lib/format";
 
 export function DefaultCatchBoundary({ error }: ErrorComponentProps) {
-  const router = useRouter()
+  const router = useRouter();
   const isRoot = useMatch({
     strict: false,
     select: (state) => state.id === rootRouteId,
-  })
+  });
 
-  console.error('DefaultCatchBoundary Error:', error)
+  console.error("DefaultCatchBoundary Error:", error);
 
   return (
-    <div className="min-w-0 flex-1 p-4 flex flex-col items-center justify-center gap-6">
-      <ErrorComponent error={error} />
-      <div className="flex gap-2 items-center flex-wrap">
-        <button
-          onClick={() => {
-            router.invalidate()
-          }}
-          className={`px-2 py-1 bg-gray-600 dark:bg-gray-700 rounded text-white uppercase font-extrabold`}
-        >
-          Try Again
-        </button>
-        {isRoot ? (
-          <Link
-            to="/"
-            className={`px-2 py-1 bg-gray-600 dark:bg-gray-700 rounded text-white uppercase font-extrabold`}
-          >
-            Home
-          </Link>
-        ) : (
-          <Link
-            to="/"
-            className={`px-2 py-1 bg-gray-600 dark:bg-gray-700 rounded text-white uppercase font-extrabold`}
-            onClick={(e: React.MouseEvent) => {
-              e.preventDefault()
-              window.history.back()
-            }}
-          >
-            Go Back
-          </Link>
-        )}
-      </div>
-    </div>
-  )
+    <SignInPanel
+      title="Something went wrong"
+      description={formatErrorMessage(error.message) ?? "The page failed to load."}
+      network={SEPOLIA.networkLabel}>
+      <Button variant="outline" size="lg" fullWidth onClick={() => router.invalidate()}>
+        Try again
+      </Button>
+      {isRoot ? (
+        <Button variant="outline" size="lg" fullWidth onClick={() => router.navigate({ to: "/" })}>
+          Home
+        </Button>
+      ) : (
+        <Button variant="outline" size="lg" fullWidth onClick={() => window.history.back()}>
+          Go back
+        </Button>
+      )}
+    </SignInPanel>
+  );
 }

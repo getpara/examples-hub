@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import MessageSigningDemo from "@/components/demos/MessageSigningDemo";
+import { MessageSigningContainer } from "@/components/demos/MessageSigningContainer";
 
 export const metadata: Metadata = {
   title: "Message Signing | Para Ethers v5 Signer",
@@ -7,5 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function MessageSigningPage() {
-  return <MessageSigningDemo />;
+  return <MessageSigningContainer />;
 }

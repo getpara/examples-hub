@@ -1,10 +1,9 @@
-"use client";
-
 import { useState, useEffect, useCallback } from "react";
 import { ethers } from "ethers";
 import { useWallet } from "@getpara/react-sdk-lite";
-import { useParaSigner } from "./useParaSigner";
-import ParaTestToken from "@/contracts/artifacts/src/contracts/ParaTestToken.sol/ParaTestToken.json";
+import { useParaSigner } from "@/hooks/useParaSigner";
+import { HOLESKY } from "@/lib/chain";
+import { PARA_TEST_TOKEN } from "@/lib/contracts";
 
 export type TokenAttestation = {
   holder: string;
@@ -14,10 +13,7 @@ export type TokenAttestation = {
   nonce: number;
 };
 
-const DEFAULT_CONTRACT_ADDRESS = "0x83cC70475A0d71EF1F2F61FeDE625c8C7E90C3f2";
-const HOLESKY_CHAIN_ID = 17000;
-
-export function useTypedDataSigning(contractAddress: string = DEFAULT_CONTRACT_ADDRESS) {
+export function useTypedDataSigning(contractAddress: string = PARA_TEST_TOKEN.address) {
   const [tokenBalance, setTokenBalance] = useState<string | null>(null);
   const [signature, setSignature] = useState<string | null>(null);
   const [attestation, setAttestation] = useState<TokenAttestation | null>(null);
@@ -33,7 +29,7 @@ export function useTypedDataSigning(contractAddress: string = DEFAULT_CONTRACT_A
 
     setIsBalanceLoading(true);
     try {
-      const contract = new ethers.Contract(contractAddress, ParaTestToken.abi, provider);
+      const contract = new ethers.Contract(contractAddress, PARA_TEST_TOKEN.abi, provider);
       const balance = await contract.balanceOf(wallet.address);
       setTokenBalance(ethers.utils.formatEther(balance));
     } catch (err) {
@@ -50,25 +46,24 @@ export function useTypedDataSigning(contractAddress: string = DEFAULT_CONTRACT_A
 
   const signAttestation = useCallback(
     async (purpose: string) => {
-      if (!signer || !provider || !wallet?.address) {
-        throw new Error("Signer not initialized. Please connect your wallet.");
-      }
-
-      if (!tokenBalance) {
-        throw new Error("Unable to fetch token balance.");
-      }
-
       setIsLoading(true);
       setError(null);
       setSignature(null);
       setAttestation(null);
 
       try {
-        const contract = new ethers.Contract(contractAddress, ParaTestToken.abi, provider);
+        if (!signer || !provider || !wallet?.address) {
+          throw new Error("Signer not initialized. Please connect your wallet.");
+        }
+
+        if (!tokenBalance) {
+          throw new Error("Unable to fetch token balance.");
+        }
+
+        const contract = new ethers.Contract(contractAddress, PARA_TEST_TOKEN.abi, provider);
         const name = await contract.name();
         const nonce = await contract.nonces(wallet.address);
 
-        // Create the attestation data
         const newAttestation: TokenAttestation = {
           holder: wallet.address,
           balance: tokenBalance,
@@ -77,11 +72,10 @@ export function useTypedDataSigning(contractAddress: string = DEFAULT_CONTRACT_A
           nonce: Number(nonce),
         };
 
-        // Define the typed data structure
         const domain = {
           name,
           version: "1",
-          chainId: HOLESKY_CHAIN_ID,
+          chainId: HOLESKY.chainId,
           verifyingContract: contractAddress,
         };
 

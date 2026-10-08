@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import PermitSigningDemo from "@/components/demos/PermitSigningDemo";
+import { PermitSigningContainer } from "@/components/demos/PermitSigningContainer";
 
 export const metadata: Metadata = {
   title: "Permit Signing | Para Viem v2 Signer",
@@ -7,5 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function PermitSigningPage() {
-  return <PermitSigningDemo />;
+  return <PermitSigningContainer />;
 }

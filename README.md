@@ -69,11 +69,6 @@ examples-hub/
 │   ├── with-bun/                 # Bun runtime
 │   └── with-deno/                # Deno runtime
 │
-├── defi-integrations/            # DeFi protocol integrations
-│   ├── with-jupiter-dex-api/     # Jupiter DEX (Solana swaps)
-│   ├── with-squid-router-api/    # Squid Router (cross-chain swaps)
-│   └── with-relay-bridge-api/    # Relay Bridge (bridging)
-│
 └── advanced-patterns/            # Advanced architectural patterns
     ├── client-auth-server-sign/  # Client auth + server-side signing
     └── with-bulk-pregen/         # Bulk wallet pre-generation

@@ -2,34 +2,20 @@
 
 [![Live Demo](https://img.shields.io/badge/Live_Demo-black?style=for-the-badge&logo=vercel)](https://para-example-para-modal-multichain.vercel.app)
 
-A minimal Next.js example showing how to open Para Modal for EVM, Cosmos, and Solana wallet connection and sign a message on the connected chain.
-
-## What This Example Shows
-
-- Configuring `ParaProvider` with EVM, Cosmos, and Solana connector runtimes
-- Opening Para Modal with `useModal`
-- Reading Para connection and wallet state with `useAccount` and `useWallet`
-- Signing messages with Wagmi, CosmJS amino signing, and the Para Solana signer
-- Keeping SDK logic in hooks so the UI can be replaced by your app's components
+A minimal Next.js app that connects with the Para Modal and signs `Hello World!` on every chain the account holds a wallet on: EVM, Cosmos, Solana, and Stellar. EVM, Cosmos, and Solana cards also appear for a connected external wallet on that chain. All Para SDK usage lives in `src/hooks`. Everything else is plain React and Tailwind that you can replace with your own UI.
 
 ## Setup
 
-Create a `.env` file:
+Create a local `.env` file:
 
 ```env
 NEXT_PUBLIC_PARA_API_KEY=your_api_key_here
 NEXT_PUBLIC_PARA_ENVIRONMENT=BETA
 ```
 
-Configure the project used by that API key in the Para Developer Portal:
+Configure the API key in the [Para Developer Portal](https://developer.getpara.com) with the app display name, branding and logo, auth methods, the wallet types to create (add Stellar to get the Stellar card), the EVM, Cosmos, and Solana external wallets to offer, and a WalletConnect project ID if those wallets need one.
 
-- App name and display identity
-- Branding, logo, and modal presentation
-- Allowed auth methods and login options
-- Allowed EVM, Cosmos, and Solana external wallets
-- WalletConnect project ID, if your enabled wallets require WalletConnect
-
-Install and run the production build locally:
+Install and run the production build:
 
 ```bash
 yarn install
@@ -37,68 +23,61 @@ yarn build
 yarn start
 ```
 
-For development:
+## Para usage
 
-```bash
-yarn dev
+These are the files to copy into your own app.
+
+| File | What it does |
+| --- | --- |
+| `src/components/ParaProvider.tsx` | Wraps the app in `ParaProvider` with the EVM, Cosmos, and Solana connector config, plus a React Query client |
+| `src/hooks/useParaModalWallet.ts` | Opens the modal and reads the selected wallet with `useModal`, `useAccount`, and `useWallet` |
+| `src/hooks/useConnectedChains.ts` | Lists the chains to sign on from the account's wallets and connected external networks with `useAccount` |
+| `src/hooks/useEvmSignMessage.ts` | Signs with the Wagmi `useSignMessage` hook |
+| `src/hooks/useCosmosSignMessage.ts` | Signs an ADR-036 amino sign doc (empty chain ID) with `useParaCosmjsAminoSigner`, which returns the Graz signer for an external wallet |
+| `src/hooks/useSolanaSignMessage.ts` | Signs with `useParaSolanaSigner` (`signMessages`), which returns the wallet adapter signer for an external wallet |
+| `src/hooks/useStellarSignMessage.ts` | Signs bytes with `useParaStellarSigner`, bound to the account's Stellar wallet |
+
+```tsx
+const { address, isConnected, openModal } = useParaModalWallet();
+const { chains, wallets } = useConnectedChains();
+const { sign, isPending, errorMessage, signature } = useSolanaSignMessage();
 ```
 
-## Key Files
+Every sign hook returns the same shape. Solana and Stellar return a base64 signature over the raw message bytes, EVM returns a hex `personal_sign` signature, and Cosmos returns the base64 amino signature.
 
-```text
-src/app/page.tsx                              # Server page metadata and entry
-src/components/ParaProvider.tsx               # ParaProvider with multichain config
-src/components/ParaModalMultichainExample.tsx # Client orchestration
-src/hooks/useParaModalMultichainWallet.ts     # Para modal, account, and wallet state
-src/hooks/useMultichainSign.ts                # EVM, Cosmos, and Solana message signing
-src/components/ui/*                           # Replaceable example UI
-```
+Ed25519 wallets can serve Solana and Stellar, so `useStellarSignMessage` passes the Stellar wallet id to `useParaStellarSigner` explicitly.
 
-## Multichain Configuration
+## Connector config
 
-This example keeps connector runtime setup in code because the EVM, Cosmos, and Solana provider libraries need chain-specific wiring:
+The EVM, Cosmos, and Solana provider libraries need chain setup in code:
 
 ```tsx
 externalWalletConfig={{
-  evmConnector: {
-    config: {
-      chains: [mainnet, polygon, sepolia, celo],
-    },
-  },
+  evmConnector: { config: { chains: [sepolia] } },
   cosmosConnector: {
-    config: {
-      chains: [cosmoshub, osmosis, noble],
-      selectedChainId: cosmoshub.chainId,
-      multiChain: false,
-      onSwitchChain: () => {},
-    },
+    config: { chains: [cosmoshub, osmosis, noble], selectedChainId: cosmoshub.chainId, multiChain: false, onSwitchChain: () => {} },
   },
-  solanaConnector: {
-    config: {
-      endpoint,
-      chain: solanaNetwork,
-    },
-  },
+  solanaConnector: { config: { endpoint: clusterApiUrl(WalletAdapterNetwork.Devnet), chain: WalletAdapterNetwork.Devnet } },
 }}
 ```
 
-Wallet availability, app identity, auth methods, WalletConnect project ID, and modal presentation are controlled by the Para Developer Portal project for the API key.
+## Project layout
 
-## Dependency Notes
+```text
+src/
+├── app/                              # Next.js layout and page
+├── hooks/                            # Para SDK usage, one concern per hook
+├── components/
+│   ├── ParaProvider.tsx              # Para setup
+│   ├── ParaModalMultichainExample.tsx # Joins the hooks with the UI
+│   ├── layout/                       # App shell, header, footer, sheet
+│   └── ui/                           # Presentational components, props only
+├── lib/                              # Chain labels, formatting, and UI helpers
+└── styles/globals.css                # Tailwind theme tokens
+```
 
-This example imports from the catch-all `@getpara/react-sdk` package. Until the SDK package export graph is narrowed, production builds must include several modules that are build-reachable through SDK barrel exports:
+Components in `layout/` and `ui/` never import Para. They receive data and callbacks from `ParaModalMultichainExample`, so you can swap them for your own design system without touching the hooks.
 
-- `@metamask/delegation-toolkit`
-- `ethers`
-- `@stellar/stellar-sdk`
-- `@wagmi/core`
+## Dependency notes
 
-The `graz --generate` postinstall command also requires `arg` and `starknet`, so they remain direct dependencies even though the app UI does not import them directly. The app does import `@solana/rpc` directly for the Para Solana signer RPC object, so it is declared directly as well.
-
-These dependencies can be revisited after the SDK package dependency and export-boundary cleanup work is complete.
-
-## Learn More
-
-- [Para Documentation](https://docs.getpara.com)
-- [Para Developer Portal](https://developer.getpara.com)
-- [Next.js Documentation](https://nextjs.org/docs)
+The `graz --generate` postinstall step needs `arg` and `starknet`, so both stay direct dependencies even though the app does not import them.

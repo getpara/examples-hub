@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useAuthenticateWithEmailOrPhone, useClient } from "@getpara/react-sdk";
-import type { PhoneAuthStep } from "@/types/auth";
+
+export type PhoneAuthStep = "input" | "verify";
 
 export interface UsePhoneAuthReturn {
   countryCode: string;
@@ -141,7 +142,7 @@ export function usePhoneAuth(): UsePhoneAuthReturn {
 
     const popup = window.open(passkeyUrl, "ParaPasskey", "popup,width=480,height=760");
     if (!popup) {
-      setError("Popup blocked — allow popups for this site, then try again.");
+      setError("Pop-up blocked. Allow pop-ups for this site, then try again.");
       return;
     }
 

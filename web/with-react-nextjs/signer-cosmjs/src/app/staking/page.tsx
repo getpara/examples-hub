@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import StakingDemo from "@/components/demos/StakingDemo";
+import { StakingContainer } from "@/components/demos/StakingContainer";
 
 export const metadata: Metadata = {
   title: "Staking And Delegation | Para CosmJS Signer",
@@ -7,5 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function StakingPage() {
-  return <StakingDemo />;
+  return <StakingContainer />;
 }

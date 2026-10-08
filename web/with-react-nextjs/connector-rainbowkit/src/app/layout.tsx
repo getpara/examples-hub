@@ -1,15 +1,12 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "@/styles/globals.css";
 import "@getpara/react-sdk-lite/styles.css";
 import "@rainbow-me/rainbowkit/styles.css";
-import { Providers } from "@/components/Providers";
-
-const inter = Inter({ subsets: ["latin"] });
+import { ParaProvider } from "@/components/ParaProvider";
 
 export const metadata: Metadata = {
   title: "Para + RainbowKit Example",
-  description: "Para integration with RainbowKit wallet connector",
+  description: "Connect Para through RainbowKit and sign a message with wagmi.",
 };
 
 export default function RootLayout({
@@ -19,10 +16,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>
-        <Providers>
-          {children}
-        </Providers>
+      <body>
+        <ParaProvider>{children}</ParaProvider>
       </body>
     </html>
   );

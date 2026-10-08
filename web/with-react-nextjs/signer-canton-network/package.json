@@ -13,15 +13,14 @@
   "dependencies": {
     "@canton-network/core-tx-visualizer": "0.26.0",
     "@canton-network/wallet-sdk": "0.21.1",
-    "@getpara/react-sdk-lite": "3.21.0",
+    "@getpara/react-sdk-lite": "3.22.0",
     "@tanstack/react-query": "5.101.0",
     "bs58": "6.0.0",
     "next": "16.2.7",
     "pino": "10.3.1",
     "react": "19.2.7",
     "react-dom": "19.2.7",
-    "server-only": "0.0.1",
-    "viem": "2.55.1"
+    "server-only": "0.0.1"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

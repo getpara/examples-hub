@@ -1,15 +1,11 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "@/styles/globals.css";
 import "@getpara/react-sdk-lite/styles.css";
-import { QueryProvider } from "@/context/QueryProvider";
-import { WagmiProvider } from "@/context/WagmiProvider";
-
-const inter = Inter({ subsets: ["latin"] });
+import { ParaProvider } from "@/components/ParaProvider";
 
 export const metadata: Metadata = {
   title: "Para + Wagmi Example",
-  description: "Para integration with a Wagmi wallet connector and Sepolia ETH transfers.",
+  description: "Connect Para as a wagmi connector and send Sepolia ETH.",
 };
 
 export default function RootLayout({
@@ -19,12 +15,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>
-        <WagmiProvider>
-          <QueryProvider>
-            {children}
-          </QueryProvider>
-        </WagmiProvider>
+      <body>
+        <ParaProvider>{children}</ParaProvider>
       </body>
     </html>
   );

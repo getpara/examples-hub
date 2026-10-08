@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { randomUUID } from "node:crypto";
-import { getSdk } from "@/lib/canton";
+import { getSdk } from "@/lib/server/canton";
 
 export const runtime = "nodejs";
 
@@ -34,9 +34,6 @@ export async function POST(request: Request) {
 
     await sdk.setPartyId(partyId);
 
-    // DevNet/LocalNet only: AmuletRules exposes a Tap choice that mints
-    // test Amulet directly to the actor. Same prepare → Para-sign → execute
-    // pattern as preapproval/transfer.
     const [command, disclosedContracts] = await sdk.tokenStandard.createTap(
       partyId,
       amount,

@@ -1,131 +1,68 @@
 # Custom OIDC Auth
 
-A Next.js example that runs Para **Custom OIDC** authentication through `@getpara/react-sdk`,
-then exercises the resulting MPC wallet: request testnet funds from the faucet and send an EVM
-transaction signed with ethers — all on Sepolia, with links to view each transaction on Etherscan.
-
-## What This Example Shows
-
-- Wrapping the app in the Para React provider (`ParaProvider` + React Query)
-- Signing in with `useAuthenticateWithOAuth` using `method: "CUSTOM_OIDC"`
-- Opening the passkey popup the SDK surfaces via `onStatePhaseChange`
-- Handling a login-time 2FA (MFA) challenge with `useEnrollMfa` / `useVerifyMfa` — QR
-  enrollment with backup codes, then TOTP / backup-code verification
-- Reading the connected wallet with `useAccount` / `useWallet`
-- Funding the wallet with `useRequestFaucet` (`ETHEREUM_SEPOLIA`)
-- Sending a transaction with an ethers signer from `useParaEthersSigner`
-- Linking the faucet and transaction hashes to Sepolia Etherscan
-
-## Flow
-
-1. **Sign in with OIDC** — custom OIDC handshake, plus passkey creation for new users.
-2. **Two-factor (if required)** — when the partner requires login-time 2FA, the sign-in pauses:
-   new users enroll (scan a QR, save backup codes), returning users enter a TOTP or backup code.
-3. **Request faucet** — funds the Para wallet with Sepolia testnet ETH.
-4. **Send transaction** — self-transfers 0.0001 ETH, signed by the Para wallet through ethers.
-5. **View on Etherscan** — each step links to its transaction on Sepolia.
-
-> The 2FA step only appears when the partner has login-time 2FA enabled. Without it, sign-in
-> goes straight to the wallet.
-
-> The send-transaction step needs gas, so request faucet funds first. An unfunded wallet shows a
-> clear "request faucet funds first" message instead of an opaque RPC error.
+A Next.js app that signs in through your own OIDC identity provider with `useAuthenticateWithOAuth` instead of the Para Modal, handles login two-factor in the same panel, then funds the wallet from the Para faucet and sends Sepolia ETH with an Ethers signer. All Para SDK usage lives in `src/hooks`. Everything else is plain React and Tailwind that you can replace with your own UI.
 
 ## Setup
 
-1. Create `.env` from `.env.example`:
+Create a local `.env` file:
 
 ```env
-NEXT_PUBLIC_PARA_API_KEY=your_para_api_key
+NEXT_PUBLIC_PARA_API_KEY=your_api_key_here
 NEXT_PUBLIC_PARA_ENVIRONMENT=BETA
-# Optional: private Sepolia RPC; defaults to a public node when unset.
-# NEXT_PUBLIC_SEPOLIA_RPC_URL=
+NEXT_PUBLIC_SEPOLIA_RPC_URL=https://ethereum-sepolia-rpc.publicnode.com
 ```
 
-2. Install and run:
+`NEXT_PUBLIC_PARA_ENVIRONMENT` defaults to `BETA`. `NEXT_PUBLIC_SEPOLIA_RPC_URL` is the Ethers JSON-RPC provider used for the balance, the faucet confirmation, and broadcasting the send; it defaults to the public Sepolia RPC above.
+
+Add your OIDC provider as a Custom OIDC login method for the API key from the [Para Developer Portal](https://developer.getpara.com) or the Para CLI; the Docs link in the footer walks through it. Depending on the API key's security settings, a new user also creates a passkey in a pop-up. Login two-factor is enabled for the API key by Para, and the custom limit is a Para permissions policy on the API key. Without them, sign in goes straight to the wallet and every send is signed.
+
+Install and run the production build:
 
 ```bash
 yarn install
-yarn dev
+yarn build
+yarn start
 ```
 
-3. Open `http://localhost:3000`.
+## Para usage
 
-## Developer Portal Configuration
+These are the files to copy into your own app.
 
-Custom OIDC is **not** self-serve in the [Para Developer Portal](https://developer.getpara.com) —
-Para must enable `CUSTOM_OIDC` on your partner and configure your OIDC provider. The partner also
-needs a non-enclave auth method (e.g. passkey), which is why a new user is prompted to create a
-passkey. Point `NEXT_PUBLIC_PARA_ENVIRONMENT` at the environment where that partner is configured.
+| File | What it does |
+| --- | --- |
+| `src/components/ParaProvider.tsx` | Wraps the app in `ParaProvider` and a React Query client |
+| `src/hooks/useOidcAuth.ts` | Signs in through `useAuthenticateWithOAuth` with `authenticateWithOAuthAsync({ method: "CUSTOM_OIDC" })`, opens the passkey pop-up, and tracks the auth phase with `onStatePhaseChange` |
+| `src/hooks/useMfaChallenge.ts` | Detects the `awaiting_2fa_enrollment` and `awaiting_2fa` phases, enrolls with `useEnrollMfa`, and checks codes with `useVerifyMfa` |
+| `src/hooks/useParaSession.ts` | Reads the connected wallet with `useAccount` and `useWallet`, and logs out with `useLogout` |
+| `src/hooks/useFaucet.ts` | Requests Sepolia ETH with `useRequestFaucet` and waits for the faucet transaction to confirm |
+| `src/hooks/useSendTransaction.ts` | Signs a 0.001 ETH send back to the faucet with the `useParaEthersSigner` signer, broadcasts it through the Ethers provider, and reports a `POLICY_DENIED` rejection |
+| `src/hooks/useEthersProvider.ts` | Creates the Ethers `JsonRpcProvider` for Sepolia |
+| `src/hooks/useAccountBalance.ts` | Reads the ETH balance through the Ethers provider |
+| `src/hooks/useE2ECleanup.ts` | Test-only cleanup for the E2E suite, active in development only |
 
-## Project Structure
+```tsx
+const { signIn, authPhase, isPending, error } = useOidcAuth();
+const { mode, enrollment, verify, attemptsRemaining } = useMfaChallenge();
+const { send, txHash, isDenied } = useSendTransaction(FAUCET_RETURN_ADDRESS);
+```
+
+When the API key requires login two-factor, the SDK pauses the sign in. A new user scans the QR code from `enrollMfa`, saves the backup codes, and enters the first code; a returning user enters a code from the authenticator app or a backup code. After a correct code the SDK finishes the sign in on its own. When a transaction limit on the API key denies the send, the signer throws an error with code `POLICY_DENIED` and the app shows it as a denied send that was not signed.
+
+## Project layout
 
 ```text
 src/
-├── app/
-│   ├── layout.tsx
-│   └── page.tsx
-├── styles/globals.css
-├── lib/
-│   ├── para.ts            # API key, environment, Sepolia chain/RPC/explorer constants
-│   └── e2e-helpers.ts
-├── hooks/
-│   ├── useOidcAuth.ts     # Custom OIDC sign-in via useAuthenticateWithOAuth + passkey popup
-│   ├── useMfaChallenge.ts # Login-time 2FA: detect awaiting_2fa*, enrollMfa + verifyMfa
-│   ├── useParaSession.ts  # Connected wallet + logout (useAccount/useWallet/useLogout)
-│   ├── useFaucet.ts        # useRequestFaucet wrapper (ETHEREUM_SEPOLIA)
-│   ├── useEthersProvider.ts
-│   └── useSendTransaction.ts # useParaEthersSigner + ethers self-transfer
-└── components/
-    ├── ParaProvider.tsx
-    ├── CustomOidcAuthExample.tsx
-    ├── layout/Header.tsx
-    └── ui/
-        ├── OidcSignInCard.tsx
-        ├── MfaChallengeCard.tsx # QR + backup codes (enroll) / TOTP + backup-code (verify)
-        ├── WalletInfo.tsx
-        ├── RequestFaucet.tsx
-        ├── SendTransaction.tsx
-        └── TxResult.tsx   # Hash + Sepolia Etherscan link, shared by both actions
+├── app/                                  # Next.js layout and page
+├── hooks/                                # Para SDK and Ethers usage, one concern per hook
+├── components/
+│   ├── ParaProvider.tsx                  # Para setup
+│   ├── CustomOidcAuthExample.tsx         # Joins the auth and session hooks with the header, menu, and sign in gate
+│   ├── sign-in/OidcSignInContainer.tsx   # Joins the sign in and two-factor state with the sign in panel
+│   ├── wallet/WalletActionsContainer.tsx # Joins the balance, faucet, and send hooks with the workbench
+│   ├── layout/                           # App shell, header, footer, workbench
+│   └── ui/                               # Presentational components, props only
+├── lib/                                  # Chain and transfer config, copy, and UI helpers
+└── styles/globals.css                    # Tailwind theme tokens
 ```
 
-`src/hooks/*` holds the copyable Para logic; `src/components/ui/*` is prop-driven presentation
-with no Para imports.
-
-## Key Integration Pattern
-
-```tsx
-// Provider (src/components/ParaProvider.tsx)
-<QueryClientProvider client={queryClient}>
-  <ParaProvider paraClientConfig={{ apiKey, env }}>{children}</ParaProvider>
-</QueryClientProvider>;
-
-// Sign in (src/hooks/useOidcAuth.ts)
-const { authenticateWithOAuthAsync } = useAuthenticateWithOAuth();
-await authenticateWithOAuthAsync({ method: "CUSTOM_OIDC", useShortUrls: true /* + popup callbacks */ });
-
-// Login-time 2FA (src/hooks/useMfaChallenge.ts)
-// onStatePhaseChange reports authPhase "awaiting_2fa_enrollment" | "awaiting_2fa" mid-login.
-const { enrollMfaAsync } = useEnrollMfa(); // -> { uri (QR), backupCodes } on enrollment
-const { verifyMfaAsync } = useVerifyMfa();
-const result = await verifyMfaAsync({ code }); // ok -> SDK re-polls and advances to the wallet
-if (!result.ok) showAttemptsRemaining(result.attemptsRemaining);
-
-// Faucet (src/hooks/useFaucet.ts)
-const { requestFaucetAsync } = useRequestFaucet();
-const { transactionHash } = await requestFaucetAsync({ chain: "ETHEREUM_SEPOLIA" });
-
-// Send transaction (src/hooks/useSendTransaction.ts)
-const { ethersSigner } = useParaEthersSigner({ provider });
-const txResponse = await ethersSigner.sendTransaction({ to: wallet.address, value, /* ...gas */ });
-```
-
-## Related Examples
-
-- `custom-oauth-auth` — social login surface built on the same React SDK hooks.
-- `signer-ethers-v6` — a deeper tour of ethers signing flows with Para.
-
-## Learn More
-
-- [Para Documentation](https://docs.getpara.com)
-- [Execute transactions (EVM)](https://docs.getpara.com/v3/react/guides/web3-operations/evm/execute-transactions)
+Components in `layout/` and `ui/` never import Para. They receive data and callbacks from the containers, so you can swap them for your own design system without touching the hooks.

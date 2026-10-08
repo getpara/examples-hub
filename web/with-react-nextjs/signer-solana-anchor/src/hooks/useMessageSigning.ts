@@ -1,10 +1,8 @@
-"use client";
-
 import { useState, useCallback } from "react";
 import { Buffer } from "buffer";
 import bs58 from "bs58";
 import nacl from "tweetnacl";
-import { useParaSigner } from "./useParaSigner";
+import { useParaSigner } from "@/hooks/useParaSigner";
 
 export function useMessageSigning() {
   const { signer, anchorProvider, isReady } = useParaSigner();
@@ -51,7 +49,7 @@ export function useMessageSigning() {
       }
 
       try {
-        const messageBytes = new TextEncoder().encode(message);
+        const messageBytes = new TextEncoder().encode(message.trim());
         const signatureBytes = bs58.decode(sig);
         const publicKeyBuffer = anchorProvider.wallet.publicKey.toBytes();
         const isValid = nacl.sign.detached.verify(messageBytes, signatureBytes, publicKeyBuffer);

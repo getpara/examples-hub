@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import AtomTransferDemo from "@/components/demos/AtomTransferDemo";
+import { AtomTransferContainer } from "@/components/demos/AtomTransferContainer";
 
 export const metadata: Metadata = {
   title: "ATOM Transfer | Para CosmJS Signer",
@@ -7,5 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function AtomTransferPage() {
-  return <AtomTransferDemo />;
+  return <AtomTransferContainer />;
 }
