@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import { StellarSdkApp } from "@/components/StellarSdkApp";
-import XlmTransferDemo from "@/components/demos/XlmTransferDemo";
+import { XlmTransferContainer } from "@/components/demos/XlmTransferContainer";
 
 export const metadata: Metadata = {
   title: "XLM Transfer | Para Stellar SDK",
@@ -8,9 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function SignTransactionPage() {
-  return (
-    <StellarSdkApp>
-      <XlmTransferDemo />
-    </StellarSdkApp>
-  );
+  return <XlmTransferContainer />;
 }

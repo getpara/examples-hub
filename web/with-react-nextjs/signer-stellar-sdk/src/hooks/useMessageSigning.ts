@@ -1,10 +1,8 @@
-"use client";
-
 import { useState, useCallback } from "react";
 import { Buffer } from "buffer";
 import { StrKey } from "@stellar/stellar-sdk";
 import nacl from "tweetnacl";
-import { useParaSigner } from "./useParaSigner";
+import { useParaSigner } from "@/hooks/useParaSigner";
 
 export function useMessageSigning() {
   const { signer, isReady } = useParaSigner();

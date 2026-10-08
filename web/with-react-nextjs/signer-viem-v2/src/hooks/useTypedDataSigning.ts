@@ -1,10 +1,9 @@
-"use client";
-
 import { useCallback, useEffect, useState } from "react";
 import { formatEther, type Address, type Hex } from "viem";
-import { PARA_TEST_TOKEN_ABI, PARA_TEST_TOKEN_ADDRESS } from "@/lib/contracts";
-import { CHAIN, publicClient } from "@/lib/viem";
-import { useParaSigner } from "./useParaSigner";
+import { HOLESKY } from "@/lib/chain";
+import { PARA_TEST_TOKEN } from "@/lib/contracts";
+import { publicClient } from "@/lib/publicClient";
+import { useParaSigner } from "@/hooks/useParaSigner";
 
 interface SignedAttestation {
   holder: Address;
@@ -49,8 +48,8 @@ export function useTypedDataSigning() {
       setIsBalanceLoading(true);
       setError(null);
       const balance = await publicClient.readContract({
-        address: PARA_TEST_TOKEN_ADDRESS,
-        abi: PARA_TEST_TOKEN_ABI,
+        address: PARA_TEST_TOKEN.address,
+        abi: PARA_TEST_TOKEN.abi,
         functionName: "balanceOf",
         args: [address],
       });
@@ -79,20 +78,20 @@ export function useTypedDataSigning() {
       setError(null);
       const [balance, nonce, tokenName] = await Promise.all([
         publicClient.readContract({
-          address: PARA_TEST_TOKEN_ADDRESS,
-          abi: PARA_TEST_TOKEN_ABI,
+          address: PARA_TEST_TOKEN.address,
+          abi: PARA_TEST_TOKEN.abi,
           functionName: "balanceOf",
           args: [address],
         }),
         publicClient.readContract({
-          address: PARA_TEST_TOKEN_ADDRESS,
-          abi: PARA_TEST_TOKEN_ABI,
+          address: PARA_TEST_TOKEN.address,
+          abi: PARA_TEST_TOKEN.abi,
           functionName: "nonces",
           args: [address],
         }),
         publicClient.readContract({
-          address: PARA_TEST_TOKEN_ADDRESS,
-          abi: PARA_TEST_TOKEN_ABI,
+          address: PARA_TEST_TOKEN.address,
+          abi: PARA_TEST_TOKEN.abi,
           functionName: "name",
         }),
       ]);
@@ -105,8 +104,8 @@ export function useTypedDataSigning() {
         domain: {
           name: tokenName as string,
           version: "1",
-          chainId: CHAIN.id,
-          verifyingContract: PARA_TEST_TOKEN_ADDRESS,
+          chainId: HOLESKY.chain.id,
+          verifyingContract: PARA_TEST_TOKEN.address,
         },
         types: attestationTypes,
         primaryType: "Attestation",

@@ -1,129 +1,70 @@
-# Thirdweb Account Abstraction Example
+# Thirdweb Smart Account Example
 
 [![Live Demo](https://img.shields.io/badge/Live_Demo-black?style=for-the-badge&logo=vercel)](https://para-example-aa-thirdweb-4337.vercel.app)
 
-A minimal Next.js example that uses Para as the signer for a Thirdweb EIP-4337 smart account and sends a gas-sponsored transaction on Sepolia.
-
-## What This Example Shows
-
-- Setting up `ParaProvider` for Para SDK authentication
-- Using `useParaViemAccount` from `@getpara/react-sdk/evm` for the Para-backed viem account
-- Adapting the Para viem account into a Thirdweb personal account
-- Creating a Thirdweb smart wallet with gas sponsorship enabled
-- Sending a zero-value sponsored transaction through Thirdweb
+A minimal Next.js app that connects with the Para Modal, creates a Thirdweb ERC-4337 smart wallet owned by the Para wallet, and sends a zero-value, gas-sponsored transaction on Sepolia. All Para SDK usage lives in `src/hooks`. Everything else is plain React and Tailwind that you can replace with your own UI.
 
 ## Setup
 
-1. Create a `.env` file:
+Create a local `.env` file:
 
 ```env
-NEXT_PUBLIC_PARA_API_KEY=your_para_api_key
+NEXT_PUBLIC_PARA_API_KEY=your_api_key_here
 NEXT_PUBLIC_PARA_ENVIRONMENT=BETA
 NEXT_PUBLIC_THIRDWEB_CLIENT_ID=your_thirdweb_client_id
 ```
 
-2. Install dependencies:
+Configure the API key in the [Para Developer Portal](https://developer.getpara.com) with the app display name, branding and logo, theme, OAuth providers, email and phone login options, and wallet visibility. The local `ParaProvider` passes the API key, the environment, and runtime modal behavior such as on-ramp test mode and recovery step visibility.
+
+Get the Thirdweb client ID from the [Thirdweb Dashboard](https://thirdweb.com/dashboard). It stays an environment variable because it configures the Thirdweb smart wallet and gas sponsorship, not Para.
+
+Install and run the production build:
 
 ```bash
 yarn install
-```
-
-3. Build and run the production server:
-
-```bash
 yarn build
 yarn start
 ```
 
-For local development, use `yarn dev`.
+## Para usage
 
-## Getting API Keys
+These are the files to copy into your own app.
 
-- **Para API Key**: Get from [Para Developer Portal](https://developer.getpara.com)
-- **Thirdweb Client ID**: Get from [Thirdweb Dashboard](https://thirdweb.com/dashboard)
+| File | What it does |
+| --- | --- |
+| `src/components/ParaProvider.tsx` | Wraps the app in `ParaProvider` and a React Query client |
+| `src/hooks/useParaModalWallet.ts` | Opens the modal and reads the connected wallet with `useModal`, `useAccount`, and `useWallet` |
+| `src/hooks/useSmartAccount.ts` | Creates the Thirdweb smart account for the connected wallet with `useThirdwebSmartAccount` |
+| `src/hooks/useSponsoredTransaction.ts` | Sends a zero-value transaction from the smart account with `smartAccount.sendTransaction` |
+| `src/hooks/useAccountBalance.ts` | Reads the Para wallet balance with `useWalletBalance`. The balance appears once the API key has an RPC URL in the Developer Portal |
 
-## Developer Portal Configuration
-
-Configure the app name, branding, logo, theme, enabled OAuth providers, email and phone login options, 2FA setting, and auth layout on the Para API key in the Developer Portal. This example keeps only runtime modal behavior in code and relies on the Portal for persistent Para app configuration.
-
-The Thirdweb client ID remains an environment variable because it configures Thirdweb smart account and paymaster behavior for this example, not Para Portal settings.
-
-## Project Structure
-
+```tsx
+const { address, isConnected, openModal } = useParaModalWallet();
+const { smartAccount, address: smartAccountAddress, isLoading, errorMessage } = useSmartAccount({ enabled: isConnected });
+const { send, targetAddress, transactionHash, isPending } = useSponsoredTransaction(smartAccount);
 ```
+
+`useSmartAccount` passes the Thirdweb client ID, the Sepolia chain, and `sponsorGas: true` to `useThirdwebSmartAccount`, which connects an ERC-4337 Thirdweb smart wallet with the Para wallet as its signer. `useSponsoredTransaction` calls `smartAccount.sendTransaction({ to })` with the burn address `0x000000000000000000000000000000000000dEaD`. Thirdweb submits it as a UserOperation, its paymaster covers the gas, and the hook returns the receipt transaction hash.
+
+## Project layout
+
+```text
 src/
-├── app/
-│   ├── layout.tsx                  # Root layout and global styles
-│   └── page.tsx                    # Example route
+├── app/                         # Next.js layout and page
+├── hooks/                       # Para SDK usage, one concern per hook
 ├── components/
-│   ├── ParaProvider.tsx            # Para SDK provider setup
-│   ├── Thirdweb4337Example.tsx     # Client container for wallet state + UI
-│   ├── layout/Header.tsx           # Presentational header
-│   └── ui/
-│       ├── ConnectCard.tsx         # Connect wallet card
-│       ├── WalletInfo.tsx          # Para wallet + smart account display
-│       └── SendTransaction.tsx     # Presentational transaction UI
-├── hooks/
-│   └── useThirdwebSponsoredTransaction.ts
-└── lib/
-    └── thirdweb.ts                 # Thirdweb configuration
+│   ├── ParaProvider.tsx         # Para setup
+│   ├── ThirdwebExample.tsx      # Joins the hooks with the UI
+│   ├── layout/                  # App shell, header, footer, workbench
+│   └── ui/                      # Presentational components, props only
+├── lib/                         # Thirdweb and chain config, formatting, and UI helpers
+└── styles/globals.css           # Tailwind theme tokens
 ```
 
-## Key Integration Pattern
+Components in `layout/` and `ui/` never import Para. They receive data and callbacks from `ThirdwebExample`, so you can swap them for your own design system without touching the hooks.
 
-```typescript
-import { useParaViemAccount } from "@getpara/react-sdk/evm";
-import { createWalletClient, http } from "viem";
-import { prepareTransaction, sendTransaction } from "thirdweb";
-import { viemAdapter } from "thirdweb/adapters/viem";
-import { smartWallet } from "thirdweb/wallets";
-import { sepolia as thirdwebSepolia } from "thirdweb/chains";
-import { sepolia as viemSepolia } from "viem/chains";
+## Learn more
 
-type ThirdwebWalletClient = Parameters<typeof viemAdapter.walletClient.fromViem>[0]["walletClient"];
-
-const { viemAccount } = useParaViemAccount();
-
-if (!viemAccount) {
-  return;
-}
-
-const walletClient = createWalletClient({
-  account: viemAccount,
-  chain: viemSepolia,
-  transport: http(),
-});
-
-const personalAccount = viemAdapter.walletClient.fromViem({
-  walletClient: walletClient as unknown as ThirdwebWalletClient,
-});
-
-const wallet = smartWallet({
-  chain: thirdwebSepolia,
-  sponsorGas: true,
-});
-
-const smartAccount = await wallet.connect({
-  client: thirdwebClient,
-  personalAccount,
-});
-
-const transaction = prepareTransaction({
-  client: thirdwebClient,
-  chain: thirdwebSepolia,
-  to: "0x000000000000000000000000000000000000dEaD",
-  value: BigInt(0),
-});
-
-const { transactionHash } = await sendTransaction({
-  account: smartAccount,
-  transaction,
-});
-```
-
-## Learn More
-
-- [Para Documentation](https://docs.getpara.com)
-- [Thirdweb Documentation](https://portal.thirdweb.com)
-- [Thirdweb Smart Wallets](https://portal.thirdweb.com/wallets/smart-wallet)
-- [EIP-4337 Specification](https://eips.ethereum.org/EIPS/eip-4337)
+- [Para and Thirdweb guide](https://docs.getpara.com/v3/walkthroughs/Thirdweb)
+- [Thirdweb smart wallet documentation](https://portal.thirdweb.com/wallets/smart-wallet)
+- [ERC-4337 specification](https://eips.ethereum.org/EIPS/eip-4337)

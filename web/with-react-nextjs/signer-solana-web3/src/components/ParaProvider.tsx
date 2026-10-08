@@ -1,20 +1,16 @@
-'use client';
+"use client";
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ParaProvider as ParaSDKProvider } from '@getpara/react-sdk-lite';
-import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
-import type { ComponentProps } from 'react';
-import { API_KEY, DEVNET_RPC_URL, ENVIRONMENT } from '@/config/constants';
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Environment, ParaProvider as ParaSDKProvider } from "@getpara/react-sdk-lite";
+import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
+import { SOLANA_DEVNET } from "@/lib/chain";
 
-// Solana network configuration
-const solanaNetwork = WalletAdapterNetwork.Devnet;
-type SolanaConnectorConfig = NonNullable<
-  NonNullable<ComponentProps<typeof ParaSDKProvider>['externalWalletConfig']>['solanaConnector']
->['config'];
-const solanaConnectorConfig = {
-  endpoint: DEVNET_RPC_URL,
-  chain: solanaNetwork,
-} as unknown as SolanaConnectorConfig;
+const API_KEY = process.env.NEXT_PUBLIC_PARA_API_KEY ?? "";
+const ENVIRONMENT = (process.env.NEXT_PUBLIC_PARA_ENVIRONMENT as Environment) || Environment.BETA;
+
+if (!API_KEY) {
+  console.warn("NEXT_PUBLIC_PARA_API_KEY is not set. Para authentication will not work.");
+}
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -25,15 +21,7 @@ const queryClient = new QueryClient({
   },
 });
 
-if (!API_KEY) {
-  console.warn('NEXT_PUBLIC_PARA_API_KEY is not set. Para authentication will not work.');
-}
-
-export function ParaProvider({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export function ParaProvider({ children }: { children: React.ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       <ParaSDKProvider
@@ -43,14 +31,16 @@ export function ParaProvider({
         }}
         externalWalletConfig={{
           solanaConnector: {
-            config: solanaConnectorConfig,
+            config: {
+              endpoint: SOLANA_DEVNET.rpcUrl,
+              chain: WalletAdapterNetwork.Devnet,
+            },
           },
         }}
         paraModalConfig={{
           onRampTestMode: true,
           recoverySecretStepEnabled: true,
-        }}
-      >
+        }}>
         {children}
       </ParaSDKProvider>
     </QueryClientProvider>

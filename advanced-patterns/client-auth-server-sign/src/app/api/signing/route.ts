@@ -1,70 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Para as ParaServer, Environment } from "@getpara/server-sdk";
-import { createParaEthersSigner } from "@getpara/ethers-v6-integration";
-import { ethers } from "ethers";
-
-type RequestBody = {
-  session?: string;
-  transaction?: string;
-};
+import type { SigningRequestBody, SigningResponse } from "@/lib/signingApi";
+import { signAndBroadcastTransaction } from "@/lib/server/serverSigning";
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    const body: Partial<SigningRequestBody> = await request.json();
 
-    const { session, transaction } = body as RequestBody;
-
-    if (!session || !transaction) {
-      return NextResponse.json(
-        {
-          error: "Provide both `session` and `transaction` in the request body.",
-        },
+    if (!body.session || !body.transaction) {
+      return NextResponse.json<SigningResponse>(
+        { error: "Provide both `session` and `transaction` in the request body." },
         { status: 400 }
       );
     }
 
-    const PARA_API_KEY = process.env.NEXT_PUBLIC_PARA_API_KEY;
+    const result = await signAndBroadcastTransaction({ session: body.session, transaction: body.transaction });
 
-    if (!PARA_API_KEY) {
-      return NextResponse.json(
-        {
-          error: "NEXT_PUBLIC_PARA_API_KEY is not configured",
-        },
-        { status: 500 }
-      );
-    }
-
-    const txParsed = JSON.parse(transaction);
-
-    const tx = ethers.Transaction.from(txParsed);
-
-    const para = new ParaServer(
-      (process.env.NEXT_PUBLIC_PARA_ENVIRONMENT as Environment) ?? Environment.BETA,
-      PARA_API_KEY
-    );
-
-    await para.importSession(session);
-
-    const ethersProvider = new ethers.JsonRpcProvider("https://ethereum-sepolia-rpc.publicnode.com");
-
-    const paraEthersSigner = createParaEthersSigner({ para, provider: ethersProvider });
-
-    const signedTx = await paraEthersSigner.signTransaction(tx);
-
-    const txResponse = await ethersProvider.broadcastTransaction(signedTx);
-
-    return NextResponse.json({
-      message: "Transaction signed and broadcast successfully",
-      signedTransaction: signedTx,
-      transactionHash: txResponse.hash,
-      transactionResponse: txResponse,
-    });
+    return NextResponse.json<SigningResponse>(result);
   } catch (error) {
     console.error("Error in transaction signing handler:", error);
-    return NextResponse.json(
+
+    return NextResponse.json<SigningResponse>(
       {
         error: "Failed to sign or broadcast transaction",
-        details: (error as Error).message,
+        details: error instanceof Error ? error.message : undefined,
       },
       { status: 500 }
     );

@@ -1,10 +1,8 @@
-"use client";
-
 import { useCallback, useState } from "react";
 import { Buffer } from "buffer";
 import bs58 from "bs58";
 import nacl from "tweetnacl";
-import { useParaSigner } from "./useParaSigner";
+import { useParaSigner } from "@/hooks/useParaSigner";
 
 export function useMessageSigning() {
   const { signer, isReady } = useParaSigner();
@@ -35,7 +33,6 @@ export function useMessageSigning() {
         const signedBytes = await signer.signBytes(Buffer.from(messageBytes));
         setSignature(bs58.encode(signedBytes));
       } catch (err) {
-        console.error("Error signing message:", err);
         setError(err instanceof Error ? err : new Error("Failed to sign message"));
       } finally {
         setIsLoading(false);
@@ -52,13 +49,12 @@ export function useMessageSigning() {
       }
 
       try {
-        const messageBytes = new TextEncoder().encode(message);
+        const messageBytes = new TextEncoder().encode(message.trim());
         const signatureBytes = bs58.decode(signature);
         const publicKeyBuffer = signer.sender.toBytes();
         const isValid = nacl.sign.detached.verify(messageBytes, signatureBytes, publicKeyBuffer);
         setIsVerified(isValid);
       } catch (err) {
-        console.error("Error verifying signature:", err);
         setError(err instanceof Error ? err : new Error("Failed to verify signature"));
         setIsVerified(false);
       }

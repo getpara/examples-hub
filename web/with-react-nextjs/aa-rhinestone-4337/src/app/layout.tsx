@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import "./globals.css";
+import "@/styles/globals.css";
 import "@getpara/react-sdk/styles.css";
-
-const inter = Inter({ subsets: ["latin"] });
+import { ParaProvider } from "@/components/ParaProvider";
 
 export const metadata: Metadata = {
   title: "Rhinestone Account Abstraction Example",
@@ -17,7 +15,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body>
+        <ParaProvider>{children}</ParaProvider>
+      </body>
     </html>
   );
 }

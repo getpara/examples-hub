@@ -1,14 +1,11 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "@/styles/globals.css";
 import "@getpara/react-sdk-lite/styles.css";
 import { ParaProvider } from "@/components/ParaProvider";
 
-const inter = Inter({ subsets: ["latin"] });
-
 export const metadata: Metadata = {
   title: "Signer Canton Network Example",
-  description: "Onboard a Canton Network external party signed by Para's embedded Ed25519 key",
+  description: "Onboard a Canton Network external party signed by a Para wallet.",
 };
 
 export default function RootLayout({
@@ -18,7 +15,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.className} antialiased`}>
+      <body>
         <ParaProvider>{children}</ParaProvider>
       </body>
     </html>

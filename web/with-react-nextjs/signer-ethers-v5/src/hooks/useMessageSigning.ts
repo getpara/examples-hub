@@ -1,8 +1,6 @@
-"use client";
-
 import { useState, useCallback } from "react";
 import { ethers } from "ethers";
-import { useParaSigner } from "./useParaSigner";
+import { useParaSigner } from "@/hooks/useParaSigner";
 
 export function useMessageSigning() {
   const [signature, setSignature] = useState<string | null>(null);
@@ -14,20 +12,20 @@ export function useMessageSigning() {
 
   const signMessage = useCallback(
     async (message: string) => {
-      if (!signer) {
-        throw new Error("Signer not initialized. Please connect your wallet.");
-      }
-
-      if (!message.trim()) {
-        throw new Error("Please enter a message to sign.");
-      }
-
       setIsLoading(true);
       setError(null);
       setSignature(null);
       setRecoveredAddress(null);
 
       try {
+        if (!signer) {
+          throw new Error("Signer not initialized. Please connect your wallet.");
+        }
+
+        if (!message.trim()) {
+          throw new Error("Please enter a message to sign.");
+        }
+
         const sig = await signer.signMessage(message.trim());
         setSignature(sig);
         return sig;
@@ -44,12 +42,22 @@ export function useMessageSigning() {
 
   const verifySignature = useCallback(
     async (message: string, sig: string) => {
-      if (!message || !sig) {
-        throw new Error("Message and signature are required for verification.");
-      }
-
       try {
-        const recovered = ethers.utils.verifyMessage(message, sig);
+        if (!signer) {
+          throw new Error("Signer not initialized. Please connect your wallet.");
+        }
+
+        if (!message.trim() || !sig) {
+          throw new Error("Message and signature are required for verification.");
+        }
+
+        const recovered = ethers.utils.verifyMessage(message.trim(), sig);
+        const signerAddress = await signer.getAddress();
+
+        if (recovered.toLowerCase() !== signerAddress.toLowerCase()) {
+          throw new Error("Signature does not match the connected wallet.");
+        }
+
         setRecoveredAddress(recovered);
         return recovered;
       } catch (err) {
@@ -58,7 +66,7 @@ export function useMessageSigning() {
         throw error;
       }
     },
-    []
+    [signer]
   );
 
   const reset = useCallback(() => {

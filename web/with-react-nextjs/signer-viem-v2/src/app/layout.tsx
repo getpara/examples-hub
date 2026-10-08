@@ -1,11 +1,8 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import { ParaProvider } from "@/components/ParaProvider";
-import { ConnectedHeader } from "@/components/layout/ConnectedHeader";
 import "@/styles/globals.css";
 import "@getpara/react-sdk-lite/styles.css";
-
-const inter = Inter({ subsets: ["latin"] });
+import { ParaProvider } from "@/components/ParaProvider";
+import { ViemV2Example } from "@/components/ViemV2Example";
 
 export const metadata: Metadata = {
   title: "Para Viem v2 Signer",
@@ -19,10 +16,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.className} antialiased`}>
+      <body>
         <ParaProvider>
-          <ConnectedHeader />
-          <main>{children}</main>
+          <ViemV2Example>{children}</ViemV2Example>
         </ParaProvider>
       </body>
     </html>

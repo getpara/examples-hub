@@ -1,26 +1,17 @@
-"use client";
-
 import { useState, useEffect } from "react";
 import { SigningCosmWasmClient } from "@cosmjs/cosmwasm";
 import { GasPrice } from "@cosmjs/stargate";
-import { useParaCosmjsProtoSigner } from "@getpara/react-sdk-lite/chains/cosmos";
-import { useAccount } from "@getpara/react-sdk-lite";
-import { DEFAULT_CHAIN } from "@/config/chains";
-import { DEFAULT_GAS_PRICE } from "@/config/constants";
+import { useCosmosWalletConnection } from "@/hooks/useCosmosWalletConnection";
+import { ICS_PROVIDER_TESTNET } from "@/lib/chain";
 
 export function useParaCosmWasmSigner() {
   const [signingClient, setSigningClient] = useState<SigningCosmWasmClient | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  const { isConnected } = useAccount();
-  const { protoSigner, isLoading: isSignerLoading } = useParaCosmjsProtoSigner();
-
-  // Get the Cosmos address directly from the signer
-  const address = isConnected && protoSigner ? protoSigner.address : null;
+  const { isConnected, protoSigner, address, error: accountError, isLoading: isSignerLoading } = useCosmosWalletConnection();
 
   useEffect(() => {
-    // Clear client when disconnected or no signer available
     if (!isConnected || !protoSigner) {
       setSigningClient(null);
       setError(null);
@@ -34,9 +25,9 @@ export function useParaCosmWasmSigner() {
       setIsConnecting(true);
       try {
         const client = await SigningCosmWasmClient.connectWithSigner(
-          DEFAULT_CHAIN.rpc,
+          ICS_PROVIDER_TESTNET.rpcUrl,
           protoSigner,
-          { gasPrice: GasPrice.fromString(DEFAULT_GAS_PRICE) }
+          { gasPrice: GasPrice.fromString(ICS_PROVIDER_TESTNET.gasPrice) }
         );
 
         if (mounted) {
@@ -63,8 +54,7 @@ export function useParaCosmWasmSigner() {
     };
   }, [isConnected, protoSigner]);
 
-  // isLoading is true when either the signer is loading OR we're connecting the client
   const isLoading = isSignerLoading || isConnecting;
 
-  return { signingClient, address, isLoading, error };
+  return { signingClient, address: address || null, isLoading, error: accountError ?? error };
 }

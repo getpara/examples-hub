@@ -1342,34 +1342,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@cosmjs/encoding@npm:^0.32.4":
-  version: 0.32.4
-  resolution: "@cosmjs/encoding@npm:0.32.4"
-  dependencies:
-    base64-js: "npm:^1.3.0"
-    bech32: "npm:^1.1.4"
-    readonly-date: "npm:^1.0.0"
-  checksum: 10c0/4a30d5ae1a2d1247d44bda46101ce208c7666d8801ca9a33de94edc35cc22460c16b4834ec84d5a65ffef5e2a4b58605e0a0a056c46bc0a042979ec84acf20cd
-  languageName: node
-  linkType: hard
-
-"@craftzdog/react-native-buffer@npm:6.1.0":
-  version: 6.1.0
-  resolution: "@craftzdog/react-native-buffer@npm:6.1.0"
+"@craftzdog/react-native-buffer@npm:^6.1.2":
+  version: 6.1.2
+  resolution: "@craftzdog/react-native-buffer@npm:6.1.2"
   dependencies:
     ieee754: "npm:^1.2.1"
-    react-native-quick-base64: "npm:^2.0.5"
-  checksum: 10c0/ec6115d5ae1924a329b5ce7bebe147b7e2464e8529088dc1be75d8de67837976f0ecc555b486684a81b7a4e9d779335cf9c9a68afd03849f971e47456b55eafc
-  languageName: node
-  linkType: hard
-
-"@craftzdog/react-native-buffer@npm:^6.1.0":
-  version: 6.1.1
-  resolution: "@craftzdog/react-native-buffer@npm:6.1.1"
-  dependencies:
-    ieee754: "npm:^1.2.1"
-    react-native-quick-base64: "npm:^2.2.2"
-  checksum: 10c0/be70e3b53f72aaa97e7b742101e51039cafa0a20250addf3c1fbd2a852f59f50190ff79429152595b8b5330d58576c864fb211ceda8f967fa6b2f46df263b3d8
+    react-native-quick-base64: "npm:^3.0.0"
+  checksum: 10c0/039e9f74d4f06c0fd1008fc3d42a5ca50970c61a126bcb561f8b4cf8fd06ebc8a372adaeec36526de2d544e3117b71023b6fe2d634361c142b96978e64954f36
   languageName: node
   linkType: hard
 
@@ -1419,16 +1398,6 @@ __metadata:
     ethereum-cryptography: "npm:^2.0.0"
     micro-ftch: "npm:^0.3.1"
   checksum: 10c0/4e6e0449236f66b53782bab3b387108f0ddc050835bfe1381c67a7c038fea27cb85ab38851d98b700957022f0acb6e455ca0c634249cfcce1a116bad76500160
-  languageName: node
-  linkType: hard
-
-"@ethereumjs/util@npm:^9.1.0":
-  version: 9.1.0
-  resolution: "@ethereumjs/util@npm:9.1.0"
-  dependencies:
-    "@ethereumjs/rlp": "npm:^5.0.2"
-    ethereum-cryptography: "npm:^2.2.1"
-  checksum: 10c0/7b55c79d90e55da873037b8283c37b61164f1712b194e2783bdb0a3401ff0999dc9d1404c7051589f71fb79e8aeb6952ec43ede21dd0028d7d9b1c07abcfff27
   languageName: node
   linkType: hard
 
@@ -2146,14 +2115,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@getpara/core-sdk@npm:3.20.0":
-  version: 3.20.0
-  resolution: "@getpara/core-sdk@npm:3.20.0"
+"@getpara/core-sdk@npm:3.22.0":
+  version: 3.22.0
+  resolution: "@getpara/core-sdk@npm:3.22.0"
   dependencies:
     "@celo/utils": "npm:^8.0.2"
-    "@cosmjs/encoding": "npm:^0.32.4"
-    "@ethereumjs/util": "npm:^9.1.0"
-    "@getpara/user-management-client": "npm:3.20.0"
+    "@getpara/shared": "npm:^1.35.0"
+    "@getpara/user-management-client": "npm:3.22.0"
+    "@noble/curves": "npm:^1.9.7"
     "@noble/hashes": "npm:^1.5.0"
     "@opentelemetry/api": "npm:^1.9.1"
     "@opentelemetry/context-zone": "npm:^2.9.0"
@@ -2166,34 +2135,74 @@ __metadata:
     "@opentelemetry/resources": "npm:^2.9.0"
     "@opentelemetry/sdk-trace-base": "npm:^2.9.0"
     "@opentelemetry/semantic-conventions": "npm:^1.40.0"
+    "@scure/base": "npm:^1.2.6"
+    "@types/node-forge": "npm:^1.3.11"
     axios: "npm:^1.8.4"
-    base64url: "npm:^3.0.1"
-    elliptic: "npm:^6.6.1"
+    buffer: "npm:6.0.3"
     libphonenumber-js: "npm:^1.11.7"
     node-forge: "npm:^1.4.0"
     uuid: "npm:^11.1.1"
     xstate: "npm:^5.24.0"
-  checksum: 10c0/7c3f9c278cb341765ae7b3d954955e0fb0bb192f6ddbdff403cd9776810b28689244568440ded000eca038e4156e40ef1c3354fdf37c02a715efaf4be4546dc7
+  checksum: 10c0/40a377c97f3c3b265a79f2a32d70caf9eda4b459b8ccf4e593813d91d197706814295230318a535de60a24e8ece16df717150f2573aca9573e8b59ea6d714ca6
   languageName: node
   linkType: hard
 
-"@getpara/react-core@npm:3.20.0":
-  version: 3.20.0
-  resolution: "@getpara/react-core@npm:3.20.0"
+"@getpara/react-core@npm:3.22.0":
+  version: 3.22.0
+  resolution: "@getpara/react-core@npm:3.22.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.20.0"
+    "@getpara/core-sdk": "npm:3.22.0"
     zustand: "npm:^5.0.0"
   peerDependencies:
+    "@cosmjs/amino": ">=0.32.4"
+    "@cosmjs/proto-signing": ">=0.32.4"
+    "@getpara/aa-alchemy": ">=2.15.0"
+    "@getpara/aa-biconomy": ">=2.15.0"
+    "@getpara/aa-cdp": ">=2.15.0"
+    "@getpara/aa-gelato": ">=2.15.0"
+    "@getpara/aa-pimlico": ">=2.15.0"
+    "@getpara/aa-porto": ">=2.15.0"
+    "@getpara/aa-rhinestone": ">=2.15.0"
+    "@getpara/aa-safe": ">=2.15.0"
+    "@getpara/aa-thirdweb": ">=2.15.0"
+    "@getpara/aa-zerodev": ">=2.15.0"
     "@getpara/cosmjs-v0-integration": ">=2"
     "@getpara/ethers-v6-integration": ">=2"
     "@getpara/solana-signers-v2-integration": ">=2"
     "@getpara/stellar-sdk-v14-integration": ">=2"
     "@getpara/sui-sdk-integration": ">=2"
     "@getpara/viem-v2-integration": ">=2"
+    "@solana/signers": ">=2.0.0"
+    "@stellar/stellar-sdk": ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
     "@tanstack/react-query": ">=5"
+    ethers: ^6.0.0
     react: ">=18"
-    viem: ">=2"
+    viem: ^2.0.0
   peerDependenciesMeta:
+    "@cosmjs/amino":
+      optional: true
+    "@cosmjs/proto-signing":
+      optional: true
+    "@getpara/aa-alchemy":
+      optional: true
+    "@getpara/aa-biconomy":
+      optional: true
+    "@getpara/aa-cdp":
+      optional: true
+    "@getpara/aa-gelato":
+      optional: true
+    "@getpara/aa-pimlico":
+      optional: true
+    "@getpara/aa-porto":
+      optional: true
+    "@getpara/aa-rhinestone":
+      optional: true
+    "@getpara/aa-safe":
+      optional: true
+    "@getpara/aa-thirdweb":
+      optional: true
+    "@getpara/aa-zerodev":
+      optional: true
     "@getpara/cosmjs-v0-integration":
       optional: true
     "@getpara/ethers-v6-integration":
@@ -2206,26 +2215,54 @@ __metadata:
       optional: true
     "@getpara/viem-v2-integration":
       optional: true
-  checksum: 10c0/4aa72942c5f67ca8749dc519ad4e2631dec177f6f443520fcffa29563ac5b62d99552ce8133961501592a727633af472b38de0bbfe2f351c6c281d65c9ca1fb3
+    "@solana/signers":
+      optional: true
+    "@stellar/stellar-sdk":
+      optional: true
+    ethers:
+      optional: true
+    viem:
+      optional: true
+  checksum: 10c0/a84f5c1c24d9523b3546a4eaa705f82cc9a546d2c2a52c061d7b1b0d667f1b5789ba1612d5f26162a67d563f49ec74d8d047931e0197b4e67190146f5ad1a31e
   languageName: node
   linkType: hard
 
-"@getpara/react-native-wallet@npm:3.20.0":
-  version: 3.20.0
-  resolution: "@getpara/react-native-wallet@npm:3.20.0"
+"@getpara/react-native-wallet@npm:3.22.0":
+  version: 3.22.0
+  resolution: "@getpara/react-native-wallet@npm:3.22.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.20.0"
-    "@getpara/react-core": "npm:3.20.0"
-    "@getpara/user-management-client": "npm:3.20.0"
-    "@getpara/viem-v2-integration": "npm:3.20.0"
-    "@getpara/web-sdk": "npm:3.20.0"
+    "@getpara/core-sdk": "npm:3.22.0"
+    "@getpara/react-core": "npm:3.22.0"
+    "@getpara/user-management-client": "npm:3.22.0"
+    "@getpara/viem-v2-integration": "npm:3.22.0"
+    "@getpara/web-sdk": "npm:3.22.0"
     "@peculiar/webcrypto": "npm:^1.5.0"
     "@ungap/structured-clone": "npm:1.3.0"
+    base64url: "npm:^3.0.1"
+    brorand: "npm:^1.1.0"
+    elliptic: "npm:^6.6.1"
+    node-forge: "npm:^1.3.1"
+    process: "npm:^0.11.10"
     react-native-url-polyfill: "npm:2.0.0"
     readable-stream: "npm:^4.5.2"
     text-encoding: "npm:0.7.0"
   peerDependencies:
     "@craftzdog/react-native-buffer": ">=6.0.0"
+    "@getpara/aa-alchemy": ">=2.15.0"
+    "@getpara/aa-biconomy": ">=2.15.0"
+    "@getpara/aa-cdp": ">=2.15.0"
+    "@getpara/aa-gelato": ">=2.15.0"
+    "@getpara/aa-pimlico": ">=2.15.0"
+    "@getpara/aa-porto": ">=2.15.0"
+    "@getpara/aa-rhinestone": ">=2.15.0"
+    "@getpara/aa-safe": ">=2.15.0"
+    "@getpara/aa-thirdweb": ">=2.15.0"
+    "@getpara/aa-zerodev": ">=2.15.0"
+    "@getpara/cosmjs-v0-integration": ">=2"
+    "@getpara/ethers-v6-integration": ">=2"
+    "@getpara/solana-signers-v2-integration": ">=2"
+    "@getpara/stellar-sdk-v14-integration": ">=2"
+    "@getpara/sui-sdk-integration": ">=2"
     "@getpara/viem-v2-integration": ">=2.18.0"
     "@react-native-async-storage/async-storage": ">=2.0.0"
     "@tanstack/react-query": ">=5"
@@ -2238,64 +2275,89 @@ __metadata:
     react-native-quick-base64: ">=2.0.0"
     react-native-quick-crypto: ">=1.0.0"
   peerDependenciesMeta:
+    "@getpara/aa-alchemy":
+      optional: true
+    "@getpara/aa-biconomy":
+      optional: true
+    "@getpara/aa-cdp":
+      optional: true
+    "@getpara/aa-gelato":
+      optional: true
+    "@getpara/aa-pimlico":
+      optional: true
+    "@getpara/aa-porto":
+      optional: true
+    "@getpara/aa-rhinestone":
+      optional: true
+    "@getpara/aa-safe":
+      optional: true
+    "@getpara/aa-thirdweb":
+      optional: true
+    "@getpara/aa-zerodev":
+      optional: true
+    "@getpara/cosmjs-v0-integration":
+      optional: true
+    "@getpara/ethers-v6-integration":
+      optional: true
+    "@getpara/solana-signers-v2-integration":
+      optional: true
+    "@getpara/stellar-sdk-v14-integration":
+      optional: true
+    "@getpara/sui-sdk-integration":
+      optional: true
     "@getpara/viem-v2-integration":
       optional: true
-  checksum: 10c0/ae1c3c95969c562021177cd49831f0006e04a6ec0b4ddb92dd7af355696c88358708feec1e4115fb00fe0421573b414e2a0de046feff75a6deb2ae616d01c0f5
+  checksum: 10c0/a5b9e9acf2db51be527b92f4fc8842d27705d71291d18bd471739bff43b870723b276af107284329c5cd411e71c206ce9087a2e4322040752cc72dace9ae33b1
   languageName: node
   linkType: hard
 
-"@getpara/shared@npm:^1.33.0":
-  version: 1.33.0
-  resolution: "@getpara/shared@npm:1.33.0"
+"@getpara/shared@npm:^1.35.0":
+  version: 1.35.0
+  resolution: "@getpara/shared@npm:1.35.0"
   dependencies:
     zod: "npm:^3.22.4"
-  checksum: 10c0/443bb9c843f772ebc2f622e5e08ea02c7ef3cf51655333535cfba645bf206d009269c0b8ce906fb8c5114fb03b88f17339ba2bff5e24b8411ad2e2feb7067249
+  checksum: 10c0/1c78ce3bacd7ad1e9394994259543bd219fd3bd24e87a6f91230265c88f7cc3e68e27b19edab255905a849f69bf0eef07a9e57406a87fb7206609a75065979d0
   languageName: node
   linkType: hard
 
-"@getpara/user-management-client@npm:3.20.0":
-  version: 3.20.0
-  resolution: "@getpara/user-management-client@npm:3.20.0"
+"@getpara/user-management-client@npm:3.22.0":
+  version: 3.22.0
+  resolution: "@getpara/user-management-client@npm:3.22.0"
   dependencies:
-    "@getpara/shared": "npm:^1.33.0"
+    "@getpara/shared": "npm:^1.35.0"
     "@opentelemetry/api": "npm:^1.9.1"
     axios: "npm:^1.8.4"
     axios-retry: "npm:^4.5.0"
     libphonenumber-js: "npm:^1.11.7"
-  checksum: 10c0/46210cf54f37c874c27c3b9ab57607b063ac52a5f586981b4aacf58ae5273f4cff7f29925c02e7092b594d72718d4c9dee0ae47edf65ee467ec3e35ae2d36452
+  checksum: 10c0/596320b517ece8da5bbcbdc59eeaea26c657dd65371e420fa33225e33b9c5184e8c6b3db74974de0176288ba22115c526244d403481ff525d074947756670a34
   languageName: node
   linkType: hard
 
-"@getpara/viem-v2-integration@npm:3.20.0":
-  version: 3.20.0
-  resolution: "@getpara/viem-v2-integration@npm:3.20.0"
+"@getpara/viem-v2-integration@npm:3.22.0":
+  version: 3.22.0
+  resolution: "@getpara/viem-v2-integration@npm:3.22.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.20.0"
+    "@getpara/core-sdk": "npm:3.22.0"
   peerDependencies:
-    viem: ^2.39.0
-  checksum: 10c0/802e0ae9ab31f5c2f526ac7ff59399b0b11e3e1188c4e9eb62beece2061c4cd2c52bfab9ac100a24efbcd65c7c5e77319bfd237ecdead7e26199b2756301655d
+    viem: ^2.10.0
+  checksum: 10c0/a00249b2817e0ef3167e87dc1689c56b4369f6ae4f08408a047dcca5ce5ce58acaa50c396c5e40bea5a7f87aed5e49d2af1325381bfb1b2c0204e11d385e9474
   languageName: node
   linkType: hard
 
-"@getpara/web-sdk@npm:3.20.0":
-  version: 3.20.0
-  resolution: "@getpara/web-sdk@npm:3.20.0"
+"@getpara/web-sdk@npm:3.22.0":
+  version: 3.22.0
+  resolution: "@getpara/web-sdk@npm:3.22.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.20.0"
-    "@getpara/user-management-client": "npm:3.20.0"
+    "@getpara/core-sdk": "npm:3.22.0"
+    "@getpara/user-management-client": "npm:3.22.0"
     "@opentelemetry/api": "npm:^1.9.1"
-    base64url: "npm:^3.0.1"
+    "@scure/base": "npm:^1.2.6"
     buffer: "npm:6.0.3"
     cbor-web: "npm:^9.0.2"
     node-forge: "npm:^1.4.0"
     ua-parser-js: "npm:^2.0.2"
     uuid: "npm:^11.1.1"
-  peerDependencies:
-    "@farcaster/miniapp-sdk": ^0.1.2
-  peerDependenciesMeta:
-    "@farcaster/miniapp-sdk":
-      optional: true
-  checksum: 10c0/57b277104d348614f5536380dc04e98fca9fac9ace855ee3f6df1ab79473773452a15a846c164ea13b949b955c2eb860a9b09209a4b828211ea1a26f9ac122a4
+  checksum: 10c0/c358e25f38e8c704e45a933db14bbc745babe89f07fd288ac65bdb054e86d37c10ece721adbaa5c91842be6fd4f6e012ef60899a816185931a9bf972d42111a8
   languageName: node
   linkType: hard
 
@@ -2511,7 +2573,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@noble/curves@npm:~1.9.0":
+"@noble/curves@npm:^1.9.7, @noble/curves@npm:~1.9.0":
   version: 1.9.7
   resolution: "@noble/curves@npm:1.9.7"
   dependencies:
@@ -3528,17 +3590,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@scure/base@npm:^1.2.6, @scure/base@npm:~1.2.5":
+  version: 1.2.6
+  resolution: "@scure/base@npm:1.2.6"
+  checksum: 10c0/49bd5293371c4e062cb6ba689c8fe3ea3981b7bb9c000400dc4eafa29f56814cdcdd27c04311c2fec34de26bc373c593a1d6ca6d754398a488d587943b7c128a
+  languageName: node
+  linkType: hard
+
 "@scure/base@npm:~1.1.0, @scure/base@npm:~1.1.6":
   version: 1.1.9
   resolution: "@scure/base@npm:1.1.9"
   checksum: 10c0/77a06b9a2db8144d22d9bf198338893d77367c51b58c72b99df990c0a11f7cadd066d4102abb15e3ca6798d1529e3765f55c4355742465e49aed7a0c01fe76e8
-  languageName: node
-  linkType: hard
-
-"@scure/base@npm:~1.2.5":
-  version: 1.2.6
-  resolution: "@scure/base@npm:1.2.6"
-  checksum: 10c0/49bd5293371c4e062cb6ba689c8fe3ea3981b7bb9c000400dc4eafa29f56814cdcdd27c04311c2fec34de26bc373c593a1d6ca6d754398a488d587943b7c128a
   languageName: node
   linkType: hard
 
@@ -3736,6 +3798,15 @@ __metadata:
   dependencies:
     "@types/istanbul-lib-report": "npm:*"
   checksum: 10c0/1647fd402aced5b6edac87274af14ebd6b3a85447ef9ad11853a70fd92a98d35f81a5d3ea9fcb5dbb5834e800c6e35b64475e33fcae6bfa9acc70d61497c54ee
+  languageName: node
+  linkType: hard
+
+"@types/node-forge@npm:^1.3.11":
+  version: 1.3.14
+  resolution: "@types/node-forge@npm:1.3.14"
+  dependencies:
+    "@types/node": "npm:*"
+  checksum: 10c0/da6158fd34fa7652aa7f8164508f97a76b558724ab292f13c257e39d54d95d4d77604e8fb14dc454a867f1aeec7af70118294889195ec4400cecbb8a5c77a212
   languageName: node
   linkType: hard
 
@@ -4271,7 +4342,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"base64-js@npm:^1.3.0, base64-js@npm:^1.3.1, base64-js@npm:^1.5.1":
+"base64-js@npm:^1.3.1, base64-js@npm:^1.5.1":
   version: 1.5.1
   resolution: "base64-js@npm:1.5.1"
   checksum: 10c0/f23823513b63173a001030fae4f2dabe283b99a9d324ade3ad3d148e218134676f1ee8568c877cd79ec1c53158dcf2d2ba527a97c606618928ba99dd930102bf
@@ -4291,13 +4362,6 @@ __metadata:
   bin:
     baseline-browser-mapping: dist/cli.cjs
   checksum: 10c0/391d354240160546c8248317698b61f21f287cc6444766414c2d299a8880045e605ed97e8d8cd198a0b9dfaa4e73c2fa765bbef089474533a904733b1dc9a363
-  languageName: node
-  linkType: hard
-
-"bech32@npm:^1.1.4":
-  version: 1.1.4
-  resolution: "bech32@npm:1.1.4"
-  checksum: 10c0/5f62ca47b8df99ace9c0e0d8deb36a919d91bf40066700aaa9920a45f86bb10eb56d537d559416fd8703aa0fb60dddb642e58f049701e7291df678b2033e5ee5
   languageName: node
   linkType: hard
 
@@ -5150,7 +5214,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ethereum-cryptography@npm:^2.0.0, ethereum-cryptography@npm:^2.1.2, ethereum-cryptography@npm:^2.2.1":
+"ethereum-cryptography@npm:^2.0.0, ethereum-cryptography@npm:^2.1.2":
   version: 2.2.1
   resolution: "ethereum-cryptography@npm:2.2.1"
   dependencies:
@@ -7485,7 +7549,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"node-forge@npm:^1.3.3, node-forge@npm:^1.4.0":
+"node-forge@npm:^1.3.1, node-forge@npm:^1.3.3, node-forge@npm:^1.4.0":
   version: 1.4.0
   resolution: "node-forge@npm:1.4.0"
   checksum: 10c0/67330a5f1f95257a4c8a93b7d555abe87b5f15e350123aa396c97a21a8ca94f9c6549008eb2c73668a91e0d7e3a905785acbd8f8bd0751c29401292011f8f8e1
@@ -8117,39 +8181,36 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-quick-base64@npm:^2.0.5, react-native-quick-base64@npm:^2.2.0, react-native-quick-base64@npm:^2.2.2":
-  version: 2.2.2
-  resolution: "react-native-quick-base64@npm:2.2.2"
+"react-native-quick-base64@npm:^3.0.0":
+  version: 3.0.1
+  resolution: "react-native-quick-base64@npm:3.0.1"
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: 10c0/25a550388ce51ada9c63be3b301f1c0e1de160ff3c3b956ea081febecf6d8a2cd6ed510b5cb34403c540a2a475c614bad3b098f922fb88cc9dd72ebf1949d972
+  checksum: 10c0/5600efa5a5583b6160a6b9d74c3dcfb3cef491b6267e9ce9193f82598662df780310ac32247505d99ec2c6cf72162ed48ed32e342a61fffc02e5375d3a7d871b
   languageName: node
   linkType: hard
 
-"react-native-quick-crypto@npm:^1.0.18":
-  version: 1.0.18
-  resolution: "react-native-quick-crypto@npm:1.0.18"
+"react-native-quick-crypto@npm:^1.1.4":
+  version: 1.1.7
+  resolution: "react-native-quick-crypto@npm:1.1.7"
   dependencies:
-    "@craftzdog/react-native-buffer": "npm:6.1.0"
+    "@craftzdog/react-native-buffer": "npm:^6.1.2"
     events: "npm:3.3.0"
-    readable-stream: "npm:4.5.2"
+    readable-stream: "npm:4.7.0"
     safe-buffer: "npm:^5.2.1"
     string_decoder: "npm:^1.3.0"
     util: "npm:0.12.5"
   peerDependencies:
     expo: ">=48.0.0"
-    expo-build-properties: "*"
     react: "*"
     react-native: "*"
-    react-native-nitro-modules: ">=0.29.1"
-    react-native-quick-base64: ">=2.1.0"
+    react-native-nitro-modules: ">=0.31.2"
+    react-native-quick-base64: ">=3.0.0"
   peerDependenciesMeta:
     expo:
       optional: true
-    expo-build-properties:
-      optional: true
-  checksum: 10c0/348be5bb622ea5f7db9ba5a25202b977e12253a9a7dab09a6af707d6ebf00b46bf14adef044294e98eb56727c9231bcc1c98e34bc63b9da6b59fb7d71555a99e
+  checksum: 10c0/9b2528a2cce41d01f4e346f356bd7bc706402cd02489398dddf60fa1f570031c2999346848f7cb8c78f50f3c236667612e3f732207e2b286d22dea91c9c9e60a
   languageName: node
   linkType: hard
 
@@ -8359,20 +8420,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"readable-stream@npm:4.5.2":
-  version: 4.5.2
-  resolution: "readable-stream@npm:4.5.2"
-  dependencies:
-    abort-controller: "npm:^3.0.0"
-    buffer: "npm:^6.0.3"
-    events: "npm:^3.3.0"
-    process: "npm:^0.11.10"
-    string_decoder: "npm:^1.3.0"
-  checksum: 10c0/a2c80e0e53aabd91d7df0330929e32d0a73219f9477dbbb18472f6fdd6a11a699fc5d172a1beff98d50eae4f1496c950ffa85b7cc2c4c196963f289a5f39275d
-  languageName: node
-  linkType: hard
-
-"readable-stream@npm:^4.5.2":
+"readable-stream@npm:4.7.0, readable-stream@npm:^4.5.2":
   version: 4.7.0
   resolution: "readable-stream@npm:4.7.0"
   dependencies:
@@ -8382,13 +8430,6 @@ __metadata:
     process: "npm:^0.11.10"
     string_decoder: "npm:^1.3.0"
   checksum: 10c0/fd86d068da21cfdb10f7a4479f2e47d9c0a9b0c862fc0c840a7e5360201580a55ac399c764b12a4f6fa291f8cee74d9c4b7562e0d53b3c4b2769f2c98155d957
-  languageName: node
-  linkType: hard
-
-"readonly-date@npm:^1.0.0":
-  version: 1.0.0
-  resolution: "readonly-date@npm:1.0.0"
-  checksum: 10c0/7ab32bf19f6bfec102584a524fa79a289e6ede0bf20c80fd90ab309962e45b71d19dd0e3915dff6e81edf226f08fda65e890539b4aca74668921790b10471356
   languageName: node
   linkType: hard
 
@@ -9555,9 +9596,9 @@ __metadata:
   resolution: "with-expo-password@workspace:."
   dependencies:
     "@babel/core": "npm:^7.20.0"
-    "@craftzdog/react-native-buffer": "npm:^6.1.0"
-    "@getpara/react-native-wallet": "npm:3.20.0"
-    "@getpara/viem-v2-integration": "npm:3.20.0"
+    "@craftzdog/react-native-buffer": "npm:^6.1.2"
+    "@getpara/react-native-wallet": "npm:3.22.0"
+    "@getpara/viem-v2-integration": "npm:3.22.0"
     "@peculiar/webcrypto": "npm:^1.5.0"
     "@react-native-async-storage/async-storage": "npm:^2.2.0"
     "@tanstack/react-query": "npm:^5.95.2"
@@ -9577,8 +9618,8 @@ __metadata:
     react-native-modpow: "npm:^1.1.0"
     react-native-nitro-modules: "npm:^0.35.2"
     react-native-passkey: "npm:^3.3.2"
-    react-native-quick-base64: "npm:^2.2.0"
-    react-native-quick-crypto: "npm:^1.0.18"
+    react-native-quick-base64: "npm:^3.0.0"
+    react-native-quick-crypto: "npm:^1.1.4"
     react-native-reanimated: "npm:4.2.1"
     react-native-safe-area-context: "npm:~5.6.0"
     react-native-screens: "npm:~4.23.0"

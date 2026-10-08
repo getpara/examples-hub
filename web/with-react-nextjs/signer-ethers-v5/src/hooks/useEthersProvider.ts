@@ -1,13 +1,10 @@
-"use client";
-
 import { useMemo } from "react";
 import { ethers } from "ethers";
-
-const HOLESKY_RPC_URL = process.env.NEXT_PUBLIC_HOLESKY_RPC_URL || "https://ethereum-holesky-rpc.publicnode.com";
+import { HOLESKY } from "@/lib/chain";
 
 export function useEthersProvider() {
   const provider = useMemo(() => {
-    return new ethers.providers.JsonRpcProvider(HOLESKY_RPC_URL);
+    return new ethers.providers.JsonRpcProvider(HOLESKY.rpcUrl);
   }, []);
 
   return {

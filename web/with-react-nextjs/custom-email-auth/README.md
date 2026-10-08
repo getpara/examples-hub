@@ -2,20 +2,20 @@
 
 [![Live Demo](https://img.shields.io/badge/Live_Demo-black?style=for-the-badge&logo=vercel)](https://para-example-custom-email-auth.vercel.app)
 
-This example shows a custom Para email OTP authentication flow in a Next.js app. It uses Para React SDK hooks directly instead of ParaModal so the email auth logic can be copied into an app with its own UI.
+A Next.js app that signs in with its own email login UI instead of the Para Modal, then shows the connected account and its Sepolia balance and signs `Hello World!`. All Para SDK usage lives in `src/hooks`. Everything else is plain React and Tailwind that you can replace with your own UI.
 
 ## Setup
 
-Create `.env`:
+Create a local `.env` file:
 
 ```env
-NEXT_PUBLIC_PARA_API_KEY=your_para_api_key
+NEXT_PUBLIC_PARA_API_KEY=your_api_key_here
 NEXT_PUBLIC_PARA_ENVIRONMENT=BETA
 ```
 
-Configure the API key in the [Para Developer Portal](https://developer.getpara.com) with email login availability, 2FA policy, app display name, branding, and auth layout.
+Configure the API key in the [Para Developer Portal](https://developer.getpara.com) with the app display name, branding, email login, and 2FA policy.
 
-Install and run the production server:
+Install and run the production build:
 
 ```bash
 yarn install
@@ -23,59 +23,41 @@ yarn build
 yarn start
 ```
 
-## Key Files
+## Para usage
 
-```text
-src/
-├── app/
-│   ├── layout.tsx
-│   └── page.tsx
-├── components/
-│   ├── CustomEmailAuthExample.tsx
-│   ├── CustomEmailAuthPreview.tsx
-│   ├── ParaProvider.tsx
-│   ├── layout/Header.tsx
-│   └── ui/
-│       ├── EmailAuth.tsx
-│       ├── EmailForm.tsx
-│       ├── VerifyIframe.tsx
-│       ├── WalletInfo.tsx
-│       └── SignMessage.tsx
-└── hooks/
-    ├── useEmailAuth.ts
-    ├── useParaSession.ts
-    └── useSignHelloWorld.ts
-```
+These are the files to copy into your own app.
 
-`src/hooks/useEmailAuth.ts` contains the copyable Para email auth logic. `src/components/ui/*` is prop-driven presentation and has no Para, Wagmi, or Viem imports.
-
-## Core Email Hook
+| File | What it does |
+| --- | --- |
+| `src/components/ParaProvider.tsx` | Wraps the app in `ParaProvider` and a React Query client |
+| `src/hooks/useEmailAuth.ts` | Signs in with an email address through `useAuthenticateWithEmailOrPhone` |
+| `src/hooks/useParaSession.ts` | Reads the connected wallet with `useAccount` and `useWallet`, and logs out with `useLogout` |
+| `src/hooks/useSignHelloWorld.ts` | Signs `Hello World!` with a Para Viem client and `useParaViemSignMessage` |
+| `src/hooks/useAccountBalance.ts` | Reads the wallet balance with `useWalletBalance`. The balance appears once the API key has an RPC URL in the Developer Portal |
+| `src/hooks/useE2ECleanup.ts` | Test-only cleanup for the E2E suite, active in development only |
 
 ```tsx
 const auth = useEmailAuth();
-
-return (
-  <EmailAuth
-    email={auth.email}
-    error={auth.error}
-    isPending={auth.isPending}
-    onCancel={auth.cancel}
-    onEmailChange={auth.setEmail}
-    onSubmit={auth.submit}
-    step={auth.step}
-    verifyUrl={auth.verifyUrl}
-  />
-);
+const { address, isConnected, disconnect } = useParaSession();
+const { sign, message, isPending, errorMessage, signature } = useSignHelloWorld();
 ```
 
-`useEmailAuth` uses `useAuthenticateWithEmailOrPhone`, renders verification and credential URLs from SDK state, and resolves only after the authenticated session and any required wallet are ready.
+`useEmailAuth` watches the Para client state and shows the verification URL in an iframe, or opens the passkey URL in a pop-up, until the session and wallet are ready. It can cancel the attempt.
 
-## Connected Wallet Hooks
+## Project layout
 
-`useParaSession` reads the connected wallet state and exposes `disconnect`. `useSignHelloWorld` creates a Para Viem client for Sepolia and signs a message with `useParaViemSignMessage`.
+```text
+src/
+├── app/                                # Next.js layout and page
+├── hooks/                              # Para SDK usage, one concern per hook
+├── components/
+│   ├── ParaProvider.tsx                # Para setup
+│   ├── CustomEmailAuthExample.tsx      # Joins the session and signing hooks with the UI
+│   ├── sign-in/EmailSignInContainer.tsx  # Joins the email sign in hook with the sign in panel
+│   ├── layout/                         # App shell, header, footer, workbench
+│   └── ui/                             # Presentational components, props only
+├── lib/                                # Chain config, sign in copy, and UI helpers
+└── styles/globals.css                  # Tailwind theme tokens
+```
 
-## Dependency Notes
-
-This example uses `@getpara/react-sdk@3.0.0` with Next.js 16 and React 19. Because the current catch-all SDK entry evaluates chain and account-abstraction barrels during production builds, the example includes the build-reachable modules `@metamask/delegation-toolkit`, `ethers`, `@stellar/stellar-sdk`, and `@wagmi/core` directly until the SDK export surface is narrowed.
-
-The remaining install warnings are expected from shared wallet packages that still peer on Wagmi Core v2 or optional React Native packages.
+Components in `layout/` and `ui/` never import Para. They receive data and callbacks from the two containers, so you can swap them for your own design system without touching the hooks.

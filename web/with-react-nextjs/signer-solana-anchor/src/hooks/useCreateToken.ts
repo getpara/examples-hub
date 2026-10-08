@@ -1,12 +1,9 @@
-"use client";
-
 import { useState, useCallback } from "react";
 import * as anchor from "@coral-xyz/anchor";
 import { SystemProgram } from "@solana/web3.js";
 import { TOKEN_2022_PROGRAM_ID } from "@solana/spl-token";
-import { TransferTokens } from "@/idl/transfer_tokens";
-import idl from "@/idl/transfer_tokens.json";
-import { useParaSigner } from "./useParaSigner";
+import { getTransferTokensProgram } from "@/lib/program";
+import { useParaSigner } from "@/hooks/useParaSigner";
 
 export function useCreateToken() {
   const { signer, anchorProvider, isReady } = useParaSigner();
@@ -36,7 +33,7 @@ export function useCreateToken() {
       try {
         anchor.setProvider(anchorProvider);
 
-        const program = new anchor.Program(idl as TransferTokens, anchorProvider);
+        const program = getTransferTokensProgram(anchorProvider);
 
         const mintKeypair = anchor.web3.Keypair.generate();
         setMintAddress(mintKeypair.publicKey.toString());

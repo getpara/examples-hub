@@ -1,19 +1,17 @@
-"use client";
-
 import { useState } from "react";
-import { verifyMessage, type Hex } from "viem";
-import { useParaSigner } from "./useParaSigner";
+import { verifyMessage, type Address, type Hex } from "viem";
+import { useParaSigner } from "@/hooks/useParaSigner";
 
 export function useMessageSigning() {
   const { viemClient, account, address, isReady } = useParaSigner();
   const [signature, setSignature] = useState<Hex | null>(null);
-  const [recoveredAddress, setRecoveredAddress] = useState<string | null>(null);
+  const [verifiedAddress, setVerifiedAddress] = useState<Address | null>(null);
   const [error, setError] = useState<Error | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const reset = () => {
     setSignature(null);
-    setRecoveredAddress(null);
+    setVerifiedAddress(null);
     setError(null);
   };
 
@@ -49,7 +47,12 @@ export function useMessageSigning() {
         message,
         signature: sig,
       });
-      setRecoveredAddress(isValid ? address : "Signature does not match the connected wallet");
+
+      if (!isValid) {
+        throw new Error("Signature does not match the connected wallet.");
+      }
+
+      setVerifiedAddress(address);
     } catch (err) {
       setError(err instanceof Error ? err : new Error("Failed to verify signature"));
     } finally {
@@ -61,7 +64,7 @@ export function useMessageSigning() {
     signMessage,
     verifySignature,
     signature,
-    recoveredAddress,
+    verifiedAddress,
     isLoading,
     isReady,
     error,

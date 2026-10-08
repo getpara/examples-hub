@@ -1,49 +1,107 @@
 "use client";
 
-import { Header } from "@/components/layout/Header";
-import { ConnectWalletCard } from "@/components/ui/ConnectWalletCard";
-import { WalletDisplay } from "@/components/ui/WalletDisplay";
-import { APP_DESCRIPTION } from "@/config/appkit";
+import { AppShell } from "@/components/layout/AppShell";
+import { ExampleFooter } from "@/components/layout/ExampleFooter";
+import { ExampleHeader } from "@/components/layout/ExampleHeader";
+import { Workbench } from "@/components/layout/Workbench";
+import { AccountStrip } from "@/components/ui/AccountStrip";
+import { ActionPanel } from "@/components/ui/ActionPanel";
+import { Aside } from "@/components/ui/Aside";
+import { BadgeList } from "@/components/ui/BadgeList";
+import { Button } from "@/components/ui/Button";
+import { Facts, type FactRow } from "@/components/ui/Facts";
+import { Icon } from "@/components/ui/Icon";
+import { SignInPanel } from "@/components/ui/SignInPanel";
+import { UserCircleIcon } from "@/components/ui/UserCircleIcon";
+import { useReownAppKitNetwork } from "@/hooks/useReownAppKitNetwork";
 import { useReownAppKitWallet } from "@/hooks/useReownAppKitWallet";
+import { useWagmiBalance } from "@/hooks/useWagmiBalance";
+import { NETWORKS } from "@/lib/chain";
+import { EXAMPLE } from "@/lib/example";
+import { formatBalance } from "@/lib/format";
+import { useCopyToClipboard } from "@/lib/useCopyToClipboard";
+
+const NETWORK_NAMES = NETWORKS.map((network) => network.name);
 
 export function ReownAppKitExample() {
   const wallet = useReownAppKitWallet();
+  const network = useReownAppKitNetwork();
+  const balance = useWagmiBalance(wallet.address);
+  const addressCopy = useCopyToClipboard();
+
+  const header = (
+    <ExampleHeader
+      scope={EXAMPLE.scope}
+      isConnected={wallet.isConnected}
+      address={wallet.address}
+      onConnect={wallet.openAppKit}
+      onOpenAccount={wallet.openAppKit}
+    />
+  );
+
+  const footer = <ExampleFooter docsHref={EXAMPLE.docsHref} sourceHref={EXAMPLE.sourceHref} />;
+
+  if (!wallet.isConnected) {
+    return (
+      <AppShell header={header} footer={footer}>
+        <SignInPanel
+          title="Connect a wallet"
+          description="Open Reown AppKit and choose Para."
+          network={network.networkName}>
+          <Button size="lg" fullWidth onClick={wallet.openAppKit} data-testid="auth-connect-button">
+            Connect wallet
+          </Button>
+        </SignInPanel>
+      </AppShell>
+    );
+  }
+
+  const formattedBalance = formatBalance(balance.balance, balance.symbol);
+  const facts: FactRow[] = [
+    { label: "Connector", value: wallet.connectorName ?? "Unknown" },
+    { label: "Network", value: network.networkName },
+    ...(formattedBalance ? [{ label: "Balance", value: formattedBalance, tone: "data" as const }] : []),
+  ];
 
   return (
-    <main className="min-h-screen">
-      <Header
+    <AppShell header={header} footer={footer}>
+      <AccountStrip
         address={wallet.address}
-        isConnected={wallet.isConnected}
-        onConnect={wallet.openAppKit}
+        onCopyAddress={() => addressCopy.copy(wallet.address)}
+        addressCopyStatus={addressCopy.status}
+        network={network.networkName}
+        balance={formattedBalance}
+        isBalanceLoading={balance.isLoading}
+        isBalanceRefreshing={balance.isRefreshing}
+        onRefreshBalance={balance.refresh}
       />
-
-      <section className="mx-auto flex w-full max-w-4xl flex-col gap-8 px-4 py-12 sm:px-6 lg:px-8">
-        <div className="animate-fade-in-up text-center">
-          <p className="mb-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-            Reown AppKit connector
-          </p>
-          <h1 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-            Connect with Reown AppKit
-          </h1>
-          <p className="mx-auto mt-4 max-w-2xl text-sm leading-6 text-muted-foreground">
-            {APP_DESCRIPTION}
-          </p>
-        </div>
-
-        <div className="animate-fade-in-up-delayed mx-auto w-full max-w-xl">
-          {!wallet.isConnected ? (
-            <ConnectWalletCard onConnect={wallet.openAppKit} />
-          ) : (
-            <WalletDisplay
-              address={wallet.address}
-              balance={wallet.balance}
-              networkName={wallet.networkName}
-              onDisconnect={wallet.disconnectWallet}
-              onOpenAccount={wallet.openAppKit}
-            />
-          )}
-        </div>
-      </section>
-    </main>
+      <Workbench
+        aside={
+          <Aside title="Networks">
+            <BadgeList label="Supported networks" items={NETWORK_NAMES} hint="Switch networks from the AppKit account view." />
+          </Aside>
+        }>
+        <ActionPanel
+          title="Your wallet"
+          api="useAppKit().open()"
+          description="AppKit manages the connection and the account view. Para is one of its wallets, added as a wagmi connector."
+          actions={
+            <>
+              <Button variant="outline" size="lg" icon={<UserCircleIcon className="size-icon-md" />} onClick={wallet.openAppKit}>
+                Open account
+              </Button>
+              <Button
+                variant="ghost"
+                size="lg"
+                icon={<Icon name="sign-out" className="size-icon-md" />}
+                onClick={wallet.disconnectWallet}>
+                Disconnect
+              </Button>
+            </>
+          }>
+          <Facts rows={facts} />
+        </ActionPanel>
+      </Workbench>
+    </AppShell>
   );
 }

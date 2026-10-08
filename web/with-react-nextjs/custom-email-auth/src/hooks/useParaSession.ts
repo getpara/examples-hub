@@ -1,5 +1,5 @@
 import { useAccount, useClient, useLogout, useWallet } from "@getpara/react-sdk";
-import { useE2ECleanup } from "@/lib/e2e-helpers";
+import { useE2ECleanup } from "@/hooks/useE2ECleanup";
 
 export function useParaSession() {
   const para = useClient();
@@ -10,7 +10,7 @@ export function useParaSession() {
   useE2ECleanup(para);
 
   return {
-    address: wallet?.address,
+    address: wallet?.address ?? "",
     isConnected,
     isDisconnecting,
     disconnect: logout,

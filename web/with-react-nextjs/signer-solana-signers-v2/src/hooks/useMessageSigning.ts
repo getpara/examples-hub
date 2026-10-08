@@ -1,10 +1,9 @@
-"use client";
-
 import { useState, useCallback } from "react";
 import { getUtf8Encoder } from "@solana/codecs-strings";
+import { getAddressEncoder } from "@solana/addresses";
 import nacl from "tweetnacl";
 import bs58 from "bs58";
-import { useParaSigner } from "./useParaSigner";
+import { useParaSigner } from "@/hooks/useParaSigner";
 
 export function useMessageSigning() {
   const { signer, isReady } = useParaSigner();
@@ -35,9 +34,8 @@ export function useMessageSigning() {
         const messageBytes = new Uint8Array(getUtf8Encoder().encode(message.trim()));
         const signatureResult = await signer.signMessages([{ content: messageBytes, signatures: {} }]);
         const signatureBytes = signatureResult[0][signer.address];
-        const signatureBase58 = bs58.encode(signatureBytes);
 
-        setSignature(signatureBase58);
+        setSignature(bs58.encode(signatureBytes));
       } catch (err) {
         console.error("Error signing message:", err);
         setError(err instanceof Error ? err : new Error("Failed to sign message. Please try again."));
@@ -56,12 +54,11 @@ export function useMessageSigning() {
       }
 
       try {
-        const messageBytes = new Uint8Array(getUtf8Encoder().encode(message));
+        const messageBytes = new Uint8Array(getUtf8Encoder().encode(message.trim()));
         const signatureBytes = bs58.decode(sig);
-        const publicKeyBuffer = signer.sender;
+        const publicKeyBytes = new Uint8Array(getAddressEncoder().encode(signer.address));
 
-        const isValid = nacl.sign.detached.verify(messageBytes, signatureBytes, publicKeyBuffer);
-        setIsVerified(isValid);
+        setIsVerified(nacl.sign.detached.verify(messageBytes, signatureBytes, publicKeyBytes));
       } catch (err) {
         console.error("Error verifying signature:", err);
         setError(err instanceof Error ? err : new Error("Failed to verify signature."));

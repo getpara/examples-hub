@@ -1,102 +1,68 @@
-# Para Custom Auth + Svelte + Vite Example
+# Svelte + Vite Example
 
-A Svelte + Vite example demonstrating custom UI authentication with Para's web-sdk. Uses direct Para client methods (equivalent to React SDK hooks) for email, phone, and OAuth authentication flows.
-
-## What This Example Shows
-
-- Setting up Para web-sdk client singleton
-- Custom authentication UI with three methods:
-  - Email with OTP verification (iframe)
-  - Phone with OTP verification (iframe)
-  - OAuth (Google, Apple, Discord, X)
-- Using Para portal iframe for OTP verification
-- Handling new vs returning users with `waitForLogin`/`waitForWalletCreation`
-- Svelte stores for auth state management
-- Message signing with connected wallet
-
-## Para Client Methods Used
-
-| Method | Purpose |
-|--------|---------|
-| `para.signUpOrLogIn()` | Initiate email/phone auth |
-| `para.verifyOAuth()` | OAuth provider auth |
-| `para.verifyFarcaster()` | Farcaster auth |
-| `para.waitForLogin()` | Wait for returning user login |
-| `para.waitForWalletCreation()` | Wait for new user wallet |
-| `para.isFullyLoggedIn()` | Check auth status |
-| `para.getWallets()` | Get user wallets |
-| `para.signMessage()` | Sign messages |
-| `para.logout()` | Logout user |
+A Svelte and Vite app that signs in with its own email, phone, and social login UI built on `@getpara/web-sdk`, then shows the connected account and its Sepolia balance and signs `Hello World!`. All Para SDK usage lives in `src/hooks` and `src/lib/para.ts`. Everything else is plain Svelte and Tailwind that you can replace with your own UI.
 
 ## Setup
 
-1. Create a `.env` file:
+Create a local `.env` file:
 
 ```env
 VITE_PARA_API_KEY=your_api_key_here
 VITE_PARA_ENVIRONMENT=BETA
 ```
 
-2. Install dependencies and run:
+Configure the API key in the [Para Developer Portal](https://developer.getpara.com) with the app display name, branding, OAuth providers, email and phone login options, and wallet creation settings. The app reads only `VITE_PARA_API_KEY` and `VITE_PARA_ENVIRONMENT`.
+
+Install and run the production build:
 
 ```bash
 yarn install
-yarn dev
+yarn build
+yarn preview
 ```
 
-## Developer Portal Configuration
+`vite.config.ts` adds `vite-plugin-node-polyfills` for the Node.js built-ins that wallet libraries expect, and maps `@/` to `src/`.
 
-This custom UI example uses direct `@getpara/web-sdk` methods instead of `ParaProvider`. Configure app identity, enabled auth methods, branding, theme, wallet visibility, and wallet creation settings in the Para Developer Portal for the API key. The app reads only `VITE_PARA_API_KEY` and `VITE_PARA_ENVIRONMENT`; it does not require a WalletConnect project ID.
+## Para usage
 
-## Project Structure
+There is no provider. `src/lib/para.ts` creates one `ParaWeb` client for the whole app, and the hooks call it directly. The hooks are Svelte 5 rune modules (`.svelte.ts`), so their state is reactive wherever the container reads it.
 
+| File | What it does |
+| --- | --- |
+| `src/lib/para.ts` | Creates the `ParaWeb` client from the API key and environment |
+| `src/hooks/useEmailOrPhoneAuth.svelte.ts` | Runs `para.authenticateWithEmailOrPhone`, follows `para.onStatePhaseChange` for the verification, password, PIN, and passkey URLs, and cancels with `para.cancelAuthFlow` |
+| `src/hooks/useEmailAuth.svelte.ts` | Signs in with an email address through `useEmailOrPhoneAuth` |
+| `src/hooks/usePhoneAuth.svelte.ts` | Signs in with a phone number through `useEmailOrPhoneAuth` |
+| `src/hooks/useOAuthAuth.svelte.ts` | Signs in with Google, Apple, Discord, or X through `para.authenticateWithOAuth`, and sends its pop-up to the URLs from `para.onStatePhaseChange` |
+| `src/hooks/useCombinedAuth.svelte.ts` | Combines the three sign in hooks behind one active tab |
+| `src/hooks/usePortalCancel.svelte.ts` | Cancels the attempt when the Para verification frame, matched against the origin from `getPortalBaseURL`, reports that it closed without success |
+| `src/hooks/useParaSession.svelte.ts` | Checks the session with `para.isFullyLoggedIn`, reads the wallet with `para.getWallets`, and logs out with `para.logout` |
+| `src/hooks/useAccountBalance.svelte.ts` | Reads the wallet balance with `para.getWalletBalance`. The balance appears once the API key has an RPC URL in the Developer Portal |
+| `src/hooks/useSignHelloWorld.svelte.ts` | Signs `Hello World!` with `createParaViemClient` from `@getpara/viem-v2-integration` |
+
+```ts
+const session = useParaSession();
+const auth = useCombinedAuth(session.refresh);
+const balance = useAccountBalance(() => session.walletId);
+const signing = useSignHelloWorld();
 ```
+
+Email and phone sign in show the Para verification, password, or PIN URL in an iframe, and offer a passkey button when Para returns a passkey URL. `para.authenticateWithEmailOrPhone` resolves once the session and wallet are ready, and the attempt can be canceled. Social sign in opens the provider in a pop-up, moves that pop-up through any passkey, password, or PIN step, and stops when you press Cancel or close the pop-up.
+
+## Project layout
+
+```text
 src/
+├── main.ts                                    # Entry: styles and the app
+├── app/App.svelte                             # Renders the example
+├── hooks/                                     # Para SDK usage, one concern per hook
 ├── components/
-│   ├── layout/
-│   │   └── Header.svelte             # Header with logout
-│   └── ui/
-│       ├── CombinedAuth.svelte       # Main auth orchestrator
-│       ├── AuthCard.svelte           # Card wrapper
-│       ├── AuthTabs.svelte           # Tab navigation
-│       ├── EmailForm.svelte          # Email input
-│       ├── PhoneForm.svelte          # Phone input
-│       ├── OAuthButtons.svelte       # OAuth provider buttons
-│       ├── VerifyIframe.svelte       # OTP verification iframe
-│       ├── WalletInfo.svelte         # Connected wallet display
-│       └── SignMessage.svelte        # Message signing UI
-├── stores/
-│   ├── auth/
-│   │   ├── emailAuth.ts              # Email auth flow
-│   │   ├── phoneAuth.ts              # Phone auth flow
-│   │   ├── oauthAuth.ts              # OAuth auth flow
-│   │   └── combinedAuth.ts           # Auth orchestrator
-│   └── account.ts                    # Account/wallet state
-├── lib/
-│   ├── para.ts                       # Para client singleton
-│   └── e2e-helpers.ts                # E2E testing utilities
-├── constants/
-│   └── auth.ts                       # Country codes, OAuth providers
-├── App.svelte                        # Main app component
-├── app.css                           # Global styles
-└── main.ts                           # Entry point
+│   ├── CustomAuthExample.svelte               # Joins the session, balance, and signing hooks with the UI
+│   ├── sign-in/CombinedSignInContainer.svelte # Joins the sign in hooks with the sign in panel
+│   ├── layout/                                # App shell, header, footer, workbench
+│   └── ui/                                    # Presentational components, props only
+├── lib/                                       # Para client, chain config, sign in options, copy, and UI helpers
+└── styles/globals.css                         # Tailwind theme tokens
 ```
 
-## Key Implementation Pattern
-
-This example uses Svelte stores to replicate the React hook patterns from `custom-combined-auth`:
-
-- **emailAuth.ts** → equivalent to `useEmailAuth` hook
-- **phoneAuth.ts** → equivalent to `usePhoneAuth` hook
-- **oauthAuth.ts** → equivalent to `useOAuthAuth` hook
-- **combinedAuth.ts** → equivalent to `useCombinedAuth` hook
-
-The stores use `writable` for state and `derived` for computed values, providing the same separation of concerns as React hooks.
-
-## Learn More
-
-- [Para Documentation](https://docs.getpara.com)
-- [Para Website](https://getpara.com)
-- [Para Developer Portal](https://developer.getpara.com)
-- [Svelte Documentation](https://svelte.dev)
-- [Vite Documentation](https://vite.dev)
+Components in `layout/` and `ui/` never import Para. They receive data and callbacks from the two containers, so you can swap them for your own design system without touching the hooks.

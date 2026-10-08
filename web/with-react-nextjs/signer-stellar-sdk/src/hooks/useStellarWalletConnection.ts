@@ -1,5 +1,3 @@
-"use client";
-
 import { useEffect } from "react";
 import { useAccount, useModal, useWallet, useWalletState } from "@getpara/react-sdk-lite";
 
@@ -20,6 +18,5 @@ export function useStellarWalletConnection() {
     address: (wallet?.type === "STELLAR" ? wallet.address : stellarWallet?.address) ?? "",
     isConnected: Boolean(account?.isConnected),
     openModal,
-    wallet,
   };
 }

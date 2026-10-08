@@ -1,9 +1,8 @@
-"use client";
-
 import { useState } from "react";
 import { isAddress, parseEther, type Hex } from "viem";
-import { CHAIN, publicClient } from "@/lib/viem";
-import { useParaSigner } from "./useParaSigner";
+import { HOLESKY } from "@/lib/chain";
+import { publicClient } from "@/lib/publicClient";
+import { useParaSigner } from "@/hooks/useParaSigner";
 
 export function useEthTransfer() {
   const { viemClient, account, isReady } = useParaSigner();
@@ -19,12 +18,12 @@ export function useEthTransfer() {
   const sendTransaction = async (to: string, amount: string) => {
     if (!viemClient || !account) {
       setError(new Error("Connect your Para wallet before sending ETH."));
-      return;
+      return null;
     }
 
     if (!isAddress(to)) {
       setError(new Error("Enter a valid recipient address."));
-      return;
+      return null;
     }
 
     try {
@@ -32,14 +31,16 @@ export function useEthTransfer() {
       setError(null);
       const hash = await viemClient.sendTransaction({
         account,
-        chain: CHAIN,
+        chain: HOLESKY.chain,
         to,
         value: parseEther(amount),
       });
-      await publicClient.waitForTransactionReceipt({ hash });
       setTxHash(hash);
+      await publicClient.waitForTransactionReceipt({ hash });
+      return hash;
     } catch (err) {
       setError(err instanceof Error ? err : new Error("Failed to send transaction"));
+      return null;
     } finally {
       setIsLoading(false);
     }

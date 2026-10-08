@@ -1,9 +1,7 @@
-"use client";
-
 import { useState, useCallback } from "react";
 import { ethers } from "ethers";
-import { useParaSigner } from "./useParaSigner";
-import ParaTestToken from "@/contracts/artifacts/src/contracts/ParaTestToken.sol/ParaTestToken.json";
+import { useParaSigner } from "@/hooks/useParaSigner";
+import { PARA_TEST_TOKEN } from "@/lib/contracts";
 
 export interface DeploymentInfo {
   contractAddress: string;
@@ -19,23 +17,23 @@ export function useContractDeployment() {
   const { signer } = useParaSigner();
 
   const deployContract = useCallback(async () => {
-    if (!signer) {
-      throw new Error("Signer not initialized. Please connect your wallet.");
-    }
-
     setIsLoading(true);
     setError(null);
     setDeploymentInfo(null);
 
     try {
-      const factory = new ethers.ContractFactory(ParaTestToken.abi, ParaTestToken.bytecode, signer);
+      if (!signer) {
+        throw new Error("Signer not initialized. Please connect your wallet.");
+      }
+
+      const factory = new ethers.ContractFactory(PARA_TEST_TOKEN.abi, PARA_TEST_TOKEN.bytecode, signer);
       const contract = await factory.deploy();
       await contract.deployed();
 
       const info: DeploymentInfo = {
         contractAddress: contract.address,
         transactionHash: contract.deployTransaction.hash,
-        deployedBytecode: ParaTestToken.bytecode,
+        deployedBytecode: PARA_TEST_TOKEN.bytecode,
       };
 
       setDeploymentInfo(info);

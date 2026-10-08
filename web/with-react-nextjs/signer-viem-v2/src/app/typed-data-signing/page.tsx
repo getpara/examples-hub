@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import TypedDataSigningDemo from "@/components/demos/TypedDataSigningDemo";
+import { TypedDataSigningContainer } from "@/components/demos/TypedDataSigningContainer";
 
 export const metadata: Metadata = {
   title: "Typed Data Signing | Para Viem v2 Signer",
@@ -7,5 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function TypedDataSigningPage() {
-  return <TypedDataSigningDemo />;
+  return <TypedDataSigningContainer />;
 }

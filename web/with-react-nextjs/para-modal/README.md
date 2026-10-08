@@ -2,16 +2,7 @@
 
 [![Live Demo](https://img.shields.io/badge/Live_Demo-black?style=for-the-badge&logo=vercel)](https://para-example-para-modal.vercel.app)
 
-A minimal Next.js example showing Para Modal connection state and message signing. Para SDK logic lives in hooks and the UI components receive plain props, so the modal integration can be copied without adopting this example's presentation components.
-
-## Features
-
-- Para Modal connection button
-- Connected wallet address display
-- EVM message signing with `Hello World!`
-- Portal-driven persistent app, auth, branding, and wallet configuration
-- On-brand Para token, card, and header styling
-- Clean separation between SDK hooks and presentation components
+A minimal Next.js app that connects with the Para Modal, shows the connected account and its Sepolia balance, and signs `Hello World!`. All Para SDK usage lives in `src/hooks`. Everything else is plain React and Tailwind that you can replace with your own UI.
 
 ## Setup
 
@@ -22,7 +13,7 @@ NEXT_PUBLIC_PARA_API_KEY=your_api_key_here
 NEXT_PUBLIC_PARA_ENVIRONMENT=BETA
 ```
 
-Configure the API key in the [Para Developer Portal](https://developer.getpara.com) with the app display name, branding and logo, theme, OAuth providers, email and phone login options, and wallet visibility. The local `ParaProvider` only passes the API key, environment, and runtime modal behavior such as on-ramp test mode and recovery step visibility.
+Configure the API key in the [Para Developer Portal](https://developer.getpara.com) with the app display name, branding and logo, theme, OAuth providers, email and phone login options, and wallet visibility. The local `ParaProvider` passes the API key, the environment, and runtime modal behavior such as on-ramp test mode and recovery step visibility.
 
 Install and run the production build:
 
@@ -32,53 +23,38 @@ yarn build
 yarn start
 ```
 
-## Key Files
+## Para usage
+
+These are the files to copy into your own app.
+
+| File | What it does |
+| --- | --- |
+| `src/components/ParaProvider.tsx` | Wraps the app in `ParaProvider` and a React Query client |
+| `src/hooks/useParaModalWallet.ts` | Opens the modal and reads the connected wallet with `useModal`, `useAccount`, and `useWallet` |
+| `src/hooks/useSignHelloWorld.ts` | Signs `Hello World!` with `useSignMessage` |
+| `src/hooks/useAccountBalance.ts` | Reads the wallet balance with `useWalletBalance`. The balance appears once the API key has an RPC URL in the Developer Portal |
+
+```tsx
+const { address, isConnected, openModal } = useParaModalWallet();
+const { sign, message, isPending, errorMessage, signature } = useSignHelloWorld();
+const { balance, isLoading, isRefreshing, refresh } = useAccountBalance();
+```
+
+`useSignHelloWorld` calls `signMessage({ walletId, messageBase64 })` with the base64 encoded message and returns the signature once the user approves the request in the Para window.
+
+## Project layout
 
 ```text
 src/
-├── app/
-│   ├── layout.tsx              # Root layout, metadata, ParaProvider, SDK styles
-│   └── page.tsx                # Server entry that renders the client example
+├── app/                         # Next.js layout and page
+├── hooks/                       # Para SDK usage, one concern per hook
 ├── components/
-│   ├── ParaModalExample.tsx    # Client orchestration
-│   ├── ParaProvider.tsx        # Para SDK provider setup
-│   ├── layout/Header.tsx       # Prop-only header
-│   └── ui/
-│       ├── ConnectCard.tsx     # Prop-only connect card
-│       ├── WalletInfo.tsx      # Prop-only wallet display
-│       └── SignMessage.tsx     # Prop-only message signing UI
-├── hooks/
-│   ├── useParaModalWallet.ts   # Copyable modal connection state
-│   └── useSignHelloWorld.ts    # Copyable message signing logic
-└── styles/globals.css          # Para example tokens and UI primitives
+│   ├── ParaProvider.tsx         # Para setup
+│   ├── ParaModalExample.tsx     # Joins the hooks with the UI
+│   ├── layout/                  # App shell, header, footer, workbench
+│   └── ui/                      # Presentational components, props only
+├── lib/                         # Chain config, formatting, and UI helpers
+└── styles/globals.css           # Tailwind theme tokens
 ```
 
-## Hook Contracts
-
-`useParaModalWallet` owns the Para Modal connection hooks:
-
-```tsx
-const {
-  address,
-  isConnected,
-  openModal,
-} = useParaModalWallet();
-```
-
-`useSignHelloWorld` owns the Para signing hook:
-
-```tsx
-const {
-  errorMessage,
-  isPending,
-  message,
-  sign,
-  signature,
-} = useSignHelloWorld();
-```
-
-Presentation components do not import Para, Wagmi, or Viem. They receive state and callbacks from `ParaModalExample`.
-
-## Notes
-
-The example includes direct dependencies that are currently reached by the catch-all Para React SDK build graph, including `@metamask/delegation-toolkit`, `ethers`, `@stellar/stellar-sdk`, and `@wagmi/core`. These keep the production build self-contained until the SDK export boundary can be narrowed.
+Components in `layout/` and `ui/` never import Para. They receive data and callbacks from `ParaModalExample`, so you can swap them for your own design system without touching the hooks.

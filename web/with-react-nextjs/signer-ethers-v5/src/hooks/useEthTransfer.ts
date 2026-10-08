@@ -1,11 +1,8 @@
-"use client";
-
 import { useState, useCallback } from "react";
 import { ethers } from "ethers";
 import { useWallet } from "@getpara/react-sdk-lite";
-import { useParaSigner } from "./useParaSigner";
-
-const HOLESKY_CHAIN_ID = 17000;
+import { HOLESKY } from "@/lib/chain";
+import { useParaSigner } from "@/hooks/useParaSigner";
 
 export function useEthTransfer() {
   const [txHash, setTxHash] = useState<string | null>(null);
@@ -17,25 +14,24 @@ export function useEthTransfer() {
 
   const sendTransaction = useCallback(
     async (to: string, amount: string) => {
-      if (!signer || !provider || !wallet?.address) {
-        throw new Error("Signer not initialized. Please connect your wallet.");
-      }
-
-      if (!to.match(/^0x[a-fA-F0-9]{40}$/)) {
-        throw new Error("Invalid recipient address format.");
-      }
-
-      const amountFloat = parseFloat(amount);
-      if (isNaN(amountFloat) || amountFloat <= 0) {
-        throw new Error("Please enter a valid amount greater than 0.");
-      }
-
       setIsLoading(true);
       setError(null);
       setTxHash(null);
 
       try {
-        // Validate balance
+        if (!signer || !provider || !wallet?.address) {
+          throw new Error("Signer not initialized. Please connect your wallet.");
+        }
+
+        if (!to.match(/^0x[a-fA-F0-9]{40}$/)) {
+          throw new Error("Invalid recipient address format.");
+        }
+
+        const amountFloat = parseFloat(amount);
+        if (isNaN(amountFloat) || amountFloat <= 0) {
+          throw new Error("Please enter a valid amount greater than 0.");
+        }
+
         const balanceWei = await provider.getBalance(wallet.address);
         const feeData = await provider.getFeeData();
         const gasLimit = ethers.BigNumber.from(21000);
@@ -51,7 +47,6 @@ export function useEthTransfer() {
           );
         }
 
-        // Construct transaction
         const nonce = await provider.getTransactionCount(wallet.address);
         const tx: ethers.providers.TransactionRequest = {
           to,
@@ -60,14 +55,13 @@ export function useEthTransfer() {
           gasLimit,
           maxFeePerGas: feeData.maxFeePerGas ?? undefined,
           maxPriorityFeePerGas: feeData.maxPriorityFeePerGas ?? undefined,
-          chainId: HOLESKY_CHAIN_ID,
+          chainId: HOLESKY.chainId,
           data: "0x",
         };
 
         const txResponse = await signer.sendTransaction(tx);
         setTxHash(txResponse.hash);
 
-        // Wait for confirmation
         await txResponse.wait();
 
         return txResponse.hash;

@@ -1,14 +1,10 @@
-"use client";
-
 import { useState, useEffect, useCallback } from "react";
 import { ethers } from "ethers";
 import { useWallet } from "@getpara/react-sdk-lite";
-import { useParaSigner } from "./useParaSigner";
-import ParaTestToken from "@/contracts/artifacts/src/contracts/ParaTestToken.sol/ParaTestToken.json";
+import { useParaSigner } from "@/hooks/useParaSigner";
+import { PARA_TEST_TOKEN } from "@/lib/contracts";
 
-const DEFAULT_CONTRACT_ADDRESS = "0x83cC70475A0d71EF1F2F61FeDE625c8C7E90C3f2";
-
-export function useContractInteraction(contractAddress: string = DEFAULT_CONTRACT_ADDRESS) {
+export function useContractInteraction(contractAddress: string = PARA_TEST_TOKEN.address) {
   const [tokenBalance, setTokenBalance] = useState<string | null>(null);
   const [mintedAmount, setMintedAmount] = useState<string | null>(null);
   const [mintLimit, setMintLimit] = useState<string | null>(null);
@@ -25,7 +21,7 @@ export function useContractInteraction(contractAddress: string = DEFAULT_CONTRAC
 
     setIsDataLoading(true);
     try {
-      const contract = new ethers.Contract(contractAddress, ParaTestToken.abi, provider);
+      const contract = new ethers.Contract(contractAddress, PARA_TEST_TOKEN.abi, provider);
 
       const balance = await contract.balanceOf(wallet.address);
       setTokenBalance(ethers.formatEther(balance));
@@ -51,30 +47,29 @@ export function useContractInteraction(contractAddress: string = DEFAULT_CONTRAC
 
   const mint = useCallback(
     async (amount: string) => {
-      if (!signer) {
-        throw new Error("Signer not initialized. Please connect your wallet.");
-      }
-
-      const amountFloat = parseFloat(amount);
-      if (isNaN(amountFloat) || amountFloat <= 0) {
-        throw new Error("Please enter a valid amount greater than 0.");
-      }
-
-      // Check mint limit
-      if (mintedAmount && mintLimit) {
-        const currentMinted = parseFloat(mintedAmount);
-        const limit = parseFloat(mintLimit);
-        if (currentMinted + amountFloat > limit) {
-          throw new Error(`Minting ${amountFloat} tokens would exceed your limit of ${limit} tokens.`);
-        }
-      }
-
       setIsLoading(true);
       setError(null);
       setTxHash(null);
 
       try {
-        const contract = new ethers.Contract(contractAddress, ParaTestToken.abi, signer);
+        if (!signer) {
+          throw new Error("Signer not initialized. Please connect your wallet.");
+        }
+
+        const amountFloat = parseFloat(amount);
+        if (isNaN(amountFloat) || amountFloat <= 0) {
+          throw new Error("Please enter a valid amount greater than 0.");
+        }
+
+        if (mintedAmount && mintLimit) {
+          const currentMinted = parseFloat(mintedAmount);
+          const limit = parseFloat(mintLimit);
+          if (currentMinted + amountFloat > limit) {
+            throw new Error(`Minting ${amountFloat} tokens would exceed your limit of ${limit} tokens.`);
+          }
+        }
+
+        const contract = new ethers.Contract(contractAddress, PARA_TEST_TOKEN.abi, signer);
         const tx = await contract.mint(ethers.parseEther(amount));
         setTxHash(tx.hash);
 

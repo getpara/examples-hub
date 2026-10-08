@@ -1,29 +1,22 @@
-"use client";
-
 import { http } from "viem";
-import { useParaViemAccount, useParaViemClient } from "@getpara/react-sdk-lite/chains/evm";
-import { HOLESKY_RPC_URL } from "@/config/constants";
-import { CHAIN, publicClient } from "@/lib/viem";
+import { useParaViemClient } from "@getpara/react-sdk-lite/chains/evm/viem";
+import { HOLESKY } from "@/lib/chain";
 
 export function useParaSigner() {
-  const { viemAccount, isLoading: isAccountLoading } = useParaViemAccount();
-  const { viemClient, isLoading: isClientLoading } = useParaViemClient({
+  const { viemClient } = useParaViemClient({
     walletClientConfig: {
-      chain: CHAIN,
-      transport: http(HOLESKY_RPC_URL),
+      chain: HOLESKY.chain,
+      transport: http(HOLESKY.rpcUrl),
     },
   });
 
-  const address = viemAccount?.address ?? viemClient?.account?.address ?? null;
-  const account = viemClient?.account ?? viemAccount ?? address ?? undefined;
+  const account = viemClient?.account;
+  const address = account?.address ?? null;
 
   return {
-    viemAccount,
     viemClient,
-    publicClient,
     account,
     address,
-    isLoading: isAccountLoading || isClientLoading,
-    isReady: Boolean(viemClient && account && address),
+    isReady: Boolean(viemClient && account),
   };
 }

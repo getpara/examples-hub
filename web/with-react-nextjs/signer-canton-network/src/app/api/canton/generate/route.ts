@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import bs58 from "bs58";
-import { getSdk } from "@/lib/canton";
+import { getSdk } from "@/lib/server/canton";
 
 export const runtime = "nodejs";
 
@@ -25,7 +25,6 @@ export async function POST(request: Request) {
     );
   }
 
-  // Solana address (base58) → raw 32-byte Ed25519 → base64 for Canton.
   let rawPubkey: Uint8Array;
   try {
     rawPubkey = bs58.decode(solanaAddress);

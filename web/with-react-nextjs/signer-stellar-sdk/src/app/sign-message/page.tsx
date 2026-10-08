@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import { StellarSdkApp } from "@/components/StellarSdkApp";
-import SignMessageDemo from "@/components/demos/SignMessageDemo";
+import { MessageSigningContainer } from "@/components/demos/MessageSigningContainer";
 
 export const metadata: Metadata = {
   title: "Sign Message | Para Stellar SDK",
@@ -8,9 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function SignMessagePage() {
-  return (
-    <StellarSdkApp>
-      <SignMessageDemo />
-    </StellarSdkApp>
-  );
+  return <MessageSigningContainer />;
 }

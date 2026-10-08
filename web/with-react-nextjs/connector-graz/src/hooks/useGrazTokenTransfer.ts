@@ -1,59 +1,31 @@
-import { useCallback, useMemo, useState } from "react";
-import {
-  useAccount,
-  useActiveChains,
-  useBalance,
-  useSendTokens,
-  useStargateSigningClient,
-} from "graz";
-import { CHAIN_ID, FAUCET_ADDRESS } from "@/config/constants";
-import { formatBalance } from "@/utils/format";
+import { useState } from "react";
+import { useAccount, useSendTokens, useStargateSigningClient } from "graz";
+import { ICS_PROVIDER_TESTNET } from "@/lib/chain";
 
-const FAUCET_URL = "https://testnet.ping.pub/cosmos/faucet";
+const CHAIN_ID = ICS_PROVIDER_TESTNET.chainId;
+const BALANCE_REFRESH_DELAY_MS = 2000;
 
-function toError(error: unknown) {
-  return error instanceof Error ? error : new Error("Transaction failed. Please try again.");
+interface UseGrazTokenTransferOptions {
+  onSent: () => void;
 }
 
-function toMinimalDenomAmount(amount: string, decimals: number) {
+function toMinimalDenomAmount(amount: string) {
   const parsedAmount = Number.parseFloat(amount);
 
   if (!Number.isFinite(parsedAmount) || parsedAmount <= 0) {
     return null;
   }
 
-  const minimalAmount = Math.floor(parsedAmount * 10 ** decimals);
+  const minimalAmount = Math.floor(parsedAmount * 10 ** ICS_PROVIDER_TESTNET.decimals);
   return minimalAmount > 0 ? minimalAmount.toString() : null;
 }
 
-export function useGrazTokenTransfer() {
-  const [amount, setAmount] = useState("");
+export function useGrazTokenTransfer({ onSent }: UseGrazTokenTransferOptions) {
   const [transactionHash, setTransactionHash] = useState<string | null>(null);
-  const [error, setError] = useState<Error | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
 
-  const { data: accounts, isConnected } = useAccount({ chainId: [CHAIN_ID] as const });
-  const address = accounts?.[CHAIN_ID]?.bech32Address ?? "";
-  const activeChains = useActiveChains();
-  const activeChain = activeChains?.find((chain) => chain.chainId === CHAIN_ID) ?? activeChains?.[0];
-
-  const currency = activeChain?.currencies?.[0];
-  const chainDenom = currency?.coinMinimalDenom ?? "uatom";
-  const chainDecimals = currency?.coinDecimals ?? 6;
-  const displayDenom = currency?.coinDenom ?? "ATOM";
-  const networkName = activeChain?.chainName ?? "Cosmos ICS Provider Testnet";
-
-  const {
-    data: balance,
-    isLoading: isBalanceLoading,
-    refetch: refetchBalance,
-  } = useBalance({
-    chainId: CHAIN_ID,
-    denom: chainDenom,
-    bech32Address: address,
-    enabled: isConnected && Boolean(address),
-  });
-
+  const { isConnected } = useAccount({ chainId: [CHAIN_ID] as const });
   const { sendTokensAsync } = useSendTokens();
   const { data: signingClients } = useStargateSigningClient({
     chainId: [CHAIN_ID] as const,
@@ -61,87 +33,49 @@ export function useGrazTokenTransfer() {
   });
   const signingClient = signingClients?.[CHAIN_ID] ?? null;
 
-  const balanceLabel = useMemo(() => {
-    if (isBalanceLoading) {
-      return "Loading...";
-    }
-
-    if (!balance) {
-      return `0.0000 ${displayDenom}`;
-    }
-
-    const displayAmount = Number.parseFloat(balance.amount) / 10 ** chainDecimals;
-    return `${formatBalance(displayAmount.toString())} ${displayDenom}`;
-  }, [balance, chainDecimals, displayDenom, isBalanceLoading]);
-
-  const refreshBalance = useCallback(() => {
-    void refetchBalance();
-  }, [refetchBalance]);
-
-  const sendTokensToFaucet = useCallback(async () => {
-    if (!signingClient) {
-      setError(new Error("Signing client is not ready yet."));
-      return;
-    }
-
-    const amountInMinimalDenom = toMinimalDenomAmount(amount, chainDecimals);
-    if (!amountInMinimalDenom) {
-      setError(new Error("Enter an amount greater than zero."));
-      return;
-    }
-
+  const send = async (amount: string) => {
     setIsSending(true);
-    setError(null);
+    setErrorMessage(null);
     setTransactionHash(null);
 
     try {
+      if (!signingClient) {
+        throw new Error("Signing client is not ready yet.");
+      }
+
+      const amountInMinimalDenom = toMinimalDenomAmount(amount);
+
+      if (!amountInMinimalDenom) {
+        throw new Error("Enter an amount greater than zero.");
+      }
+
       const response = await sendTokensAsync({
         signingClient,
-        recipientAddress: FAUCET_ADDRESS,
-        amount: [{ denom: chainDenom, amount: amountInMinimalDenom }],
+        recipientAddress: ICS_PROVIDER_TESTNET.faucetAddress,
+        amount: [{ denom: ICS_PROVIDER_TESTNET.denom, amount: amountInMinimalDenom }],
         fee: {
-          amount: [{ denom: chainDenom, amount: "5000" }],
+          amount: [{ denom: ICS_PROVIDER_TESTNET.denom, amount: "5000" }],
           gas: "200000",
         },
-        memo: `Return ${amount} ${displayDenom} to faucet`,
+        memo: `Return ${amount} ${ICS_PROVIDER_TESTNET.currencySymbol} to faucet`,
       });
 
       setTransactionHash(response.transactionHash);
-      setAmount("");
-      window.setTimeout(() => {
-        void refetchBalance();
-      }, 2000);
-    } catch (transactionError) {
-      setError(toError(transactionError));
+      window.setTimeout(onSent, BALANCE_REFRESH_DELAY_MS);
+      return true;
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "Transaction failed. Please try again.");
+      return false;
     } finally {
       setIsSending(false);
     }
-  }, [
-    amount,
-    chainDecimals,
-    chainDenom,
-    displayDenom,
-    refetchBalance,
-    sendTokensAsync,
-    signingClient,
-  ]);
+  };
 
   return {
-    address,
-    amount,
-    displayDenom,
-    networkName,
-    balanceLabel,
-    hasBalance: Boolean(balance),
-    faucetAddress: FAUCET_ADDRESS,
-    faucetUrl: FAUCET_URL,
+    send,
     transactionHash,
-    error,
-    isBalanceLoading,
+    errorMessage,
     isSending,
-    canSend: Boolean(signingClient) && !isSending,
-    setAmount,
-    refreshBalance,
-    sendTokensToFaucet,
+    isReady: Boolean(signingClient),
   };
 }

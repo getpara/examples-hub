@@ -1,33 +1,31 @@
-"use client";
-
 import { useState, useCallback } from "react";
 import { TransactionBuilder, Operation, Asset, Networks, StrKey } from "@stellar/stellar-sdk";
-import { useParaSigner } from "./useParaSigner";
+import { horizon } from "@/lib/horizon";
+import { useParaSigner } from "@/hooks/useParaSigner";
 
 export function useXlmTransfer() {
-  const { signer, server, isReady, address } = useParaSigner();
+  const { signer, isReady, address } = useParaSigner();
   const [txHash, setTxHash] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<Error | null>(null);
-  const [status, setStatus] = useState<"idle" | "pending" | "confirming" | "success" | "error">("idle");
 
   const reset = useCallback(() => {
     setTxHash(null);
     setError(null);
-    setStatus("idle");
   }, []);
 
   const transfer = useCallback(
     async (destination: string, amount: string) => {
-      if (!signer || !server || !address || !isReady) {
+      if (!signer || !address || !isReady) {
         setError(new Error("Signer not ready"));
         return;
       }
 
       setIsLoading(true);
+      setIsSubmitting(false);
       setError(null);
       setTxHash(null);
-      setStatus("pending");
 
       try {
         if (!StrKey.isValidEd25519PublicKey(destination)) {
@@ -39,7 +37,7 @@ export function useXlmTransfer() {
           throw new Error("Please enter a valid amount greater than 0");
         }
 
-        const account = await server.loadAccount(address);
+        const account = await horizon.loadAccount(address);
 
         const tx = new TransactionBuilder(account, {
           fee: "100",
@@ -55,22 +53,21 @@ export function useXlmTransfer() {
           .setTimeout(30)
           .build();
 
-        setStatus("confirming");
         const { signedTxXdr } = await signer.signTransaction(tx.toXDR());
         const signedTx = TransactionBuilder.fromXDR(signedTxXdr, Networks.TESTNET);
-        const result = await server.submitTransaction(signedTx);
+        setIsSubmitting(true);
+        const result = await horizon.submitTransaction(signedTx);
         setTxHash(result.hash);
-        setStatus("success");
       } catch (err) {
         console.error("Error sending transaction:", err);
         setError(err instanceof Error ? err : new Error("Failed to send transaction"));
-        setStatus("error");
       } finally {
         setIsLoading(false);
+        setIsSubmitting(false);
       }
     },
-    [signer, server, address, isReady]
+    [signer, address, isReady]
   );
 
-  return { transfer, txHash, isLoading, error, isReady, status, reset };
+  return { transfer, txHash, isLoading, isSubmitting, error, isReady, reset };
 }

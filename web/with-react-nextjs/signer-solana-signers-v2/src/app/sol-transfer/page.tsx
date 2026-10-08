@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
-import { SolanaSignersV2App } from "@/components/SolanaSignersV2App";
-import { SolanaSignersV2Preview } from "@/components/SolanaSignersV2Preview";
-import SolTransferDemo from "@/components/demos/SolTransferDemo";
+import { SolTransferContainer } from "@/components/demos/SolTransferContainer";
 
 export const metadata: Metadata = {
   title: "SOL Transfer | Para Solana Signers v2",
@@ -9,12 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function SolTransferPage() {
-  return (
-    <>
-      <SolanaSignersV2Preview variant="sol-transfer" />
-      <SolanaSignersV2App>
-        <SolTransferDemo />
-      </SolanaSignersV2App>
-    </>
-  );
+  return <SolTransferContainer />;
 }

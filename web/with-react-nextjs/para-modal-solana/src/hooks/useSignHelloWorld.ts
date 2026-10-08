@@ -1,36 +1,23 @@
-"use client";
-
-import { useState, useCallback } from "react";
-import { useAccount } from "@getpara/react-sdk";
+import { useCallback, useState } from "react";
+import { useAccount, useWallet } from "@getpara/react-sdk";
 import { useParaSolanaSigner } from "@getpara/react-sdk/solana";
-import { useWallet as useSolanaWallet } from "@solana/wallet-adapter-react";
 import { createSolanaRpc } from "@solana/rpc";
+import { SOLANA_DEVNET } from "@/lib/chain";
+import { bytesToBase64 } from "@/lib/base64";
 
 const HELLO_WORLD_MESSAGE = "Hello World!";
-const rpc = createSolanaRpc("https://api.devnet.solana.com");
-
-function getErrorMessage(error: unknown, fallback: string) {
-  return error instanceof Error ? error.message : fallback;
-}
-
-function bytesToBase64(bytes: Uint8Array) {
-  let binary = "";
-  for (const byte of bytes) {
-    binary += String.fromCharCode(byte);
-  }
-  return btoa(binary);
-}
+const rpc = createSolanaRpc(SOLANA_DEVNET.rpcUrl);
 
 export function useSignHelloWorld() {
-  const { connectionType } = useAccount();
+  const { embedded } = useAccount();
+  const { data: wallet } = useWallet();
   const { solanaSigner } = useParaSolanaSigner({ rpc });
-  const { signMessage: solanaWalletSign } = useSolanaWallet();
 
   const [isPending, setIsPending] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [signature, setSignature] = useState<string | undefined>();
 
-  const isExternal = connectionType === "external";
+  const isExternal = wallet?.isExternal ?? !embedded.isConnected;
 
   const sign = useCallback(async () => {
     setIsPending(true);
@@ -38,29 +25,23 @@ export function useSignHelloWorld() {
     setSignature(undefined);
 
     try {
+      if (!solanaSigner) throw new Error("No Solana signer available");
       const encoded = new TextEncoder().encode(HELLO_WORLD_MESSAGE);
-
-      if (isExternal && solanaWalletSign) {
-        const sig = await solanaWalletSign(encoded);
-        setSignature(bytesToBase64(sig));
-      } else if (solanaSigner) {
-        const results = await solanaSigner.signMessages([{ content: encoded, signatures: {} }]);
-        const sigBytes = Object.values(results[0] ?? {})[0];
-        if (!(sigBytes instanceof Uint8Array)) throw new Error("Unexpected signing result format");
-        setSignature(bytesToBase64(sigBytes));
-      } else {
-        throw new Error("No Solana signer available");
-      }
-    } catch (err) {
-      setErrorMessage(getErrorMessage(err, "Failed to sign message"));
+      const results = await solanaSigner.signMessages([{ content: encoded, signatures: {} }]);
+      const signatureBytes = Object.values(results[0] ?? {})[0];
+      if (!(signatureBytes instanceof Uint8Array)) throw new Error("Unexpected signing result format");
+      setSignature(bytesToBase64(signatureBytes));
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "Failed to sign message");
     } finally {
       setIsPending(false);
     }
-  }, [isExternal, solanaWalletSign, solanaSigner]);
+  }, [solanaSigner]);
 
   return {
     sign,
     message: HELLO_WORLD_MESSAGE,
+    isExternal,
     isPending,
     errorMessage,
     signature,

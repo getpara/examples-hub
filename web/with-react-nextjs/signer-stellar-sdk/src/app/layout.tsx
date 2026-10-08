@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "@/styles/globals.css";
 import "@getpara/react-sdk-lite/styles.css";
-
-const inter = Inter({ subsets: ["latin"] });
+import { ParaProvider } from "@/components/ParaProvider";
+import { StellarSdkExample } from "@/components/StellarSdkExample";
 
 export const metadata: Metadata = {
   title: "Para Stellar SDK",
@@ -17,7 +16,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.className} antialiased`}>{children}</body>
+      <body>
+        <ParaProvider>
+          <StellarSdkExample>{children}</StellarSdkExample>
+        </ParaProvider>
+      </body>
     </html>
   );
 }

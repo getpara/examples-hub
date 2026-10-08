@@ -1,83 +1,65 @@
-# Signer Solana Signers v2
+# Para Solana Signers v2 Example
 
 [![Live Demo](https://img.shields.io/badge/Live_Demo-black?style=for-the-badge&logo=vercel)](https://para-example-signer-solana-signers-v2.vercel.app)
 
-This example demonstrates how to use Para with Solana's v2 signer interfaces in a Next.js app. It includes message signing, signature verification, balance reads, and a Devnet SOL transfer.
+A Next.js app that connects with the Para Modal and signs on Solana Devnet with the Signers v2 signer from `useParaSolanaSigner` and `@solana/kit`. Each route is one demo: message signing with signature verification, and a SOL transfer. `/` opens message signing. All Para SDK usage lives in `src/hooks`. Everything else is plain React and Tailwind that you can replace with your own UI.
 
 ## Setup
 
-Create a `.env` file in this directory:
+Create a local `.env` file:
 
 ```env
-NEXT_PUBLIC_PARA_API_KEY=your_para_api_key
+NEXT_PUBLIC_PARA_API_KEY=your_api_key_here
 NEXT_PUBLIC_PARA_ENVIRONMENT=BETA
 NEXT_PUBLIC_DEVNET_RPC_URL=https://api.devnet.solana.com
 ```
+
+`NEXT_PUBLIC_PARA_ENVIRONMENT` defaults to `BETA`. `NEXT_PUBLIC_DEVNET_RPC_URL` is the Solana RPC used for the balance, the signer, and transactions; it defaults to the public Devnet RPC above. It is not a Para provider setting. Configure app identity, login methods, branding, and wallet visibility in the [Para Developer Portal](https://developer.getpara.com). The API key must have Solana wallets enabled; otherwise the app shows a notice after sign in instead of the demos. The local `ParaProvider` passes the API key, the environment, the Solana Devnet wallet connector, and runtime modal flags.
 
 Install and run the production build:
 
 ```bash
 yarn install
 yarn build
-yarn start --hostname 127.0.0.1 --port 3000
+yarn start
 ```
 
-Open [http://127.0.0.1:3000](http://127.0.0.1:3000).
+## Para usage
 
-## Developer Portal Configuration
+These are the files to copy into your own app.
 
-Configure app identity, authentication methods, theme, wallet visibility, and external wallet availability in the Para Developer Portal for the API key. The `ParaProvider` in this example only handles the API key/environment, Solana external wallet connector wiring, and modal runtime options.
-
-`NEXT_PUBLIC_DEVNET_RPC_URL` is used by the example's Solana RPC clients for balance, transaction, and signer operations. It is not a Para provider config override.
-
-## Core Integration
-
-The copyable Para signer setup lives in `src/hooks/useParaSigner.ts`:
+| File | What it does |
+| --- | --- |
+| `src/components/ParaProvider.tsx` | Wraps the app in `ParaProvider` and a React Query client |
+| `src/hooks/useSolanaWalletConnection.ts` | Opens the modal, reads the connected wallet with `useModal`, `useAccount`, and `useWallet`, and selects the Solana wallet with `useWalletState` |
+| `src/hooks/useSolana.ts` | Creates the `@solana/kit` RPC and the `@solana/rpc-spec` RPC that the signer takes |
+| `src/hooks/useParaSigner.ts` | Gets the Signers v2 signer with `useParaSolanaSigner({ rpc })` |
+| `src/hooks/useAccountBalance.ts` | Reads the SOL balance with `rpc.getBalance` |
+| `src/hooks/useMessageSigning.ts` | Signs a message with `signer.signMessages` and verifies it against the wallet public key |
+| `src/hooks/useSolTransfer.ts` | Checks the balance, builds the transfer, signs it with `signTransactionMessageWithSigners`, sends it, and polls until it is confirmed, fails on chain, or its blockhash expires |
 
 ```tsx
-import { useAccount } from "@getpara/react-sdk-lite";
-import { useParaSolanaSigner } from "@getpara/react-sdk-lite/chains/solana";
-import { useSolana } from "./useSolana";
-
-export function useParaSigner() {
-  const account = useAccount();
-  const { rpc, paraRpc } = useSolana();
-  const { solanaSigner, isLoading } = useParaSolanaSigner({ rpc: paraRpc });
-
-  return {
-    signer: solanaSigner,
-    rpc,
-    isLoading,
-    isReady: Boolean(solanaSigner && account?.isConnected && !isLoading),
-    address: solanaSigner?.address?.toString() ?? null,
-  };
-}
+const { address, isConnected, openModal } = useSolanaWalletConnection();
+const { signer, rpc, isReady } = useParaSigner();
+const { sendTransaction, txSignature, isLoading, error } = useSolTransfer();
 ```
 
-`src/hooks/useSolana.ts` creates both RPC clients used by the app:
+`@getpara/solana-signers-v2-integration` peers on the Solana 2.x packages, so this example pins them to `2.3.0`.
 
-- `@solana/kit` RPC for balance, transaction construction, send, and confirmation helpers.
-- `@solana/rpc-spec` RPC for Para's Solana Signers v2 hook.
+## Project layout
 
-## Key Files
+```text
+src/
+├── app/                           # Next.js layout, one page per demo route
+├── hooks/                         # Para SDK and Solana usage, one concern per hook
+├── components/
+│   ├── ParaProvider.tsx           # Para setup
+│   ├── SolanaSignersV2Example.tsx # Header, sign in, and account strip shared by every route
+│   ├── demos/                     # One container per route, joins its hook with the UI
+│   ├── layout/                    # App shell, header, footer, route workbench
+│   └── ui/                        # Presentational components, props only
+├── lib/                           # Chain config, demo routes, formatting, UI helpers
+└── styles/globals.css             # Tailwind theme tokens
+```
 
-- `src/components/ParaProvider.tsx` - Para SDK Lite provider and Solana connector configuration.
-- `src/hooks/useSolanaWalletConnection.ts` - Para modal state and active Solana wallet selection.
-- `src/hooks/useParaSigner.ts` - Para Solana Signers v2 hook wrapper.
-- `src/hooks/useMessageSigning.ts` - Message signing and verification.
-- `src/hooks/useSolTransfer.ts` - SOL transfer construction, signing, submission, and confirmation.
-- `src/hooks/useBalance.ts` - Devnet SOL balance query.
-- `src/components/demos/MessageSigningDemo.tsx` - Message signing UI.
-- `src/components/demos/SolTransferDemo.tsx` - SOL transfer UI.
-
-## Dependency Notes
-
-This app uses `@getpara/react-sdk-lite@3.0.0` instead of the catch-all React SDK because it only needs Para modal/core hooks plus the Solana chain subpath. `@getpara/solana-signers-v2-integration@3.0.0` currently peers on the Solana 2.x package line, so this example pins Solana v2 packages to the newest compatible `2.3.0` release instead of the registry-latest 6.x line.
-
-## Learn More
-
-- [Para Documentation](https://docs.getpara.com)
-- [Para Developer Portal](https://developer.getpara.com)
-- [Solana Documentation](https://docs.solana.com/)
-- [Solana JavaScript SDK](https://github.com/solana-labs/solana-web3.js)
-- [Next.js Documentation](https://nextjs.org/docs)
+Components in `layout/` and `ui/` never import Para. They receive data and callbacks from the containers, so you can swap them for your own design system without touching the hooks.

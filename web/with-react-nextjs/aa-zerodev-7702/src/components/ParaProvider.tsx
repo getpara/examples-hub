@@ -23,8 +23,7 @@ export function ParaProvider({ children }: { children: React.ReactNode }) {
         paraModalConfig={{
           onRampTestMode: true,
           recoverySecretStepEnabled: true,
-        }}
-      >
+        }}>
         {children}
       </ParaSDKProvider>
     </QueryClientProvider>

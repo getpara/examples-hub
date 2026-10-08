@@ -1,94 +1,187 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { ConnectWalletModal } from "@/components/ConnectWalletModal";
-import { Header } from "@/components/layout/Header";
-import { BalanceCard } from "@/components/ui/BalanceCard";
-import { ConnectWalletCard } from "@/components/ui/ConnectWalletCard";
-import { StatusAlert } from "@/components/ui/StatusAlert";
-import { TransactionHash } from "@/components/ui/TransactionHash";
-import { TransferForm } from "@/components/ui/TransferForm";
+import { AppShell } from "@/components/layout/AppShell";
+import { ExampleFooter } from "@/components/layout/ExampleFooter";
+import { ExampleHeader } from "@/components/layout/ExampleHeader";
+import { Workbench } from "@/components/layout/Workbench";
+import { AccountMenu } from "@/components/ui/AccountMenu";
+import { AccountStrip } from "@/components/ui/AccountStrip";
+import { ActionPanel } from "@/components/ui/ActionPanel";
+import { Button } from "@/components/ui/Button";
+import { PickerIcon } from "@/components/ui/PickerIcon";
+import { ResultPanel } from "@/components/ui/ResultPanel";
+import { SignInPanel } from "@/components/ui/SignInPanel";
+import { TextField } from "@/components/ui/TextField";
+import { WalletPicker, type WalletPickerOption } from "@/components/ui/WalletPicker";
 import { useWagmiBalance } from "@/hooks/useWagmiBalance";
 import { useWagmiEthTransfer } from "@/hooks/useWagmiEthTransfer";
 import { useWagmiWalletConnection } from "@/hooks/useWagmiWalletConnection";
+import { explorerAddressUrl, explorerTxUrl, SEPOLIA } from "@/lib/chain";
+import { EXAMPLE } from "@/lib/example";
+import { formatBalance, formatErrorMessage } from "@/lib/format";
+import { getResultStatus } from "@/lib/resultStatus";
+import { useAccountMenu } from "@/lib/useAccountMenu";
+import { useCopyToClipboard } from "@/lib/useCopyToClipboard";
+import { useTransferForm } from "@/lib/useTransferForm";
 
 export function WagmiExample() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const closeModal = useCallback(() => setIsModalOpen(false), []);
-  const wallet = useWagmiWalletConnection({
-    onConnectSuccess: closeModal,
-  });
+  const [isPickerOpen, setIsPickerOpen] = useState(false);
+  const closePicker = useCallback(() => setIsPickerOpen(false), []);
+  const wallet = useWagmiWalletConnection({ onConnectSuccess: closePicker });
+  const accountMenu = useAccountMenu(wallet.isConnected);
   const balance = useWagmiBalance(wallet.address);
-  const transfer = useWagmiEthTransfer({
-    isConnected: wallet.isConnected,
-  });
+  const transfer = useWagmiEthTransfer();
+  const form = useTransferForm(transfer.send);
+  const addressCopy = useCopyToClipboard();
+  const hashCopy = useCopyToClipboard();
+  const address = wallet.address ?? "";
+
+  const walletOptions: WalletPickerOption[] = [...wallet.connectors]
+    .sort((first, second) => Number(second.isPara) - Number(first.isPara))
+    .map((connector) =>
+      connector.isPara
+        ? {
+            id: connector.id,
+            name: connector.name,
+            description: "Email, phone, passkey, or social",
+            connectingDescription: "Continue in the Para window",
+            mark: <PickerIcon name="para-mark" className="size-6" />,
+            testId: "auth-oauth-para",
+          }
+        : {
+            id: connector.id,
+            name: connector.name,
+            description: "Detected in this browser",
+            mark: <PickerIcon name="globe-simple" className="size-6" />,
+            testId: `wallet-option-${connector.id}`,
+          }
+    );
+
+  const header = (
+    <ExampleHeader
+      scope={EXAMPLE.scope}
+      isConnected={wallet.isConnected}
+      address={address}
+      isConnecting={wallet.isConnecting}
+      onConnect={() => setIsPickerOpen(true)}
+      onOpenAccount={accountMenu.toggle}
+      isAccountOpen={accountMenu.isOpen}
+    />
+  );
+
+  const footer = <ExampleFooter docsHref={EXAMPLE.docsHref} sourceHref={EXAMPLE.sourceHref} />;
+
+  if (!wallet.isConnected) {
+    return (
+      <AppShell header={header} footer={footer}>
+        <WalletPicker
+          isOpen={isPickerOpen}
+          onClose={closePicker}
+          options={walletOptions}
+          onSelect={wallet.connectWallet}
+          connectingId={wallet.connectingConnectorId}
+          testId="auth-modal"
+          closeTestId="modal-close-button"
+        />
+        <SignInPanel
+          title="Connect a wallet"
+          description="Choose Para or another wallet to send Sepolia ETH."
+          network={SEPOLIA.networkLabel}>
+          <Button size="lg" fullWidth onClick={() => setIsPickerOpen(true)} data-testid="auth-connect-button">
+            Connect wallet
+          </Button>
+        </SignInPanel>
+      </AppShell>
+    );
+  }
+
+  const isTransferPending = transfer.isSending || transfer.isConfirming;
 
   return (
-    <main className="min-h-screen">
-      <ConnectWalletModal
-        activeConnectorName={wallet.activeConnectorName}
-        address={wallet.address}
-        connectors={wallet.connectors}
-        isConnected={wallet.isConnected}
-        isOpen={isModalOpen}
-        onClose={closeModal}
-        onConnect={wallet.connectWallet}
-        onDisconnect={() => {
-          wallet.disconnectWallet();
-          closeModal();
-        }}
+    <AppShell header={header} footer={footer}>
+      <AccountMenu
+        isOpen={accountMenu.isOpen}
+        onClose={accountMenu.close}
+        address={address}
+        connectionLabel={`Connected with ${wallet.activeConnectorName ?? "wagmi"}`}
+        onCopyAddress={() => addressCopy.copy(address)}
+        addressCopyStatus={addressCopy.status}
+        explorerHref={explorerAddressUrl(address)}
+        explorerLabel={`View on ${SEPOLIA.explorerName}`}
+        onDisconnect={() => wallet.disconnectWallet()}
+        disconnectTestId="auth-logout-button"
       />
-
-      <Header
-        address={wallet.address}
-        isConnected={wallet.isConnected}
-        onConnect={() => setIsModalOpen(true)}
+      <AccountStrip
+        address={address}
+        onCopyAddress={() => addressCopy.copy(address)}
+        addressCopyStatus={addressCopy.status}
+        network={SEPOLIA.name}
+        balance={formatBalance(balance.balance, SEPOLIA.currencySymbol)}
+        isBalanceLoading={balance.isLoading}
+        isBalanceRefreshing={balance.isRefreshing}
+        onRefreshBalance={balance.refresh}
       />
-
-      <section className="mx-auto flex w-full max-w-4xl flex-col gap-8 px-4 py-12 sm:px-6 lg:px-8">
-        <div className="animate-fade-in-up text-center">
-          <p className="mb-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-            Wagmi connector
-          </p>
-          <h1 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-            Send Sepolia ETH with Wagmi
-          </h1>
-          <p className="mx-auto mt-4 max-w-2xl text-sm leading-6 text-muted-foreground">
-            Use Para as a Wagmi connector, then send a Sepolia ETH transaction from the connected wallet.
-          </p>
-        </div>
-
-        <div className="animate-fade-in-up-delayed mx-auto w-full max-w-xl">
-          {!wallet.isConnected ? (
-            <ConnectWalletCard onConnect={() => setIsModalOpen(true)} />
-          ) : (
-            <div className="space-y-4">
-              <BalanceCard
-                balance={balance.balance}
-                isLoading={balance.isLoading}
-                onRefresh={balance.refresh}
-              />
-
-              <StatusAlert
-                message={transfer.status.message}
-                show={transfer.status.show}
-                type={transfer.status.type}
-              />
-
-              <TransferForm
-                amount={transfer.amount}
-                isLoading={transfer.isLoading}
-                onAmountChange={transfer.setAmount}
-                onSubmit={transfer.submit}
-                onToChange={transfer.setTo}
-                to={transfer.to}
-              />
-
-              <TransactionHash txHash={transfer.hash || ""} />
-            </div>
-          )}
-        </div>
-      </section>
-    </main>
+      <Workbench
+        aside={
+          <ResultPanel
+            status={getResultStatus({
+              isPending: isTransferPending,
+              errorMessage: transfer.errorMessage,
+              value: transfer.isConfirmed ? transfer.hash : undefined,
+            })}
+            emptyMessage="The transaction hash appears here after you send."
+            pendingMessage={
+              transfer.isSending
+                ? "Approve the request in your wallet."
+                : `Waiting for ${SEPOLIA.name} to confirm the transaction.`
+            }
+            successLabel="Confirmed"
+            fields={transfer.hash ? [{ label: "Transaction hash", value: transfer.hash, testId: "tx-hash-display" }] : []}
+            onCopy={() => transfer.hash && hashCopy.copy(transfer.hash)}
+            copiedMessage="Transaction hash copied"
+            copyStatus={hashCopy.status}
+            explorerHref={transfer.hash ? explorerTxUrl(transfer.hash) : undefined}
+            explorerLabel={`View on ${SEPOLIA.explorerName}`}
+            explorerTestId="tx-etherscan-link"
+            errorTitle="Transaction failed"
+            errorMessage={formatErrorMessage(transfer.errorMessage, { declinedMessage: "You declined the request in your wallet." })}
+          />
+        }>
+        <form onSubmit={form.submit} noValidate data-testid="transfer-form">
+          <ActionPanel
+            title="Send ETH"
+            api="useSendTransaction()"
+            description="Send Sepolia ETH with wagmi, then wait for the receipt."
+            actions={
+              <Button type="submit" size="lg" isLoading={isTransferPending} data-testid="tx-submit-button">
+                Send transaction
+              </Button>
+            }
+            hint="Gas is paid from this account.">
+            <TextField
+              label="Recipient"
+              value={form.to}
+              onChange={(event) => form.setTo(event.target.value)}
+              placeholder="0x..."
+              autoComplete="off"
+              spellCheck={false}
+              error={form.errors.to}
+              data-testid="tx-to-input"
+            />
+            <TextField
+              label="Amount"
+              value={form.amount}
+              onChange={(event) => form.setAmount(event.target.value)}
+              placeholder="0.001"
+              inputMode="decimal"
+              trailing={SEPOLIA.currencySymbol}
+              error={form.errors.amount}
+              data-testid="tx-amount-input"
+            />
+          </ActionPanel>
+        </form>
+      </Workbench>
+    </AppShell>
   );
 }

@@ -1,5 +1,3 @@
-"use client";
-
 import { useEffect, useMemo } from "react";
 import { useAccount, useConnect, useDisconnect } from "wagmi";
 
@@ -15,7 +13,7 @@ export interface WalletConnectorOption {
 
 export function useWagmiWalletConnection({ onConnectSuccess }: UseWagmiWalletConnectionOptions) {
   const { address, connector: activeConnector, isConnected } = useAccount();
-  const { connect, connectors, isSuccess } = useConnect();
+  const { connect, connectors, isPending, isSuccess, variables } = useConnect();
   const { disconnect } = useDisconnect();
 
   useEffect(() => {
@@ -42,12 +40,16 @@ export function useWagmiWalletConnection({ onConnectSuccess }: UseWagmiWalletCon
     }
   };
 
+  const pendingConnector = isPending ? variables?.connector : undefined;
+
   return {
     activeConnectorName: activeConnector?.name,
     address,
     connectWallet,
+    connectingConnectorId: typeof pendingConnector === "object" ? pendingConnector.id : undefined,
     connectors: connectorOptions,
     disconnectWallet: disconnect,
     isConnected,
+    isConnecting: isPending,
   };
 }

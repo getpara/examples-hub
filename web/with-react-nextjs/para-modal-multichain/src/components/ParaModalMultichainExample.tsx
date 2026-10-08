@@ -1,51 +1,113 @@
 "use client";
 
-import { useParaModalMultichainWallet } from "@/hooks/useParaModalMultichainWallet";
-import { useMultichainSign } from "@/hooks/useMultichainSign";
-import { Header } from "@/components/layout/Header";
-import { ConnectCard } from "@/components/ui/ConnectCard";
-import { WalletInfo } from "@/components/ui/WalletInfo";
-import { SignMessage } from "@/components/ui/SignMessage";
+import { AppShell } from "@/components/layout/AppShell";
+import { ExampleFooter } from "@/components/layout/ExampleFooter";
+import { ExampleHeader } from "@/components/layout/ExampleHeader";
+import { Sheet } from "@/components/layout/Sheet";
+import { AccountStrip } from "@/components/ui/AccountStrip";
+import { ActionPanel } from "@/components/ui/ActionPanel";
+import { Button } from "@/components/ui/Button";
+import { ChainCard } from "@/components/ui/ChainCard";
+import { ChainCardGrid } from "@/components/ui/ChainCardGrid";
+import { ChainMark } from "@/components/ui/ChainMark";
+import { SignInPanel } from "@/components/ui/SignInPanel";
+import { useConnectedChains } from "@/hooks/useConnectedChains";
+import { useCosmosSignMessage } from "@/hooks/useCosmosSignMessage";
+import { useEvmSignMessage } from "@/hooks/useEvmSignMessage";
+import { useParaModalWallet } from "@/hooks/useParaModalWallet";
+import { useSolanaSignMessage } from "@/hooks/useSolanaSignMessage";
+import { useStellarSignMessage } from "@/hooks/useStellarSignMessage";
+import { CHAINS, HELLO_WORLD_MESSAGE, SIGN_IN_NETWORK_LABEL, formatChainCount, type ChainId } from "@/lib/chain";
+import { getChainCardStatus } from "@/lib/chainCardStatus";
+import { EXAMPLE } from "@/lib/example";
+import { formatErrorMessage, shortenAddress } from "@/lib/format";
+import { useCopyToClipboard } from "@/lib/useCopyToClipboard";
+import { useKeyedCopy } from "@/lib/useKeyedCopy";
 
 export function ParaModalMultichainExample() {
-  const wallet = useParaModalMultichainWallet();
-  const signing = useMultichainSign();
+  const wallet = useParaModalWallet();
+  const connected = useConnectedChains();
+  const signers = {
+    evm: useEvmSignMessage(),
+    cosmos: useCosmosSignMessage(),
+    solana: useSolanaSignMessage(),
+    stellar: useStellarSignMessage(),
+  };
+  const addressCopy = useCopyToClipboard();
+  const signatureCopy = useKeyedCopy<ChainId>();
+
+  const header = (
+    <ExampleHeader
+      scope={EXAMPLE.scope}
+      isConnected={wallet.isConnected}
+      address={wallet.address}
+      onConnect={wallet.openModal}
+      onOpenAccount={wallet.openModal}
+    />
+  );
+
+  const footer = <ExampleFooter docsHref={EXAMPLE.docsHref} sourceHref={EXAMPLE.sourceHref} />;
+
+  if (!wallet.isConnected) {
+    return (
+      <AppShell header={header} footer={footer}>
+        <SignInPanel
+          description="Connect to continue. One Para account holds a wallet on each chain."
+          network={SIGN_IN_NETWORK_LABEL}>
+          <Button size="lg" fullWidth onClick={() => wallet.openModal()} data-testid="auth-connect-button">
+            Connect with Para
+          </Button>
+        </SignInPanel>
+      </AppShell>
+    );
+  }
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <Header isConnected={wallet.isConnected} address={wallet.address} onConnect={wallet.openModal} />
+    <AppShell header={header} footer={footer}>
+      <AccountStrip
+        address={wallet.address}
+        onCopyAddress={() => addressCopy.copy(wallet.address)}
+        addressCopyStatus={addressCopy.status}
+        network={formatChainCount(connected.chains.length)}
+        networkLabel="Networks"
+      />
+      <div data-testid="embedded-wallets" hidden>
+        {JSON.stringify(connected.wallets)}
+      </div>
+      <Sheet>
+        <ActionPanel
+          title="Sign on each chain"
+          api="useSignMessage · signAmino · signMessages · signBytes"
+          description="Each wallet signs the same message with its own chain format."
+        />
+        <ChainCardGrid>
+          {connected.chains.map(({ chainId, address }) => {
+            const chain = CHAINS[chainId];
+            const signer = signers[chainId];
 
-      <main
-        className={
-          wallet.isConnected
-            ? "mx-auto w-full max-w-xl px-4 py-10"
-            : "flex flex-1 items-center justify-center px-4 pb-16"
-        }>
-        {!wallet.isConnected ? (
-          <ConnectCard onConnect={wallet.openModal} />
-        ) : (
-          <div className="space-y-4">
-            <WalletInfo address={wallet.address} />
-            <div
-              data-testid="embedded-wallets"
-              className="hidden">
-              {JSON.stringify(signing.wallets)}
-            </div>
-            {signing.chains.map((chain) => (
-              <SignMessage
-                key={chain.chainId}
-                testId={`sign-card-${chain.chainId}`}
-                title={`Sign Message - ${chain.label}`}
-                message={signing.message}
-                onSign={chain.sign}
-                isPending={chain.isPending}
-                errorMessage={chain.errorMessage}
-                signature={chain.signature}
+            return (
+              <ChainCard
+                key={chainId}
+                testId={`sign-card-${chainId}`}
+                status={getChainCardStatus(signer)}
+                mark={<ChainMark name={chain.mark} />}
+                chain={chain.label}
+                network={chain.network}
+                address={address && shortenAddress(address)}
+                message={HELLO_WORLD_MESSAGE}
+                signature={signer.signature}
+                signLabel={`Sign ${HELLO_WORLD_MESSAGE}`}
+                onSign={signer.sign}
+                signTestId="sign-submit-button"
+                signatureTestId="sign-signature-display"
+                copyStatus={signatureCopy.statusFor(chainId)}
+                onCopySignature={() => signer.signature && signatureCopy.copyFor(chainId, signer.signature)}
+                errorMessage={formatErrorMessage(signer.errorMessage)}
               />
-            ))}
-          </div>
-        )}
-      </main>
-    </div>
+            );
+          })}
+        </ChainCardGrid>
+      </Sheet>
+    </AppShell>
   );
 }

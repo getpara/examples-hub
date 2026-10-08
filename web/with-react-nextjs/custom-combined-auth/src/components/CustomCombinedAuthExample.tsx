@@ -1,116 +1,116 @@
 "use client";
 
-import { useCallback, useEffect } from "react";
-import type { TOAuthMethod } from "@getpara/react-sdk";
-import { COUNTRY_CODES, OAUTH_PROVIDERS } from "@/constants/auth";
+import { AppShell } from "@/components/layout/AppShell";
+import { ExampleFooter } from "@/components/layout/ExampleFooter";
+import { ExampleHeader } from "@/components/layout/ExampleHeader";
+import { Workbench } from "@/components/layout/Workbench";
+import { CombinedSignInContainer } from "@/components/sign-in/CombinedSignInContainer";
+import { AccountMenu } from "@/components/ui/AccountMenu";
+import { AccountStrip } from "@/components/ui/AccountStrip";
+import { ActionPanel } from "@/components/ui/ActionPanel";
+import { Button } from "@/components/ui/Button";
+import { ResultPanel } from "@/components/ui/ResultPanel";
+import { TextAreaField } from "@/components/ui/TextAreaField";
+import { useAccountBalance } from "@/hooks/useAccountBalance";
 import { useCombinedAuth } from "@/hooks/useCombinedAuth";
 import { useParaSession } from "@/hooks/useParaSession";
 import { useSignHelloWorld } from "@/hooks/useSignHelloWorld";
-import { ParaProvider } from "@/components/ParaProvider";
-import { Header } from "@/components/layout/Header";
-import { CombinedAuth } from "@/components/ui/CombinedAuth";
-import { SignMessage } from "@/components/ui/SignMessage";
-import { WalletInfo } from "@/components/ui/WalletInfo";
+import { SEPOLIA } from "@/lib/chain";
+import { EXAMPLE } from "@/lib/example";
+import { formatBalance, formatErrorMessage } from "@/lib/format";
+import { getResultStatus } from "@/lib/resultStatus";
+import { useAccountMenu } from "@/lib/useAccountMenu";
+import { useCopyToClipboard } from "@/lib/useCopyToClipboard";
 
 export function CustomCombinedAuthExample() {
-  useEffect(() => {
-    document.documentElement.dataset.customAuthHydrated = "true";
-
-    return () => {
-      delete document.documentElement.dataset.customAuthHydrated;
-    };
-  }, []);
-
-  return (
-    <div className="hydrated-app">
-      <CustomCombinedAuthContent />
-    </div>
-  );
-}
-
-function CustomCombinedAuthContent() {
-  return (
-    <ParaProvider>
-      <CustomCombinedAuthRuntime />
-    </ParaProvider>
-  );
-}
-
-function CustomCombinedAuthRuntime() {
   const auth = useCombinedAuth();
   const session = useParaSession();
   const signing = useSignHelloWorld();
-  const passkeyUrl =
-    auth.activeTab === "email" ? auth.email.passkeyUrl : auth.activeTab === "phone" ? auth.phone.passkeyUrl : null;
-  const openPasskeyWindow = auth.activeTab === "email" ? auth.email.openPasskeyWindow : auth.phone.openPasskeyWindow;
-  const oauthActiveProvider = auth.oauth.activeProvider;
-  const oauthAuthenticate = auth.oauth.authenticate;
-  const oauthCancel = auth.oauth.cancel;
-  const oauthIsPending = auth.oauth.isPending;
-  const authenticateOAuth = useCallback(
-    (method: string) => oauthAuthenticate(method as TOAuthMethod),
-    [oauthAuthenticate]
+  const balance = useAccountBalance();
+  const addressCopy = useCopyToClipboard();
+  const signatureCopy = useCopyToClipboard();
+  const accountMenu = useAccountMenu(session.isConnected);
+
+  const header = (
+    <ExampleHeader
+      scope={EXAMPLE.scope}
+      isConnected={session.isConnected}
+      address={session.address}
+      onOpenAccount={accountMenu.toggle}
+      isAccountOpen={accountMenu.isOpen}
+    />
   );
 
+  const footer = <ExampleFooter docsHref={EXAMPLE.docsHref} sourceHref={EXAMPLE.sourceHref} />;
+
+  if (!session.isConnected) {
+    return (
+      <AppShell header={header} footer={footer}>
+        <CombinedSignInContainer auth={auth} network={SEPOLIA.networkLabel} />
+      </AppShell>
+    );
+  }
+
   return (
-    <main className="min-h-screen bg-background">
-      <Header address={session.address} isConnected={session.isConnected} />
-
-      <section className="mx-auto grid max-w-5xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[minmax(0,0.9fr)_minmax(22rem,1fr)] lg:px-8 lg:py-16">
-        <div className="animate-fade-in-up">
-          <p className="mb-3 text-sm font-semibold uppercase tracking-wide text-primary">Custom auth</p>
-          <h1 className="text-4xl font-semibold tracking-normal text-foreground sm:text-5xl">
-            Email, phone, and OAuth in one Para flow
-          </h1>
-          <p className="mt-5 max-w-xl text-base leading-7 text-muted-foreground">
-            Build your own sign-in surface with Para hooks, then sign an EVM message once the wallet is connected.
-          </p>
-        </div>
-
-        <div className="animate-fade-in-up space-y-4">
-          {!session.isConnected ? (
-            <CombinedAuth
-              activeTab={auth.activeTab}
-              countryCodes={COUNTRY_CODES}
-              email={auth.email}
-              error={auth.error}
-              isPending={auth.isPending}
-              oauth={{
-                activeProvider: oauthActiveProvider,
-                authenticate: authenticateOAuth,
-                cancel: oauthCancel,
-                isPending: oauthIsPending,
-              }}
-              onCancel={auth.cancel}
-              onOpenPasskey={openPasskeyWindow}
-              onTabChange={auth.setActiveTab}
-              phone={auth.phone}
-              providers={OAUTH_PROVIDERS}
-              passkeyUrl={passkeyUrl}
-              step={auth.step}
-              verifyUrl={auth.verifyUrl}
-            />
-          ) : (
-            <>
-              <WalletInfo address={session.address} />
-              <SignMessage
-                errorMessage={signing.errorMessage}
-                isPending={signing.isPending}
-                message={signing.message}
-                onSign={signing.signMessage}
-                signature={signing.signature}
-              />
-              <button
-                type="button"
-                onClick={() => session.disconnect()}
-                disabled={session.isDisconnecting}
-                className="btn-secondary min-h-11 w-full px-4 text-sm">
-                {session.isDisconnecting ? "Disconnecting..." : "Disconnect"}
-              </button>
-            </>
-          )}
-        </div>
-      </section>
-    </main>
+    <AppShell header={header} footer={footer}>
+      <AccountMenu
+        isOpen={accountMenu.isOpen}
+        onClose={accountMenu.close}
+        address={session.address}
+        onCopyAddress={() => addressCopy.copy(session.address)}
+        addressCopyStatus={addressCopy.status}
+        onDisconnect={() => session.disconnect()}
+        isDisconnecting={session.isDisconnecting}
+      />
+      <AccountStrip
+        address={session.address}
+        onCopyAddress={() => addressCopy.copy(session.address)}
+        addressCopyStatus={addressCopy.status}
+        network={SEPOLIA.name}
+        balance={formatBalance(balance.balance, SEPOLIA.currencySymbol)}
+        isBalanceLoading={balance.isLoading}
+        isBalanceRefreshing={balance.isRefreshing}
+        onRefreshBalance={balance.refresh}
+      />
+      <Workbench
+        aside={
+          <ResultPanel
+            status={getResultStatus({
+              isPending: signing.isPending,
+              errorMessage: signing.errorMessage,
+              value: signing.signature,
+            })}
+            emptyMessage="The signature appears here after you sign."
+            pendingMessage="Approve the request in the Para window."
+            successLabel="Signed"
+            fields={
+              signing.signature
+                ? [{ label: "Signature", value: signing.signature, testId: "sign-signature-display" }]
+                : []
+            }
+            onCopy={() => signing.signature && signatureCopy.copy(signing.signature)}
+            copiedMessage="Signature copied"
+            copyStatus={signatureCopy.status}
+            errorTitle="Signing failed"
+            errorMessage={formatErrorMessage(signing.errorMessage)}
+          />
+        }>
+        <ActionPanel
+          title="Sign a message"
+          api="useParaViemSignMessage()"
+          description="Signing proves you control this account. It does not send a transaction or cost gas."
+          actions={
+            <Button
+              size="lg"
+              isLoading={signing.isPending}
+              onClick={() => signing.sign()}
+              data-testid="sign-submit-button">
+              {`Sign ${signing.message}`}
+            </Button>
+          }>
+          <TextAreaField label="Message" value={signing.message} readOnly hint="The app signs this exact text." />
+        </ActionPanel>
+      </Workbench>
+    </AppShell>
   );
 }

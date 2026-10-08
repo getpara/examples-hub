@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
-import { SolanaSignersV2App } from "@/components/SolanaSignersV2App";
-import { SolanaSignersV2Preview } from "@/components/SolanaSignersV2Preview";
-import MessageSigningDemo from "@/components/demos/MessageSigningDemo";
+import { MessageSigningContainer } from "@/components/demos/MessageSigningContainer";
 
 export const metadata: Metadata = {
   title: "Message Signing | Para Solana Signers v2",
@@ -9,12 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function MessageSigningPage() {
-  return (
-    <>
-      <SolanaSignersV2Preview variant="message-signing" />
-      <SolanaSignersV2App>
-        <MessageSigningDemo />
-      </SolanaSignersV2App>
-    </>
-  );
+  return <MessageSigningContainer />;
 }

@@ -1,5 +1,3 @@
-"use client";
-
 import { useEffect } from "react";
 import { useAccount, useModal, useWallet, useWalletState } from "@getpara/react-sdk-lite";
 import { useParaSuiSigner } from "@getpara/react-sdk-lite/chains/sui";
@@ -19,11 +17,8 @@ export function useSuiWalletConnection() {
   }, [account?.isConnected, wallet?.type, suiWallet, setSelectedWallet]);
 
   return {
-    // Sui reuses the Solana Ed25519 key, so the wallet's stored `address` is the base58 Solana form.
-    // The signer exposes the derived 0x Sui address (blake2b of the public key) — use that for display.
     address: suiSigner?.address ?? "",
     isConnected: Boolean(account?.isConnected),
     openModal,
-    wallet,
   };
 }

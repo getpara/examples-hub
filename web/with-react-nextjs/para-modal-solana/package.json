@@ -11,7 +11,7 @@
     "typecheck": "next typegen && tsc --noEmit"
   },
   "dependencies": {
-    "@getpara/react-sdk": "3.21.0",
+    "@getpara/react-sdk": "3.22.0",
     "@solana/rpc": "2.3.0",
     "@solana/wallet-adapter-base": "0.9.27",
     "@solana/wallet-adapter-react": "0.15.39",

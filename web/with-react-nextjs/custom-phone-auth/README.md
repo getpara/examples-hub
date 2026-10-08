@@ -2,17 +2,7 @@
 
 [![Live Demo](https://img.shields.io/badge/Live_Demo-black?style=for-the-badge&logo=vercel)](https://para-example-custom-phone-auth.vercel.app)
 
-This example shows how to build your own phone authentication UI with Para's React SDK hooks in a Next.js app. The copyable phone auth logic lives in hooks, while the UI components stay prop-driven so you can reuse the auth flow without copying this example's styling.
-
-## Features
-
-- Phone number input with country code selection
-- Embedded Para verification iframe for SMS OTP completion
-- Automatic wallet creation for new users
-- Returning-user login completion
-- EVM message signing after authentication
-- Server-rendered first screen plus hydrated Para runtime
-- Clean separation between SDK logic and presentation components
+A Next.js app that signs in with its own phone number UI instead of the Para Modal, then shows the connected account and its Sepolia balance and signs `Hello World!`. All Para SDK usage lives in `src/hooks`. Everything else is plain React and Tailwind that you can replace with your own UI.
 
 ## Setup
 
@@ -23,7 +13,7 @@ NEXT_PUBLIC_PARA_API_KEY=your_para_api_key
 NEXT_PUBLIC_PARA_ENVIRONMENT=BETA
 ```
 
-Configure the API key in the [Para Developer Portal](https://developer.getpara.com) for the selected environment with the app display name, branding, phone login availability, 2FA policy, and auth layout. This example keeps the phone input and verification iframe behavior in code, but leaves persistent Para app configuration in the Portal.
+Configure the API key in the [Para Developer Portal](https://developer.getpara.com) with the app display name, branding, phone login, and 2FA policy.
 
 Install and run the production build:
 
@@ -33,56 +23,41 @@ yarn build
 yarn start
 ```
 
-## Key Files
+## Para usage
+
+These are the files to copy into your own app.
+
+| File | What it does |
+| --- | --- |
+| `src/components/ParaProvider.tsx` | Wraps the app in `ParaProvider` and a React Query client |
+| `src/hooks/usePhoneAuth.ts` | Signs in with a country code and phone number through `useAuthenticateWithEmailOrPhone` |
+| `src/hooks/useParaSession.ts` | Reads the connected wallet with `useAccount` and `useWallet`, and logs out with `useLogout` |
+| `src/hooks/useSignHelloWorld.ts` | Signs `Hello World!` with a Para Viem client and `useParaViemSignMessage` |
+| `src/hooks/useAccountBalance.ts` | Reads the wallet balance with `useWalletBalance`. The balance appears once the API key has an RPC URL in the Developer Portal |
+| `src/hooks/useE2ECleanup.ts` | Test-only cleanup for the E2E suite, active in development only |
+
+```tsx
+const auth = usePhoneAuth();
+const { address, isConnected, disconnect } = useParaSession();
+const { sign, message, isPending, errorMessage, signature } = useSignHelloWorld();
+```
+
+`usePhoneAuth` watches the Para client state and shows the verification URL in an iframe, or opens the passkey URL in a pop-up, until the session and wallet are ready. It can cancel the attempt.
+
+## Project layout
 
 ```text
 src/
-├── app/
-│   ├── layout.tsx                     # Root layout, metadata, SDK styles
-│   └── page.tsx                       # Server page with preview + client runtime
+├── app/                                  # Next.js layout and page
+├── hooks/                                # Para SDK usage, one concern per hook
 ├── components/
-│   ├── CustomPhoneAuthExample.tsx     # Client orchestration and provider placement
-│   ├── CustomPhoneAuthPreview.tsx     # Server-rendered disconnected first screen
-│   ├── ParaProvider.tsx               # Para SDK provider setup
-│   ├── layout/Header.tsx              # Prop-only header
-│   └── ui/                            # Prop-only auth, wallet, and signing UI
-├── constants/auth.ts                  # Country code options
-├── hooks/
-│   ├── usePhoneAuth.ts                # Copyable phone auth flow
-│   ├── useParaSession.ts              # Para session state and logout
-│   └── useSignHelloWorld.ts           # Message signing logic
-└── types/auth.ts                      # UI-facing auth option types
+│   ├── ParaProvider.tsx                  # Para setup
+│   ├── CustomPhoneAuthExample.tsx        # Joins the session and signing hooks with the UI
+│   ├── sign-in/PhoneSignInContainer.tsx  # Joins the phone sign in hook with the sign in panel
+│   ├── layout/                           # App shell, header, footer, workbench
+│   └── ui/                               # Presentational components, props only
+├── lib/                                  # Chain config, country codes, copy, and UI helpers
+└── styles/globals.css                    # Tailwind theme tokens
 ```
 
-## Hook Contract
-
-`usePhoneAuth` owns the complete phone authentication flow, including SDK-state verification and credential URLs, until the session and any required wallet are ready:
-
-```tsx
-const {
-  countryCode,
-  phoneNumber,
-  setCountryCode,
-  setPhoneNumber,
-  step,
-  submit,
-  verifyUrl,
-} = usePhoneAuth();
-```
-
-The presentation components do not import Para, Wagmi, or Viem. They receive only state and callbacks from `CustomPhoneAuthExample`.
-
-## Para SDK Hooks Used
-
-| Hook | Purpose |
-| --- | --- |
-| `useAuthenticateWithEmailOrPhone` | Starts and completes phone authentication through wallet readiness |
-| `useAccount` | Reads connection state |
-| `useWallet` | Reads the connected wallet address |
-| `useLogout` | Disconnects the Para session |
-| `useParaViemClient` | Creates a Viem client for the Para wallet |
-| `useParaViemSignMessage` | Signs the example message |
-
-## Notes
-
-The example includes direct dependencies that are currently reached by the catch-all Para React SDK build graph, including `@metamask/delegation-toolkit`, `ethers`, `@stellar/stellar-sdk`, and `@wagmi/core`. These keep the production build self-contained until the SDK export boundary can be narrowed.
+Components in `layout/` and `ui/` never import Para. They receive data and callbacks from the two containers, so you can swap them for your own design system without touching the hooks.

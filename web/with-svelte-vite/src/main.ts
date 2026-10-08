@@ -1,9 +1,5 @@
 import { mount } from "svelte";
-import "./app.css";
-import App from "./App.svelte";
+import "@/styles/globals.css";
+import App from "@/app/App.svelte";
 
-const app = mount(App, {
-  target: document.getElementById("app")!,
-});
-
-export default app;
+mount(App, { target: document.getElementById("app")! });

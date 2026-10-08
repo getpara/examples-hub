@@ -1,138 +1,77 @@
-# Safe Recovery Custom Auth Example
+# Safe 4337 Recovery Custom Auth Example
 
-[Live Demo](https://para-example-aa-safe-4337-recovery-custom-auth.vercel.app)
+[![Live Demo](https://img.shields.io/badge/Live_Demo-black?style=for-the-badge&logo=vercel)](https://para-example-aa-safe-4337-recovery-custom-auth.vercel.app)
 
-A minimal Next.js example that uses an app-owned passkey auth UI, a direct Para web client, and a Para wallet as the recovery guardian for a Safe ERC-4337 account on Sepolia.
-
-## What This Example Shows
-
-- Creating a `ParaWeb` client without the React provider or hosted modal
-- Managing email verification, OTP entry, and passkey portal URLs from custom UI
-- Turning the authenticated Para EVM wallet into a viem signer
-- Registering that Para signer as a Safe SocialRecoveryModule guardian
-- Proving the guardian cannot spend as an owner
-- Starting, vetoing, and finalizing a Safe owner recovery
+A Next.js app that signs in with its own email and passkey UI on a `ParaWeb` client, without the React provider or the Para Modal, then uses the Para wallet as the recovery guardian for a Safe ERC-4337 account on Sepolia. A local key stands in for the app passkey as the Safe owner. The app walks through six steps that unlock in order: create the Safe, add Para as guardian, fund the guardian with the Para faucet, use the Safe with its owner, prove Para cannot spend, and recover the Safe to a new owner.
 
 ## Setup
 
-1. Create `.env.local` from `.env.example`:
+Create a local `.env` file:
 
 ```env
-NEXT_PUBLIC_PARA_API_KEY=your_passkey_evm_para_api_key_here
+NEXT_PUBLIC_PARA_API_KEY=your_para_api_key
 NEXT_PUBLIC_PARA_ENVIRONMENT=BETA
-NEXT_PUBLIC_PIMLICO_API_KEY=your_pimlico_api_key_here
-NEXT_PUBLIC_SEPOLIA_RPC_URL=https://ethereum-sepolia-rpc.publicnode.com
+NEXT_PUBLIC_PIMLICO_API_KEY=your_pimlico_api_key
 ```
 
-2. Install dependencies:
+`NEXT_PUBLIC_SEPOLIA_RPC_URL` is optional and defaults to `https://ethereum-sepolia-rpc.publicnode.com`. Get a Para API key from the [Para Developer Portal](https://developer.getpara.com) and a Pimlico API key from the [Pimlico Dashboard](https://dashboard.pimlico.io). Pimlico bundles and sponsors the Safe user operations.
+
+Enable passkey authentication and EVM wallets for the API key in the Developer Portal. The app owns the sign-in form, and Para-hosted pages handle email verification and the passkey ceremony.
+
+Install and run the production build:
 
 ```bash
 yarn install
+yarn build
+yarn start
 ```
 
-3. Run the app:
+## Para usage
 
-```bash
-yarn dev
+| File | What it does |
+| --- | --- |
+| `src/lib/para.ts` | Creates the `ParaWeb` client once, as a module singleton, from the API key and environment. It is the only Para import in `src/lib` |
+| `src/hooks/useParaClient.ts` | Runs `init()` and `setup()` on the client from `src/lib/para.ts` |
+| `src/hooks/useParaSession.ts` | Reads the session with `isFullyLoggedIn()` and the EVM wallet with `getWalletsByType("EVM")`, refreshes on `onStatePhaseChange`, and signs out with `logout()` |
+| `src/hooks/useEmailPasskeyAuth.ts` | Signs in with `signUpOrLogIn({ auth: { email } })`, takes a verification code with `verifyNewAccount`, returns the verification URL for the sign-in iframe and clears it when the Para portal (`getPortalBaseURL`) posts `CLOSE_WINDOW`, opens the passkey URL in a pop-up, and waits with `waitForLogin` and `waitForWalletCreation` |
+| `src/hooks/useGuardianAccount.ts` | Turns the Para wallet into a viem `LocalAccount` with `createParaViemAccount` |
+| `src/hooks/useGuardianFaucet.ts` | Requests Sepolia ETH for the Para wallet with `requestFaucet` |
+| `src/hooks/useSafeRecovery.ts` | Runs the six steps with the Safe client and the Para guardian account |
+
+```tsx
+const client = useParaClient();
+const session = useParaSession(client.para, client.isReady);
+const auth = useEmailPasskeyAuth({ para: client.para, isReady: client.isReady, onAuthenticated: session.refresh });
+const guardian = useGuardianAccount(client.para, session.address);
+const faucet = useGuardianFaucet(client.para, session.walletId);
+const recovery = useSafeRecovery({ guardianAccount: guardian.account, requestFaucet: faucet.requestFunds });
 ```
 
-4. Open `http://127.0.0.1:3000`.
+`useSafeRecovery` keeps the Safe client in memory and calls the contract helpers in `src/lib`: `safe4337Client.ts` builds the Safe account with `permissionless` and Pimlico, and `socialRecoveryActions.ts` reads the recovery module and sends the guardian transactions with the Para `LocalAccount`.
 
-## Developer Portal Configuration
+## How recovery works
 
-Use a passkey-capable EVM API key from the [Para Developer Portal](https://developer.getpara.com). Enable passkey authentication and EVM wallet creation for the key. The example owns the visible auth UI, while Para portal URLs handle the secure verification and passkey ceremony.
+The Safe owner signs normal user operations. Para is registered only as a guardian on the Safe SocialRecoveryModule, not as an owner. Step 5 has Para sign a Safe transaction and simulates it; the Safe rejects it during owner validation, which shows the guardian cannot spend.
 
-The Pimlico API key comes from the [Pimlico Dashboard](https://dashboard.pimlico.io) and is used for sponsored Safe ERC-4337 owner operations.
+In step 6 the Para guardian calls `confirmRecovery` to start recovery to a new owner. The current owner can veto with `cancelRecovery` until recovery is finalized; after a veto the Safe keeps its owner and you can create a new Safe to start over. Once the grace period ends, `finalizeRecovery` rotates the owner and the new owner sends its first transaction. The guardian sends these calls itself, so step 3 funds it with the Para faucet first.
 
-## Project Structure
+Every guardian signature needs the user to authenticate with Para, and Para co-signs it. The app cannot produce that signature on its own, and Para cannot sign without the user. Safe modules bypass owner signatures once enabled, so keep the enabled module list small and audited. This example uses one guardian with a threshold of 1 to keep the mechanics clear; the module also supports several guardians, higher thresholds, and other delays.
+
+For the same flow with the Para Modal, see `aa-safe-4337-recovery`. For the standard flow where the Para wallet owns the Safe, see `aa-safe-4337`.
+
+## Project layout
 
 ```text
 src/
-├── app/
-│   ├── layout.tsx
-│   └── page.tsx
+├── app/                                   # Next.js layout and page
+├── hooks/                                 # Para SDK usage and the Safe recovery flow
 ├── components/
-│   ├── SafeRecoveryCustomAuthExample.tsx
-│   ├── layout/Header.tsx
-│   └── ui/
-│       ├── AuthCard.tsx
-│       ├── RecoveryFlow.tsx
-│       ├── VerifyIframe.tsx
-│       └── WalletInfo.tsx
-├── hooks/
-│   ├── safeRecoveryState.ts
-│   ├── useCustomParaAuth.ts
-│   └── useSafeRecoveryDemo.ts
-└── lib/
-    ├── para.ts
-    ├── safe-4337-client.ts
-    ├── safe-recovery-abi.ts
-    ├── safe-recovery.ts
-    └── social-recovery-actions.ts
+│   ├── SafeRecoveryCustomAuthExample.tsx  # Joins the hooks with the UI
+│   ├── sign-in/EmailSignInContainer.tsx   # Joins the sign in hook with the sign in panel
+│   ├── layout/                            # App shell, header, footer, step workbench
+│   └── ui/                                # Presentational components, props only
+├── lib/                                   # Para client, chain and Safe config, contract helpers, step state, formatting
+└── styles/globals.css                     # Tailwind theme tokens
 ```
 
-## Key Integration Pattern
-
-`useCustomParaAuth` owns the SDK client and exposes the authenticated EVM wallet:
-
-```tsx
-const para = new ParaWeb(Environment.BETA, paraApiKey);
-
-await para.init();
-await para.setup();
-
-const authState = await para.signUpOrLogIn({
-  auth: { email },
-  useShortUrls: true,
-});
-
-if (authState.stage === "verify" && !authState.loginUrl) {
-  const signupState = await para.verifyNewAccount({
-    verificationCode,
-    useShortUrls: true,
-  });
-
-  setPasskeyUrl(signupState.passkeyUrl);
-  await para.waitForWalletCreation({ isCanceled });
-  return;
-}
-
-if (authState.stage === "login") {
-  setPasskeyUrl(authState.passkeyUrl);
-  const loginResult = await para.waitForLogin({ isCanceled });
-  if (loginResult.needsWallet) {
-    await para.waitForWalletCreation({ isCanceled });
-  }
-}
-```
-
-`useSafeRecoveryDemo` turns that wallet into the Safe recovery guardian signer:
-
-```tsx
-const guardianAccount = createParaViemAccount({
-  para,
-  address: guardianWalletAddress,
-});
-
-await confirmRecoveryWithGuardian({
-  safe,
-  guardianAccount,
-  safeAddress,
-  newOwnerAddress,
-});
-```
-
-The Safe owner remains separate from the Para guardian. Normal sponsored user operations are signed by the simulated owner, while the Para guardian can only use the SocialRecoveryModule path.
-
-## Related Examples
-
-- `custom-email-auth` shows a custom email auth surface using React hooks.
-- `aa-safe-4337` shows Para as the Safe owner for sponsored transactions.
-- `aa-safe-4337-recovery` shows the same recovery flow using the default React provider and modal.
-
-## Learn More
-
-- [Para Documentation](https://docs.getpara.com)
-- [Safe ERC-4337 Documentation](https://docs.safe.global/advanced/erc-4337/4337-safe)
-- [Safe Modules Documentation](https://docs.safe.global/advanced/smart-account-modules)
-- [EIP-4337 Specification](https://eips.ethereum.org/EIPS/eip-4337)
+Components in `layout/` and `ui/` never import Para. They receive data and callbacks from the two containers, so you can swap them for your own design system without touching the hooks.

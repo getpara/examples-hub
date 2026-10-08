@@ -1,14 +1,12 @@
 import { NextResponse } from "next/server";
-import { getSdk } from "@/lib/canton";
+import type { GeneratedParty } from "@/lib/cantonTypes";
+import { getSdk } from "@/lib/server/canton";
 
 export const runtime = "nodejs";
 
 interface AllocateBody {
   signatureBase64?: string;
-  // The full object returned by generateExternalParty. We pass it back
-  // to allocateExternalParty unmodified.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  generatedParty?: any;
+  generatedParty?: GeneratedParty;
 }
 
 export async function POST(request: Request) {

@@ -1,22 +1,15 @@
-"use client";
-
 import { useCallback, useEffect, useState } from "react";
-import { encodeFunctionData, formatEther, isAddress, parseEther, type Address, type Hex } from "viem";
-import { PARA_TEST_TOKEN_ABI, PARA_TEST_TOKEN_ADDRESS } from "@/lib/contracts";
-import { CHAIN, publicClient } from "@/lib/viem";
-import { useParaSigner } from "./useParaSigner";
+import { encodeFunctionData, formatEther, isAddress, parseEther, type Hex } from "viem";
+import { HOLESKY } from "@/lib/chain";
+import { PARA_TEST_TOKEN } from "@/lib/contracts";
+import { publicClient } from "@/lib/publicClient";
+import { useParaSigner } from "@/hooks/useParaSigner";
 
-export type Operation =
-  | {
-      type: "mint";
-      recipient?: string;
-      amount: string;
-    }
-  | {
-      type: "transfer";
-      recipient: string;
-      amount: string;
-    };
+export type Operation = {
+  type: "mint" | "transfer";
+  recipient: string;
+  amount: string;
+};
 
 export function useBatchTransactions() {
   const { viemClient, account, address, isReady } = useParaSigner();
@@ -41,8 +34,8 @@ export function useBatchTransactions() {
       setIsBalanceLoading(true);
       setError(null);
       const balance = await publicClient.readContract({
-        address: PARA_TEST_TOKEN_ADDRESS,
-        abi: PARA_TEST_TOKEN_ABI,
+        address: PARA_TEST_TOKEN.address,
+        abi: PARA_TEST_TOKEN.abi,
         functionName: "balanceOf",
         args: [address],
       });
@@ -63,7 +56,7 @@ export function useBatchTransactions() {
   const executeMulticall = async (operations: Operation[]) => {
     if (!viemClient || !account) {
       setError(new Error("Connect your Para wallet before executing a batch."));
-      return;
+      return null;
     }
 
     try {
@@ -72,7 +65,7 @@ export function useBatchTransactions() {
       const callData = operations.map((operation) => {
         if (operation.type === "mint") {
           return encodeFunctionData({
-            abi: PARA_TEST_TOKEN_ABI,
+            abi: PARA_TEST_TOKEN.abi,
             functionName: "mint",
             args: [parseEther(operation.amount)],
           });
@@ -83,25 +76,27 @@ export function useBatchTransactions() {
         }
 
         return encodeFunctionData({
-          abi: PARA_TEST_TOKEN_ABI,
+          abi: PARA_TEST_TOKEN.abi,
           functionName: "transfer",
-          args: [operation.recipient as Address, parseEther(operation.amount)],
+          args: [operation.recipient, parseEther(operation.amount)],
         });
       });
 
       const hash = await viemClient.writeContract({
-        address: PARA_TEST_TOKEN_ADDRESS,
-        abi: PARA_TEST_TOKEN_ABI,
+        address: PARA_TEST_TOKEN.address,
+        abi: PARA_TEST_TOKEN.abi,
         account,
-        chain: CHAIN,
+        chain: HOLESKY.chain,
         functionName: "multicall",
         args: [callData],
       });
-      await publicClient.waitForTransactionReceipt({ hash });
       setTxHash(hash);
+      await publicClient.waitForTransactionReceipt({ hash });
       await fetchTokenData();
+      return hash;
     } catch (err) {
       setError(err instanceof Error ? err : new Error("Failed to execute batch transaction"));
+      return null;
     } finally {
       setIsLoading(false);
     }

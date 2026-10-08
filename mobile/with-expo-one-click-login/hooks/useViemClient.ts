@@ -1,11 +1,11 @@
 /**
- * Thin wrapper around useParaViemClient from react-core.
+ * Thin wrapper around useParaViemClient from the native SDK.
  * Adds balance fetching and convenience methods for the example app.
  */
 import { useCallback, useState } from 'react';
 import { createPublicClient, http, formatEther, parseEther, type Hex, type PublicClient } from 'viem';
 import { sepolia } from 'viem/chains';
-import { useParaViemClient } from '@getpara/react-core/evm/viem';
+import { useParaViemClient } from '@getpara/react-native-wallet/evm/viem';
 
 const publicClient: PublicClient = createPublicClient({
   chain: sepolia,
@@ -44,12 +44,13 @@ export function useViemClient() {
 
   const sendTransaction = useCallback(
     async (to: Hex, amount: string): Promise<Hex | null> => {
-      if (!viemClient) return null;
+      if (!viemClient?.account) return null;
 
       try {
         setIsLoading(true);
         setError(null);
         return await viemClient.sendTransaction({
+          account: viemClient.account,
           to,
           value: parseEther(amount),
           chain: sepolia,

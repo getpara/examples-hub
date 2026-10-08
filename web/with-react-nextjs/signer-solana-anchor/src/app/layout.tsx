@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "@/styles/globals.css";
 import "@getpara/react-sdk-lite/styles.css";
-
-const inter = Inter({ subsets: ["latin"] });
+import { ParaProvider } from "@/components/ParaProvider";
+import { SolanaAnchorExample } from "@/components/SolanaAnchorExample";
 
 export const metadata: Metadata = {
   title: "Para Solana Anchor Signer",
@@ -17,8 +16,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.className} antialiased`}>
-        {children}
+      <body>
+        <ParaProvider>
+          <SolanaAnchorExample>{children}</SolanaAnchorExample>
+        </ParaProvider>
       </body>
     </html>
   );

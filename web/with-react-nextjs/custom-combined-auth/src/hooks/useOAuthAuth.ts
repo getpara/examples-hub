@@ -2,12 +2,9 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { useAuthenticateWithOAuth, useClient, type TOAuthMethod } from "@getpara/react-sdk";
 
 export interface UseOAuthAuthReturn {
-  // State
   activeProvider: TOAuthMethod | null;
   error: string | null;
   isPending: boolean;
-
-  // Actions
   authenticate: (method: TOAuthMethod) => void;
   cancel: () => void;
 }
@@ -83,7 +80,7 @@ export function useOAuthAuth(): UseOAuthAuthReturn {
         if (activeAttempt.current === attempt) {
           activeAttempt.current = null;
           resetState();
-          setError("Popup blocked — allow popups for this site, then sign in again.");
+          setError("Pop-up blocked. Allow pop-ups for this site, then sign in again.");
         }
         return;
       }
@@ -131,7 +128,7 @@ export function useOAuthAuth(): UseOAuthAuthReturn {
           attempt.isCanceled = true;
           activeAttempt.current = null;
           resetState();
-          setError("Popup blocked — allow popups for this site, then sign in again.");
+          setError("Pop-up blocked. Allow pop-ups for this site, then sign in again.");
           return;
         }
 

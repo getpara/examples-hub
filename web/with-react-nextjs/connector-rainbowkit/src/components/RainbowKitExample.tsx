@@ -1,97 +1,99 @@
 "use client";
 
-import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { useAccount } from "wagmi";
-import { Header } from "@/components/layout/Header";
-import { ConnectCard } from "@/components/ui/ConnectCard";
-import { SignMessage } from "@/components/ui/SignMessage";
-import { WalletInfo } from "@/components/ui/WalletInfo";
+import { AppShell } from "@/components/layout/AppShell";
+import { ExampleFooter } from "@/components/layout/ExampleFooter";
+import { ExampleHeader } from "@/components/layout/ExampleHeader";
+import { Workbench } from "@/components/layout/Workbench";
+import { AccountStrip } from "@/components/ui/AccountStrip";
+import { ActionPanel } from "@/components/ui/ActionPanel";
+import { Button } from "@/components/ui/Button";
+import { ResultPanel } from "@/components/ui/ResultPanel";
+import { SignInPanel } from "@/components/ui/SignInPanel";
+import { TextAreaField } from "@/components/ui/TextAreaField";
+import { useRainbowKitWallet } from "@/hooks/useRainbowKitWallet";
 import { useSignHelloWorld } from "@/hooks/useSignHelloWorld";
-
-interface RainbowKitActionProps {
-  label: string;
-  compact?: boolean;
-}
-
-function RainbowKitAction({ label, compact = false }: RainbowKitActionProps) {
-  return (
-    <ConnectButton.Custom>
-      {({ account, chain, mounted, openAccountModal, openChainModal, openConnectModal }) => {
-        const ready = mounted;
-        const connected = ready && account && chain;
-        const isWrongNetwork = chain?.unsupported;
-        const buttonLabel = !connected
-          ? label
-          : isWrongNetwork
-            ? "Wrong network"
-            : account.displayName;
-
-        const handleClick = () => {
-          if (!connected) {
-            openConnectModal();
-            return;
-          }
-
-          if (isWrongNetwork) {
-            openChainModal();
-            return;
-          }
-
-          openAccountModal();
-        };
-
-        return (
-          <button
-            type="button"
-            className={`btn-primary ${compact ? "px-4 py-2 text-sm" : "w-full px-4 py-3"}`}
-            disabled={!ready}
-            onClick={handleClick}>
-            {buttonLabel}
-          </button>
-        );
-      }}
-    </ConnectButton.Custom>
-  );
-}
+import { SEPOLIA } from "@/lib/chain";
+import { EXAMPLE } from "@/lib/example";
+import { formatErrorMessage } from "@/lib/format";
+import { getResultStatus } from "@/lib/resultStatus";
+import { useCopyToClipboard } from "@/lib/useCopyToClipboard";
 
 export function RainbowKitExample() {
-  const { address, isConnected } = useAccount();
-  const { sign, message, isPending, error, signature } = useSignHelloWorld();
+  const wallet = useRainbowKitWallet();
+  const signing = useSignHelloWorld();
+  const addressCopy = useCopyToClipboard();
+  const signatureCopy = useCopyToClipboard();
+
+  const header = (
+    <ExampleHeader
+      scope={EXAMPLE.scope}
+      isConnected={wallet.isConnected}
+      address={wallet.address}
+      onConnect={wallet.openConnect}
+      onOpenAccount={wallet.openAccount}
+    />
+  );
+
+  const footer = <ExampleFooter docsHref={EXAMPLE.docsHref} sourceHref={EXAMPLE.sourceHref} />;
+
+  if (!wallet.isConnected) {
+    return (
+      <AppShell header={header} footer={footer}>
+        <SignInPanel
+          title="Connect a wallet"
+          description="Open RainbowKit and choose Para. Your wallet is created the first time you sign in."
+          network={SEPOLIA.networkLabel}>
+          <Button size="lg" fullWidth onClick={wallet.openConnect} data-testid="auth-connect-button">
+            Connect with RainbowKit
+          </Button>
+        </SignInPanel>
+      </AppShell>
+    );
+  }
 
   return (
-    <main className="min-h-screen">
-      <Header connectButton={<RainbowKitAction label="Connect Wallet" compact />} />
-
-      <section className="mx-auto flex w-full max-w-4xl flex-col gap-8 px-4 py-12 sm:px-6 lg:px-8">
-        <div className="animate-fade-in-up text-center">
-          <p className="mb-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-            RainbowKit connector
-          </p>
-          <h1 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-            Connect with RainbowKit
-          </h1>
-          <p className="mx-auto mt-4 max-w-2xl text-sm leading-6 text-muted-foreground">
-            Use Para as a RainbowKit wallet connector, then sign a message through Wagmi.
-          </p>
-        </div>
-
-        <div className="animate-fade-in-up-delayed mx-auto w-full max-w-xl">
-          {!isConnected ? (
-            <ConnectCard connectButton={<RainbowKitAction label="Connect with RainbowKit" />} />
-          ) : (
-            <div className="space-y-4">
-              <WalletInfo address={address} />
-              <SignMessage
-                message={message}
-                onSign={sign}
-                isPending={isPending}
-                error={error}
-                signature={signature}
-              />
-            </div>
-          )}
-        </div>
-      </section>
-    </main>
+    <AppShell header={header} footer={footer}>
+      <AccountStrip
+        address={wallet.address}
+        onCopyAddress={() => addressCopy.copy(wallet.address)}
+        addressCopyStatus={addressCopy.status}
+        network={SEPOLIA.name}
+      />
+      <Workbench
+        aside={
+          <ResultPanel
+            status={getResultStatus({
+              isPending: signing.isPending,
+              errorMessage: signing.errorMessage,
+              value: signing.signature,
+            })}
+            emptyMessage="The signature appears here after you sign."
+            pendingMessage="Approve the request in the Para window."
+            successLabel="Signed"
+            fields={
+              signing.signature
+                ? [{ label: "Signature", value: signing.signature, testId: "sign-signature-display" }]
+                : []
+            }
+            onCopy={() => signing.signature && signatureCopy.copy(signing.signature)}
+            copiedMessage="Signature copied"
+            copyStatus={signatureCopy.status}
+            errorTitle="Signing failed"
+            errorMessage={formatErrorMessage(signing.errorMessage)}
+          />
+        }>
+        <ActionPanel
+          title="Sign a message"
+          api="signMessage({ message })"
+          description="Signing proves you control this account. It does not send a transaction or cost gas."
+          actions={
+            <Button size="lg" isLoading={signing.isPending} onClick={signing.sign} data-testid="sign-submit-button">
+              {`Sign ${signing.message}`}
+            </Button>
+          }>
+          <TextAreaField label="Message" value={signing.message} readOnly hint="The app signs this exact text." />
+        </ActionPanel>
+      </Workbench>
+    </AppShell>
   );
 }

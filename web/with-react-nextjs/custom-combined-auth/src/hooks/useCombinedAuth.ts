@@ -1,8 +1,9 @@
 import { useState, useCallback } from "react";
-import { useEmailAuth, type UseEmailAuthReturn } from "./useEmailAuth";
-import { usePhoneAuth, type UsePhoneAuthReturn } from "./usePhoneAuth";
-import { useOAuthAuth, type UseOAuthAuthReturn } from "./useOAuthAuth";
-import type { AuthTab } from "@/types/auth";
+import { useEmailAuth, type UseEmailAuthReturn } from "@/hooks/useEmailAuth";
+import { usePhoneAuth, type UsePhoneAuthReturn } from "@/hooks/usePhoneAuth";
+import { useOAuthAuth, type UseOAuthAuthReturn } from "@/hooks/useOAuthAuth";
+
+export type AuthTab = "email" | "phone" | "social";
 
 export interface UseCombinedAuthReturn {
   activeTab: AuthTab;
@@ -12,6 +13,8 @@ export interface UseCombinedAuthReturn {
   oauth: UseOAuthAuthReturn;
   step: "input" | "verify";
   verifyUrl: string | null;
+  passkeyUrl: string | null;
+  openPasskeyWindow: () => void;
   error: string | null;
   isPending: boolean;
   cancel: () => void;
@@ -30,6 +33,10 @@ export function useCombinedAuth(): UseCombinedAuthReturn {
   const step = activeTab === "email" ? email.step : activeTab === "phone" ? phone.step : "input";
 
   const verifyUrl = activeTab === "email" ? email.verifyUrl : activeTab === "phone" ? phone.verifyUrl : null;
+
+  const passkeyUrl = activeTab === "email" ? email.passkeyUrl : activeTab === "phone" ? phone.passkeyUrl : null;
+
+  const openPasskeyWindow = activeTab === "email" ? email.openPasskeyWindow : phone.openPasskeyWindow;
 
   const error = activeTab === "email" ? email.error : activeTab === "phone" ? phone.error : oauth.error;
 
@@ -53,6 +60,8 @@ export function useCombinedAuth(): UseCombinedAuthReturn {
     oauth,
     step,
     verifyUrl,
+    passkeyUrl,
+    openPasskeyWindow,
     error,
     isPending,
     cancel,

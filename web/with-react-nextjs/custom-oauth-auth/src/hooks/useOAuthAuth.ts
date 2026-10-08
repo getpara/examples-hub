@@ -1,12 +1,11 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useAuthenticateWithOAuth, useClient, type TOAuthMethod } from "@getpara/react-sdk";
-import type { OAuthProviderMethod } from "@/types/auth";
 
 export interface UseOAuthAuthReturn {
-  activeProvider: OAuthProviderMethod | null;
+  activeProvider: TOAuthMethod | null;
   error: string | null;
   isPending: boolean;
-  authenticate: (method: OAuthProviderMethod) => void;
+  authenticate: (method: TOAuthMethod) => void;
   cancel: () => void;
 }
 
@@ -27,7 +26,7 @@ function closePopup(attempt: OAuthAttempt) {
 
 export function useOAuthAuth(): UseOAuthAuthReturn {
   const para = useClient();
-  const [activeProvider, setActiveProvider] = useState<OAuthProviderMethod | null>(null);
+  const [activeProvider, setActiveProvider] = useState<TOAuthMethod | null>(null);
   const [error, setError] = useState<string | null>(null);
   const { authenticateWithOAuthAsync, isPending } = useAuthenticateWithOAuth();
   const activeAttempt = useRef<OAuthAttempt | null>(null);
@@ -81,7 +80,7 @@ export function useOAuthAuth(): UseOAuthAuthReturn {
         if (activeAttempt.current === attempt) {
           activeAttempt.current = null;
           resetState();
-          setError("Popup blocked — allow popups for this site, then sign in again.");
+          setError("Pop-up blocked. Allow pop-ups for this site, then sign in again.");
         }
         return;
       }
@@ -104,7 +103,7 @@ export function useOAuthAuth(): UseOAuthAuthReturn {
   }, [para, resetState]);
 
   const authenticate = useCallback(
-    (method: OAuthProviderMethod) => {
+    (method: TOAuthMethod) => {
       const previousAttempt = activeAttempt.current;
       if (previousAttempt) {
         previousAttempt.isCanceled = true;
@@ -129,7 +128,7 @@ export function useOAuthAuth(): UseOAuthAuthReturn {
           attempt.isCanceled = true;
           activeAttempt.current = null;
           resetState();
-          setError("Popup blocked — allow popups for this site, then sign in again.");
+          setError("Pop-up blocked. Allow pop-ups for this site, then sign in again.");
           return;
         }
 
@@ -154,7 +153,7 @@ export function useOAuthAuth(): UseOAuthAuthReturn {
       };
 
       void authenticateWithOAuthAsync({
-        method: method as TOAuthMethod,
+        method,
         redirectCallbacks: {
           onOAuthPopup: popup => {
             if (activeAttempt.current !== attempt || attempt.isCanceled) {

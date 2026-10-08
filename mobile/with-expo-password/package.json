@@ -10,9 +10,9 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@craftzdog/react-native-buffer": "^6.1.0",
-    "@getpara/react-native-wallet": "3.21.0",
-    "@getpara/viem-v2-integration": "3.21.0",
+    "@craftzdog/react-native-buffer": "^6.1.2",
+    "@getpara/react-native-wallet": "3.22.0",
+    "@getpara/viem-v2-integration": "3.22.0",
     "@peculiar/webcrypto": "^1.5.0",
     "@react-native-async-storage/async-storage": "^2.2.0",
     "@tanstack/react-query": "^5.95.2",
@@ -31,8 +31,8 @@
     "react-native-modpow": "^1.1.0",
     "react-native-nitro-modules": "^0.35.2",
     "react-native-passkey": "^3.3.2",
-    "react-native-quick-base64": "^2.2.0",
-    "react-native-quick-crypto": "^1.0.18",
+    "react-native-quick-base64": "^3.0.0",
+    "react-native-quick-crypto": "^1.1.4",
     "react-native-reanimated": "4.2.1",
     "react-native-safe-area-context": "~5.6.0",
     "react-native-screens": "~4.23.0",

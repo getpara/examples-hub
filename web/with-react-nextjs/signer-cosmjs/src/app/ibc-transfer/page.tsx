@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import IbcTransferDemo from "@/components/demos/IbcTransferDemo";
+import { IbcTransferContainer } from "@/components/demos/IbcTransferContainer";
 
 export const metadata: Metadata = {
   title: "IBC Transfer | Para CosmJS Signer",
@@ -7,5 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function IbcTransferPage() {
-  return <IbcTransferDemo />;
+  return <IbcTransferContainer />;
 }

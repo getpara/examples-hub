@@ -2,16 +2,13 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "@/styles/globals.css";
 import "@getpara/react-sdk/styles.css";
-import App from "@/app/App";
-import { QueryProvider } from "@/context/QueryProvider";
-import { ParaProvider } from "@/context/ParaProvider";
+import { App } from "@/app/App";
+import { ParaProvider } from "@/components/ParaProvider";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <QueryProvider>
-      <ParaProvider>
-        <App />
-      </ParaProvider>
-    </QueryProvider>
+    <ParaProvider>
+      <App />
+    </ParaProvider>
   </StrictMode>
 );

@@ -1,121 +1,76 @@
 # Para + RainbowKit Example
 
-[![Live Demo](https://img.shields.io/badge/▶_Live_Demo-black?style=for-the-badge&logo=vercel)](https://para-example-connector-rainbowkit.vercel.app)
+[![Live Demo](https://img.shields.io/badge/Live_Demo-black?style=for-the-badge&logo=vercel)](https://para-example-connector-rainbowkit.vercel.app)
 
-A minimal Next.js example showing Para as a RainbowKit wallet connector with Wagmi message signing.
+A minimal Next.js app that adds Para as a RainbowKit wallet, opens RainbowKit from Connect, shows the connected account, and signs `Hello World!` with wagmi. The Para, RainbowKit, and wagmi setup lives in `src/components/ParaProvider.tsx` and the wallet hooks live in `src/hooks`. Everything else is plain React and Tailwind that you can replace with your own UI.
 
-## What This Example Shows
-
-- Configuring `@getpara/rainbowkit-wallet` with RainbowKit and Wagmi
-- Rendering a Para wallet option through `ConnectButton.Custom`
-- Reading connection state with Wagmi's `useAccount`
-- Signing a message with Wagmi's `useSignMessage`
-
-This example uses the latest compatible RainbowKit stack for the current Para package contract. `@getpara/rainbowkit-wallet@3.0.0` currently peers on `@rainbow-me/rainbowkit@2.2.9`, and RainbowKit 2 peers on Wagmi 2, so this example uses Wagmi 2 rather than Wagmi 3.
+`@getpara/rainbowkit-wallet` peers on RainbowKit 2, and RainbowKit 2 peers on wagmi 2, so this example uses wagmi 2.
 
 ## Setup
 
-1. Create a `.env` file:
+Create a local `.env` file:
 
 ```env
 NEXT_PUBLIC_PARA_API_KEY=your_api_key_here
+NEXT_PUBLIC_PARA_ENVIRONMENT=BETA
 NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID=your_walletconnect_project_id
 ```
 
-2. Install dependencies:
+`NEXT_PUBLIC_PARA_ENVIRONMENT` is the Para environment for that API key and defaults to `BETA`. RainbowKit needs a WalletConnect project ID and an `appName` to build its wagmi connectors. Configure the Para API key in the [Para Developer Portal](https://developer.getpara.com) with the app display name, branding, login methods, and wallet visibility.
+
+Install and run the production build:
 
 ```bash
 yarn install
-```
-
-3. Build and start the production server:
-
-```bash
 yarn build
 yarn start
 ```
 
-4. Open the app:
+## Para usage
 
-```text
-http://localhost:3000
-```
+These are the files to copy into your own app.
 
-## Developer Portal Configuration
-
-This example expects Para app identity, branding, authentication methods, theme, wallet visibility, and Para-managed external wallet settings to be configured in the Para Developer Portal for the API key. The local `NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID` value remains because RainbowKit requires a WalletConnect project ID when building its wagmi connectors, and the RainbowKit `appName` remains because RainbowKit connector metadata requires an app label.
-
-## Core Integration
-
-The RainbowKit connector setup lives in `src/client/wagmi.ts`:
+| File | What it does |
+| --- | --- |
+| `src/components/ParaProvider.tsx` | Creates the Para wallet with `getParaWallet`, registers it with `connectorsForWallets`, and wraps the app in `WagmiProvider`, a React Query client, and `RainbowKitProvider` |
+| `src/hooks/useRainbowKitWallet.ts` | Reads the account with `useAccount` and opens the RainbowKit connect, account, and network modals |
+| `src/hooks/useSignHelloWorld.ts` | Signs `Hello World!` with wagmi `useSignMessage` |
 
 ```ts
 const paraWallet = getParaWallet({
   para: {
-    environment: Environment.BETA,
-    apiKey: process.env.NEXT_PUBLIC_PARA_API_KEY || "missing-para-api-key",
+    environment: ENVIRONMENT,
+    apiKey: API_KEY,
   },
   queryClient,
-  appName: "Para RainbowKit Example",
+  appName: APP_NAME,
   onRampTestMode: true,
   recoverySecretStepEnabled: true,
 });
 
-const connectors = connectorsForWallets(
-  [
-    {
-      groupName: "Social Login",
-      wallets: [paraWallet],
-    },
-  ],
-  {
-    appName: "Para RainbowKit Example",
-    projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID || "missing-walletconnect-project-id",
-  }
-);
+const connectors = connectorsForWallets([{ groupName: "Social Login", wallets: [paraWallet] }], {
+  appName: APP_NAME,
+  projectId: WALLET_CONNECT_PROJECT_ID,
+});
 ```
 
-The copyable signing logic is isolated in `src/hooks/useSignHelloWorld.ts`:
+Choosing Para in RainbowKit opens the Para modal. Once the user signs in, the Para wallet behaves like any other wagmi account, so `signMessage({ message })` signs the text and the user approves it in the Para window. The address chip in the header opens the RainbowKit account modal.
 
-```ts
-export function useSignHelloWorld() {
-  const { signMessage, isPending, error, data: signature } = useSignMessage();
+`src/lib/rainbowKitTheme.ts` styles the RainbowKit modal with `lightTheme` (accent color, square corners) and the app font.
 
-  return {
-    sign: () => signMessage({ message: "Hello World!" }),
-    message: "Hello World!",
-    isPending,
-    error,
-    signature,
-  };
-}
-```
+## Project layout
 
-## Project Structure
-
-```
+```text
 src/
-├── app/
-│   ├── layout.tsx              # Root layout with providers
-│   └── page.tsx                # Server entry for the example
-├── client/
-│   └── wagmi.ts                # wagmi + Para connector config
+├── app/                         # Next.js layout and page
+├── hooks/                       # RainbowKit and wagmi hooks, one concern per hook
 ├── components/
-│   ├── Providers.tsx           # wagmi + RainbowKit providers
-│   ├── RainbowKitExample.tsx   # Client orchestration and SDK hooks
-│   ├── layout/Header.tsx       # Header with ConnectButton
-│   └── ui/
-│       ├── ConnectCard.tsx     # Connect wallet card
-│       ├── WalletInfo.tsx      # Connected wallet display
-│       └── SignMessage.tsx     # Sign message UI
-└── hooks/
-    └── useSignHelloWorld.ts    # Custom hook for signing
+│   ├── ParaProvider.tsx         # Para wallet, RainbowKit, and wagmi setup
+│   ├── RainbowKitExample.tsx    # Joins the hooks with the UI
+│   ├── layout/                  # App shell, header, footer, workbench
+│   └── ui/                      # Presentational components, props only
+├── lib/                         # Chain labels, RainbowKit theme, formatting, and UI helpers
+└── styles/globals.css           # Tailwind theme tokens
 ```
 
-## Learn More
-
-- [Para Documentation](https://docs.getpara.com)
-- [Para Website](https://getpara.com)
-- [Para Developer Portal](https://developer.getpara.com)
-- [RainbowKit Documentation](https://rainbowkit.com/docs)
-- [wagmi Documentation](https://wagmi.sh)
+Components in `layout/` and `ui/` never import Para, RainbowKit, or wagmi. They receive data and callbacks from `RainbowKitExample`, so you can swap them for your own design system without touching the hooks.

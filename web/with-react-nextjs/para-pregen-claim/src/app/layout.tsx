@@ -1,10 +1,11 @@
-import "@/styles/globals.css";
-import { ParaProvider } from "@/components/ParaProvider";
 import type { Metadata } from "next";
+import "@/styles/globals.css";
+import "@getpara/react-sdk-lite/styles.css";
+import { ParaProvider } from "@/components/ParaProvider";
 
 export const metadata: Metadata = {
   title: "Para Pregen Claim",
-  description: "Create and claim a Para pregen wallet through a UUID-to-email upgrade flow.",
+  description: "Create a pregen wallet before the user signs up, then claim it by signing in with the mapped email.",
 };
 
 export default function RootLayout({

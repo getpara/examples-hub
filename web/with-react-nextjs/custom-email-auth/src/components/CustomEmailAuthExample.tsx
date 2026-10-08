@@ -1,88 +1,116 @@
 "use client";
 
-import { useEffect } from "react";
-import { ParaProvider } from "@/components/ParaProvider";
-import { Header } from "@/components/layout/Header";
-import { EmailAuth } from "@/components/ui/EmailAuth";
-import { SignMessage } from "@/components/ui/SignMessage";
-import { WalletInfo } from "@/components/ui/WalletInfo";
+import { AppShell } from "@/components/layout/AppShell";
+import { ExampleFooter } from "@/components/layout/ExampleFooter";
+import { ExampleHeader } from "@/components/layout/ExampleHeader";
+import { Workbench } from "@/components/layout/Workbench";
+import { EmailSignInContainer } from "@/components/sign-in/EmailSignInContainer";
+import { AccountMenu } from "@/components/ui/AccountMenu";
+import { AccountStrip } from "@/components/ui/AccountStrip";
+import { ActionPanel } from "@/components/ui/ActionPanel";
+import { Button } from "@/components/ui/Button";
+import { ResultPanel } from "@/components/ui/ResultPanel";
+import { TextAreaField } from "@/components/ui/TextAreaField";
+import { useAccountBalance } from "@/hooks/useAccountBalance";
 import { useEmailAuth } from "@/hooks/useEmailAuth";
 import { useParaSession } from "@/hooks/useParaSession";
 import { useSignHelloWorld } from "@/hooks/useSignHelloWorld";
+import { SEPOLIA } from "@/lib/chain";
+import { EXAMPLE } from "@/lib/example";
+import { formatBalance, formatErrorMessage } from "@/lib/format";
+import { getResultStatus } from "@/lib/resultStatus";
+import { useAccountMenu } from "@/lib/useAccountMenu";
+import { useCopyToClipboard } from "@/lib/useCopyToClipboard";
 
 export function CustomEmailAuthExample() {
-  useEffect(() => {
-    document.documentElement.dataset.customEmailAuthHydrated = "true";
-
-    return () => {
-      delete document.documentElement.dataset.customEmailAuthHydrated;
-    };
-  }, []);
-
-  return (
-    <div className="hydrated-app">
-      <ParaProvider>
-        <CustomEmailAuthRuntime />
-      </ParaProvider>
-    </div>
-  );
-}
-
-function CustomEmailAuthRuntime() {
   const auth = useEmailAuth();
   const session = useParaSession();
   const signing = useSignHelloWorld();
+  const balance = useAccountBalance();
+  const addressCopy = useCopyToClipboard();
+  const signatureCopy = useCopyToClipboard();
+  const accountMenu = useAccountMenu(session.isConnected);
+
+  const header = (
+    <ExampleHeader
+      scope={EXAMPLE.scope}
+      isConnected={session.isConnected}
+      address={session.address}
+      onOpenAccount={accountMenu.toggle}
+      isAccountOpen={accountMenu.isOpen}
+    />
+  );
+
+  const footer = <ExampleFooter docsHref={EXAMPLE.docsHref} sourceHref={EXAMPLE.sourceHref} />;
+
+  if (!session.isConnected) {
+    return (
+      <AppShell header={header} footer={footer}>
+        <EmailSignInContainer auth={auth} network={SEPOLIA.networkLabel} />
+      </AppShell>
+    );
+  }
 
   return (
-    <main className="min-h-screen bg-background">
-      <Header address={session.address} isConnected={session.isConnected} />
-
-      <section className="mx-auto grid max-w-5xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[minmax(0,0.9fr)_minmax(22rem,1fr)] lg:px-8 lg:py-16">
-        <div className="animate-fade-in-up">
-          <p className="mb-3 text-sm font-semibold uppercase tracking-wide text-primary">Custom email auth</p>
-          <h1 className="text-4xl font-semibold tracking-normal text-foreground sm:text-5xl">
-            Email OTP with your own Para UI
-          </h1>
-          <p className="mt-5 max-w-xl text-base leading-7 text-muted-foreground">
-            Start an email auth flow with Para hooks, then sign an EVM message once the wallet is connected.
-          </p>
-        </div>
-
-        <div className="animate-fade-in-up space-y-4">
-          {!session.isConnected ? (
-            <EmailAuth
-              email={auth.email}
-              error={auth.error}
-              isPending={auth.isPending}
-              onCancel={auth.cancel}
-              onEmailChange={auth.setEmail}
-              onOpenPasskey={auth.openPasskeyWindow}
-              onSubmit={auth.submit}
-              passkeyUrl={auth.passkeyUrl}
-              step={auth.step}
-              verifyUrl={auth.verifyUrl}
-            />
-          ) : (
-            <>
-              <WalletInfo address={session.address} />
-              <SignMessage
-                errorMessage={signing.errorMessage}
-                isPending={signing.isPending}
-                message={signing.message}
-                onSign={signing.signMessage}
-                signature={signing.signature}
-              />
-              <button
-                type="button"
-                onClick={() => session.disconnect()}
-                disabled={session.isDisconnecting}
-                className="btn-secondary min-h-11 w-full px-4 text-sm">
-                {session.isDisconnecting ? "Disconnecting..." : "Disconnect"}
-              </button>
-            </>
-          )}
-        </div>
-      </section>
-    </main>
+    <AppShell header={header} footer={footer}>
+      <AccountMenu
+        isOpen={accountMenu.isOpen}
+        onClose={accountMenu.close}
+        address={session.address}
+        onCopyAddress={() => addressCopy.copy(session.address)}
+        addressCopyStatus={addressCopy.status}
+        onDisconnect={() => session.disconnect()}
+        isDisconnecting={session.isDisconnecting}
+      />
+      <AccountStrip
+        address={session.address}
+        onCopyAddress={() => addressCopy.copy(session.address)}
+        addressCopyStatus={addressCopy.status}
+        network={SEPOLIA.name}
+        balance={formatBalance(balance.balance, SEPOLIA.currencySymbol)}
+        isBalanceLoading={balance.isLoading}
+        isBalanceRefreshing={balance.isRefreshing}
+        onRefreshBalance={balance.refresh}
+      />
+      <Workbench
+        aside={
+          <ResultPanel
+            status={getResultStatus({
+              isPending: signing.isPending,
+              errorMessage: signing.errorMessage,
+              value: signing.signature,
+            })}
+            emptyMessage="The signature appears here after you sign."
+            pendingMessage="Approve the request in the Para window."
+            successLabel="Signed"
+            fields={
+              signing.signature
+                ? [{ label: "Signature", value: signing.signature, testId: "sign-signature-display" }]
+                : []
+            }
+            onCopy={() => signing.signature && signatureCopy.copy(signing.signature)}
+            copiedMessage="Signature copied"
+            copyStatus={signatureCopy.status}
+            errorTitle="Signing failed"
+            errorMessage={formatErrorMessage(signing.errorMessage)}
+          />
+        }>
+        <ActionPanel
+          title="Sign a message"
+          api="useParaViemSignMessage()"
+          description="Signing proves you control this account. It does not send a transaction or cost gas."
+          actions={
+            <Button
+              size="lg"
+              isLoading={signing.isPending}
+              onClick={() => signing.sign()}
+              data-testid="sign-submit-button">
+              {`Sign ${signing.message}`}
+            </Button>
+          }>
+          <TextAreaField label="Message" value={signing.message} readOnly hint="The app signs this exact text." />
+        </ActionPanel>
+      </Workbench>
+    </AppShell>
   );
 }

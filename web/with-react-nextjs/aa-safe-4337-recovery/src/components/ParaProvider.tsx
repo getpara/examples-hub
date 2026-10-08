@@ -21,11 +21,9 @@ export function ParaProvider({ children }: { children: React.ReactNode }) {
           env: ENVIRONMENT,
         }}
         paraModalConfig={{
-          authLayout: ["AUTH:FULL"],
           onRampTestMode: true,
           recoverySecretStepEnabled: true,
-        }}
-      >
+        }}>
         {children}
       </ParaSDKProvider>
     </QueryClientProvider>

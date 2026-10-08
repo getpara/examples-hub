@@ -2,34 +2,20 @@
 
 [![Live Demo](https://img.shields.io/badge/Live_Demo-black?style=for-the-badge&logo=vercel)](https://para-example-para-modal-solana.vercel.app)
 
-A minimal Next.js example showing how to open Para Modal for Solana wallet connection and sign a message.
-
-## What This Example Shows
-
-- Configuring `ParaProvider` with the Solana connector runtime
-- Opening Para Modal with `useModal`
-- Reading Para connection and wallet state with `useAccount` and `useWallet`
-- Signing a Solana message with `useParaSolanaSigner` or the Solana wallet adapter
-- Keeping SDK logic in hooks so the UI can be replaced by your app's components
+A minimal Next.js app that connects with the Para Modal, including Solana external wallets, shows the connected account on Solana devnet, and signs `Hello World!`. All Para SDK usage lives in `src/hooks`. Everything else is plain React and Tailwind that you can replace with your own UI.
 
 ## Setup
 
-Create a `.env` file:
+Create a local `.env` file:
 
 ```env
 NEXT_PUBLIC_PARA_API_KEY=your_api_key_here
 NEXT_PUBLIC_PARA_ENVIRONMENT=BETA
 ```
 
-Configure the project used by that API key in the Para Developer Portal:
+Configure the API key in the [Para Developer Portal](https://developer.getpara.com) with the app display name, branding and logo, theme, OAuth providers, email and phone login options, the allowed Solana external wallets and whether they verify with a signature, and a WalletConnect project ID if your Solana wallets need one. The local `ParaProvider` passes the API key, the environment, the Solana devnet connection, and runtime modal behavior such as on-ramp test mode and recovery step visibility.
 
-- App name and display identity
-- Branding, logo, and modal presentation
-- Allowed auth methods and login options
-- Allowed Solana external wallets
-- WalletConnect project ID, if your enabled wallets require WalletConnect
-
-Install and run the production build locally:
+Install and run the production build:
 
 ```bash
 yarn install
@@ -37,31 +23,25 @@ yarn build
 yarn start
 ```
 
-For development:
+## Para usage
 
-```bash
-yarn dev
+These are the files to copy into your own app.
+
+| File | What it does |
+| --- | --- |
+| `src/components/ParaProvider.tsx` | Wraps the app in `ParaProvider` and a React Query client, and points the Solana connector at the devnet endpoint |
+| `src/hooks/useParaModalWallet.ts` | Opens the modal and reads the connected wallet with `useModal`, `useAccount`, and `useWallet` |
+| `src/hooks/useSignHelloWorld.ts` | Signs `Hello World!` with `useParaSolanaSigner` for Para and external wallets, and reports whether the selected wallet is external with `useWallet` and `useAccount` |
+
+```tsx
+const { address, isConnected, openModal } = useParaModalWallet();
+const { sign, message, isExternal, isPending, errorMessage, signature } = useSignHelloWorld();
 ```
 
-## Key Files
-
-```text
-src/app/page.tsx                              # Server page metadata and entry
-src/components/ParaProvider.tsx               # ParaProvider with Solana connector config
-src/components/ParaModalSolanaExample.tsx     # Client orchestration
-src/hooks/useParaModalSolanaWallet.ts         # Para modal, account, and wallet state
-src/hooks/useSignHelloWorld.ts                # Solana message signing
-src/components/ui/*                           # Replaceable example UI
-```
-
-## Solana Configuration
-
-The Solana connector needs runtime endpoint and network setup in code:
+`ParaProvider` points the Solana connector at devnet:
 
 ```tsx
 externalWalletConfig={{
-  wallets: ["GLOW", "PHANTOM", "BACKPACK", "SOLFLARE"],
-  includeWalletVerification: true,
   solanaConnector: {
     config: {
       endpoint: clusterApiUrl(WalletAdapterNetwork.Devnet),
@@ -71,24 +51,21 @@ externalWalletConfig={{
 }}
 ```
 
-Wallet availability, app identity, auth methods, WalletConnect project ID, and modal presentation are controlled by the Para Developer Portal project for the API key.
+`useSignHelloWorld` calls `solanaSigner.signMessages([{ content, signatures }])` on the signer from `useParaSolanaSigner`, which takes a devnet RPC client from `@solana/rpc`. `useParaSolanaSigner` returns the Para signer for a Para wallet and the wallet adapter signer for an external wallet, so one call covers both. The hook shows the signature bytes as base64. The hook also returns `isExternal`, read from the selected wallet, so the page can tell the user to approve the request in their wallet instead of the Para window.
 
-## Dependency Notes
+## Project layout
 
-This example imports from the catch-all `@getpara/react-sdk` package. Until the SDK package export graph is narrowed, production builds must include several modules that are build-reachable through SDK barrel exports:
+```text
+src/
+├── app/                             # Next.js layout and page
+├── hooks/                           # Para SDK usage, one concern per hook
+├── components/
+│   ├── ParaProvider.tsx             # Para setup
+│   ├── ParaModalSolanaExample.tsx   # Joins the hooks with the UI
+│   ├── layout/                      # App shell, header, footer, workbench
+│   └── ui/                          # Presentational components, props only
+├── lib/                             # Chain config, formatting, and UI helpers
+└── styles/globals.css               # Tailwind theme tokens
+```
 
-- `@metamask/delegation-toolkit`
-- `ethers`
-- `@stellar/stellar-sdk`
-- `@wagmi/core`
-
-The app imports `@solana/rpc` directly for the Para Solana signer RPC object, so it is declared directly.
-
-These dependencies can be revisited after the SDK package dependency and export-boundary cleanup work is complete.
-
-## Learn More
-
-- [Para Documentation](https://docs.getpara.com)
-- [Para Developer Portal](https://developer.getpara.com)
-- [Solana Documentation](https://docs.solana.com)
-- [Next.js Documentation](https://nextjs.org/docs)
+Components in `layout/` and `ui/` never import Para. They receive data and callbacks from `ParaModalSolanaExample`, so you can swap them for your own design system without touching the hooks.

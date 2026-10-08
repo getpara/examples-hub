@@ -1,10 +1,7 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import type { ReactNode } from "react";
 import "@/styles/globals.css";
 import "@getpara/react-sdk/styles.css";
-
-const inter = Inter({ subsets: ["latin"] });
+import { ParaProvider } from "@/components/ParaProvider";
 
 export const metadata: Metadata = {
   title: "Safe Recovery Example",
@@ -14,11 +11,13 @@ export const metadata: Metadata = {
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: ReactNode;
+  children: React.ReactNode;
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body>
+        <ParaProvider>{children}</ParaProvider>
+      </body>
     </html>
   );
 }

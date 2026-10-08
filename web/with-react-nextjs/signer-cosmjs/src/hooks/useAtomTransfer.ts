@@ -1,55 +1,48 @@
-"use client";
-
 import { useState, useCallback } from "react";
 import { coins } from "@cosmjs/stargate";
-import { useParaSigner } from "./useParaSigner";
-import { DEFAULT_CHAIN } from "@/config/chains";
+import { useParaSigner } from "@/hooks/useParaSigner";
+import { ICS_PROVIDER_TESTNET, toMinimalDenom } from "@/lib/chain";
 
 export function useAtomTransfer() {
   const [txHash, setTxHash] = useState<string | null>(null);
-  const [gasUsed, setGasUsed] = useState<bigint | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  const { signingClient, address, isLoading: isSignerLoading } = useParaSigner();
+  const { signingClient, address } = useParaSigner();
 
   const sendTokens = useCallback(
     async (recipient: string, amount: string) => {
-      if (!address) {
-        throw new Error("Please connect your wallet to send a transaction.");
-      }
-
-      if (!signingClient) {
-        throw new Error("Signing client not initialized. Please try reconnecting.");
-      }
-
-      if (!recipient.startsWith("cosmos")) {
-        throw new Error("Invalid recipient address. Must start with 'cosmos'.");
-      }
-
-      const amountInMinimalDenom = Math.floor(
-        parseFloat(amount) * Math.pow(10, DEFAULT_CHAIN.coinDecimals)
-      );
-      if (isNaN(amountInMinimalDenom) || amountInMinimalDenom <= 0) {
-        throw new Error("Invalid amount. Please enter a valid positive number.");
-      }
-
       setIsLoading(true);
       setError(null);
       setTxHash(null);
-      setGasUsed(null);
 
       try {
+        if (!address) {
+          throw new Error("Please connect your wallet to send a transaction.");
+        }
+
+        if (!signingClient) {
+          throw new Error("Signing client not initialized. Please try reconnecting.");
+        }
+
+        if (!recipient.startsWith("cosmos")) {
+          throw new Error("Invalid recipient address. Must start with 'cosmos'.");
+        }
+
+        const amountInMinimalDenom = toMinimalDenom(amount);
+        if (isNaN(amountInMinimalDenom) || amountInMinimalDenom <= 0) {
+          throw new Error("Invalid amount. Please enter a valid positive number.");
+        }
+
         const result = await signingClient.sendTokens(
           address,
           recipient,
-          coins(amountInMinimalDenom, DEFAULT_CHAIN.coinMinimalDenom),
+          coins(amountInMinimalDenom, ICS_PROVIDER_TESTNET.denom),
           "auto",
           "Sent via Para + CosmJS"
         );
 
         setTxHash(result.transactionHash);
-        setGasUsed(result.gasUsed);
       } catch (err) {
         const error = err instanceof Error ? err : new Error("Failed to send transaction");
         setError(error);
@@ -63,15 +56,13 @@ export function useAtomTransfer() {
 
   const reset = useCallback(() => {
     setTxHash(null);
-    setGasUsed(null);
     setError(null);
   }, []);
 
   return {
     sendTokens,
     txHash,
-    gasUsed,
-    isLoading: isLoading || isSignerLoading,
+    isLoading,
     isReady: !!signingClient && !!address,
     error,
     reset,

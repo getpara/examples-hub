@@ -1,41 +1,103 @@
 "use client";
 
-import { useParaModalSolanaWallet } from "@/hooks/useParaModalSolanaWallet";
+import { AppShell } from "@/components/layout/AppShell";
+import { ExampleFooter } from "@/components/layout/ExampleFooter";
+import { ExampleHeader } from "@/components/layout/ExampleHeader";
+import { Workbench } from "@/components/layout/Workbench";
+import { AccountStrip } from "@/components/ui/AccountStrip";
+import { ActionPanel } from "@/components/ui/ActionPanel";
+import { Button } from "@/components/ui/Button";
+import { ResultPanel } from "@/components/ui/ResultPanel";
+import { SignInPanel } from "@/components/ui/SignInPanel";
+import { TextAreaField } from "@/components/ui/TextAreaField";
+import { useParaModalWallet } from "@/hooks/useParaModalWallet";
 import { useSignHelloWorld } from "@/hooks/useSignHelloWorld";
-import { Header } from "@/components/layout/Header";
-import { ConnectCard } from "@/components/ui/ConnectCard";
-import { WalletInfo } from "@/components/ui/WalletInfo";
-import { SignMessage } from "@/components/ui/SignMessage";
+import { SOLANA_DEVNET } from "@/lib/chain";
+import { EXAMPLE } from "@/lib/example";
+import { formatErrorMessage } from "@/lib/format";
+import { getResultStatus } from "@/lib/resultStatus";
+import { useCopyToClipboard } from "@/lib/useCopyToClipboard";
 
 export function ParaModalSolanaExample() {
-  const wallet = useParaModalSolanaWallet();
+  const wallet = useParaModalWallet();
   const signing = useSignHelloWorld();
+  const addressCopy = useCopyToClipboard();
+  const signatureCopy = useCopyToClipboard();
+
+  const header = (
+    <ExampleHeader
+      scope={EXAMPLE.scope}
+      isConnected={wallet.isConnected}
+      address={wallet.address}
+      onConnect={wallet.openModal}
+      onOpenAccount={wallet.openModal}
+    />
+  );
+
+  const footer = <ExampleFooter docsHref={EXAMPLE.docsHref} sourceHref={EXAMPLE.sourceHref} />;
+
+  if (!wallet.isConnected) {
+    return (
+      <AppShell header={header} footer={footer}>
+        <SignInPanel
+          description="Connect to continue. Your wallet is created the first time you sign in."
+          network={SOLANA_DEVNET.networkLabel}>
+          <Button size="lg" fullWidth onClick={() => wallet.openModal()} data-testid="auth-connect-button">
+            Connect with Para
+          </Button>
+        </SignInPanel>
+      </AppShell>
+    );
+  }
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <Header isConnected={wallet.isConnected} address={wallet.address} onConnect={wallet.openModal} />
-
-      <main
-        className={
-          wallet.isConnected
-            ? "mx-auto w-full max-w-xl px-4 py-10"
-            : "flex flex-1 items-center justify-center px-4 pb-16"
+    <AppShell header={header} footer={footer}>
+      <AccountStrip
+        address={wallet.address}
+        onCopyAddress={() => addressCopy.copy(wallet.address)}
+        addressCopyStatus={addressCopy.status}
+        network={SOLANA_DEVNET.name}
+      />
+      <Workbench
+        aside={
+          <ResultPanel
+            status={getResultStatus({
+              isPending: signing.isPending,
+              errorMessage: signing.errorMessage,
+              value: signing.signature,
+            })}
+            emptyMessage="The signature appears here after you sign."
+            pendingMessage={
+              signing.isExternal ? "Approve the request in your wallet." : "Approve the request in the Para window."
+            }
+            successLabel="Signed"
+            fields={
+              signing.signature
+                ? [{ label: "Signature", value: signing.signature, testId: "sign-signature-display" }]
+                : []
+            }
+            onCopy={() => signing.signature && signatureCopy.copy(signing.signature)}
+            copiedMessage="Signature copied"
+            copyStatus={signatureCopy.status}
+            errorTitle="Signing failed"
+            errorMessage={formatErrorMessage(
+              signing.errorMessage,
+              signing.isExternal ? { declinedMessage: "You declined the request in your wallet." } : undefined
+            )}
+          />
         }>
-        {!wallet.isConnected ? (
-          <ConnectCard onConnect={wallet.openModal} />
-        ) : (
-          <div className="space-y-4">
-            <WalletInfo address={wallet.address} />
-            <SignMessage
-              message={signing.message}
-              onSign={signing.sign}
-              isPending={signing.isPending}
-              errorMessage={signing.errorMessage}
-              signature={signing.signature}
-            />
-          </div>
-        )}
-      </main>
-    </div>
+        <ActionPanel
+          title="Sign a message"
+          api="signMessages([{ content, signatures }])"
+          description="Signing proves you control this account. It does not send a transaction or cost fees."
+          actions={
+            <Button size="lg" isLoading={signing.isPending} onClick={() => signing.sign()} data-testid="sign-submit-button">
+              {`Sign ${signing.message}`}
+            </Button>
+          }>
+          <TextAreaField label="Message" value={signing.message} readOnly hint="The app signs this exact text." />
+        </ActionPanel>
+      </Workbench>
+    </AppShell>
   );
 }

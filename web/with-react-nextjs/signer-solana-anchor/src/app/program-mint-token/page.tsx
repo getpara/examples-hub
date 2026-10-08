@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
-import { SolanaAnchorApp } from "@/components/SolanaAnchorApp";
-import { SolanaAnchorPreview } from "@/components/SolanaAnchorPreview";
-import ProgramMintTokenDemo from "@/components/demos/ProgramMintTokenDemo";
+import { MintTokenContainer } from "@/components/demos/MintTokenContainer";
 
 export const metadata: Metadata = {
   title: "Mint Token | Para Solana Anchor Signer",
@@ -9,12 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function ProgramMintTokenPage() {
-  return (
-    <>
-      <SolanaAnchorPreview variant="program-mint-token" />
-      <SolanaAnchorApp>
-        <ProgramMintTokenDemo />
-      </SolanaAnchorApp>
-    </>
-  );
+  return <MintTokenContainer />;
 }

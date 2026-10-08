@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { randomUUID } from "node:crypto";
-import { getSdk } from "@/lib/canton";
+import { getSdk } from "@/lib/server/canton";
 
 export const runtime = "nodejs";
 
@@ -34,9 +34,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "SDK not fully initialized" }, { status: 500 });
     }
 
-    // setPartyId hydrates userLedger + tokenStandard with the act-as party
-    // and discovers the synchronizer the party lives on. Required before
-    // any token-standard call or prepareSubmission.
     await sdk.setPartyId(partyId);
 
     const [command, disclosedContracts] = await sdk.tokenStandard.createTransfer(

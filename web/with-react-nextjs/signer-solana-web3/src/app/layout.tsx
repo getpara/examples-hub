@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "@/styles/globals.css";
 import "@getpara/react-sdk-lite/styles.css";
-
-const inter = Inter({ subsets: ["latin"] });
+import { ParaProvider } from "@/components/ParaProvider";
+import { SolanaWeb3Example } from "@/components/SolanaWeb3Example";
 
 export const metadata: Metadata = {
-  title: "Para Solana web3.js",
+  title: "Para Solana web3.js Signer",
   description: "An example showcasing how to sign Solana web3.js messages and transactions with Para",
 };
 
@@ -17,8 +16,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.className} antialiased`}>
-        {children}
+      <body>
+        <ParaProvider>
+          <SolanaWeb3Example>{children}</SolanaWeb3Example>
+        </ParaProvider>
       </body>
     </html>
   );

@@ -1,150 +1,72 @@
-# Bulk Wallet Pre-generation Example
+# Para Bulk Pregen
 
-This example demonstrates how to bulk pre-generate wallets for Twitter/X and Telegram handles using Para SDK 2.0.0-alpha. It showcases a clean architecture pattern with proper separation of concerns through hooks and components.
-
-## Features
-
-- **Bulk CSV Upload**: Upload a CSV file with handles and their types
-- **Manual Handle Entry**: Add individual handles through a form
-- **Batch Processing**: Process wallet creation in batches with progress tracking
-- **Results Management**: View, export, and retry failed wallet creations
-- **Clean Architecture**: Organized with hooks, context providers, and reusable components
+A Next.js app that creates EVM pregen wallets in bulk for X (Twitter) usernames and Telegram user IDs. You sign in with Para, load handles from a CSV file or add them by hand, and the app calls a server route once per handle in batches, then shows each wallet address with its status so you can retry failures and download the results. Client-side Para SDK usage lives in `src/components/ParaProvider.tsx` and `src/hooks`; server-side Para usage lives in `src/app/api` and `src/lib/server`.
 
 ## Setup
 
-### Environment Variables
-
-Create a `.env.local` file in the root directory:
+Create a local `.env` file:
 
 ```env
 NEXT_PUBLIC_PARA_API_KEY=your_para_api_key
-PARA_API_KEY=your_para_api_key
 NEXT_PUBLIC_PARA_ENVIRONMENT=BETA
 ```
 
-Note: The API key is needed both for client-side (prefixed with `NEXT_PUBLIC_`) and server-side operations.
+`NEXT_PUBLIC_PARA_ENVIRONMENT` defaults to `BETA`. The server route reads the same API key to create the pregen wallets. The build does not need either value; the sign-in screen shows a warning when the API key is missing.
 
-### Installation
+Configure the API key in the [Para Developer Portal](https://developer.getpara.com) with the app display name, branding and logo, email and X login, and EVM wallets. The local `ParaProvider` passes the API key, the environment, and runtime modal behavior such as on-ramp test mode and recovery step visibility.
+
+Install and run the production build:
 
 ```bash
-# Using yarn (recommended)
 yarn install
-
-# Using npm
-npm install
-
-# Using pnpm
-pnpm install
+yarn build
+yarn start
 ```
 
-## Architecture
+## Flow
 
-### Directory Structure
+1. Sign in with Para. The workspace appears once you are connected.
+2. Add handles. Upload a CSV with `handle,type` rows (the header row is optional, and `type` is `twitter` or `telegram`), or add handles one at a time. `Download template` saves a starter CSV, and `dummy_csv.csv` and `dummy_csv_batch2.csv` hold 40 sample handles each. Uploading a file replaces the current list.
+3. Click the create button. The app posts each handle to `/api/wallet/generate` in batches of 5 with a 1 second pause between batches. The route calls `createPregenWallet({ type: "EVM", pregenId })` with `{ xUsername }` for X handles or `{ telegramUserId }` for Telegram handles, reads `getUserShare()`, and keeps the share in an in-memory store.
+4. Review the results. Each row shows the wallet address or the error. The retry button sends only the failed rows again, `Download results CSV` saves the handle to address mapping, and `Start new batch` clears everything.
 
-```
-├── app/                      # Next.js App Router
-│   ├── api/                 # API routes
-│   │   └── wallet/          # Wallet generation endpoints
-│   ├── layout.tsx           # Root layout with providers
-│   └── page.tsx             # Home page
-├── components/              # React components
-│   ├── bulk/               # Bulk generation components
-│   │   ├── BulkActions.tsx
-│   │   ├── HandleEntryForm.tsx
-│   │   ├── HandleListTable.tsx
-│   │   ├── ProcessingStatus.tsx
-│   │   └── ResultsSummary.tsx
-│   └── ui/                 # Reusable UI components
-├── config/                 # Configuration
-│   └── constants.ts        # Environment variables
-├── context/                # React Context providers
-│   ├── ParaProvider.tsx    # Para SDK provider
-│   └── QueryProvider.tsx   # TanStack Query provider
-├── hooks/                  # Custom React hooks
-│   ├── use-batch-processor.ts
-│   ├── use-bulk-results.ts
-│   ├── use-csv-export.ts
-│   ├── use-csv-parser.ts
-│   └── use-handle-manager.ts
-└── lib/                    # Utility libraries
-    ├── para/               # Para SDK utilities
-    │   └── server-client.ts
-    └── store.ts            # Wallet storage (demo)
+The in-memory store only lasts as long as the server process. In production, save each user share in your own database and protect the route so only your team can call it. When the owner later signs in with that X or Telegram account, your app returns the stored share so they can claim the wallet, as shown in the pregen claim example.
+
+## Para usage
+
+| File | What it does |
+| --- | --- |
+| `src/components/ParaProvider.tsx` | Wraps the app in `ParaProvider` (React SDK Lite) and a React Query client |
+| `src/hooks/useParaModalWallet.ts` | Opens the modal and reads the connected wallet with `useModal`, `useAccount`, and `useWallet` |
+| `src/hooks/useAccountBalance.ts` | Reads the wallet balance with `useWalletBalance`. The balance appears once the API key has an RPC URL in the Developer Portal |
+| `src/hooks/useBulkPregenWallets.ts` | Posts each handle to `/api/wallet/generate` in batches, tracks progress and per-handle results, and retries failures |
+| `src/lib/server/bulkPregenService.ts` | Validates the handle and type, calls `createPregenWallet` and `getUserShare`, and saves the wallet |
+| `src/lib/server/paraServerClient.ts` | Builds a new `@getpara/server-sdk` client for each request, so one request never holds another handle's share |
+| `src/lib/server/pregenWalletStore.ts` | Keeps each wallet and its user share in memory for this demo |
+
+```tsx
+const { address, isConnected, openModal } = useParaModalWallet();
+const { stage, progress, results, summary, create, retryFailed, reset } = useBulkPregenWallets();
+const { balance, isLoading, isRefreshing, refresh } = useAccountBalance();
 ```
 
-### Key Hooks
+CSV parsing, the handle list, and pagination are plain React helpers in `src/lib`.
 
-- **`use-csv-parser`**: Handles CSV file parsing and template download
-- **`use-handle-manager`**: Manages the list of handles to process
-- **`use-batch-processor`**: Processes wallet creation in batches
-- **`use-bulk-results`**: Manages results state and summary statistics
-- **`use-csv-export`**: Exports results to CSV format
+## Project layout
 
-### CSV Format
-
-The CSV file should have the following format:
-
-```csv
-handle,type
-@username1,twitter
-@username2,telegram
-username3,twitter
+```text
+src/
+├── app/                              # Next.js layout, page, and API route
+├── hooks/                            # Para SDK usage and the bulk request queue, one concern per hook
+├── components/
+│   ├── ParaProvider.tsx              # Para setup
+│   ├── BulkPregenExample.tsx         # Joins the hooks with the UI
+│   ├── demos/                        # Handle list and results panels
+│   ├── layout/                       # App shell, header, footer, workbench
+│   └── ui/                           # Presentational components, props only
+├── lib/                              # API types, CSV helpers, handle list, pagination, formatting
+│   └── server/                       # Server-only pregen service, Para server client, wallet store
+└── styles/globals.css                # Tailwind theme tokens
 ```
 
-Headers are optional and automatically detected.
-
-## Development
-
-### Running the Development Server
-
-```bash
-yarn dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) to view the application.
-
-### Type Checking
-
-```bash
-yarn typecheck
-```
-
-### Linting
-
-```bash
-yarn lint
-```
-
-## API Changes (v1.x to v2.x)
-
-The Para SDK 2.0.0-alpha introduces changes to the pre-generation API:
-
-### Old (v1.x)
-```typescript
-para.createPregenWallet({
-  type: WalletType.EVM,
-  pregenIdentifier: handle,
-  pregenIdentifierType: "TWITTER"
-})
-```
-
-### New (v2.x)
-```typescript
-para.createPregenWallet({
-  type: WalletType.EVM,
-  pregenId: { xUsername: handle }  // For Twitter/X
-})
-```
-
-## Important Notes
-
-- The wallet store uses an in-memory implementation for demo purposes. In production, use a proper database.
-- Twitter handles are now referenced as `xUsername` in the v2.0.0-alpha SDK
-- Batch processing includes a 1-second delay between batches to avoid API rate limits
-- The application requires wallet connection before accessing bulk generation features
-
-## Learn More
-
-- [Para Documentation](https://docs.getpara.com)
-- [Para SDK Reference](https://github.com/getpara/para-sdk)
-- [Next.js Documentation](https://nextjs.org/docs)
+Components in `layout/` and `ui/` never import Para. They receive data and callbacks from `BulkPregenExample` and the panels in `demos/`, so you can swap them for your own design system without touching the hooks.

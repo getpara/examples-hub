@@ -1,105 +1,67 @@
-# Progressive Web App with Para
+# Progressive Web App Example
 
-This example demonstrates how to integrate Para SDK in a Progressive Web App (PWA) built with Next.js. It showcases wallet connection and authentication within a PWA context, with offline support for the UI while maintaining secure online authentication.
+A minimal Next.js app that you can install to the home screen. It connects with the Para Modal, shows the connected account and its Sepolia balance, and signs `Hello World!`. All Para SDK usage lives in `src/hooks`. Everything else is plain React and Tailwind that you can replace with your own UI.
 
 ## Setup
 
-### Environment Variables
-
-Create a `.env.local` file in the root directory:
+Create a `.env.local` file:
 
 ```env
 NEXT_PUBLIC_PARA_API_KEY=your_para_api_key
 NEXT_PUBLIC_PARA_ENVIRONMENT=BETA
 ```
 
-Configure the API key in the [Para Developer Portal](https://developer.getpara.com/) with the app display name, branding assets, theme colors, OAuth providers, email and phone authentication settings, 2FA policy, and auth layout for this PWA. This example only keeps runtime modal behavior in code, including `onRampTestMode` and `recoverySecretStepEnabled`.
+Configure the API key in the [Para Developer Portal](https://developer.getpara.com) with the app display name, branding and logo, theme, OAuth providers, email and phone login options, and wallet visibility. The local `ParaProvider` passes the API key, the environment, and runtime modal behavior such as on-ramp test mode and recovery step visibility.
 
-### Installation
-
-Install dependencies using your preferred package manager:
+Install and run the production build:
 
 ```bash
-# npm
-npm install
-
-# yarn
 yarn install
-
-# pnpm
-pnpm install
+yarn build
+yarn start
 ```
 
-## Key Dependencies
+## Para usage
 
-- `@getpara/react-sdk` (v3.0.0-alpha.1) - Para React SDK for wallet integration
-- `@tanstack/react-query` (v5.81.2) - Data fetching and state management
-- `next` (v15.1.5) - React framework with PWA support
-- `react` (v19.0.0) - React library
-- `react-dom` (v19.0.0) - React DOM library
+These are the files to copy into your own app.
 
-## Key Files
+| File | What it does |
+| --- | --- |
+| `src/components/ParaProvider.tsx` | Wraps the app in `ParaProvider` and a React Query client |
+| `src/hooks/useParaModalWallet.ts` | Opens the modal and reads the connected wallet with `useModal`, `useAccount`, and `useWallet` |
+| `src/hooks/useSignHelloWorld.ts` | Signs `Hello World!` with `useSignMessage` |
+| `src/hooks/useAccountBalance.ts` | Reads the wallet balance with `useWalletBalance`. The balance appears once the API key has an RPC URL in the Developer Portal |
 
-- `src/context/ParaProvider.tsx` - Para SDK React context provider
-- `src/context/QueryProvider.tsx` - TanStack Query provider configuration
-- `src/app/layout.tsx` - Root layout with PWA metadata and service worker registration
-- `src/app/page.tsx` - Main page with wallet connection interface
-- `public/manifest.json` - PWA manifest configuration
-- `public/sw.js` - Service worker for offline functionality
+```tsx
+const { address, isConnected, openModal } = useParaModalWallet();
+const { sign, message, isPending, errorMessage, signature } = useSignHelloWorld();
+const { balance, isLoading, isRefreshing, refresh } = useAccountBalance();
+```
 
-## PWA Features
+`useSignHelloWorld` calls `signMessage({ walletId, messageBase64 })` with the base64 encoded message and returns the signature once the user approves the request in the Para window.
 
-### Service Worker
+## PWA setup
 
-The service worker (`public/sw.js`) provides:
-- Offline caching for static assets
-- Network-first strategy for API calls
-- Cache-first strategy for fonts and images
+- `public/manifest.json` sets the app name, icons, colors, and standalone display.
+- `src/app/layout.tsx` links the manifest, sets `viewport-fit=cover` and the Apple web app options, and registers `public/sw.js`.
+- `public/sw.js` activates right away and passes every request to the network. It caches nothing, so the app needs a connection to load.
+- In standalone display the header and footer are padded with `env(safe-area-inset-*)` so they clear the status bar and the home indicator.
 
-### Manifest
+Para needs a connection to sign in and sign. `src/lib/useOnlineStatus.ts` reads `navigator.onLine`; while the device is offline, the sign-in panel shows a notice and disables Connect with Para.
 
-The PWA manifest (`public/manifest.json`) configures:
-- App name and icons
-- Theme colors
-- Display mode (standalone)
-- Start URL
+## Project layout
 
-## PWA Considerations for Para
+```text
+src/
+├── app/                         # Next.js layout and page
+├── hooks/                       # Para SDK usage, one concern per hook
+├── components/
+│   ├── ParaProvider.tsx         # Para setup
+│   ├── PwaExample.tsx           # Joins the hooks with the UI
+│   ├── layout/                  # App shell, header, footer, workbench, safe area
+│   └── ui/                      # Presentational components, props only
+├── lib/                         # Chain config, formatting, online status, and UI helpers
+└── styles/globals.css           # Tailwind theme tokens
+```
 
-### Offline Functionality
-
-- **Important**: Authentication operations require an active internet connection to communicate with Para's servers
-- The PWA caches static assets and provides offline UI, but wallet connection must be performed online
-- Consider implementing offline detection to provide appropriate user feedback
-
-### Authentication Experience
-
-For the best PWA experience:
-- Enable Password authentication in the [Para Developer Portal](https://developer.getpara.com/) for seamless in-app authentication
-- Password fields are handled within the web app context rather than triggering native browser dialogs
-- This provides a more integrated PWA experience
-
-### Development Tips
-
-1. Test PWA features in production build:
-   ```bash
-   npm run build && npm run start
-   ```
-
-2. Use Chrome DevTools Application tab to:
-   - View and test service worker
-   - Check manifest configuration
-   - Inspect cache storage
-
-3. Test offline functionality:
-   - Enable offline mode in DevTools Network tab
-   - Verify cached content loads correctly
-   - Ensure appropriate error handling for authentication
-
-## Learn More
-
-- [Para Documentation](https://docs.getpara.com)
-- [Para Website](https://getpara.com)
-- [Para Developer Portal](https://developer.getpara.com)
-- [Next.js PWA Documentation](https://nextjs.org/docs/app/building-your-application/configuring/progressive-web-apps)
-- [Web.dev PWA Guide](https://web.dev/progressive-web-apps/)
+Components in `layout/` and `ui/` never import Para. They receive data and callbacks from `PwaExample`, so you can swap them for your own design system without touching the hooks.

@@ -1,10 +1,9 @@
-"use client";
-
 import { useCallback, useEffect, useState } from "react";
 import { formatEther, formatUnits, isAddress, parseUnits, type Address, type Hex } from "viem";
+import { HOLESKY } from "@/lib/chain";
 import { ERC20_ABI } from "@/lib/contracts";
-import { CHAIN, publicClient } from "@/lib/viem";
-import { useParaSigner } from "./useParaSigner";
+import { publicClient } from "@/lib/publicClient";
+import { useParaSigner } from "@/hooks/useParaSigner";
 
 export function useTokenTransfer(contractAddress: string) {
   const { viemClient, account, address, isReady } = useParaSigner();
@@ -73,12 +72,12 @@ export function useTokenTransfer(contractAddress: string) {
   const transfer = async (to: string, amount: string) => {
     if (!viemClient || !account) {
       setError(new Error("Connect your Para wallet before transferring tokens."));
-      return;
+      return null;
     }
 
     if (!isAddress(contractAddress) || !isAddress(to)) {
       setError(new Error("Enter valid contract and recipient addresses."));
-      return;
+      return null;
     }
 
     try {
@@ -88,15 +87,17 @@ export function useTokenTransfer(contractAddress: string) {
         address: contractAddress as Address,
         abi: ERC20_ABI,
         account,
-        chain: CHAIN,
+        chain: HOLESKY.chain,
         functionName: "transfer",
         args: [to, parseUnits(amount, tokenDecimals)],
       });
-      await publicClient.waitForTransactionReceipt({ hash });
       setTxHash(hash);
+      await publicClient.waitForTransactionReceipt({ hash });
       await fetchBalances();
+      return hash;
     } catch (err) {
       setError(err instanceof Error ? err : new Error("Failed to transfer tokens"));
+      return null;
     } finally {
       setIsLoading(false);
     }

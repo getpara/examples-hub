@@ -1,13 +1,11 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "@/styles/globals.css";
 import "@getpara/react-sdk/styles.css";
-
-const inter = Inter({ subsets: ["latin"] });
+import { ParaProvider } from "@/components/ParaProvider";
 
 export const metadata: Metadata = {
   title: "ZeroDev EIP-7702 Example",
-  description: "Delegate smart account behavior to a Para wallet EOA with ZeroDev.",
+  description: "Send a gas-sponsored EIP-7702 transaction from a Para wallet with ZeroDev.",
 };
 
 export default function RootLayout({
@@ -17,7 +15,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body>
+        <ParaProvider>{children}</ParaProvider>
+      </body>
     </html>
   );
 }

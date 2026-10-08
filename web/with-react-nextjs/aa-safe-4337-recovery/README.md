@@ -2,21 +2,11 @@
 
 [![Live Demo](https://img.shields.io/badge/Live_Demo-black?style=for-the-badge&logo=vercel)](https://para-example-aa-safe-4337-recovery.vercel.app)
 
-A Next.js example showing how Para can act as a recovery guardian for a Safe ERC-4337 account. The demo uses a local EOA as the host passkey-signer simulation so the recovery-module behavior is easy to inspect.
-
-## What This Example Shows
-
-- Configuring `ParaProvider` with full Para authentication
-- Creating a Safe ERC-4337 recovery demo flow on Sepolia
-- Registering the Para wallet as a SocialRecoveryModule guardian
-- Showing that the Para guardian is not a Safe owner and cannot authorize arbitrary spending
-- Recovering to a replacement owner after a visible grace period
-- Canceling an in-flight recovery before the grace period completes
-- Requesting Sepolia funds with `useRequestFaucet`
+A Next.js app that uses a Para wallet as the recovery guardian for a Safe ERC-4337 account on Sepolia. A local key stands in for the app passkey as the Safe owner. The app walks through six steps that unlock in order: create the Safe, add Para as guardian, fund the guardian with the Para faucet, use the Safe with its owner, prove Para cannot spend, and recover the Safe to a new owner.
 
 ## Setup
 
-1. Create a `.env` file with the two required keys:
+Create a local `.env` file:
 
 ```env
 NEXT_PUBLIC_PARA_API_KEY=your_para_api_key
@@ -24,96 +14,60 @@ NEXT_PUBLIC_PARA_ENVIRONMENT=BETA
 NEXT_PUBLIC_PIMLICO_API_KEY=your_pimlico_api_key
 ```
 
-Optionally override the default Sepolia RPC URL:
+`NEXT_PUBLIC_SEPOLIA_RPC_URL` is optional and defaults to `https://ethereum-sepolia-rpc.publicnode.com`. Get a Para API key from the [Para Developer Portal](https://developer.getpara.com) and a Pimlico API key from the [Pimlico Dashboard](https://dashboard.pimlico.io). Pimlico bundles and sponsors the Safe user operations.
 
-```env
-NEXT_PUBLIC_SEPOLIA_RPC_URL=https://ethereum-sepolia-rpc.publicnode.com
-```
+Configure the API key in the Developer Portal with the app display name, branding and logo, theme, OAuth providers, email and phone login options, and wallet visibility. The local `ParaProvider` passes the API key, the environment, and runtime modal behavior such as on-ramp test mode and recovery step visibility.
 
-2. Install dependencies:
+Install and run the production build:
 
 ```bash
 yarn install
-```
-
-3. Build and run the production server:
-
-```bash
 yarn build
 yarn start
 ```
 
-For local development, use `yarn dev`.
+## Para usage
 
-4. Open `http://127.0.0.1:3000`.
+| File | What it does |
+| --- | --- |
+| `src/components/ParaProvider.tsx` | Wraps the app in `ParaProvider` and a React Query client |
+| `src/hooks/useParaModalWallet.ts` | Opens the modal and reads the connected wallet with `useModal`, `useAccount`, and `useWallet` |
+| `src/hooks/useAccountBalance.ts` | Reads the wallet balance with `useWalletBalance`. The balance appears once the API key has an RPC URL in the Developer Portal |
+| `src/hooks/useGuardianAccount.ts` | Gets the Para wallet as a viem `LocalAccount` with `useParaViemAccount` |
+| `src/hooks/useGuardianFaucet.ts` | Requests Sepolia ETH for the Para wallet with `useRequestFaucet` |
+| `src/hooks/useSafeRecovery.ts` | Runs the six steps with the Safe client and the Para guardian account |
 
-## Getting API Keys
+```tsx
+const guardian = useGuardianAccount();
+const faucet = useGuardianFaucet();
+const recovery = useSafeRecovery({ guardianAccount: guardian.account, requestFaucet: faucet.requestFunds });
+```
 
-- **Para API Key**: Get from [Para Developer Portal](https://developer.getpara.com)
-- **Pimlico API Key**: Get from [Pimlico Dashboard](https://dashboard.pimlico.io)
+`useSafeRecovery` keeps the Safe client in memory and calls the contract helpers in `src/lib`: `safe4337Client.ts` builds the Safe account with `permissionless` and Pimlico, and `socialRecoveryActions.ts` reads the recovery module and sends the guardian transactions with the Para `LocalAccount`.
 
-## Developer Portal Configuration
+## How recovery works
 
-Configure the app name, branding, logo, theme, enabled OAuth providers, email and phone login options, 2FA setting, and auth layout on the Para API key in the Developer Portal. This example keeps only runtime modal behavior in code and relies on the Portal for persistent Para app configuration.
+The Safe owner signs normal user operations. Para is registered only as a guardian on the Safe SocialRecoveryModule, not as an owner. Step 5 has Para sign a Safe transaction and simulates it; the Safe rejects it during owner validation, which shows the guardian cannot spend.
 
-The Pimlico API key remains an environment variable because it configures Safe account sponsorship for this example, not Para Portal settings.
+In step 6 the Para guardian calls `confirmRecovery` to start recovery to a new owner. The current owner can veto with `cancelRecovery` until recovery is finalized; after a veto the Safe keeps its owner and you can create a new Safe to start over. Once the grace period ends, `finalizeRecovery` rotates the owner and the new owner sends its first transaction. The guardian sends these calls itself, so step 3 funds it with the Para faucet first.
 
-## Security Model
+Every guardian signature needs the user to authenticate with Para, and Para co-signs it. The app cannot produce that signature on its own, and Para cannot sign without the user. Safe modules bypass owner signatures once enabled, so keep the enabled module list small and audited. This example uses one guardian with a threshold of 1 to keep the mechanics clear; the module also supports several guardians, higher thresholds, and other delays.
 
-The Safe owner is the primary account that signs normal user operations. In this demo that owner is a local EOA labeled as the passkey-signer simulation. Para is registered only as a SocialRecoveryModule guardian, not as a Safe owner.
+For the standard flow where the Para wallet owns the Safe, see `aa-safe-4337`.
 
-Safe modules bypass owner signatures once enabled, so module choice matters. This demo uses the SocialRecoveryModule model because it is constrained to owner rotation, has a grace period, and lets the current owner veto a pending recovery. Other enabled modules could change the Safe security story, so production Safes should keep their enabled-module list intentionally small and audited.
-
-The Para guardian trust model is 2-of-2 MPC. A recovery signature is initiated by the host app through the Para-authenticated signer, but it only completes after the user authenticates with Para and Para co-signs. The host app cannot produce that signature by itself, and Para does not have unilateral signing authority without the user's auth ceremony.
-
-Losing the host app passkey is separate from losing access to Para. Para account recovery options, such as email, phone, recovery secret, and 2FA policy, cover the lost-Para-credential chain before the Para wallet can act as the guardian again.
-
-The module can support multiple guardians, guardian thresholds, and different delay periods. This example keeps the configuration to one Para guardian and one guardian signature so the recovery mechanics stay clear.
-
-## Why ERC-4337
-
-Safe ERC-4337 is the production path used here. Safe EIP-7702 support is not used because Safe's 7702 contracts are not the production audited path for this recovery demo.
-
-## Phone And SMS Recovery
-
-Para phone auth can be one way to authenticate the guardian ceremony. This example does not build an SMS iframe flow; it keeps the recovery permission on the Para wallet and shows the host-initiated, Para-verified boundary.
-
-## Related Example
-
-For the standard Para-as-owner Safe flow, see `aa-safe-4337`. This recovery example is the guardian/recovery counterpart.
-
-## Project Structure
+## Project layout
 
 ```text
 src/
-├── app/
-│   ├── layout.tsx
-│   └── page.tsx
+├── app/                         # Next.js layout and page
+├── hooks/                       # Para SDK usage and the Safe recovery flow
 ├── components/
-│   ├── SafeRecoveryExample.tsx
-│   ├── ParaProvider.tsx
-│   ├── layout/Header.tsx
-│   └── ui/
-│       ├── ConnectCard.tsx
-│       ├── RecoveryFlow.tsx
-│       └── WalletInfo.tsx
-├── hooks/
-│   ├── safeRecoveryState.ts
-│   └── useSafeRecoveryDemo.ts
-└── lib/
-    ├── safe-4337-client.ts
-    ├── safe-recovery-abi.ts
-    ├── safe-recovery.ts
-    └── social-recovery-actions.ts
+│   ├── ParaProvider.tsx         # Para setup
+│   ├── SafeRecoveryExample.tsx  # Joins the hooks with the UI
+│   ├── layout/                  # App shell, header, footer, step workbench
+│   └── ui/                      # Presentational components, props only
+├── lib/                         # Chain and Safe config, contract helpers, step state, formatting
+└── styles/globals.css           # Tailwind theme tokens
 ```
 
-## Key Integration Pattern
-
-The reusable flow state lives in `src/hooks/useSafeRecoveryDemo.ts`. The Safe and recovery-module contract calls live in `src/lib/` so the UI stays prop-driven while the create, guardian setup, faucet, negative proof, recovery, veto, and finalize steps execute through real Safe/Pimlico/SocialRecoveryModule calls.
-
-## Learn More
-
-- [Para Documentation](https://docs.getpara.com)
-- [Safe ERC-4337 Documentation](https://docs.safe.global/advanced/erc-4337/4337-safe)
-- [Safe Modules Documentation](https://docs.safe.global/advanced/smart-account-modules)
-- [EIP-4337 Specification](https://eips.ethereum.org/EIPS/eip-4337)
+Components in `layout/` and `ui/` never import Para. They receive data and callbacks from `SafeRecoveryExample`, so you can swap them for your own design system without touching the hooks.

@@ -1,10 +1,9 @@
-"use client";
-
 import { useCallback, useEffect, useState } from "react";
 import { formatEther, maxUint256, parseSignature, type Address, type Hex } from "viem";
-import { PARA_TEST_TOKEN_ABI, PARA_TEST_TOKEN_ADDRESS } from "@/lib/contracts";
-import { CHAIN, publicClient } from "@/lib/viem";
-import { useParaSigner } from "./useParaSigner";
+import { HOLESKY } from "@/lib/chain";
+import { PARA_TEST_TOKEN } from "@/lib/contracts";
+import { publicClient } from "@/lib/publicClient";
+import { useParaSigner } from "@/hooks/useParaSigner";
 
 interface SignedPermit {
   owner: Address;
@@ -52,21 +51,21 @@ export function usePermitSigning() {
       setIsDataLoading(true);
       setError(null);
       const owner = (await publicClient.readContract({
-        address: PARA_TEST_TOKEN_ADDRESS,
-        abi: PARA_TEST_TOKEN_ABI,
+        address: PARA_TEST_TOKEN.address,
+        abi: PARA_TEST_TOKEN.abi,
         functionName: "owner",
       })) as Address;
 
       const [balance, allowance] = await Promise.all([
         publicClient.readContract({
-          address: PARA_TEST_TOKEN_ADDRESS,
-          abi: PARA_TEST_TOKEN_ABI,
+          address: PARA_TEST_TOKEN.address,
+          abi: PARA_TEST_TOKEN.abi,
           functionName: "balanceOf",
           args: [address],
         }),
         publicClient.readContract({
-          address: PARA_TEST_TOKEN_ADDRESS,
-          abi: PARA_TEST_TOKEN_ABI,
+          address: PARA_TEST_TOKEN.address,
+          abi: PARA_TEST_TOKEN.abi,
           functionName: "allowance",
           args: [address, owner],
         }),
@@ -98,19 +97,19 @@ export function usePermitSigning() {
       setError(null);
       const [spender, nonce, tokenName] = await Promise.all([
         publicClient.readContract({
-          address: PARA_TEST_TOKEN_ADDRESS,
-          abi: PARA_TEST_TOKEN_ABI,
+          address: PARA_TEST_TOKEN.address,
+          abi: PARA_TEST_TOKEN.abi,
           functionName: "owner",
         }),
         publicClient.readContract({
-          address: PARA_TEST_TOKEN_ADDRESS,
-          abi: PARA_TEST_TOKEN_ABI,
+          address: PARA_TEST_TOKEN.address,
+          abi: PARA_TEST_TOKEN.abi,
           functionName: "nonces",
           args: [address],
         }),
         publicClient.readContract({
-          address: PARA_TEST_TOKEN_ADDRESS,
-          abi: PARA_TEST_TOKEN_ABI,
+          address: PARA_TEST_TOKEN.address,
+          abi: PARA_TEST_TOKEN.abi,
           functionName: "name",
         }),
       ]);
@@ -121,8 +120,8 @@ export function usePermitSigning() {
         domain: {
           name: tokenName as string,
           version: "1",
-          chainId: CHAIN.id,
-          verifyingContract: PARA_TEST_TOKEN_ADDRESS,
+          chainId: HOLESKY.chain.id,
+          verifyingContract: PARA_TEST_TOKEN.address,
         },
         types: permitTypes,
         primaryType: "Permit",

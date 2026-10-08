@@ -1,125 +1,75 @@
 # Para + Reown AppKit Example
 
-[![Live Demo](https://img.shields.io/badge/▶_Live_Demo-black?style=for-the-badge&logo=vercel)](https://para-example-connector-reown-appkit.vercel.app)
+[![Live Demo](https://img.shields.io/badge/Live_Demo-black?style=for-the-badge&logo=vercel)](https://para-example-connector-reown-appkit.vercel.app)
 
-A minimal Next.js example showing Para as a custom Wagmi connector inside Reown AppKit.
+A minimal Next.js app that adds Para as a wagmi connector inside Reown AppKit. AppKit keeps its own modal for connecting and for the account view; the app shows the connected account, its network and balance, and the networks configured for AppKit. The Para, AppKit, and wagmi setup lives in `src/components/ParaProvider.tsx` and the AppKit and wagmi hooks live in `src/hooks`. Everything else is plain React and Tailwind that you can replace with your own UI.
 
-## What This Example Shows
-
-- Configuring Reown AppKit with `@getpara/wagmi-v2-integration`
-- Creating the AppKit Wagmi adapter with a Para connector
-- Opening the AppKit modal through `useAppKit`
-- Reading account, network, balance, and disconnect state from Reown AppKit and Wagmi
-
-This example uses Reown AppKit's current Wagmi adapter with Wagmi 3 and `@wagmi/core` 3. The remaining install peer warning for `@wagmi/core` comes from mobile/Farcaster-oriented transitive packages that still request the Wagmi 2 core range.
+This example uses wagmi 3 and `@wagmi/core` 3. The remaining install peer warning for `@wagmi/core` comes from mobile and Farcaster packages that still request the wagmi 2 core range.
 
 ## Setup
 
-1. Create a `.env` file:
+Create a local `.env` file:
 
 ```env
 NEXT_PUBLIC_PARA_API_KEY=your_api_key_here
 NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID=your_walletconnect_project_id
 ```
 
-2. Install dependencies:
+Configure the API key in the [Para Developer Portal](https://developer.getpara.com) with the app display name, branding, theme, login methods, and wallet visibility. The Para connector still needs an `appName` option to initialize its modal, so keep it aligned with the display name in the portal. The AppKit metadata, features, theme, network list, and WalletConnect project ID stay in code because they configure AppKit and wagmi, not Para.
+
+Install and run the production build:
 
 ```bash
 yarn install
-```
-
-3. Build and start the production server:
-
-```bash
 yarn build
 yarn start
 ```
 
-4. Open the app:
+## Para usage
 
-```text
-http://localhost:3000
-```
+These are the files to copy into your own app.
 
-## Developer Portal Configuration
-
-Configure the API key in the Para Developer Portal with the app display identity, authentication methods, branding, theme, and wallet visibility. This example does not set `paraModalConfig`, `configOverrides`, or `externalWalletConfig` in app code.
-
-The `paraConnector({ appName })` value remains in code because `@getpara/wagmi-v2-integration` requires it to initialize the connector modal; keep it aligned with the Developer Portal display identity. The Reown AppKit metadata, feature flags, chain list, and WalletConnect project ID also remain in code because they configure Reown AppKit and wagmi provider behavior, not Para Portal partner configuration.
-
-## Core Integration
-
-The AppKit connector setup lives in `src/config/appkit.ts`:
+| File | What it does |
+| --- | --- |
+| `src/components/ParaProvider.tsx` | Creates a `ParaWeb` client, registers it with `paraConnector`, passes it to the AppKit `WagmiAdapter`, calls `createAppKit`, and wraps the app in `WagmiProvider` and a React Query client |
+| `src/hooks/useReownAppKitWallet.ts` | Opens AppKit, reads the account and connector, and disconnects with `useAppKit`, `useAppKitAccount`, `useAccount`, and `useDisconnect` |
+| `src/hooks/useReownAppKitNetwork.ts` | Reads the active network with `useAppKitNetwork` |
+| `src/hooks/useWagmiBalance.ts` | Reads the balance on the active network with `useBalance` |
 
 ```ts
 const connector = paraConnector({
-  para,
-  chains: [...chains],
   appName: "Reown AppKit with Para",
-  queryClient,
+  chains: [...NETWORKS],
   onRampTestMode: true,
-  recoverySecretStepEnabled: true,
   options: {},
+  para,
+  queryClient,
+  recoverySecretStepEnabled: true,
 });
 
-export const wagmiAdapter = new WagmiAdapter({
+const wagmiAdapter = new WagmiAdapter({
   ssr: true,
-  networks: [...chains],
-  projectId,
-  connectors: [connector],
+  networks,
+  projectId: PROJECT_ID,
+  connectors: connector ? [connector as CreateConnectorFn] : [],
 });
 ```
 
-The copyable wallet state lives in `src/hooks/useReownAppKitWallet.ts`:
+Connect calls `open()` from `useAppKit`. The user picks Para in the AppKit modal, which opens the Para modal to sign in. Once connected, Open account calls `open()` again to show the AppKit account view, where the user can also switch networks. `createAppKit` sets `themeVariables` so the AppKit modal uses the app accent, square corners, and the app font.
 
-```ts
-export function useReownAppKitWallet() {
-  const { open } = useAppKit();
-  const { address, isConnected } = useAppKitAccount();
-  const { caipNetwork } = useAppKitNetwork();
-  const { disconnect } = useDisconnect();
-  const { data: balanceData } = useBalance({
-    address: address as `0x${string}` | undefined,
-  });
+## Project layout
 
-  return {
-    address,
-    disconnectWallet: disconnect,
-    isConnected,
-    networkName: caipNetwork?.name || "Unknown",
-    openAppKit: open,
-  };
-}
-```
-
-## Project Structure
-
-```
+```text
 src/
-├── app/
-│   ├── layout.tsx              # Root layout with AppKitProvider
-│   └── page.tsx                # Server entry for the example
+├── app/                         # Next.js layout and page
+├── hooks/                       # AppKit and wagmi hooks, one concern per hook
 ├── components/
-│   ├── ReownAppKitExample.tsx  # Client orchestration and SDK hooks
-│   ├── layout/
-│   │   └── Header.tsx          # Presentational header
-│   └── ui/
-│       ├── ConnectWalletCard.tsx
-│       └── WalletDisplay.tsx   # Presentational wallet display
-├── config/
-│   └── appkit.ts               # AppKit configuration
-├── context/
-│   └── AppKitProvider.tsx      # Reown AppKit provider
-├── hooks/
-│   └── useReownAppKitWallet.ts # Reown AppKit and Wagmi logic
-└── lib/
-    └── para/client.ts          # Para client initialization
+│   ├── ParaProvider.tsx         # Para connector, AppKit, and wagmi setup
+│   ├── ReownAppKitExample.tsx   # Joins the hooks with the UI
+│   ├── layout/                  # App shell, header, footer, workbench
+│   └── ui/                      # Presentational components, props only
+├── lib/                         # Network list, AppKit theme, formatting, and UI helpers
+└── styles/globals.css           # Tailwind theme tokens
 ```
 
-## Learn More
-
-- [Para Documentation](https://docs.getpara.com)
-- [Para Website](https://getpara.com)
-- [Para Developer Portal](https://developer.getpara.com)
-- [Reown AppKit Documentation](https://docs.reown.com/appkit/overview)
-- [wagmi Documentation](https://wagmi.sh)
+Components in `layout/` and `ui/` never import Para, AppKit, or wagmi. They receive data and callbacks from `ReownAppKitExample`, so you can swap them for your own design system without touching the hooks.

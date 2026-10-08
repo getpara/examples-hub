@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useCallback } from "react";
 import { Address } from "@solana/addresses";
 import {
@@ -9,13 +7,14 @@ import {
   setTransactionMessageLifetimeUsingBlockhash,
   pipe,
   lamports,
-  Signature,
 } from "@solana/kit";
-import { compileTransaction, getBase64EncodedWireTransaction } from "@solana/transactions";
+import { getBase64EncodedWireTransaction } from "@solana/transactions";
+import { signTransactionMessageWithSigners } from "@solana/signers";
 import { getTransferSolInstruction } from "@solana-program/system";
-import { useParaSigner } from "./useParaSigner";
+import { useParaSigner } from "@/hooks/useParaSigner";
 
-const LAMPORTS_PER_SOL = BigInt(1000000000);
+const LAMPORTS_PER_SOL = 1_000_000_000;
+const ESTIMATED_FEE_LAMPORTS = 5000;
 
 export function useSolTransfer() {
   const { signer, rpc, isReady } = useParaSigner();
@@ -47,72 +46,61 @@ export function useSolTransfer() {
       setTxSignature(null);
 
       try {
-        // Validate balance
         const balanceResponse = await rpc.getBalance(signer.address).send();
-        const balanceLamports = balanceResponse.value;
-        const amountLamports = parseFloat(amount) * Number(LAMPORTS_PER_SOL);
-        const estimatedFee = 5000;
-        const totalCost = amountLamports + estimatedFee;
+        const balanceLamports = Number(balanceResponse.value);
+        const totalCost = amountFloat * LAMPORTS_PER_SOL + ESTIMATED_FEE_LAMPORTS;
 
-        if (totalCost > Number(balanceLamports)) {
-          const requiredSol = (totalCost / Number(LAMPORTS_PER_SOL)).toFixed(4);
-          const availableSol = (Number(balanceLamports) / Number(LAMPORTS_PER_SOL)).toFixed(4);
+        if (totalCost > balanceLamports) {
+          const requiredSol = (totalCost / LAMPORTS_PER_SOL).toFixed(4);
+          const availableSol = (balanceLamports / LAMPORTS_PER_SOL).toFixed(4);
           throw new Error(
             `Insufficient balance. Transaction requires approximately ${requiredSol} SOL, but you have only ${availableSol} SOL available.`
           );
         }
 
-        // Construct transaction
-        const response = await rpc.getLatestBlockhash().send();
-        const { blockhash, lastValidBlockHeight } = response.value;
+        const { value: latestBlockhash } = await rpc.getLatestBlockhash().send();
 
         const transferInstruction = getTransferSolInstruction({
           source: signer,
           destination: to as Address,
-          amount: lamports(BigInt(Math.floor(amountFloat * Number(LAMPORTS_PER_SOL)))),
+          amount: lamports(BigInt(Math.floor(amountFloat * LAMPORTS_PER_SOL))),
         });
 
         const transactionMessage = pipe(
           createTransactionMessage({ version: "legacy" }),
           (tx) => setTransactionMessageFeePayer(signer.address, tx),
-          (tx) => setTransactionMessageLifetimeUsingBlockhash({ blockhash, lastValidBlockHeight }, tx),
+          (tx) => setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, tx),
           (tx) => appendTransactionMessageInstruction(transferInstruction, tx)
         );
 
-        const tx = compileTransaction(transactionMessage);
+        const signedTx = await signTransactionMessageWithSigners(transactionMessage);
 
-        // Sign and send
-        const signedTxs = await signer.modifyAndSignTransactions([tx]);
-        const signedTx = signedTxs[0];
-        const serializedTx = getBase64EncodedWireTransaction(signedTx);
-
-        const txResponse = await rpc
-          .sendTransaction(serializedTx, {
+        const signature = await rpc
+          .sendTransaction(getBase64EncodedWireTransaction(signedTx), {
             encoding: "base64",
             skipPreflight: false,
             preflightCommitment: "processed",
           })
           .send();
 
-        setTxSignature(txResponse as string);
+        setTxSignature(signature);
 
-        // Wait for confirmation
-        let confirmed = false;
-        while (!confirmed) {
-          const signature = txResponse as unknown as Signature;
-          const receipt = await rpc
-            .getSignatureStatuses([signature], {
-              searchTransactionHistory: true,
-            })
-            .send();
+        for (;;) {
+          const receipt = await rpc.getSignatureStatuses([signature], { searchTransactionHistory: true }).send();
+          const status = receipt?.value?.[0];
 
-          if (
-            receipt?.value?.[0]?.confirmationStatus === "confirmed" ||
-            receipt?.value?.[0]?.confirmationStatus === "finalized"
-          ) {
-            confirmed = true;
+          if (status?.err) {
+            throw new Error("Transaction failed on chain.");
+          }
+
+          if (status?.confirmationStatus === "confirmed" || status?.confirmationStatus === "finalized") {
             break;
           }
+
+          if ((await rpc.getBlockHeight().send()) > latestBlockhash.lastValidBlockHeight) {
+            throw new Error("Transaction expired before it was confirmed.");
+          }
+
           await new Promise((resolve) => setTimeout(resolve, 500));
         }
       } catch (err) {

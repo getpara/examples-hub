@@ -1,10 +1,9 @@
-"use client";
-
 import { useState, useEffect, useCallback } from "react";
 import { ethers } from "ethers";
 import { useWallet } from "@getpara/react-sdk-lite";
-import { useParaSigner } from "./useParaSigner";
-import ParaTestToken from "@/contracts/artifacts/src/contracts/ParaTestToken.sol/ParaTestToken.json";
+import { useParaSigner } from "@/hooks/useParaSigner";
+import { HOLESKY } from "@/lib/chain";
+import { PARA_TEST_TOKEN } from "@/lib/contracts";
 
 export type SignedPermit = {
   deadline: string;
@@ -13,13 +12,9 @@ export type SignedPermit = {
   s: string;
 };
 
-const DEFAULT_CONTRACT_ADDRESS = "0x83cC70475A0d71EF1F2F61FeDE625c8C7E90C3f2";
-const DEFAULT_SPENDER = "0x0f35268de976323e06f5aed6f366b490d9b17750";
-const HOLESKY_CHAIN_ID = 17000;
-
 export function usePermitSigning(
-  contractAddress: string = DEFAULT_CONTRACT_ADDRESS,
-  spenderAddress: string = DEFAULT_SPENDER
+  contractAddress: string = PARA_TEST_TOKEN.address,
+  spenderAddress: string = PARA_TEST_TOKEN.owner
 ) {
   const [tokenBalance, setTokenBalance] = useState<string | null>(null);
   const [currentAllowance, setCurrentAllowance] = useState<string | null>(null);
@@ -36,7 +31,7 @@ export function usePermitSigning(
 
     setIsDataLoading(true);
     try {
-      const contract = new ethers.Contract(contractAddress, ParaTestToken.abi, provider);
+      const contract = new ethers.Contract(contractAddress, PARA_TEST_TOKEN.abi, provider);
 
       const balance = await contract.balanceOf(wallet.address);
       setTokenBalance(ethers.formatEther(balance));
@@ -57,25 +52,25 @@ export function usePermitSigning(
   }, [fetchTokenData]);
 
   const signPermit = useCallback(async () => {
-    if (!signer || !provider || !wallet?.address) {
-      throw new Error("Signer not initialized. Please connect your wallet.");
-    }
-
     setIsLoading(true);
     setError(null);
     setSignedPermit(null);
 
     try {
-      const contract = new ethers.Contract(contractAddress, ParaTestToken.abi, provider);
+      if (!signer || !provider || !wallet?.address) {
+        throw new Error("Signer not initialized. Please connect your wallet.");
+      }
+
+      const contract = new ethers.Contract(contractAddress, PARA_TEST_TOKEN.abi, provider);
 
       const nonce = await contract.nonces(wallet.address);
-      const deadline = Math.floor(Date.now() / 1000) + 3600; // 1 hour from now
+      const deadline = Math.floor(Date.now() / 1000) + 3600;
       const name = await contract.name();
 
       const domain = {
         name,
         version: "1",
-        chainId: HOLESKY_CHAIN_ID,
+        chainId: HOLESKY.chainId,
         verifyingContract: contractAddress,
       };
 
@@ -99,7 +94,6 @@ export function usePermitSigning(
 
       const signature = await signer.signTypedData(domain, types, value);
 
-      // Split signature into v, r, s components
       const r = signature.slice(0, 66);
       const s = "0x" + signature.slice(66, 130);
       const v = parseInt(signature.slice(130, 132), 16);
