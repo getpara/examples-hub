@@ -431,13 +431,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@getpara/core-sdk@npm:3.22.0":
-  version: 3.22.0
-  resolution: "@getpara/core-sdk@npm:3.22.0"
+"@getpara/core-sdk@npm:3.23.0":
+  version: 3.23.0
+  resolution: "@getpara/core-sdk@npm:3.23.0"
   dependencies:
     "@celo/utils": "npm:^8.0.2"
-    "@getpara/shared": "npm:^1.35.0"
-    "@getpara/user-management-client": "npm:3.22.0"
+    "@getpara/shared": "npm:^1.37.0"
+    "@getpara/user-management-client": "npm:3.23.0"
     "@noble/curves": "npm:^1.9.7"
     "@noble/hashes": "npm:^1.5.0"
     "@opentelemetry/api": "npm:^1.9.1"
@@ -459,49 +459,49 @@ __metadata:
     node-forge: "npm:^1.4.0"
     uuid: "npm:^11.1.1"
     xstate: "npm:^5.24.0"
-  checksum: 10c0/40a377c97f3c3b265a79f2a32d70caf9eda4b459b8ccf4e593813d91d197706814295230318a535de60a24e8ece16df717150f2573aca9573e8b59ea6d714ca6
+  checksum: 10c0/0da36e7bd63f73f367c1160a42157f259e8aab9602b98ba96932e4667a62359d8caf82aaa73961ee49fe09141a71b4f1fceaef95cbe78150df8e7dcacdfa70be
   languageName: node
   linkType: hard
 
-"@getpara/shared@npm:^1.35.0":
-  version: 1.35.0
-  resolution: "@getpara/shared@npm:1.35.0"
+"@getpara/shared@npm:^1.37.0":
+  version: 1.37.0
+  resolution: "@getpara/shared@npm:1.37.0"
   dependencies:
     zod: "npm:^3.22.4"
-  checksum: 10c0/1c78ce3bacd7ad1e9394994259543bd219fd3bd24e87a6f91230265c88f7cc3e68e27b19edab255905a849f69bf0eef07a9e57406a87fb7206609a75065979d0
+  checksum: 10c0/9bed8eacea7f577a48e8145d7e5063b4d28b444090ceacbc0aab60ef131219a40b76edc5deff00e6e602ef02e515c26f96b6897b0def4572295e07a3bd046553
   languageName: node
   linkType: hard
 
-"@getpara/user-management-client@npm:3.22.0":
-  version: 3.22.0
-  resolution: "@getpara/user-management-client@npm:3.22.0"
+"@getpara/user-management-client@npm:3.23.0":
+  version: 3.23.0
+  resolution: "@getpara/user-management-client@npm:3.23.0"
   dependencies:
-    "@getpara/shared": "npm:^1.35.0"
+    "@getpara/shared": "npm:^1.37.0"
     "@opentelemetry/api": "npm:^1.9.1"
     axios: "npm:^1.8.4"
     axios-retry: "npm:^4.5.0"
     libphonenumber-js: "npm:^1.11.7"
-  checksum: 10c0/596320b517ece8da5bbcbdc59eeaea26c657dd65371e420fa33225e33b9c5184e8c6b3db74974de0176288ba22115c526244d403481ff525d074947756670a34
+  checksum: 10c0/8a7a9c6527e6599c819642ff895e0fb6875d129899e7bf6fa0da56c89e495fa01524f90286536bad1dcf0d938172be5bb7542710a86e4ffc7f89f2efd6363e13
   languageName: node
   linkType: hard
 
-"@getpara/viem-v2-integration@npm:3.22.0":
-  version: 3.22.0
-  resolution: "@getpara/viem-v2-integration@npm:3.22.0"
+"@getpara/viem-v2-integration@npm:3.23.0":
+  version: 3.23.0
+  resolution: "@getpara/viem-v2-integration@npm:3.23.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.22.0"
+    "@getpara/core-sdk": "npm:3.23.0"
   peerDependencies:
     viem: ^2.10.0
-  checksum: 10c0/a00249b2817e0ef3167e87dc1689c56b4369f6ae4f08408a047dcca5ce5ce58acaa50c396c5e40bea5a7f87aed5e49d2af1325381bfb1b2c0204e11d385e9474
+  checksum: 10c0/5c189389f92bffbb25045a93ca98db8b274de6e942ee632bc147d7a9482c620019d9d64ba716867682da40fbb5d5318f901d7251243652321eba341f3a2bd739
   languageName: node
   linkType: hard
 
-"@getpara/web-sdk@npm:3.22.0":
-  version: 3.22.0
-  resolution: "@getpara/web-sdk@npm:3.22.0"
+"@getpara/web-sdk@npm:3.23.0":
+  version: 3.23.0
+  resolution: "@getpara/web-sdk@npm:3.23.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.22.0"
-    "@getpara/user-management-client": "npm:3.22.0"
+    "@getpara/core-sdk": "npm:3.23.0"
+    "@getpara/user-management-client": "npm:3.23.0"
     "@opentelemetry/api": "npm:^1.9.1"
     "@scure/base": "npm:^1.2.6"
     buffer: "npm:6.0.3"
@@ -509,7 +509,7 @@ __metadata:
     node-forge: "npm:^1.4.0"
     ua-parser-js: "npm:^2.0.2"
     uuid: "npm:^11.1.1"
-  checksum: 10c0/c358e25f38e8c704e45a933db14bbc745babe89f07fd288ac65bdb054e86d37c10ece721adbaa5c91842be6fd4f6e012ef60899a816185931a9bf972d42111a8
+  checksum: 10c0/3322fe10dc386addfec9266aca2e95a0e692575bb3349986fff549836e2b78a761e820171f64ed8276288f50583c1ce336f4e07ef3f67c1e2a3c6f049fece94d
   languageName: node
   linkType: hard
 
@@ -1687,8 +1687,8 @@ __metadata:
   resolution: "aa-safe-4337-recovery-custom-auth@workspace:."
   dependencies:
     "@eslint/js": "npm:10.0.1"
-    "@getpara/viem-v2-integration": "npm:3.22.0"
-    "@getpara/web-sdk": "npm:3.22.0"
+    "@getpara/viem-v2-integration": "npm:3.23.0"
+    "@getpara/web-sdk": "npm:3.23.0"
     "@tailwindcss/postcss": "npm:4.3.0"
     "@types/node": "npm:25.9.1"
     "@types/react": "npm:19.2.16"

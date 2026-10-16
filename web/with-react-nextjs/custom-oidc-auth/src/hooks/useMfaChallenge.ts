@@ -30,8 +30,9 @@ export function useMfaChallenge() {
     setIsEnrolling(true);
     setError(null);
     try {
-      const { uri, backupCodes } = await enrollMfaAsync();
-      setEnrollment({ uri, backupCodes });
+      const response = await enrollMfaAsync({ method: "totp" });
+      if (response.method !== "totp") throw new Error("Could not start two-factor setup.");
+      setEnrollment({ uri: response.uri, backupCodes: response.backupCodes });
     } catch (enrollError) {
       hasEnrolled.current = false;
       setError(enrollError instanceof Error ? enrollError.message : "Could not start two-factor setup.");

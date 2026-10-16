@@ -74,6 +74,14 @@ Gasless and sponsored transactions using smart accounts.
 | `aa-safe-4337-recovery-custom-auth` | Safe | ERC-4337 | [View](https://para-example-aa-safe-4337-recovery-custom-auth.vercel.app) |
 | `aa-thirdweb-4337`       | Thirdweb   | ERC-4337 | [View](https://para-example-aa-thirdweb-4337.vercel.app)                  |
 
+### Bridges
+
+Move tokens between chains with the Para wallet signing on both sides.
+
+| Example              | Protocol    | Route                     | Live Demo                                                  |
+| -------------------- | ----------- | ------------------------- | ---------------------------------------------------------- |
+| `bridge-circle-cctp` | Circle CCTP | Base to Arc, mainnet USDC | [View](https://para-example-bridge-circle-cctp.vercel.app) |
+
 ## Quick Start
 
 ```bash

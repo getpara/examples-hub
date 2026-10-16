@@ -49,7 +49,8 @@ examples-hub/
 │   │   ├── aa-safe-4337          # Safe (ERC-4337)
 │   │   ├── aa-safe-4337-recovery # Safe SocialRecoveryModule (ERC-4337)
 │   │   ├── aa-safe-4337-recovery-custom-auth # Safe recovery with custom auth UI
-│   │   └── aa-thirdweb-4337      # Thirdweb (ERC-4337)
+│   │   ├── aa-thirdweb-4337      # Thirdweb (ERC-4337)
+│   │   └── bridge-circle-cctp    # Circle CCTP USDC bridge, Base to Arc mainnet
 │   ├── with-react-vite/          # React + Vite (Para Modal)
 │   ├── with-react-tanstack-start/ # React + TanStack Start
 │   ├── with-svelte-vite/         # Svelte + Vite (custom UI)

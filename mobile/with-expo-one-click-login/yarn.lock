@@ -10852,13 +10852,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-nitro-modules@npm:^0.31.2":
-  version: 0.31.10
-  resolution: "react-native-nitro-modules@npm:0.31.10"
+"react-native-nitro-modules@npm:^0.35.2":
+  version: 0.35.10
+  resolution: "react-native-nitro-modules@npm:0.35.10"
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: 10c0/0acc6ca5f12e24a6601e682070f257a771b95214c11fba911b342af705071234544c93076900f43400c8ae2f1a6738011b120e4425813968102997860ffd7626
+  checksum: 10c0/55c117c418abfb1223053eb93b8604bd7b6edc22ee9568a7017888a78f51dfa8ae5f2d11906c4cf6c87ae41b05ba099dc8958082b8aa1cfe8e1c7c1f3e9aff0e
   languageName: node
   linkType: hard
 
@@ -13178,7 +13178,7 @@ __metadata:
     react-native-gesture-handler: "npm:~2.28.0"
     react-native-keychain: "npm:^10.0.0"
     react-native-modpow: "npm:^1.1.0"
-    react-native-nitro-modules: "npm:^0.31.2"
+    react-native-nitro-modules: "npm:^0.35.2"
     react-native-passkey: "npm:^3.3.2"
     react-native-quick-base64: "npm:^3.0.0"
     react-native-quick-crypto: "npm:^1.1.4"
