@@ -12,9 +12,9 @@
     "typecheck": "next typegen && tsc --noEmit"
   },
   "dependencies": {
-    "@getpara/evm-wallet-connectors": "3.22.0",
-    "@getpara/react-sdk-lite": "3.22.0",
-    "@getpara/viem-v2-integration": "3.22.0",
+    "@getpara/evm-wallet-connectors": "3.23.0",
+    "@getpara/react-sdk-lite": "3.23.0",
+    "@getpara/viem-v2-integration": "3.23.0",
     "@tanstack/react-query": "5.101.0",
     "@wagmi/core": "3.5.0",
     "next": "16.2.7",

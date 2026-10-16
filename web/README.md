@@ -55,7 +55,10 @@ web/
 │   ├── aa-safe-4337             # Safe (ERC-4337)
 │   ├── aa-safe-4337-recovery    # Safe recovery guardian
 │   ├── aa-safe-4337-recovery-custom-auth # Safe recovery with custom auth UI
-│   └── aa-thirdweb-4337         # Thirdweb (ERC-4337)
+│   ├── aa-thirdweb-4337         # Thirdweb (ERC-4337)
+│   │
+│   │── Bridges
+│   └── bridge-circle-cctp       # Circle CCTP USDC bridge, Base to Arc mainnet
 │
 ├── with-react-vite/             # React + Vite starter
 ├── with-react-tanstack-start/   # React + TanStack Start
@@ -84,5 +87,6 @@ Each example has its own README with specific setup instructions.
 | Build custom auth UI                 | `custom-*-auth` examples       |
 | Integrate with existing wallet UI    | `connector-*` examples         |
 | Add gasless/sponsored transactions   | `aa-*` examples                |
+| Bridge USDC between chains           | `bridge-circle-cctp`           |
 | Use non-React framework              | `with-svelte-vite` or `with-vue-vite` |
 | Build a browser extension            | `with-chrome-extension`        |

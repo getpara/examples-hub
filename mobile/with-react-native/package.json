@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@craftzdog/react-native-buffer": "^6.1.2",
-    "@getpara/react-native-wallet": "3.22.0",
+    "@getpara/react-native-wallet": "3.23.0",
     "@react-native-async-storage/async-storage": "^2.2.0",
     "@react-native/new-app-screen": "0.80.0",
     "@tanstack/react-query": "^5.0.0",
@@ -22,7 +22,7 @@
     "react-native-inappbrowser-reborn": "^3.7.0",
     "react-native-keychain": "^10.0.0",
     "react-native-modpow": "^1.1.0",
-    "react-native-nitro-modules": "^0.31.2",
+    "react-native-nitro-modules": "^0.35.2",
     "react-native-passkey": "^3.1.0",
     "react-native-quick-base64": "^3.0.0",
     "react-native-quick-crypto": "^1.1.4",
