@@ -485,13 +485,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@getpara/core-sdk@npm:3.23.0":
-  version: 3.23.0
-  resolution: "@getpara/core-sdk@npm:3.23.0"
+"@getpara/core-sdk@npm:3.24.0":
+  version: 3.24.0
+  resolution: "@getpara/core-sdk@npm:3.24.0"
   dependencies:
     "@celo/utils": "npm:^8.0.2"
-    "@getpara/shared": "npm:^1.37.0"
-    "@getpara/user-management-client": "npm:3.23.0"
+    "@getpara/shared": "npm:^1.38.0"
+    "@getpara/user-management-client": "npm:3.24.0"
     "@noble/curves": "npm:^1.9.7"
     "@noble/hashes": "npm:^1.5.0"
     "@opentelemetry/api": "npm:^1.9.1"
@@ -513,26 +513,26 @@ __metadata:
     node-forge: "npm:^1.4.0"
     uuid: "npm:^11.1.1"
     xstate: "npm:^5.24.0"
-  checksum: 10c0/0da36e7bd63f73f367c1160a42157f259e8aab9602b98ba96932e4667a62359d8caf82aaa73961ee49fe09141a71b4f1fceaef95cbe78150df8e7dcacdfa70be
+  checksum: 10c0/010bb80b562d487e5bdf1b7ef26c82eaa223f57c7709581b0fd53fe05944520e9d17f630d7069c046be0e3de6afb9c8151dcf23ecb03bdd92daeec07ccd46c4f
   languageName: node
   linkType: hard
 
-"@getpara/react-common@npm:3.23.0":
-  version: 3.23.0
-  resolution: "@getpara/react-common@npm:3.23.0"
+"@getpara/react-common@npm:3.24.0":
+  version: 3.24.0
+  resolution: "@getpara/react-common@npm:3.24.0"
   dependencies:
-    "@getpara/user-management-client": "npm:3.23.0"
-    "@getpara/web-sdk": "npm:3.23.0"
+    "@getpara/user-management-client": "npm:3.24.0"
+    "@getpara/web-sdk": "npm:3.24.0"
   peerDependencies:
     react: ">=18"
     react-dom: ">=18"
-  checksum: 10c0/5dde4dcf6f03757e048474cbfe73308affa38a9b51f7343d9df5d48e3eaf2ccfeb0910085902e87ff101439af114d9317a93d6bb1f10a1d6a4e3bc3668d78df6
+  checksum: 10c0/a1c0da9823a55b3fc1b87e504f6e3621ae0afa00dd45afad8f529e5b4db3b6aac849fa711eaa7e64e6e0441f66b026893a7eb3c5171c462e9a895b00abf68664
   languageName: node
   linkType: hard
 
-"@getpara/react-component-library@npm:3.23.0":
-  version: 3.23.0
-  resolution: "@getpara/react-component-library@npm:3.23.0"
+"@getpara/react-component-library@npm:3.24.0":
+  version: 3.24.0
+  resolution: "@getpara/react-component-library@npm:3.24.0"
   dependencies:
     "@radix-ui/react-avatar": "npm:^1.1.2"
     "@radix-ui/react-checkbox": "npm:^1.3.3"
@@ -570,15 +570,15 @@ __metadata:
   peerDependencies:
     react: ">=18"
     react-dom: ">=18"
-  checksum: 10c0/5835321c1225746dff7a79b1e34aa1daa4afed8deeb1a96f89951323419b394cbd70dcbeea51f4ea53bef9e7c727a4e0f5c8ed563096533af791fa89ea279b44
+  checksum: 10c0/18bacb87bd93d8e7b0a07af27373da9ca8eea86a7e157cc4cab37692a53807fa1ed0d6e387dcd95b3fc28007a5ab57dd10428a80c4b8a8208d3595b1b1033a10
   languageName: node
   linkType: hard
 
-"@getpara/react-core@npm:3.23.0":
-  version: 3.23.0
-  resolution: "@getpara/react-core@npm:3.23.0"
+"@getpara/react-core@npm:3.24.0":
+  version: 3.24.0
+  resolution: "@getpara/react-core@npm:3.24.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.23.0"
+    "@getpara/core-sdk": "npm:3.24.0"
     zustand: "npm:^5.0.0"
   peerDependencies:
     "@cosmjs/amino": ">=0.32.4"
@@ -650,21 +650,21 @@ __metadata:
       optional: true
     viem:
       optional: true
-  checksum: 10c0/2c90d072ab61f46ba070a88c637a8b8861b7cf84d6df363a93095573508213bd6e0a8a1031a5c3cbe49483cec5e735ef26cf0791105d7500b4a56f10b637ee01
+  checksum: 10c0/c2fb66092bedf50476c623ed345d2ca9d508ef7e25e0da877c479bb4becc718f74c54b9dafdd148d942525998b881bade0218b4a2a818407ea6de0bc828e5191
   languageName: node
   linkType: hard
 
-"@getpara/react-sdk-lite@npm:3.23.0":
-  version: 3.23.0
-  resolution: "@getpara/react-sdk-lite@npm:3.23.0"
+"@getpara/react-sdk-lite@npm:3.24.0":
+  version: 3.24.0
+  resolution: "@getpara/react-sdk-lite@npm:3.24.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.23.0"
-    "@getpara/react-common": "npm:3.23.0"
-    "@getpara/react-component-library": "npm:3.23.0"
-    "@getpara/react-core": "npm:3.23.0"
-    "@getpara/shared": "npm:^1.37.0"
-    "@getpara/user-management-client": "npm:3.23.0"
-    "@getpara/web-sdk": "npm:3.23.0"
+    "@getpara/core-sdk": "npm:3.24.0"
+    "@getpara/react-common": "npm:3.24.0"
+    "@getpara/react-component-library": "npm:3.24.0"
+    "@getpara/react-core": "npm:3.24.0"
+    "@getpara/shared": "npm:^1.38.0"
+    "@getpara/user-management-client": "npm:3.24.0"
+    "@getpara/web-sdk": "npm:3.24.0"
     "@opentelemetry/api": "npm:^1.9.1"
     date-fns: "npm:^3.6.0"
     detect-browser: "npm:^5.3.0"
@@ -745,64 +745,64 @@ __metadata:
       optional: true
   bin:
     setup-para: dist/cli/cli.mjs
-  checksum: 10c0/711e90a75f84964edbb94a3b13ce7e998f7361ff66b675cc1c58a52994ed6868d88cb595d9d4b8aa13f221aa978e1f452fb2abbb1d78f1a3a3f3c92f00381295
+  checksum: 10c0/9f78cf6c4c2dcec4e5fdc7b61fb2b4bead51cab82836338504f31fc34bd6f68e7918b7491b0dcca03c0c883c49e37c636f3acb9538d6763d3fcad523ab93e833
   languageName: node
   linkType: hard
 
-"@getpara/server-sdk@npm:3.23.0":
-  version: 3.23.0
-  resolution: "@getpara/server-sdk@npm:3.23.0"
+"@getpara/server-sdk@npm:3.24.0":
+  version: 3.24.0
+  resolution: "@getpara/server-sdk@npm:3.24.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.23.0"
-    "@getpara/user-management-client": "npm:3.23.0"
-    "@getpara/viem-v2-integration": "npm:3.23.0"
+    "@getpara/core-sdk": "npm:3.24.0"
+    "@getpara/user-management-client": "npm:3.24.0"
+    "@getpara/viem-v2-integration": "npm:3.24.0"
     axios: "npm:^1.8.4"
     uuid: "npm:^11.1.1"
     viem: "npm:^2.39.0"
     ws: "npm:^8.21.0"
-  checksum: 10c0/2c988868073dc8caf7cc9a3007a4a4b17e2d56d65e0521278f4fb080c997d416913e1e05e2d7abd09367c09f68797d18c99de150fd2e1dfeb2d70f59e0265646
+  checksum: 10c0/c6b434f6bc30fc962af54fd127f90c590c94a176b2021f840151d86a9d677db9fbbb7981ff558c1d4558bd229707a3305a61f60e0d06b21c0f2a650da6f41ebf
   languageName: node
   linkType: hard
 
-"@getpara/shared@npm:^1.37.0":
-  version: 1.37.0
-  resolution: "@getpara/shared@npm:1.37.0"
+"@getpara/shared@npm:^1.38.0":
+  version: 1.39.0
+  resolution: "@getpara/shared@npm:1.39.0"
   dependencies:
     zod: "npm:^3.22.4"
-  checksum: 10c0/9bed8eacea7f577a48e8145d7e5063b4d28b444090ceacbc0aab60ef131219a40b76edc5deff00e6e602ef02e515c26f96b6897b0def4572295e07a3bd046553
+  checksum: 10c0/f54dff33e720f7426d73bcfe4f97d056557a4c9a6b40c2117394d8266f3a81aad26f726367833e1f8ef817573b3785be2c15edbb0a4cc9855ff60b1726cf89b5
   languageName: node
   linkType: hard
 
-"@getpara/user-management-client@npm:3.23.0":
-  version: 3.23.0
-  resolution: "@getpara/user-management-client@npm:3.23.0"
+"@getpara/user-management-client@npm:3.24.0":
+  version: 3.24.0
+  resolution: "@getpara/user-management-client@npm:3.24.0"
   dependencies:
-    "@getpara/shared": "npm:^1.37.0"
+    "@getpara/shared": "npm:^1.38.0"
     "@opentelemetry/api": "npm:^1.9.1"
     axios: "npm:^1.8.4"
     axios-retry: "npm:^4.5.0"
     libphonenumber-js: "npm:^1.11.7"
-  checksum: 10c0/8a7a9c6527e6599c819642ff895e0fb6875d129899e7bf6fa0da56c89e495fa01524f90286536bad1dcf0d938172be5bb7542710a86e4ffc7f89f2efd6363e13
+  checksum: 10c0/2bdb1417e74080917916805b0ba9940223947a8f860b8d91e81133006c0edee442401adfb1908113af305f3ccdc246ce45ff5c3c0e59126f593530f18a40b5f6
   languageName: node
   linkType: hard
 
-"@getpara/viem-v2-integration@npm:3.23.0":
-  version: 3.23.0
-  resolution: "@getpara/viem-v2-integration@npm:3.23.0"
+"@getpara/viem-v2-integration@npm:3.24.0":
+  version: 3.24.0
+  resolution: "@getpara/viem-v2-integration@npm:3.24.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.23.0"
+    "@getpara/core-sdk": "npm:3.24.0"
   peerDependencies:
     viem: ^2.10.0
-  checksum: 10c0/5c189389f92bffbb25045a93ca98db8b274de6e942ee632bc147d7a9482c620019d9d64ba716867682da40fbb5d5318f901d7251243652321eba341f3a2bd739
+  checksum: 10c0/ebeb3047a88e9a8e44f6eeb56a696a24c1b9c686313ce03698b751e554831aafd584c6194d8008664d2a2e0b644b70ab4435de1cd9fbb275f52bffad7c9c78f0
   languageName: node
   linkType: hard
 
-"@getpara/web-sdk@npm:3.23.0":
-  version: 3.23.0
-  resolution: "@getpara/web-sdk@npm:3.23.0"
+"@getpara/web-sdk@npm:3.24.0":
+  version: 3.24.0
+  resolution: "@getpara/web-sdk@npm:3.24.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.23.0"
-    "@getpara/user-management-client": "npm:3.23.0"
+    "@getpara/core-sdk": "npm:3.24.0"
+    "@getpara/user-management-client": "npm:3.24.0"
     "@opentelemetry/api": "npm:^1.9.1"
     "@scure/base": "npm:^1.2.6"
     buffer: "npm:6.0.3"
@@ -810,7 +810,7 @@ __metadata:
     node-forge: "npm:^1.4.0"
     ua-parser-js: "npm:^2.0.2"
     uuid: "npm:^11.1.1"
-  checksum: 10c0/3322fe10dc386addfec9266aca2e95a0e692575bb3349986fff549836e2b78a761e820171f64ed8276288f50583c1ce336f4e07ef3f67c1e2a3c6f049fece94d
+  checksum: 10c0/97dc947282615e744a83525b88f3195e4dfe092072dd5dd5f487087400034f2596cec5ab395a13a3fe313475127da8d8917a792a940874bc381875fd01ae5f69
   languageName: node
   linkType: hard
 
@@ -5871,8 +5871,8 @@ __metadata:
   resolution: "with-bulk-pregen@workspace:."
   dependencies:
     "@eslint/js": "npm:10.0.1"
-    "@getpara/react-sdk-lite": "npm:3.23.0"
-    "@getpara/server-sdk": "npm:3.23.0"
+    "@getpara/react-sdk-lite": "npm:3.24.0"
+    "@getpara/server-sdk": "npm:3.24.0"
     "@tailwindcss/postcss": "npm:4.3.0"
     "@tanstack/react-query": "npm:5.101.0"
     "@types/node": "npm:25.9.1"
