@@ -17,7 +17,7 @@
     "@cosmjs/encoding": "0.39.0",
     "@cosmjs/proto-signing": "0.39.0",
     "@cosmjs/stargate": "0.39.0",
-    "@getpara/react-sdk": "3.23.0",
+    "@getpara/react-sdk": "3.24.0",
     "@solana/rpc": "2.3.0",
     "@solana/wallet-adapter-base": "0.9.27",
     "@solana/wallet-adapter-react": "0.15.39",
