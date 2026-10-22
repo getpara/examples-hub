@@ -635,13 +635,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@getpara/core-sdk@npm:3.23.0":
-  version: 3.23.0
-  resolution: "@getpara/core-sdk@npm:3.23.0"
+"@getpara/core-sdk@npm:3.24.0":
+  version: 3.24.0
+  resolution: "@getpara/core-sdk@npm:3.24.0"
   dependencies:
     "@celo/utils": "npm:^8.0.2"
-    "@getpara/shared": "npm:^1.37.0"
-    "@getpara/user-management-client": "npm:3.23.0"
+    "@getpara/shared": "npm:^1.38.0"
+    "@getpara/user-management-client": "npm:3.24.0"
     "@noble/curves": "npm:^1.9.7"
     "@noble/hashes": "npm:^1.5.0"
     "@opentelemetry/api": "npm:^1.9.1"
@@ -663,49 +663,49 @@ __metadata:
     node-forge: "npm:^1.4.0"
     uuid: "npm:^11.1.1"
     xstate: "npm:^5.24.0"
-  checksum: 10c0/0da36e7bd63f73f367c1160a42157f259e8aab9602b98ba96932e4667a62359d8caf82aaa73961ee49fe09141a71b4f1fceaef95cbe78150df8e7dcacdfa70be
+  checksum: 10c0/010bb80b562d487e5bdf1b7ef26c82eaa223f57c7709581b0fd53fe05944520e9d17f630d7069c046be0e3de6afb9c8151dcf23ecb03bdd92daeec07ccd46c4f
   languageName: node
   linkType: hard
 
-"@getpara/shared@npm:^1.37.0":
-  version: 1.37.0
-  resolution: "@getpara/shared@npm:1.37.0"
+"@getpara/shared@npm:^1.38.0":
+  version: 1.39.0
+  resolution: "@getpara/shared@npm:1.39.0"
   dependencies:
     zod: "npm:^3.22.4"
-  checksum: 10c0/9bed8eacea7f577a48e8145d7e5063b4d28b444090ceacbc0aab60ef131219a40b76edc5deff00e6e602ef02e515c26f96b6897b0def4572295e07a3bd046553
+  checksum: 10c0/f54dff33e720f7426d73bcfe4f97d056557a4c9a6b40c2117394d8266f3a81aad26f726367833e1f8ef817573b3785be2c15edbb0a4cc9855ff60b1726cf89b5
   languageName: node
   linkType: hard
 
-"@getpara/user-management-client@npm:3.23.0":
-  version: 3.23.0
-  resolution: "@getpara/user-management-client@npm:3.23.0"
+"@getpara/user-management-client@npm:3.24.0":
+  version: 3.24.0
+  resolution: "@getpara/user-management-client@npm:3.24.0"
   dependencies:
-    "@getpara/shared": "npm:^1.37.0"
+    "@getpara/shared": "npm:^1.38.0"
     "@opentelemetry/api": "npm:^1.9.1"
     axios: "npm:^1.8.4"
     axios-retry: "npm:^4.5.0"
     libphonenumber-js: "npm:^1.11.7"
-  checksum: 10c0/8a7a9c6527e6599c819642ff895e0fb6875d129899e7bf6fa0da56c89e495fa01524f90286536bad1dcf0d938172be5bb7542710a86e4ffc7f89f2efd6363e13
+  checksum: 10c0/2bdb1417e74080917916805b0ba9940223947a8f860b8d91e81133006c0edee442401adfb1908113af305f3ccdc246ce45ff5c3c0e59126f593530f18a40b5f6
   languageName: node
   linkType: hard
 
-"@getpara/viem-v2-integration@npm:3.23.0":
-  version: 3.23.0
-  resolution: "@getpara/viem-v2-integration@npm:3.23.0"
+"@getpara/viem-v2-integration@npm:3.24.0":
+  version: 3.24.0
+  resolution: "@getpara/viem-v2-integration@npm:3.24.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.23.0"
+    "@getpara/core-sdk": "npm:3.24.0"
   peerDependencies:
     viem: ^2.10.0
-  checksum: 10c0/5c189389f92bffbb25045a93ca98db8b274de6e942ee632bc147d7a9482c620019d9d64ba716867682da40fbb5d5318f901d7251243652321eba341f3a2bd739
+  checksum: 10c0/ebeb3047a88e9a8e44f6eeb56a696a24c1b9c686313ce03698b751e554831aafd584c6194d8008664d2a2e0b644b70ab4435de1cd9fbb275f52bffad7c9c78f0
   languageName: node
   linkType: hard
 
-"@getpara/web-sdk@npm:3.23.0":
-  version: 3.23.0
-  resolution: "@getpara/web-sdk@npm:3.23.0"
+"@getpara/web-sdk@npm:3.24.0":
+  version: 3.24.0
+  resolution: "@getpara/web-sdk@npm:3.24.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.23.0"
-    "@getpara/user-management-client": "npm:3.23.0"
+    "@getpara/core-sdk": "npm:3.24.0"
+    "@getpara/user-management-client": "npm:3.24.0"
     "@opentelemetry/api": "npm:^1.9.1"
     "@scure/base": "npm:^1.2.6"
     buffer: "npm:6.0.3"
@@ -713,7 +713,7 @@ __metadata:
     node-forge: "npm:^1.4.0"
     ua-parser-js: "npm:^2.0.2"
     uuid: "npm:^11.1.1"
-  checksum: 10c0/3322fe10dc386addfec9266aca2e95a0e692575bb3349986fff549836e2b78a761e820171f64ed8276288f50583c1ce336f4e07ef3f67c1e2a3c6f049fece94d
+  checksum: 10c0/97dc947282615e744a83525b88f3195e4dfe092072dd5dd5f487087400034f2596cec5ab395a13a3fe313475127da8d8917a792a940874bc381875fd01ae5f69
   languageName: node
   linkType: hard
 
@@ -5354,8 +5354,8 @@ __metadata:
   resolution: "with-svelte-vite@workspace:."
   dependencies:
     "@eslint/js": "npm:^9.29.0"
-    "@getpara/viem-v2-integration": "npm:3.23.0"
-    "@getpara/web-sdk": "npm:3.23.0"
+    "@getpara/viem-v2-integration": "npm:3.24.0"
+    "@getpara/web-sdk": "npm:3.24.0"
     "@sveltejs/vite-plugin-svelte": "npm:^5.0.3"
     "@tailwindcss/vite": "npm:4.1.11"
     "@tsconfig/svelte": "npm:^5.0.4"
