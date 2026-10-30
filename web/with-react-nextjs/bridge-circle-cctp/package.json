@@ -13,7 +13,7 @@
   "dependencies": {
     "@circle-fin/adapter-viem-v2": "1.19.0",
     "@circle-fin/bridge-kit": "1.15.2",
-    "@getpara/react-sdk": "3.24.0",
+    "@getpara/react-sdk": "3.25.0",
     "@tanstack/react-query": "5.101.0",
     "next": "16.2.10",
     "react": "19.2.7",
