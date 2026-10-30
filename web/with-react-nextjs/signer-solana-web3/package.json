@@ -11,9 +11,9 @@
     "typecheck": "next typegen && tsc --noEmit"
   },
   "dependencies": {
-    "@getpara/react-sdk-lite": "3.24.0",
-    "@getpara/solana-wallet-connectors": "3.24.0",
-    "@getpara/solana-web3.js-v1-integration": "3.24.0",
+    "@getpara/react-sdk-lite": "3.25.0",
+    "@getpara/solana-wallet-connectors": "3.25.0",
+    "@getpara/solana-web3.js-v1-integration": "3.25.0",
     "@solana-mobile/wallet-adapter-mobile": "2.2.9",
     "@solana/wallet-adapter-base": "0.9.27",
     "@solana/wallet-adapter-react": "0.15.39",
