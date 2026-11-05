@@ -16,7 +16,7 @@ export function DefaultCatchBoundary({ error }: ErrorComponentProps) {
   return (
     <SignInPanel
       title="Something went wrong"
-      description={formatErrorMessage(error.message) ?? "The page failed to load."}
+      description={formatErrorMessage(error instanceof Error ? error.message : null) ?? "The page failed to load."}
       network={SEPOLIA.networkLabel}>
       <Button variant="outline" size="lg" fullWidth onClick={() => router.invalidate()}>
         Try again
