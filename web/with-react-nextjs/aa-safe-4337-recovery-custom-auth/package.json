@@ -11,9 +11,9 @@
     "typecheck": "next typegen && tsc --noEmit"
   },
   "dependencies": {
-    "@getpara/viem-v2-integration": "3.25.0",
-    "@getpara/web-sdk": "3.25.0",
-    "next": "16.2.7",
+    "@getpara/viem-v2-integration": "3.26.0",
+    "@getpara/web-sdk": "3.26.0",
+    "next": "16.4.3",
     "permissionless": "^0.2.12",
     "react": "19.2.7",
     "react-dom": "19.2.7",
@@ -26,7 +26,7 @@
     "@types/react": "19.2.16",
     "@types/react-dom": "19.2.3",
     "eslint": "10.4.1",
-    "postcss": "8.5.15",
+    "postcss": "8.5.32",
     "tailwindcss": "4.3.0",
     "typescript": "6.0.3",
     "typescript-eslint": "8.60.1"
