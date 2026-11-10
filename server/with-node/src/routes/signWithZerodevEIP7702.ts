@@ -1,11 +1,11 @@
 import { Request, Response } from "express";
 import { create7702KernelAccount, create7702KernelAccountClient } from "@zerodev/ecdsa-validator";
-import { createZeroDevPaymasterClient } from "@zerodev/sdk";
+import { createZeroDevPaymasterClient, getUserOperationGasPrice } from "@zerodev/sdk";
 import { getEntryPoint, KERNEL_V3_3 } from "@zerodev/sdk/constants";
 import { Environment } from "@getpara/server-sdk";
 import { createParaViemAccount } from "@getpara/viem-v2-integration";
 import { arbitrumSepolia } from "viem/chains";
-import { createPublicClient, encodeFunctionData, http, parseGwei } from "viem";
+import { createPublicClient, encodeFunctionData, http } from "viem";
 import Example from "../contracts/Example.json" with { type: "json" };
 import { getKeyShareInDB } from "../db/keySharesDB.js";
 import { decrypt } from "../utils/encryption-utils.js";
@@ -82,10 +82,7 @@ export async function zerodevEip7702SignHandler(req: Request, res: Response): Pr
       paymaster: paymasterClient,
       client: publicClient,
       userOperation: {
-        estimateFeesPerGas: async () => ({
-          maxFeePerGas: parseGwei("2"),
-          maxPriorityFeePerGas: parseGwei("0.01"),
-        }),
+        estimateFeesPerGas: ({ bundlerClient }) => getUserOperationGasPrice(bundlerClient),
       },
     });
 
