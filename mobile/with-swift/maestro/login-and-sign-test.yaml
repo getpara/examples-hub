@@ -28,6 +28,22 @@ appId: com.usecapsule.example.swift
     visible: "Send new code"
     timeout: 15000
 
+# The hosted portal's sandbox/beta environment banner sits in normal flow above
+# the step and pushes the OTP boxes down. Dismiss it so the focus tap below
+# lands on the first code box instead of the "Verify Email" title.
+# Scope "Dismiss" to the banner (above the OTP prompt): iOS can expose another
+# "Dismiss" element lower on screen during the sheet transition.
+- runFlow:
+    when:
+      visible:
+        text: "Dismiss"
+        above: "Please enter the code we sent to.*"
+    commands:
+      - tapOn:
+          text: "Dismiss"
+          above: "Please enter the code we sent to.*"
+      - waitForAnimationToEnd
+
 # Tap on OTP input field for keyboard focus
 - tapOn:
     point: "15%,35%"

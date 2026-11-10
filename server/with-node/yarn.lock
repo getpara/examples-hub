@@ -1598,13 +1598,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@getpara/core-sdk@npm:3.26.0":
-  version: 3.26.0
-  resolution: "@getpara/core-sdk@npm:3.26.0"
+"@getpara/core-sdk@npm:3.27.0":
+  version: 3.27.0
+  resolution: "@getpara/core-sdk@npm:3.27.0"
   dependencies:
     "@celo/utils": "npm:^8.0.2"
     "@getpara/shared": "npm:^1.42.0"
-    "@getpara/user-management-client": "npm:3.26.0"
+    "@getpara/user-management-client": "npm:3.27.0"
     "@noble/curves": "npm:^1.9.7"
     "@noble/hashes": "npm:^1.5.0"
     "@opentelemetry/api": "npm:^1.9.1"
@@ -1612,7 +1612,6 @@ __metadata:
     "@opentelemetry/core": "npm:^2.9.0"
     "@opentelemetry/exporter-trace-otlp-http": "npm:^0.220.0"
     "@opentelemetry/instrumentation": "npm:^0.220.0"
-    "@opentelemetry/instrumentation-fetch": "npm:^0.220.0"
     "@opentelemetry/instrumentation-xml-http-request": "npm:^0.220.0"
     "@opentelemetry/otlp-transformer": "npm:^0.220.0"
     "@opentelemetry/resources": "npm:^2.9.0"
@@ -1626,47 +1625,47 @@ __metadata:
     node-forge: "npm:^1.4.0"
     uuid: "npm:^11.1.1"
     xstate: "npm:^5.24.0"
-  checksum: 10c0/11b2a7c14bcb68ef00605ad5ab4d7e3f83383d11d007c2d8d48d17aaff8cc2076c8b988aba669f04db4fea376dde91cce4dfa10675aaffd6108e8832c5a26bad
+  checksum: 10c0/01204a1300f6271146739b8dfff4e3034d85641de23399b547e519fdaa582934a9654d683a590f322413d4aff429fc942d2e0809b9502fe15ad73be929fbb5b1
   languageName: node
   linkType: hard
 
-"@getpara/cosmjs-v0-integration@npm:3.26.0":
-  version: 3.26.0
-  resolution: "@getpara/cosmjs-v0-integration@npm:3.26.0"
+"@getpara/cosmjs-v0-integration@npm:3.27.0":
+  version: 3.27.0
+  resolution: "@getpara/cosmjs-v0-integration@npm:3.27.0"
   dependencies:
     "@cosmjs/amino": "npm:>=0.32.4"
     "@cosmjs/crypto": "npm:>=0.32.4"
     "@cosmjs/proto-signing": "npm:>=0.32.4"
     "@cosmjs/stargate": "npm:>=0.32.4"
-    "@getpara/core-sdk": "npm:3.26.0"
+    "@getpara/core-sdk": "npm:3.27.0"
     cosmjs-types: "npm:>=0.9.0"
-  checksum: 10c0/21ac816b0f37c0e5f715c72b0bb529b205c4e585d0d07f0036ecdf47a6ac5d6a6be6f4c65963044e8351c731af040ad5c16c4454e97d06d12c871b253968c497
+  checksum: 10c0/4c1c5252d0dbca2527898b78f23db211b81d596ce332ccde2d072fa5bd529208c7d272aa03f9b469d38640d2fb416ba045043824a4a40649a94853240c0cf5d5
   languageName: node
   linkType: hard
 
-"@getpara/ethers-v6-integration@npm:3.26.0":
-  version: 3.26.0
-  resolution: "@getpara/ethers-v6-integration@npm:3.26.0"
+"@getpara/ethers-v6-integration@npm:3.27.0":
+  version: 3.27.0
+  resolution: "@getpara/ethers-v6-integration@npm:3.27.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.26.0"
+    "@getpara/core-sdk": "npm:3.27.0"
   peerDependencies:
     ethers: ^6.13.5
-  checksum: 10c0/5fb65ac69e2559c4b809456b96c3f41c1cbc7241ee57d93ea6d5cba2c5c528cf0615fde47c16c0d897f598ed4f20f357b86596e662909644c99a92c9d3b6c65d
+  checksum: 10c0/dede1084165bbd0621d51c3d1260e3dd993fa3398e7fcaacf3084657908aa528a5aa0f9cbca7a6f51ce6ecca66edf4edaa3ea3ff690a3f0392eccfda888847c1
   languageName: node
   linkType: hard
 
-"@getpara/server-sdk@npm:3.26.0":
-  version: 3.26.0
-  resolution: "@getpara/server-sdk@npm:3.26.0"
+"@getpara/server-sdk@npm:3.27.0":
+  version: 3.27.0
+  resolution: "@getpara/server-sdk@npm:3.27.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.26.0"
-    "@getpara/user-management-client": "npm:3.26.0"
-    "@getpara/viem-v2-integration": "npm:3.26.0"
+    "@getpara/core-sdk": "npm:3.27.0"
+    "@getpara/user-management-client": "npm:3.27.0"
+    "@getpara/viem-v2-integration": "npm:3.27.0"
     axios: "npm:^1.8.4"
     uuid: "npm:^11.1.1"
     viem: "npm:^2.39.0"
     ws: "npm:^8.21.0"
-  checksum: 10c0/f2fa0fd731c7b5e2ad9160544070fac34d9dca8dfa9bc637a81edb7ade8265b43a0bce09d8acbd6a9bc9be03371738752595425eb945dc662842ebef36d5fa62
+  checksum: 10c0/d67b03984d3f9f1b6ab818c9be80b1f83be722bf1e42f901dfa11acfb8e30105cc49463b9b17d9c3fde37e721cc4d4ad475f27a848aa76fe057b116547519947
   languageName: node
   linkType: hard
 
@@ -1679,39 +1678,39 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@getpara/solana-web3.js-v1-integration@npm:3.26.0":
-  version: 3.26.0
-  resolution: "@getpara/solana-web3.js-v1-integration@npm:3.26.0"
+"@getpara/solana-web3.js-v1-integration@npm:3.27.0":
+  version: 3.27.0
+  resolution: "@getpara/solana-web3.js-v1-integration@npm:3.27.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.26.0"
+    "@getpara/core-sdk": "npm:3.27.0"
     bs58: "npm:^6.0.0"
   peerDependencies:
     "@solana/web3.js": ^1.98.0
-  checksum: 10c0/ad10f2d289d019be0fba76d5d688330c65eb3d6d795b97a95b703ff220b800f58b60e85006099c8daada0e9dff2f074ab95d505d1f5707a2c47abf1f147da90c
+  checksum: 10c0/015f428c27e98107fb9ca586c15bf5d436741f14aac5fbf4c43a6789fa8fd39778257e734d5854446de651ece6f6969f94ba89111fe84f0138f55ebd254cc31f
   languageName: node
   linkType: hard
 
-"@getpara/user-management-client@npm:3.26.0":
-  version: 3.26.0
-  resolution: "@getpara/user-management-client@npm:3.26.0"
+"@getpara/user-management-client@npm:3.27.0":
+  version: 3.27.0
+  resolution: "@getpara/user-management-client@npm:3.27.0"
   dependencies:
     "@getpara/shared": "npm:^1.42.0"
     "@opentelemetry/api": "npm:^1.9.1"
     axios: "npm:^1.8.4"
     axios-retry: "npm:^4.5.0"
     libphonenumber-js: "npm:^1.11.7"
-  checksum: 10c0/58b6a6e44839c3240cf0aaa291f9ea29fb95b59ebce2d19168d79a231625b2228893cbcff0921c76eef7f220a3214c274a4a9414e2f217f5f7b76930560f6a63
+  checksum: 10c0/c28b6f78a6d257ff2942b88fe802b64db9fb286eb827133610e8fe4fefe736859e71a0f3ceba87dec24d31095cd06465a38fb11f49350b24f54dce180f652693
   languageName: node
   linkType: hard
 
-"@getpara/viem-v2-integration@npm:3.26.0":
-  version: 3.26.0
-  resolution: "@getpara/viem-v2-integration@npm:3.26.0"
+"@getpara/viem-v2-integration@npm:3.27.0":
+  version: 3.27.0
+  resolution: "@getpara/viem-v2-integration@npm:3.27.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.26.0"
+    "@getpara/core-sdk": "npm:3.27.0"
   peerDependencies:
     viem: ^2.10.0
-  checksum: 10c0/72ad401d508cc42cbc111a2285bc1c55ace5b0e9c1663761172c9aaa827f7e3bcb18bdcb673bb3aba2e17dc32c56252350586a71841839a49243d0b6bc6211ef
+  checksum: 10c0/2552933ce2d0ec6d6e8444065d259a0da2f98159f5998be81913d107eb3ed5f87d89d50e2a1ebee6cc76195d3996039484b72d6e9cc4007861c5e3d1f167afe7
   languageName: node
   linkType: hard
 
@@ -2317,20 +2316,6 @@ __metadata:
   peerDependencies:
     "@opentelemetry/api": ^1.3.0
   checksum: 10c0/fc9622a76db9322dbae0090d957ae884630c4d91847912ea269f8ba112d186fdca3a875a359715d2b0354fb0910f0fccb1f389d336c6b739dd174159580a4597
-  languageName: node
-  linkType: hard
-
-"@opentelemetry/instrumentation-fetch@npm:^0.220.0":
-  version: 0.220.0
-  resolution: "@opentelemetry/instrumentation-fetch@npm:0.220.0"
-  dependencies:
-    "@opentelemetry/core": "npm:2.9.0"
-    "@opentelemetry/instrumentation": "npm:0.220.0"
-    "@opentelemetry/sdk-trace-web": "npm:2.9.0"
-    "@opentelemetry/semantic-conventions": "npm:^1.29.0"
-  peerDependencies:
-    "@opentelemetry/api": ^1.3.0
-  checksum: 10c0/2232f45b9294c690cbbd46537d187435707636b6260841b56cd8d1d466d9bc219485360fa0be68a7a84860ef1b7ae3a19fcd2cf6ffef2d27c73f967ba13df29c
   languageName: node
   linkType: hard
 
@@ -9190,12 +9175,12 @@ __metadata:
     "@account-kit/smart-contracts": "npm:4.81.3"
     "@cosmjs/stargate": "npm:0.34.0"
     "@eslint/js": "npm:^9.29.0"
-    "@getpara/core-sdk": "npm:3.26.0"
-    "@getpara/cosmjs-v0-integration": "npm:3.26.0"
-    "@getpara/ethers-v6-integration": "npm:3.26.0"
-    "@getpara/server-sdk": "npm:3.26.0"
-    "@getpara/solana-web3.js-v1-integration": "npm:3.26.0"
-    "@getpara/viem-v2-integration": "npm:3.26.0"
+    "@getpara/core-sdk": "npm:3.27.0"
+    "@getpara/cosmjs-v0-integration": "npm:3.27.0"
+    "@getpara/ethers-v6-integration": "npm:3.27.0"
+    "@getpara/server-sdk": "npm:3.27.0"
+    "@getpara/solana-web3.js-v1-integration": "npm:3.27.0"
+    "@getpara/viem-v2-integration": "npm:3.27.0"
     "@solana/web3.js": "npm:1.98.2"
     "@types/crypto-js": "npm:^4.2.2"
     "@types/express": "npm:^4.17.17"

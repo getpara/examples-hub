@@ -5,7 +5,7 @@ import { getEntryPoint, KERNEL_V3_1 } from "@zerodev/sdk/constants";
 import { Environment } from "@getpara/server-sdk";
 import { createParaViemAccount, createParaViemClient } from "@getpara/viem-v2-integration";
 import { arbitrumSepolia } from "viem/chains";
-import { createPublicClient, encodeFunctionData, http, parseGwei } from "viem";
+import { createPublicClient, encodeFunctionData, http } from "viem";
 import Example from "../contracts/Example.json" with { type: "json" };
 import { getKeyShareInDB } from "../db/keySharesDB.js";
 import { decrypt } from "../utils/encryption-utils.js";
@@ -93,12 +93,6 @@ export async function zerodevPregenSignHandler(req: Request, res: Response): Pro
       bundlerTransport: http(ZERODEV_BUNDLER_RPC),
       paymaster: {
         getPaymasterData: (userOperation) => zerodevPaymaster.sponsorUserOperation({ userOperation }),
-      },
-      userOperation: {
-        estimateFeesPerGas: async () => ({
-          maxFeePerGas: parseGwei("2"),
-          maxPriorityFeePerGas: parseGwei("0.01"),
-        }),
       },
     });
 

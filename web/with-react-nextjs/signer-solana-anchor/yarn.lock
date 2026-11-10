@@ -548,13 +548,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@getpara/core-sdk@npm:3.26.0":
-  version: 3.26.0
-  resolution: "@getpara/core-sdk@npm:3.26.0"
+"@getpara/core-sdk@npm:3.27.0":
+  version: 3.27.0
+  resolution: "@getpara/core-sdk@npm:3.27.0"
   dependencies:
     "@celo/utils": "npm:^8.0.2"
     "@getpara/shared": "npm:^1.42.0"
-    "@getpara/user-management-client": "npm:3.26.0"
+    "@getpara/user-management-client": "npm:3.27.0"
     "@noble/curves": "npm:^1.9.7"
     "@noble/hashes": "npm:^1.5.0"
     "@opentelemetry/api": "npm:^1.9.1"
@@ -562,7 +562,6 @@ __metadata:
     "@opentelemetry/core": "npm:^2.9.0"
     "@opentelemetry/exporter-trace-otlp-http": "npm:^0.220.0"
     "@opentelemetry/instrumentation": "npm:^0.220.0"
-    "@opentelemetry/instrumentation-fetch": "npm:^0.220.0"
     "@opentelemetry/instrumentation-xml-http-request": "npm:^0.220.0"
     "@opentelemetry/otlp-transformer": "npm:^0.220.0"
     "@opentelemetry/resources": "npm:^2.9.0"
@@ -576,26 +575,26 @@ __metadata:
     node-forge: "npm:^1.4.0"
     uuid: "npm:^11.1.1"
     xstate: "npm:^5.24.0"
-  checksum: 10c0/11b2a7c14bcb68ef00605ad5ab4d7e3f83383d11d007c2d8d48d17aaff8cc2076c8b988aba669f04db4fea376dde91cce4dfa10675aaffd6108e8832c5a26bad
+  checksum: 10c0/01204a1300f6271146739b8dfff4e3034d85641de23399b547e519fdaa582934a9654d683a590f322413d4aff429fc942d2e0809b9502fe15ad73be929fbb5b1
   languageName: node
   linkType: hard
 
-"@getpara/react-common@npm:3.26.0":
-  version: 3.26.0
-  resolution: "@getpara/react-common@npm:3.26.0"
+"@getpara/react-common@npm:3.27.0":
+  version: 3.27.0
+  resolution: "@getpara/react-common@npm:3.27.0"
   dependencies:
-    "@getpara/user-management-client": "npm:3.26.0"
-    "@getpara/web-sdk": "npm:3.26.0"
+    "@getpara/user-management-client": "npm:3.27.0"
+    "@getpara/web-sdk": "npm:3.27.0"
   peerDependencies:
     react: ">=18"
     react-dom: ">=18"
-  checksum: 10c0/f64abc856fee1c26fad76f0e81ad72b6c9bff9945e9706f02721f175016c3a879b1ed4328949b6b969d11ac0a45bce8961639463e9e50e813ed5f60ff82f5e86
+  checksum: 10c0/afc6a45aacab924f0f596616d7e6f82d6cfeb431e8f61b2ca26cdb6a2e421a5612f7396d01785fbe8db872683a7038f3bdd3c221a866d71a399114da46a33fc1
   languageName: node
   linkType: hard
 
-"@getpara/react-component-library@npm:3.26.0":
-  version: 3.26.0
-  resolution: "@getpara/react-component-library@npm:3.26.0"
+"@getpara/react-component-library@npm:3.27.0":
+  version: 3.27.0
+  resolution: "@getpara/react-component-library@npm:3.27.0"
   dependencies:
     "@radix-ui/react-avatar": "npm:^1.1.2"
     "@radix-ui/react-checkbox": "npm:^1.3.3"
@@ -633,15 +632,15 @@ __metadata:
   peerDependencies:
     react: ">=18"
     react-dom: ">=18"
-  checksum: 10c0/db4466db257b17f6aa8988507b71ebdfa0732e33c011ae3c2f6445eb00c44e25c9fb0755b89c461a8d3b93064b60426dd1e54d7100e79ebe3c32b886d01d10fd
+  checksum: 10c0/96e270b8016908752b6c557120aaa7a10cf7c5f718fe6e1cc7ea003e2ae071938cbdf933bbcae387b6c48dadc54b6d052f868d888d30dbaba050859565faa0b2
   languageName: node
   linkType: hard
 
-"@getpara/react-core@npm:3.26.0":
-  version: 3.26.0
-  resolution: "@getpara/react-core@npm:3.26.0"
+"@getpara/react-core@npm:3.27.0":
+  version: 3.27.0
+  resolution: "@getpara/react-core@npm:3.27.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.26.0"
+    "@getpara/core-sdk": "npm:3.27.0"
     zustand: "npm:^5.0.0"
   peerDependencies:
     "@cosmjs/amino": ">=0.32.4"
@@ -713,21 +712,21 @@ __metadata:
       optional: true
     viem:
       optional: true
-  checksum: 10c0/f0427f4f856d5ea56aa8cb09baafb9b621a77e926184dd28685bc10c048cd7140d8b79022d28c74979dc702783027f0bc67b694863d251d19ab1da829e982b25
+  checksum: 10c0/b7c6127312d6d8967398889261468cbd16ca382085d04c430ec2addae6df72b6042113116663fa2d3d7f3f4bbd223b24a42e38d0d1203771e411949c6e23ea32
   languageName: node
   linkType: hard
 
-"@getpara/react-sdk-lite@npm:3.26.0":
-  version: 3.26.0
-  resolution: "@getpara/react-sdk-lite@npm:3.26.0"
+"@getpara/react-sdk-lite@npm:3.27.0":
+  version: 3.27.0
+  resolution: "@getpara/react-sdk-lite@npm:3.27.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.26.0"
-    "@getpara/react-common": "npm:3.26.0"
-    "@getpara/react-component-library": "npm:3.26.0"
-    "@getpara/react-core": "npm:3.26.0"
+    "@getpara/core-sdk": "npm:3.27.0"
+    "@getpara/react-common": "npm:3.27.0"
+    "@getpara/react-component-library": "npm:3.27.0"
+    "@getpara/react-core": "npm:3.27.0"
     "@getpara/shared": "npm:^1.42.0"
-    "@getpara/user-management-client": "npm:3.26.0"
-    "@getpara/web-sdk": "npm:3.26.0"
+    "@getpara/user-management-client": "npm:3.27.0"
+    "@getpara/web-sdk": "npm:3.27.0"
     "@opentelemetry/api": "npm:^1.9.1"
     date-fns: "npm:^3.6.0"
     detect-browser: "npm:^5.3.0"
@@ -811,7 +810,7 @@ __metadata:
       optional: true
   bin:
     setup-para: dist/cli/cli.mjs
-  checksum: 10c0/c05b8ec0facc35f24a7e7f1a15fd32c2c7662fb11bc0a9c3f88519ade0bf016364834181cc08cac12d4b210e1ccdecd99446b715c696e7db65f7cfa8c32c3d84
+  checksum: 10c0/89695b5704c38510143e0fca6babad1de09e53d6d8354d0dc0d27d4a812bac6bae22e6702bddb67b12f62e85208eed268d8d703c01209b25e496791e0c630452
   languageName: node
   linkType: hard
 
@@ -824,12 +823,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@getpara/solana-wallet-connectors@npm:3.26.0":
-  version: 3.26.0
-  resolution: "@getpara/solana-wallet-connectors@npm:3.26.0"
+"@getpara/solana-wallet-connectors@npm:3.27.0":
+  version: 3.27.0
+  resolution: "@getpara/solana-wallet-connectors@npm:3.27.0"
   dependencies:
-    "@getpara/react-common": "npm:3.26.0"
-    "@getpara/web-sdk": "npm:3.26.0"
+    "@getpara/react-common": "npm:3.27.0"
+    "@getpara/web-sdk": "npm:3.27.0"
     "@solana/signers": "npm:^2.2.1"
     bs58: "npm:^6.0.0"
   peerDependencies:
@@ -844,41 +843,41 @@ __metadata:
   peerDependenciesMeta:
     "@farcaster/mini-app-solana":
       optional: true
-  checksum: 10c0/3d7b8f77c06ed07035542cd1618dae81053156d3486f9da28257786baf689bb2738ef376f5a59d8526025ddfe4bba2f18f78526c67ee87604274f3e55c949796
+  checksum: 10c0/7a05f9b84c005bb6634f5c1a4a20fe067accf725421513373abe06e34843de94f8ffd883bbe243406d9ce0b712c7377cb7eeb99f43a0c29c49c40d838195b5d9
   languageName: node
   linkType: hard
 
-"@getpara/solana-web3.js-v1-integration@npm:3.26.0":
-  version: 3.26.0
-  resolution: "@getpara/solana-web3.js-v1-integration@npm:3.26.0"
+"@getpara/solana-web3.js-v1-integration@npm:3.27.0":
+  version: 3.27.0
+  resolution: "@getpara/solana-web3.js-v1-integration@npm:3.27.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.26.0"
+    "@getpara/core-sdk": "npm:3.27.0"
     bs58: "npm:^6.0.0"
   peerDependencies:
     "@solana/web3.js": ^1.98.0
-  checksum: 10c0/ad10f2d289d019be0fba76d5d688330c65eb3d6d795b97a95b703ff220b800f58b60e85006099c8daada0e9dff2f074ab95d505d1f5707a2c47abf1f147da90c
+  checksum: 10c0/015f428c27e98107fb9ca586c15bf5d436741f14aac5fbf4c43a6789fa8fd39778257e734d5854446de651ece6f6969f94ba89111fe84f0138f55ebd254cc31f
   languageName: node
   linkType: hard
 
-"@getpara/user-management-client@npm:3.26.0":
-  version: 3.26.0
-  resolution: "@getpara/user-management-client@npm:3.26.0"
+"@getpara/user-management-client@npm:3.27.0":
+  version: 3.27.0
+  resolution: "@getpara/user-management-client@npm:3.27.0"
   dependencies:
     "@getpara/shared": "npm:^1.42.0"
     "@opentelemetry/api": "npm:^1.9.1"
     axios: "npm:^1.8.4"
     axios-retry: "npm:^4.5.0"
     libphonenumber-js: "npm:^1.11.7"
-  checksum: 10c0/58b6a6e44839c3240cf0aaa291f9ea29fb95b59ebce2d19168d79a231625b2228893cbcff0921c76eef7f220a3214c274a4a9414e2f217f5f7b76930560f6a63
+  checksum: 10c0/c28b6f78a6d257ff2942b88fe802b64db9fb286eb827133610e8fe4fefe736859e71a0f3ceba87dec24d31095cd06465a38fb11f49350b24f54dce180f652693
   languageName: node
   linkType: hard
 
-"@getpara/web-sdk@npm:3.26.0":
-  version: 3.26.0
-  resolution: "@getpara/web-sdk@npm:3.26.0"
+"@getpara/web-sdk@npm:3.27.0":
+  version: 3.27.0
+  resolution: "@getpara/web-sdk@npm:3.27.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.26.0"
-    "@getpara/user-management-client": "npm:3.26.0"
+    "@getpara/core-sdk": "npm:3.27.0"
+    "@getpara/user-management-client": "npm:3.27.0"
     "@opentelemetry/api": "npm:^1.9.1"
     "@scure/base": "npm:^1.2.6"
     buffer: "npm:6.0.3"
@@ -886,7 +885,7 @@ __metadata:
     node-forge: "npm:^1.4.0"
     ua-parser-js: "npm:^2.0.2"
     uuid: "npm:^11.1.1"
-  checksum: 10c0/8b5b3e4ea7cb94bbac6ec0618ee46cd9c8db6e2f7bc9bf42e9e1163222d14ff1ed93dfe4ead568b240a724c8f363c5657e5970e53cbcf3810920aa00945cd987
+  checksum: 10c0/c08fd6bf732776495c3fdcfcef46777fbdcafa27726b2d67a4d2866fc6f6a16f1c2c30d47dd3aab36a437680b99ed7cb5ae667c744c45f422633f3beab1e3d81
   languageName: node
   linkType: hard
 
@@ -1565,20 +1564,6 @@ __metadata:
   peerDependencies:
     "@opentelemetry/api": ^1.3.0
   checksum: 10c0/fc9622a76db9322dbae0090d957ae884630c4d91847912ea269f8ba112d186fdca3a875a359715d2b0354fb0910f0fccb1f389d336c6b739dd174159580a4597
-  languageName: node
-  linkType: hard
-
-"@opentelemetry/instrumentation-fetch@npm:^0.220.0":
-  version: 0.220.0
-  resolution: "@opentelemetry/instrumentation-fetch@npm:0.220.0"
-  dependencies:
-    "@opentelemetry/core": "npm:2.9.0"
-    "@opentelemetry/instrumentation": "npm:0.220.0"
-    "@opentelemetry/sdk-trace-web": "npm:2.9.0"
-    "@opentelemetry/semantic-conventions": "npm:^1.29.0"
-  peerDependencies:
-    "@opentelemetry/api": ^1.3.0
-  checksum: 10c0/2232f45b9294c690cbbd46537d187435707636b6260841b56cd8d1d466d9bc219485360fa0be68a7a84860ef1b7ae3a19fcd2cf6ffef2d27c73f967ba13df29c
   languageName: node
   linkType: hard
 
@@ -8919,9 +8904,9 @@ __metadata:
   dependencies:
     "@coral-xyz/anchor": "npm:0.32.1"
     "@eslint/js": "npm:10.0.1"
-    "@getpara/react-sdk-lite": "npm:3.26.0"
-    "@getpara/solana-wallet-connectors": "npm:3.26.0"
-    "@getpara/solana-web3.js-v1-integration": "npm:3.26.0"
+    "@getpara/react-sdk-lite": "npm:3.27.0"
+    "@getpara/solana-wallet-connectors": "npm:3.27.0"
+    "@getpara/solana-web3.js-v1-integration": "npm:3.27.0"
     "@solana-mobile/wallet-adapter-mobile": "npm:2.2.9"
     "@solana/spl-token": "npm:0.4.14"
     "@solana/wallet-adapter-base": "npm:0.9.27"
