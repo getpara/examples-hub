@@ -440,13 +440,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@getpara/core-sdk@npm:3.27.0":
-  version: 3.27.0
-  resolution: "@getpara/core-sdk@npm:3.27.0"
+"@getpara/core-sdk@npm:3.28.0":
+  version: 3.28.0
+  resolution: "@getpara/core-sdk@npm:3.28.0"
   dependencies:
     "@celo/utils": "npm:^8.0.2"
     "@getpara/shared": "npm:^1.42.0"
-    "@getpara/user-management-client": "npm:3.27.0"
+    "@getpara/user-management-client": "npm:3.28.0"
     "@noble/curves": "npm:^1.9.7"
     "@noble/hashes": "npm:^1.5.0"
     "@opentelemetry/api": "npm:^1.9.1"
@@ -467,7 +467,7 @@ __metadata:
     node-forge: "npm:^1.4.0"
     uuid: "npm:^11.1.1"
     xstate: "npm:^5.24.0"
-  checksum: 10c0/01204a1300f6271146739b8dfff4e3034d85641de23399b547e519fdaa582934a9654d683a590f322413d4aff429fc942d2e0809b9502fe15ad73be929fbb5b1
+  checksum: 10c0/63c7ebadf084db053d4973b1468ed01f17914ebced0f8314e715e96f98b2a793b05ab2c19affd9ddbe2ab5794e8439089a649338f56df24e85113e7d410f48c1
   languageName: node
   linkType: hard
 
@@ -480,36 +480,36 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@getpara/user-management-client@npm:3.27.0":
-  version: 3.27.0
-  resolution: "@getpara/user-management-client@npm:3.27.0"
+"@getpara/user-management-client@npm:3.28.0":
+  version: 3.28.0
+  resolution: "@getpara/user-management-client@npm:3.28.0"
   dependencies:
     "@getpara/shared": "npm:^1.42.0"
     "@opentelemetry/api": "npm:^1.9.1"
     axios: "npm:^1.8.4"
     axios-retry: "npm:^4.5.0"
     libphonenumber-js: "npm:^1.11.7"
-  checksum: 10c0/c28b6f78a6d257ff2942b88fe802b64db9fb286eb827133610e8fe4fefe736859e71a0f3ceba87dec24d31095cd06465a38fb11f49350b24f54dce180f652693
+  checksum: 10c0/7f9eb7b2c11025bc8eac380d2705d784931cd8038e955ce851b498dc26766fc4e9d988b2b027c78fe2501d8347d4d4d3080907c8d67993604ffb979328fe0f0f
   languageName: node
   linkType: hard
 
-"@getpara/viem-v2-integration@npm:3.27.0":
-  version: 3.27.0
-  resolution: "@getpara/viem-v2-integration@npm:3.27.0"
+"@getpara/viem-v2-integration@npm:3.28.0":
+  version: 3.28.0
+  resolution: "@getpara/viem-v2-integration@npm:3.28.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.27.0"
+    "@getpara/core-sdk": "npm:3.28.0"
   peerDependencies:
     viem: ^2.10.0
-  checksum: 10c0/2552933ce2d0ec6d6e8444065d259a0da2f98159f5998be81913d107eb3ed5f87d89d50e2a1ebee6cc76195d3996039484b72d6e9cc4007861c5e3d1f167afe7
+  checksum: 10c0/9b70e4cb8bea863c6b988ebf6dd947cedc9b58ed33b63e71ee542431a2a47c0391a867f610b0cabd32ee952ed3e7289b0671436b991b1e5fdbd46da84d8c79c6
   languageName: node
   linkType: hard
 
-"@getpara/web-sdk@npm:3.27.0":
-  version: 3.27.0
-  resolution: "@getpara/web-sdk@npm:3.27.0"
+"@getpara/web-sdk@npm:3.28.0":
+  version: 3.28.0
+  resolution: "@getpara/web-sdk@npm:3.28.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.27.0"
-    "@getpara/user-management-client": "npm:3.27.0"
+    "@getpara/core-sdk": "npm:3.28.0"
+    "@getpara/user-management-client": "npm:3.28.0"
     "@opentelemetry/api": "npm:^1.9.1"
     "@scure/base": "npm:^1.2.6"
     buffer: "npm:6.0.3"
@@ -517,7 +517,7 @@ __metadata:
     node-forge: "npm:^1.4.0"
     ua-parser-js: "npm:^2.0.2"
     uuid: "npm:^11.1.1"
-  checksum: 10c0/c08fd6bf732776495c3fdcfcef46777fbdcafa27726b2d67a4d2866fc6f6a16f1c2c30d47dd3aab36a437680b99ed7cb5ae667c744c45f422633f3beab1e3d81
+  checksum: 10c0/3111c85ba73af1f14fde99cf4c8ed83c8ed04106c59ef641361fc945a90df6016ccc23c628f9eee129a8fa0c8a0482ff4784813df9704b589016e2013c944825
   languageName: node
   linkType: hard
 
@@ -1709,8 +1709,8 @@ __metadata:
   resolution: "aa-safe-4337-recovery-custom-auth@workspace:."
   dependencies:
     "@eslint/js": "npm:10.0.1"
-    "@getpara/viem-v2-integration": "npm:3.27.0"
-    "@getpara/web-sdk": "npm:3.27.0"
+    "@getpara/viem-v2-integration": "npm:3.28.0"
+    "@getpara/web-sdk": "npm:3.28.0"
     "@tailwindcss/postcss": "npm:4.3.0"
     "@types/node": "npm:25.9.1"
     "@types/react": "npm:19.2.16"
