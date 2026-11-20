@@ -89,13 +89,13 @@ appId: com.usecapsule.example.flutter
     visible: "Send new code"
     timeout: 30000
 
-# The hosted portal's sandbox/beta environment banner sits in normal flow above
-# the step and pushes the OTP boxes down. Dismiss it so the focus tap below
-# lands on the first code box instead of the "Verify Email" title.
-# Scope "Dismiss" to the banner (above the OTP prompt): iOS can expose another
-# "Dismiss" element lower on screen during the sheet transition.
+# Android only: dismiss the env banner. Later fixed-point taps in the Custom
+# Tab (e.g. the 50%,52% consent Approve) assume the banner is gone. iOS skips
+# it: there the close icon moves while the autofocused input scrolls into
+# view, and the tap can open Safari's Format Options menu instead (ENG-7833).
 - runFlow:
     when:
+      platform: Android
       visible:
         text: "Dismiss"
         above: "Please enter the code we sent to.*"
@@ -105,9 +105,12 @@ appId: com.usecapsule.example.flutter
           above: "Please enter the code we sent to.*"
       - waitForAnimationToEnd
 
-# Tap on OTP input field for keyboard focus
+# Focus the code input by its position in the step, not a fixed screen point,
+# so it lands whether or not the banner is still above it (ENG-7833).
+- waitForAnimationToEnd
 - tapOn:
-    point: "15%,35%"
+    below: "Please enter the code we sent to.*"
+    above: "Send new code"
 - waitForAnimationToEnd
 
 # Enter OTP digits (test emails accept any 6-digit code)

@@ -3,14 +3,14 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useState, useCallback, useEffect } from 'react';
-import type { Hex } from 'viem';
+import { isAddress } from 'viem';
 
 import { Button } from '@/components/ui';
 import { useViemClient } from '@/hooks/useViemClient';
 
 export default function SendScreen() {
   const router = useRouter();
-  const { isReady, getBalance, sendTransaction, isLoading, error } = useViemClient();
+  const { isReady, chain, getBalance, sendTransaction, isLoading } = useViemClient();
 
   const [balance, setBalance] = useState<string | null>(null);
   const [recipient, setRecipient] = useState('');
@@ -28,8 +28,13 @@ export default function SendScreen() {
   }, [fetchBalance]);
 
   const handleSend = async () => {
-    if (!recipient) {
+    const recipientAddress = recipient.trim();
+    if (!recipientAddress) {
       Alert.alert('Error', 'Please enter a recipient address');
+      return;
+    }
+    if (!isAddress(recipientAddress)) {
+      Alert.alert('Error', 'Please enter a valid recipient address');
       return;
     }
     if (!amount || parseFloat(amount) <= 0) {
@@ -39,21 +44,19 @@ export default function SendScreen() {
 
     Alert.alert(
       'Confirm Transaction',
-      `Send ${amount} ETH to\n${recipient.slice(0, 16)}...?`,
+      `Send ${amount} ETH on ${chain.name} to\n${recipientAddress}?`,
       [
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'Send',
           onPress: async () => {
-            const hash = await sendTransaction(recipient as Hex, amount);
+            const hash = await sendTransaction(recipientAddress, amount);
             if (hash) {
-              Alert.alert(
-                'Success',
-                `Transaction sent!\n\nHash: ${hash.slice(0, 20)}...`,
-                [{ text: 'OK', onPress: () => router.back() }]
-              );
-            } else if (error) {
-              Alert.alert('Error', error);
+              Alert.alert('Success', `Transaction sent!\n\nHash: ${hash.slice(0, 20)}...`, [
+                { text: 'OK', onPress: () => router.back() },
+              ]);
+            } else {
+              Alert.alert('Error', 'Transaction failed. Please try again.');
             }
           },
         },

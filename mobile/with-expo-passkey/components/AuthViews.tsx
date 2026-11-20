@@ -107,44 +107,6 @@ export function IdentifierInput({
   );
 }
 
-export function OtpVerifyView({
-  otpCode,
-  onOtpChange,
-  onVerify,
-  onResend,
-}: {
-  otpCode: string;
-  onOtpChange: (text: string) => void;
-  onVerify: () => void;
-  onResend: () => void;
-}) {
-  return (
-    <View style={styles.form}>
-      <Text style={styles.formLabel}>Enter the verification code</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Verification code"
-        placeholderTextColor="#A8A29E"
-        value={otpCode}
-        onChangeText={onOtpChange}
-        keyboardType="number-pad"
-        autoFocus
-        returnKeyType="done"
-        onSubmitEditing={onVerify}
-      />
-      <Pressable
-        style={({ pressed }) => [styles.primaryButton, pressed && styles.primaryButtonPressed]}
-        onPress={onVerify}
-      >
-        <Text style={styles.primaryButtonText}>Verify</Text>
-      </Pressable>
-      <Pressable onPress={onResend} style={styles.linkButton}>
-        <Text style={styles.linkText}>Resend Code</Text>
-      </Pressable>
-    </View>
-  );
-}
-
 export function LoadingView({ message }: { message: string }) {
   return (
     <View style={styles.centered}>
@@ -172,7 +134,6 @@ export function ErrorView({ message, onRetry }: { message: string; onRetry: () =
 
 const styles = StyleSheet.create({
   form: { gap: 16 },
-  formLabel: { fontSize: 14, color: '#78716C', marginBottom: 4 },
   tabContainer: {
     flexDirection: 'row',
     backgroundColor: '#F5F5F4',
@@ -260,14 +221,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '600',
     color: '#1C1917',
-  },
-  linkButton: {
-    alignItems: 'center',
-    paddingVertical: 8,
-  },
-  linkText: {
-    fontSize: 14,
-    color: '#E8642B',
   },
   centered: {
     alignItems: 'center',

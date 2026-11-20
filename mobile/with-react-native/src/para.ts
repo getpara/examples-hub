@@ -11,6 +11,8 @@ if (!API_KEY) {
 // Initialize Para SDK
 // - Environment.BETA for testing (use Environment.PRODUCTION for live apps)
 // - disableWorkers: true required for React Native compatibility
+// - supportsAuthV2: true opts into the current sign-in flow (see src/signIn.ts)
 export const para = new ParaMobile(Environment.BETA, API_KEY, undefined, {
   disableWorkers: true,
+  supportsAuthV2: true,
 });

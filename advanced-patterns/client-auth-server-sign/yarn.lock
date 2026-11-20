@@ -483,13 +483,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@getpara/core-sdk@npm:3.28.0":
-  version: 3.28.0
-  resolution: "@getpara/core-sdk@npm:3.28.0"
+"@getpara/core-sdk@npm:3.29.0":
+  version: 3.29.0
+  resolution: "@getpara/core-sdk@npm:3.29.0"
   dependencies:
     "@celo/utils": "npm:^8.0.2"
-    "@getpara/shared": "npm:^1.42.0"
-    "@getpara/user-management-client": "npm:3.28.0"
+    "@getpara/shared": "npm:^1.44.0"
+    "@getpara/user-management-client": "npm:3.29.0"
     "@noble/curves": "npm:^1.9.7"
     "@noble/hashes": "npm:^1.5.0"
     "@opentelemetry/api": "npm:^1.9.1"
@@ -510,37 +510,37 @@ __metadata:
     node-forge: "npm:^1.4.0"
     uuid: "npm:^11.1.1"
     xstate: "npm:^5.24.0"
-  checksum: 10c0/63c7ebadf084db053d4973b1468ed01f17914ebced0f8314e715e96f98b2a793b05ab2c19affd9ddbe2ab5794e8439089a649338f56df24e85113e7d410f48c1
+  checksum: 10c0/ffe1070d6a3ce0360606e810705b83ad26c981963b7eeba544791102c33eb4e1518174c629d666cc22d352e8b91221c33211b126e91c71be4b7baf322263489d
   languageName: node
   linkType: hard
 
-"@getpara/ethers-v6-integration@npm:3.28.0":
-  version: 3.28.0
-  resolution: "@getpara/ethers-v6-integration@npm:3.28.0"
+"@getpara/ethers-v6-integration@npm:3.29.0":
+  version: 3.29.0
+  resolution: "@getpara/ethers-v6-integration@npm:3.29.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.28.0"
+    "@getpara/core-sdk": "npm:3.29.0"
   peerDependencies:
     ethers: ^6.13.5
-  checksum: 10c0/112d0ede2dffaa2cb2a59809a4f3ee5088c9ac15f3be4b1fe8844f4cb8ea4595b50f3778093b62276b6138cfcc57cfaf9ee7b02fd3fbf55a383743f0f0e51b32
+  checksum: 10c0/ad34767c4795d5766671c34849762ce35732bfc8b91bc4369f48c842c3822d7d7700251cff580f2f5cfe3a0d6c950bfacf590eaa822b462636b559755d4be53a
   languageName: node
   linkType: hard
 
-"@getpara/react-common@npm:3.28.0":
-  version: 3.28.0
-  resolution: "@getpara/react-common@npm:3.28.0"
+"@getpara/react-common@npm:3.29.0":
+  version: 3.29.0
+  resolution: "@getpara/react-common@npm:3.29.0"
   dependencies:
-    "@getpara/user-management-client": "npm:3.28.0"
-    "@getpara/web-sdk": "npm:3.28.0"
+    "@getpara/user-management-client": "npm:3.29.0"
+    "@getpara/web-sdk": "npm:3.29.0"
   peerDependencies:
     react: ">=18"
     react-dom: ">=18"
-  checksum: 10c0/3040f62d0d69708ea26d9006364e746b5f1ac61ceedc50abed7767d51c753b4e27ea5f1070c9a9365e7723bfaddf6e22cfef7d90f912bf47d2e9530bc7e48766
+  checksum: 10c0/03197cde86388dcd5d0d2278068591896c51cc9c3b06d77595f0a59c9482af83e7d3eb113cbb6a41088ad922b4ea57366e4824a3d264a1e39a1ebe8fd4c9a075
   languageName: node
   linkType: hard
 
-"@getpara/react-component-library@npm:3.28.0":
-  version: 3.28.0
-  resolution: "@getpara/react-component-library@npm:3.28.0"
+"@getpara/react-component-library@npm:3.29.0":
+  version: 3.29.0
+  resolution: "@getpara/react-component-library@npm:3.29.0"
   dependencies:
     "@radix-ui/react-avatar": "npm:^1.1.2"
     "@radix-ui/react-checkbox": "npm:^1.3.3"
@@ -578,15 +578,15 @@ __metadata:
   peerDependencies:
     react: ">=18"
     react-dom: ">=18"
-  checksum: 10c0/1f1d7d5998c342986ef0725c9651d02584384dac9c57d4f91f2723b848a8a18f058835e849d3784953c1138f5279234a6255aece938a6415a39ca40eb365696e
+  checksum: 10c0/277f0c73c41b23d30a98c3a119ee519808b7e7bec20ffe035b27324b1517e2671db35b3d75ea3d50fab9276127e3ef76b794472a1db4fa7a3c64be361b94c79d
   languageName: node
   linkType: hard
 
-"@getpara/react-core@npm:3.28.0":
-  version: 3.28.0
-  resolution: "@getpara/react-core@npm:3.28.0"
+"@getpara/react-core@npm:3.29.0":
+  version: 3.29.0
+  resolution: "@getpara/react-core@npm:3.29.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.28.0"
+    "@getpara/core-sdk": "npm:3.29.0"
     zustand: "npm:^5.0.0"
   peerDependencies:
     "@cosmjs/amino": ">=0.32.4"
@@ -658,21 +658,21 @@ __metadata:
       optional: true
     viem:
       optional: true
-  checksum: 10c0/a2db9c694a8fbb4e42eaaea6700229a7dd1383a3d784013f07da7b44d306385964af1714bec70acff06ad40631e4e6c85951a67d351c1d31752558cbe039316f
+  checksum: 10c0/aace9a86916352fdc5c6ca7ee06b84a628e737f27bb35a4e9d8de6fda6880075e7fa928c107c00c5ae6f8c38902c4352091273bc86c2327154618a9aca5a9b6e
   languageName: node
   linkType: hard
 
-"@getpara/react-sdk-lite@npm:3.28.0":
-  version: 3.28.0
-  resolution: "@getpara/react-sdk-lite@npm:3.28.0"
+"@getpara/react-sdk-lite@npm:3.29.0":
+  version: 3.29.0
+  resolution: "@getpara/react-sdk-lite@npm:3.29.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.28.0"
-    "@getpara/react-common": "npm:3.28.0"
-    "@getpara/react-component-library": "npm:3.28.0"
-    "@getpara/react-core": "npm:3.28.0"
-    "@getpara/shared": "npm:^1.42.0"
-    "@getpara/user-management-client": "npm:3.28.0"
-    "@getpara/web-sdk": "npm:3.28.0"
+    "@getpara/core-sdk": "npm:3.29.0"
+    "@getpara/react-common": "npm:3.29.0"
+    "@getpara/react-component-library": "npm:3.29.0"
+    "@getpara/react-core": "npm:3.29.0"
+    "@getpara/shared": "npm:^1.44.0"
+    "@getpara/user-management-client": "npm:3.29.0"
+    "@getpara/web-sdk": "npm:3.29.0"
     "@opentelemetry/api": "npm:^1.9.1"
     date-fns: "npm:^3.6.0"
     detect-browser: "npm:^5.3.0"
@@ -703,6 +703,7 @@ __metadata:
     "@getpara/stellar-sdk-v14-integration": ">=2"
     "@getpara/sui-sdk-integration": ">=2"
     "@getpara/viem-v2-integration": ">=2.18.0"
+    "@sumsub/websdk": ">=2.9.1"
     "@tanstack/react-query": ">=5.0.0"
     ethers: ^6.0.0
     react: ">=18"
@@ -748,6 +749,8 @@ __metadata:
       optional: true
     "@getpara/viem-v2-integration":
       optional: true
+    "@sumsub/websdk":
+      optional: true
     ethers:
       optional: true
     react-plaid-link:
@@ -756,64 +759,64 @@ __metadata:
       optional: true
   bin:
     setup-para: dist/cli/cli.mjs
-  checksum: 10c0/f7cbf1cfd1daf2b5ea96f700b17bd5846f6233baed8f1c84df7d2c7a57e53c55020a0bc42b92dc4c9148a22cd33b4e636b60f0b03869c49716c2fe0f70456fea
+  checksum: 10c0/17214e4c31a3b50d90fcbb1a91e832f889679c9347007628b5670bcd30b8149a1d4e86e2c0790e3c2ab2e5d95472f8fd53fdd2c92de98133be437418dcc640b8
   languageName: node
   linkType: hard
 
-"@getpara/server-sdk@npm:3.28.0":
-  version: 3.28.0
-  resolution: "@getpara/server-sdk@npm:3.28.0"
+"@getpara/server-sdk@npm:3.29.0":
+  version: 3.29.0
+  resolution: "@getpara/server-sdk@npm:3.29.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.28.0"
-    "@getpara/user-management-client": "npm:3.28.0"
-    "@getpara/viem-v2-integration": "npm:3.28.0"
+    "@getpara/core-sdk": "npm:3.29.0"
+    "@getpara/user-management-client": "npm:3.29.0"
+    "@getpara/viem-v2-integration": "npm:3.29.0"
     axios: "npm:^1.8.4"
     uuid: "npm:^11.1.1"
     viem: "npm:^2.39.0"
     ws: "npm:^8.21.0"
-  checksum: 10c0/78687b2487c24786fa2f7b6bbbfb74dd0318178e86ebbfadccb01b5d04161160cfe0a3f30714d045437110d8aa80512923e6a01da571a244da4d96a5488f3db7
+  checksum: 10c0/fcac1d43813c67a61786e1ddb552f27359754608188fa7ceeb8151eb563422faedf7d80bf910f54ae196cc7aaa74a5e76a85d9a32517fc0753a315cca933aa3c
   languageName: node
   linkType: hard
 
-"@getpara/shared@npm:^1.42.0":
-  version: 1.42.0
-  resolution: "@getpara/shared@npm:1.42.0"
+"@getpara/shared@npm:^1.44.0":
+  version: 1.44.0
+  resolution: "@getpara/shared@npm:1.44.0"
   dependencies:
     zod: "npm:^4.6.7"
-  checksum: 10c0/782f375e13ab3b69e896b5be77b2880fb5770a5d1f0b1bfae8e320608640af1294c2d183f7d5921cb7accd40c08fcdb68e8b374f70f2e0edbe518fb6119f938f
+  checksum: 10c0/14b23837e3d6ccf6f057f9c0749af9df608d1bca2b90922ae1423e2eb52a540a6d040d0158d79627b571597afbfffcc4ec3a2214025e64d0246d0ee192e7c33a
   languageName: node
   linkType: hard
 
-"@getpara/user-management-client@npm:3.28.0":
-  version: 3.28.0
-  resolution: "@getpara/user-management-client@npm:3.28.0"
+"@getpara/user-management-client@npm:3.29.0":
+  version: 3.29.0
+  resolution: "@getpara/user-management-client@npm:3.29.0"
   dependencies:
-    "@getpara/shared": "npm:^1.42.0"
+    "@getpara/shared": "npm:^1.44.0"
     "@opentelemetry/api": "npm:^1.9.1"
     axios: "npm:^1.8.4"
     axios-retry: "npm:^4.5.0"
     libphonenumber-js: "npm:^1.11.7"
-  checksum: 10c0/7f9eb7b2c11025bc8eac380d2705d784931cd8038e955ce851b498dc26766fc4e9d988b2b027c78fe2501d8347d4d4d3080907c8d67993604ffb979328fe0f0f
+  checksum: 10c0/fe24bbeee9d89f814c9a6a48768cde923c8aa1cc74c57e145f7eb3a0bbc14a819a2a6ac81d2591878df1ac4ff32af3b550847f213ecc3f9c0fff6545b4fb8c6e
   languageName: node
   linkType: hard
 
-"@getpara/viem-v2-integration@npm:3.28.0":
-  version: 3.28.0
-  resolution: "@getpara/viem-v2-integration@npm:3.28.0"
+"@getpara/viem-v2-integration@npm:3.29.0":
+  version: 3.29.0
+  resolution: "@getpara/viem-v2-integration@npm:3.29.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.28.0"
+    "@getpara/core-sdk": "npm:3.29.0"
   peerDependencies:
     viem: ^2.10.0
-  checksum: 10c0/9b70e4cb8bea863c6b988ebf6dd947cedc9b58ed33b63e71ee542431a2a47c0391a867f610b0cabd32ee952ed3e7289b0671436b991b1e5fdbd46da84d8c79c6
+  checksum: 10c0/09dbd3e7ad1fd6392f85010363fe59fdc9e65bad0cdc7eeee39397bc72ff1935da2a3b81965acbd6306f809367b1df94e3bd1ad2001c12a9e0d47fa5da4b6c51
   languageName: node
   linkType: hard
 
-"@getpara/web-sdk@npm:3.28.0":
-  version: 3.28.0
-  resolution: "@getpara/web-sdk@npm:3.28.0"
+"@getpara/web-sdk@npm:3.29.0":
+  version: 3.29.0
+  resolution: "@getpara/web-sdk@npm:3.29.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.28.0"
-    "@getpara/user-management-client": "npm:3.28.0"
+    "@getpara/core-sdk": "npm:3.29.0"
+    "@getpara/user-management-client": "npm:3.29.0"
     "@opentelemetry/api": "npm:^1.9.1"
     "@scure/base": "npm:^1.2.6"
     buffer: "npm:6.0.3"
@@ -821,7 +824,7 @@ __metadata:
     node-forge: "npm:^1.4.0"
     ua-parser-js: "npm:^2.0.2"
     uuid: "npm:^11.1.1"
-  checksum: 10c0/3111c85ba73af1f14fde99cf4c8ed83c8ed04106c59ef641361fc945a90df6016ccc23c628f9eee129a8fa0c8a0482ff4784813df9704b589016e2013c944825
+  checksum: 10c0/0a090dd185a90a809d423631a06aaf3e194a0b19c642ba00f5b226efeccf1199fd247fc16b9802922fac35cbe09f3ed08f5644286d08b6c824ae4a7d28672ab0
   languageName: node
   linkType: hard
 
@@ -3394,9 +3397,9 @@ __metadata:
   resolution: "client-auth-server-sign@workspace:."
   dependencies:
     "@eslint/js": "npm:10.0.1"
-    "@getpara/ethers-v6-integration": "npm:3.28.0"
-    "@getpara/react-sdk-lite": "npm:3.28.0"
-    "@getpara/server-sdk": "npm:3.28.0"
+    "@getpara/ethers-v6-integration": "npm:3.29.0"
+    "@getpara/react-sdk-lite": "npm:3.29.0"
+    "@getpara/server-sdk": "npm:3.29.0"
     "@tailwindcss/postcss": "npm:4.3.0"
     "@tanstack/react-query": "npm:5.101.0"
     "@types/node": "npm:25.9.1"

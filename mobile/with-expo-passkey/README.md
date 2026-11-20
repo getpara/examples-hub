@@ -41,7 +41,7 @@ This links your app to Para's relying party domain for WebAuthn credential creat
 
 ### Authentication
 
-The hooks handle signup/login detection, session polling, and wallet creation:
+The client opts into the current sign-in flow with `supportsAuthV2: true` (`lib/para.ts`). The hooks handle signup/login detection, session polling, and wallet creation:
 
 ```tsx
 const { authenticateWithEmailOrPhoneAsync } = useAuthenticateWithEmailOrPhone();
@@ -49,35 +49,36 @@ const { authenticateWithEmailOrPhoneAsync } = useAuthenticateWithEmailOrPhone();
 await authenticateWithEmailOrPhoneAsync({ auth: { email } });
 ```
 
+For OAuth, pass `appScheme: APP_SCHEME` so the hosted OAuth page returns to the app.
+
+### Email/Phone Code
+
+Every email/phone sign-in starts on a Para-hosted page (`authStateInfo.verificationUrl`) that sends and checks the code, then signs the user in or creates their account. Open it with `openAuthUrl`, which adds the app's `nativeCallbackUrl`.
+
 ### Native Passkey
 
-Unlike password/PIN (which open a portal URL in a browser), passkeys use the device's native biometric module. Subscribe to state changes and call the native methods directly:
+Passkeys use the device's native biometric module, so the hosted page hands the passkey step back to the app:
 
 ```tsx
 const para = useClient() as ParaMobile;
 
-para.onStatePhaseChange(async (snapshot) => {
-  if (snapshot.authPhase === 'awaiting_session_start') {
-    if (snapshot.authStateInfo.isNewUser && snapshot.authStateInfo.passkeyId) {
-      await para.registerPasskey(snapshot.authStateInfo.passkeyId);
-    } else {
-      await para.loginWithPasskey();
-    }
+para.onStatePhaseChange(async ({ authStateInfo }) => {
+  // New account: create its passkey once the code (or OAuth) is proven
+  if (authStateInfo.isCredentialSetup && authStateInfo.passkeyId) {
+    await para.registerPasskey(authStateInfo.passkeyId);
+  } else if (authStateInfo.verificationUrl) {
+    await openAuthUrl(authStateInfo.verificationUrl);
   }
+});
+
+// Returning account: prove its passkey after the code; the pending login then resolves
+para.onPasskeyLoginRequired(() => {
+  dismissAuthSession();
+  para.loginWithPasskey();
 });
 ```
 
-`registerPasskey` triggers the OS passkey creation prompt. `loginWithPasskey` triggers the OS passkey authentication prompt. No URLs, no browser.
-
-### OTP Verification
-
-New users signing up via email/phone must verify with an OTP code before passkey creation. The SDK fires `awaiting_account_verification` — show a code input and call:
-
-```tsx
-const { verifyNewAccountAsync } = useVerifyNewAccount();
-
-await verifyNewAccountAsync({ verificationCode: code });
-```
+`registerPasskey` triggers the OS passkey creation prompt. `loginWithPasskey` triggers the OS passkey authentication prompt.
 
 ## Project Structure
 
@@ -86,7 +87,7 @@ app/_layout.tsx         → ParaProvider + QueryClientProvider
 app/index.tsx           → Auth screen (email/phone/OAuth → passkey)
 app/home.tsx            → Wallet display + logout
 lib/para.ts             → ParaMobile client singleton
-lib/auth.ts             → openAuthUrl helper (for OAuth URLs), validation
+lib/auth.ts             → openAuthUrl helper (OAuth and email/phone code pages), validation
 lib/constants.ts        → App scheme
 components/AuthViews.tsx → Presentational auth components
 ```

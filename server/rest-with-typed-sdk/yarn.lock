@@ -201,11 +201,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@getpara/rest-sdk@npm:3.28.0":
-  version: 3.28.0
-  resolution: "@getpara/rest-sdk@npm:3.28.0"
+"@getpara/rest-sdk@npm:3.29.0":
+  version: 3.29.0
+  resolution: "@getpara/rest-sdk@npm:3.29.0"
   dependencies:
-    "@getpara/shared": "npm:^1.42.0"
+    "@getpara/shared": "npm:^1.44.0"
   peerDependencies:
     "@solana/addresses": ^2.2.1
     "@solana/keys": ^2.2.1
@@ -226,16 +226,16 @@ __metadata:
       optional: true
     viem:
       optional: true
-  checksum: 10c0/119591f5c50e7f04b0a2cd95048db0322cb041de77f698d533fdf7c61e144561c3b7d6b24b4ea70a0bef76a559fc36fcada802fb947de5701ca490140bd06087
+  checksum: 10c0/f4ec6abe20c66852dceba2daafa5c135050c14b85c25fd09be97eafff30fc0177af39f23c6f9c70d2246b562aaa8fd26ec78afa249dd4e7a5f03b0155e9486d7
   languageName: node
   linkType: hard
 
-"@getpara/shared@npm:^1.42.0":
-  version: 1.42.0
-  resolution: "@getpara/shared@npm:1.42.0"
+"@getpara/shared@npm:^1.44.0":
+  version: 1.44.0
+  resolution: "@getpara/shared@npm:1.44.0"
   dependencies:
     zod: "npm:^4.6.7"
-  checksum: 10c0/782f375e13ab3b69e896b5be77b2880fb5770a5d1f0b1bfae8e320608640af1294c2d183f7d5921cb7accd40c08fcdb68e8b374f70f2e0edbe518fb6119f938f
+  checksum: 10c0/14b23837e3d6ccf6f057f9c0749af9df608d1bca2b90922ae1423e2eb52a540a6d040d0158d79627b571597afbfffcc4ec3a2214025e64d0246d0ee192e7c33a
   languageName: node
   linkType: hard
 
@@ -889,7 +889,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "rest-with-typed-sdk@workspace:."
   dependencies:
-    "@getpara/rest-sdk": "npm:3.28.0"
+    "@getpara/rest-sdk": "npm:3.29.0"
     "@solana/addresses": "npm:^2.2.1"
     "@solana/keys": "npm:^2.2.1"
     "@solana/signers": "npm:^2.2.1"

@@ -58,8 +58,7 @@ Without these steps, iOS will fail due to security restrictions on passkey authe
 ## Features
 
 - **Multiple Authentication Methods:**
-  - Email with OTP verification
-  - Phone with SMS verification
+  - Email or phone: Para's hosted page sends and checks the code (`src/signIn.ts`)
   - OAuth (Google, Discord)
   - Passkey authentication
 
@@ -72,6 +71,7 @@ Without these steps, iOS will fail due to security restrictions on passkey authe
 - **Polyfills:** Configured in `metro.config.js` for crypto operations
 - **App Scheme:** `para-sdk-demo://` for OAuth redirects
 - **Environment:** Beta environment configured in `src/para.ts`
+- **Auth v2:** `supportsAuthV2: true` in `src/para.ts` (email/phone sign-in, a new account's passkey, and a returning account's passkey via `onPasskeyLoginRequired`)
 
 ## Documentation
 

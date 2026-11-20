@@ -11,18 +11,8 @@ interface AuthSectionProps {
 export const AuthSection: React.FC<AuthSectionProps> = ({ onSuccess }) => {
   // Toggle between email and phone auth methods
   const [authMethod, setAuthMethod] = useState<"email" | "phone">("email");
-  // Controls visibility of OTP verification screen
-  const [showVerification, setShowVerification] = useState(false);
-  // Controls visibility of security choice screen
+  // Controls visibility of security choice screen (OAuth sign-up)
   const [showSecurityChoice, setShowSecurityChoice] = useState(false);
-
-  const handleShowVerification = () => {
-    setShowVerification(true);
-  };
-
-  const handleHideVerification = () => {
-    setShowVerification(false);
-  };
 
   const handleShowSecurityChoice = () => {
     setShowSecurityChoice(true);
@@ -49,7 +39,7 @@ export const AuthSection: React.FC<AuthSectionProps> = ({ onSuccess }) => {
           </>
         )}
 
-        {!showVerification && !showSecurityChoice && (
+        {!showSecurityChoice && (
           <View style={styles.tabs}>
             <TouchableOpacity
               style={[styles.tab, authMethod === "email" && styles.activeTab]}
@@ -66,24 +56,9 @@ export const AuthSection: React.FC<AuthSectionProps> = ({ onSuccess }) => {
         )}
 
         {/* Render selected auth method component */}
-        {authMethod === "email" ? 
-          <EmailAuth 
-            onSuccess={onSuccess} 
-            onShowVerification={handleShowVerification} 
-            onHideVerification={handleHideVerification}
-            onShowSecurityChoice={handleShowSecurityChoice}
-            onHideSecurityChoice={handleHideSecurityChoice}
-          /> : 
-          <PhoneAuth 
-            onSuccess={onSuccess} 
-            onShowVerification={handleShowVerification} 
-            onHideVerification={handleHideVerification}
-            onShowSecurityChoice={handleShowSecurityChoice}
-            onHideSecurityChoice={handleHideSecurityChoice}
-          />
-        }
+        {authMethod === "email" ? <EmailAuth onSuccess={onSuccess} /> : <PhoneAuth onSuccess={onSuccess} />}
 
-        {!showVerification && !showSecurityChoice && (
+        {!showSecurityChoice && (
           <>
             <View style={styles.divider}>
               <View style={styles.dividerLine} />

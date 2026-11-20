@@ -33,7 +33,7 @@ yarn start
 | `src/lib/para.ts` | Creates the `ParaWeb` client once, as a module singleton, from the API key and environment. It is the only Para import in `src/lib` |
 | `src/hooks/useParaClient.ts` | Runs `init()` and `setup()` on the client from `src/lib/para.ts` |
 | `src/hooks/useParaSession.ts` | Reads the session with `isFullyLoggedIn()` and the EVM wallet with `getWalletsByType("EVM")`, refreshes on `onStatePhaseChange`, and signs out with `logout()` |
-| `src/hooks/useEmailPasskeyAuth.ts` | Signs in with `signUpOrLogIn({ auth: { email } })`, takes a verification code with `verifyNewAccount`, returns the verification URL for the sign-in iframe and clears it when the Para portal (`getPortalBaseURL`) posts `CLOSE_WINDOW`, opens the passkey URL in a pop-up, and waits with `waitForLogin` and `waitForWalletCreation` |
+| `src/hooks/useEmailPasskeyAuth.ts` | Signs in with `signUpOrLogIn({ auth: { email } })`, takes a verification code with `verifyNewAccount` (which answers `signup` for a new account and `login` or `done` for a returning one), returns the verification URL for the sign-in iframe and clears it when the Para portal (`getPortalBaseURL`) posts `CLOSE_WINDOW`, opens the passkey URL in a pop-up, and waits with `waitForLogin` and `waitForWalletCreation` |
 | `src/hooks/useGuardianAccount.ts` | Turns the Para wallet into a viem `LocalAccount` with `createParaViemAccount` |
 | `src/hooks/useGuardianFaucet.ts` | Requests Sepolia ETH for the Para wallet with `requestFaucet` |
 | `src/hooks/useSafeRecovery.ts` | Runs the six steps with the Safe client and the Para guardian account |
