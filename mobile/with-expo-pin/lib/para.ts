@@ -9,6 +9,8 @@ if (!API_KEY) {
 
 export const para = new ParaMobile(Environment.BETA, API_KEY, undefined, {
   disableWorkers: true,
+  // Opts into the current sign-in flow: Para's hosted page takes the email/phone code
+  supportsAuthV2: true,
 });
 
 para.setTransactionReviewHandler((url) => {

@@ -5,16 +5,15 @@ import { useRouter } from 'expo-router';
 import {
   useAuthenticateWithEmailOrPhone,
   useAuthenticateWithOAuth,
-  useVerifyNewAccount,
-  useResendVerificationCode,
   useIsFullyLoggedIn,
   useClient,
 } from '@getpara/react-native-wallet';
 import type { StateSnapshot, TOAuthMethod } from '@getpara/react-native-wallet';
 import { openAuthUrl, isValidEmail, isValidPhone } from '@/lib/auth';
-import { IdentifierInput, OtpVerifyView, LoadingView, ErrorView } from '@/components/AuthComponents';
+import { APP_SCHEME } from '@/lib/constants';
+import { IdentifierInput, LoadingView, ErrorView } from '@/components/AuthComponents';
 
-type AuthState = 'idle' | 'authenticating' | 'verifying' | 'awaiting_browser' | 'error';
+type AuthState = 'idle' | 'authenticating' | 'awaiting_browser' | 'error';
 
 export default function AuthScreen() {
   const router = useRouter();
@@ -22,14 +21,11 @@ export default function AuthScreen() {
   const { data: isLoggedIn } = useIsFullyLoggedIn();
   const { authenticateWithEmailOrPhoneAsync } = useAuthenticateWithEmailOrPhone();
   const { authenticateWithOAuthAsync } = useAuthenticateWithOAuth();
-  const { verifyNewAccountAsync } = useVerifyNewAccount();
-  const { resendVerificationCodeAsync } = useResendVerificationCode();
 
   const [authState, setAuthState] = useState<AuthState>('idle');
   const [activeTab, setActiveTab] = useState<'email' | 'phone'>('email');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
-  const [otpCode, setOtpCode] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const lastUrlRef = useRef<string | null>(null);
   const canceledRef = useRef(false);
@@ -42,20 +38,16 @@ export default function AuthScreen() {
     if (!para) return;
 
     const unsubscribe = para.onStatePhaseChange(async (snapshot: StateSnapshot) => {
-      const { authPhase, authStateInfo } = snapshot;
+      const { authStateInfo } = snapshot;
 
-      if (authPhase === 'awaiting_account_verification') {
-        setAuthState('verifying');
-      }
-
-      if (
-        authPhase === 'awaiting_session_start' &&
-        authStateInfo.pinUrl &&
-        authStateInfo.pinUrl !== lastUrlRef.current
-      ) {
-        lastUrlRef.current = authStateInfo.pinUrl;
+      // Para's hosted page (`verificationUrl`) sends and checks the email/phone code, then signs the user in (a
+      // returning user enters their PIN there) or creates their account. A new account then gets its PIN
+      // setup page.
+      const portalUrl = authStateInfo.verificationUrl ?? authStateInfo.pinUrl;
+      if (portalUrl && portalUrl !== lastUrlRef.current) {
+        lastUrlRef.current = portalUrl;
         setAuthState('awaiting_browser');
-        const result = await openAuthUrl(authStateInfo.pinUrl);
+        const result = await openAuthUrl(portalUrl);
         if (!result.success) {
           canceledRef.current = true;
           setAuthState('idle');
@@ -111,6 +103,8 @@ export default function AuthScreen() {
     try {
       await authenticateWithOAuthAsync({
         method,
+        // Where the hosted OAuth page returns to
+        appScheme: APP_SCHEME,
         redirectCallbacks: {
           onOAuthUrl: async (url) => {
             const result = await openAuthUrl(url);
@@ -127,33 +121,6 @@ export default function AuthScreen() {
       if (!canceledRef.current) router.replace('/home');
     } catch (err) {
       handleError(err, 'OAuth login failed.');
-    }
-  }
-
-  async function handleVerify() {
-    if (otpCode.length < 4) {
-      setErrorMessage('Please enter the verification code.');
-      setAuthState('error');
-      return;
-    }
-
-    setAuthState('authenticating');
-    setErrorMessage('');
-
-    try {
-      await verifyNewAccountAsync({ verificationCode: otpCode });
-    } catch (err) {
-      handleError(err, 'Verification failed.');
-    }
-  }
-
-  async function handleResendCode() {
-    try {
-      await resendVerificationCodeAsync({ type: 'SIGNUP' });
-      setOtpCode('');
-      setAuthState('verifying');
-    } catch (err) {
-      handleError(err, 'Failed to resend code.');
     }
   }
 
@@ -183,15 +150,6 @@ export default function AuthScreen() {
 
             {authState === 'authenticating' && <LoadingView message="Authenticating..." />}
 
-            {authState === 'verifying' && (
-              <OtpVerifyView
-                otpCode={otpCode}
-                onOtpChange={setOtpCode}
-                onVerify={handleVerify}
-                onResend={handleResendCode}
-              />
-            )}
-
             {authState === 'awaiting_browser' && <LoadingView message="Complete PIN setup in the browser" />}
 
             {authState === 'error' && (
@@ -200,7 +158,6 @@ export default function AuthScreen() {
                 onRetry={() => {
                   setAuthState('idle');
                   setErrorMessage('');
-                  setOtpCode('');
                 }}
               />
             )}

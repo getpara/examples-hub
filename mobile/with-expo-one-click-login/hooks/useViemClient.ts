@@ -3,7 +3,14 @@
  * Adds balance fetching and convenience methods for the example app.
  */
 import { useCallback, useState } from 'react';
-import { createPublicClient, http, formatEther, parseEther, type Hex, type PublicClient } from 'viem';
+import {
+  createPublicClient,
+  http,
+  formatEther,
+  parseEther,
+  type Hex,
+  type PublicClient,
+} from 'viem';
 import { sepolia } from 'viem/chains';
 import { useParaViemClient } from '@getpara/react-native-wallet/evm/viem';
 
@@ -62,7 +69,7 @@ export function useViemClient() {
         setIsLoading(false);
       }
     },
-    [viemClient],
+    [viemClient]
   );
 
   return {
@@ -70,6 +77,7 @@ export function useViemClient() {
     walletClient: viemClient,
     publicClient,
     isReady,
+    chain: sepolia,
     getBalance,
     sendTransaction,
     isLoading: isClientLoading || isLoading,

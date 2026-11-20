@@ -2,19 +2,19 @@ import { useState, useEffect, useRef } from 'react';
 import { View, Text, Image, ImageBackground, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { dismissAuthSession } from 'expo-web-browser';
 import {
   useAuthenticateWithEmailOrPhone,
   useAuthenticateWithOAuth,
-  useVerifyNewAccount,
-  useResendVerificationCode,
   useIsFullyLoggedIn,
   useClient,
 } from '@getpara/react-native-wallet';
 import type { StateSnapshot, TOAuthMethod } from '@getpara/react-native-wallet';
 import { isValidEmail, isValidPhone, openAuthUrl } from '@/lib/auth';
-import { IdentifierInput, OtpVerifyView, LoadingView, ErrorView } from '@/components/AuthViews';
+import { APP_SCHEME } from '@/lib/constants';
+import { IdentifierInput, LoadingView, ErrorView } from '@/components/AuthViews';
 
-type AuthState = 'idle' | 'authenticating' | 'verifying' | 'passkey' | 'error';
+type AuthState = 'idle' | 'authenticating' | 'passkey' | 'error';
 
 export default function AuthScreen() {
   const router = useRouter();
@@ -22,15 +22,13 @@ export default function AuthScreen() {
   const { data: isLoggedIn } = useIsFullyLoggedIn();
   const { authenticateWithEmailOrPhoneAsync } = useAuthenticateWithEmailOrPhone();
   const { authenticateWithOAuthAsync } = useAuthenticateWithOAuth();
-  const { verifyNewAccountAsync } = useVerifyNewAccount();
-  const { resendVerificationCodeAsync } = useResendVerificationCode();
 
   const [authState, setAuthState] = useState<AuthState>('idle');
   const [activeTab, setActiveTab] = useState<'email' | 'phone'>('email');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
-  const [otpCode, setOtpCode] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const lastUrlRef = useRef<string | null>(null);
   const passkeyHandledRef = useRef(false);
 
   useEffect(() => {
@@ -39,36 +37,55 @@ export default function AuthScreen() {
 
   useEffect(() => {
     if (!para) return;
-    const unsubscribe = para.onStatePhaseChange(async (snapshot: StateSnapshot) => {
-      const { authPhase, authStateInfo } = snapshot;
 
-      if (authPhase === 'awaiting_account_verification') {
-        setAuthState('verifying');
+    async function runPasskey(step: () => Promise<void>) {
+      if (passkeyHandledRef.current) return;
+      passkeyHandledRef.current = true;
+      setAuthState('passkey');
+      try {
+        await step();
+      } catch (error) {
+        passkeyHandledRef.current = false;
+        handleError(error, 'Passkey authentication failed');
+      }
+    }
+
+    const unsubscribe = para.onStatePhaseChange(async (snapshot: StateSnapshot) => {
+      const { authStateInfo } = snapshot;
+
+      // A new account creates its passkey on this device once it has proven its email, phone or OAuth login
+      const { isCredentialSetup, passkeyId } = authStateInfo;
+      if (isCredentialSetup && passkeyId) {
+        await runPasskey(() => para.registerPasskey(passkeyId));
+        return;
       }
 
-      if (authPhase === 'awaiting_session_start' && !passkeyHandledRef.current) {
-        passkeyHandledRef.current = true;
-        setAuthState('passkey');
-
-        try {
-          if (authStateInfo.isNewUser && authStateInfo.passkeyId) {
-            await para.registerPasskey(authStateInfo.passkeyId);
-          } else if (!authStateInfo.isNewUser) {
-            await para.loginWithPasskey();
-          }
-        } catch (error) {
-          passkeyHandledRef.current = false;
-          handleError(error, 'Passkey authentication failed');
-        }
+      // Para's hosted page sends and checks the email/phone code, then signs the user in or creates their account
+      const { verificationUrl } = authStateInfo;
+      if (verificationUrl && verificationUrl !== lastUrlRef.current) {
+        lastUrlRef.current = verificationUrl;
+        const result = await openAuthUrl(verificationUrl);
+        if (!result.success && !passkeyHandledRef.current) setAuthState('idle');
       }
     });
 
-    return unsubscribe;
+    // A returning account protected by this device's passkey: the hosted page hands the sign-in back after the code
+    // (or OAuth), and the pending login resolves once the passkey is proven here
+    const stopPasskeyLogin = para.onPasskeyLoginRequired(() => {
+      dismissAuthSession();
+      void runPasskey(() => para.loginWithPasskey());
+    });
+
+    return () => {
+      unsubscribe();
+      stopPasskeyLogin();
+    };
   }, [para]);
 
   function resetState() {
     setAuthState('authenticating');
     setErrorMessage('');
+    lastUrlRef.current = null;
     passkeyHandledRef.current = false;
   }
 
@@ -108,6 +125,8 @@ export default function AuthScreen() {
     try {
       await authenticateWithOAuthAsync({
         method,
+        // Where the hosted OAuth page returns to
+        appScheme: APP_SCHEME,
         redirectCallbacks: {
           onOAuthUrl: async (url) => {
             const result = await openAuthUrl(url);
@@ -121,26 +140,6 @@ export default function AuthScreen() {
       router.replace('/home');
     } catch (err) {
       handleError(err, 'OAuth login failed');
-    }
-  }
-
-  async function handleVerify() {
-    if (otpCode.length < 4) return;
-
-    setAuthState('authenticating');
-    try {
-      await verifyNewAccountAsync({ verificationCode: otpCode });
-    } catch (err) {
-      handleError(err, 'Verification failed');
-    }
-  }
-
-  async function handleResendCode() {
-    try {
-      await resendVerificationCodeAsync({ type: 'SIGNUP' });
-      setOtpCode('');
-    } catch (err) {
-      handleError(err, 'Failed to resend code');
     }
   }
 
@@ -174,15 +173,6 @@ export default function AuthScreen() {
 
             {authState === 'authenticating' && <LoadingView message="Authenticating..." />}
 
-            {authState === 'verifying' && (
-              <OtpVerifyView
-                otpCode={otpCode}
-                onOtpChange={setOtpCode}
-                onVerify={handleVerify}
-                onResend={handleResendCode}
-              />
-            )}
-
             {authState === 'passkey' && <LoadingView message="Complete passkey authentication" />}
 
             {authState === 'error' && (
@@ -191,7 +181,6 @@ export default function AuthScreen() {
                 onRetry={() => {
                   setAuthState('idle');
                   setErrorMessage('');
-                  setOtpCode('');
                   passkeyHandledRef.current = false;
                 }}
               />

@@ -29,7 +29,7 @@ yarn ios
 
 ### Authentication
 
-The hooks handle the entire flow in a single call:
+The client opts into the current sign-in flow with `supportsAuthV2: true` (`lib/para.ts`). The hooks handle the entire flow in a single call:
 
 ```tsx
 const { authenticateWithEmailOrPhoneAsync } = useAuthenticateWithEmailOrPhone();
@@ -40,32 +40,25 @@ await authenticateWithEmailOrPhoneAsync({
 });
 ```
 
-### PIN Portal
+For OAuth, pass `appScheme: APP_SCHEME` so the hosted OAuth page returns to the app.
 
-When the SDK is ready for the PIN step, it provides a `pinUrl`. Open it in an in-app browser:
+### Hosted Pages
+
+Every email/phone sign-in starts on a Para-hosted page (`verificationUrl`) that sends and checks the code, then signs the user in (a returning user enters their PIN there) or creates their account. A new account then gets a `pinUrl` to set its PIN. Open each in an in-app browser:
 
 ```tsx
 const para = useClient();
 
-para.onStatePhaseChange(async (snapshot) => {
-  if (snapshot.authPhase === 'awaiting_session_start' && snapshot.authStateInfo.pinUrl) {
-    const result = await openAuthUrl(snapshot.authStateInfo.pinUrl);
+para.onStatePhaseChange(async ({ authStateInfo }) => {
+  const url = authStateInfo.verificationUrl ?? authStateInfo.pinUrl;
+  if (url) {
+    const result = await openAuthUrl(url);
     if (!result.success) canceledRef.current = true; // User dismissed browser
   }
 });
 ```
 
-The portal handles both PIN creation (new users) and PIN login (returning users). After completion, the browser redirects back via deep link and the SDK finalizes the session.
-
-### OTP Verification
-
-New users signing up via email/phone must verify with an OTP code before PIN setup:
-
-```tsx
-const { verifyNewAccountAsync } = useVerifyNewAccount();
-
-await verifyNewAccountAsync({ verificationCode: code });
-```
+After each page, the browser redirects back via deep link and the SDK finalizes the session.
 
 ## Project Structure
 

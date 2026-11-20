@@ -45,7 +45,12 @@ export default function HomeScreen() {
         text: 'Sign Out',
         style: 'destructive',
         onPress: async () => {
-          await logout({});
+          try {
+            await logout({});
+          } catch {
+            Alert.alert('Sign Out Failed', 'Could not sign out. Please try again.');
+            return;
+          }
           router.replace('/(auth)');
         },
       },

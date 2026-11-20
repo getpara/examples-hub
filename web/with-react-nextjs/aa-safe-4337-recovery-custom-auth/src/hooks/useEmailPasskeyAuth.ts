@@ -1,7 +1,16 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { getPortalBaseURL, type AuthStateLogin, type AuthStateVerify, type StateSnapshot } from "@getpara/web-sdk";
+import {
+  getPortalBaseURL,
+  type AuthState,
+  type AuthStateLogin,
+  type AuthStateVerify,
+  type StateSnapshot,
+} from "@getpara/web-sdk";
 import type ParaWeb from "@getpara/web-sdk";
 import { PARA_API_KEY } from "@/lib/para";
+
+/** What `verifyNewAccount` answers: `signup` for a new account, `login` or `done` for a returning one. */
+type VerifiedAuthState = Extract<AuthState, { stage: "signup" | "login" | "done" }>;
 
 const MISSING_PASSKEY_URL = "No passkey URL was returned. Check that passkeys are enabled for this API key.";
 
@@ -170,18 +179,21 @@ export function useEmailPasskeyAuth({ para, isReady, onAuthenticated }: UseEmail
     setIsPending(true);
 
     try {
-      const signupState = await para.verifyNewAccount({
+      const verifiedState = (await para.verifyNewAccount({
         verificationCode: verificationCode.trim(),
         useShortUrls: true,
-      });
+      })) as VerifiedAuthState;
 
-      if (!signupState.passkeyUrl) {
+      // `done` is already signed in; `signup` and `login` continue with the passkey.
+      const nextPasskeyUrl = verifiedState.stage === "done" ? null : verifiedState.passkeyUrl;
+      if (verifiedState.stage !== "done" && !nextPasskeyUrl) {
         throw new Error(MISSING_PASSKEY_URL);
       }
 
       setNeedsVerificationCode(false);
-      setPasskeyUrl(signupState.passkeyUrl);
-      await completeAuth(para, true);
+      setPasskeyUrl(nextPasskeyUrl ?? null);
+
+      await completeAuth(para, verifiedState.stage === "signup");
     } catch (error) {
       if (!shouldCancel.current) {
         setErrorMessage(error instanceof Error ? error.message : "Verification failed.");
