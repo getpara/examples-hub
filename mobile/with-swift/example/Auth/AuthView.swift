@@ -26,6 +26,10 @@ struct AuthView: View {
     @State private var showErrorAlert = false
     @State private var errorMessage = ""
     @State private var currentAuthState: AuthState?
+    /// Hands the code typed in the OTP sheet back to `authenticateWithEmailOrPhone`
+    @State private var codeContinuation: CheckedContinuation<String, Error>?
+    @State private var codeError: String?
+    @State private var codeAttempt = 0
     @State private var showWalletSelection = false
     @State private var loadingProvider: OAuthProvider?
 
@@ -70,8 +74,19 @@ struct AuthView: View {
         }
         .sheet(isPresented: $showOTP) {
             if let authState = currentAuthState {
-                OTPVerificationView(authState: authState, showOTP: $showOTP)
-                    .interactiveDismissDisabled()
+                OTPVerificationView(
+                    authState: authState,
+                    showOTP: $showOTP,
+                    codeError: codeError,
+                    onCode: codeContinuation.map { continuation in
+                        { code in
+                            codeContinuation = nil
+                            continuation.resume(returning: code)
+                        }
+                    }
+                )
+                .id(codeAttempt)
+                .interactiveDismissDisabled()
             }
         }
         .sheet(isPresented: $showWalletSelection) {
@@ -106,6 +121,7 @@ struct AuthView: View {
         EmailPhoneInput(
             isFocused: $textFieldFocus,
             onContinue: handleEmailPhone,
+            onLegacyContinue: handleLegacyEmailPhone,
         )
         .padding(.horizontal, 24)
     }
@@ -180,7 +196,7 @@ struct AuthView: View {
             defer { loadingProvider = nil }
 
             do {
-                try await paraManager.handleOAuth(
+                _ = try await paraManager.authenticateWithOAuth(
                     provider: provider,
                     authorizationController: authorizationController
                 )
@@ -193,6 +209,42 @@ struct AuthView: View {
     }
 
     private func handleEmailPhone(_ auth: Auth) {
+        Task {
+            do {
+                // Runs the whole sign-up or login. On auth v2 the user verifies in Para's hosted page;
+                // the code provider is only asked on the legacy flow.
+                _ = try await paraManager.authenticateWithEmailOrPhone(
+                    auth: auth,
+                    authorizationController: authorizationController
+                ) { previousError in
+                    try await requestVerificationCode(for: auth, previousError: previousError)
+                }
+                showOTP = false
+                appRootManager.setAuthenticated(true)
+            } catch {
+                showOTP = false
+                errorMessage = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+                showErrorAlert = true
+            }
+        }
+    }
+
+    /// Shows the OTP sheet and waits for the user to enter a code.
+    private func requestVerificationCode(for auth: Auth, previousError: Error?) async throws -> String {
+        switch auth {
+        case let .email(email): currentAuthState = AuthState(stage: .verify, userId: "", email: email)
+        case let .phone(phone): currentAuthState = AuthState(stage: .verify, userId: "", phone: phone)
+        }
+        codeError = previousError.map { ($0 as? LocalizedError)?.errorDescription ?? $0.localizedDescription }
+        codeAttempt += 1
+        return try await withCheckedThrowingContinuation { continuation in
+            codeContinuation = continuation
+            showOTP = true
+        }
+    }
+
+    /// The step-by-step flow apps used before `authenticateWithEmailOrPhone`. It stays on legacy auth.
+    private func handleLegacyEmailPhone(_ auth: Auth) {
         Task {
             do {
                 showOTP = false

@@ -699,13 +699,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@getpara/core-sdk@npm:3.29.0":
-  version: 3.29.0
-  resolution: "@getpara/core-sdk@npm:3.29.0"
+"@getpara/core-sdk@npm:3.30.0":
+  version: 3.30.0
+  resolution: "@getpara/core-sdk@npm:3.30.0"
   dependencies:
     "@celo/utils": "npm:^8.0.2"
-    "@getpara/shared": "npm:^1.44.0"
-    "@getpara/user-management-client": "npm:3.29.0"
+    "@getpara/shared": "npm:^1.46.0"
+    "@getpara/user-management-client": "npm:3.30.0"
     "@noble/curves": "npm:^1.9.7"
     "@noble/hashes": "npm:^1.5.0"
     "@opentelemetry/api": "npm:^1.9.1"
@@ -726,16 +726,16 @@ __metadata:
     node-forge: "npm:^1.4.0"
     uuid: "npm:^11.1.1"
     xstate: "npm:^5.24.0"
-  checksum: 10c0/ffe1070d6a3ce0360606e810705b83ad26c981963b7eeba544791102c33eb4e1518174c629d666cc22d352e8b91221c33211b126e91c71be4b7baf322263489d
+  checksum: 10c0/acb543d2d6d48620857bc14c1f535ee620b311de1b65c20968c35f8736f2a8e8ce55790044f246674f7e48f6718b142ec49446aa36b14210525ec3122f0ddfbf
   languageName: node
   linkType: hard
 
-"@getpara/rainbowkit-wallet@npm:3.29.0":
-  version: 3.29.0
-  resolution: "@getpara/rainbowkit-wallet@npm:3.29.0"
+"@getpara/rainbowkit-wallet@npm:3.30.0":
+  version: 3.30.0
+  resolution: "@getpara/rainbowkit-wallet@npm:3.30.0"
   dependencies:
-    "@getpara/react-sdk-lite": "npm:3.29.0"
-    "@getpara/wagmi-v2-integration": "npm:3.29.0"
+    "@getpara/react-sdk-lite": "npm:3.30.0"
+    "@getpara/wagmi-v2-integration": "npm:3.30.0"
   peerDependencies:
     "@rainbow-me/rainbowkit": 2.2.9
     "@tanstack/react-query": ^5.74.0
@@ -743,26 +743,26 @@ __metadata:
     react-dom: ">=18"
     viem: ^2.10.0
     wagmi: ^2.14.16
-  checksum: 10c0/cc7343b16c99a65fba01c38f83c6c4f06d8856130f7b975a59e3190c4427a655638fcacd4a563ad44f37c9b3008907669cecdebc9b6223c4e7ecaced575e1251
+  checksum: 10c0/e90d9f255099a1e7548685ca38cfaa4ef9e43e21666882da3e16b290eef395a21a3d58ede60ff1230fdd03e3e005724cfe45f6183b98c74f14035072240cfdba
   languageName: node
   linkType: hard
 
-"@getpara/react-common@npm:3.29.0":
-  version: 3.29.0
-  resolution: "@getpara/react-common@npm:3.29.0"
+"@getpara/react-common@npm:3.30.0":
+  version: 3.30.0
+  resolution: "@getpara/react-common@npm:3.30.0"
   dependencies:
-    "@getpara/user-management-client": "npm:3.29.0"
-    "@getpara/web-sdk": "npm:3.29.0"
+    "@getpara/user-management-client": "npm:3.30.0"
+    "@getpara/web-sdk": "npm:3.30.0"
   peerDependencies:
     react: ">=18"
     react-dom: ">=18"
-  checksum: 10c0/03197cde86388dcd5d0d2278068591896c51cc9c3b06d77595f0a59c9482af83e7d3eb113cbb6a41088ad922b4ea57366e4824a3d264a1e39a1ebe8fd4c9a075
+  checksum: 10c0/30e008e3757bf9e8354c6934366266f2344d53a672c1bc153614a12cfc7ab487a3e1d5e071103029b7d48506de2a1cdc22c7de834fdaf775c8e3d3a85d52447c
   languageName: node
   linkType: hard
 
-"@getpara/react-component-library@npm:3.29.0":
-  version: 3.29.0
-  resolution: "@getpara/react-component-library@npm:3.29.0"
+"@getpara/react-component-library@npm:3.30.0":
+  version: 3.30.0
+  resolution: "@getpara/react-component-library@npm:3.30.0"
   dependencies:
     "@radix-ui/react-avatar": "npm:^1.1.2"
     "@radix-ui/react-checkbox": "npm:^1.3.3"
@@ -800,15 +800,15 @@ __metadata:
   peerDependencies:
     react: ">=18"
     react-dom: ">=18"
-  checksum: 10c0/277f0c73c41b23d30a98c3a119ee519808b7e7bec20ffe035b27324b1517e2671db35b3d75ea3d50fab9276127e3ef76b794472a1db4fa7a3c64be361b94c79d
+  checksum: 10c0/dbbaaf0782a2002bec8065749f965b922c686ffe96b44acc1538cbf53ab28a736ad6da9606382651c299cde3f60c83e4553ac8ae6dd805758d818dbaba5ddba9
   languageName: node
   linkType: hard
 
-"@getpara/react-core@npm:3.29.0":
-  version: 3.29.0
-  resolution: "@getpara/react-core@npm:3.29.0"
+"@getpara/react-core@npm:3.30.0":
+  version: 3.30.0
+  resolution: "@getpara/react-core@npm:3.30.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.29.0"
+    "@getpara/core-sdk": "npm:3.30.0"
     zustand: "npm:^5.0.0"
   peerDependencies:
     "@cosmjs/amino": ">=0.32.4"
@@ -880,21 +880,21 @@ __metadata:
       optional: true
     viem:
       optional: true
-  checksum: 10c0/aace9a86916352fdc5c6ca7ee06b84a628e737f27bb35a4e9d8de6fda6880075e7fa928c107c00c5ae6f8c38902c4352091273bc86c2327154618a9aca5a9b6e
+  checksum: 10c0/59ec5d6e2e0cdbf440b74d158aee43640c0b44d843e3bbcba136513abc2c89436aef08cdfa934d5f429e5b51962921cac525bfd9fb62a692b34e0e3ad6d665cf
   languageName: node
   linkType: hard
 
-"@getpara/react-sdk-lite@npm:3.29.0":
-  version: 3.29.0
-  resolution: "@getpara/react-sdk-lite@npm:3.29.0"
+"@getpara/react-sdk-lite@npm:3.30.0":
+  version: 3.30.0
+  resolution: "@getpara/react-sdk-lite@npm:3.30.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.29.0"
-    "@getpara/react-common": "npm:3.29.0"
-    "@getpara/react-component-library": "npm:3.29.0"
-    "@getpara/react-core": "npm:3.29.0"
-    "@getpara/shared": "npm:^1.44.0"
-    "@getpara/user-management-client": "npm:3.29.0"
-    "@getpara/web-sdk": "npm:3.29.0"
+    "@getpara/core-sdk": "npm:3.30.0"
+    "@getpara/react-common": "npm:3.30.0"
+    "@getpara/react-component-library": "npm:3.30.0"
+    "@getpara/react-core": "npm:3.30.0"
+    "@getpara/shared": "npm:^1.46.0"
+    "@getpara/user-management-client": "npm:3.30.0"
+    "@getpara/web-sdk": "npm:3.30.0"
     "@opentelemetry/api": "npm:^1.9.1"
     date-fns: "npm:^3.6.0"
     detect-browser: "npm:^5.3.0"
@@ -925,6 +925,7 @@ __metadata:
     "@getpara/stellar-sdk-v14-integration": ">=2"
     "@getpara/sui-sdk-integration": ">=2"
     "@getpara/viem-v2-integration": ">=2.18.0"
+    "@meldcrypto/sdk": ^0.8.0
     "@sumsub/websdk": ">=2.9.1"
     "@tanstack/react-query": ">=5.0.0"
     ethers: ^6.0.0
@@ -971,6 +972,8 @@ __metadata:
       optional: true
     "@getpara/viem-v2-integration":
       optional: true
+    "@meldcrypto/sdk":
+      optional: true
     "@sumsub/websdk":
       optional: true
     ethers:
@@ -981,77 +984,77 @@ __metadata:
       optional: true
   bin:
     setup-para: dist/cli/cli.mjs
-  checksum: 10c0/17214e4c31a3b50d90fcbb1a91e832f889679c9347007628b5670bcd30b8149a1d4e86e2c0790e3c2ab2e5d95472f8fd53fdd2c92de98133be437418dcc640b8
+  checksum: 10c0/c3ef7900fec0bd18296c28b3b7d9e7e155b45a37344961a45d7e6b1a1726d56175e8031948cf72eafd47ef2ac09bc236144bb47eb3ce0546f9407aaec4275127
   languageName: node
   linkType: hard
 
-"@getpara/shared@npm:^1.44.0":
-  version: 1.44.0
-  resolution: "@getpara/shared@npm:1.44.0"
+"@getpara/shared@npm:^1.46.0":
+  version: 1.47.0
+  resolution: "@getpara/shared@npm:1.47.0"
   dependencies:
     zod: "npm:^4.6.7"
-  checksum: 10c0/14b23837e3d6ccf6f057f9c0749af9df608d1bca2b90922ae1423e2eb52a540a6d040d0158d79627b571597afbfffcc4ec3a2214025e64d0246d0ee192e7c33a
+  checksum: 10c0/2fcd14e1683945352f2b59537bf5a34f882bb350729f0ddd1605fc9dc95eb8cd97ed514512f2b9b580fe47dcf039840ebf821464574e5b81dd8f9066a49bf30e
   languageName: node
   linkType: hard
 
-"@getpara/user-management-client@npm:3.29.0":
-  version: 3.29.0
-  resolution: "@getpara/user-management-client@npm:3.29.0"
+"@getpara/user-management-client@npm:3.30.0":
+  version: 3.30.0
+  resolution: "@getpara/user-management-client@npm:3.30.0"
   dependencies:
-    "@getpara/shared": "npm:^1.44.0"
+    "@getpara/shared": "npm:^1.46.0"
     "@opentelemetry/api": "npm:^1.9.1"
     axios: "npm:^1.8.4"
     axios-retry: "npm:^4.5.0"
     libphonenumber-js: "npm:^1.11.7"
-  checksum: 10c0/fe24bbeee9d89f814c9a6a48768cde923c8aa1cc74c57e145f7eb3a0bbc14a819a2a6ac81d2591878df1ac4ff32af3b550847f213ecc3f9c0fff6545b4fb8c6e
+  checksum: 10c0/3d61b7c5d932f81bc007f7b50c38340b890ee02c48ff737ec86a6ae60131bade06cfc6423332f4bd0f64eaf74d19fff180825579feed2e3848ec6ef1e825b6cb
   languageName: node
   linkType: hard
 
-"@getpara/viem-v2-integration@npm:3.29.0":
-  version: 3.29.0
-  resolution: "@getpara/viem-v2-integration@npm:3.29.0"
+"@getpara/viem-v2-integration@npm:3.30.0":
+  version: 3.30.0
+  resolution: "@getpara/viem-v2-integration@npm:3.30.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.29.0"
+    "@getpara/core-sdk": "npm:3.30.0"
   peerDependencies:
     viem: ^2.10.0
-  checksum: 10c0/09dbd3e7ad1fd6392f85010363fe59fdc9e65bad0cdc7eeee39397bc72ff1935da2a3b81965acbd6306f809367b1df94e3bd1ad2001c12a9e0d47fa5da4b6c51
+  checksum: 10c0/ff3c9df7e50943b4451072c6130b496cbb60ee6e516745917d0d8f6eec9a2d20f8e0e956de905dcc434d06d7001ad97ae30d3d33428605bf6215ebe1ee48e032
   languageName: node
   linkType: hard
 
-"@getpara/wagmi-v2-connector@npm:3.29.0":
-  version: 3.29.0
-  resolution: "@getpara/wagmi-v2-connector@npm:3.29.0"
+"@getpara/wagmi-v2-connector@npm:3.30.0":
+  version: 3.30.0
+  resolution: "@getpara/wagmi-v2-connector@npm:3.30.0"
   dependencies:
-    "@getpara/viem-v2-integration": "npm:3.29.0"
-    "@getpara/web-sdk": "npm:3.29.0"
+    "@getpara/viem-v2-integration": "npm:3.30.0"
+    "@getpara/web-sdk": "npm:3.30.0"
     eventemitter3: "npm:^5.0.1"
   peerDependencies:
     "@wagmi/core": ^2.16.7 || ^3.0.0
     viem: ^2.10.0
-  checksum: 10c0/33afa14f023fb995db3090f2194cfed13d75227d66319499d8fbb1ec68502a79919c9c362a95bd8e099d16d77f25a559cc71f1080ab3aabe6a5cb6770dc344a2
+  checksum: 10c0/897cfcdd3e23936f13d919fad24327a668fa77d08cf1af7f621669aa79409ffacc12e24670c3265bf8e20f2287b4fbf4b3883181429b7dfabb39c06f351c0a35
   languageName: node
   linkType: hard
 
-"@getpara/wagmi-v2-integration@npm:3.29.0":
-  version: 3.29.0
-  resolution: "@getpara/wagmi-v2-integration@npm:3.29.0"
+"@getpara/wagmi-v2-integration@npm:3.30.0":
+  version: 3.30.0
+  resolution: "@getpara/wagmi-v2-integration@npm:3.30.0"
   dependencies:
-    "@getpara/react-sdk-lite": "npm:3.29.0"
-    "@getpara/wagmi-v2-connector": "npm:3.29.0"
+    "@getpara/react-sdk-lite": "npm:3.30.0"
+    "@getpara/wagmi-v2-connector": "npm:3.30.0"
   peerDependencies:
     "@tanstack/react-query": ^5.74.0
     react: ">=18"
     react-dom: ">=18"
-  checksum: 10c0/73c4b88d262a6ef522b8e2624c36378a8f60693b5f4ac69b6fc955ae84561a50d3e4c2a6b27b825a883fd05bd4653907538e78be7379773c27439e29a8edb0f5
+  checksum: 10c0/44ed4cb3df33a143b683b097d8e202b043ffa4db3ce7c49e701c59c02d496af5a57ac9da8d54f76e5f1871b35d441dab5a1afb5a05d1958eb52e5a4176b4b19a
   languageName: node
   linkType: hard
 
-"@getpara/web-sdk@npm:3.29.0":
-  version: 3.29.0
-  resolution: "@getpara/web-sdk@npm:3.29.0"
+"@getpara/web-sdk@npm:3.30.0":
+  version: 3.30.0
+  resolution: "@getpara/web-sdk@npm:3.30.0"
   dependencies:
-    "@getpara/core-sdk": "npm:3.29.0"
-    "@getpara/user-management-client": "npm:3.29.0"
+    "@getpara/core-sdk": "npm:3.30.0"
+    "@getpara/user-management-client": "npm:3.30.0"
     "@opentelemetry/api": "npm:^1.9.1"
     "@scure/base": "npm:^1.2.6"
     buffer: "npm:6.0.3"
@@ -1059,7 +1062,7 @@ __metadata:
     node-forge: "npm:^1.4.0"
     ua-parser-js: "npm:^2.0.2"
     uuid: "npm:^11.1.1"
-  checksum: 10c0/0a090dd185a90a809d423631a06aaf3e194a0b19c642ba00f5b226efeccf1199fd247fc16b9802922fac35cbe09f3ed08f5644286d08b6c824ae4a7d28672ab0
+  checksum: 10c0/85c8c81e389cdec1ad0567397e66a7ad32998fd05bb692d13ee7cccdc3ff118ffd10c7eb3d6ddcd6085762f8c01e8a8bbbfe2cf123346308279a36c31291a4f1
   languageName: node
   linkType: hard
 
@@ -6887,9 +6890,9 @@ __metadata:
     "@farcaster/miniapp-sdk": "npm:0.3.0"
     "@farcaster/miniapp-wagmi-connector": "npm:2.0.0"
     "@gemini-wallet/core": "npm:0.3.2"
-    "@getpara/rainbowkit-wallet": "npm:3.29.0"
-    "@getpara/react-sdk-lite": "npm:3.29.0"
-    "@getpara/web-sdk": "npm:3.29.0"
+    "@getpara/rainbowkit-wallet": "npm:3.30.0"
+    "@getpara/react-sdk-lite": "npm:3.30.0"
+    "@getpara/web-sdk": "npm:3.30.0"
     "@metamask/sdk": "npm:0.34.0"
     "@rainbow-me/rainbowkit": "npm:2.2.9"
     "@safe-global/safe-apps-provider": "npm:0.18.6"

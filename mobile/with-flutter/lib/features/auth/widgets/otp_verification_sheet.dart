@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:para/para.dart';
 
-class OTPVerificationSheet extends StatefulWidget {
+class OTPVerificationSheet<T> extends StatefulWidget {
   final String identifier; // email or phone
-  final Future<AuthState?> Function(String otp) onVerify;
+  final Future<T?> Function(String otp) onVerify;
   final VoidCallback onResend;
 
   const OTPVerificationSheet({
@@ -15,10 +14,11 @@ class OTPVerificationSheet extends StatefulWidget {
   });
 
   @override
-  State<OTPVerificationSheet> createState() => _OTPVerificationSheetState();
+  State<OTPVerificationSheet<T>> createState() =>
+      _OTPVerificationSheetState<T>();
 }
 
-class _OTPVerificationSheetState extends State<OTPVerificationSheet> {
+class _OTPVerificationSheetState<T> extends State<OTPVerificationSheet<T>> {
   final List<TextEditingController> _controllers = List.generate(
     6,
     (_) => TextEditingController(),
@@ -165,13 +165,13 @@ class _OTPVerificationSheetState extends State<OTPVerificationSheet> {
   }
 }
 
-Future<AuthState?> showOTPVerificationSheet({
+Future<T?> showOTPVerificationSheet<T>({
   required BuildContext context,
   required String identifier,
-  required Future<AuthState?> Function(String) onVerify,
+  required Future<T?> Function(String) onVerify,
   required VoidCallback onResend,
 }) {
-  return showModalBottomSheet<AuthState?>(
+  return showModalBottomSheet<T>(
     context: context,
     isScrollControlled: true,
     isDismissible: false,
@@ -180,7 +180,7 @@ Future<AuthState?> showOTPVerificationSheet({
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
-    builder: (_) => OTPVerificationSheet(
+    builder: (_) => OTPVerificationSheet<T>(
       identifier: identifier,
       onVerify: onVerify,
       onResend: onResend,

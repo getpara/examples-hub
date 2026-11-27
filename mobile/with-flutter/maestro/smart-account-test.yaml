@@ -1,137 +1,10 @@
 appId: com.usecapsule.example.flutter
 ---
-- clearState
-- launchApp
-- waitForAnimationToEnd
 - runFlow:
-    when:
-      platform: Android
-    commands:
-      - tapOn:
-          text: "Close app"
-          optional: true
-      - waitForAnimationToEnd
-
-# Logout if already signed in
-- tapOn:
-    text: "Logout"
-    optional: true
-- waitForAnimationToEnd
-- runFlow:
-    when:
-      platform: Android
-    commands:
-      - tapOn:
-          text: "Close app"
-          optional: true
-      - waitForAnimationToEnd
-
-# Wait for auth screen
-- extendedWaitUntil:
-    visible: "Sign Up or Log In"
-    timeout: 10000
-
-# Generate random test email
-- evalScript: ${output.email = 'maestro-aa-' + Date.now() + '@test.getpara.com'}
-
-# Switch to email tab and enter email
-- tapOn: "Email"
-- waitForAnimationToEnd
-- runFlow:
-    when:
-      platform: Android
-    commands:
-      - tapOn:
-          point: "74%,63%"
-      - waitForAnimationToEnd
-- tapOn: "Email address"
-- inputText: "${output.email}"
-- pressKey: "Enter"
-
-# Tap continue to trigger ASWebAuth
-- tapOn: "Continue"
-- runFlow:
-    when:
-      platform: Android
-    commands:
-      - waitForAnimationToEnd
-      - runFlow:
-          when:
-            visible: "Use without an account"
-          commands:
-            - tapOn: "Use without an account"
-            - waitForAnimationToEnd
-      - runFlow:
-          when:
-            visible: "Continue"
-          commands:
-            - tapOn: "Continue"
-            - waitForAnimationToEnd
-      - runFlow:
-          when:
-            visible: "Use without an account"
-          commands:
-            - tapOn: "Use without an account"
-            - waitForAnimationToEnd
-
-# Handle the iOS ASWebAuth consent dialog when it appears. Android usually
-# goes straight to the browser/OTP flow, and iOS may skip this after consent
-# has persisted on the simulator.
-- runFlow:
-    when:
-      platform: iOS
-      visible: "Cancel"
-    commands:
-      - tapOn: "Continue"
-
-# Wait for OTP page
-- extendedWaitUntil:
-    visible: "Send new code"
-    timeout: 30000
-
-# Android only: dismiss the env banner. Later fixed-point taps in the Custom
-# Tab (e.g. the 50%,52% consent Approve) assume the banner is gone. iOS skips
-# it: there the close icon moves while the autofocused input scrolls into
-# view, and the tap can open Safari's Format Options menu instead (ENG-7833).
-- runFlow:
-    when:
-      platform: Android
-      visible:
-        text: "Dismiss"
-        above: "Please enter the code we sent to.*"
-    commands:
-      - tapOn:
-          text: "Dismiss"
-          above: "Please enter the code we sent to.*"
-      - waitForAnimationToEnd
-
-# Focus the code input by its position in the step, not a fixed screen point,
-# so it lands whether or not the banner is still above it (ENG-7833).
-- waitForAnimationToEnd
-- tapOn:
-    below: "Please enter the code we sent to.*"
-    above: "Send new code"
-- waitForAnimationToEnd
-
-# Enter OTP digits (test emails accept any 6-digit code)
-- inputText: "1"
-- waitForAnimationToEnd
-- inputText: "2"
-- waitForAnimationToEnd
-- inputText: "3"
-- waitForAnimationToEnd
-- inputText: "4"
-- waitForAnimationToEnd
-- inputText: "5"
-- waitForAnimationToEnd
-- inputText: "6"
-
-- runFlow:
-    when:
-      platform: Android
-    commands:
-      - pressKey: "Enter"
-      - waitForAnimationToEnd
+    file: subflows/login.yaml
+    env:
+      EMAIL_PREFIX: "maestro-aa-"
+      SIGN_IN_BUTTON: "Continue"
 
 - runFlow:
     when:
@@ -198,12 +71,17 @@ appId: com.usecapsule.example.flutter
     timeout: 30000
 - assertVisible: "Wallets"
 
-# Create an EVM wallet (smart account needs an EOA to sign)
-- tapOn: "Create Your First Wallet"
-- extendedWaitUntil:
-    visible: "Select Wallet Type"
-    timeout: 10000
-- tapOn: "EVM"
+# Create an EVM wallet (smart account needs an EOA to sign). Para auth v2 creates the
+# project's wallets during signup, so this only runs when there are none yet.
+- runFlow:
+    when:
+      visible: "Create Your First Wallet"
+    commands:
+      - tapOn: "Create Your First Wallet"
+      - extendedWaitUntil:
+          visible: "Select Wallet Type"
+          timeout: 10000
+      - tapOn: "EVM"
 - extendedWaitUntil:
     visible: "0x.*"
     timeout: 30000

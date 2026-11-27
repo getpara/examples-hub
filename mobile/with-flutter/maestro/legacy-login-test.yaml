@@ -1,0 +1,31 @@
+appId: com.usecapsule.example.flutter
+# Signs in through initiateAuthFlow and the stage-based methods, which existing
+# apps call and which stay on Para's legacy auth flow.
+---
+- runFlow:
+    file: subflows/login.yaml
+    env:
+      EMAIL_PREFIX: "maestro-legacy-"
+      SIGN_IN_BUTTON: "Continue with legacy auth"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      # Chrome Custom Tabs can stay visually on top after the custom-scheme
+      # callback succeeds. Close it so Maestro targets the Flutter app again.
+      - tapOn:
+          point: "6%,9%"
+      - waitForAnimationToEnd
+
+- runFlow:
+    when:
+      visible: "Approve"
+    commands:
+      - tapOn: "Approve"
+
+# Wait for wallets screen
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible: "Wallets"
+    timeout: 30000
+- assertVisible: "Wallets"

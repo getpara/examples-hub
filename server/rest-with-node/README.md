@@ -73,6 +73,73 @@ curl -X POST http://localhost:4000/rest/wallets/wal_123/sign-transaction \
       }'
 ```
 
+## Gated Solana Devnet sponsored transfer (direct HTTP)
+
+This pilot is not enabled merely by using this example. Wait for Para to confirm compatible Beta deployment,
+partner sponsorship enrollment, an allowlisted classic SPL mint, and Stripe test billing readiness. Production and
+Solana mainnet are excluded. Use an API-created, unclaimed Solana wallet; both source and recipient associated
+token accounts must already exist. Sponsorship pays network fees only, not rent or token-account creation.
+Native SOL and Token-2022 are unsupported. Partners with wallet policies enabled need Permissions v2 for this flow.
+
+The example server above intentionally has no transfer proxy route. This standalone Node script calls Para directly.
+Export `PARA_API_KEY`, `WALLET_ID`, `RECIPIENT`, `TOKEN_MINT`, `TOKEN_AMOUNT` (positive integer base units), and
+`PAYOUT_FILE` (a unique file path for this payment). Never reuse that file for a different payment. It saves the exact
+request and idempotency key before sending; rerun with the same file after interruption, not a new key.
+
+```javascript
+// Save as sponsored-solana.mjs; run only after pilot activation is confirmed.
+import { randomUUID } from 'node:crypto';
+import { readFile, writeFile } from 'node:fs/promises';
+
+const { PARA_API_KEY, WALLET_ID, RECIPIENT, TOKEN_MINT, TOKEN_AMOUNT, PAYOUT_FILE } = process.env;
+if (![PARA_API_KEY, WALLET_ID, RECIPIENT, TOKEN_MINT, TOKEN_AMOUNT, PAYOUT_FILE].every(Boolean)) {
+  throw new Error('Set all required environment variables before running');
+}
+const initial = {
+  walletId: WALLET_ID,
+  idempotencyKey: randomUUID(),
+  body: { sponsoredGas: true, network: 'SOLANA_DEVNET', kind: 'SPL',
+    to: RECIPIENT, tokenAddress: TOKEN_MINT, value: TOKEN_AMOUNT },
+};
+try {
+  await writeFile(PAYOUT_FILE, JSON.stringify(initial, null, 2), { flag: 'wx', mode: 0o600 });
+} catch (error) {
+  if (error.code !== 'EEXIST') throw error;
+}
+const saved = JSON.parse(await readFile(PAYOUT_FILE, 'utf8'));
+const base = 'https://api.beta.getpara.com/v1';
+const headers = { 'X-API-Key': PARA_API_KEY, 'Content-Type': 'application/json' };
+const response = await fetch(`${base}/wallets/${encodeURIComponent(saved.walletId)}/transfer`, {
+  method: 'POST', headers: { ...headers, 'Idempotency-Key': saved.idempotencyKey },
+  body: JSON.stringify(saved.body),
+});
+const result = await response.json();
+if (response.status !== 202 || result.sponsoredGas !== true || !result.transactionId) {
+  throw new Error(`Inspect response before retrying: ${JSON.stringify(result)}`);
+}
+console.log('Tracking ID:', result.transactionId);
+for (let attempt = 0; attempt < 24; attempt++) {
+  const lookup = await fetch(`${base}/wallets/${encodeURIComponent(saved.walletId)}/transactions/${result.transactionId}`, { headers });
+  if (!lookup.ok) throw new Error(`Lookup failed (${lookup.status}); retain the saved payment file`);
+  const record = await lookup.json();
+  console.log(record.status, record.stage, record.hash);
+  if (['confirmed', 'reverted', 'failed'].includes(record.status)) break;
+  if (record.stage === 'requires_action') {
+    console.log('Approve review, then explicitly resume this same transaction:', record.reviewId);
+    break;
+  }
+  await new Promise(resolve => setTimeout(resolve, 5000));
+}
+// A polling timeout is not failure. Keep tracking the original ID; never automatically create a replacement.
+```
+
+Solana uses a separate fee-payer signature, not EIP-7702. Its finalized signature appears in `hash`, not
+`userOperationHash`, and `actualGasCost` is in lamports. Reverted transactions still incur their finalized network fee.
+The backend retries only the same signed bytes. Missing signature history does not prove failure: unknown signing
+outcomes stay tracked until exact-message reconciliation or complete finalized non-inclusion evidence permits expiry.
+A replay retrieves the same operation; it does not resume a review. See the [gas sponsorship guide](https://docs.getpara.com/v3/rest/gas-sponsorship#solana-devnet-pilot)
+for policy review/resume, billing, and eligibility. Do not send `chainId`, nonce/fee overrides, or `autoRetry` with this pilot request.
+
 ## Routes
 
 All routes live under `/rest/*` to make them easy to spot:

@@ -1,58 +1,11 @@
 appId: com.usecapsule.example.swift
 ---
-- clearState
-- launchApp
-- waitForAnimationToEnd
-
-# Wait for auth screen
-- assertVisible: "Sign Up or Log In"
-
-# Generate random test email
-- evalScript: ${output.email = 'maestro-' + Date.now() + '@test.getpara.com'}
-
-# Enter email
-- tapOn: "Enter email or phone"
-- inputText: "${output.email}"
-
-# Tap continue to trigger ASWebAuth
-- tapOn: "Continue"
-
-# Handle ASWebAuth consent dialog
-- extendedWaitUntil:
-    visible: "Cancel"
-    timeout: 10000
-- tapOn: "Continue"
-
-# Wait for OTP page
-- extendedWaitUntil:
-    visible: "Send new code"
-    timeout: 15000
-
-# Focus the code input by its position in the step, not a fixed screen point,
-# and leave the env banner alone: its 16pt close icon moves while iOS scrolls
-# the autofocused input into view, so a tap on it can open Safari's Format
-# Options menu instead (ENG-7833).
-- waitForAnimationToEnd
-- tapOn:
-    below: "Please enter the code we sent to.*"
-    above: "Send new code"
-- waitForAnimationToEnd
-
-# Enter OTP digits
-- inputText: "1"
-- waitForAnimationToEnd
-- inputText: "2"
-- waitForAnimationToEnd
-- inputText: "3"
-- waitForAnimationToEnd
-- inputText: "4"
-- waitForAnimationToEnd
-- inputText: "5"
-- waitForAnimationToEnd
-- inputText: "6"
+- runFlow:
+    file: subflows/login.yaml
+    env:
+      EMAIL_PREFIX: maestro
 
 # Wait for wallets screen
-- waitForAnimationToEnd
 - runFlow:
     when:
       visible: "Approve"

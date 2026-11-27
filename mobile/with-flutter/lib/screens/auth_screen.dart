@@ -12,19 +12,19 @@ import '../config/deep_link_constants.dart';
 import 'wallet_creation_loading_screen.dart';
 import 'external_wallet_demo_screen.dart';
 
-enum _AuthFlow {
-  emailOrPhone,
-  oauth,
-}
-
 class AuthScreen extends StatefulWidget {
   final VoidCallback onSuccess;
-  final Future<AuthState> Function({required Auth auth})? initiateAuthFlow;
+  final Future<AuthenticationResult> Function({
+    required Auth auth,
+    required ParaWebAuthenticationSession webAuthenticationSession,
+    required Future<String> Function(Object? previousError)
+        verificationCodeProvider,
+  })? authenticateWithEmailOrPhone;
 
   const AuthScreen({
     super.key,
     required this.onSuccess,
-    this.initiateAuthFlow,
+    this.authenticateWithEmailOrPhone,
   });
 
   @override
@@ -54,12 +54,14 @@ class _AuthScreenState extends State<AuthScreen> {
         SocialProvider.discord => OAuthMethod.discord,
       };
 
-      final authState = await para.verifyOAuth(
+      await para.authenticateWithOAuth(
         provider: oauthMethod,
-        appScheme: DeepLinkConstants.appScheme,
+        webAuthenticationSession: _webAuthSession,
       );
 
-      await _continueAuth(authState, flow: _AuthFlow.oauth);
+      if (mounted) {
+        widget.onSuccess();
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -73,7 +75,11 @@ class _AuthScreenState extends State<AuthScreen> {
     }
   }
 
-  Future<void> _handleEmailPhone(String value, bool isPhone) async {
+  Future<void> _handleEmailPhone(
+    String value,
+    bool isPhone, {
+    bool legacy = false,
+  }) async {
     if (_isProcessing) {
       return;
     }
@@ -82,15 +88,28 @@ class _AuthScreenState extends State<AuthScreen> {
 
     try {
       final auth = isPhone ? Auth.phone(value) : Auth.email(value);
-      final initiateAuthFlow = widget.initiateAuthFlow ?? para.initiateAuthFlow;
-      final authState = await initiateAuthFlow(auth: auth);
+      if (legacy) {
+        // The stage-based methods apps used before authenticateWithEmailOrPhone.
+        // They always run Para's legacy auth flow.
+        final authState = await para.initiateAuthFlow(auth: auth);
+        await _continueAuth(authState, authForResend: auth, identifier: value);
+        return;
+      }
 
-      await _continueAuth(
-        authState,
-        flow: _AuthFlow.emailOrPhone,
-        authForResend: auth,
-        identifier: value,
+      final authenticate = widget.authenticateWithEmailOrPhone ??
+          para.authenticateWithEmailOrPhone;
+      await authenticate(
+        auth: auth,
+        webAuthenticationSession: _webAuthSession,
+        // Only called where Para auth v2 is off; on v2 the user enters the
+        // code on Para's hosted page.
+        verificationCodeProvider: (previousError) =>
+            _promptCode(identifier: value, auth: auth, error: previousError),
       );
+
+      if (mounted) {
+        widget.onSuccess();
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -106,9 +125,8 @@ class _AuthScreenState extends State<AuthScreen> {
 
   Future<void> _continueAuth(
     AuthState authState, {
-    required _AuthFlow flow,
-    Auth? authForResend,
-    String? identifier,
+    required Auth authForResend,
+    required String identifier,
   }) async {
     if (await _handleOneClick(authState)) {
       return;
@@ -116,10 +134,6 @@ class _AuthScreenState extends State<AuthScreen> {
 
     switch (authState.stage) {
       case AuthStage.verify:
-        if (authForResend == null || identifier == null) {
-          return;
-        }
-
         final verifiedState = await _promptOtp(
           identifier: identifier,
           auth: authForResend,
@@ -128,18 +142,13 @@ class _AuthScreenState extends State<AuthScreen> {
         if (verifiedState != null) {
           await _continueAuth(
             verifiedState,
-            flow: flow,
             authForResend: authForResend,
             identifier: identifier,
           );
         }
         break;
       case AuthStage.login:
-        if (flow == _AuthFlow.oauth) {
-          await _finalizeOAuthLogin();
-        } else {
-          await _completeLogin(authState);
-        }
+        await _completeLogin(authState);
         break;
       case AuthStage.signup:
         await _startSignup(authState);
@@ -151,14 +160,36 @@ class _AuthScreenState extends State<AuthScreen> {
     required String identifier,
     required Auth auth,
   }) async {
-    final result = await showOTPVerificationSheet(
+    return showOTPVerificationSheet(
       context: context,
       identifier: identifier,
       onVerify: _verifyOtp,
       onResend: () => _resendOTP(auth),
     );
+  }
 
-    return result is AuthState ? result : null;
+  Future<String> _promptCode({
+    required String identifier,
+    required Auth auth,
+    Object? error,
+  }) async {
+    if (error != null && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Invalid code: ${error.toString()}')),
+      );
+    }
+
+    final code = await showOTPVerificationSheet<String>(
+      context: context,
+      identifier: identifier,
+      onVerify: (otp) async => otp,
+      onResend: () => _resendOTP(auth),
+    );
+
+    if (code == null) {
+      throw Exception('Verification cancelled');
+    }
+    return code;
   }
 
   Future<AuthState?> _verifyOtp(String otp) async {
@@ -244,20 +275,6 @@ class _AuthScreenState extends State<AuthScreen> {
           SnackBar(content: Text('Wallet creation failed: ${e.toString()}')),
         );
       }
-    }
-  }
-
-  Future<void> _finalizeOAuthLogin() async {
-    try {
-      await para.touchSession();
-    } catch (_) {
-      // Session touch is best effort for OAuth callbacks
-    }
-
-    await para.fetchWallets();
-
-    if (mounted) {
-      widget.onSuccess();
     }
   }
 
@@ -486,6 +503,8 @@ class _AuthScreenState extends State<AuthScreen> {
               EmailPhoneInput(
                 key: const Key('emailPhoneInput'),
                 onSubmit: _isProcessing ? (_, __) {} : _handleEmailPhone,
+                onLegacySubmit: (value, isPhone) =>
+                    _handleEmailPhone(value, isPhone, legacy: true),
               ),
               const SizedBox(height: 20),
               // Divider

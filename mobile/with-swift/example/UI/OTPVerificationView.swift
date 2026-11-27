@@ -16,6 +16,10 @@ struct OTPVerificationView: View {
 
     let authState: AuthState
     @Binding var showOTP: Bool
+    /// Why the previous code was rejected, when `onCode` is asked for another
+    var codeError: String?
+    /// When set, the code is handed back to `authenticateWithEmailOrPhone` instead of being verified here
+    var onCode: ((String) -> Void)?
 
     @State private var otpText = ""
     @State private var isLoading = false
@@ -108,6 +112,13 @@ struct OTPVerificationView: View {
                     .font(.footnote)
                     .foregroundColor(.gray)
                     .disabled(isLoading)
+
+                    if let codeError {
+                        Text(codeError)
+                            .font(.footnote)
+                            .foregroundColor(.red)
+                            .multilineTextAlignment(.center)
+                    }
 
                     // Status message
                     if !statusMessage.isEmpty {
@@ -204,10 +215,16 @@ struct OTPVerificationView: View {
 
     private func verifyCode() async {
         let code = otpText
-        guard code.count == 6 else { return }
+        guard code.count == 6, !isLoading else { return }
 
         isLoading = true
         errorMessage = ""
+
+        if let onCode {
+            statusMessage = "Verifying..."
+            onCode(code)
+            return
+        }
 
         do {
             let resultState = try await paraManager.handleVerificationCode(verificationCode: code)

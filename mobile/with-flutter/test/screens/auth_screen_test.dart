@@ -8,7 +8,7 @@ import 'package:para_flutter/screens/auth_screen.dart';
 void main() {
   testWidgets('starts authentication without advancing the clock',
       (tester) async {
-    final pendingState = Completer<AuthState>();
+    final pendingResult = Completer<AuthenticationResult>();
     Auth? submittedAuth;
 
     await tester.pumpWidget(
@@ -16,9 +16,13 @@ void main() {
         home: Scaffold(
           body: AuthScreen(
             onSuccess: () {},
-            initiateAuthFlow: ({required auth}) {
+            authenticateWithEmailOrPhone: ({
+              required auth,
+              required webAuthenticationSession,
+              required verificationCodeProvider,
+            }) {
               submittedAuth = auth;
-              return pendingState.future;
+              return pendingResult.future;
             },
           ),
         ),
