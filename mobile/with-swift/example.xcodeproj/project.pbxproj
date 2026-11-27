@@ -798,7 +798,7 @@
 			repositoryURL = "https://github.com/getpara/swift-sdk";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 2.10.0;
+				minimumVersion = 2.11.0;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */

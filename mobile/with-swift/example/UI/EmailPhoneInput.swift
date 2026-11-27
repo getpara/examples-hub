@@ -12,6 +12,7 @@ import SwiftUI
 struct EmailPhoneInput: View {
     @FocusState.Binding var isFocused: Bool
     let onContinue: (Auth) -> Void
+    let onLegacyContinue: (Auth) -> Void
 
     @State private var text = ""
     @State private var inputType: InputType = .unknown
@@ -46,6 +47,13 @@ struct EmailPhoneInput: View {
 
             if shouldShowContinueButton {
                 continueButton
+
+                Button("Continue with legacy auth") {
+                    onLegacyContinue(authValue)
+                }
+                .font(.footnote)
+                .foregroundColor(.secondary)
+                .disabled(!isInputValid)
             }
         }
         .animation(.easeInOut(duration: 0.3), value: shouldShowContinueButton)
@@ -107,8 +115,6 @@ struct EmailPhoneInput: View {
 
     private var continueButton: some View {
         Button("Continue") {
-            print("Continue button tapped")
-            let authValue: Auth = inputType == .phone ? .phone(formattedValue) : .email(formattedValue)
             onContinue(authValue)
         }
         .font(.headline)
@@ -118,6 +124,10 @@ struct EmailPhoneInput: View {
         .background(isInputValid ? .black : Color(.systemGray5))
         .clipShape(RoundedRectangle(cornerRadius: 10))
         .disabled(!isInputValid)
+    }
+
+    private var authValue: Auth {
+        inputType == .phone ? .phone(formattedValue) : .email(formattedValue)
     }
 
     private var textContentType: UITextContentType? {
@@ -205,6 +215,7 @@ struct CountryRow: View {
                 EmailPhoneInput(
                     isFocused: $isFocused,
                     onContinue: { auth in print("Continue tapped with: \(auth)") },
+                    onLegacyContinue: { auth in print("Legacy continue tapped with: \(auth)") },
                 )
                 .padding()
 

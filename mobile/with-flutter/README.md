@@ -147,32 +147,27 @@ chain data from your application before Para signs it.
 
 ### Basic Login
 
-The standard mobile path is Basic Login. The app starts authentication with an email, phone number, or social
-provider, opens Para's hosted verification URL in a secure system browser session, and returns to the wallet list when
-Para reports that login or signup is complete:
+The standard mobile path is Basic Login. One call starts authentication with an email or phone number, opens Para's
+hosted verification page in a secure system browser session, and returns once the user is signed in:
 
 ```dart
-final authState = await para.initiateAuthFlow(auth: Auth.email(email));
-final loginUrl = authState.loginUrl;
-
-if (loginUrl != null) {
-  await para.presentAuthUrl(
-    url: loginUrl,
-    webAuthenticationSession: webAuthenticationSession,
-  );
-
-  if (authState.effectiveNextStage == AuthStage.signup) {
-    await para.waitForSignup();
-  } else {
-    await para.waitForLogin();
-  }
-
-  await para.fetchWallets();
-}
+await para.authenticateWithEmailOrPhone(
+  auth: Auth.email(email),
+  webAuthenticationSession: webAuthenticationSession,
+  // Only called where Para auth v2 is off; return the code the user was sent.
+  verificationCodeProvider: (previousError) => promptForCode(previousError),
+);
 ```
 
-See `lib/screens/auth_screen.dart` for the complete implementation and `maestro/login-and-sign-test.yaml` for the
-automated email, hosted verification, native callback, wallet, and signing flow.
+Social sign-in works the same way through `para.authenticateWithOAuth`. Both run Para auth v2 where it is enabled and
+the legacy flow everywhere else.
+
+**Continue with legacy auth** signs in through `initiateAuthFlow` and the stage-based methods (`verifyOtp`,
+`handleLogin`, `handleSignup`) that existing apps call. Those always run the legacy flow.
+
+See `lib/screens/auth_screen.dart` for the complete implementation, `maestro/login-and-sign-test.yaml` for the
+automated email, hosted verification, native callback, wallet, and signing flow, and `maestro/legacy-login-test.yaml`
+for the legacy sign-in.
 
 ```bash
 maestro test maestro/login-and-sign-test.yaml

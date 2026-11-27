@@ -1,0 +1,22 @@
+appId: com.usecapsule.example.swift
+---
+# Existing apps still sign in with initiateAuthFlow, which stays on legacy auth.
+# Covers that path through the example's "Continue with legacy auth" button.
+
+- runFlow:
+    file: subflows/login.yaml
+    env:
+      EMAIL_PREFIX: maestro-legacy
+      LEGACY: "true"
+
+# Wait for wallets screen
+- runFlow:
+    when:
+      visible: "Approve"
+    commands:
+      - tapOn: "Approve"
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible: "Wallets"
+    timeout: 30000
+- assertVisible: "Wallets"

@@ -4,10 +4,12 @@ import 'package:country_code_picker/country_code_picker.dart';
 
 class EmailPhoneInput extends StatefulWidget {
   final Function(String value, bool isPhone) onSubmit;
+  final Function(String value, bool isPhone)? onLegacySubmit;
 
   const EmailPhoneInput({
     super.key,
     required this.onSubmit,
+    this.onLegacySubmit,
   });
 
   @override
@@ -56,7 +58,7 @@ class _EmailPhoneInputState extends State<EmailPhoneInput> {
   }
 
   bool _isValidEmail(String email) {
-    return RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
+    return RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,}$').hasMatch(email);
   }
 
   String _formatPhoneNumber(String phone) {
@@ -74,7 +76,7 @@ class _EmailPhoneInputState extends State<EmailPhoneInput> {
     }
   }
 
-  void _handleSubmit() {
+  void _handleSubmit([Function(String value, bool isPhone)? onSubmit]) {
     if (!_isValidInput()) {
       setState(() {
         _errorText =
@@ -84,7 +86,7 @@ class _EmailPhoneInputState extends State<EmailPhoneInput> {
     }
 
     final value = _controller.text.trim();
-    widget.onSubmit(
+    (onSubmit ?? widget.onSubmit)(
       _isPhoneMode ? _formatPhoneNumber(value) : value,
       _isPhoneMode,
     );
@@ -349,6 +351,14 @@ class _EmailPhoneInputState extends State<EmailPhoneInput> {
             ),
           ),
         ),
+        if (widget.onLegacySubmit != null)
+          TextButton(
+            onPressed: _isValidInput()
+                ? () => _handleSubmit(widget.onLegacySubmit)
+                : null,
+            style: TextButton.styleFrom(foregroundColor: Colors.grey[700]),
+            child: const Text('Continue with legacy auth'),
+          ),
       ],
     );
   }
